@@ -1,0 +1,10 @@
+# python generated files
+*.pyc
+__pycache__
+
+# external tool files
+*.swp
+tags
+
+# samplelib dpkg-buildpackage tmp files
+libsamplelib*

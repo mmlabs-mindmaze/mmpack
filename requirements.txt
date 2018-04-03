@@ -1,0 +1,14 @@
+ast
+elftools
+flask
+glob
+json
+os
+pefile
+re
+subprocess
+sys
+syslog
+tarfile
+typing
+yaml
