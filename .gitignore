@@ -5,6 +5,48 @@ __pycache__
 # external tool files
 *.swp
 tags
+/cscope.*
+*.unc-backup~
+*.unc-backup.md5~
+*.uncrustify
+*.gcno
 
-# samplelib dpkg-buildpackage tmp files
-libsamplelib*
+# autotools generated files
+aclocal.m4
+Makefile.in
+configure
+config.h.in
+config.h.in~
+config.log
+config.status
+config.h
+config.guess
+config.sub
+configure.scan
+install-sh
+missing
+stamp-h1
+libtool
+compile
+Makefile
+Makefile.in
+.deps
+INSTALL
+ABOUT-NLS
+.dirstamp
+*.tar.xz
+
+autom4te.cache/*
+build-aux/*
+.libs/
+
+# ignore build-directory if any
+/build*
+
+# C generated objects
+*.o
+*.la
+*.lo
+
+# nfs tmp files
+*.nfs*
