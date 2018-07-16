@@ -20,7 +20,7 @@ class Dependency(object):  # pylint: disable=too-few-public-methods
     TODOC
     '''
     def __init__(self, name: str, min_version: Version,
-                 max_version: Version = None):
+                 max_version: Version=None):
         '''
         only explicit deps on packages (script, python library ...)
         symbols deps will be automatically filled during package creation
@@ -107,7 +107,7 @@ class Package(object):
 
         return sources_archive_name
 
-    def local_install(self, source_pkg: str, build_system: str = None) -> None:
+    def local_install(self, source_pkg: str, build_system: str=None) -> None:
         ''' local installation of the package from the source package
 
         guesses build system if none given.
@@ -177,7 +177,6 @@ class Package(object):
             ValueError: if a specified version is invalid or if a symbol in
                         the spec file is not found provided by the package
         '''
-        wrk = Workspace()
         provide_spec_name = '{0}/mmpack/{1}.provides.yaml' \
                             .format(self._local_build_path(), self.name)
         try:
@@ -259,7 +258,7 @@ class Package(object):
         pkg_data_name = '{0}-{1}.data.mmpack'.format(self.name, self.tag)
         pkg_name = '{0}-{1}.mmpack'.format(self.name, self.tag)
 
-        # TODO: autodetect and generate those packages
+        # autodetect and generate those packages
         doc_pkg = None
         dev_pkg = None
         dbgsym_pkg = None
@@ -272,7 +271,6 @@ class Package(object):
                 pkg.add(inst_file)
         pkg.close()
 
-        # TODO
         # create and add <pkg_data_name> hash file
         # create and add signature file
 

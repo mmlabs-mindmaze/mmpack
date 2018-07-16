@@ -5,9 +5,9 @@ TODOC
 
 import os
 import sys
-import syslog
 from subprocess import PIPE, run
 from typing import Union
+import syslog
 import yaml
 
 CONFIG = {'debug': True, 'verbose': True}
@@ -56,14 +56,12 @@ PUSHSTACK = []
 
 def pushdir(dirname):
     'Save and then change the current directory'
-    global PUSHSTACK  # pylint: disable=global-statement
     PUSHSTACK.append(os.getcwd())
     os.chdir(dirname)
 
 
 def popdir(num=1):
     'Remove the top n entries from the directory stack'
-    global PUSHSTACK  # pylint: disable=global-statement
     os.chdir(PUSHSTACK.pop())
     if num > 1:
         popdir(num - 1)

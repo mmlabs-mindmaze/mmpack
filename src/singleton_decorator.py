@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+'''
+simple singleton decorator module
+'''
 
-class _SingletonWrapper(object):
+
+class _SingletonWrapper(object):  # pylint: disable=too-few-public-methods
     '''
     A singleton wrapper class. Its instances would be created
-    for each decorated class. 
+    for each decorated class.
     '''
 
     def __init__(self, cls):
@@ -15,6 +19,7 @@ class _SingletonWrapper(object):
         if self._instance is None:
             self._instance = self.__wrapped__(*args, **kwargs)
         return self._instance
+
 
 def singleton(cls):
     '''

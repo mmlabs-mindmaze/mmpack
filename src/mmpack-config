@@ -9,7 +9,7 @@ import sys
 import yaml
 
 from pprint import pprint
-from settings import CONFIG_PATH
+from workspace import Workspace
 
 
 def usage(progname):
@@ -19,8 +19,9 @@ def usage(progname):
 
 def show(argv):
     'dump whole configuration'
+    wrk = workspace()
     try:
-        config = yaml.load(open(CONFIG_PATH, 'rb').read())
+        config = yaml.load(open(wrk.config, 'rb').read())
     except IOError:
         # could not find config file
         # create one and return it

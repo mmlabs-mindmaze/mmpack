@@ -4,24 +4,23 @@ TODOC
 '''
 
 import os
+from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_home
 
 from singleton_decorator import singleton
 from common import shell
-from settings import HOME
 
 
 @singleton
 class Workspace(object):
     'global mmpack workspace singleton class'
-    def __init__(self, root=None):
-        if not root:
-            self.root = HOME + '/.mmpack'
+    def __init__(self):
+        self.config = xdg_config_home + '/mmpack-config.yml'
+        self.sources = xdg_cache_home + '/mmpack-sources'
+        self.build = xdg_cache_home + '/mmpack-build'
+        self.packages = xdg_data_home + '/mmpack-packages'
 
-        self.build = self.root + '/build'
-        self.sources = self.root + '/sources'
-        self.packages = self.root + '/packages'
-
-        os.makedirs(self.root, exist_ok=True)
+        # create the directories if they do not exist
+        os.makedirs(xdg_config_home, exist_ok=True)
         os.makedirs(self.build, exist_ok=True)
         os.makedirs(self.sources, exist_ok=True)
         os.makedirs(self.packages, exist_ok=True)
