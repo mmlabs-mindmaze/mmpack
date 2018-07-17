@@ -23,9 +23,27 @@ LT_INIT([win32-dll disable-static])
 LT_SYS_MODULE_EXT
 AC_SUBST(LIBTOOL_DEPS)
 
+# Optional build of 'check' based tests
+PKG_CHECK_MODULES_EXT(CHECK, [check >= 0.9.12],
+                      [has_check=yes; tap_in_check=yes],
+                      [PKG_CHECK_MODULES_EXT(CHECK, [check], [has_check=yes], [has_check=no])])
+AC_ARG_WITH([check], AC_HELP_STRING([--with-check], [Build and run check based tests. @<:@default=detect@:>@]),
+        [], [with_check=detect])
+AS_CASE([$with_check],
+		[yes], [AS_IF([test "$has_check" != no],
+			[build_check_tests=yes],
+			[AC_MSG_FAILURE([check required but not found])])
+		],
+		[no], [build_check_tests=no],
+		[detect], [build_check_tests=$has_check],
+		[AC_MSG_FAILURE([invalid argument for '--with-check' option])])
+AM_CONDITIONAL(BUILD_CHECK_TESTS, [test "$build_check_tests" = yes])
+AM_CONDITIONAL(TAP_SUPPORT_IN_CHECK, [test "x$tap_in_check" = xyes])
+
 # Check for libraries
 MM_CHECK_LIB([mmthr_create], [mmlib], MMLIB, [], [AC_MSG_ERROR([mmlib library required])])
-MM_CHECK_LIB([yaml_parser_initialize], [libyaml], [], [AC_MSG_ERROR([yaml library required])])
+MM_CHECK_LIB([yaml_parser_initialize], [yaml], YAML, [], [AC_MSG_ERROR([yaml library required])])
+MM_CHECK_LIB([curl_easy_init], [curl], CURL, [], [AC_MSG_ERROR([curl library required])])
 
 AC_DEF_API_EXPORT_ATTRS
 AC_SET_HOSTSYSTEM
@@ -34,6 +52,6 @@ AH_TOP([#ifndef CONFIG_H
 #define CONFIG_H])
 AH_BOTTOM([#endif /*CONFIG_H*/])
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 AC_OUTPUT
 

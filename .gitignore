@@ -15,13 +15,8 @@ tags
 aclocal.m4
 Makefile.in
 configure
-config.h.in
-config.h.in~
 config.log
 config.status
-config.h
-config.guess
-config.sub
 configure.scan
 install-sh
 missing
@@ -39,6 +34,10 @@ ABOUT-NLS
 autom4te.cache/*
 build-aux/*
 .libs/
+
+# unit-test generated files
+*.log
+*.trs
 
 # ignore build-directory if any
 /build*
