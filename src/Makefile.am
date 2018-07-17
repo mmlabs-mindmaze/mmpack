@@ -7,6 +7,7 @@ dist_bin_SCRIPTS = mmpack-build
 
 mmpack_builddir = $(pkgpythondir)
 mmpack_build_PYTHON =\
+	binary_package.py \
 	common.py \
 	elf_utils.py \
 	mmpack_config.py \

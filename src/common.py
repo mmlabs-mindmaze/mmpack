@@ -7,6 +7,7 @@ import os
 import sys
 from subprocess import PIPE, run
 from typing import Union
+from hashlib import sha256
 import syslog
 import yaml
 
@@ -112,3 +113,16 @@ def mm_representer(dumper, data):
     (Otherwise, they will be printed with a !!python/object tag)
     '''
     return dumper.represent_data(repr(data))
+
+
+def sha256sum(filename: str) -> str:
+    ''' compute the SHA-256 hash a file
+
+    Args:
+        filename: path of file whose hash must be computed
+    Returns:
+        a string containing hexadecimal value of hash
+    '''
+    sha = sha256()
+    sha.update(open(filename, 'rb').read())
+    return sha.hexdigest()
