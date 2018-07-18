@@ -15,6 +15,8 @@ check_PROGRAMS = \
 	$(eol)
 
 mmpack_sources = \
+	../src/mmpack-common.c \
+	../src/mmpack-common.h \
 	../src/mmpack-config.c \
 	../src/mmpack-config.h \
 	../src/mmpack-update.c \

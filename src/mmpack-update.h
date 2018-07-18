@@ -5,8 +5,8 @@
 #ifndef MMPACK_UPDATE_H
 #define MMPACK_UPDATE_H
 
-#include "mmpack-config.h"
+#include "mmpack-common.h"
 
-int mmpack_update_all(void);
+int mmpack_update_all(struct mmpack_ctx * ctx);
 
 #endif /* MMPACK_UPDATE_H */

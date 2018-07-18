@@ -11,8 +11,10 @@
 #include <string.h>
 
 #include <mmargparse.h>
+#include <mmerrno.h>
 #include <mmsysio.h>
 
+#include "mmpack-common.h"
 #include "mmpack-update.h"
 
 #define STR_EQUAL(str, const_str) \
@@ -26,7 +28,9 @@ void usage(char const * progname)
 
 int main(int argc, char ** argv)
 {
+	int rv;
 	char * command;
+	struct mmpack_ctx ctx;
 
 	if (argc < 2) {
 		usage(argv[0]);
@@ -34,12 +38,19 @@ int main(int argc, char ** argv)
 	}
 	command = argv[1];
 
+	rv = mmpack_ctx_init(&ctx);
+	if (rv != 0)
+		return mm_raise_from_errno("failed to init mmpack");
+
+
 	if (STR_EQUAL(command, "update")) {
-		return mmpack_update_all();
+		rv = mmpack_update_all(&ctx);
 	} else {
 		usage(argv[0]);
-		return -1;
+		rv = -1;
 	}
 
-	return 0;
+	mmpack_ctx_deinit(&ctx);
+
+	return rv;
 }

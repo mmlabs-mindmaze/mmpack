@@ -14,9 +14,11 @@
 #define TEST_CONFIG "mmpack-config.yaml"
 
 static
-int check_server_entry(char const * server, char const * url)
+int check_server_entry(char const * server, char const * url, void * arg)
 {
 	static int i = 0;
+
+	(void) arg;
 
 	i++;
 	if (i == 1) {
@@ -34,7 +36,7 @@ int check_server_entry(char const * server, char const * url)
 
 START_TEST(test_foreach_config_server)
 {
-	foreach_config_server(TEST_CONFIG, check_server_entry);
+	foreach_config_server(TEST_CONFIG, check_server_entry, NULL);
 }
 END_TEST
 

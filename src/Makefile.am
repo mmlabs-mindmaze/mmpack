@@ -6,6 +6,8 @@ bin_PROGRAMS = mmpack
 
 mmpack_SOURCES = \
 	mmpack.c \
+	mmpack-common.c \
+	mmpack-common.h \
 	mmpack-config.c \
 	mmpack-config.h \
 	mmpack-update.c \

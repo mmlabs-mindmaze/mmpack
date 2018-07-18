@@ -59,7 +59,7 @@ char const * get_config_filename(void)
  * server2: http://mmpack-server-2:8888/
  */
 static
-int parse_config(yaml_parser_t * parser, server_cb cb)
+int parse_config(yaml_parser_t * parser, server_cb cb, void * arg)
 {
 	yaml_token_t token;
 	char const * name;
@@ -82,7 +82,7 @@ int parse_config(yaml_parser_t * parser, server_cb cb)
 				if (type == YAML_KEY_TOKEN) {
 					name = (char const *) token.data.scalar.value;
 				} else if (type == YAML_VALUE_TOKEN) {
-					rv = cb(name, (char const *) token.data.scalar.value);
+					rv = cb(name, (char const *) token.data.scalar.value, arg);
 					if (rv != 0)
 						goto exit;
 					name = NULL;
@@ -118,7 +118,7 @@ int yaml_read_handler(void * data, unsigned char * buffer,
 
 
 LOCAL_SYMBOL
-int foreach_config_server(char const * filename, server_cb cb)
+int foreach_config_server(char const * filename, server_cb cb, void * arg)
 {
 	int fd;
 	yaml_parser_t parser;
@@ -139,7 +139,7 @@ int foreach_config_server(char const * filename, server_cb cb)
 	}
 	yaml_parser_set_input(&parser, yaml_read_handler, &fd);
 
-	parse_config(&parser, cb);
+	parse_config(&parser, cb, arg);
 
 	yaml_parser_delete(&parser);
 	mm_close(fd);

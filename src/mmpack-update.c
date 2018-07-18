@@ -7,40 +7,38 @@
 #endif
 
 #include <curl/curl.h>
+#include <mmerrno.h>
 
+#include "mmpack-common.h"
 #include "mmpack-config.h"
 #include "mmpack-update.h"
 
-/*
- * TODO: lazy curl init, ond once ...
- */
 static
-int mmpack_update(char const * server, char const * url)
+int mmpack_update(char const * server, char const * url, void * arg)
 {
-	CURL *curl;
 	CURLcode res;
+	struct mmpack_ctx * ctx = (struct mmpack_ctx *) arg;
 
-	(void) server; /* TODO: user server name in error message */
-
-	curl = curl_easy_init();
-	if(curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, url);
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-		res = curl_easy_perform(curl);
-		if(res != CURLE_OK)
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-					curl_easy_strerror(res));
-
-		curl_easy_cleanup(curl);
+	if (ctx->curl == NULL) {
+		ctx->curl = curl_easy_init();
+		if (ctx->curl == NULL)
+			return mm_raise_from_errno("curl init failed");
 	}
+
+	curl_easy_setopt(ctx->curl, CURLOPT_URL, url);
+	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+	res = curl_easy_perform(ctx->curl);
+	if(res != CURLE_OK)
+		return mm_raise_from_errno("update from %s failed: %s",
+				server, curl_easy_strerror(res));
 
 	return 0;
 }
 
 
 LOCAL_SYMBOL
-int mmpack_update_all(void)
+int mmpack_update_all(struct mmpack_ctx * ctx)
 {
-	return foreach_config_server(get_config_filename(), mmpack_update);
+	return foreach_config_server(get_config_filename(), mmpack_update, ctx);
 }
