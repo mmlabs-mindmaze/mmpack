@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# @mindmaze_header@
 '''
 helper module containing functions to scan for dependencies within files
 '''

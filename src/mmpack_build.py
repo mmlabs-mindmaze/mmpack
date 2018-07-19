@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# @mindmaze_header@
 '''
 This is a stub for all mmpack commands
 
@@ -45,9 +45,11 @@ from os import path
 
 def cmdlist():
     'get mmpack subcommand list'
-    cmds = glob.glob('{0}/mmpack-*'
+    cmds = glob.glob('{0}/mmpack_*.py'
                      .format(path.join(path.dirname(__file__))))
-    names = [re.split(".*/mmpack-([a-z-]*).*", cmd)[1] for cmd in cmds]
+    names = []
+    for cmd in cmds:
+        names.append(re.split(".*/mmpack_(.*).py", cmd)[1].replace('_', '-'))
     names.sort()
     return names
 
@@ -65,8 +67,9 @@ def main():
        mmpack cmd [options] -> ./mmpack-{cmd}.py [options]
     '''
     try:
-        name = '{0}/mmpack-{1}.py'.format(path.join(path.dirname(__file__)),
-                                          sys.argv[1])
+        cmd = sys.argv[1].replace('-', '_')
+        name = '{0}/mmpack_{1}.py'.format(path.join(path.dirname(__file__)),
+                                          cmd)
         cmd = [name] + sys.argv[2:]
         return subprocess.call(cmd)
     except (IndexError, FileNotFoundError):

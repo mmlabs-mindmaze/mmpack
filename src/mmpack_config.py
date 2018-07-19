@@ -1,14 +1,11 @@
-#!/usr/bin/env python3
+# @mindmaze_header@
 '''
 TODOC
 '''
 
-import os
 import sys
-
-import yaml
-
 from pprint import pprint
+import yaml
 from workspace import Workspace
 
 
@@ -17,9 +14,9 @@ def usage(progname):
     print('usage {}'.format(progname))
 
 
-def show(argv):
+def show():
     'dump whole configuration'
-    wrk = workspace()
+    wrk = Workspace()
     try:
         config = yaml.load(open(wrk.config, 'rb').read())
     except IOError:
@@ -28,7 +25,7 @@ def show(argv):
         config = {'This is a config placeholder': None,
                   'remote': ["fill with mmpack server:",
                              "http://server1:42/custom_url"]}
-        with open(CONFIG_PATH, 'w+') as outfile:
+        with open(wrk.config, 'w+') as outfile:
             yaml.dump(config, outfile, default_flow_style=False)
     except yaml.parser.ParserError:
         raise  # malformed config file
@@ -45,7 +42,7 @@ def edit(argv):
 def options(argv):
     'parse options'
     if argv[1] == 'show':
-        return show(argv[2:])
+        return show()
     elif argv[1] == 'edit':
         return edit(argv[2:])
 

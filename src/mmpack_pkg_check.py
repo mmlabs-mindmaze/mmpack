@@ -1,14 +1,9 @@
-#!/usr/bin/env python3
+# @mindmaze_header@
 '''
 TODOC
-This is not mmpack-info.py
-could be aliased with mmpack-pkg-info.py
 '''
 
-import os
 import sys
-
-import yaml
 
 
 def usage(progname):

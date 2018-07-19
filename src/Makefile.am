@@ -3,22 +3,34 @@ eol=
 AM_CFLAGS = $(MM_WARNFLAGS)
 
 bin_PROGRAMS = mmpack
+dist_bin_SCRIPTS = mmpack-build
 
-PYTHON_INTERNALS = \
+mmpack_builddir = $(pkgpythondir)
+mmpack_build_PYTHON =\
 	common.py \
-	dependencies.py \
 	elf_utils.py \
+	mmpack_config.py \
+	mmpack_pkg_create.py \
 	package.py \
-	settings.py \
 	singleton_decorator.py \
-	version.py \
 	workspace.py \
+	dependencies.py \
+	mmpack_build.py \
+	mmpack_pkg_check.py \
+	mmpack_pkg_show.py \
+	settings.py \
+	version.py \
 	$(eol)
+
+
+PYLINT_CONFIG = $(top_srcdir)/tools/pylint-config
 
 .PHONY: syntax
 syntax:
-	$(foreach file, $(PYTHON_INTERNALS), pycodestyle $(top_srcdir)/src/$(file);)
-	$(foreach file, $(PYTHON_INTERNALS), pylint3 -rn $(top_srcdir)/src/$(file);)
+	$(foreach file, $(mmpack_build_PYTHON), \
+			pycodestyle $(top_srcdir)/src/$(file) || exit;)
+	$(foreach file, $(mmpack_build_PYTHON), \
+			pylint3 --rcfile=$(PYLINT_CONFIG) $(top_srcdir)/src/$(file) || exit;)
 
 check: syntax
 

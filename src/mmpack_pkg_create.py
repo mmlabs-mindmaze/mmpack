@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# @mindmaze_header@
 '''
 Create a mmpack package
 

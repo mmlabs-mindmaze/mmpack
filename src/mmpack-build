@@ -1,0 +1,4 @@
+#!/bin/sh
+
+PYTHON=${PYTHON:-python3}
+exec $PYTHON -m mmpack $@
