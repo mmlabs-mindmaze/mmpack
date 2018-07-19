@@ -3,38 +3,63 @@
 TODOC
 '''
 
+import logging
+import logging.handlers
 import os
 import sys
 from subprocess import PIPE, run
 from typing import Union
 from hashlib import sha256
-import syslog
 import yaml
+from decorators import run_once
+from xdg.BaseDirectory import xdg_data_home
 
 CONFIG = {'debug': True, 'verbose': True}
 
 
-def eprint(message):
-    'error print: print to stderr'
-    message = 'ERR: ' + message
-    syslog.syslog(syslog.LOG_ERR, message)
-    print(message, file=sys.stderr)
+@run_once
+def _init_logger_if_not():
+    '''
+    Init logger to print to *log_file*.
+    Usually called via (e|i|d)print helpers.
 
+    If verbose flag is set, it will log up to DEBUG level
+    otherwise, only up to INFO level.
+    '''
+    log_file = xdg_data_home + '/mmpack.log'
+    log_handler = logging.handlers.TimedRotatingFileHandler(log_file)
+    logger = logging.getLogger()
+    logger.addHandler(log_handler)
 
-def iprint(message):
-    'info print: print only if verbose flag is set'
-    message = 'INFO: ' + message
-    syslog.syslog(syslog.LOG_INFO, message)
-    if CONFIG['verbose'] or CONFIG['debug']:
-        print(message, file=sys.stderr)
-
-
-def dprint(message):
-    'debug print: standard print and log'
-    message = 'DEBUG: ' + message
-    syslog.syslog(syslog.LOG_DEBUG, message)
     if CONFIG['debug']:
-        print(message, file=sys.stderr)
+        logger.setLevel(logging.DEBUG)
+    elif CONFIG['debug'] or CONFIG['verbose']:
+        logger.setLevel(logging.INFO)
+    else:
+        logger.setLevel(logging.WARNING)
+
+
+def eprint(*args, **kwargs):
+    'error print: print to stderr'
+    _init_logger_if_not()
+    logging.error(*args, **kwargs)
+    print(*args, file=sys.stderr, **kwargs)
+
+
+def iprint(*args, **kwargs):
+    'info print: print only if verbose flag is set'
+    _init_logger_if_not()
+    logging.info(*args, **kwargs)
+    if CONFIG['verbose'] or CONFIG['debug']:
+        print(*args, file=sys.stderr, **kwargs)
+
+
+def dprint(*args, **kwargs):
+    'debug print: standard print and log'
+    _init_logger_if_not()
+    logging.debug(*args, **kwargs)
+    if CONFIG['debug']:
+        print(*args, file=sys.stderr, **kwargs)
 
 
 class ShellException(RuntimeError):

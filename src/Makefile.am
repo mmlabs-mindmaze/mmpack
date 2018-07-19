@@ -9,18 +9,18 @@ mmpack_builddir = $(pkgpythondir)
 mmpack_build_PYTHON =\
 	binary_package.py \
 	common.py \
+	decorators.py \
+	dependencies.py \
 	elf_utils.py \
 	mmpack_config.py \
 	mmpack_pkg_create.py \
-	package.py \
-	singleton_decorator.py \
-	workspace.py \
-	dependencies.py \
 	mmpack_build.py \
 	mmpack_pkg_check.py \
 	mmpack_pkg_show.py \
+	package.py \
 	settings.py \
 	version.py \
+	workspace.py \
 	$(eol)
 
 

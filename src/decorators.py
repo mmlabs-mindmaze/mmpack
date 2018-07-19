@@ -1,7 +1,19 @@
 # @mindmaze_header@
 '''
-simple singleton decorator module
+simple usual decorators
 '''
+
+
+def run_once(function):
+    '''
+    Run decorated function only once.
+    '''
+    def _wrapper(*args, **kwargs):
+        if not _wrapper.has_run:
+            _wrapper.has_run = True
+            return function(*args, **kwargs)
+    _wrapper.has_run = False
+    return _wrapper
 
 
 class _SingletonWrapper(object):  # pylint: disable=too-few-public-methods

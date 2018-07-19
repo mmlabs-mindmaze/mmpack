@@ -6,7 +6,7 @@ TODOC
 import os
 from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_home
 
-from singleton_decorator import singleton
+from decorators import singleton
 from common import shell
 
 
