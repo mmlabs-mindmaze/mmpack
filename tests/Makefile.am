@@ -14,6 +14,11 @@ check_PROGRAMS = \
 	unittests \
 	$(eol)
 
+EXTRA_DIST = \
+	create-mpkgs \
+	run-test-mpkrepo \
+	$(eol)
+
 mmpack_sources = \
 	../src/mmpack-common.c \
 	../src/mmpack-common.h \
