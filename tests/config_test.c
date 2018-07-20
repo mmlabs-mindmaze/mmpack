@@ -11,7 +11,7 @@
 #include "mmpack-config.h"
 #include "testcases.h"
 
-#define TEST_CONFIG "mmpack-config.yaml"
+#define TEST_CONFIG SRCDIR"/mmpack-config.yaml"
 
 static
 int check_server_entry(char const * server, char const * url, void * arg)
@@ -36,7 +36,10 @@ int check_server_entry(char const * server, char const * url, void * arg)
 
 START_TEST(test_foreach_config_server)
 {
-	foreach_config_server(TEST_CONFIG, check_server_entry, NULL);
+	int rv;
+
+	rv = foreach_config_server(TEST_CONFIG, check_server_entry, NULL);
+	ck_assert(rv == 0);
 }
 END_TEST
 

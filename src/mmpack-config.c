@@ -12,7 +12,6 @@
 
 #include <mmerrno.h>
 #include <mmlib.h>
-#include <mmsysio.h>
 
 #include "mmpack-config.h"
 
@@ -69,7 +68,8 @@ int parse_config(yaml_parser_t * parser, server_cb cb, void * arg)
 	name = NULL;
 	type = -1;
 	do {
-		yaml_parser_scan(parser, &token);
+		if (!yaml_parser_scan(parser, &token))
+			goto exit;
 
 		switch(token.type) {
 			case YAML_KEY_TOKEN:
@@ -103,46 +103,32 @@ exit:
 }
 
 
-static
-int yaml_read_handler(void * data, unsigned char * buffer,
-                      size_t size, size_t * size_read)
-{
-	ssize_t rv;
-	int * fd = (int *) data;
-
-	rv = mm_read(*fd, buffer, size);
-	*size_read = rv;
-
-	return (rv == -1);
-}
-
-
 LOCAL_SYMBOL
 int foreach_config_server(char const * filename, server_cb cb, void * arg)
 {
-	int fd;
+	int rv;
+	FILE * fh;
 	yaml_parser_t parser;
 
 	if (filename == NULL) {
 		return mm_raise_error(EINVAL, "invalid config filename");
 	}
 
-	fd = mm_open(filename, O_RDONLY, 0);
-	if(fd == -1) {
+	fh = fopen(filename, "r");
+	if(fh == NULL) {
 		return mm_raise_from_errno("failed to open config file");
-		return -1;
 	}
 
 	if (!yaml_parser_initialize(&parser)) {
-		mm_close(fd);
+		fclose(fh);
 		return mm_raise_error(ENOMEM, "failed to parse config file");
 	}
-	yaml_parser_set_input(&parser, yaml_read_handler, &fd);
+	yaml_parser_set_input_file(&parser, fh);
 
-	parse_config(&parser, cb, arg);
+	rv = parse_config(&parser, cb, arg);
 
 	yaml_parser_delete(&parser);
-	mm_close(fd);
+	fclose(fh);
 
-	return 0;
+	return rv;
 }

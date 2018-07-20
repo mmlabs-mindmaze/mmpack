@@ -2,6 +2,8 @@ eol=
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/src \
+	-DSRCDIR=\"$(srcdir)\" \
+	$(CHECK_CPPFLAGS) \
 	$(eol)
 
 AM_CFLAGS = \
@@ -17,6 +19,7 @@ check_PROGRAMS = \
 EXTRA_DIST = \
 	create-mpkgs \
 	run-test-mpkrepo \
+	mmpack-config.yaml \
 	$(eol)
 
 mmpack_sources = \
