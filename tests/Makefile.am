@@ -3,6 +3,7 @@ eol=
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/src \
 	-DSRCDIR=\"$(srcdir)\" \
+	-DBUILDDIR=\"$(builddir)\" \
 	$(CHECK_CPPFLAGS) \
 	$(eol)
 
@@ -23,6 +24,7 @@ EXTRA_DIST = \
 	$(eol)
 
 mmpack_sources = \
+	../src/hash-utils.c \
 	../src/mmpack-common.c \
 	../src/mmpack-common.h \
 	../src/mmpack-config.c \
@@ -34,6 +36,7 @@ mmpack_sources = \
 unittests_SOURCES = \
 	$(mmpack_sources) \
 	config_test.c \
+	hash_test.c \
 	testcases.h \
 	unittests.c \
 	$(eol)
@@ -43,4 +46,5 @@ unittests_LDADD = \
 	$(CURL_LIB) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
+	$(CRYPTO_LIB) \
 	$(eol)

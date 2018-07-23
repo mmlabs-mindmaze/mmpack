@@ -7,5 +7,6 @@
 #include <check.h>
 
 TCase* create_config_tcase(void);
+TCase* create_hash_tcase(void);
 
 #endif /* TESTCASES_H */

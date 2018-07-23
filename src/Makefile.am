@@ -36,6 +36,8 @@ syntax:
 check: syntax
 
 mmpack_SOURCES = \
+	hash-utils.c \
+	hash-utils.h \
 	mmpack.c \
 	mmpack-common.c \
 	mmpack-common.h \
@@ -49,4 +51,5 @@ mmpack_LDADD = \
 	$(CURL_LIB) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
+	$(CRYPTO_LIB) \
 	$(eol)
