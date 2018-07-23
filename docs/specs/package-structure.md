@@ -6,6 +6,7 @@ tar.xz file with extension .mpk containing:
 
  * files to install
  * MMPACK/info: YAML description of binary package
+ * MMPACK/sha256sums: YAML dictionary of SHA256 hash of installed files
  * MMPACK/symbols: YAML description of symbols exported by ABI of a shared
    lib of in the package (if applicable)
  * MMPACK/pyobjects: YAML description of python objects (function or class)
@@ -37,7 +38,26 @@ named after the package name with the following fields:
  * provides: metapackage that this package provides. This field is optional
  * description: string describing what the package does/provides
  * arch: string of the architecture/OS that this package is built for
+ * sumsha256sums: SHA256 hash of list of installed files (MMPACK/sha256sums)
 
+
+## sha256sums file
+
+YAML file located in the MMPACK folder in the binary package that list all
+installed files by a binary package along with their SHA256 hash values. As
+an exception, the sha256sums (although it is installed) shall not be listed
+in itself (its hash can be retrieved by the sumsha256sums field of info file)
+
+The file consists of a dictionary expressed in YAML where each installed file
+is a key whose associated value is the hash of the file.
+
+### example:
+
+usr/bin/a-prog: a43d3be2987fab2cc5177f279dced0b3a3cf1773cd943c18a5d35981f147ecb7
+usr/lib/liba: 17822ba7e3e60f55c475320fa745e5c3da4bc06ca8f608767d543358a20a0f7f
+usr/share/doc/pkg-a/changelog: 67f682b05c81fed6af15ad2c4d8db0cb8341f4129fcfc7fe4b4c8084809dc8a8
+MMPACK/symbols: 925312a655a8943ff4fabcf394ff2f76ba10aafc730a51e4a17c0ce4aa791605
+MMPACK/post-install: 06410d79e7ee0b1ec2558ef8a282e163fd711a84d412ae7b2229fbff252c6579
 
 ## symbols file
 
