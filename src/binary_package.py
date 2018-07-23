@@ -4,8 +4,10 @@ TODOC
 '''
 
 import os
+from os.path import isfile
+from glob import glob
 import tarfile
-from common import sha256sum, yaml_serialize
+from common import sha256sum, yaml_serialize, pushdir, popdir
 from version import Version
 
 
@@ -46,13 +48,28 @@ class BinaryPackage(object):
         self._install_files = []
 
     def _gen_info(self, pkgdir: str) -> None:
+        pushdir(pkgdir)
+
+        # Create file containing of hashes of all installed files
+        cksums = {}
+        for filename in glob('**', recursive=True):
+            # skip folder and MMPACK/info
+            if not isfile(filename) or filename == 'MMPACK/info':
+                continue
+
+            # Add file with checksum
+            cksums[filename] = sha256sum(filename)
+        yaml_serialize(cksums, 'MMPACK/sha256sums')
+
+        # Create info file
         info = {'version': self.version,
                 'source': self.source,
                 'description': self.description,
-                'sumsha256sums': sha256sum(pkgdir + 'MMPACK/sha256sums')}
+                'sumsha256sums': sha256sum('MMPACK/sha256sums')}
         info.update(self._dependencies)
-        yaml_serialize({self.name: info},
-                       pkgdir + 'MMPACK/info')
+        yaml_serialize({self.name: info}, 'MMPACK/info')
+
+        popdir()
 
     def _populate(self, instdir: str, pkgdir: str) -> None:
         for instfile in self._install_files:
@@ -60,12 +77,6 @@ class BinaryPackage(object):
             dst = pkgdir + instfile
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             os.link(src, dst, follow_symlinks=False)
-
-    def _gen_cksum(self, pkgdir: str) -> None:
-        cksums = dict()
-        for instfile in self._install_files:
-            cksums[instfile] = sha256sum(pkgdir + instfile)
-        yaml_serialize(cksums, pkgdir + 'MMPACK/sha256sums')
 
     def _make_archive(self, pkgdir: str, dstdir: str) -> str:
         mpkfile = "{0}/{1}_{2}_{3}.mpk".format(dstdir, self.name,
@@ -85,7 +96,6 @@ class BinaryPackage(object):
         os.makedirs(pkgdir + 'MMPACK', exist_ok=True)
 
         self._populate(instdir, pkgdir)
-        self._gen_cksum(pkgdir)
         self._gen_info(pkgdir)
         return self._make_archive(pkgdir, dstdir)
 
