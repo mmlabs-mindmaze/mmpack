@@ -31,5 +31,8 @@ os_id get_os_id(void);
 int mmpack_ctx_init(struct mmpack_ctx * ctx);
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx);
 
+char const * get_local_mmpack_binary_index_path(void);
+char const * get_mmpack_installed_pkg_path(void);
+char const * get_config_filename(void);
 
 #endif /* MMPACK_COMMON_H */

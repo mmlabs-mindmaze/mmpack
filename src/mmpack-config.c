@@ -18,40 +18,6 @@
 #define CONFIG_FILENAME "mmpack-config.yaml"
 
 
-LOCAL_SYMBOL
-char const * get_config_filename(void)
-{
-	char * filename;
-	size_t filename_len;
-
-	int xdg_env_set = 1;
-	char * xdg_home = mm_getenv("XDG_CONFIG_HOME", NULL);
-	if (xdg_home == NULL) {
-		xdg_home = mm_getenv("HOME", NULL);
-		xdg_env_set = 0;
-	}
-
-	if (xdg_home == NULL)
-		return NULL;
-
-	filename_len = strlen(xdg_home) + sizeof(CONFIG_FILENAME) + 1;
-	if (!xdg_env_set)
-		filename_len += sizeof("/.config/");
-	filename = malloc(filename_len);
-	if (filename == NULL)
-		return NULL;
-
-	filename[0] = '\0';
-	strcat(filename, xdg_home);
-	strcat(filename, "/");
-	if (!xdg_env_set)
-		strcat(filename, ".config/");
-	strcat(filename, CONFIG_FILENAME);
-
-	return filename;
-}
-
-
 /*
  * # list of name: url
  * server1: http://mmpack-server-1:8888/

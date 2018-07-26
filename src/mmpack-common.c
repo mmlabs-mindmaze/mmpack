@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <mmerrno.h>
+#include <mmlib.h>
+
 #include "mmpack-common.h"
 
 
@@ -69,4 +72,50 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 	if (ctx->curl != NULL)
 		curl_easy_cleanup(ctx->curl);
 	ctx->curl = NULL;
+}
+
+
+static
+char const * get_default_path(enum mm_known_dir dirtype,
+                              char const * default_filename)
+{
+	char * filename;
+	size_t filename_len;
+
+	char const * xdg_home = mm_get_basedir(dirtype);
+	if (xdg_home == NULL)
+		return NULL;
+
+	filename_len = strlen(xdg_home) + strlen(default_filename) + 2;
+	filename = malloc(filename_len);
+	if (filename == NULL)
+		return NULL;
+
+	filename[0] = '\0';
+	strcat(filename, xdg_home);
+	strcat(filename, "/");
+	strcat(filename, default_filename);
+
+	return filename;
+}
+
+
+LOCAL_SYMBOL
+char const * get_local_mmpack_binary_index_path(void)
+{
+	return get_default_path(MM_DATA_HOME, "mmpack-binindex.yaml");
+}
+
+
+LOCAL_SYMBOL
+char const * get_mmpack_installed_pkg_path(void)
+{
+	return get_default_path(MM_DATA_HOME, "mmpack-installed.yaml");
+}
+
+
+LOCAL_SYMBOL
+char const * get_config_filename(void)
+{
+	return get_default_path(MM_CONFIG_HOME, "mmpack-config.yaml");
 }
