@@ -42,6 +42,8 @@ mmpack_SOURCES = \
 	mmpack-config.h \
 	mmpack-update.c \
 	mmpack-update.h \
+	package-utils.c \
+	package-utils.h \
 	$(eol)
 
 mmpack_LDADD = \

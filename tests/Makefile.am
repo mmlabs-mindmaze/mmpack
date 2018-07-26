@@ -40,6 +40,7 @@ mmpack_sources = \
 	../src/mmpack-common.c \
 	../src/mmpack-config.c \
 	../src/mmpack-update.c \
+	../src/package-utils.c \
 	$(eol)
 
 unittests_tap_SOURCES = \
@@ -48,6 +49,7 @@ unittests_tap_SOURCES = \
 	hash_test.c \
 	testcases.h \
 	unittests.c \
+	version_test.c \
 	$(eol)
 
 unittests_tap_LDADD = \

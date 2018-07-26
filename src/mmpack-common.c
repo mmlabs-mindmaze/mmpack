@@ -29,20 +29,22 @@ os_id get_os_id(void)
 	char * line = NULL;
 	size_t len = 0;
 	ssize_t nread;
+	os_id id = OS_IS_UNKNOWN;
 
 	stream = popen(OS_ID_CMD, "r");
 
 	nread = getline(&line, &len, stream);
-	fclose(stream);
-	free(line);
 	if (nread == -1)
-		return OS_IS_UNKNOWN;
+		goto exit;
 
 	if (strncasecmp(line, "ubuntu", len)
 			||  strncasecmp(line, "debian", len))
-		return OS_ID_DEBIAN;
+		id = OS_ID_DEBIAN;
 
-	return OS_IS_UNKNOWN;
+exit:
+	fclose(stream);
+	free(line);
+	return id;
 }
 #else /* !win32 && !linux */
 LOCAL_SYMBOL

@@ -7,9 +7,12 @@
 
 #include <curl/curl.h>
 
-
 #define STR_EQUAL(str, len, const_str) \
 	(len == (sizeof(const_str) - 1) \
+	 && memcmp(str, const_str, sizeof(const_str) - 1) == 0)
+
+#define STR_STARTS_WITH(str, len, const_str) \
+	(len >= (sizeof(const_str) - 1) \
 	 && memcmp(str, const_str, sizeof(const_str) - 1) == 0)
 
 struct mmpack_ctx {
