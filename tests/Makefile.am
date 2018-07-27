@@ -12,7 +12,13 @@ AM_CFLAGS = \
 	$(MM_WARNFLAGS) \
 	$(eol)
 
-TESTS = unittests.tap
+clean-local:
+	@rm -rvf venv
+
+noinst_PYTHON = pytests.py
+
+TESTS = unittests.tap python-unittests.tap
+check_SCRIPTS = python-unittests.tap
 check_PROGRAMS = \
 	unittests.tap \
 	$(eol)
@@ -25,6 +31,7 @@ EXTRA_DIST = \
 	create-mpkgs \
 	run-test-mpkrepo \
 	mmpack-config.yaml \
+	test_version.py \
 	$(eol)
 
 mmpack_sources = \
