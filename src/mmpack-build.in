@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# @mindmaze_header@
+
+PYTHON=${PYTHON:-python3}
+
+cmd=$1
+mmpack_moduledir=<pythondir>/mmpack
+
+# Get python entry file by transforming the '-' of command into '_'
+pyfile=$mmpack_moduledir/mmpack_`echo $cmd | tr '-' '_'`.py
+
+
+print_usage() {
+	cat << ENDOFDOC
+This is a stub for all mmpack commands
+
+Usage:
+mmpack <command> [command-options]
+
+List all mmpack commands:
+mmpack --help
+
+More infos about a specific command:
+mmpack <command> --help
+
+TODO:
+- user commands to implement
+  * config
+  * download
+  * info/show
+  * install
+  * reinstall
+  * search
+  * uninstall
+  * update/make-cache
+  * upgrade
+
+- package creation commands to implement:
+  * pkg-check
+  * pkg-create
+  * pkg-show
+
+- package DB commands to implement:
+  * provides
+  * ...
+
+List of available commands:
+ENDOFDOC
+	for file in `ls $mmpack_moduledir/mmpack_*.py`; do
+		cmd=`basename $file .py | cut -f2- -d'_' | tr '_' '-'`
+		printf "\t$cmd\n"
+	done
+}
+
+
+# check command is provided
+if [ -z "$cmd" ]; then
+	echo "missing command"
+	print_usage
+	exit 1
+fi
+
+# check target file is readable
+if ! [ -r $pyfile ]; then
+	echo "command $cmd unknown"
+	print_usage
+	exit 1
+fi
+
+shift 1
+exec $PYTHON $pyfile "$@"

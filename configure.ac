@@ -23,6 +23,7 @@ LT_INIT([win32-dll disable-static])
 LT_SYS_MODULE_EXT
 AC_SUBST(LIBTOOL_DEPS)
 AM_PATH_PYTHON([3])
+AC_PROG_SED
 
 # Optional build of 'check' based tests
 PKG_CHECK_MODULES_EXT(CHECK, [check >= 0.9.12],

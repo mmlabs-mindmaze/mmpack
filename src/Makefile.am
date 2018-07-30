@@ -3,7 +3,10 @@ eol=
 AM_CFLAGS = $(MM_WARNFLAGS)
 
 bin_PROGRAMS = mmpack
-dist_bin_SCRIPTS = mmpack-build
+bin_SCRIPTS = mmpack-build
+
+CLEANFILES = $(bin_SCRIPTS)
+EXTRA_DIST = mmpack-build.in
 
 mmpack_builddir = $(pkgpythondir)
 mmpack_build_PYTHON =\
@@ -14,7 +17,6 @@ mmpack_build_PYTHON =\
 	elf_utils.py \
 	mmpack_config.py \
 	mmpack_pkg_create.py \
-	mmpack_build.py \
 	mmpack_pkg_check.py \
 	mmpack_pkg_show.py \
 	package.py \
@@ -53,3 +55,6 @@ mmpack_LDADD = \
 	$(YAML_LIB) \
 	$(CRYPTO_LIB) \
 	$(eol)
+
+mmpack-build: mmpack-build.in Makefile
+	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@
