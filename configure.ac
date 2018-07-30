@@ -6,6 +6,7 @@ AC_CONFIG_SRCDIR([src/mmpack-update.c])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([config/config.h])
+AC_REQUIRE_AUX_FILE([tap-driver.sh])
 
 # Setup automake
 AM_INIT_AUTOMAKE([no-dist-gzip dist-xz color-tests subdir-objects parallel-tests foreign])

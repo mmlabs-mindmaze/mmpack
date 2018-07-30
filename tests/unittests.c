@@ -31,10 +31,9 @@ int main(void)
 
 	suite = api_suite();
 	runner = srunner_create(suite);
+	srunner_set_tap(runner, "-");
 
 	srunner_run_all(runner, CK_ENV);
-	if (srunner_ntests_failed(runner) != 0)
-		exitcode = EXIT_FAILURE;
 
 	srunner_free(runner);
 

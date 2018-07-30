@@ -12,10 +12,14 @@ AM_CFLAGS = \
 	$(MM_WARNFLAGS) \
 	$(eol)
 
-TESTS = unittests
+TESTS = unittests.tap
 check_PROGRAMS = \
-	unittests \
+	unittests.tap \
 	$(eol)
+
+TEST_EXTENSIONS = .test .tap
+TAP_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
+                 $(top_srcdir)/build-aux/tap-driver.sh
 
 EXTRA_DIST = \
 	create-mpkgs \
@@ -30,7 +34,7 @@ mmpack_sources = \
 	../src/mmpack-update.c \
 	$(eol)
 
-unittests_SOURCES = \
+unittests_tap_SOURCES = \
 	$(mmpack_sources) \
 	config_test.c \
 	hash_test.c \
@@ -38,7 +42,7 @@ unittests_SOURCES = \
 	unittests.c \
 	$(eol)
 
-unittests_LDADD = \
+unittests_tap_LDADD = \
 	$(CHECK_LIBS) \
 	$(CURL_LIB) \
 	$(MMLIB_LIB) \
