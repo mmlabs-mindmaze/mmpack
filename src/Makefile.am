@@ -25,16 +25,10 @@ pkgpython_PYTHON =\
 	$(eol)
 
 
-PYLINT_CONFIG = $(top_srcdir)/tools/pylint-config
-
 .PHONY: syntax
-syntax:
-	$(foreach file, $(pkgpython_PYTHON), \
-			pycodestyle $(top_srcdir)/src/$(file) || exit;)
-	$(foreach file, $(pkgpython_PYTHON), \
-			pylint3 --rcfile=$(PYLINT_CONFIG) $(top_srcdir)/src/$(file) || exit;)
+syntax: $(pkgpython_PYTHON)
+	$(top_srcdir)/tools/check-pyfile $^
 
-check: syntax
 
 mmpack_SOURCES = \
 	hash-utils.c \
