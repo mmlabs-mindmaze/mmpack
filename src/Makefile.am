@@ -8,8 +8,7 @@ bin_SCRIPTS = mmpack-build
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST = mmpack-build.in
 
-mmpack_builddir = $(pkgpythondir)
-mmpack_build_PYTHON =\
+pkgpython_PYTHON =\
 	binary_package.py \
 	common.py \
 	decorators.py \
@@ -30,9 +29,9 @@ PYLINT_CONFIG = $(top_srcdir)/tools/pylint-config
 
 .PHONY: syntax
 syntax:
-	$(foreach file, $(mmpack_build_PYTHON), \
+	$(foreach file, $(pkgpython_PYTHON), \
 			pycodestyle $(top_srcdir)/src/$(file) || exit;)
-	$(foreach file, $(mmpack_build_PYTHON), \
+	$(foreach file, $(pkgpython_PYTHON), \
 			pylint3 --rcfile=$(PYLINT_CONFIG) $(top_srcdir)/src/$(file) || exit;)
 
 check: syntax
