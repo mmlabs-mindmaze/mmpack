@@ -31,6 +31,8 @@ syntax: $(pkgpython_PYTHON)
 
 
 mmpack_SOURCES = \
+	indextable.c \
+	indextable.h \
 	mmpack.c \
 	mmpack-common.c \
 	mmpack-common.h \

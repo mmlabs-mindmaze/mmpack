@@ -35,6 +35,7 @@ EXTRA_DIST = \
 	$(eol)
 
 mmpack_sources = \
+	../src/indextable.c \
 	../src/mmpack-common.c \
 	../src/mmpack-config.c \
 	../src/mmpack-update.c \
@@ -45,6 +46,7 @@ mmpack_sources = \
 unittests_tap_SOURCES = \
 	$(mmpack_sources) \
 	config_test.c \
+	indextable_test.c \
 	sha_test.c \
 	testcases.h \
 	unittests.c \
