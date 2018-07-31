@@ -35,18 +35,17 @@ EXTRA_DIST = \
 	$(eol)
 
 mmpack_sources = \
-	../src/sha256.c \
-	../src/hash-utils.c \
 	../src/mmpack-common.c \
 	../src/mmpack-config.c \
 	../src/mmpack-update.c \
 	../src/package-utils.c \
+	../src/sha256.c \
 	$(eol)
 
 unittests_tap_SOURCES = \
 	$(mmpack_sources) \
 	config_test.c \
-	hash_test.c \
+	sha_test.c \
 	testcases.h \
 	unittests.c \
 	version_test.c \

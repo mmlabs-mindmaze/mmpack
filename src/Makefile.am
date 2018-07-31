@@ -31,10 +31,6 @@ syntax: $(pkgpython_PYTHON)
 
 
 mmpack_SOURCES = \
-	hash-utils.c \
-	hash-utils.h \
-	sha256.c \
-	sha256.h \
 	mmpack.c \
 	mmpack-common.c \
 	mmpack-common.h \
@@ -44,6 +40,8 @@ mmpack_SOURCES = \
 	mmpack-update.h \
 	package-utils.c \
 	package-utils.h \
+	sha256.c \
+	sha256.h \
 	$(eol)
 
 mmpack_LDADD = \
