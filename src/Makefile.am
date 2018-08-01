@@ -38,6 +38,7 @@ mmpack_SOURCES = \
 	mmpack-config.h \
 	mmpack-update.c \
 	mmpack-update.h \
+	mmstring.h \
 	package-utils.c \
 	package-utils.h \
 	sha256.c \
