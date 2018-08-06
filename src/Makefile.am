@@ -33,6 +33,8 @@ syntax: $(pkgpython_PYTHON)
 mmpack_SOURCES = \
 	hash-utils.c \
 	hash-utils.h \
+	sha256.c \
+	sha256.h \
 	mmpack.c \
 	mmpack-common.c \
 	mmpack-common.h \
