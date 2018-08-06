@@ -61,17 +61,20 @@ static
 int parse_config(yaml_parser_t * parser, server_cb cb, void * arg)
 {
 	yaml_token_t token;
-	char const * name;
+	char * name;
 	int rv, type;
 
 	rv = -1;
 	name = NULL;
 	type = -1;
-	do {
+	while (1) {
 		if (!yaml_parser_scan(parser, &token))
 			goto exit;
 
 		switch(token.type) {
+			case YAML_STREAM_END_TOKEN:
+				rv = 0;
+				goto exit;
 			case YAML_KEY_TOKEN:
 				type = YAML_KEY_TOKEN;
 				break;
@@ -80,21 +83,25 @@ int parse_config(yaml_parser_t * parser, server_cb cb, void * arg)
 				break;
 			case YAML_SCALAR_TOKEN:
 				if (type == YAML_KEY_TOKEN) {
-					name = (char const *) token.data.scalar.value;
+					name = strdup((char const *) token.data.scalar.value);
 				} else if (type == YAML_VALUE_TOKEN) {
 					rv = cb(name, (char const *) token.data.scalar.value, arg);
 					if (rv != 0)
 						goto exit;
+
+					free(name);
 					name = NULL;
 				}
 				break;
 			default:
 				type = -1;
+				free(name);
 				name = NULL;
 				break;
 		}
-	} while(token.type != YAML_STREAM_END_TOKEN);
-	rv = 0;
+
+		yaml_token_delete(&token);
+	}
 
 exit:
 	yaml_token_delete(&token);
