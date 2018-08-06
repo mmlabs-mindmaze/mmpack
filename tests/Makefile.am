@@ -26,11 +26,8 @@ EXTRA_DIST = \
 mmpack_sources = \
 	../src/hash-utils.c \
 	../src/mmpack-common.c \
-	../src/mmpack-common.h \
 	../src/mmpack-config.c \
-	../src/mmpack-config.h \
 	../src/mmpack-update.c \
-	../src/mmpack-update.h \
 	$(eol)
 
 unittests_SOURCES = \
