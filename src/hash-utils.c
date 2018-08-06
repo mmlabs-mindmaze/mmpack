@@ -7,13 +7,14 @@
 
 #include <mmlib.h>
 #include <mmsysio.h>
-#include <openssl/sha.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sha256.h"
 #include "hash-utils.h"
 
 #define HASH_UPDATE_SIZE	512
+#define SHA256_DIGEST_LENGTH	SHA256_BLOCK_SIZE
 
 /**
  * conv_to_hexstr() - convert byte array into hexadecimal string
@@ -63,7 +64,7 @@ int hash_fd_compute(char* hash, int fd)
 	ssize_t rsz;
 	int rv = 0;
 
-	SHA256_Init(&ctx);
+	sha256_init(&ctx);
 
 	do {
 		rsz = mm_read(fd, data, sizeof(data));
@@ -72,10 +73,10 @@ int hash_fd_compute(char* hash, int fd)
 			break;
 		}
 
-		SHA256_Update(&ctx, data, rsz);
+		sha256_update(&ctx, data, rsz);
 	} while (rsz > 0);
 
-	SHA256_Final(md, &ctx);
+	sha256_final(&ctx, md);
 	conv_to_hexstr(hash, md, sizeof(md));
 
 	return rv;

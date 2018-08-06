@@ -28,6 +28,7 @@ EXTRA_DIST = \
 	$(eol)
 
 mmpack_sources = \
+	../src/sha256.c \
 	../src/hash-utils.c \
 	../src/mmpack-common.c \
 	../src/mmpack-config.c \

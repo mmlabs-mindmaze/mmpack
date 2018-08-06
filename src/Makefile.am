@@ -48,7 +48,6 @@ mmpack_LDADD = \
 	$(CURL_LIB) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
-	$(CRYPTO_LIB) \
 	$(eol)
 
 mmpack-build: mmpack-build.in Makefile
