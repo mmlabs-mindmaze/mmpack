@@ -17,8 +17,6 @@
 #include "mmpack-common.h"
 #include "mmpack-update.h"
 
-#define STR_EQUAL(str, const_str) \
-	memcmp(str, const_str, sizeof(const_str) - 1)
 
 static
 void usage(char const * progname)
@@ -43,7 +41,7 @@ int main(int argc, char ** argv)
 		return mm_raise_from_errno("failed to init mmpack");
 
 
-	if (STR_EQUAL(command, "update")) {
+	if (STR_EQUAL(command, strlen(command), "update")) {
 		rv = mmpack_update_all(&ctx);
 	} else {
 		usage(argv[0]);
