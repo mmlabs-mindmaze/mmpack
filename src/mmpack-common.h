@@ -16,6 +16,14 @@ struct mmpack_ctx {
 	CURL * curl;
 };
 
+typedef enum {
+	OS_IS_UNKNOWN,
+	OS_ID_DEBIAN,
+	OS_ID_WINDOWS_10,
+} os_id;
+
+
+os_id get_os_id(void);
 
 int mmpack_ctx_init(struct mmpack_ctx * ctx);
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx);
