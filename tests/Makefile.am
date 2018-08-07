@@ -55,5 +55,4 @@ unittests_tap_LDADD = \
 	$(CURL_LIB) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
-	$(CRYPTO_LIB) \
 	$(eol)
