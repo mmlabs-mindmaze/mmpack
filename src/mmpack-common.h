@@ -8,6 +8,14 @@
 #include <curl/curl.h>
 
 
+/* Function attribute to specify some pointer arguments are non null */
+#if defined(__GNUC__)
+#  define NONNULL_ARGS(...)     __attribute__((nonnull (__VA_ARGS__)))
+#else
+#  define NONNULL_ARGS(...)
+#endif
+
+
 #ifndef MIN
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #endif
