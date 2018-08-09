@@ -12,17 +12,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <yaml.h>
 
 #include <mmerrno.h>
 #include <mmlib.h>
 
+#include "indextable.h"
 #include "mmpack-common.h"
 #include "mmpack-context.h"
+#include "package-utils.h"
+
 
 LOCAL_SYMBOL
 int mmpack_ctx_init(struct mmpack_ctx * ctx)
 {
 	memset(ctx, 0, sizeof(*ctx));
+
+	if (!yaml_parser_initialize(&ctx->parser))
+		return mm_raise_error(ENOMEM, "failed to init yaml parse");
+
+	indextable_init(&ctx->binindex, -1, -1);
 
 	return 0;
 }
@@ -31,7 +40,21 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx)
 LOCAL_SYMBOL
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 {
-	if (ctx->curl != NULL)
+	struct it_iterator iter;
+	struct it_entry * entry;
+
+	if (ctx->curl != NULL) {
 		curl_easy_cleanup(ctx->curl);
-	ctx->curl = NULL;
+		ctx->curl = NULL;
+	}
+
+	yaml_parser_delete(&ctx->parser);
+
+	entry = it_iter_first(&iter, &ctx->binindex);
+	while (entry != NULL) {
+		struct mmpkg * pkg = entry->value;
+		mmpkg_destroy(pkg);
+		entry = it_iter_next(&iter);
+	}
+	indextable_deinit(&ctx->binindex);
 }

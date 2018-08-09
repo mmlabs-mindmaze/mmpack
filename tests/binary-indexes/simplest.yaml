@@ -1,0 +1,16 @@
+# smoke-test binary index: only contain a single package
+#
+# Note: package A also has system dependencies
+
+pkg-a:
+    depends:
+        pkg-b: [0.0.2, any]
+        pkg-d: [any, "08-10"]
+    description: ''
+    source: test-pkg
+    sysdepends:
+        libc6: [2.24-11+deb9u3, 2.24-11+deb9u3]
+        libgcc1: ["1:6.3.0-18+deb9u1", "1:6.3.0-18+deb9u1"]
+    version: 0.0.1
+    filename: pool/pkg-a_0.0.1_amd64-gnu-linux.mpk
+    sha256: fec4d632375388675fcbc40484569b5359ab6e948472de974c1234d6e2756567

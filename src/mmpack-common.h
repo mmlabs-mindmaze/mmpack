@@ -30,7 +30,6 @@ typedef enum {
 	OS_ID_WINDOWS_10,
 } os_id;
 
-
 os_id get_os_id(void);
 
 char const * get_local_mmpack_binary_index_path(void);

@@ -41,6 +41,7 @@ EXTRA_DIST = \
 	$(eol)
 
 mmpack_sources = \
+	../src/binary-index.c \
 	../src/indextable.c \
 	../src/mmpack-common.c \
 	../src/mmpack-context.c \
@@ -52,6 +53,7 @@ mmpack_sources = \
 
 unittests_tap_SOURCES = \
 	$(mmpack_sources) \
+	binindex_test.c \
 	config_test.c \
 	indextable_test.c \
 	sha_test.c \

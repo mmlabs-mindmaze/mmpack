@@ -71,6 +71,7 @@ int parse_config(yaml_parser_t * parser, server_cb cb, void * arg)
 
 exit:
 	yaml_token_delete(&token);
+	free(name);
 
 	return rv;
 }

@@ -1,0 +1,40 @@
+# mmpack dependency graph:
+#    A
+#  /   \
+# B---- C
+#
+# A depends on B
+# B depends on C
+# C depends on A
+#
+# there are no version conflict
+
+pkg-a:
+    depends:
+        pkg-b: [0.0.2, 0.0.2]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.1
+    filename: pool/pkg-a_0.0.1_amd64-gnu-linux.mpk
+    sha256: fec4d632345388675fcbc4048c319b5359ab6e94a472de974c76e4d6e2756267
+
+pkg-b:
+    depends:
+        pkg-c: [0.0.3, 0.0.3]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.2
+    filename: pool/pkg-b_0.0.2_amd64-gnu-linux.mpk
+    sha256: 20a95041eca0d160768b88ef006dd0e3bdaac0e18dc1618582b9dcac9e3400bd
+
+pkg-c:
+    depends:
+        pkg-a: [0.0.1, 0.0.1]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.3
+    filename: pool/pkg-c_0.0.3_amd64-gnu-linux.mpk
+    sha256: 0f1d8854bfdd2ca152306322e25f6b8cc30e5216e9251d548687d3979c415e3d

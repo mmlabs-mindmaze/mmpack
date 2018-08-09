@@ -6,9 +6,14 @@
 #define MMPACK_CONTEXT_H
 
 #include <curl/curl.h>
+#include <yaml.h>
+
+#include "indextable.h"
 
 struct mmpack_ctx {
 	CURL * curl;
+	yaml_parser_t parser;
+	struct indextable binindex;
 };
 
 int mmpack_ctx_init(struct mmpack_ctx * ctx);

@@ -45,6 +45,7 @@ int get_install_state_debian(char const * name, char const * version)
 			sys_version = strdup(line + sizeof("Version:"));
 			sys_version[strlen(version) - 1] = '\0';
 			if (pkg_version_compare(version, sys_version)) {
+				free(sys_version);
 				installed = SYSTEM_PKG_REQUIRED;
 				goto exit;
 			}
@@ -70,4 +71,77 @@ int get_local_system_install_state(char const * name, char const * version)
 	default:
 		return mm_raise_error(ENOSYS, "Unsupported OS");
 	}
+}
+
+
+LOCAL_SYMBOL
+struct mmpkg * mmpkg_create(char const * name)
+{
+	struct mmpkg * pkg = malloc(sizeof(*pkg));
+	if (pkg == NULL)
+		return NULL;
+	memset(pkg, 0, sizeof(*pkg));
+
+	pkg->name = mmstr_malloc_from_cstr(name);
+	if (pkg->name == NULL)
+		goto enomem;
+
+	return pkg;
+
+enomem:
+	mmpkg_destroy(pkg);
+	return NULL;
+}
+
+
+LOCAL_SYMBOL
+void mmpkg_destroy(struct mmpkg * pkg)
+{
+	if (pkg == NULL)
+		return;
+
+	mmstr_free(pkg->name);
+	mmstr_free(pkg->version);
+
+	mmpkg_dep_destroy(pkg->dependencies);
+	/* Ignore next_version pointer. Is reachable for cleanup via indextable */
+
+	free(pkg);
+}
+
+
+LOCAL_SYMBOL
+struct mmpkg_dep * mmpkg_dep_create(char const * name)
+{
+	struct mmpkg_dep * dep = malloc(sizeof(*dep));
+	if (dep == NULL)
+		return NULL;
+	memset(dep, 0, sizeof(*dep));
+
+	dep->name = mmstr_malloc_from_cstr(name);
+	if (dep->name == NULL)
+		goto enomem;
+
+	return dep;
+
+enomem:
+	mmpkg_dep_destroy(dep);
+	return NULL;
+}
+
+
+LOCAL_SYMBOL
+void mmpkg_dep_destroy(struct mmpkg_dep * dep)
+{
+	if (dep == NULL)
+		return;
+
+	mmstr_free(dep->name);
+	mmstr_free(dep->min_version);
+	mmstr_free(dep->max_version);
+
+	if (dep->next)
+		mmpkg_dep_destroy(dep->next);
+
+	free(dep);
 }

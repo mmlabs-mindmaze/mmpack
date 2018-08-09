@@ -1,0 +1,82 @@
+# mmpack dependency graph:
+#    A
+#  / | \
+# B  |  C
+#  \ | / \
+#    D    E
+#     \  /
+#       F
+#
+# Package C should trigger this install chain :
+#   F -> D -> E -> C
+# Package A should trigger this install chain :
+#   F -> D -> B -> E -> C -> A
+#
+# there are no version conflict
+# there are no circular dependencies
+#
+# Note: package A also has system dependencies
+
+pkg-a:
+    depends:
+        pkg-b: [0.0.2, any]
+        pkg-d: [0.0.4, 0.0.4]
+        pkg-c: [any, any]
+    description: ''
+    source: test-pkg
+    sysdepends:
+        libc6: [2.24-11+deb9u3, 2.24-11+deb9u3]
+        libgcc1: ["1:6.3.0-18+deb9u1", "1:6.3.0-18+deb9u1"]
+    version: 0.0.1
+    filename: pool/pkg-a_0.0.1_amd64-gnu-linux.mpk
+    sha256: fec4d632345388675fcbc4048c319b5359ab6e94a472de974c76e4d6e2756267
+
+pkg-b:
+    depends:
+        pkg-d: [0.0.2, 0.0.2]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.2
+    filename: pool/pkg-b_0.0.2_amd64-gnu-linux.mpk
+    sha256: 20a95041eca0d160768b88ef006dd0e3bdaac0e18dc1618582b9dcac9e3400bd
+
+pkg-c:
+    depends:
+        pkg-d: [0.0.4, 0.0.4]
+        pkg-e: [0.0.5, 0.0.5]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.3
+    filename: pool/pkg-c_0.0.3_amd64-gnu-linux.mpk
+    sha256: 0f1d8854bfdd2ca152306322e25f6b8cc30e5216e9251d548687d3979c415e3d
+
+pkg-d:
+    depends:
+        pkg-f: [0.0.6, any]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.4
+    filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    sha256: 2498fd7b104e224f41665556147b1ad24c8e0b1ef0273a1db47e0ba714fa8be1
+
+pkg-e:
+    depends:
+        pkg-f: [0.0.6, 0.0.6]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.5
+    filename: pool/pkg-e_0.0.5_amd64-gnu-linux.mpk
+    sha256: cd2a6e62aca59661cc79a6e2668283b8de306e783d498925b49c81cf7e74b14c
+
+pkg-f:
+    depends: {}
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.6
+    filename: pool/pkg-f_0.0.6_amd64-gnu-linux.mpk
+    sha256: e0ace64b803f7c6d7d8445ee2e01d0ea4bd503c90cc5ce0b3980a54a06696a6c
