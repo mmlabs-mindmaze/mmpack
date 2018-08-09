@@ -48,7 +48,8 @@ class BinaryPackage(object):
     def _gen_info(self, pkgdir: str) -> None:
         info = {'version': self.version,
                 'source': self.source,
-                'description': self.description}
+                'description': self.description,
+                'sumsha256sums': sha256sum(pkgdir + 'MMPACK/sha256sums')}
         info.update(self._dependencies)
         yaml_serialize({self.name: info},
                        pkgdir + 'MMPACK/info')
