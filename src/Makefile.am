@@ -36,6 +36,8 @@ mmpack_SOURCES = \
 	mmpack.c \
 	mmpack-common.c \
 	mmpack-common.h \
+	mmpack-context.c \
+	mmpack-context.h \
 	mmpack-config.c \
 	mmpack-config.h \
 	mmpack-update.c \

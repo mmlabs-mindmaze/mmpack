@@ -10,6 +10,7 @@
 #include <mmerrno.h>
 
 #include "mmpack-common.h"
+#include "mmpack-context.h"
 #include "mmpack-config.h"
 #include "mmpack-update.h"
 

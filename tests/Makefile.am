@@ -37,6 +37,7 @@ EXTRA_DIST = \
 mmpack_sources = \
 	../src/indextable.c \
 	../src/mmpack-common.c \
+	../src/mmpack-context.c \
 	../src/mmpack-config.c \
 	../src/mmpack-update.c \
 	../src/package-utils.c \
