@@ -12,8 +12,14 @@ AM_CFLAGS = \
 	$(MM_WARNFLAGS) \
 	$(eol)
 
+
+AM_V_RM = $(am__v_RM_$(V))
+am__v_RM_ = $(am__v_RM_$(AM_DEFAULT_VERBOSITY))
+am__v_RM_0 = -rm -f
+am__v_RM_1 = -@rm -vf
+
 clean-local:
-	@rm -rvf venv
+	$(AM_V_RM) -r venv
 
 noinst_PYTHON = pytests.py
 
