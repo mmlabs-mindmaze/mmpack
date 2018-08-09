@@ -605,7 +605,7 @@ struct it_entry* indextable_lookup(struct indextable* table, const mmstr* key)
  * otherwise.
  */
 LOCAL_SYMBOL
-struct it_entry* it_iter_first(struct it_iterator* iter, struct indextable* table)
+struct it_entry* it_iter_first(struct it_iterator* iter, struct indextable const * table)
 {
 	*iter = (struct it_iterator) {table = table, .e = -1, .b = -1};
 	return it_iter_next(iter);
@@ -622,7 +622,7 @@ struct it_entry* it_iter_first(struct it_iterator* iter, struct indextable* tabl
 LOCAL_SYMBOL
 struct it_entry* it_iter_next(struct it_iterator* iter)
 {
-	struct indextable* table = iter->table;
+	struct indextable const * table = iter->table;
 	struct it_bucket* curr = iter->curr;
 	struct it_bucket* buckets;
 	int b;
