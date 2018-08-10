@@ -52,7 +52,8 @@ void randperm(int* perms, int len)
 
 	for (i = 0; i < len; i++) {
 		p = randint(0, i);
-		perms[i] = perms[p];
+		if (i != p)
+			perms[i] = perms[p];
 		perms[p] = i;
 	}
 }
