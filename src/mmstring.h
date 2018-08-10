@@ -84,10 +84,24 @@ mmstr* mmstr_copy(mmstr* str, const char* restrict data, int len)
 }
 
 
+static inline
+void mmstr_free(const mmstr* str)
+{
+	if (str != NULL)
+		free(MMSTR_HDR(str));
+}
+
+
+static inline
+void mmstr_freea(const mmstr* str)
+{
+	if (str != NULL)
+		mm_freea(MMSTR_HDR(str));
+}
+
+
 #define mmstr_malloc(maxlen)    mmstr_init(malloc(MMSTR_NEEDED_SIZE(maxlen)), maxlen)
-#define mmstr_free(str)      free(MMSTR_HDR(str))
 #define mmstr_malloca(maxlen)   mmstr_init(mm_malloca(MMSTR_NEEDED_SIZE(maxlen)), maxlen)
-#define mmstr_freea(str)     mm_freea(MMSTR_HDR(str))
 #define mmstr_alloca(maxlen)    mmstr_init(alloca(MMSTR_NEEDED_SIZE(maxlen)), maxlen)
 #define mmstr_map_on_array(array)       mmstr_init(array, MMSTR_SIZE_TO_MAXLEN(sizeof(array)))
 
