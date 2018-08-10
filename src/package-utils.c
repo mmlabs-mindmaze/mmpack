@@ -5,6 +5,7 @@
 # include <config.h>
 #endif
 
+#include <assert.h>
 #include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -221,4 +222,41 @@ void mmpkg_dep_destroy(struct mmpkg_dep * dep)
 		mmpkg_dep_destroy(dep->next);
 
 	free(dep);
+}
+
+
+/**
+ * mmpkg_get_latest() - get the latest possible version of given package
+ *                      inferior to geven maximum
+ * ctx:         mmapck context
+ * name:        package name
+ * max_version: exclusive maximum boundary
+ *
+ * Return: NULL on error, a pointer to the found package otherwise
+ */
+LOCAL_SYMBOL
+struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * name,
+                                      mmstr const * max_version)
+{
+	struct it_entry * entry;
+	struct mmpkg * pkg, * latest_pkg;
+
+	assert(mmpack_ctx_is_init(ctx));
+
+	entry = indextable_lookup(&ctx->binindex, name);
+	if (entry == NULL || entry->value == NULL)
+		return NULL;
+
+	latest_pkg = entry->value;
+	pkg = latest_pkg->next_version;
+
+	while (pkg != NULL) {
+		if (pkg_version_compare(latest_pkg->version, pkg->version) < 0
+		    && pkg_version_compare(pkg->version, max_version) < 0)
+			latest_pkg = pkg;
+
+		pkg = pkg->next_version;
+	}
+
+	return latest_pkg;
 }

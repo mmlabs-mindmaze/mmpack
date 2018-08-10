@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "mmpack-common.h"
+#include "mmpack-context.h"
 #include "mmstring.h"
 
 
@@ -58,5 +59,8 @@ struct mmpkg * mmpkg_create(char const * name);
 void mmpkg_destroy(struct mmpkg * pkg);
 struct mmpkg_dep * mmpkg_dep_create(char const * name);
 void mmpkg_dep_destroy(struct mmpkg_dep * dep);
+
+struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * name,
+                                mmstr const * max_version);
 
 #endif /* PACKAGE_UTILS_H */
