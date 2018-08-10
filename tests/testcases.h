@@ -8,6 +8,7 @@
 
 TCase* create_binindex_tcase(void);
 TCase* create_config_tcase(void);
+TCase* create_dependencies_tcase(void);
 TCase* create_version_tcase(void);
 TCase* create_sha_tcase(void);
 TCase* create_indextable_tcase(void);

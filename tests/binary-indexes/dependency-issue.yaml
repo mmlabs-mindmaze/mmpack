@@ -1,0 +1,118 @@
+# mmpack dependency graph:
+#
+#   +------------ A1 -------+
+#   |         |             |
+# B[1-1]    E[1-1]       C[1-2]
+#   |         |          --+----+
+#   |         |         1|      |2
+#   |         |          |      |
+# D[1-4]    D[2-2]    D[1-3]    D5
+#
+# Read:
+# * Package A1 depends on packages (B, E, C)
+# * A1 is compatible with both C1 and C2 (and any version in between)
+# * B1 depends on D, and is compatible with version 1 -> 4
+# * E1 depends on D2 exclusively (incompatible with other versions)
+# * C1 depends on D and is compatible with versions 1-> 3
+# * C2 depends on D5 exclusively (incompatible with other versions)
+#
+# Although we CAN read and deduce that the following would work using C1 and D2
+# this is not currently supported and expected to fail with an error message
+# expliciting the issue for the user to solve
+
+pkg-a:
+    depends:
+        pkg-b: [0.0.1, 0.0.1]
+        pkg-e: [0.0.1, 0.0.1]
+        pkg-c: [0.0.1, 0.0.2]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.1
+    filename: pool/pkg-a_0.0.1_amd64-gnu-linux.mpk
+    sha256: a001000000000000000000000000000000000000000000000000000000000000
+
+pkg-b:
+    depends:
+        pkg-d: [0.0.1, 0.0.4]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.1
+    filename: pool/pkg-b_0.0.2_amd64-gnu-linux.mpk
+    sha256: b001000000000000000000000000000000000000000000000000000000000000
+
+pkg-c:
+    depends:
+        pkg-d: [0.0.1, 0.0.3]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.1
+    filename: pool/pkg-c_0.0.3_amd64-gnu-linux.mpk
+    sha256: c001000000000000000000000000000000000000000000000000000000000000
+
+pkg-c:
+    depends:
+        pkg-d: [0.0.5, 0.0.5]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.2
+    filename: pool/pkg-c_0.0.3_amd64-gnu-linux.mpk
+    sha256: c002000000000000000000000000000000000000000000000000000000000000
+
+pkg-d:
+    depends: {}
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.1
+    filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    sha256: d001000000000000000000000000000000000000000000000000000000000000
+
+pkg-d:
+    depends: {}
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.2
+    filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    sha256: d002000000000000000000000000000000000000000000000000000000000000
+
+pkg-d:
+    depends: {}
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.3
+    filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    sha256: d003000000000000000000000000000000000000000000000000000000000000
+
+pkg-d:
+    depends: {}
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.4
+    filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    sha256: d004000000000000000000000000000000000000000000000000000000000000
+
+pkg-d:
+    depends: {}
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.5
+    filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    sha256: d005000000000000000000000000000000000000000000000000000000000000
+
+pkg-e:
+    depends:
+        pkg-d: [0.0.2, 0.0.2]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.1
+    filename: pool/pkg-e_0.0.5_amd64-gnu-linux.mpk
+    sha256: e002000000000000000000000000000000000000000000000000000000000000

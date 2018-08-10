@@ -21,6 +21,7 @@ static const char * binindexes[] = {
 	TEST_BININDEX_DIR"/simplest.yaml",
 	TEST_BININDEX_DIR"/simple.yaml",
 	TEST_BININDEX_DIR"/circular.yaml",
+	TEST_BININDEX_DIR"/dependency-issue.yaml",
 };
 #define NUM_BININDEXES MM_NELEM(binindexes)
 

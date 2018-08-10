@@ -55,6 +55,7 @@ unittests_tap_SOURCES = \
 	$(mmpack_sources) \
 	binindex_test.c \
 	config_test.c \
+	dependencies_test.c \
 	indextable_test.c \
 	sha_test.c \
 	testcases.h \

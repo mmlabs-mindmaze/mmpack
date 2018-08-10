@@ -17,6 +17,8 @@ Suite* api_suite(void)
 	Suite *s = suite_create("mmpack");
 
 	suite_add_tcase(s, create_binindex_tcase());
+	suite_add_tcase(s, create_config_tcase());
+	suite_add_tcase(s, create_dependencies_tcase());
 	suite_add_tcase(s, create_version_tcase());
 	suite_add_tcase(s, create_sha_tcase());
 	suite_add_tcase(s, create_indextable_tcase());

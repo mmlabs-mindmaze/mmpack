@@ -54,6 +54,23 @@ struct mmpkg_dep {
 	struct mmpkg_dep * next;
 };
 
+typedef enum {
+	INSTALL_PKG = 1,
+	REMOVE_PKG = -1,
+} action;
+
+struct action {
+	action action;
+	struct mmpkg const * pkg;
+};
+
+struct action_stack {
+	int index;
+	int size;
+	struct action actions[];
+};
+
+
 struct mmpkg * mmpkg_create(char const * name);
 void mmpkg_destroy(struct mmpkg * pkg);
 void mmpkg_dump(struct mmpkg const * pkg);
@@ -64,5 +81,14 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps);
 
 struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * name,
                                 mmstr const * max_version);
+
+struct action_stack * mmpkg_get_install_list(struct mmpack_ctx * ctx,
+                                                    mmstr const * name,
+                                                    mmstr const * version);
+
+struct action_stack * mmpack_action_stack_create(void);
+void mmpack_action_stack_destroy(struct action_stack * stack);
+struct action * mmpack_action_stack_pop(struct action_stack * stack);
+void mmpack_action_stack_dump(struct action_stack * actions);
 
 #endif /* PACKAGE_UTILS_H */

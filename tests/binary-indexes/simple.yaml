@@ -10,7 +10,7 @@
 # Package C should trigger this install chain :
 #   F -> D -> E -> C
 # Package A should trigger this install chain :
-#   F -> D -> B -> E -> C -> A
+#   F -> E -> D -> C -> B -> A
 #
 # there are no version conflict
 # there are no circular dependencies
@@ -33,7 +33,7 @@ pkg-a:
 
 pkg-b:
     depends:
-        pkg-d: [0.0.2, 0.0.2]
+        pkg-d: [0.0.4, 0.0.4]
     description: ''
     source: test-pkg
     sysdepends: {}

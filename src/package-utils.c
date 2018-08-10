@@ -284,3 +284,398 @@ struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * nam
 
 	return latest_pkg;
 }
+
+
+#define DEFAULT_STACK_SZ 10
+LOCAL_SYMBOL
+struct action_stack * mmpack_action_stack_create(void)
+{
+	size_t stack_size;
+	struct action_stack * stack;
+
+	stack_size = sizeof(*stack) + DEFAULT_STACK_SZ * sizeof(*stack->actions);
+	stack = malloc(stack_size);
+	if (stack == NULL)
+		return NULL;
+
+	memset(stack, 0, stack_size);
+	stack->size = DEFAULT_STACK_SZ;
+
+	return stack;
+}
+
+
+LOCAL_SYMBOL
+void mmpack_action_stack_destroy(struct action_stack * stack)
+{
+	free(stack);
+}
+
+
+static
+struct action_stack * mmpack_action_stack_push(struct action_stack * stack,
+                                                      action action,
+                                                      struct mmpkg const * pkg)
+{
+	/* increase by DEFAULT_STACK_SZ if full */
+	if ((stack->index + 1) == stack->size) {
+		struct action_stack * tmp;
+		size_t stack_size = sizeof(*stack) + (stack->size + DEFAULT_STACK_SZ) * sizeof(*stack->actions);
+		tmp = realloc(stack, stack_size);
+		if (tmp == NULL)
+			return NULL;
+
+		stack = tmp;
+	}
+
+	stack->actions[stack->index] = (struct action) {
+		.action = action,
+		.pkg = pkg,
+	};
+	stack->index++;
+
+	return stack;
+}
+
+
+LOCAL_SYMBOL
+struct action * mmpack_action_stack_pop(struct action_stack * stack)
+{
+	struct action * action;
+
+	if (stack->index == 0)
+		return NULL;
+
+	stack->index --;
+	action = &stack->actions[stack->index];
+
+	return action;
+}
+
+
+static
+struct mmpkg_dep * mmpkg_dep_append_copy(struct mmpkg_dep * deps,
+                                         struct mmpkg_dep const * new_deps,
+                                         mmstr const * min_version,
+                                         mmstr const * max_version)
+{
+	struct mmpkg_dep * d;
+	struct mmpkg_dep * new = malloc(sizeof(*new));
+	if (new == NULL)
+		return NULL;
+	new->name = mmstr_malloc_from_cstr(new_deps->name);
+	new->min_version = mmstr_malloc_from_cstr(min_version);
+	new->max_version = mmstr_malloc_from_cstr(max_version);
+	new->is_system_package = new_deps->is_system_package;
+	new->next = NULL;  /* ensure there is no bad chaining leftover */
+	if (new->name == NULL || new->min_version == NULL || new->max_version == NULL) {
+		mmpkg_dep_destroy(new);
+		return NULL;
+	}
+
+	if (deps == NULL)
+		return new;
+
+	d = deps;
+	while (d->next)
+		d = d->next;
+
+	d->next = new;
+
+	return deps;
+}
+
+
+/**
+ * dependency_already_met() - check whether a dependency has already been met
+ * @ctx:     mmpack context
+ * @actions: currently planned actions
+ * @dep:     the dependency being investigated
+ *
+ * Return:
+ *    1 if dependency has already been met
+ *    0 if not
+ *   -1 on version conflict
+ */
+static
+int dependency_already_met(struct mmpack_ctx * ctx,
+                           struct action_stack const * actions,
+                           struct mmpkg_dep const * dep)
+{
+	int i;
+	struct it_entry * entry;
+	struct mmpkg const * pkg;
+
+	assert(dep != NULL);
+
+	/* is a version of the package already installed ? */
+	entry = indextable_lookup(&ctx->installed, dep->name);
+	if (entry != NULL && entry->value != NULL) {
+		pkg = entry->value;
+		if (pkg_version_compare(pkg->version, dep->max_version) <= 0
+		    && pkg_version_compare(dep->min_version, pkg->version) <= 0)
+			return 1;
+
+		/* package found installed, but with an incompatible version */
+		return -1;
+	}
+
+	/* package not already installed in the system, but maybe its installation
+	 * has already been planned */
+	for (i = 0 ; i < actions->index ; i++) {
+		pkg = actions->actions[i].pkg;
+		if (!mmstrequal(pkg->name, dep->name))
+			continue;
+
+		if (pkg_version_compare(pkg->version, dep->max_version) <= 0
+		    && pkg_version_compare(dep->min_version, pkg->version) <= 0)
+			return 1;
+
+		/* package was planned to be installed, but with an incompatible version */
+		return -1;
+	}
+
+	/* dependency not met */
+	return 0;
+}
+
+
+static
+struct mmpkg_dep * mmpkg_dep_lookup(struct mmpkg_dep * deplist,
+                                    struct mmpkg_dep const * dep)
+{
+	while (deplist != NULL) {
+		if (mmstrequal(deplist->name, dep->name))
+			return deplist;
+
+		deplist = deplist->next;
+	}
+
+	return NULL;
+}
+
+
+static
+struct mmpkg_dep * mmpkg_dep_remove(struct mmpkg_dep * deps, mmstr const * name)
+{
+	struct mmpkg_dep * tmp;
+	struct mmpkg_dep * d = deps;
+
+	tmp = NULL;
+	while (d != NULL) {
+		if (mmstrequal(d->name, name)) {
+			if (tmp == NULL)
+				deps = d->next;
+			else
+				tmp->next = d->next;
+
+			d->next = NULL;
+			mmpkg_dep_destroy(d);
+			return deps;
+		}
+		tmp = d;
+		d = d->next;
+	}
+
+	assert(0);  /* should always remove an existing element */
+	return deps;
+}
+
+
+static
+struct mmpkg_dep * mmpkg_dep_update(struct mmpkg_dep * deps_out,
+                                    struct mmpkg_dep const * new_dep)
+{
+	mmstr const * min_version, * max_version;
+	struct mmpkg_dep * tmp, * old_dep;
+	old_dep = mmpkg_dep_lookup(deps_out, new_dep);
+	assert(old_dep != NULL);
+
+	/* min = MAX(old->min, new->min) */
+	if (pkg_version_compare(old_dep->min_version, new_dep->min_version) > 0)
+		min_version = old_dep->min_version;
+	else
+		min_version = new_dep->min_version;
+
+	/* max = MIN(old->max, new->max) */
+	if (pkg_version_compare(old_dep->max_version, new_dep->max_version) < 0)
+		max_version = old_dep->max_version;
+	else
+		max_version = new_dep->max_version;
+
+	/* FAIL if min > max */
+	if (pkg_version_compare(min_version, max_version) > 0)
+		return NULL;
+
+	/* create a copy of the new dependency at the end of the list */
+	tmp = mmpkg_dep_append_copy(deps_out, new_dep, min_version, max_version);
+	if (tmp == NULL)
+		return NULL;
+	deps_out = tmp;
+
+
+	return mmpkg_dep_remove(deps_out, new_dep->name);
+}
+
+/**
+ * mmpkg_dep_filter() - only keep unmet dependencies from given read-only dependency list.
+ * @ctx:             the mmpack context
+ * @actions:         the already staged actions
+ * deps_in:          the list of dependencies to be filtered
+ * deps_out:         the list of dependencies which will receive the new dependencies
+ * new_dependencies: flag telling if a new dependency has been added to deps_out
+ *
+ * The deps_in is expected to be taken directly from the indextable, and as such
+ * MUST NOT be touched in any way. The deps_out list will be increased with a
+ * copy of the dependency read from deps_in.
+ *
+ * Return: the filtered list, newly allocated on success, NULL on failure.
+ */
+static
+struct mmpkg_dep * mmpkg_dep_filter(struct mmpack_ctx * ctx,
+                                    struct action_stack const * actions,
+                                    struct mmpkg_dep const * deps_in,
+                                    struct mmpkg_dep * deps_out,
+                                    int * new_dependencies)
+{
+	int rv;
+	struct mmpkg_dep * tmp;
+	struct mmpkg_dep const * new_dep;
+
+	*new_dependencies = 0;
+
+	for (new_dep = deps_in ; new_dep != NULL ; new_dep = new_dep->next) {
+		/* check whether the dependency is already in the unmet dependency list
+		 * if it is, move it to the end of the list, and stop investigating it */
+		if (mmpkg_dep_lookup(deps_out, new_dep)) {
+			deps_out = mmpkg_dep_update(deps_out, new_dep);
+			continue;
+		}
+
+		/* check whether the dependency is already installed, or already staged in
+		 * the action stack */
+		rv = dependency_already_met(ctx, actions, new_dep);
+		if (rv > 0)
+			continue;
+		else if (rv < 0)
+			return NULL;
+
+		if (new_dep->is_system_package) {
+			/* TODO: handle system packages */
+			continue;
+		}
+
+		*new_dependencies = 1;
+		/* we got deps_in from the global index table, which is read-only.
+		 * duplicate it so it can be changed later */
+		tmp = mmpkg_dep_append_copy(deps_out, new_dep,
+		                            new_dep->min_version, new_dep->max_version);
+		if (tmp == NULL)
+			return NULL;
+		deps_out = tmp;
+	}
+
+	return deps_out;
+}
+
+
+/**
+ * mmpkg_get_install_list() -  parse package dependencies and return install order
+ * @ctx:     the mmpack context
+ * @name:    the package's name
+ * @version: the package's version
+ *
+ * In brief, this function will initialize a dependency ordered list with a
+ * single element: the package passed as argument.
+ *
+ * Then while this list is not empty, take the last package of the list.
+ * - if it introduces no new dependency, then stage it as an installed action
+ *   in the action stack.
+ * - if it has unmet *new* dependencies, append those to the dependency list,
+ *   let the current dependency unmet in the list.
+ *
+ * This way, a dependency is removed from the list of needed package only if all
+ * its dependency are already met.
+ *
+ * Returns: an action stack of the packages to be installed in the right order
+ *          and at the correct version on success.
+ *          NULL on error.
+ */
+LOCAL_SYMBOL
+struct action_stack * mmpkg_get_install_list(struct mmpack_ctx * ctx,
+                                                    mmstr const * name,
+                                                    mmstr const * version)
+{
+	void * tmp;
+	struct mmpkg const * pkg;
+	struct action_stack * actions = NULL;
+	struct mmpkg_dep * deps = NULL;
+	struct mmpkg_dep * curr_dep;
+	int new_dependencies;
+
+	actions = mmpack_action_stack_create();
+	deps = mmpkg_dep_create(name);
+	if (actions == NULL || deps == NULL)
+		goto error;
+
+	deps->min_version = mmstr_malloc_from_cstr(version);
+	deps->max_version = mmstr_malloc_from_cstr(version);
+	if (deps->min_version == NULL || deps->max_version == NULL)
+		goto error;
+
+	while (deps != NULL) {
+		/* handle the last dependency introduced */
+		curr_dep = deps;
+		while (curr_dep->next != NULL)
+			curr_dep = curr_dep->next;
+
+		/* get the corresponding package, at its latest possible version */
+		pkg = mmpkg_get_latest(ctx, curr_dep->name, curr_dep->max_version);
+		if (pkg == NULL)
+			goto error;
+
+		/* merge this package dependency into the global dependency list */
+		tmp = mmpkg_dep_filter(ctx, actions, pkg->dependencies, deps, &new_dependencies);
+		if (tmp == NULL)
+			goto error;
+		deps = tmp;
+
+		/* if the package required yet unmet dependency, consider those first.
+		 * leave this one in the dependency list for now */
+		if (!new_dependencies) {
+			/* current package can be installed.
+			 * - add it on top of the stack
+			 * - remove it from the list */
+			tmp = mmpack_action_stack_push(actions, INSTALL_PKG, pkg);
+			if (tmp == NULL)
+				goto error;
+			actions = tmp;
+
+			deps = mmpkg_dep_remove(deps, pkg->name);
+		}
+	}
+
+	return actions;
+
+error:
+	mmpack_action_stack_destroy(actions);
+	mmpkg_dep_destroy(deps);
+
+	return NULL;
+}
+
+
+LOCAL_SYMBOL
+void mmpack_action_stack_dump(struct action_stack * stack)
+{
+	int i;
+
+	for (i =  0 ; i < stack->index ; i++) {
+		if (stack->actions[i].action == INSTALL_PKG)
+			printf("INSTALL: ");
+		else if (stack->actions[i].action == REMOVE_PKG)
+			printf("REMOVE: ");
+
+		mmpkg_dump(stack->actions[i].pkg);
+	}
+}
