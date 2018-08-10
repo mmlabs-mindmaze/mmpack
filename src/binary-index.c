@@ -334,7 +334,7 @@ int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
 	int rv;
 	FILE * index_fh;
 
-	assert(ctx != NULL && ctx->binindex.buckets != NULL);
+	assert(mmpack_ctx_is_init(ctx));
 
 	index_fh = fopen(index_filename, "r");
 	if (index_fh == NULL)

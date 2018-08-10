@@ -19,4 +19,10 @@ struct mmpack_ctx {
 int mmpack_ctx_init(struct mmpack_ctx * ctx);
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx);
 
+static inline
+int mmpack_ctx_is_init(struct mmpack_ctx const * ctx)
+{
+	return (ctx != NULL && ctx->binindex.num_buckets != 0);
+}
+
 #endif /* MMPACK_CONTEXT_H */
