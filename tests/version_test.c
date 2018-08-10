@@ -25,6 +25,11 @@ START_TEST(test_version_formats)
 	ck_assert(pkg_version_compare("1.2", "1.2.1") < 0);
 	ck_assert(pkg_version_compare("16.04", "18.04") < 0);
 	ck_assert(pkg_version_compare("16.04", "18.04") < 0);
+	ck_assert(pkg_version_compare("16.10", "16.9") > 0);
+	ck_assert(pkg_version_compare("01.10", "10.9") < 0);
+	ck_assert(pkg_version_compare("01.9", "1.9") == 0);
+	ck_assert(pkg_version_compare("v01.9.0", "v1.90.0") < 0);
+	ck_assert(pkg_version_compare("vv1.9.0", "v01.9.0") > 0);
 }
 END_TEST
 

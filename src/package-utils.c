@@ -17,10 +17,74 @@
 #include "package-utils.h"
 
 
+/* standard isdigit() is locale dependent making it unnecessarily slow.
+ * This macro is here to keep the semantic of isdigit() as usually known by
+ * most programmer while issuing the fast implementation of it. */
+#define isdigit(c)      ((c) >= '0' && (c) <= '9')
+
+
+/**
+ * pkg_version_compare() - compare package version string
+ *
+ * This function compare the package version string is a way that take into
+ * account the version number. It follows the lexicographic order excepting
+ * when an numeric value is encounter. In such a case, the whole numeric
+ * value is compared. In effect this ensure the result of the following
+ * comparisons :
+ *
+ * * abcd1.3.5 > abc1.3.5
+ * * abc1.3.5 < abc1.29.5
+ * * abc1.30.5 > abc1.29.50
+ *
+ * Return: an integer less than, equal to, or greater than zero if @v1 is
+ * found, respectively, to be less than, to match, or be greater than @v2.
+ */
 LOCAL_SYMBOL
 int pkg_version_compare(char const * v1, char const * v2)
 {
-	return strcmp(v1, v2);
+	int c1, c2;
+	int first_diff;
+
+	do {
+		c1 = *v1++;
+		c2 = *v2++;
+
+		// Compare the numeric value as a whole
+		if (isdigit(c1) && isdigit(c2)) {
+			// Skip leading '0' of v1
+			while (c1 == '0')
+				c1 = *v1++;
+
+			// Skip leading '0' of v2
+			while (c2 == '0')
+				c2 = *v2++;
+
+			// Advance while scanning a numeric value
+			first_diff = 0;
+			while (c1 && isdigit(c1) && c2 && isdigit(c2)) {
+				if (!first_diff)
+					first_diff = c1 - c2;
+
+				c1 = *v1++;
+				c2 = *v2++;
+			}
+
+			// We are leaving the numeric value. So check the
+			// longest numeric value. If equal inspect the first
+			// digit difference
+			if (isdigit(c1) == isdigit(c2)) {
+				if (!first_diff)
+					continue;
+
+				return first_diff;
+			}
+
+			// Check numeric value of v1 is longest or not
+			return isdigit(c1) ? 1 : -1;
+		}
+	} while (c1 && c2 && c1 == c2);
+
+	return c1 - c2;
 }
 
 
