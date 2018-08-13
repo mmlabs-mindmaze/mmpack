@@ -607,7 +607,7 @@ struct it_entry* indextable_lookup(struct indextable* table, const mmstr* key)
 LOCAL_SYMBOL
 struct it_entry* it_iter_first(struct it_iterator* iter, struct indextable const * table)
 {
-	*iter = (struct it_iterator) {table = table, .e = -1, .b = -1};
+	*iter = (struct it_iterator) {.table = table, .e = -1, .b = -1};
 	return it_iter_next(iter);
 }
 
