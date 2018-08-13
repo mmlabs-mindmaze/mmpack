@@ -36,6 +36,13 @@
  * * abc1.3.5 < abc1.29.5
  * * abc1.30.5 > abc1.29.50
  *
+ * "any" is an allowed wildcard.
+ * Anything is lower and higher than "any". Comparing "any" to itself results
+ * in an undefined behavior.
+ *
+ * * 1.0.0 <= any
+ * * any <= 1.0.0
+ *
  * Return: an integer less than, equal to, or greater than zero if @v1 is
  * found, respectively, to be less than, to match, or be greater than @v2.
  */
@@ -45,6 +52,12 @@ int pkg_version_compare(char const * v1, char const * v2)
 	int c1, c2;
 	int first_diff;
 
+	// version wildcards
+	if (STR_EQUAL(v1, strlen(v1), "any")
+	    || STR_EQUAL(v2, strlen(v2), "any"))
+		return 0;
+
+	// normal version processing
 	do {
 		c1 = *v1++;
 		c2 = *v2++;

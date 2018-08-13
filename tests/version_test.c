@@ -30,6 +30,9 @@ START_TEST(test_version_formats)
 	ck_assert(pkg_version_compare("01.9", "1.9") == 0);
 	ck_assert(pkg_version_compare("v01.9.0", "v1.90.0") < 0);
 	ck_assert(pkg_version_compare("vv1.9.0", "v01.9.0") > 0);
+
+	ck_assert(pkg_version_compare("1.0.0", "any") == 0);
+	ck_assert(pkg_version_compare("any", "1.0.0") == 0);
 }
 END_TEST
 
