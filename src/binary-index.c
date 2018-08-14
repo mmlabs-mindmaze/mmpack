@@ -274,7 +274,7 @@ error:
  *   ...
  */
 static
-int mmpack_parse_index(struct mmpack_ctx * ctx)
+int mmpack_parse_index(struct mmpack_ctx * ctx, struct indextable * index)
 {
 	int exitvalue, type;
 	yaml_token_t token;
@@ -306,7 +306,7 @@ int mmpack_parse_index(struct mmpack_ctx * ctx)
 
 				// TODO: package informations have been filled.
 				// insert into indextable
-				struct it_entry* entry = indextable_insert(&ctx->binindex, pkg->name);
+				struct it_entry* entry = indextable_insert(index, pkg->name);
 				if (entry == NULL)
 					goto exit;
 				entry->value = pkg;
@@ -329,8 +329,9 @@ exit:
 }
 
 
-LOCAL_SYMBOL
-int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
+static
+int index_populate(struct mmpack_ctx * ctx, char const * index_filename,
+                   struct indextable * index)
 {
 	int rv;
 	FILE * index_fh;
@@ -342,10 +343,17 @@ int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
 		return mm_raise_error(EINVAL, "failed to open given binary index file");
 
 	yaml_parser_set_input_file(&ctx->parser, index_fh);
-	rv = mmpack_parse_index(ctx);
+	rv = mmpack_parse_index(ctx, index);
 
 	fclose(index_fh);
 	return rv;
+}
+
+
+LOCAL_SYMBOL
+int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
+{
+	return index_populate(ctx, index_filename, &ctx->binindex);
 }
 
 
@@ -361,4 +369,18 @@ void binary_index_dump(struct indextable const * binindex)
 		mmpkg_dump(entry->value);
 		entry = it_iter_next(&iter);
 	}
+}
+
+
+LOCAL_SYMBOL
+void installed_index_dump(struct indextable const * installed)
+{
+	return binary_index_dump(installed);
+}
+
+
+LOCAL_SYMBOL
+int installed_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
+{
+	return index_populate(ctx, index_filename, &ctx->installed);
 }

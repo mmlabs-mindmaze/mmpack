@@ -32,6 +32,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx)
 		return mm_raise_error(ENOMEM, "failed to init yaml parse");
 
 	indextable_init(&ctx->binindex, -1, -1);
+	indextable_init(&ctx->installed, -1, -1);
 
 	return 0;
 }
@@ -57,4 +58,12 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 		entry = it_iter_next(&iter);
 	}
 	indextable_deinit(&ctx->binindex);
+
+	entry = it_iter_first(&iter, &ctx->installed);
+	while (entry != NULL) {
+		struct mmpkg * pkg = entry->value;
+		mmpkg_destroy(pkg);
+		entry = it_iter_next(&iter);
+	}
+	indextable_deinit(&ctx->installed);
 }

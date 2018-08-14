@@ -96,6 +96,13 @@ char const * get_local_mmpack_binary_index_path(void)
 
 
 LOCAL_SYMBOL
+char const * get_local_mmpack_installed_index_path(void)
+{
+	return get_default_path(MM_DATA_HOME, "mmpack-installed.yaml");
+}
+
+
+LOCAL_SYMBOL
 char const * get_mmpack_installed_pkg_path(void)
 {
 	return get_default_path(MM_DATA_HOME, "mmpack-installed.yaml");
