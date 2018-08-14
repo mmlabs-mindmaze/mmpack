@@ -279,6 +279,7 @@ int mmpack_parse_index(struct mmpack_ctx * ctx, struct indextable * index)
 	int exitvalue, type;
 	yaml_token_t token;
 	struct mmpkg * pkg;
+	struct it_entry* entry;
 
 	exitvalue = -1;
 	type = -1;
@@ -304,11 +305,12 @@ int mmpack_parse_index(struct mmpack_ctx * ctx, struct indextable * index)
 				if (exitvalue != 0)
 					goto exit;
 
-				// TODO: package informations have been filled.
-				// insert into indextable
-				struct it_entry* entry = indextable_insert(index, pkg->name);
-				if (entry == NULL)
-					goto exit;
+				/* insert into indextable */
+				entry = indextable_lookup_create(index, pkg->name);
+				assert(entry != NULL);
+
+				/* prepend new version */
+				pkg->next_version = entry->value;
 				entry->value = pkg;
 			}
 			type = -1;
