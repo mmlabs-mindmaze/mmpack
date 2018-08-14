@@ -3,9 +3,7 @@
 # Note: package A also has system dependencies
 
 pkg-a:
-    depends:
-        pkg-b: [0.0.2, any]
-        pkg-d: [any, "08-10"]
+    depends: {}
     description: ''
     source: test-pkg
     sysdepends:
