@@ -4,7 +4,6 @@
 #ifndef PACKAGE_UTILS_H
 #define PACKAGE_UTILS_H
 
-#include <stdbool.h>
 #include <stdio.h>
 
 #include "mmpack-common.h"
@@ -50,7 +49,7 @@ struct mmpkg_dep {
 	mmstr const * min_version; /* inclusive */
 	mmstr const * max_version; /* exclusive */
 
-	bool is_system_package;
+	int is_system_package;
 
 	struct mmpkg_dep * next;
 };
