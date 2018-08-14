@@ -57,8 +57,11 @@ struct mmpkg_dep {
 
 struct mmpkg * mmpkg_create(char const * name);
 void mmpkg_destroy(struct mmpkg * pkg);
+void mmpkg_dump(struct mmpkg const * pkg);
+
 struct mmpkg_dep * mmpkg_dep_create(char const * name);
 void mmpkg_dep_destroy(struct mmpkg_dep * dep);
+void mmpkg_dep_dump(struct mmpkg_dep const * deps);
 
 struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * name,
                                 mmstr const * max_version);

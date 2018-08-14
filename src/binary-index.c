@@ -349,28 +349,6 @@ int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
 }
 
 
-static
-void mmpkg_dep_dump(struct mmpkg_dep const * deps)
-{
-	struct mmpkg_dep const * d = deps;
-
-	while (d != NULL) {
-		printf("\t\t [%s] %s [%s -> %s]\n",
-		       d->is_system_package ? "SYS":"MMP", d->name,
-		       d->min_version, d->max_version);
-		d = d->next;
-	}
-}
-
-static
-void mmpkg_dump(struct mmpkg const * pkg)
-{
-	printf("# %s (%s)\n", pkg->name, pkg->version);
-	printf("\tdependencies:\n");
-	mmpkg_dep_dump(pkg->dependencies);
-	printf("\n");
-}
-
 LOCAL_SYMBOL
 void binary_index_dump(struct indextable const * binindex)
 {

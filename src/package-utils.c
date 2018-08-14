@@ -189,6 +189,16 @@ void mmpkg_destroy(struct mmpkg * pkg)
 
 
 LOCAL_SYMBOL
+void mmpkg_dump(struct mmpkg const * pkg)
+{
+	printf("# %s (%s)\n", pkg->name, pkg->version);
+	printf("\tdependencies:\n");
+	mmpkg_dep_dump(pkg->dependencies);
+	printf("\n");
+}
+
+
+LOCAL_SYMBOL
 struct mmpkg_dep * mmpkg_dep_create(char const * name)
 {
 	struct mmpkg_dep * dep = malloc(sizeof(*dep));
@@ -222,6 +232,20 @@ void mmpkg_dep_destroy(struct mmpkg_dep * dep)
 		mmpkg_dep_destroy(dep->next);
 
 	free(dep);
+}
+
+
+LOCAL_SYMBOL
+void mmpkg_dep_dump(struct mmpkg_dep const * deps)
+{
+	struct mmpkg_dep const * d = deps;
+
+	while (d != NULL) {
+		printf("\t\t [%s] %s [%s -> %s]\n",
+		       d->is_system_package ? "SYS":"MMP", d->name,
+		       d->min_version, d->max_version);
+		d = d->next;
+	}
 }
 
 
