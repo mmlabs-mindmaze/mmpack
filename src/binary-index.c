@@ -175,7 +175,8 @@ int mmpack_parse_deplist(struct mmpack_ctx * ctx,
 
 exit:
 	yaml_token_delete(&token);
-	mmpkg_dep_destroy(dep);
+	if (exitvalue != 0)
+		mmpkg_dep_destroy(dep);
 
 	return exitvalue;
 }
