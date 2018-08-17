@@ -1,63 +1,68 @@
 # @mindmaze_header@
 '''
-TODOC
+version manipulation utility based on python's distutil LooseVersion class
+
+LooseVersion is described as:
+  Version numbering for anarchists and software realists.
+
+  A version number consists of a series of numbers, separated by either periods
+  or strings of letters. When comparing version numbers, the numeric components
+  will be compared numerically, and the alphabetic components lexically.
+
+There are no invalid version number.
+Still LooseVersion expects *at least* one digit within the version string.
 '''
 
-import yaml
-from common import mm_representer
+from distutils.version import LooseVersion
 
 
-class Version(object):  # pylint: disable=too-few-public-methods
-    'version manipulation utility'
-    def __init__(self, v_str: str):
+class Version(LooseVersion):  # pylint: disable=too-few-public-methods
+    '''
+    Simple version class:
+    * inherited from LooseVersion:
+      - recognizes digits so that: "1.2" == "1.02", and "1.2" < "1.10"
+      - Use string comparison otherwise: "1x" < "1y"
+    * adds "any" as version wildcard
+    '''
+    def is_any(self):
+        ''' LooseVersion asserts its string description contains at least one
+            digit. We neeed to explicitely request its string description to
+            prevent raising a TypeError
         '''
-        validate this is in the format x.y.z with digits only
-        :raise: ValueError if x or y or z not an integer
-        :raise: IndexError if not
-        '''
-        nums = v_str.split('.')
-        if not all(num.isdigit() for num in nums) or len(nums) != 3:
-            raise ValueError('Invalid version format: {0}'.format(v_str))
-
-        self.maj = int(nums[0])
-        self.min = int(nums[1])
-        self.rev = int(nums[2])
+        return str(self) == "any"
 
     def __lt__(self, other):
-        return (self.maj < other.maj
-                or (self.maj == other.maj and self.min < other.min)
-                or (self.maj == other.maj and
-                    self.min == other.min and
-                    self.rev < other.rev))
+        if self.is_any() or other.is_any():
+            return True
+        try:
+            return super().__lt__(other)
+        except TypeError:
+            return str(self) < str(other)
 
     def __le__(self, other):
-        return (self.maj <= other.maj
-                or (self.maj == other.maj and self.min <= other.min)
-                or (self.maj == other.maj and
-                    self.min == other.min and
-                    self.rev <= other.rev))
+        if self.is_any() or other.is_any():
+            return True
+        try:
+            return super().__le__(other)
+        except TypeError:
+            return str(self) < str(other)
 
     def __eq__(self, other):
-        return (self.maj == other.maj
-                or self.min == other.min
-                or self.rev == other.rev)
+        if self.is_any() or other.is_any():
+            return True
+        return str(self.version) == str(other.version)
 
     def __ne__(self, other):
+        if self.is_any() or other.is_any():
+            return True
         return not self.__eq__(other)
 
     def __gt__(self, other):
+        if self.is_any() or other.is_any():
+            return True
         return not self.__le__(other)
 
     def __ge__(self, other):
+        if self.is_any() or other.is_any():
+            return True
         return not self.__lt__(other)
-
-    def __repr__(self):
-        'as a unicode string again'
-        return u'{0}.{1}.{2}'.format(self.maj, self.min, self.rev)
-
-    def __str__(self):
-        return self.__repr__()
-
-
-# add yaml representation of Version as a unicode string
-yaml.add_representer(Version, mm_representer)
