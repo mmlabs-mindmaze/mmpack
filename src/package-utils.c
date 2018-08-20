@@ -579,6 +579,43 @@ struct mmpkg_dep * mmpkg_dep_filter(struct mmpack_ctx * ctx,
 }
 
 
+static
+int mmpkg_depends_on(struct mmpkg const * pkg, mmstr const * name)
+{
+	struct mmpkg_dep const * d;
+	for (d = pkg->dependencies ; d != NULL ; d = d->next) {
+		if (mmstrequal(d->name, name))
+			return 1;
+	}
+
+	return 0;
+}
+
+
+static
+void mmpack_print_dependencies_on_conflict(struct action_stack const * actions,
+                                           struct mmpkg const * pkg)
+{
+	int i;
+	struct mmpkg_dep const * d;
+	struct action const * a;
+
+	printf("Package details: \n");
+	mmpkg_dump(pkg);
+
+	for (d = pkg->dependencies ; d != NULL ; d = d->next) {
+		for (i = 0 ; i < actions->index ; i++) {
+			a = &actions->actions[i];
+
+			if (mmpkg_depends_on(a->pkg, d->name)) {
+				printf("Package already staged with conflicting dependency :\n");
+				mmpkg_dump(a->pkg);
+			}
+		}
+	}
+}
+
+
 /**
  * mmpkg_get_install_list() -  parse package dependencies and return install order
  * @ctx:     the mmpack context
@@ -631,13 +668,20 @@ struct action_stack * mmpkg_get_install_list(struct mmpack_ctx * ctx,
 
 		/* get the corresponding package, at its latest possible version */
 		pkg = mmpkg_get_latest(ctx, curr_dep->name, curr_dep->max_version);
-		if (pkg == NULL)
+		if (pkg == NULL) {
+			mm_raise_error(ENODATA, "Cannot resolve dependency: %s", curr_dep->name);
 			goto error;
+		}
 
 		/* merge this package dependency into the global dependency list */
 		tmp = mmpkg_dep_filter(ctx, actions, pkg->dependencies, deps, &new_dependencies);
-		if (tmp == NULL)
+		if (tmp == NULL) {
+			mm_raise_error(EAGAIN, "Failure while resolving package: %s\n"
+			                       "Try resolving the conflicting dependency manally first",
+			                       pkg->name);
+			mmpack_print_dependencies_on_conflict(actions, pkg);
 			goto error;
+		}
 		deps = tmp;
 
 		/* if the package required yet unmet dependency, consider those first.
