@@ -15,6 +15,7 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 
+#include "mm-alloc.h"
 #include "mmpack-common.h"
 #include "sha256.h"
 
@@ -75,9 +76,7 @@ char const * get_default_path(enum mm_known_dir dirtype,
 		return NULL;
 
 	filename_len = strlen(xdg_home) + strlen(default_filename) + 2;
-	filename = malloc(filename_len);
-	if (filename == NULL)
-		return NULL;
+	filename = mm_malloc(filename_len);
 
 	filename[0] = '\0';
 	strcat(filename, xdg_home);

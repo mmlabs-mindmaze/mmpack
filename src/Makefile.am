@@ -35,6 +35,7 @@ mmpack_SOURCES = \
 	binary-index.h \
 	indextable.c \
 	indextable.h \
+	mm-alloc.h \
 	mmpack.c \
 	mmpack-common.c \
 	mmpack-common.h \

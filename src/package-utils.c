@@ -14,6 +14,7 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 
+#include "mm-alloc.h"
 #include "mmpack-common.h"
 #include "package-utils.h"
 
@@ -156,19 +157,9 @@ LOCAL_SYMBOL
 struct mmpkg * mmpkg_create(char const * name)
 {
 	struct mmpkg * pkg = malloc(sizeof(*pkg));
-	if (pkg == NULL)
-		return NULL;
 	memset(pkg, 0, sizeof(*pkg));
-
 	pkg->name = mmstr_malloc_from_cstr(name);
-	if (pkg->name == NULL)
-		goto enomem;
-
 	return pkg;
-
-enomem:
-	mmpkg_destroy(pkg);
-	return NULL;
 }
 
 
@@ -202,19 +193,9 @@ LOCAL_SYMBOL
 struct mmpkg_dep * mmpkg_dep_create(char const * name)
 {
 	struct mmpkg_dep * dep = malloc(sizeof(*dep));
-	if (dep == NULL)
-		return NULL;
 	memset(dep, 0, sizeof(*dep));
-
 	dep->name = mmstr_malloc_from_cstr(name);
-	if (dep->name == NULL)
-		goto enomem;
-
 	return dep;
-
-enomem:
-	mmpkg_dep_destroy(dep);
-	return NULL;
 }
 
 
@@ -295,9 +276,6 @@ struct action_stack * mmpack_action_stack_create(void)
 
 	stack_size = sizeof(*stack) + DEFAULT_STACK_SZ * sizeof(*stack->actions);
 	stack = malloc(stack_size);
-	if (stack == NULL)
-		return NULL;
-
 	memset(stack, 0, stack_size);
 	stack->size = DEFAULT_STACK_SZ;
 
@@ -319,13 +297,8 @@ struct action_stack * mmpack_action_stack_push(struct action_stack * stack,
 {
 	/* increase by DEFAULT_STACK_SZ if full */
 	if ((stack->index + 1) == stack->size) {
-		struct action_stack * tmp;
 		size_t stack_size = sizeof(*stack) + (stack->size + DEFAULT_STACK_SZ) * sizeof(*stack->actions);
-		tmp = realloc(stack, stack_size);
-		if (tmp == NULL)
-			return NULL;
-
-		stack = tmp;
+		stack = mm_realloc(stack, stack_size);
 	}
 
 	stack->actions[stack->index] = (struct action) {
@@ -361,17 +334,11 @@ struct mmpkg_dep * mmpkg_dep_append_copy(struct mmpkg_dep * deps,
 {
 	struct mmpkg_dep * d;
 	struct mmpkg_dep * new = malloc(sizeof(*new));
-	if (new == NULL)
-		return NULL;
 	new->name = mmstr_malloc_from_cstr(new_deps->name);
 	new->min_version = mmstr_malloc_from_cstr(min_version);
 	new->max_version = mmstr_malloc_from_cstr(max_version);
 	new->is_system_package = new_deps->is_system_package;
 	new->next = NULL;  /* ensure there is no bad chaining leftover */
-	if (new->name == NULL || new->min_version == NULL || new->max_version == NULL) {
-		mmpkg_dep_destroy(new);
-		return NULL;
-	}
 
 	if (deps == NULL)
 		return new;
@@ -652,13 +619,9 @@ struct action_stack * mmpkg_get_install_list(struct mmpack_ctx * ctx,
 
 	actions = mmpack_action_stack_create();
 	deps = mmpkg_dep_create(name);
-	if (actions == NULL || deps == NULL)
-		goto error;
 
 	deps->min_version = mmstr_malloc_from_cstr(version);
 	deps->max_version = mmstr_malloc_from_cstr(version);
-	if (deps->min_version == NULL || deps->max_version == NULL)
-		goto error;
 
 	while (deps != NULL) {
 		/* handle the last dependency introduced */

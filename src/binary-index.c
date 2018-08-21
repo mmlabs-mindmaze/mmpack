@@ -14,6 +14,7 @@
 #include <mmlib.h>
 
 #include "indextable.h"
+#include "mm-alloc.h"
 #include "mmstring.h"
 #include "mmpack-context.h"
 #include "package-utils.h"
@@ -64,14 +65,10 @@ int mmpack_parse_dependency(struct mmpack_ctx * ctx,
 		case YAML_SCALAR_TOKEN:
 			if (dep->min_version == NULL) {
 				dep->min_version = mmstr_malloc_from_cstr((char const *) token.data.scalar.value);
-				if (dep->min_version == NULL)
-					goto exit;
 			} else {
 				if (dep->max_version != NULL) 
 					goto exit;
 				dep->max_version = mmstr_malloc_from_cstr((char const *) token.data.scalar.value);
-				if (dep->max_version == NULL)
-					goto exit;
 			}
 			break;
 
@@ -151,8 +148,6 @@ int mmpack_parse_deplist(struct mmpack_ctx * ctx,
 				if (dep != NULL)
 					goto exit;
 				dep = mmpkg_dep_create((char const *)token.data.scalar.value);
-				if (dep == NULL)
-					goto exit;
 				break;
 
 			default:
@@ -233,8 +228,6 @@ int mmpack_parse_index_package(struct mmpack_ctx * ctx,
 					if (pkg->version != NULL)
 						goto error;
 					pkg->version = mmstr_malloc_from_cstr((char const *) token.data.scalar.value);
-					if (pkg->version == NULL)
-						goto error;
 				}
 			/* fallthrough */
 			default:
@@ -299,8 +292,6 @@ int mmpack_parse_index(struct mmpack_ctx * ctx, struct indextable * index)
 		case YAML_SCALAR_TOKEN:
 			if (type == YAML_KEY_TOKEN) {
 				pkg = mmpkg_create((char const *) token.data.scalar.value);
-				if (pkg == NULL)
-					goto exit;
 				exitvalue = mmpack_parse_index_package(ctx, pkg);
 				if (exitvalue != 0)
 					goto exit;
