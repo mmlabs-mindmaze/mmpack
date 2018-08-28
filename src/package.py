@@ -182,7 +182,7 @@ class Package(object):
         try:
             specs_provides = yaml.load(open(provide_spec_name, 'rb').read())
         except FileNotFoundError:
-            specs_provides = {}
+            specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
 
         for inst_file in self._install_files_list:
             self.provides['elf'].update(elf_symbols_list(inst_file,
