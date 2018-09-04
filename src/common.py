@@ -154,7 +154,7 @@ def sha256sum(filename: str) -> str:
     return sha.hexdigest()
 
 
-def get_host_arch() -> str:
+def get_host_arch() -> (str, str):
     ''' return the host arch
 
     Format is <cpu arch>-<os>, and the values are converted if necessary.
@@ -172,9 +172,9 @@ def get_host_arch() -> str:
     try:
         for line in open("/etc/os-release", "r"):
             if line.startswith('ID='):
-                dist = line[3:]
+                dist = line[3:].strip()
     except FileNotFoundError:
         # if not linux, then windows
         dist = 'windows'
 
-    return '{0}-{1}'.format(cpu_arch, dist)
+    return (cpu_arch, dist)

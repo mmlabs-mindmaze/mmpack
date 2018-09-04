@@ -43,7 +43,7 @@ def create_files(builddir):
 def gen_mpk_packages(builddir, location):
     vers = '0.1.2'
     srcname = 'test-pkg'
-    arch = 'amd64-gnu-linux'
+    arch = 'amd64-debian'
 
     pkg_a = BinaryPackage('pkg-a', vers, srcname, arch)
     pkg_a._install_files = pkgfiles['pkg-a']

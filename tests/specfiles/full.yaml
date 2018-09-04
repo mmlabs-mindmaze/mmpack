@@ -1,0 +1,75 @@
+# yaml specfile with as many fields as possible
+
+general:
+  name: full
+  version: 1.0.0
+  maintainer: mmpack.test@mindmaze.ch
+  url: ssh://git@intranet.mindmaze.ch:7999/~mmpack.test/full.git
+  description: |
+    This is the fullest mmpack specfile possible.
+
+  build-options: -D_WITH_DUMMY_DEFINE=1
+  build-depends:
+  - libmyotherlib-devel
+  - libsomeotherlib-devel
+
+  ignore:
+  - /tmp/ignorefile
+  - .*/ignore-regex/.*
+
+# overload some of the default packages values
+full:
+  depends:
+  - util-stuff: any
+  - other-util-stuff: 1.0.0
+  description: |
+    This should follow the general description
+  files:
+  - /full-binary-package-file-2
+  - /full-binary-package-file-1
+
+# add a custom package
+custom-package:
+  depends:
+  - custom-dep: any
+  - other-custom-dep: 2.0.0
+  sysdepends-debian:
+  - debian-dep: any
+  - other-debian-dep: 2.0.0
+  sysdepends-msys:
+  - windows-dep: any
+  - other-windows-dep: 2.0.0
+  description: |
+    This should overload the general description.
+    Meaning this is the only description for this package
+  files:
+  - /custom-package-file-1
+  - /custom-package-file-2
+  - .*/custom-package-regex/.*
+
+# python dict representation:
+# {'custom-package': {'depends': [{'custom-dep': 'any'},
+#                                 {'other-custom-dep': '2.0.0'}],
+#                     'description': 'This should overload the general '
+#                                    'description.\n'
+#                                    'Meaning this is the only description for '
+#                                    'this package\n',
+#                     'files': ['/custom-package-file-1',
+#                               '/custom-package-file-2',
+#                               '.*/custom-package-regex/.*'],
+#                     'sysdepends-debian': [{'debian-dep': 'any'},
+#                                           {'other-debian-dep': '2.0.0'}],
+#                     'sysdepends-msys': [{'windows-dep': 'any'},
+#                                         {'other-windows-dep': '2.0.0'}]},
+#  'full': {'depends': [{'util-stuff': 'any'}, {'other-util-stuff': '1.0.0'}],
+#           'description': 'This should follow the general description\n',
+#           'files': ['/full-binary-package-file-2',
+#                     '/full-binary-package-file-1']},
+#  'general': {'build-depends': ['libmyotherlib-devel', 'libsomeotherlib-devel'],
+#              'build-options': '-D_WITH_DUMMY_DEFINE=1',
+#              'description': 'This is the fullest mmpack specfile possible.\n',
+#              'ignore': ['/tmp/ignorefile', '.*/ignore-regex/.*'],
+#              'maintainer': 'mmpack.test@mindmaze.ch',
+#              'name': 'full',
+#              'url': 'ssh://git@intranet.mindmaze.ch:7999/~mmpack.test/full.git',
+#              'version': '1.0.0'}}

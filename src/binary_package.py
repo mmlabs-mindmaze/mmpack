@@ -45,7 +45,7 @@ class BinaryPackage(object):
         self.description = ''
         self._dependencies = {'sysdepends': {}, 'depends': {}}
         self._symbols = {}
-        self._install_files = []
+        self.install_files = []
 
     def _gen_info(self, pkgdir: str) -> None:
         pushdir(pkgdir)
@@ -72,7 +72,7 @@ class BinaryPackage(object):
         popdir()
 
     def _populate(self, instdir: str, pkgdir: str) -> None:
-        for instfile in self._install_files:
+        for instfile in self.install_files:
             src = instdir + instfile
             dst = pkgdir + instfile
             os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -108,8 +108,11 @@ class BinaryPackage(object):
         if not curr_version or curr_version < version:
             dependencies[name] = version
 
-    def add_sysdepend(self, name: str) -> None:
+    def add_sysdepend(self, name: str, version: Version) -> None:
         '''
         Add a system dependencies to the binary package
         '''
-        self._dependencies['sysdepends'][name] = 'any'
+        dependencies = self._dependencies['sysdepends']
+        curr_version = dependencies.get(name)
+        if not curr_version or curr_version < version:
+            dependencies[name] = version
