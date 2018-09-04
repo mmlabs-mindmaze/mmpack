@@ -11,7 +11,7 @@ for path in mmpack.__path__:
 from version import Version
 from distutils.version import LooseVersion
 
-class TestPlaceHolder(unittest.TestCase):
+class TestVersionClass(unittest.TestCase):
 
     def setUp(self):
         pass
