@@ -583,11 +583,24 @@ void mmpack_print_dependencies_on_conflict(struct action_stack const * actions,
 }
 
 
+static
+struct mmpkg_dep* dep_create_from_request(const struct pkg_request* req)
+{
+	struct mmpkg_dep * dep = NULL;
+	const char* version = req->version ? req->version : "any";
+
+	dep = mmpkg_dep_create(req->name);
+	dep->min_version = mmstrdup(version);
+	dep->max_version = mmstrdup(version);
+
+	return dep;
+}
+
+
 /**
  * mmpkg_get_install_list() -  parse package dependencies and return install order
  * @ctx:     the mmpack context
- * @name:    the package's name
- * @version: the package's version
+ * @req:     requested package list to be installed
  *
  * In brief, this function will initialize a dependency ordered list with a
  * single element: the package passed as argument.
@@ -606,22 +619,26 @@ void mmpack_print_dependencies_on_conflict(struct action_stack const * actions,
  *          NULL on error.
  */
 LOCAL_SYMBOL
-struct action_stack * mmpkg_get_install_list(struct mmpack_ctx * ctx,
-                                                    mmstr const * name,
-                                                    mmstr const * version)
+struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
+                                            const struct pkg_request* req)
 {
 	void * tmp;
 	struct mmpkg const * pkg;
 	struct action_stack * actions = NULL;
 	struct mmpkg_dep * deps = NULL;
-	struct mmpkg_dep * curr_dep;
+	struct mmpkg_dep *curr_dep;
 	int new_dependencies;
 
 	actions = mmpack_action_stack_create();
-	deps = mmpkg_dep_create(name);
 
-	deps->min_version = mmstrdup(version);
-	deps->max_version = mmstrdup(version);
+	/* create initial dependency list from pkg_request list */
+	deps = dep_create_from_request(req);
+	curr_dep = deps;
+	while (req->next) {
+		req = req->next;
+		curr_dep->next = dep_create_from_request(req);
+		curr_dep = curr_dep->next;
+	}
 
 	while (deps != NULL) {
 		/* handle the last dependency introduced */

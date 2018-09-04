@@ -70,6 +70,11 @@ struct action_stack {
 	struct action actions[];
 };
 
+struct pkg_request {
+	const mmstr* name;
+	const mmstr* version;
+	struct pkg_request* next;
+};
 
 struct mmpkg * mmpkg_create(char const * name);
 void mmpkg_destroy(struct mmpkg * pkg);
@@ -83,8 +88,7 @@ struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * nam
                                 mmstr const * max_version);
 
 struct action_stack * mmpkg_get_install_list(struct mmpack_ctx * ctx,
-                                                    mmstr const * name,
-                                                    mmstr const * version);
+                                             const struct pkg_request* req);
 
 struct action_stack * mmpack_action_stack_create(void);
 void mmpack_action_stack_destroy(struct action_stack * stack);

@@ -45,11 +45,33 @@ START_TEST(test_valid_dependencies)
 {
 	int rv;
 	struct action_stack * actions;
+	struct pkg_request req;
 
 	rv = binary_index_populate(&ctx, valid_binindexes[_i]);
 	ck_assert(rv == 0);
 
-	actions = mmpkg_get_install_list(&ctx, "pkg-a", "0.0.1");
+	req = (struct pkg_request){.name = "pkg-a", .version = "0.0.1"};
+	actions = mmpkg_get_install_list(&ctx, &req);
+	ck_assert(actions != NULL);
+
+	mmpack_action_stack_dump(actions);
+	mmpack_action_stack_destroy(actions);
+}
+END_TEST
+
+
+START_TEST(test_valid_dependencies_multiple_req)
+{
+	int rv;
+	struct action_stack * actions;
+	struct pkg_request req[2];
+
+	rv = binary_index_populate(&ctx, TEST_BININDEX_DIR"/simple.yaml");
+	ck_assert(rv == 0);
+
+	req[0] = (struct pkg_request){.name = "pkg-b", .next = &req[1]};
+	req[1] = (struct pkg_request){.name = "pkg-a", .version = "0.0.1"};
+	actions = mmpkg_get_install_list(&ctx, req);
 	ck_assert(actions != NULL);
 
 	mmpack_action_stack_dump(actions);
@@ -61,11 +83,13 @@ START_TEST(test_invalid_dependencies)
 {
 	int rv;
 	struct action_stack * actions;
+	struct pkg_request req;
 
 	rv = binary_index_populate(&ctx, invalid_binindexes[_i]);
 	ck_assert(rv == 0);
 
-	actions = mmpkg_get_install_list(&ctx, "pkg-a", "0.0.1");
+	req = (struct pkg_request){.name = "pkg-a", .version = "0.0.1"};
+	actions = mmpkg_get_install_list(&ctx, &req);
 	ck_assert(actions == NULL);
 }
 END_TEST
@@ -79,6 +103,7 @@ TCase* create_dependencies_tcase(void)
 
     tcase_add_loop_test(tc, test_valid_dependencies, 0, NUM_VALID_BININDEXES);
     tcase_add_loop_test(tc, test_invalid_dependencies, 0, NUM_INVALID_BININDEXES);
+    tcase_add_test(tc, test_valid_dependencies_multiple_req);
 
     return tc;
 }
