@@ -4,6 +4,7 @@ TODOC
 '''
 
 import os
+import sys
 from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_home
 
 from decorators import singleton
@@ -48,3 +49,31 @@ class Workspace(object):
         'same as clean, but also remove all created pacakges'
         self.clean()
         shell('rm -vf {0}/*'.format(self.packages))
+
+
+def is_valid_prefix(prefix: str) -> bool:
+    'returns wether given prefix is a valid path for mmpack prefix'
+    return os.path.exists(prefix + '/var/lib/mmpack/')
+
+
+def push_prefix(prefix: str) -> None:
+    ''' Prepend given prefix to all relevant os environment variables
+        Since python is launched in its own process, directly write to
+        os.environ.
+    '''
+    # system environment execution
+    os.environ['PATH'] = '{0}/bin:{1}'.format(prefix, os.environ.get('PATH'))
+    os.environ['LD_LIBRARY_PATH'] = '{0}/lib:{1}' \
+                                    .format(prefix,
+                                            os.environ.get('LD_LIBRARY_PATH'))
+    os.environ['LIBRARY_PATH'] = '{0}/lib:{1}' \
+                                 .format(prefix,
+                                         os.environ.get('LIBRARY_PATH'))
+    os.environ['CPATH'] = '{0}/include:{1}' \
+                          .format(prefix, os.environ.get('CPATH'))
+
+    pythonpath = '/lib/python/{:d}.{:d}'.format(sys.version_info.major,
+                                                sys.version_info.minor)
+    os.environ['PYTHONPATH'] = '{0}/{1}:{2}' \
+                               .format(prefix, pythonpath,
+                                       os.environ.get('PYTHONPATH'))
