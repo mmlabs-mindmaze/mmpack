@@ -210,4 +210,15 @@ mmstr* mmstrcpy_cstr(mmstr* restrict dst, const char* restrict cstr)
 	return dst;
 }
 
+
+static inline NONNULL_ARGS(1)
+mmstr* mmstrdup(const mmstr* restrict src)
+{
+	mmstr* dst;
+
+	dst = mmstr_malloc(mmstr_maxlen(src));
+	return mmstrcpy(dst, src);
+}
+
+
 #endif

@@ -334,9 +334,9 @@ struct mmpkg_dep * mmpkg_dep_append_copy(struct mmpkg_dep * deps,
 {
 	struct mmpkg_dep * d;
 	struct mmpkg_dep * new = malloc(sizeof(*new));
-	new->name = mmstr_malloc_from_cstr(new_deps->name);
-	new->min_version = mmstr_malloc_from_cstr(min_version);
-	new->max_version = mmstr_malloc_from_cstr(max_version);
+	new->name = mmstrdup(new_deps->name);
+	new->min_version = mmstrdup(min_version);
+	new->max_version = mmstrdup(max_version);
 	new->is_system_package = new_deps->is_system_package;
 	new->next = NULL;  /* ensure there is no bad chaining leftover */
 
@@ -620,8 +620,8 @@ struct action_stack * mmpkg_get_install_list(struct mmpack_ctx * ctx,
 	actions = mmpack_action_stack_create();
 	deps = mmpkg_dep_create(name);
 
-	deps->min_version = mmstr_malloc_from_cstr(version);
-	deps->max_version = mmstr_malloc_from_cstr(version);
+	deps->min_version = mmstrdup(version);
+	deps->max_version = mmstrdup(version);
 
 	while (deps != NULL) {
 		/* handle the last dependency introduced */
