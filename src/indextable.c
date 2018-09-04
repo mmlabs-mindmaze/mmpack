@@ -26,9 +26,9 @@
  * cacheline per each group of 3 entries in the list.
  *
  * When the table internals are allocated, a number of bucket is reserved
- * (a power of 2). Each bucket can accomodate a chaining list of entries
+ * (a power of 2). Each bucket can accommodate a chaining list of entries
  * with at least 3 entries.  However an extra amount of entries node are
- * allocated and made avaible for biggest chain to accomodate an extra
+ * allocated and made avaible for biggest chain to accommodate an extra
  * number of element. The "long" chain (of more than 3 elements) stay
  * nevertheless the minority. When all extra entries are recruited for a
  * big chain, the index table can be resized (double its size) if a new
@@ -248,7 +248,7 @@ void indextable_release_bucketnode(struct indextable* table,
  * This function is the internal mechanism to "allocate" an new entry. This
  * does not check for the existence of an entry already associated to the
  * underlying key, so this must be checked beforehand if this is a
- * possibilty.
+ * possibility.
  *
  * Return: the created entry (fields are not initiliazed yet) in case of
  * success, NULL in case of allocation failure.
@@ -402,7 +402,7 @@ int indextable_init(struct indextable* table, int capacity, int num_extra)
 	if (num_extra < 0)
 		num_extra = (table->num_buckets * MAX_PER_BUCKET) / 8;
 
-	// Size bucket nodes array with some extra to accomodate some
+	// Size bucket nodes array with some extra to accommodate some
 	// exceptional variability in bucket list length
 	num_extra_bucket = (num_extra + MAX_PER_BUCKET-1) / MAX_PER_BUCKET;
 	table->buckets_len_max = table->num_buckets + num_extra_bucket;

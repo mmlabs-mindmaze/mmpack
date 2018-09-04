@@ -14,8 +14,8 @@ Email me: gabriel.ganne@mindmaze.ch
 * mmpack is the entry point for **all** mmpack-reladed commands (git-like)
 * python **MUST** comply with pycodestyle, and *SHOULD* comply with pylint
 * use pre-defined package build tree (rpmbuild style)
-* use debian way of handling symbols and dependancies
-* do not handle any system packages (but have dependancies upon them).
+* use debian way of handling symbols and dependencies
+* do not handle any system packages (but have dependencies upon them).
   Should one be needed and not installed, abort and request its installation
 * enforce tag and version format: tag **MUST** be of format "vx.y.z[-whatever]"
   version will be extracted with format x.y.z from the tag.
