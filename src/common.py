@@ -10,6 +10,7 @@ import sys
 from subprocess import PIPE, run
 from typing import Union
 from hashlib import sha256
+import platform
 import yaml
 from decorators import run_once
 from xdg.BaseDirectory import xdg_data_home
@@ -151,3 +152,29 @@ def sha256sum(filename: str) -> str:
     sha = sha256()
     sha.update(open(filename, 'rb').read())
     return sha.hexdigest()
+
+
+def get_host_arch() -> str:
+    ''' return the host arch
+
+    Format is <cpu arch>-<os>, and the values are converted if necessary.
+    possible archs: amd64, i386, aarch64, ...
+    possible os: debian, windows, ...
+    Eg.
+        amd64-debian
+        aarch64-debian
+        i386-windows
+    '''
+    cpu_arch = platform.machine()
+    if cpu_arch == 'x86_64':
+        cpu_arch = 'amd64'
+
+    try:
+        for line in open("/etc/os-release", "r"):
+            if line.startswith('ID='):
+                dist = line[3:]
+    except FileNotFoundError:
+        # if not linux, then windows
+        dist = 'windows'
+
+    return '{0}-{1}'.format(cpu_arch, dist)
