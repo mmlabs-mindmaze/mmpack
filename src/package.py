@@ -51,22 +51,19 @@ class Package(object):
     '''
     TODOC
     '''
-    def __init__(self, name: str, tag: str, version: Version, source: str,
-                 maintainer: str):
+    def __init__(self, url: str=None, tag: str=None):
         # pylint: disable=too-many-arguments
         '''
         TODOC
-        name, version, source (git link) and maintainer are mandatory
-        others fields are optional
 
         tags is a list of strings
         dependencies is a list of Dependency objects
         '''
-        self.name = name
+        self.name = None
         self.tag = tag
-        self.version = version
-        self.source = source
-        self.maintainer = maintainer
+        self.version = None
+        self.source = url
+        self.maintainer = None
 
         self.description = ''
         self.pkg_tags = ['MindMaze']
