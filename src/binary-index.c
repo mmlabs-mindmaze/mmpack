@@ -6,6 +6,7 @@
 #endif
 
 #include <assert.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <yaml.h>
@@ -18,6 +19,69 @@
 #include "mm-alloc.h"
 #include "mmstring.h"
 #include "package-utils.h"
+
+enum field_type {
+	FIELD_UNKNOWN = -1,
+	FIELD_VERSION = 0,
+	FIELD_FILENAME,
+	FIELD_SHA,
+	FIELD_SIZE,
+};
+
+static
+const char* scalar_field_names[] = {
+	[FIELD_VERSION] = "version",
+	[FIELD_FILENAME] = "filename",
+	[FIELD_SHA] = "sha256",
+	[FIELD_SIZE] = "size",
+};
+
+
+static
+enum field_type get_scalar_field_type(const char* key)
+{
+	int i;
+
+	for (i = 0; i < MM_NELEM(scalar_field_names); i++)
+		if (strcmp(key, scalar_field_names[i]) == 0)
+			return i;
+
+	return FIELD_UNKNOWN;
+}
+
+
+static
+int mmpkg_set_scalar_field(struct mmpkg * pkg, enum field_type type,
+                           const char* value, size_t valuelen)
+{
+	const mmstr** field = NULL;
+
+	switch(type) {
+	case FIELD_VERSION:
+		field = &pkg->version;
+		break;
+
+	case FIELD_FILENAME:
+		field = &pkg->filename;
+		break;
+
+	case FIELD_SHA:
+		field = &pkg->sha256;
+		break;
+
+	case FIELD_SIZE:
+		pkg->size = atoi(value);
+		return 0;
+
+	default:
+		return -1;
+	}
+
+	mmstr_free(*field);
+	*field = mmstr_malloc_copy(value, valuelen);
+
+	return 0;
+}
 
 
 static inline
@@ -184,19 +248,23 @@ int mmpack_parse_index_package(struct mmpack_ctx * ctx,
 {
 	int exitvalue, type;
 	yaml_token_t token;
-	char const * key;
-	int flag_key;
+	char const * data;
+	size_t data_len;
+	enum field_type scalar_field;
 
 	exitvalue = 0;
-	key = NULL;
-	flag_key = type = -1;
+	data = NULL;
+	type = -1;
+	scalar_field = FIELD_UNKNOWN;
 	do {
 		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto error;
 
 		switch(token.type) {
 		case YAML_BLOCK_END_TOKEN:
-			goto package_ok;
+			if (!mmpkg_is_valid(pkg))
+				goto error;
+			goto exit;
 
 		case YAML_KEY_TOKEN:
 			type = YAML_KEY_TOKEN;
@@ -207,32 +275,32 @@ int mmpack_parse_index_package(struct mmpack_ctx * ctx,
 			break;
 
 		case YAML_SCALAR_TOKEN:
+			data = (char const *) token.data.scalar.value;
+			data_len = token.data.scalar.length;
+
 			switch (type) {
 			case YAML_KEY_TOKEN:
-				key = (char const *) token.data.scalar.value;
-				size_t key_len = token.data.scalar.length;
-				if (STR_EQUAL(key, key_len, "depends")) {
+				if (STR_EQUAL(data, data_len, "depends")) {
 					if (mmpack_parse_deplist(ctx, pkg, 0) < 0)
 						goto error;
-				} else if (STR_EQUAL(key, key_len, "sysdepends")) {
+				} else if (STR_EQUAL(data, data_len, "sysdepends")) {
 					if (mmpack_parse_deplist(ctx, pkg, 1) < 0)
 						goto error;
-				} else if (STR_EQUAL(key, key_len, "version")) {
-					flag_key = 1;
+				} else {
+					scalar_field = get_scalar_field_type(data);
 					type = -1;
 				}
 				break;
 
 			case YAML_VALUE_TOKEN:
-				if (flag_key && token.data.scalar.length) {
-					if (pkg->version != NULL)
+				if ((scalar_field != FIELD_UNKNOWN) && token.data.scalar.length) {
+					if (mmpkg_set_scalar_field(pkg, scalar_field, data, data_len))
 						goto error;
-					pkg->version = mmstr_malloc_from_cstr((char const *) token.data.scalar.value);
 				}
 			/* fallthrough */
 			default:
-				flag_key = 0;
-				key = NULL;
+				scalar_field = FIELD_UNKNOWN;
+				data = NULL;
 				type = -1;
 				break;
 			}
@@ -245,11 +313,11 @@ int mmpack_parse_index_package(struct mmpack_ctx * ctx,
 		yaml_token_delete(&token);
 	} while(token.type != YAML_STREAM_END_TOKEN);
 
-package_ok:
-
 error:
-	yaml_token_delete(&token);
+	exitvalue = -1;
 
+exit:
+	yaml_token_delete(&token);
 	return exitvalue;
 }
 

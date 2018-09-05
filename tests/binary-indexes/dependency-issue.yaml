@@ -30,6 +30,7 @@ pkg-a:
     sysdepends: {}
     version: 0.0.1
     filename: pool/pkg-a_0.0.1_amd64-gnu-linux.mpk
+    size: 1
     sha256: a001000000000000000000000000000000000000000000000000000000000000
 
 pkg-b:
@@ -40,6 +41,7 @@ pkg-b:
     sysdepends: {}
     version: 0.0.1
     filename: pool/pkg-b_0.0.2_amd64-gnu-linux.mpk
+    size: 1
     sha256: b001000000000000000000000000000000000000000000000000000000000000
 
 pkg-c:
@@ -50,6 +52,7 @@ pkg-c:
     sysdepends: {}
     version: 0.0.1
     filename: pool/pkg-c_0.0.3_amd64-gnu-linux.mpk
+    size: 1
     sha256: c001000000000000000000000000000000000000000000000000000000000000
 
 pkg-c:
@@ -60,6 +63,7 @@ pkg-c:
     sysdepends: {}
     version: 0.0.2
     filename: pool/pkg-c_0.0.3_amd64-gnu-linux.mpk
+    size: 1
     sha256: c002000000000000000000000000000000000000000000000000000000000000
 
 pkg-d:
@@ -69,6 +73,7 @@ pkg-d:
     sysdepends: {}
     version: 0.0.1
     filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    size: 1
     sha256: d001000000000000000000000000000000000000000000000000000000000000
 
 pkg-d:
@@ -78,6 +83,7 @@ pkg-d:
     sysdepends: {}
     version: 0.0.2
     filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    size: 1
     sha256: d002000000000000000000000000000000000000000000000000000000000000
 
 pkg-d:
@@ -87,6 +93,7 @@ pkg-d:
     sysdepends: {}
     version: 0.0.3
     filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    size: 1
     sha256: d003000000000000000000000000000000000000000000000000000000000000
 
 pkg-d:
@@ -96,6 +103,7 @@ pkg-d:
     sysdepends: {}
     version: 0.0.4
     filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    size: 1
     sha256: d004000000000000000000000000000000000000000000000000000000000000
 
 pkg-d:
@@ -105,6 +113,7 @@ pkg-d:
     sysdepends: {}
     version: 0.0.5
     filename: pool/pkg-d_0.0.4_amd64-gnu-linux.mpk
+    size: 1
     sha256: d005000000000000000000000000000000000000000000000000000000000000
 
 pkg-e:
@@ -115,4 +124,5 @@ pkg-e:
     sysdepends: {}
     version: 0.0.1
     filename: pool/pkg-e_0.0.5_amd64-gnu-linux.mpk
+    size: 1
     sha256: e002000000000000000000000000000000000000000000000000000000000000

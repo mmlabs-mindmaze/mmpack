@@ -171,6 +171,8 @@ void mmpkg_destroy(struct mmpkg * pkg)
 
 	mmstr_free(pkg->name);
 	mmstr_free(pkg->version);
+	mmstr_free(pkg->filename);
+	mmstr_free(pkg->sha256);
 
 	mmpkg_dep_destroy(pkg->dependencies);
 	mmpkg_destroy(pkg->next_version);
@@ -186,6 +188,17 @@ void mmpkg_dump(struct mmpkg const * pkg)
 	printf("\tdependencies:\n");
 	mmpkg_dep_dump(pkg->dependencies);
 	printf("\n");
+}
+
+
+LOCAL_SYMBOL
+int mmpkg_is_valid(struct mmpkg const * pkg)
+{
+	return (  pkg->name != NULL
+	       && pkg->version != NULL
+	       && pkg->filename != NULL
+	       && pkg->sha256 != NULL
+	       && pkg->size != 0);
 }
 
 
