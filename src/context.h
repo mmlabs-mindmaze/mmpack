@@ -10,14 +10,19 @@
 
 #include "indextable.h"
 
+struct mmpack_opts {
+	const char* prefix;
+};
+
 struct mmpack_ctx {
 	CURL * curl;
 	yaml_parser_t parser;
 	struct indextable binindex;
 	struct indextable installed;
+	mmstr* prefix;
 };
 
-int mmpack_ctx_init(struct mmpack_ctx * ctx);
+int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts);
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx);
 
 static inline

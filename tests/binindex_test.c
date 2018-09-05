@@ -28,7 +28,8 @@ static const char * binindexes[] = {
 static
 void ctx_setup(void)
 {
-	mmpack_ctx_init(&ctx);
+	struct mmpack_opts opts = {.prefix = NULL };
+	mmpack_ctx_init(&ctx, &opts);
 }
 
 static

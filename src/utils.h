@@ -16,6 +16,7 @@ os_id get_os_id(void);
 char const * get_local_mmpack_binary_index_path(void);
 char const * get_local_mmpack_installed_index_path(void);
 char const * get_mmpack_installed_pkg_path(void);
+char const * get_default_mmpack_prefix(void);
 char const * get_config_filename(void);
 
 #define SHA_HEXSTR_SIZE (32*2+1) // string of SHA-256 in hexa (\0 incl.)

@@ -117,6 +117,12 @@ char const * get_config_filename(void)
 }
 
 
+LOCAL_SYMBOL
+char const * get_default_mmpack_prefix(void)
+{
+	return get_default_path(MM_DATA_HOME, "mmpack");
+}
+
 /**
  * conv_to_hexstr() - convert byte array into hexadecimal string
  * @hexstr:     output string, must be (2*@len + 1) long

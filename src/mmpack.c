@@ -17,38 +17,58 @@
 #include "common.h"
 #include "mmpack-update.h"
 
+static const char mmpack_doc[] =
+	"TODO write a proper tool description";
 
-static
-void usage(char const * progname)
-{
-	printf("usage:\n %s <comand> [options]\n", progname);
-}
+static const char arguments_docs[] =
+	"[options] update\n";
 
-int main(int argc, char ** argv)
+static struct mmpack_opts cmdline_opts;
+
+static const struct mmarg_opt cmdline_optv[] = {
+	{"p|prefix", MMOPT_NEEDSTR, NULL, {.sptr = &cmdline_opts.prefix},
+	 "Use @PATH as install prefix."},
+};
+
+int main(int argc, char* argv[])
 {
-	int rv;
-	char * command;
+	int rv, arg_index;
+	const char* cmd;
 	struct mmpack_ctx ctx;
+	struct mmarg_parser parser = {
+		.doc = mmpack_doc,
+		.args_doc = arguments_docs,
+		.optv = cmdline_optv,
+		.num_opt = MM_NELEM(cmdline_optv),
+		.execname = argv[0],
+	};
 
-	if (argc < 2) {
-		usage(argv[0]);
-		return -1;
+	/* Parse commmand line options and check command is supplied */
+	arg_index = mmarg_parse(&parser, argc, argv);
+	if (arg_index+1 > argc) {
+		fprintf(stderr, "Invalid number of argument."
+		                " Run \"%s --help\" to see Usage\n", argv[0]);
+		rv = -1;
+		goto exit;
 	}
-	command = argv[1];
+	cmd = argv[arg_index];
 
-	rv = mmpack_ctx_init(&ctx);
+	/* Initialize context according to command line options */
+	rv = mmpack_ctx_init(&ctx, &cmdline_opts);
 	if (rv != 0)
-		return mm_raise_from_errno("failed to init mmpack");
+		goto exit;
 
-
-	if (STR_EQUAL(command, strlen(command), "update")) {
+	/* Dispatch command */
+	if (STR_EQUAL(cmd, strlen(cmd), "update")) {
 		rv = mmpack_update_all(&ctx);
 	} else {
-		usage(argv[0]);
+		fprintf(stderr, "Invalid command: %s."
+		                " Run \"%s --help\" to see Usage\n", cmd, argv[0]);
 		rv = -1;
 	}
 
+exit:
 	mmpack_ctx_deinit(&ctx);
 
-	return rv;
+	return (rv == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
