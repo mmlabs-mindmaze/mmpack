@@ -117,20 +117,12 @@ def main():
     src_pkg = package.create_source_archive()
     package.local_install(src_pkg)
 
-    # TODO: ventilate before generating dependencies
-    package.gen_dependencies()
-    package.gen_provides()
-    package.save_metadatas()
-    (pkg, doc_pkg, dev_pkg, dbgsym_pkg) = package.build_package()
-
-    iprint('generated package: {}'.format(pkg))
-    iprint('generated source package: {}'.format(src_pkg))
-    if doc_pkg:
-        iprint('generated doc package: {}'.format(doc_pkg))
-    if dev_pkg:
-        iprint('generated dev package: {}'.format(dev_pkg))
-    if dbgsym_pkg:
-        iprint('generated dbgsym package: {}'.format(dbgsym_pkg))
+    binpkg_list = package.ventilate()
+    for binpkg in binpkg_list:
+        # TODO: generate dependencies
+        # TODO: generate provide list
+        binpkg.create()
+        iprint('generated package: {}'.format(binpkg))
 
 
 if __name__ == '__main__':

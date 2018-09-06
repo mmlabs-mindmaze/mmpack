@@ -11,7 +11,7 @@ from typing import List
 import yaml
 from workspace import Workspace
 from binary_package import BinaryPackage
-from common import shell, pushdir, popdir, yaml_serialize, ShellException, \
+from common import shell, pushdir, popdir, ShellException, \
          dprint, iprint, eprint, remove_duplicates, get_host_arch
 from dependencies import dependencies
 from elf_utils import elf_symbols_list
@@ -302,7 +302,7 @@ class Package(object):
                     if re.match(regex, file):
                         self._packages[binpkg].install_files.append(file)
 
-    def ventilate(self) -> None:
+    def ventilate(self) -> List[BinaryPackage]:
         ''' Ventilate files.
         Must be called after local-install, otherwise it will return dummy
         packages with no files.
@@ -336,6 +336,8 @@ class Package(object):
                 pkg = self._binpkg_get_create(bin_pkg_name)
 
             pkg.install_files.append(file)
+
+        return self._packages
 
     def gen_provides(self) -> None:
         ''' Go through the install files, look for what this package provides
@@ -385,81 +387,6 @@ class Package(object):
         for inst_file in self.install_files_list:
             self.dependencies['dpkg'].append(dependencies(inst_file))
         remove_duplicates(self.dependencies['dpkg'])
-
-    def save_metadatas(self):
-        ''' Saves package metadatas as yaml files
-
-        generated files:
-        - mmpack-provides-XXX.yaml
-        - mmpack-dependencies-XXX.yaml
-        - mmpack-XXX.yaml
-
-        files are generated within the package install directory
-        '''
-        pushdir(self._local_build_path() + '/install')
-
-        provides_filename = 'mmpack-provides-{0}.yaml'.format(self.name)
-        yaml_serialize(self.provides, provides_filename)
-        self._metadata_files_list.append(provides_filename)
-
-        deps_filename = 'mmpack-dependencies-{0}.yaml'.format(self.name)
-        yaml_serialize(self.dependencies, deps_filename)
-        self._metadata_files_list.append(deps_filename)
-
-        pkg_metadata_filename = 'mmpack-' + self.name + '.yaml'
-        yaml_serialize(self.__dict__, pkg_metadata_filename)
-        self._metadata_files_list.append(pkg_metadata_filename)
-        popdir()
-
-    def build_package(self) -> str:
-        ''' create package archive
-
-        the package (currently a tar archive) is an archive of both
-         - the data to be installed
-         - the metadata about the data to be installed
-
-        put the generated package into the "package" directory
-
-        Returns:
-            a tuple of names of the generated packages files
-            eg. (XXX, XXX-doc, XXX-dev, XXX-dbgsym)
-        '''
-        wrk = Workspace()
-        prefix = self._local_build_path() + '/install'
-        prefix_len = len(prefix)
-        pushdir(prefix)
-
-        pkg_data_name = '{0}-{1}.data.mmpack'.format(self.name, self.tag)
-        pkg_name = '{0}-{1}.mmpack'.format(self.name, self.tag)
-
-        # autodetect and generate those packages
-        doc_pkg = None
-        dev_pkg = None
-        dbgsym_pkg = None
-
-        pkg = tarfile.TarFile(name=pkg_data_name, mode='w')
-        for inst_file in self.install_files_list:
-            # convert to relative path
-            inst_file = '.' + inst_file[prefix_len:]
-            if inst_file:
-                pkg.add(inst_file)
-        pkg.close()
-
-        # create and add <pkg_data_name> hash file
-        # create and add signature file
-
-        pkg = tarfile.TarFile(name=pkg_name, mode='w')
-        pkg.add(pkg_data_name)
-        for meta_file in self._metadata_files_list:
-            pkg.add(meta_file)
-        pkg.close()
-
-        # copy package to
-        cmd = 'cp -vf {0} {1}'.format(pkg_name, wrk.packages)
-        shell(cmd)
-        popdir()  # local install directory
-
-        return (pkg_name, doc_pkg, dev_pkg, dbgsym_pkg)
 
     def __repr__(self):
         return u'{}'.format(self.__dict__)

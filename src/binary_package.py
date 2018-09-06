@@ -92,11 +92,12 @@ class BinaryPackage(object):
         TODOC
         '''
         pkgdir = builddir + '/' + self.name + '/'
-        instdir = builddir + '/local-install/'
+        instdir = builddir + '/install/'
         os.makedirs(pkgdir + 'MMPACK', exist_ok=True)
 
         self._populate(instdir, pkgdir)
         self._gen_info(pkgdir)
+        # TODO: generate a metadata file with the list of symbols provided
         return self._make_archive(pkgdir, dstdir)
 
     def add_depend(self, name: str, version: Version) -> None:
