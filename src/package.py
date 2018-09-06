@@ -12,8 +12,7 @@ import yaml
 from workspace import Workspace
 from binary_package import BinaryPackage
 from common import shell, pushdir, popdir, ShellException, \
-         dprint, iprint, eprint, remove_duplicates, get_host_arch
-from dependencies import dependencies
+         dprint, iprint, eprint, get_host_arch
 from version import Version
 
 
@@ -55,7 +54,6 @@ class Package(object):
 
         self.description = ''
         self.pkg_tags = ['MindMaze']
-        self.dependencies = {'dpkg': [], 'mmpack': []}
 
         self.build_options = None
         self.build_depends = []
@@ -315,15 +313,6 @@ class Package(object):
             pkg.install_files.append(file)
 
         return self._packages
-
-    def gen_dependencies(self) -> None:
-        ''' Go through the install files and search for external dependencies
-
-        FIXME: only handle elf deps ...
-        '''
-        for inst_file in self.install_files_list:
-            self.dependencies['dpkg'].append(dependencies(inst_file))
-        remove_duplicates(self.dependencies['dpkg'])
 
     def __repr__(self):
         return u'{}'.format(self.__dict__)

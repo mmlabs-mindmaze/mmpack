@@ -7,21 +7,22 @@ packaging as mmpack file.
 import os
 from os.path import isfile
 from glob import glob
-from typing import List, Dict
+from typing import Dict
 import tarfile
 from common import sha256sum, yaml_serialize, pushdir, popdir
 from version import Version
+from dependencies import scan_dependencies
 from elf_utils import elf_symbols_list
 import yaml
+from workspace import Workspace
 
 
-def _get_specs_provides(pkgname: str) -> List[Dict[str, Version]]:
-    ''' TODOC
-
-    assert we already are the the mmpak spec folder.
-    '''
+def _get_specs_provides(pkgname: str) -> Dict[str, Dict[str, Version]]:
+    ' TODOC '
     # TODO: also work with the last package published
-    provide_spec_name = pkgname + '.provides'
+    wrk = Workspace()
+    provide_spec_name = '{0}/mmpack/{1}.provides'.format(wrk.sources,
+                                                         pkgname)
     try:
         specs_provides = yaml.load(open(provide_spec_name, 'rb').read())
     except FileNotFoundError:
@@ -171,3 +172,12 @@ class BinaryPackage(object):
                                  .format(symbol, version, self.version))
             else:
                 self._provides['elf'][symbol] = self.version
+
+    def gen_sysdeps(self) -> None:
+        ''' Go through the install files and search for external dependencies
+
+        FIXME: only handle elf deps ...
+        '''
+        for inst_file in self.install_files:
+            self._dependencies['sysdepends'] \
+                .update(scan_dependencies(inst_file))

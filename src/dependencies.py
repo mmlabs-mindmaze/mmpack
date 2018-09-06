@@ -4,8 +4,8 @@ helper module containing functions to scan for dependencies within files
 '''
 
 
-from common import shell, remove_duplicates, filetype
-from elf_utils import elf_pkg_deps, elf_deps
+from common import shell, remove_duplicates, filetype, get_host_arch
+from elf_utils import elf_dpkg_deps, elf_deps
 
 
 def mmpack_pkg_provides(filename):
@@ -21,11 +21,15 @@ def mmpack_pkg_provides(filename):
     return packagelist
 
 
-def dependencies(filename):
+def scan_dependencies(filename):
     'scan filename for dependency with the right file type'
+    _, dist = get_host_arch()
+    if dist != 'debian':
+        raise NotImplementedError('unsupported distribution: ' + dist)
+
     ftype = filetype(filename)
     if ftype == 'elf':
-        return elf_pkg_deps(filename)
+        return elf_dpkg_deps(filename)
 
     # only elf format is supported for now
     return None

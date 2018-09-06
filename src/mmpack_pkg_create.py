@@ -119,6 +119,7 @@ def main():
     binpkg_list = package.ventilate()
     for binpkg in binpkg_list:
         # TODO: generate dependencies
+        binpkg.gen_sysdeps()
         binpkg.gen_provides()
         binpkg.create()
         iprint('generated package: {}'.format(binpkg))

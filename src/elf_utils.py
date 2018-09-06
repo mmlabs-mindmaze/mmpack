@@ -9,7 +9,7 @@ from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
 from elftools.elf.dynamic import DynamicSection
 
-from common import remove_duplicates
+from common import shell
 
 
 def elf_deps(filename):
@@ -47,9 +47,15 @@ def elf_symbols_list(filename, default_version):
     return symbols
 
 
-def elf_pkg_deps(filename):
-    'Parse given elf file and return its dependency *package* list'
-    packagelist = []
+def _dpkg_get_pkg_version(dpkg_name: str) -> str:
+    cmd = 'dpkg --status {} | grep "^Version:"'.format(dpkg_name)
+    version_line = shell(cmd)
+    return version_line[len('Version:'):].strip()
+
+
+def elf_dpkg_deps(filename):
+    'Parse given elf file and return its dependency debian package dict'
+    packagedict = {}
     librarylist = elf_deps(filename)
     for lib in librarylist:
         cmd = ['dpkg', '--search'] + [lib]
@@ -59,12 +65,12 @@ def elf_pkg_deps(filename):
                 try:
                     pkg, arch = package.split(':')[0:2]
                     if arch in ['amd64', 'x86_64']:
-                        packagelist.append(pkg)
+                        version = _dpkg_get_pkg_version(package)
+                        packagedict.update({pkg: version})
                 except ValueError:
                     continue
 
-    remove_duplicates(packagelist)
-    return packagelist
+    return packagedict
 
 
 def elf_build_id(libname):
