@@ -25,21 +25,6 @@ DEVEL_PKG_FILE_RE = re.compile(r'.*(/man/.*\.(2|3)|/include/.*|\.so)')
 DEBUG_PKG_FILE_RE = re.compile(r'.*\.debug')
 
 
-class Dependency(object):  # pylint: disable=too-few-public-methods
-    '''
-    TODOC
-    '''
-    def __init__(self, name: str, min_version: Version,
-                 max_version: Version=None):
-        '''
-        only explicit deps on packages (script, python library ...)
-        symbols deps will be automatically filled during package creation
-        '''
-        self.name = name
-        self.min_version = min_version
-        self.max_version = max_version
-
-
 def guess_project_build_system() -> str:
     ''' helper: guesses the project build system
 
