@@ -15,6 +15,7 @@
 #include <mmsysio.h>
 
 #include "common.h"
+#include "mmpack-install.h"
 #include "mmpack-mkprefix.h"
 #include "mmpack-update.h"
 
@@ -23,7 +24,8 @@ static const char mmpack_doc[] =
 
 static const char arguments_docs[] =
 	"[options] "MKPREFIX_SYNOPSIS"\n"
-	"[options] "UPDATE_SYNOPSIS"\n";
+	"[options] "UPDATE_SYNOPSIS"\n"
+	"[options] "INSTALL_SYNOPSIS;
 
 static struct mmpack_opts cmdline_opts;
 
@@ -68,6 +70,8 @@ int main(int argc, char* argv[])
 		rv = mmpack_mkprefix(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "update")) {
 		rv = mmpack_update_all(&ctx);
+	} else if (STR_EQUAL(cmd, strlen(cmd), "install")) {
+		rv = mmpack_install(&ctx, cmd_argc, cmd_argv);
 	} else {
 		fprintf(stderr, "Invalid command: %s."
 		                " Run \"%s --help\" to see Usage\n", cmd, argv[0]);

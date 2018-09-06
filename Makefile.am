@@ -66,6 +66,8 @@ mmpack_lib_sources = \
 	src/indextable.c \
 	src/indextable.h \
 	src/mm-alloc.h \
+	src/mmpack-install.c \
+	src/mmpack-install.h \
 	src/mmpack-mkprefix.c \
 	src/mmpack-mkprefix.h \
 	src/mmpack-update.c \
@@ -98,6 +100,7 @@ mmpack_LDADD = \
 	$(LIBARCHIVE_LIBS) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
+	$(LIBARCHIVE_LIBS) \
 	$(eol)
 
 mmpack-build: src/mmpack-build.in Makefile
