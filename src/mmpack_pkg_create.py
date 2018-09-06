@@ -105,13 +105,12 @@ def parse_options(argv):
 
 
 def main():
-    'TODOC'
+    'entry point to create a mmpack package'
     ctx = parse_options(sys.argv[1:])
 
     package = Package(ctx['url'], ctx['tag'])
 
     wrk = Workspace()
-    # TODO: parse mmpack/specs file
     wrk.clean(package.name)
 
     src_pkg = package.create_source_archive()

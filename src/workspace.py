@@ -1,6 +1,6 @@
 # @mindmaze_header@
 '''
-TODOC
+os helpers to manipulate the paths and environments
 '''
 
 import os

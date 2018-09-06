@@ -1,6 +1,6 @@
 # @mindmaze_header@
 '''
-TODOC
+global system variables helper
 '''
 
 import os

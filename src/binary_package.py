@@ -1,6 +1,7 @@
 # @mindmaze_header@
 '''
-TODOC
+Class to handle binary packages, their dependencies, symbol interface, and
+packaging as mmpack file.
 '''
 
 import os
@@ -31,12 +32,9 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
 class BinaryPackage(object):
     # pylint: disable=too-many-instance-attributes
     '''
-    TODOC
+    Binary package class
     '''
     def __init__(self, name: str, version: Version, source: str, arch: str):
-        '''
-        TODOC
-        '''
         self.name = name
         self.version = version
         self.source = source
@@ -89,7 +87,9 @@ class BinaryPackage(object):
 
     def create(self, dstdir: str, builddir: str) -> str:
         '''
-        TODOC
+        Gather all the package data, generates metadata files
+        (including exposed symbols), and create the mmpack package
+        file.
         '''
         pkgdir = builddir + '/' + self.name + '/'
         instdir = builddir + '/install/'

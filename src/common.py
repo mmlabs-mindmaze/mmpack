@@ -1,6 +1,6 @@
 # @mindmaze_header@
 '''
-TODOC
+A set of helpers used throughout the mmpack project
 '''
 
 import logging

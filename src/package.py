@@ -1,6 +1,6 @@
 # @mindmaze_header@
 '''
-TODOC
+Class to handle source packages, build them and generates binary packages.
 '''
 
 import os
@@ -44,16 +44,10 @@ def _guess_project_build_system() -> str:
 class Package(object):
     # pylint: disable=too-many-instance-attributes
     '''
-    TODOC
+    Source package class.
     '''
     def __init__(self, url: str=None, tag: str=None):
         # pylint: disable=too-many-arguments
-        '''
-        TODOC
-
-        tags is a list of strings
-        dependencies is a list of Dependency objects
-        '''
         self.name = None
         self.tag = tag
         self.version = None
