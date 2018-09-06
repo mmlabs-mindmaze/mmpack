@@ -7,9 +7,28 @@ packaging as mmpack file.
 import os
 from os.path import isfile
 from glob import glob
+from typing import List, Dict
 import tarfile
 from common import sha256sum, yaml_serialize, pushdir, popdir
 from version import Version
+from elf_utils import elf_symbols_list
+import yaml
+
+
+def _get_specs_provides(pkgname: str) -> List[Dict[str, Version]]:
+    ''' TODOC
+
+    assert we already are the the mmpak spec folder.
+    '''
+    # TODO: also work with the last package published
+    provide_spec_name = pkgname + '.provides'
+    try:
+        specs_provides = yaml.load(open(provide_spec_name, 'rb').read())
+    except FileNotFoundError:
+        # return an empty dict if nothing has been provided
+        specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
+
+    return specs_provides
 
 
 def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
@@ -42,7 +61,7 @@ class BinaryPackage(object):
 
         self.description = ''
         self._dependencies = {'sysdepends': {}, 'depends': {}}
-        self._symbols = {}
+        self._provides = {'elf': {}, 'pe': {}, 'python': {}}
         self.install_files = []
 
     def _gen_info(self, pkgdir: str) -> None:
@@ -117,3 +136,38 @@ class BinaryPackage(object):
         curr_version = dependencies.get(name)
         if not curr_version or curr_version < version:
             dependencies[name] = version
+
+    def gen_provides(self):
+        ''' Go through the install files, look for what this package provides
+
+        eg. scan elf libraries for symbols
+            python files for top-level classes and functions
+            ...
+
+        This fills the class provides field dictionary
+        It does not return any value.
+
+        Raises:
+            ValueError: if a specified version is invalid or if a symbol in
+                        the spec file is not found provided by the package
+        '''
+        specs_provides = _get_specs_provides(self.name)
+
+        for inst_file in self.install_files:
+            self._provides['elf'].update(elf_symbols_list(inst_file,
+                                                          self.version))
+
+        for symbol, str_version in specs_provides['elf'].items():
+            version = Version(str_version)  # will raise an error if malformed
+            if symbol not in self._provides['elf']:
+                raise ValueError('Specified elf symbol {0} not found '
+                                 'in package files'.format(symbol))
+
+            if version < self.version:
+                self._provides['elf'][symbol] = version
+            elif version > self.version:
+                raise ValueError('Specified version of symbol {0} ({1})'
+                                 'is greater than current version ({2})'
+                                 .format(symbol, version, self.version))
+            else:
+                self._provides['elf'][symbol] = self.version

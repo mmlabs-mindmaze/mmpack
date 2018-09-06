@@ -14,7 +14,6 @@ from binary_package import BinaryPackage
 from common import shell, pushdir, popdir, ShellException, \
          dprint, iprint, eprint, remove_duplicates, get_host_arch
 from dependencies import dependencies
-from elf_utils import elf_symbols_list
 from version import Version
 
 
@@ -57,7 +56,6 @@ class Package(object):
         self.description = ''
         self.pkg_tags = ['MindMaze']
         self.dependencies = {'dpkg': [], 'mmpack': []}
-        self.provides = {'elf': {}, 'pe': {}, 'python': {}}
 
         self.build_options = None
         self.build_depends = []
@@ -317,46 +315,6 @@ class Package(object):
             pkg.install_files.append(file)
 
         return self._packages
-
-    def gen_provides(self) -> None:
-        ''' Go through the install files, look for what this package provides
-
-        eg. scan elf libraries for symbols
-            python files for top-level classes and functions
-            ...
-
-        This fills the class provides field dictionary
-        It does not return any value.
-
-        Raises:
-            ValueError: if a specified version is invalid or if a symbol in
-                        the spec file is not found provided by the package
-        '''
-        provide_spec_name = '{0}/mmpack/{1}.provides.yaml' \
-                            .format(self._local_build_path(), self.name)
-        try:
-            specs_provides = yaml.load(open(provide_spec_name, 'rb').read())
-        except FileNotFoundError:
-            specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
-
-        for inst_file in self.install_files_list:
-            self.provides['elf'].update(elf_symbols_list(inst_file,
-                                                         self.version))
-
-        for symbol, str_version in specs_provides['elf'].items():
-            version = Version(str_version)  # will raise an error if malformed
-            if symbol not in self.provides['elf']:
-                raise ValueError('Specified elf symbol {0} not found '
-                                 'in package files'.format(symbol))
-
-            if version < self.version:
-                self.provides['elf'][symbol] = version
-            elif version > self.version:
-                raise ValueError('Specified version of symbol {0} ({1})'
-                                 'is greater than current version ({2})'
-                                 .format(symbol, version, self.version))
-            else:
-                self.provides['elf'][symbol] = self.version
 
     def gen_dependencies(self) -> None:
         ''' Go through the install files and search for external dependencies
