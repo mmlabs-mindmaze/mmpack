@@ -25,7 +25,7 @@ DEVEL_PKG_FILE_RE = re.compile(r'.*(/man/.*\.(2|3)|/include/.*|\.so)')
 DEBUG_PKG_FILE_RE = re.compile(r'.*\.debug')
 
 
-def guess_project_build_system() -> str:
+def _guess_project_build_system() -> str:
     ''' helper: guesses the project build system
 
     Raises:
@@ -248,7 +248,7 @@ class Package(object):
         os.makedirs('install')
 
         if not build_system:
-            build_system = guess_project_build_system()
+            build_system = _guess_project_build_system()
 
         if build_system == 'autotools':
             cmd = '{{ cd build ' \
