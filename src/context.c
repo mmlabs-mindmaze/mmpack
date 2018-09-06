@@ -23,7 +23,6 @@
 #include "indextable.h"
 #include "mmstring.h"
 #include "package-utils.h"
-#include "mmstring.h"
 
 
 LOCAL_SYMBOL
@@ -81,4 +80,39 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 		entry = it_iter_next(&iter);
 	}
 	indextable_deinit(&ctx->installed);
+}
+
+
+/**
+ * mmpack_ctx_init_pkglist() - parse repo cache and installed package list
+ * @ctx:        initialized mmpack-context
+ *
+ * This inspect the prefix path set at init, parse the cache of repo
+ * package list and installed package list.
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
+{
+	mmstr* repo_index_path;
+	mmstr* installed_index_path;
+	size_t prefixlen = mmstrlen(ctx->prefix);
+
+	// Form the path of installed package from prefix
+	installed_index_path = mmstr_alloca(prefixlen + sizeof(INSTALLED_INDEX_RELPATH));
+	mmstrcpy(installed_index_path, ctx->prefix);
+	mmstrcat_cstr(installed_index_path, INSTALLED_INDEX_RELPATH);
+
+	// Form the path of repo package list cache from prefix
+	repo_index_path = mmstr_alloca(prefixlen + sizeof(REPO_INDEX_RELPATH));
+	mmstrcpy(repo_index_path, ctx->prefix);
+	mmstrcat_cstr(repo_index_path, REPO_INDEX_RELPATH);
+
+	// populate the package lists
+	if (  installed_index_populate(ctx, installed_index_path)
+	   || binary_index_populate(ctx, repo_index_path))
+		return -1;
+
+	return 0;
 }
