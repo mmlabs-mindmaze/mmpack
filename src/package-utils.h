@@ -6,9 +6,9 @@
 
 #include <stdio.h>
 
-#include "mmpack-common.h"
 #include "mmpack-context.h"
 #include "mmstring.h"
+#include "utils.h"
 
 
 /**

@@ -33,12 +33,11 @@ syntax: $(pkgpython_PYTHON)
 mmpack_SOURCES = \
 	binary-index.c \
 	binary-index.h \
+	common.h \
 	indextable.c \
 	indextable.h \
 	mm-alloc.h \
 	mmpack.c \
-	mmpack-common.c \
-	mmpack-common.h \
 	mmpack-context.c \
 	mmpack-context.h \
 	mmpack-config.c \
@@ -50,6 +49,8 @@ mmpack_SOURCES = \
 	package-utils.h \
 	sha256.c \
 	sha256.h \
+	utils.c \
+	utils.h \
 	$(eol)
 
 mmpack_LDADD = \

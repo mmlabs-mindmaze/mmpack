@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include "mm-alloc.h"
-#include "mmpack-common.h"
+#include "common.h"
 
 
 struct mmstring {

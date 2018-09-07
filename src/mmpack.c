@@ -14,7 +14,7 @@
 #include <mmerrno.h>
 #include <mmsysio.h>
 
-#include "mmpack-common.h"
+#include "common.h"
 #include "mmpack-update.h"
 
 

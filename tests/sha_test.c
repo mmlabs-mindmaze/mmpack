@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mmpack-common.h"
+#include "utils.h"
 #include "testcases.h"
 
 #define HASHFILE_DIR    BUILDDIR"/hash"

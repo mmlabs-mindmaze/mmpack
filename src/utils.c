@@ -15,9 +15,11 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 
+#include "common.h"
 #include "mm-alloc.h"
-#include "mmpack-common.h"
+#include "mmstring.h"
 #include "sha256.h"
+#include "utils.h"
 
 
 #define HASH_UPDATE_SIZE        512

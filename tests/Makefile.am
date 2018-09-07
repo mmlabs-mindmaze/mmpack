@@ -43,7 +43,7 @@ EXTRA_DIST = \
 mmpack_sources = \
 	../src/binary-index.c \
 	../src/indextable.c \
-	../src/mmpack-common.c \
+	../src/utils.c \
 	../src/mmpack-context.c \
 	../src/mmpack-config.c \
 	../src/mmpack-update.c \

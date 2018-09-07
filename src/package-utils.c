@@ -14,8 +14,8 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 
+#include "common.h"
 #include "mm-alloc.h"
-#include "mmpack-common.h"
 #include "package-utils.h"
 
 

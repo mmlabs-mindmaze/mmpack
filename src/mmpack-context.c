@@ -17,9 +17,11 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 
+#include "binary-index.h"
+#include "common.h"
 #include "indextable.h"
-#include "mmpack-common.h"
 #include "mmpack-context.h"
+#include "mmstring.h"
 #include "package-utils.h"
 
 

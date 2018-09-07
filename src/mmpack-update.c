@@ -9,10 +9,10 @@
 #include <curl/curl.h>
 #include <mmerrno.h>
 
-#include "mmpack-common.h"
 #include "mmpack-context.h"
 #include "mmpack-config.h"
 #include "mmpack-update.h"
+#include "utils.h"
 
 static
 int mmpack_update(char const * server, char const * url, void * arg)
