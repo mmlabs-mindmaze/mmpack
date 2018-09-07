@@ -4,7 +4,7 @@
 #ifndef BINARY_INDEX_H
 #define BINARY_INDEX_H
 
-#include "mmpack-context.h"
+#include "context.h"
 #include "mmstring.h"
 
 int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename);

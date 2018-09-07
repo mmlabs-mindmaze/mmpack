@@ -44,7 +44,7 @@ mmpack_sources = \
 	../src/binary-index.c \
 	../src/indextable.c \
 	../src/utils.c \
-	../src/mmpack-context.c \
+	../src/context.c \
 	../src/mmpack-config.c \
 	../src/mmpack-update.c \
 	../src/package-utils.c \

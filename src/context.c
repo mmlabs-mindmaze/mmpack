@@ -19,8 +19,8 @@
 
 #include "binary-index.h"
 #include "common.h"
+#include "context.h"
 #include "indextable.h"
-#include "mmpack-context.h"
 #include "mmstring.h"
 #include "package-utils.h"
 

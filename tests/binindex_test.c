@@ -9,7 +9,7 @@
 #include <check.h>
 
 #include "binary-index.h"
-#include "mmpack-context.h"
+#include "context.h"
 #include "package-utils.h"
 #include "testcases.h"
 

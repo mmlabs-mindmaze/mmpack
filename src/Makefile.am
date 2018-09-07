@@ -34,12 +34,12 @@ mmpack_SOURCES = \
 	binary-index.c \
 	binary-index.h \
 	common.h \
+	context.c \
+	context.h \
 	indextable.c \
 	indextable.h \
 	mm-alloc.h \
 	mmpack.c \
-	mmpack-context.c \
-	mmpack-context.h \
 	mmpack-config.c \
 	mmpack-config.h \
 	mmpack-update.c \

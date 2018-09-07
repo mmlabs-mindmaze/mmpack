@@ -9,7 +9,7 @@
 #include <curl/curl.h>
 #include <mmerrno.h>
 
-#include "mmpack-context.h"
+#include "context.h"
 #include "mmpack-config.h"
 #include "mmpack-update.h"
 #include "utils.h"

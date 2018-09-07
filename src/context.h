@@ -2,8 +2,8 @@
  * @mindmaze_header@
  */
 
-#ifndef MMPACK_CONTEXT_H
-#define MMPACK_CONTEXT_H
+#ifndef CONTEXT_H
+#define CONTEXT_H
 
 #include <curl/curl.h>
 #include <yaml.h>
@@ -26,4 +26,4 @@ int mmpack_ctx_is_init(struct mmpack_ctx const * ctx)
 	return (ctx != NULL && ctx->binindex.num_buckets != 0);
 }
 
-#endif /* MMPACK_CONTEXT_H */
+#endif /* CONTEXT_H */
