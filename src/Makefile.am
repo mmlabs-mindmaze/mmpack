@@ -42,6 +42,8 @@ mmpack_SOURCES = \
 	mmpack.c \
 	mmpack-config.c \
 	mmpack-config.h \
+	mmpack-mkprefix.c \
+	mmpack-mkprefix.h \
 	mmpack-update.c \
 	mmpack-update.h \
 	mmstring.h \

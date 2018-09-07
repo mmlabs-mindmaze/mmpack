@@ -15,12 +15,14 @@
 #include <mmsysio.h>
 
 #include "common.h"
+#include "mmpack-mkprefix.h"
 #include "mmpack-update.h"
 
 static const char mmpack_doc[] =
 	"TODO write a proper tool description";
 
 static const char arguments_docs[] =
+	"[options] mkprefix\n"
 	"[options] update\n";
 
 static struct mmpack_opts cmdline_opts;
@@ -59,7 +61,9 @@ int main(int argc, char* argv[])
 		goto exit;
 
 	/* Dispatch command */
-	if (STR_EQUAL(cmd, strlen(cmd), "update")) {
+	if (STR_EQUAL(cmd, strlen(cmd), "mkprefix")) {
+		rv = mmpack_mkprefix(&ctx);
+	} else if (STR_EQUAL(cmd, strlen(cmd), "update")) {
 		rv = mmpack_update_all(&ctx);
 	} else {
 		fprintf(stderr, "Invalid command: %s."
