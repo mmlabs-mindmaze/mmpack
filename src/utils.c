@@ -26,6 +26,100 @@
 
 
 #if defined(_WIN32)
+#define IS_PATH_SEPARATOR(c) \
+	((*c) == '\\' || (*c) == '/')
+#else
+#define IS_PATH_SEPARATOR(c) \
+	((*c) == '/')
+#endif
+
+
+/**************************************************************************
+ *                                                                        *
+ *                      Parse pathname components                         *
+ *                                                                        *
+ **************************************************************************/
+static
+const char* get_last_nonsep_ptr(const mmstr* path)
+{
+	const char* c = path + mmstrlen(path) - 1;
+
+	// skip trailing path separators
+	while (c > path && IS_PATH_SEPARATOR(c))
+		c--;
+
+	return c;
+}
+
+
+static
+const char* get_basename_ptr(const mmstr* path)
+{
+	const char *c, *lastptr;
+
+	lastptr = get_last_nonsep_ptr(path);
+
+	for (c = lastptr-1; c >= path; c--) {
+		if (IS_PATH_SEPARATOR(c))
+			return (c == lastptr) ? c : c + 1;
+	}
+
+	return path;
+}
+
+
+LOCAL_SYMBOL
+mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path)
+{
+	const char* baseptr;
+	const char* lastptr;
+	int len;
+
+	baseptr = get_basename_ptr(path);
+	lastptr = get_last_nonsep_ptr(path)+1;
+
+	len = lastptr - baseptr;
+
+	// if len == 0, path was "/" (or "//" or "///" or ...)
+	if (len <= 0)
+		len = 1;
+
+	return mmstr_copy(basepath, baseptr, len);
+}
+
+
+LOCAL_SYMBOL
+mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
+{
+	const char* baseptr;
+	const char* lastptr;
+
+	baseptr = get_basename_ptr(path);
+
+	if (baseptr == path) {
+		if (IS_PATH_SEPARATOR(baseptr))
+			return mmstrcpy_cstr(dirpath, "/");
+
+		return mmstrcpy_cstr(dirpath, ".");
+	}
+
+	lastptr = baseptr-1;
+
+	// Remove trailing seperator
+	while (lastptr > path && IS_PATH_SEPARATOR(lastptr))
+		lastptr--;
+
+	return mmstr_copy(dirpath, path, lastptr - path + 1);
+}
+
+
+/**************************************************************************
+ *                                                                        *
+ *                            Host OS detection                           *
+ *                                                                        *
+ **************************************************************************/
+
+#if defined(_WIN32)
 LOCAL_SYMBOL
 os_id get_os_id(void)
 {
@@ -66,6 +160,11 @@ os_id get_os_id(void)
 #endif
 
 
+/**************************************************************************
+ *                                                                        *
+ *                               Default paths                            *
+ *                                                                        *
+ **************************************************************************/
 static
 char const * get_default_path(enum mm_known_dir dirtype,
                               char const * default_filename)
@@ -123,6 +222,12 @@ char const * get_default_mmpack_prefix(void)
 	return get_default_path(MM_DATA_HOME, "mmpack");
 }
 
+
+/**************************************************************************
+ *                                                                        *
+ *                            SHA computation helper                      *
+ *                                                                        *
+ **************************************************************************/
 /**
  * conv_to_hexstr() - convert byte array into hexadecimal string
  * @hexstr:     output string, must be (2*@len + 1) long

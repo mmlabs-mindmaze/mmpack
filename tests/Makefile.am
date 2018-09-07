@@ -57,6 +57,7 @@ unittests_tap_SOURCES = \
 	config_test.c \
 	dependencies_test.c \
 	indextable_test.c \
+	misc_test.c \
 	sha_test.c \
 	testcases.h \
 	unittests.c \
