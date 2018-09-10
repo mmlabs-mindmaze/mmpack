@@ -9,6 +9,7 @@
 #include <check.h>
 
 #include "binary-index.h"
+#include "common.h"
 #include "context.h"
 #include "package-utils.h"
 #include "testcases.h"
@@ -23,6 +24,12 @@ static const char * valid_binindexes[] = {
 	TEST_BININDEX_DIR"/circular.yaml",
 };
 #define NUM_VALID_BININDEXES MM_NELEM(valid_binindexes)
+
+static const char * valid_mmpack_deps[][6] = {
+	{"pkg-a"},
+	{"pkg-f", "pkg-e", "pkg-d", "pkg-c", "pkg-b", "pkg-a"},
+	{"pkg-c", "pkg-a", "pkg-b"},
+};
 
 static const char * invalid_binindexes[] = {
 	TEST_BININDEX_DIR"/dependency-issue.yaml",
@@ -44,9 +51,10 @@ void ctx_teardown(void)
 
 START_TEST(test_valid_dependencies)
 {
-	int rv;
+	int rv, i;
 	struct action_stack * actions;
 	struct pkg_request req;
+	char const * pkg;
 
 	rv = binary_index_populate(&ctx, valid_binindexes[_i]);
 	ck_assert(rv == 0);
@@ -56,6 +64,11 @@ START_TEST(test_valid_dependencies)
 	ck_assert(actions != NULL);
 
 	mmpack_action_stack_dump(actions);
+	for (i = 0 ; i < actions->index ; i++) {
+		pkg = actions->actions[i].pkg->name;
+		ck_assert(strcmp(pkg, valid_mmpack_deps[_i][i]) == 0);
+	}
+
 	mmpack_action_stack_destroy(actions);
 }
 END_TEST
