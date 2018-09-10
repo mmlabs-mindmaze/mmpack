@@ -293,8 +293,10 @@ int mmpack_parse_index(struct mmpack_ctx * ctx, struct indextable * index)
 			if (type == YAML_KEY_TOKEN) {
 				pkg = mmpkg_create((char const *) token.data.scalar.value);
 				exitvalue = mmpack_parse_index_package(ctx, pkg);
-				if (exitvalue != 0)
+				if (exitvalue != 0) {
+					mmpkg_destroy(pkg);
 					goto exit;
+				}
 
 				/* insert into indextable */
 				entry = indextable_lookup_create(index, pkg->name);

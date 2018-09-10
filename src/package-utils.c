@@ -173,7 +173,7 @@ void mmpkg_destroy(struct mmpkg * pkg)
 	mmstr_free(pkg->version);
 
 	mmpkg_dep_destroy(pkg->dependencies);
-	/* Ignore next_version pointer. Is reachable for cleanup via indextable */
+	mmpkg_destroy(pkg->next_version);
 
 	free(pkg);
 }
