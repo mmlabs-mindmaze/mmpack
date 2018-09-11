@@ -24,7 +24,7 @@ clean-local:
 noinst_PYTHON = pytests.py
 
 TESTS = unittests.tap python-unittests.tap
-check_SCRIPTS = python-unittests.tap
+dist_check_SCRIPTS = python-unittests.tap
 check_PROGRAMS = \
 	unittests.tap \
 	$(eol)
@@ -34,10 +34,11 @@ TAP_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
                  $(top_srcdir)/build-aux/tap-driver.sh
 
 EXTRA_DIST = \
-	create-mpkgs \
+	create-mpks \
 	run-test-mpkrepo \
 	mmpack-config.yaml \
 	test_version.py \
+	binary-indexes \
 	$(eol)
 
 mmpack_sources = \
