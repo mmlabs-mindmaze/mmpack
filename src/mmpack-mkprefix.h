@@ -7,7 +7,9 @@
 
 #include "context.h"
 
-int mmpack_mkprefix(struct mmpack_ctx * ctx);
+#define MKPREFIX_SYNOPSIS       "mkprefix <repo-url>"
+
+int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[]);
 
 #endif /* MMPACK_INITPREFIX_H */
 

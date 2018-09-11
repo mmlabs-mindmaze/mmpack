@@ -22,7 +22,7 @@ static const char mmpack_doc[] =
 	"TODO write a proper tool description";
 
 static const char arguments_docs[] =
-	"[options] mkprefix\n"
+	"[options] "MKPREFIX_SYNOPSIS"\n"
 	"[options] update\n";
 
 static struct mmpack_opts cmdline_opts;
@@ -34,9 +34,10 @@ static const struct mmarg_opt cmdline_optv[] = {
 
 int main(int argc, char* argv[])
 {
-	int rv, arg_index;
+	int rv, arg_index, cmd_argc;
+	const char** cmd_argv;
 	const char* cmd;
-	struct mmpack_ctx ctx;
+	struct mmpack_ctx ctx = {0};
 	struct mmarg_parser parser = {
 		.doc = mmpack_doc,
 		.args_doc = arguments_docs,
@@ -54,6 +55,8 @@ int main(int argc, char* argv[])
 		goto exit;
 	}
 	cmd = argv[arg_index];
+	cmd_argv = (const char**)argv + arg_index;
+	cmd_argc = argc - arg_index;
 
 	/* Initialize context according to command line options */
 	rv = mmpack_ctx_init(&ctx, &cmdline_opts);
@@ -62,7 +65,7 @@ int main(int argc, char* argv[])
 
 	/* Dispatch command */
 	if (STR_EQUAL(cmd, strlen(cmd), "mkprefix")) {
-		rv = mmpack_mkprefix(&ctx);
+		rv = mmpack_mkprefix(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "update")) {
 		rv = mmpack_update_all(&ctx);
 	} else {

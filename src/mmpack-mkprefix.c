@@ -6,6 +6,7 @@
 # include <config.h>
 #endif
 
+#include <mmerrno.h>
 #include <mmsysio.h>
 
 #include "context.h"
@@ -15,18 +16,19 @@
 #include "mmpack-mkprefix.h"
 
 
+
 static
-int create_file_in_prefix(const mmstr* prefix, const char* relpath)
+int create_file_in_prefix(const mmstr* prefix, const mmstr* relpath)
 {
 	int fd;
 	mmstr *path, *dirpath;
 
-	path = mmstr_alloca(mmstrlen(prefix) + 64);
-	dirpath = mmstr_alloca(mmstrlen(prefix) + 64);
+	path = mmstr_alloca(mmstrlen(prefix) + mmstrlen(relpath));
+	dirpath = mmstr_alloca(mmstrlen(prefix) + mmstrlen(relpath));
 
-	// Form path and dir of installed package list file
+	// Form path and dir of target file in prefix
 	mmstrcpy(path, prefix);
-	mmstrcat_cstr(path, relpath);
+	mmstrcat(path, relpath);
 	mmstr_dirname(dirpath, path);
 
 	// Create parent dir if not existing yet
@@ -34,9 +36,55 @@ int create_file_in_prefix(const mmstr* prefix, const char* relpath)
 		return -1;
 
 	// Create file if not existing yet
-	fd = mm_open(path, O_WRONLY|O_CREAT, 0666);
+	fd = mm_open(path, O_WRONLY|O_CREAT|O_EXCL, 0666);
+	if (fd < 0) {
+		fprintf(stderr, "Failed to create %s: %s\n",
+		                path, mmstrerror(mm_get_lasterror_number()));
+		return -1;
+	}
+
+	return fd;
+}
+
+
+static
+int create_initial_empty_files(const mmstr* prefix)
+{
+	int fd;
+	const mmstr *instlist_relpath, *repocache_relpath;
+
+	instlist_relpath = mmstr_alloca_from_cstr(INSTALLED_INDEX_RELPATH);
+	repocache_relpath = mmstr_alloca_from_cstr(REPO_INDEX_RELPATH);
+
+	// Create initial empty installed package list
+	fd = create_file_in_prefix(prefix, instlist_relpath);
+	mm_close(fd);
 	if (fd < 0)
 		return -1;
+
+	// Create initial empty cache repo package list
+	fd = create_file_in_prefix(prefix, repocache_relpath);
+	mm_close(fd);
+	if (fd < 0)
+		return -1;
+
+	return 0;
+}
+
+
+static
+int create_initial_prefix_cfg(const mmstr* prefix, const char* url)
+{
+	const mmstr* cfg_relpath = mmstr_alloca_from_cstr(CFG_RELPATH);
+	char line[256];
+	int fd, len;
+
+	fd = create_file_in_prefix(prefix, cfg_relpath);
+	if (fd < 0)
+		return -1;
+
+	len = sprintf(line, "remote: %s", url);
+	mm_write(fd, line, len);
 
 	mm_close(fd);
 	return 0;
@@ -44,12 +92,19 @@ int create_file_in_prefix(const mmstr* prefix, const char* relpath)
 
 
 LOCAL_SYMBOL
-int mmpack_mkprefix(struct mmpack_ctx * ctx)
+int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	const mmstr* prefix = ctx->prefix;
+	const char* url;
 
-	if (  create_file_in_prefix(prefix, INSTALLED_INDEX_RELPATH)
-	   || create_file_in_prefix(prefix, REPO_INDEX_RELPATH))
+	if (argc < 2) {
+		fprintf(stderr, "Missing argument for mkprefix command\n");
+		return -1;
+	}
+	url = argv[1];
+
+	if (  create_initial_empty_files(prefix)
+	   || create_initial_prefix_cfg(prefix, url) )
 		return -1;
 
 	return 0;
