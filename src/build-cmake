@@ -1,0 +1,9 @@
+# vi:syntax=sh
+
+set -e
+
+cd $BUILDDIR
+cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $OPTS
+make
+make test
+make install DESTDIR=$DESTDIR

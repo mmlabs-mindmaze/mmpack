@@ -6,14 +6,15 @@ Class to handle source packages, build them and generates binary packages.
 import os
 from glob import glob
 import re
+from subprocess import PIPE, run
 import tarfile
 from typing import List
 import yaml
 from workspace import Workspace
 from binary_package import BinaryPackage
-from common import shell, pushdir, popdir, ShellException, \
-         dprint, iprint, eprint, get_host_arch
+from common import shell, pushdir, popdir, dprint, iprint, get_host_arch
 from version import Version
+from settings import PKGDATADIR
 
 
 # compiled regex for ventilating files
@@ -21,22 +22,6 @@ BIN_PKG_FILE_RE = re.compile(r'.*(\.1\.0\.0|/bin/.*|/locale/.*|/man/*\.1)')
 DOC_PKG_FILE_RE = re.compile(r'.*(/man/.*\.[^123]|/doc/.*)')
 DEVEL_PKG_FILE_RE = re.compile(r'.*(/man/.*\.(2|3)|/include/.*|\.so)')
 DEBUG_PKG_FILE_RE = re.compile(r'.*\.debug')
-
-
-def _guess_project_build_system() -> str:
-    ''' helper: guesses the project build system
-
-    Raises:
-        RuntimeError: could not guess project build system
-    '''
-    if os.path.exists('configure.ac'):
-        return 'autotools'
-    elif os.path.exists('CMakeLists.txt'):
-        return 'cmake'
-    elif os.path.exists('Makefile'):
-        return 'makefile'
-    else:
-        raise RuntimeError('could not guess project build system')
 
 
 class Package(object):
@@ -56,6 +41,7 @@ class Package(object):
         self.pkg_tags = ['MindMaze']
 
         self.build_options = None
+        self.build_system = None
         self.build_depends = []
 
         self._specs = None  # raw dictionary version of the specfile
@@ -69,6 +55,24 @@ class Package(object):
         wrk = Workspace()
         return wrk.builddir(self.name) + '/{0}-{1}'.format(self.name,
                                                            self.tag)
+
+    def _guess_build_system(self):
+        ''' helper: guesses the project build system
+
+        Raises:
+            RuntimeError: could not guess project build system
+        '''
+        pushdir(self._local_build_path())
+        if os.path.exists('configure.ac'):
+            self.build_system = 'autotools'
+        elif os.path.exists('CMakeLists.txt'):
+            self.build_system = 'cmake'
+        elif os.path.exists('Makefile'):
+            self.build_system = 'makefile'
+        else:
+            raise RuntimeError('could not guess project build system')
+
+        popdir()
 
     def load_specfile(self, specfile: str=None) -> None:
         ''' Load the specfile and store it as its dictionary equivalent
@@ -145,6 +149,8 @@ class Package(object):
                 self.build_options = value
             elif key == 'build-depends':
                 self.build_depends = value
+            elif key == 'build-system':
+                self.build_system = value
 
     def _binpkg_get_create(self, binpkg_name: str) -> BinaryPackage:
         'Returns the newly create BinaryPackage if any'
@@ -211,15 +217,21 @@ class Package(object):
 
         return sources_archive_name
 
-    def local_install(self, source_pkg: str, build_system: str=None) -> None:
+    def _build_env(self):
+        build_env = os.environ.copy()
+        build_env['SRCDIR'] = self._local_build_path()
+        build_env['BUILDDIR'] = self._local_build_path() + '/build'
+        build_env['DESTDIR'] = self._local_build_path() + '/install'
+        build_env['OPTS'] = self.build_options
+        build_env['PREFIX'] = '/run/mmpack'
+        return build_env
+
+    def local_install(self, source_pkg: str) -> None:
         ''' local installation of the package from the source package
 
         guesses build system if none given.
         fills private var: _install_list before returning
 
-        Args:
-            build_system: (optional) possible values are
-                'autotools', 'cmake', 'makefile'
         Returns:
             the list of all the installed files
         Raises:
@@ -237,30 +249,22 @@ class Package(object):
         os.makedirs('build')
         os.makedirs('install')
 
-        if not build_system:
-            build_system = _guess_project_build_system()
+        if not self.build_system:
+            self._guess_build_system()
+        if not self.build_system:
+            errmsg = 'Unknown build system: ' + self.build_system
+            raise NotImplementedError(errmsg)
 
-        if build_system == 'autotools':
-            cmd = '{{ cd build ' \
-                  ' && ../autogen.sh && ../configure --prefix={0}/install' \
-                  ' && make && make check && make install ;' \
-                  ' }} 2> build.stderr'.format(os.getcwd())
-        elif build_system == 'cmake':
-            cmd = '{{ cd build ' \
-                  ' && cmake .. -DCMAKE_INSTALL_PREFIX:PATH={0}/install' \
-                  ' && make && make check && make install ;' \
-                  ' }} 2> build.stderr'.format(os.getcwd())
-        elif build_system == 'makefile':
-            cmd = '{{ make && make check && make install PREFIX={0}/install;' \
-                  ' }} 2> build.stderr'.format(os.getcwd())
-        else:
-            raise NotImplementedError('Unknown build system: ' + build_system)
+        build_script = '/bin/sh {0}/build-{1}'.format(PKGDATADIR,
+                                                      self.build_system)
+        dprint('[shell] {0}'.format(build_script))
+        ret = run(build_script, stdout=PIPE, env=self._build_env())
+        if ret.returncode != 0:
+            errmsg = 'Failed to build ' + self.name + '\n'
+            errmsg += 'Stderr:\n'
+            errmsg += ret.stderr.decode('utf-8')
+            raise RuntimeError(errmsg)
 
-        try:
-            shell(cmd)
-        except ShellException:
-            eprint('Build failed. See build.stderr file for more infos.')
-            raise
         popdir()  # local build directory
 
         pushdir(self._local_build_path() + '/install')

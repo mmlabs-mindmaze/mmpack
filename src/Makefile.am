@@ -6,7 +6,10 @@ bin_PROGRAMS = mmpack
 bin_SCRIPTS = mmpack-build
 
 CLEANFILES = $(bin_SCRIPTS)
-EXTRA_DIST = mmpack-build.in
+EXTRA_DIST = \
+	mmpack-build.in \
+	settings.py.in \
+	$(eol)
 
 pkgpython_PYTHON =\
 	binary_package.py \
@@ -55,6 +58,12 @@ mmpack_SOURCES = \
 	utils.h \
 	$(eol)
 
+pkgdata_DATA = \
+	build-autotools \
+	build-cmake \
+	build-makefile \
+	$(eol)
+
 mmpack_LDADD = \
 	$(CURL_LIB) \
 	$(MMLIB_LIB) \
@@ -63,3 +72,6 @@ mmpack_LDADD = \
 
 mmpack-build: mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@
+
+settings.py: settings.py.in Makefile
+	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' < $< > $@

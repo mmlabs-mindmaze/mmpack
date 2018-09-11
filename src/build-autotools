@@ -1,0 +1,20 @@
+# vi:syntax=sh
+
+set -e
+
+cd $SRCDIR
+if [ -x configure ] ; then
+	echo "Configure found; skipping reconfiguration ..."
+elif [ -x bootstrap.sh ] ; then
+	./bootstrap.sh
+elif [ -x autogen.sh ] ; then
+	./autogen.sh
+elif [ -r configure.ac ] ; then
+	autoreconf --force --install
+fi
+
+cd $BUILDDIR
+$SRCDIR/configure --prefix=$PREFIX $OPTS
+make
+make check
+make install DESTDIR=$DESTDIR

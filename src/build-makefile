@@ -1,0 +1,8 @@
+# vi:syntax=sh
+
+set -e
+
+cd $SRCDIR
+make         $OPTS PREFIX=$PREFIX
+make check   $OPTS PREFIX=$PREFIX
+make install $OPTS PREFIX=$PREFIX DESTDIR=$DESTDIR
