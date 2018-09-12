@@ -247,6 +247,7 @@ class Package(object):
             NotImplementedError: the specified build system is not supported
         '''
         wrk = Workspace()
+        wrk.clean(self.name)
 
         pushdir(wrk.packages)
         archive = tarfile.open(source_pkg, 'r:gz')
@@ -264,9 +265,9 @@ class Package(object):
             errmsg = 'Unknown build system: ' + self.build_system
             raise NotImplementedError(errmsg)
 
-        build_script = '/bin/sh {0}/build-{1}'.format(PKGDATADIR,
-                                                      self.build_system)
-        dprint('[shell] {0}'.format(build_script))
+        build_script = ['/bin/sh',
+                        '{0}/build-{1}'.format(PKGDATADIR, self.build_system)]
+        dprint('[shell] {0}'.format(' '.join(build_script)))
         ret = run(build_script, stdout=PIPE, env=self._build_env())
         if ret.returncode != 0:
             errmsg = 'Failed to build ' + self.name + '\n'
@@ -276,8 +277,8 @@ class Package(object):
 
         popdir()  # local build directory
 
-        pushdir(self._local_build_path() + '/install')
-        self.install_files_list = glob(os.getcwd() + '/**', recursive=True)
+        pushdir(self._local_build_path() + '/install/run/mmpack')
+        self.install_files_list = glob('./**', recursive=True)
         self._strip_dirs_from_install_files()
         popdir()
 
@@ -291,7 +292,7 @@ class Package(object):
                     if re.match(regex, file):
                         self._packages[binpkg].install_files.append(file)
 
-    def ventilate(self) -> List[BinaryPackage]:
+    def ventilate(self):
         ''' Ventilate files.
         Must be called after local-install, otherwise it will return dummy
         packages with no files.
@@ -326,7 +327,18 @@ class Package(object):
 
             pkg.install_files.append(file)
 
-        return self._packages
+    def generate_binary_packages(self):
+        'create all the binary packages'
+        instdir = self._local_build_path() + '/install/run/mmpack/'
+        pushdir(instdir)
+
+        for pkgname, binpkg in self._packages.items():
+            # TODO: generate dependencies
+            binpkg.gen_sysdeps()
+            binpkg.gen_provides()
+            binpkg.create(instdir)
+            iprint('generated package: {}'.format(pkgname))
+        popdir()  # instdir
 
     def __repr__(self):
         return u'{}'.format(self.__dict__)

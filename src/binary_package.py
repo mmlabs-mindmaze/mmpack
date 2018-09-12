@@ -9,7 +9,7 @@ from os.path import isfile
 from glob import glob
 from typing import Dict
 import tarfile
-from common import sha256sum, yaml_serialize, pushdir, popdir
+from common import sha256sum, yaml_serialize, pushdir, popdir, dprint
 from version import Version
 from dependencies import scan_dependencies
 from elf_utils import elf_symbols_list
@@ -92,33 +92,37 @@ class BinaryPackage(object):
     def _populate(self, instdir: str, pkgdir: str) -> None:
         for instfile in self.install_files:
             src = instdir + instfile
-            dst = pkgdir + instfile
+            dst = pkgdir + '/' + instfile
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             os.link(src, dst, follow_symlinks=False)
 
-    def _make_archive(self, pkgdir: str, dstdir: str) -> str:
-        mpkfile = "{0}/{1}_{2}_{3}.mpk".format(dstdir, self.name,
+    def _make_archive(self, pkgdir: str) -> str:
+        wrk = Workspace()
+        pkgdir = wrk.stagedir(self.name)
+        mpkfile = "{0}/{1}_{2}_{3}.mpk".format(wrk.packages, self.name,
                                                self.version, self.arch)
-        tar = tarfile.open(mpkfile, 'x:xz')
+        tar = tarfile.open(mpkfile, 'w:xz')
+        dprint('[tar] {0} -> {1}'.format(pkgdir, mpkfile))
         tar.add(pkgdir, recursive=True, filter=_reset_entry_attrs, arcname='.')
         tar.close()
 
         return mpkfile
 
-    def create(self, dstdir: str, builddir: str) -> str:
+    def create(self, instdir: str) -> str:
         '''
         Gather all the package data, generates metadata files
         (including exposed symbols), and create the mmpack package
         file.
         '''
-        pkgdir = builddir + '/' + self.name + '/'
-        instdir = builddir + '/install/'
-        os.makedirs(pkgdir + 'MMPACK', exist_ok=True)
+        wrk = Workspace()
+        stagedir = wrk.stagedir(self.name)
+        os.makedirs(stagedir + '/MMPACK', exist_ok=True)
 
-        self._populate(instdir, pkgdir)
-        self._gen_info(pkgdir)
+        dprint('link {0} in {1}'.format(self.name, stagedir))
+        self._populate(instdir, stagedir)
+        self._gen_info(stagedir)
         # TODO: generate a metadata file with the list of symbols provided
-        return self._make_archive(pkgdir, dstdir)
+        return self._make_archive(instdir)
 
     def add_depend(self, name: str, version: Version) -> None:
         '''

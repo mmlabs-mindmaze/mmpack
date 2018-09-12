@@ -120,7 +120,7 @@ def main():
 
     package.local_install(src_pkg)
     package.ventilate()
-    # TODO package.generate_binary_packages()
+    package.generate_binary_packages()
 
 
 if __name__ == '__main__':
