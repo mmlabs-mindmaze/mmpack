@@ -127,6 +127,8 @@ class Package(object):
         if 'ignore' in self._specs['general']:
             for regex in self._specs['general']['ignore']:
                 _ = self._get_matching_files(regex)
+        # remove *.la files
+        _ = self._get_matching_files(r'.*.la')
 
     def _parse_specfile_general(self) -> None:
         ''' Parses the mmpack/specs file's general section.
