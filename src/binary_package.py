@@ -179,5 +179,6 @@ class BinaryPackage(object):
         FIXME: only handle elf deps ...
         '''
         for inst_file in self.install_files:
-            self._dependencies['sysdepends'] \
-                .update(scan_dependencies(inst_file))
+            dep = scan_dependencies(inst_file)
+            if dep:
+                self._dependencies['sysdepends'].update(dep)
