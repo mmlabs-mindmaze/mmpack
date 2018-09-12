@@ -27,6 +27,26 @@ struct mmstring {
 
 typedef char mmstr;
 
+/**
+ * macro STATIC_CONST_MMSTR - declare and initialize statically a mmstr*
+ * @name:       name of the variable declared
+ * @str_literal: string literal used to initialize mmstr buffer
+ *
+ * This macro declare a variable static const mmstr* named @name and
+ * its value will be statically initialized with @str_literal.
+ */
+#define STATIC_CONST_MMSTR(name, str_literal)           \
+static const struct {                                   \
+	int16_t max;                                    \
+	int16_t len;                                    \
+	char buf[sizeof(str_literal)];                  \
+} name ## _mmstring_data = {                            \
+	.max = sizeof(str_literal) - 1,                 \
+	.len = sizeof(str_literal) - 1,                 \
+	.buf = str_literal,                             \
+};                                                      \
+static const mmstr* name =                              \
+	(const mmstr*)&(name ## _mmstring_data.buf);
 
 static inline NONNULL_ARGS(1)
 int mmstrlen(const mmstr* str)
