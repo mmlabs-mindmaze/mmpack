@@ -6,6 +6,10 @@ PYTHON=${PYTHON:-python3}
 
 cmd=$1
 mmpack_moduledir=<pythondir>/mmpack
+if [ -n "$VIRTUAL_ENV" ] ; then
+	mmpack_moduledir="lib/python${mmpack_moduledir#*/lib/python}"
+	mmpack_moduledir="$VIRTUAL_ENV/$mmpack_moduledir"
+fi
 
 # Get python entry file by transforming the '-' of command into '_'
 pyfile=$mmpack_moduledir/mmpack_`echo $cmd | tr '-' '_'`.py
