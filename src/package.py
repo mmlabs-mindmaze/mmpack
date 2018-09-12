@@ -226,8 +226,9 @@ class Package(object):
         build_env['SRCDIR'] = self._local_build_path()
         build_env['BUILDDIR'] = self._local_build_path() + '/build'
         build_env['DESTDIR'] = self._local_build_path() + '/install'
-        build_env['OPTS'] = self.build_options
         build_env['PREFIX'] = '/run/mmpack'
+        if self.build_options:
+            build_env['OPTS'] = self.build_options
         return build_env
 
     def local_install(self, source_pkg: str) -> None:
