@@ -137,6 +137,7 @@ class Package(object):
             - prune the ignore files from the install_files_list
         '''
         for key, value in self._specs['general'].items():
+            dprint('[specs] setting {0}={1}'.format(key, value))
             if key == 'name':
                 self.name = value
             elif key == 'version':
