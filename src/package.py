@@ -231,6 +231,10 @@ class Package(object):
             build_env['OPTS'] = self.build_options
         return build_env
 
+    def _strip_dirs_from_install_files(self):
+        tmp = [x for x in self.install_files_list if not os.path.isdir(x)]
+        self.install_files_list = tmp
+
     def local_install(self, source_pkg: str) -> None:
         ''' local installation of the package from the source package
 
@@ -274,6 +278,7 @@ class Package(object):
 
         pushdir(self._local_build_path() + '/install')
         self.install_files_list = glob(os.getcwd() + '/**', recursive=True)
+        self._strip_dirs_from_install_files()
         popdir()
 
     def _ventilate_custom_packages(self):
