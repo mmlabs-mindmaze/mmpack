@@ -29,8 +29,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from glob import glob
 import yaml
 
-from workspace import Workspace
-from common import shell, iprint, pushdir, popdir
+from common import shell, pushdir, popdir
 from package import Package
 
 
@@ -96,10 +95,15 @@ def parse_options(argv):
         ctx['url'] = find_project_root_folder()
         if not ctx['url']:
             raise ValueError('did not find project to package')
-    else:
-        if not ctx['tag']:
-            # use current branch name
-            ctx['tag'] = shell('git rev-parse --abbrev-ref HEAD').strip()
+    if not ctx['tag']:
+        # use current branch name
+        ctx['tag'] = shell('git rev-parse --abbrev-ref HEAD').strip()
+
+    # create a srcname from the arguments
+    ctx['srcname'] = os.path.basename(ctx['url'])
+    if ctx['srcname'].endswith('.git'):
+        ctx['srcname'] = ctx['srcname'][:-4]
+    ctx['srcname'] += '-' + ctx['tag']
 
     return ctx
 
@@ -108,21 +112,15 @@ def main():
     'entry point to create a mmpack package'
     ctx = parse_options(sys.argv[1:])
 
-    package = Package(ctx['url'], ctx['tag'])
-
-    wrk = Workspace()
-    wrk.clean(package.name)
-
+    package = Package(srcname=ctx['srcname'], url=ctx['url'], tag=ctx['tag'])
     src_pkg = package.create_source_archive()
-    package.local_install(src_pkg)
 
-    binpkg_list = package.ventilate()
-    for binpkg in binpkg_list:
-        # TODO: generate dependencies
-        binpkg.gen_sysdeps()
-        binpkg.gen_provides()
-        binpkg.create()
-        iprint('generated package: {}'.format(binpkg))
+    package.load_specfile()
+    package.parse_specfile()
+
+    package.local_install(src_pkg)
+    package.ventilate()
+    # TODO package.generate_binary_packages()
 
 
 if __name__ == '__main__':

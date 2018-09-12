@@ -29,8 +29,9 @@ class Package(object):
     '''
     Source package class.
     '''
-    def __init__(self, url: str=None, tag: str=None):
+    def __init__(self, srcname: str, url: str=None, tag: str=None):
         # pylint: disable=too-many-arguments
+        self.srcname = srcname
         self.name = None
         self.tag = tag
         self.version = None
@@ -77,13 +78,12 @@ class Package(object):
     def load_specfile(self, specfile: str=None) -> None:
         ''' Load the specfile and store it as its dictionary equivalent
         '''
-        if specfile:
-            self._specs = yaml.load(open(specfile, 'rb').read())
-        else:
-            wrk = Workspace()
-            pushdir(wrk.packages)
-            self._specs = yaml.load(open('mmpack/specs', 'rb').read())
-            popdir()
+        wrk = Workspace()
+        if not specfile:
+            specfile = '{0}/{1}/mmpack/specs'.format(wrk.sources,
+                                                     self.srcname)
+        dprint('loading specfile: ' + specfile)
+        self._specs = yaml.load(open(specfile, 'rb').read())
 
     def _get_matching_files(self, pcre: str) -> List[str]:
         ''' given some pcre, return the list of matching files from
@@ -197,15 +197,16 @@ class Package(object):
         Returns: the name of the archive file
         '''
         wrk = Workspace()
-
+        wrk.srcclean(self.srcname)
         pushdir(wrk.sources)
-        sources_archive_name = '{0}-{1}-src.tar.gz'.format(self.name, self.tag)
+        sources_archive_name = '{0}-{1}-src.tar.gz' \
+                               .format(self.srcname, self.tag)
         iprint('cloning ' + self.url)
-        cmd = 'git clone --quiet ' + self.url
+        cmd = 'git clone --quiet {0} {1}'.format(self.url, self.srcname)
         shell(cmd)
-        pushdir(self.name)
-        cmd = 'git archive --format=tar.gz --prefix={0}-{1}/ {1}' \
-              ' > {2}/{3}'.format(self.name, self.tag,
+        pushdir(self.srcname)
+        cmd = 'git archive --format=tar.gz --prefix={0}/ {1}' \
+              ' > {2}/{3}'.format(self.srcname, self.tag,
                                   wrk.sources, sources_archive_name)
         shell(cmd)
         popdir()  # repository name
