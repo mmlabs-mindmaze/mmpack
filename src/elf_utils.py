@@ -65,7 +65,7 @@ def elf_dpkg_deps(filename):
                 try:
                     pkg, arch = package.split(':')[0:2]
                     if arch in ['amd64', 'x86_64']:
-                        version = _dpkg_get_pkg_version(package)
+                        version = _dpkg_get_pkg_version(':'.join([pkg, arch]))
                         packagedict.update({pkg: version})
                 except ValueError:
                     continue
