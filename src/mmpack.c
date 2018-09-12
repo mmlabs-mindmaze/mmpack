@@ -23,7 +23,7 @@ static const char mmpack_doc[] =
 
 static const char arguments_docs[] =
 	"[options] "MKPREFIX_SYNOPSIS"\n"
-	"[options] update\n";
+	"[options] "UPDATE_SYNOPSIS"\n";
 
 static struct mmpack_opts cmdline_opts;
 
