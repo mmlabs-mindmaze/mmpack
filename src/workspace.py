@@ -8,7 +8,7 @@ import sys
 from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_home
 
 from decorators import singleton
-from common import shell
+from common import shell, dprint
 
 
 @singleton
@@ -18,6 +18,7 @@ class Workspace(object):
         self.config = xdg_config_home + '/mmpack-config.yml'
         self.sources = xdg_cache_home + '/mmpack-sources'
         self.build = xdg_cache_home + '/mmpack-build'
+        self.staging = xdg_cache_home + '/mmpack-staging'
         self.packages = xdg_data_home + '/mmpack-packages'
 
         # create the directories if they do not exist
@@ -26,27 +27,51 @@ class Workspace(object):
         os.makedirs(self.sources, exist_ok=True)
         os.makedirs(self.packages, exist_ok=True)
 
-    def builddir(self, pkg):
+    def builddir(self, srcpkg: str):
         'get package build directory. Create it if needed.'
 
-        builddir = self.build + '/' + pkg
+        builddir = self.build + '/' + srcpkg
         os.makedirs(builddir, exist_ok=True)
         return builddir
 
-    def clean(self, pkg=None):
-        '''remove all copied sources and temporary build objects
-           keep generated packages.
+    def installdir(self, srcpkg: str):
+        'get package local-install directory. Create it if needed.'
+        installdir = self.builddir(srcpkg)
+        os.makedirs(installdir, exist_ok=True)
+        return installdir
+
+    def stagedir(self, binpkg: str):
+        ''' Get package staging directory (create if needed).
+
+        Following package local-install, this is where the files will get
+        moved to just before package creation.
+        '''
+        stagingdir = self.staging + '/' + binpkg
+        os.makedirs(stagingdir, exist_ok=True)
+        return stagingdir
+
+    def srcclean(self, srcpkg: str=''):
+        '''remove all copied sources
            if pkg is explicited, will only clean given package
         '''
-        if not pkg:
-            pkg = ''
+        if srcpkg:
+            dprint('cleaning {0} sources'.format(srcpkg))
 
-        shell('rm -rvf {0}/{1}*'.format(self.build, pkg))
-        shell('rm -rvf {0}/{1}*'.format(self.sources, pkg))
-        shell('rm -rvf {0}/{1}*'.format(self.packages, pkg))
+        shell('rm -rvf {0}/{1}*'.format(self.sources, srcpkg))
+
+    def clean(self, srcpkg: str=''):
+        '''remove all temporary build objects keep generated packages.
+           if pkg is explicited, will only clean given package
+        '''
+        if srcpkg:
+            dprint('cleaning {0} workspace'.format(srcpkg))
+
+        shell('rm -rvf {0}/{1}*'.format(self.staging, srcpkg))
+        shell('rm -rvf {0}/{1}*'.format(self.build, srcpkg))
 
     def wipe(self):
-        'same as clean, but also remove all created pacakges'
+        'clean sources, build, staging, and all packages'
+        self.srcclean()
         self.clean()
         shell('rm -vf {0}/*'.format(self.packages))
 
@@ -56,7 +81,7 @@ def is_valid_prefix(prefix: str) -> bool:
     return os.path.exists(prefix + '/var/lib/mmpack/')
 
 
-def push_prefix(prefix: str) -> None:
+def push_prefix(prefix: str):
     ''' Prepend given prefix to all relevant os environment variables
         Since python is launched in its own process, directly write to
         os.environ.
