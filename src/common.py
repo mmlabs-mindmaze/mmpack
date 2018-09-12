@@ -84,12 +84,15 @@ PUSHSTACK = []
 def pushdir(dirname):
     'Save and then change the current directory'
     PUSHSTACK.append(os.getcwd())
+    dprint('cd ' + dirname)
     os.chdir(dirname)
 
 
 def popdir(num=1):
     'Remove the top n entries from the directory stack'
-    os.chdir(PUSHSTACK.pop())
+    lastdir = PUSHSTACK.pop()
+    dprint('cd ' + lastdir)
+    os.chdir(lastdir)
     if num > 1:
         popdir(num - 1)
 
