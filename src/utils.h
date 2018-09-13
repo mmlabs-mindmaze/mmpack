@@ -30,6 +30,8 @@ int sha_compute(char* hash, const char* filename, const char* parent);
 
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path);
 mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path);
+mmstr* mmstr_join_path(mmstr* restrict dst,
+                       const mmstr* restrict p1, const mmstr* restrict p2);
 
 #endif /* UTILS_H */
 

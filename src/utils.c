@@ -115,6 +115,29 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 }
 
 
+LOCAL_SYMBOL
+mmstr* mmstr_join_path(mmstr* restrict dst,
+                       const mmstr* restrict p1, const mmstr* restrict p2)
+{
+	int sep_end_p1, sep_start_p2;
+
+	mmstrcpy(dst, p1);
+
+	sep_end_p1 = is_path_separator(p1[mmstrlen(p1)-1]);
+	sep_start_p2 = is_path_separator(p2[0]);
+
+	// Remove one '/' if both path part provide a '/' at the junction
+	if (sep_end_p1 && sep_start_p2)
+		mmstr_setlen(dst, mmstrlen(dst)-1);
+
+	// Add one '/' if neither p1 and p2 provide a '/' at the junction
+	if (!sep_start_p2 && !sep_start_p2)
+		mmstrcat_cstr(dst, "/");
+
+	return mmstrcat(dst, p2);
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                            Host OS detection                           *
