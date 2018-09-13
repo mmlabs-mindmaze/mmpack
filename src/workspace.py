@@ -34,12 +34,6 @@ class Workspace(object):
         os.makedirs(builddir, exist_ok=True)
         return builddir
 
-    def installdir(self, srcpkg: str):
-        'get package local-install directory. Create it if needed.'
-        installdir = self.builddir(srcpkg)
-        os.makedirs(installdir, exist_ok=True)
-        return installdir
-
     def stagedir(self, binpkg: str):
         ''' Get package staging directory (create if needed).
 

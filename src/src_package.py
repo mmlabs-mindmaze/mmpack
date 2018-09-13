@@ -24,6 +24,13 @@ DEVEL_PKG_FILE_RE = re.compile(r'.*(/man/.*\.(2|3)|/include/.*|\.so)')
 DEBUG_PKG_FILE_RE = re.compile(r'.*\.debug')
 
 
+def _get_install_prefix() -> str:
+    if os.name == 'nt':
+        return '/m/'
+    else:  # if not windows, then linux
+        return '/run/mmpack/'
+
+
 class SrcPackage(object):
     # pylint: disable=too-many-instance-attributes
     '''
@@ -54,8 +61,16 @@ class SrcPackage(object):
     def _local_build_path(self) -> str:
         'internal helper: build and return the local build path'
         wrk = Workspace()
-        return wrk.builddir(self.name) + '/{0}-{1}'.format(self.name,
-                                                           self.tag)
+        return wrk.builddir(self.name) + '/{0}-{1}'.format(self.name, self.tag)
+
+    def _local_install_path(self, withprefix: bool=False) -> str:
+        'internal helper: build and return the local install path'
+        installdir = self._local_build_path() + '/install'
+        if withprefix:
+            installdir += _get_install_prefix()
+
+        os.makedirs(installdir, exist_ok=True)
+        return installdir
 
     def _guess_build_system(self):
         ''' helper: guesses the project build system
@@ -225,8 +240,8 @@ class SrcPackage(object):
         build_env = os.environ.copy()
         build_env['SRCDIR'] = self._local_build_path()
         build_env['BUILDDIR'] = self._local_build_path() + '/build'
-        build_env['DESTDIR'] = self._local_build_path() + '/install'
-        build_env['PREFIX'] = '/run/mmpack'
+        build_env['DESTDIR'] = self._local_install_path()
+        build_env['PREFIX'] = _get_install_prefix()
         if self.build_options:
             build_env['OPTS'] = self.build_options
         return build_env
@@ -257,7 +272,7 @@ class SrcPackage(object):
 
         pushdir(self._local_build_path())
         os.makedirs('build')
-        os.makedirs('install')
+        os.makedirs(self._local_install_path(), exist_ok=True)
 
         if not self.build_system:
             self._guess_build_system()
@@ -277,7 +292,7 @@ class SrcPackage(object):
 
         popdir()  # local build directory
 
-        pushdir(self._local_build_path() + '/install/run/mmpack')
+        pushdir(self._local_install_path(True))
         self.install_files_list = glob('./**', recursive=True)
         self._strip_dirs_from_install_files()
         popdir()
@@ -329,7 +344,7 @@ class SrcPackage(object):
 
     def generate_binary_packages(self):
         'create all the binary packages'
-        instdir = self._local_build_path() + '/install/run/mmpack/'
+        instdir = self._local_install_path(True)
         pushdir(instdir)
 
         for pkgname, binpkg in self._packages.items():
@@ -338,7 +353,7 @@ class SrcPackage(object):
             binpkg.gen_provides()
             binpkg.create(instdir)
             iprint('generated package: {}'.format(pkgname))
-        popdir()  # instdir
+        popdir()  # local install path
 
     def __repr__(self):
         return u'{}'.format(self.__dict__)
