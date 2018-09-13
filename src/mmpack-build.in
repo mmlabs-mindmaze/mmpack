@@ -15,6 +15,13 @@ fi
 pyfile=$mmpack_moduledir/mmpack_`echo $cmd | tr '-' '_'`.py
 
 
+list_commands() {
+	for file in `ls $mmpack_moduledir/mmpack_*.py`; do
+		cmd=`basename $file .py | cut -f2- -d'_' | tr '_' '-'`
+		printf "$cmd\n"
+	done
+}
+
 print_usage() {
 	cat << ENDOFDOC
 This is a stub for all mmpack commands
@@ -22,8 +29,11 @@ This is a stub for all mmpack commands
 Usage:
 mmpack <command> [command-options]
 
-List all mmpack commands:
+Show full mmpack help
 mmpack --help
+
+List all mmpack commands:
+mmpack --list-commands
 
 More infos about a specific command:
 mmpack <command> --help
@@ -51,11 +61,18 @@ TODO:
 
 List of available commands:
 ENDOFDOC
-	for file in `ls $mmpack_moduledir/mmpack_*.py`; do
-		cmd=`basename $file .py | cut -f2- -d'_' | tr '_' '-'`
+	for cmd in $(list_commands) ; do
 		printf "\t$cmd\n"
 	done
 }
+for arg in "$@" ; do
+case $arg in
+	--list-commands) list_commands ; exit 0 ;;
+	-h|--help) print_usage ; exit 0 ;;
+esac
+done
+
+
 
 
 # check command is provided
