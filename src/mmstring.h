@@ -134,12 +134,15 @@ void mmstr_freea(const mmstr* str)
 #define mmstr_alloca_from_cstr(cstr)    mmstr_alloca_copy(cstr, strlen(cstr))
 
 
-static inline NONNULL_ARGS(1)
-mmstr* mmstr_resize(mmstr* str, int new_maxlen)
+static inline
+mmstr* mmstr_realloc(mmstr* str, int new_maxlen)
 {
-	struct mmstring* s = MMSTR_HDR(str);
+	struct mmstring* s = NULL;
 
-	if (new_maxlen <= s->max)
+	if (str != NULL)
+		s = MMSTR_HDR(str);
+
+	if (s && (new_maxlen <= s->max))
 		return s->buf;
 
 	s = realloc(s, MMSTR_NEEDED_SIZE(new_maxlen));
@@ -238,6 +241,54 @@ mmstr* mmstrdup(const mmstr* restrict src)
 
 	dst = mmstr_malloc(mmstr_maxlen(src));
 	return mmstrcpy(dst, src);
+}
+
+
+/**
+ * mmstrcpy_realloc() - copy a mmstr to another, resizing dest if needed
+ * @dst:        destination string (may be NULL)
+ * @src:        string to copy (may NOT be NULL)
+ *
+ * Return: modified @dst. The actual pointer may be different from the value
+ * passed as input if a reallocation was necessary.
+ */
+static inline NONNULL_ARGS(2)
+mmstr* mmstrcpy_realloc(mmstr* restrict dst, const mmstr* restrict src)
+{
+	dst = mmstr_realloc(dst, mmstrlen(src));
+	return mmstrcpy(dst, src);
+}
+
+
+/**
+ * mmstr_copy_realloc() - copy data to a string, resizing dest if needed
+ * @dst:        destination string (may be NULL)
+ * @data:       buffer holding the data to copy  to @dst
+ * @len:        length of @data buffer
+ *
+ * Return: modified @dst. The actual pointer may be different from the value
+ * passed as input if a reallocation was necessary.
+ */
+static inline NONNULL_ARGS(2)
+mmstr* mmstr_copy_realloc(mmstr* dst, const char* restrict data, int len)
+{
+	dst = mmstr_realloc(dst, len);
+	return mmstr_copy(dst, data, len);
+}
+
+
+/**
+ * mmstrcpy_cstr_realloc() - copy C string, resizing dest if needed
+ * @dst:        destination string (may be NULL)
+ * @csrc:       null terminated string to copy
+ *
+ * Return: modified @dst. The actual pointer may be different from the value
+ * passed as input if a reallocation was necessary.
+ */
+static inline NONNULL_ARGS(2)
+mmstr* mmstrcpy_cstr_realloc(mmstr* restrict dst, const mmstr* restrict csrc)
+{
+	return mmstr_copy_realloc(dst, csrc, strlen(csrc));
 }
 
 
