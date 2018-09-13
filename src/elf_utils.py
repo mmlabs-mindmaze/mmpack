@@ -3,6 +3,7 @@
 helper module containing elf parsing functions
 '''
 
+import os
 import subprocess
 
 from elftools.common.exceptions import ELFError
@@ -25,6 +26,22 @@ def elf_deps(filename):
                     librarylist.append(tag.needed)
 
     return sorted(librarylist)
+
+
+def elf_soname(filename: str) -> str:
+    ''' Return the SONAME of given library
+
+    Raises:
+        ELFError: soname not found
+    '''
+    elffile = ELFFile(open(filename, 'rb'))
+    for section in elffile.iter_sections():
+        if isinstance(section, DynamicSection):
+            for tag in section.iter_tags():
+                if tag.entry.d_tag == 'DT_SONAME':
+                    return tag.soname
+    libname = os.path.basename(filename)
+    raise ELFError('SONAME not found in library: ' + libname)
 
 
 def elf_symbols_list(filename, default_version):

@@ -63,6 +63,11 @@ class Workspace(object):
         shell('rm -rvf {0}/{1}*'.format(self.staging, srcpkg))
         shell('rm -rvf {0}/{1}*'.format(self.build, srcpkg))
 
+        # remove all possibly create library packages.
+        # assume they contain the srcpkg name within them
+        shell('rm -rvf {0}/lib*{1}*'.format(self.staging, srcpkg))
+        shell('rm -rvf {0}/lib*{1}*'.format(self.build, srcpkg))
+
     def wipe(self):
         'clean sources, build, staging, and all packages'
         self.srcclean()
