@@ -34,6 +34,8 @@ syntax: $(pkgpython_PYTHON)
 
 
 mmpack_SOURCES = \
+	download.c \
+	download.h \
 	binary-index.c \
 	binary-index.h \
 	common.h \
