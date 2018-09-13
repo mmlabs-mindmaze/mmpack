@@ -65,12 +65,10 @@ ENDOFDOC
 		printf "\t$cmd\n"
 	done
 }
-for arg in "$@" ; do
-case $arg in
+case $1 in
 	--list-commands) list_commands ; exit 0 ;;
 	-h|--help) print_usage ; exit 0 ;;
 esac
-done
 
 
 

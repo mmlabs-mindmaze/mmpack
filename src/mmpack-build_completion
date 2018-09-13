@@ -1,0 +1,30 @@
+# vi:syntax=sh
+#
+# completion script for mmpack-build commands (to be sourced)
+
+_mmpack_build_subcmd_completion() {
+    local cmd=$1
+    local short_opts=$(mmpack-build $cmd --help | sed -n 's/\s*-\([a-zA-Z]\),.*/-\1/p')
+    local long_opts=$(mmpack-build $cmd --help | sed -n 's/.*--\([^= ]*\).*/--\1/p')
+    echo "$short_opts" "$long_opts"
+}
+
+_mmpack_build_completion() {
+    COMPREPLY=()
+    local mmpack_build_commands="$(mmpack-build --list-commands)"
+
+    # completion for mmpack-build
+    if [ $COMP_CWORD -eq 1 ]; then
+        mmpack_build_options="$(_mmpack_build_subcmd_completion )"
+        COMPREPLY=( $( compgen -W "$mmpack_build_commands $mmpack_build_options" -- "${COMP_WORDS[1]}" ) )
+        return
+    fi
+
+    # completion for mmpack-build <command>'s options
+       local cmd="$(echo "${COMP_WORDS[1]}" | tr -d '[:space:]')"
+
+    if [ "$(echo $mmpack_build_commands | grep -w "$cmd")" ] ; then
+        COMPREPLY=( $( compgen -W "$(_mmpack_build_subcmd_completion "$cmd")" -- "${COMP_WORDS[COMP_CWORD]}" ) )
+    fi
+}
+complete -F _mmpack_build_completion mmpack-build

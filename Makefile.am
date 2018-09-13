@@ -144,3 +144,8 @@ unittests_tap_LDADD = \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
 	$(eol)
+
+completiondir = $(datadir)/bash-completion/completions
+completion_DATA = \
+	src/mmpack-build_completion \
+	$(eol)
