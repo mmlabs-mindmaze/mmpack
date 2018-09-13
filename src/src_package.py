@@ -24,7 +24,7 @@ DEVEL_PKG_FILE_RE = re.compile(r'.*(/man/.*\.(2|3)|/include/.*|\.so)')
 DEBUG_PKG_FILE_RE = re.compile(r'.*\.debug')
 
 
-class Package(object):
+class SrcPackage(object):
     # pylint: disable=too-many-instance-attributes
     '''
     Source package class.
@@ -46,7 +46,7 @@ class Package(object):
         self.build_depends = []
 
         self._specs = None  # raw dictionary version of the specfile
-        # dict of (name, Package) of packages generated from the source package
+        # dict of (name, BinaryPackage) generated from the source package
         self._packages = {}
         self.install_files_list = []
         self._metadata_files_list = []
@@ -119,7 +119,7 @@ class Package(object):
                 binpkg.description += '\n' + description
         else:
             if not description:
-                raise ValueError('Package {0} has no description'
+                raise ValueError('Source package {0} has no description'
                                  .format(pkgname))
             binpkg.description = description
 

@@ -9,13 +9,13 @@ for path in mmpack.__path__:
     sys.path.insert(0, path)
 
 # import as if from mmpack package
-from package import Package
+from src_package import SrcPackage
 
-class TestPackageClass(unittest.TestCase):
+class TestSrcPackageClass(unittest.TestCase):
     def test_package_simple(self):
         'smoke test'
         specfile = os.path.dirname(os.path.abspath(__file__)) + '/specfiles' + '/simple.yaml'
-        test_pkg = Package('dummy.maintainer@mindmaze.ch')
+        test_pkg = SrcPackage('dummy.maintainer@mindmaze.ch')
         test_pkg.load_specfile(specfile)
         test_pkg.parse_specfile()
 
@@ -29,7 +29,7 @@ class TestPackageClass(unittest.TestCase):
     def test_package_full(self):
         'the full spec parsing'
         specfile = os.path.dirname(os.path.abspath(__file__)) + '/specfiles' + '/full.yaml'
-        test_pkg = Package('dummy.maintainer@mindmaze.ch')
+        test_pkg = SrcPackage('dummy.maintainer@mindmaze.ch')
         test_pkg.load_specfile(specfile)
         test_pkg.parse_specfile()
 

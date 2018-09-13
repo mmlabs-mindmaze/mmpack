@@ -30,7 +30,7 @@ from glob import glob
 import yaml
 
 from common import shell, pushdir, popdir
-from package import Package
+from src_package import SrcPackage
 
 
 def find_project_root_folder() -> str:
@@ -112,7 +112,8 @@ def main():
     'entry point to create a mmpack package'
     ctx = parse_options(sys.argv[1:])
 
-    package = Package(srcname=ctx['srcname'], url=ctx['url'], tag=ctx['tag'])
+    package = SrcPackage(srcname=ctx['srcname'], url=ctx['url'],
+                         tag=ctx['tag'])
     src_pkg = package.create_source_archive()
 
     package.load_specfile()

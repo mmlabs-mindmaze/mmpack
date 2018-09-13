@@ -21,7 +21,7 @@ pkgpython_PYTHON =\
 	mmpack_pkg_create.py \
 	mmpack_pkg_check.py \
 	mmpack_pkg_show.py \
-	package.py \
+	src_package.py \
 	settings.py \
 	version.py \
 	workspace.py \
