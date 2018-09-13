@@ -244,37 +244,36 @@ os_id get_os_id(void)
  *                                                                        *
  **************************************************************************/
 static
-char const * get_default_path(enum mm_known_dir dirtype,
-                              char const * default_filename)
+mmstr* get_default_path(enum mm_known_dir dirtype,
+                        char const * default_filename)
 {
-	char * filename;
+	mmstr* filename;
 	size_t filename_len;
 
 	char const * xdg_home = mm_get_basedir(dirtype);
 	if (xdg_home == NULL)
 		return NULL;
 
-	filename_len = strlen(xdg_home) + strlen(default_filename) + 2;
-	filename = mm_malloc(filename_len);
+	filename_len = strlen(xdg_home) + strlen(default_filename) + 1;
+	filename = mmstr_malloc(filename_len);
 
-	filename[0] = '\0';
-	strcat(filename, xdg_home);
-	strcat(filename, "/");
-	strcat(filename, default_filename);
+	mmstrcat_cstr(filename, xdg_home);
+	mmstrcat_cstr(filename, "/");
+	mmstrcat_cstr(filename, default_filename);
 
 	return filename;
 }
 
 
 LOCAL_SYMBOL
-char const * get_config_filename(void)
+mmstr* get_config_filename(void)
 {
 	return get_default_path(MM_CONFIG_HOME, "mmpack-config.yaml");
 }
 
 
 LOCAL_SYMBOL
-char const * get_default_mmpack_prefix(void)
+mmstr* get_default_mmpack_prefix(void)
 {
 	return get_default_path(MM_DATA_HOME, "mmpack");
 }

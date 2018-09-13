@@ -20,8 +20,8 @@ os_id get_os_id(void);
 #define REPO_INDEX_RELPATH      MMPACK_STATEDIR_RELPATH "/binindex.yaml"
 #define CFG_RELPATH             "/etc/mmpack-config.yaml"
 
-char const * get_default_mmpack_prefix(void);
-char const * get_config_filename(void);
+mmstr* get_default_mmpack_prefix(void);
+mmstr* get_config_filename(void);
 
 #define SHA_HEXSTR_SIZE (32*2+1) // string of SHA-256 in hexa (\0 incl.)
 

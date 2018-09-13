@@ -29,7 +29,7 @@ LOCAL_SYMBOL
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 {
 	const char* prefix;
-	char* default_prefix = (char*)get_default_mmpack_prefix();
+	mmstr* default_prefix = get_default_mmpack_prefix();
 
 	memset(ctx, 0, sizeof(*ctx));
 
@@ -45,7 +45,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 
 	ctx->prefix = mmstr_malloc_from_cstr(prefix);
 
-	free(default_prefix);
+	mmstr_free(default_prefix);
 	return 0;
 }
 
