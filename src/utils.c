@@ -25,27 +25,29 @@
 #define HASH_UPDATE_SIZE        512
 
 
-#if defined(_WIN32)
-#define IS_PATH_SEPARATOR(c) \
-	((*c) == '\\' || (*c) == '/')
-#else
-#define IS_PATH_SEPARATOR(c) \
-	((*c) == '/')
-#endif
-
-
 /**************************************************************************
  *                                                                        *
  *                      Parse pathname components                         *
  *                                                                        *
  **************************************************************************/
 static
+int is_path_separator(char c)
+{
+#if defined(_WIN32)
+	return (c == '\\' || c == '/');
+#else
+	return (c == '/');
+#endif
+}
+
+
+static
 const char* get_last_nonsep_ptr(const mmstr* path)
 {
 	const char* c = path + mmstrlen(path) - 1;
 
 	// skip trailing path separators
-	while (c > path && IS_PATH_SEPARATOR(c))
+	while (c > path && is_path_separator(*c))
 		c--;
 
 	return c;
@@ -60,7 +62,7 @@ const char* get_basename_ptr(const mmstr* path)
 	lastptr = get_last_nonsep_ptr(path);
 
 	for (c = lastptr-1; c >= path; c--) {
-		if (IS_PATH_SEPARATOR(c))
+		if (is_path_separator(*c))
 			return (c == lastptr) ? c : c + 1;
 	}
 
@@ -97,7 +99,7 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 	baseptr = get_basename_ptr(path);
 
 	if (baseptr == path) {
-		if (IS_PATH_SEPARATOR(baseptr))
+		if (is_path_separator(*baseptr))
 			return mmstrcpy_cstr(dirpath, "/");
 
 		return mmstrcpy_cstr(dirpath, ".");
@@ -106,7 +108,7 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 	lastptr = baseptr-1;
 
 	// Remove trailing seperator
-	while (lastptr > path && IS_PATH_SEPARATOR(lastptr))
+	while (lastptr > path && is_path_separator(*lastptr))
 		lastptr--;
 
 	return mmstr_copy(dirpath, path, lastptr - path + 1);
