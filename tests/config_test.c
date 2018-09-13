@@ -8,38 +8,24 @@
 
 #include <check.h>
 
-#include "mmpack-config.h"
+#include "settings.h"
 #include "testcases.h"
 
 #define TEST_CONFIG SRCDIR"/mmpack-config.yaml"
 
-static
-int check_server_entry(char const * server, char const * url, void * arg)
-{
-	static int i = 0;
-
-	(void) arg;
-
-	i++;
-	if (i == 1) {
-		ck_assert_str_eq(server, "server1");
-		ck_assert_str_eq(url, "http://mmpack-server-1:8888/");
-	} else if (i == 2) {
-		ck_assert_str_eq(server, "server2");
-		ck_assert_str_eq(url, "http://mmpack-server-2:8888/");
-	} else {
-		ck_abort();
-	}
-
-	return 0;
-}
-
-START_TEST(test_foreach_config_server)
+START_TEST(test_parse_settings)
 {
 	int rv;
+	struct settings settings;
 
-	rv = foreach_config_server(TEST_CONFIG, check_server_entry, NULL);
+	settings_init(&settings);
+
+	rv = settings_load(&settings, TEST_CONFIG);
 	ck_assert(rv == 0);
+	ck_assert(settings.repo_url != NULL);
+	ck_assert_str_eq(settings.repo_url, "http://another.host.com/");
+
+	settings_deinit(&settings);
 }
 END_TEST
 
@@ -48,9 +34,8 @@ TCase* create_config_tcase(void)
     TCase * tc;
 
     tc = tcase_create("config");
-    tcase_add_checked_fixture(tc, NULL, NULL);
 
-    tcase_add_test(tc, test_foreach_config_server);
+    tcase_add_test(tc, test_parse_settings);
 
     return tc;
 }

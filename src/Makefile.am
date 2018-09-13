@@ -45,8 +45,6 @@ mmpack_SOURCES = \
 	indextable.h \
 	mm-alloc.h \
 	mmpack.c \
-	mmpack-config.c \
-	mmpack-config.h \
 	mmpack-mkprefix.c \
 	mmpack-mkprefix.h \
 	mmpack-update.c \
@@ -54,6 +52,8 @@ mmpack_SOURCES = \
 	mmstring.h \
 	package-utils.c \
 	package-utils.h \
+	settings.c \
+	settings.h \
 	sha256.c \
 	sha256.h \
 	utils.c \

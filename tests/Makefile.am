@@ -46,9 +46,8 @@ mmpack_sources = \
 	../src/indextable.c \
 	../src/utils.c \
 	../src/context.c \
-	../src/mmpack-config.c \
-	../src/mmpack-update.c \
 	../src/package-utils.c \
+	../src/settings.c \
 	../src/sha256.c \
 	$(eol)
 
