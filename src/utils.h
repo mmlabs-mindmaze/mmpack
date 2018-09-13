@@ -33,5 +33,7 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path);
 mmstr* mmstr_join_path(mmstr* restrict dst,
                        const mmstr* restrict p1, const mmstr* restrict p2);
 
+int open_file_in_prefix(const mmstr* prefix, const mmstr* relpath, int oflag);
+
 #endif /* UTILS_H */
 

@@ -140,6 +140,59 @@ mmstr* mmstr_join_path(mmstr* restrict dst,
 
 /**************************************************************************
  *                                                                        *
+ *                    File manipulation in prefix                         *
+ *                                                                        *
+ **************************************************************************/
+
+/**
+ * open_file_in_prefix() - open file in specified folder
+ * @prefix:     folder from where to open the file
+ * @relpath:    path relative to @prefix of the file to open
+ * @oflag:      control flags how to open the file (same as mm_open())
+ *
+ * This function opens a file descriptor for file located at @relpath
+ * relatively to a folder specified by @prefix. @oflag are the same that
+ * can be passed to mm_open().
+ *
+ * If file may be created (ie @oflag contains O_CREAT), and the parent dir
+ * do not exist, the parent dir will be created as well (and recursively)
+ *
+ * Return: a non-negative integer representing the file descriptor in case
+ * of success. Otherwise -1 is returned with error state set accordingly.
+ */
+LOCAL_SYMBOL
+int open_file_in_prefix(const mmstr* prefix, const mmstr* relpath, int oflag)
+{
+	int fd = -1;
+	mmstr *path, *dirpath;
+
+	// Form path of file in prefix
+	path = mmstr_alloca(mmstrlen(prefix) + mmstrlen(relpath) + 1);
+	mmstr_join_path(path, prefix, relpath);
+
+	// If file may have to be created, try create parent dir if needed
+	if (oflag & O_CREAT) {
+		dirpath = mmstr_alloca(mmstrlen(path));
+		mmstr_dirname(dirpath, path);
+		if (mm_mkdir(dirpath, 0777, MM_RECURSIVE)) {
+			fprintf(stderr, "Create parent dir of %s failed: %s\n",
+		                path, mmstrerror(mm_get_lasterror_number()));
+			return -1;
+		}
+	}
+
+	// Create file
+	fd = mm_open(path, oflag, 0666);
+	if (fd < 0)
+		fprintf(stderr, "Failed to open %s: %s\n",
+		                path, mmstrerror(mm_get_lasterror_number()));
+
+	return fd;
+}
+
+
+/**************************************************************************
+ *                                                                        *
  *                            Host OS detection                           *
  *                                                                        *
  **************************************************************************/

@@ -16,54 +16,25 @@
 #include "mmpack-mkprefix.h"
 
 
-
-static
-int create_file_in_prefix(const mmstr* prefix, const mmstr* relpath)
-{
-	int fd;
-	mmstr *path, *dirpath;
-
-	path = mmstr_alloca(mmstrlen(prefix) + mmstrlen(relpath));
-	dirpath = mmstr_alloca(mmstrlen(prefix) + mmstrlen(relpath));
-
-	// Form path and dir of target file in prefix
-	mmstrcpy(path, prefix);
-	mmstrcat(path, relpath);
-	mmstr_dirname(dirpath, path);
-
-	// Create parent dir if not existing yet
-	if (mm_mkdir(dirpath, 0777, MM_RECURSIVE))
-		return -1;
-
-	// Create file if not existing yet
-	fd = mm_open(path, O_WRONLY|O_CREAT|O_EXCL, 0666);
-	if (fd < 0) {
-		fprintf(stderr, "Failed to create %s: %s\n",
-		                path, mmstrerror(mm_get_lasterror_number()));
-		return -1;
-	}
-
-	return fd;
-}
-
-
 static
 int create_initial_empty_files(const mmstr* prefix)
 {
-	int fd;
+	int fd, oflag;
 	const mmstr *instlist_relpath, *repocache_relpath;
 
 	instlist_relpath = mmstr_alloca_from_cstr(INSTALLED_INDEX_RELPATH);
 	repocache_relpath = mmstr_alloca_from_cstr(REPO_INDEX_RELPATH);
 
+	oflag = O_WRONLY|O_CREAT|O_EXCL;
+
 	// Create initial empty installed package list
-	fd = create_file_in_prefix(prefix, instlist_relpath);
+	fd = open_file_in_prefix(prefix, instlist_relpath, oflag);
 	mm_close(fd);
 	if (fd < 0)
 		return -1;
 
 	// Create initial empty cache repo package list
-	fd = create_file_in_prefix(prefix, repocache_relpath);
+	fd = open_file_in_prefix(prefix, repocache_relpath, oflag);
 	mm_close(fd);
 	if (fd < 0)
 		return -1;
@@ -77,9 +48,10 @@ int create_initial_prefix_cfg(const mmstr* prefix, const char* url)
 {
 	const mmstr* cfg_relpath = mmstr_alloca_from_cstr(CFG_RELPATH);
 	char line[256];
-	int fd, len;
+	int fd, len, oflag;
 
-	fd = create_file_in_prefix(prefix, cfg_relpath);
+	oflag = O_WRONLY|O_CREAT|O_EXCL;
+	fd = open_file_in_prefix(prefix, cfg_relpath, oflag);
 	if (fd < 0)
 		return -1;
 
