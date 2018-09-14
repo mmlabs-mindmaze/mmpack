@@ -107,7 +107,7 @@ void mmpkg_insert_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep)
  *   pkg-b: [0.0.2, any]
  */
 static
-int mmpack_parse_dependency(struct mmpack_ctx * ctx,
+int mmpack_parse_dependency(yaml_parser_t* parser,
                             struct mmpkg * pkg,
                             struct mmpkg_dep * dep,
                             int is_system_package)
@@ -117,7 +117,7 @@ int mmpack_parse_dependency(struct mmpack_ctx * ctx,
 
 	exitvalue = -1;
 	while (1) {
-		if (!yaml_parser_scan(&ctx->parser, &token))
+		if (!yaml_parser_scan(parser, &token))
 			goto exit;
 
 		switch(token.type) {
@@ -164,7 +164,7 @@ exit:
  *     ...
  */
 static
-int mmpack_parse_deplist(struct mmpack_ctx * ctx,
+int mmpack_parse_deplist(yaml_parser_t* parser,
                          struct mmpkg * pkg,
                          int is_system_package)
 {
@@ -176,7 +176,7 @@ int mmpack_parse_deplist(struct mmpack_ctx * ctx,
 	dep = NULL;
 	type = -1;
 	while (1) {
-		if (!yaml_parser_scan(&ctx->parser, &token))
+		if (!yaml_parser_scan(parser, &token))
 			goto exit;
 
 		switch(token.type) {
@@ -198,7 +198,7 @@ int mmpack_parse_deplist(struct mmpack_ctx * ctx,
 		case YAML_FLOW_SEQUENCE_START_TOKEN:
 				if (dep == NULL)
 					goto exit;
-				exitvalue = mmpack_parse_dependency(ctx, pkg, dep, is_system_package);
+				exitvalue = mmpack_parse_dependency(parser, pkg, dep, is_system_package);
 				if (exitvalue != 0)
 					goto exit;
 				dep = NULL;
@@ -243,8 +243,7 @@ exit:
 
 /* parse a single package entry */
 static
-int mmpack_parse_index_package(struct mmpack_ctx * ctx,
-                               struct mmpkg * pkg)
+int mmpack_parse_index_package(yaml_parser_t* parser, struct mmpkg * pkg)
 {
 	int exitvalue, type;
 	yaml_token_t token;
@@ -257,7 +256,7 @@ int mmpack_parse_index_package(struct mmpack_ctx * ctx,
 	type = -1;
 	scalar_field = FIELD_UNKNOWN;
 	do {
-		if (!yaml_parser_scan(&ctx->parser, &token))
+		if (!yaml_parser_scan(parser, &token))
 			goto error;
 
 		switch(token.type) {
@@ -281,10 +280,10 @@ int mmpack_parse_index_package(struct mmpack_ctx * ctx,
 			switch (type) {
 			case YAML_KEY_TOKEN:
 				if (STR_EQUAL(data, data_len, "depends")) {
-					if (mmpack_parse_deplist(ctx, pkg, 0) < 0)
+					if (mmpack_parse_deplist(parser, pkg, 0) < 0)
 						goto error;
 				} else if (STR_EQUAL(data, data_len, "sysdepends")) {
-					if (mmpack_parse_deplist(ctx, pkg, 1) < 0)
+					if (mmpack_parse_deplist(parser, pkg, 1) < 0)
 						goto error;
 				} else {
 					scalar_field = get_scalar_field_type(data);
@@ -335,7 +334,7 @@ exit:
  *   ...
  */
 static
-int mmpack_parse_index(struct mmpack_ctx * ctx, struct indextable * index)
+int mmpack_parse_index(yaml_parser_t* parser, struct indextable * index)
 {
 	int exitvalue, type;
 	yaml_token_t token;
@@ -345,7 +344,7 @@ int mmpack_parse_index(struct mmpack_ctx * ctx, struct indextable * index)
 	exitvalue = -1;
 	type = -1;
 	while (1) {
-		if (!yaml_parser_scan(&ctx->parser, &token))
+		if (!yaml_parser_scan(parser, &token))
 			goto exit;
 
 		switch(token.type) {
@@ -360,7 +359,7 @@ int mmpack_parse_index(struct mmpack_ctx * ctx, struct indextable * index)
 		case YAML_SCALAR_TOKEN:
 			if (type == YAML_KEY_TOKEN) {
 				pkg = mmpkg_create((char const *) token.data.scalar.value);
-				exitvalue = mmpack_parse_index_package(ctx, pkg);
+				exitvalue = mmpack_parse_index_package(parser, pkg);
 				if (exitvalue != 0) {
 					mmpkg_destroy(pkg);
 					goto exit;
@@ -393,22 +392,28 @@ exit:
 
 
 static
-int index_populate(struct mmpack_ctx * ctx, char const * index_filename,
-                   struct indextable * index)
+int index_populate(char const * index_filename, struct indextable * index)
 {
-	int rv;
+	int rv = -1;
 	FILE * index_fh;
+	yaml_parser_t parser;
 
-	assert(mmpack_ctx_is_init(ctx));
+	if (!yaml_parser_initialize(&parser))
+		return mm_raise_error(ENOMEM, "failed to init yaml parse");
 
 	index_fh = fopen(index_filename, "r");
-	if (index_fh == NULL)
-		return mm_raise_error(EINVAL, "failed to open given binary index file");
+	if (index_fh == NULL) {
+		mm_raise_error(EINVAL, "failed to open given binary index file");
+		goto exit;
+	}
 
-	yaml_parser_set_input_file(&ctx->parser, index_fh);
-	rv = mmpack_parse_index(ctx, index);
+	yaml_parser_set_input_file(&parser, index_fh);
+	rv = mmpack_parse_index(&parser, index);
 
 	fclose(index_fh);
+
+exit:
+	yaml_parser_delete(&parser);
 	return rv;
 }
 
@@ -416,7 +421,7 @@ int index_populate(struct mmpack_ctx * ctx, char const * index_filename,
 LOCAL_SYMBOL
 int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
 {
-	return index_populate(ctx, index_filename, &ctx->binindex);
+	return index_populate(index_filename, &ctx->binindex);
 }
 
 
@@ -445,5 +450,5 @@ void installed_index_dump(struct indextable const * installed)
 LOCAL_SYMBOL
 int installed_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
 {
-	return index_populate(ctx, index_filename, &ctx->installed);
+	return index_populate(index_filename, &ctx->installed);
 }

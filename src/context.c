@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <yaml.h>
 
 #include <mmerrno.h>
 #include <mmlib.h>
@@ -32,9 +31,6 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	mmstr* default_prefix = get_default_mmpack_prefix();
 
 	memset(ctx, 0, sizeof(*ctx));
-
-	if (!yaml_parser_initialize(&ctx->parser))
-		return mm_raise_error(ENOMEM, "failed to init yaml parse");
 
 	indextable_init(&ctx->binindex, -1, -1);
 	indextable_init(&ctx->installed, -1, -1);
@@ -62,8 +58,6 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 		curl_easy_cleanup(ctx->curl);
 		ctx->curl = NULL;
 	}
-
-	yaml_parser_delete(&ctx->parser);
 
 	entry = it_iter_first(&iter, &ctx->binindex);
 	while (entry != NULL) {
