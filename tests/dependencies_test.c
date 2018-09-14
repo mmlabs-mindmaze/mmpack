@@ -14,7 +14,7 @@
 #include "package-utils.h"
 #include "testcases.h"
 
-#define TEST_BININDEX_DIR SRCDIR"/binary-indexes"
+#define TEST_BININDEX_DIR SRCDIR"/tests/binary-indexes"
 
 static struct mmpack_ctx ctx;
 

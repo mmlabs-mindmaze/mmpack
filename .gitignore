@@ -46,6 +46,13 @@ build-aux/*
 *.o
 *.la
 *.lo
+/mmpack
+
+# generated files
+/mmpack-build
+/unittests.tap
+/src/settings.py
+/venv/
 
 # nfs tmp files
 *.nfs*

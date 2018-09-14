@@ -6,9 +6,9 @@ set -x
 testdir=$(pwd)
 
 virtualenv --python=python3 --system-site-packages venv
-make -C $testdir/.. install prefix=$testdir/venv
+make install prefix=$testdir/venv
 . venv/bin/activate
 
 cd $srcdir
 
-python pytests.py
+python tests/pytests.py

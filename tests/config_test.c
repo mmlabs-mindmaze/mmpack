@@ -11,7 +11,7 @@
 #include "settings.h"
 #include "testcases.h"
 
-#define TEST_CONFIG SRCDIR"/mmpack-config.yaml"
+#define TEST_CONFIG SRCDIR"/tests/mmpack-config.yaml"
 
 START_TEST(test_parse_settings)
 {

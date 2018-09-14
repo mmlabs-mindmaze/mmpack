@@ -9,7 +9,7 @@ AC_CONFIG_HEADERS([config/config.h])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
 
 # Setup automake
-AM_INIT_AUTOMAKE([no-dist-gzip dist-xz color-tests parallel-tests foreign])
+AM_INIT_AUTOMAKE([no-dist-gzip dist-xz color-tests parallel-tests foreign subdir-objects])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_CANONICAL_HOST
@@ -55,6 +55,6 @@ AH_TOP([#ifndef CONFIG_H
 #define CONFIG_H])
 AH_BOTTOM([#endif /*CONFIG_H*/])
 
-AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
