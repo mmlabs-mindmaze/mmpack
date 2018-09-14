@@ -22,6 +22,38 @@
 #include "indextable.h"
 #include "mmstring.h"
 #include "package-utils.h"
+#include "settings.h"
+
+static
+int read_user_config(struct mmpack_ctx* ctx)
+{
+	mmstr* filename;
+	int rv;
+
+	filename = get_config_filename();
+	rv = settings_load(&ctx->settings, filename);
+	mmstr_free(filename);
+
+	return rv;
+}
+
+
+static
+int read_prefix_config(struct mmpack_ctx* ctx)
+{
+	STATIC_CONST_MMSTR(cfg_relpath, CFG_RELPATH)
+	mmstr* filename;
+	int rv, len;
+
+	len = mmstrlen(ctx->prefix) + mmstrlen(cfg_relpath) + 1;
+	filename = mmstr_malloca(len);
+
+	mmstr_join_path(filename, ctx->prefix, cfg_relpath);
+	rv = settings_load(&ctx->settings, filename);
+
+	mmstr_freea(filename);
+	return rv;
+}
 
 
 LOCAL_SYMBOL
@@ -31,6 +63,9 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	mmstr* default_prefix = get_default_mmpack_prefix();
 
 	memset(ctx, 0, sizeof(*ctx));
+	settings_init(&ctx->settings);
+	if (read_user_config(ctx))
+		return -1;
 
 	indextable_init(&ctx->binindex, -1, -1);
 	indextable_init(&ctx->installed, -1, -1);
@@ -42,7 +77,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	ctx->prefix = mmstr_malloc_from_cstr(prefix);
 
 	mmstr_free(default_prefix);
-	return 0;
+	return read_prefix_config(ctx);
 }
 
 
@@ -74,6 +109,8 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 		entry = it_iter_next(&iter);
 	}
 	indextable_deinit(&ctx->installed);
+
+	settings_deinit(&ctx->settings);
 }
 
 

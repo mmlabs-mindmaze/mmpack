@@ -8,6 +8,7 @@
 #include <curl/curl.h>
 
 #include "indextable.h"
+#include "settings.h"
 
 struct mmpack_opts {
 	const char* prefix;
@@ -17,6 +18,7 @@ struct mmpack_ctx {
 	CURL * curl;
 	struct indextable binindex;
 	struct indextable installed;
+	struct settings settings;
 	mmstr* prefix;
 };
 
