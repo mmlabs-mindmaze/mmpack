@@ -286,51 +286,54 @@ mmstr* get_default_mmpack_prefix(void)
  **************************************************************************/
 /**
  * conv_to_hexstr() - convert byte array into hexadecimal string
- * @hexstr:     output string, must be (2*@len + 1) long
+ * @hexstr:     output string, must be (2*@len) long
  * @data:       byte array to convert
  * @len:        length of @data
  *
  * This function generates the hexadecimal string representation of a byte
- * array. The string set in @hexstr will be NULL terminated
+ * array.
+ *
+ * Return: length of the string written in @hexstr
  */
 static
-void conv_to_hexstr(char* hexstr, const unsigned char* data, size_t len)
+int conv_to_hexstr(char* hexstr, const unsigned char* data, size_t len)
 {
 	const char hexlut[] = "0123456789abcdef";
 	unsigned char d;
+	size_t i;
 
-	// Add null termination
-	hexstr[2*len] = '\0';
-
-	while (len > 0) {
-		len--;
-		d = data[len];
-		hexstr[2*len + 0] = hexlut[(d >> 4) & 0x0F];
-		hexstr[2*len + 1] = hexlut[(d >> 0) & 0x0F];
+	for (i = 0; i < len; i++) {
+		d = data[i];
+		hexstr[2*i + 0] = hexlut[(d >> 4) & 0x0F];
+		hexstr[2*i + 1] = hexlut[(d >> 0) & 0x0F];
 	}
+
+	return 2*len;
 }
 
 
 /**
  * sha_fd_compute() - compute SHA256 hash of an open file
- * @hash:       string buffer receiving the hexadecimal form of hash. The
- *              pointed buffer must be HASH_HEXSTR_SIZE long.
+ * @hash:       mmstr* buffer receiving the hexadecimal form of hash. The
+ *              pointed buffer must be SHA_HEXSTR_LEN long.
  * @fd:         file descriptor of a file opened for reading
  *
- * The computed hash is stored in hexadecimal as a NULL-terminated string
- * in @hash string buffer which must be at least HASH_HEXSTR_SIZE long
- * (this include the NULL termination).
+ * The computed hash is stored in hexadecimal as a mmstr* string in @hash whose
+ * length must be at least SHA_HEXSTR_LEN long, as reported by mmstr_maxlen().
  *
  * Return: 0 in case of success, -1 if a problem of file reading has been
  * encountered.
  */
 static
-int sha_fd_compute(char* hash, int fd)
+int sha_fd_compute(mmstr* hash, int fd)
 {
 	unsigned char md[SHA256_BLOCK_SIZE], data[HASH_UPDATE_SIZE];
 	SHA256_CTX ctx;
 	ssize_t rsz;
-	int rv = 0;
+	int len, rv = 0;
+
+	if (mmstr_maxlen(hash) < SHA_HEXSTR_LEN)
+		return mm_raise_error(EOVERFLOW, "hash argument to short");
 
 	sha256_init(&ctx);
 
@@ -345,7 +348,8 @@ int sha_fd_compute(char* hash, int fd)
 	} while (rsz > 0);
 
 	sha256_final(&ctx, md);
-	conv_to_hexstr(hash, md, sizeof(md));
+	len = conv_to_hexstr(hash, md, sizeof(md));
+	mmstr_setlen(hash, len);
 
 	return rv;
 }
@@ -353,8 +357,8 @@ int sha_fd_compute(char* hash, int fd)
 
 /**
  * sha_compute() - compute SHA256 hash on specified file
- * @hash:       string buffer receiving the hexadecimal form of hash. The
- *              pointed buffer must be HASH_HEXSTR_SIZE long.
+ * @hash:       mmstr* buffer receiving the hexadecimal form of hash. The
+ *              pointed string must be at least HASH_HEXSTR_LEN long.
  * @filename:   path of file whose hash must be computed
  * @parent:     prefix directory to prepend to @filename to get the
  *              final path of the file to hash. This may be NULL
@@ -371,32 +375,28 @@ int sha_fd_compute(char* hash, int fd)
  * encountered.
  */
 LOCAL_SYMBOL
-int sha_compute(char* hash, const char* filename, const char* parent)
+int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent)
 {
-	char* fullpath;
+	mmstr* fullpath = NULL;
 	size_t len;
 	int fd = -1;
 	int rv = 0;
 
-	fullpath = (char*)filename;
 	if (parent != NULL) {
-		len = strlen(filename) + strlen(parent) + 2;
-		fullpath = mm_malloca(len);
-		if (!fullpath)
-			return -1;
+		len = mmstrlen(filename) + mmstrlen(parent) + 1;
+		fullpath = mmstr_malloca(len);
+		mmstr_join_path(fullpath, parent, filename);
 
-		sprintf(fullpath, "%s/%s", parent, filename);
+		filename = fullpath;
 	}
 
 	/* Open file and compute hash and close */
-	if (  (fd = mm_open(fullpath, O_RDONLY, 0)) < 0
+	if (  (fd = mm_open(filename, O_RDONLY, 0)) < 0
 	   || sha_fd_compute(hash, fd)) {
 		rv = -1;
 	}
 	mm_close(fd);
 
-	if (fullpath != filename)
-		mm_freea(fullpath);
-
+	mmstr_freea(fullpath);
 	return rv;
 }

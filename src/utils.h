@@ -24,9 +24,9 @@ os_id get_os_id(void);
 mmstr* get_default_mmpack_prefix(void);
 mmstr* get_config_filename(void);
 
-#define SHA_HEXSTR_SIZE (32*2+1) // string of SHA-256 in hexa (\0 incl.)
+#define SHA_HEXSTR_LEN (32*2) // string of SHA-256 in hexa (\0 NOT incl.)
 
-int sha_compute(char* hash, const char* filename, const char* parent);
+int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent);
 
 
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path);

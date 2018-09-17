@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "mmstring.h"
 #include "utils.h"
 #include "testcases.h"
 
@@ -22,7 +23,7 @@ static
 struct {
 	size_t len;
 	char name[64];
-	char refhash[SHA_HEXSTR_SIZE];
+	char refhash[SHA_HEXSTR_LEN+1];
 } sha_cases[] = {
 	{.len =  0, .name = "zero_len"},
 	{.len =  4, .name = "tiny_file"},
@@ -86,10 +87,10 @@ void gen_ref_hash(char* hash, const char* filename)
 
 	sprintf(cmd, "openssl sha256 -hex %s | cut -f2 -d' '", filename);
 	fp = popen(cmd, "r");
-	fread(hash, SHA_HEXSTR_SIZE-1, 1, fp);
+	fread(hash, SHA_HEXSTR_LEN, 1, fp);
 	fclose(fp);
 
-	hash[SHA_HEXSTR_SIZE-1] = '\0';
+	hash[SHA_HEXSTR_LEN] = '\0';
 }
 
 
@@ -124,13 +125,16 @@ void sha_cleanup(void)
  *                         Hash test functions                            *
  *                                                                        *
  **************************************************************************/
+STATIC_CONST_MMSTR(hashfile_dir, HASHFILE_DIR)
+
+
 START_TEST(hashfile_with_parent)
 {
-	char hash[SHA_HEXSTR_SIZE];
-	const char* filename = sha_cases[_i].name;
-	const char* refhash = sha_cases[_i].refhash;
+	mmstr* hash = mmstr_alloca(SHA_HEXSTR_LEN);
+	const mmstr* filename = mmstr_alloca_from_cstr(sha_cases[_i].name);
+	const mmstr* refhash = mmstr_alloca_from_cstr(sha_cases[_i].refhash);
 
-	sha_compute(hash, filename, HASHFILE_DIR);
+	sha_compute(hash, filename, hashfile_dir);
 	ck_assert_str_eq(hash, refhash);
 }
 END_TEST
@@ -138,12 +142,12 @@ END_TEST
 
 START_TEST(hashfile_without_parent)
 {
-	char hash[SHA_HEXSTR_SIZE];
-	char fullpath[256];
-	const char* filename = sha_cases[_i].name;
-	const char* refhash = sha_cases[_i].refhash;
+	mmstr* hash = mmstr_alloca(SHA_HEXSTR_LEN);
+	mmstr* fullpath = mmstr_alloca(256);
+	const mmstr* filename = mmstr_alloca_from_cstr(sha_cases[_i].name);
+	const mmstr* refhash = mmstr_alloca_from_cstr(sha_cases[_i].refhash);
 
-	sprintf(fullpath, "%s/%s", HASHFILE_DIR, filename);
+	mmstr_join_path(fullpath, hashfile_dir, filename);
 
 	sha_compute(hash, fullpath, NULL);
 	ck_assert_str_eq(hash, refhash);
