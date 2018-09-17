@@ -88,6 +88,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 	struct it_entry * entry;
 
 	mmstr_free(ctx->prefix);
+	mmstr_free(ctx->pkgcachedir);
 
 	if (ctx->curl != NULL) {
 		curl_easy_cleanup(ctx->curl);
@@ -146,4 +147,29 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 		return -1;
 
 	return 0;
+}
+
+
+/**
+ * mmpack_ctx_get_pkgcachedir() - get prefix dir where to download packages
+ * @ctx:	initialized mmpack context
+ *
+ * Return: a mmstr pointer to the folder in prefix where to put downloaded
+ * packages
+ */
+LOCAL_SYMBOL
+const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
+{
+	STATIC_CONST_MMSTR(pkgcache_relpath, PKGS_CACHEDIR_RELPATH)
+	int len;
+
+	// If already computed, return it
+	if (ctx->pkgcachedir)
+		return ctx->pkgcachedir;
+
+	len = mmstrlen(ctx->prefix) + mmstrlen(pkgcache_relpath) + 1;
+	ctx->pkgcachedir = mmstr_malloc(len);
+	mmstr_join_path(ctx->pkgcachedir, ctx->prefix, pkgcache_relpath);
+
+	return ctx->pkgcachedir;
 }

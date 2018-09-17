@@ -20,11 +20,13 @@ struct mmpack_ctx {
 	struct indextable installed;
 	struct settings settings;
 	mmstr* prefix;
+	mmstr* pkgcachedir;
 };
 
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts);
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx);
 int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx);
+const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx);
 
 static inline
 int mmpack_ctx_is_init(struct mmpack_ctx const * ctx)
