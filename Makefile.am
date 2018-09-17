@@ -44,6 +44,9 @@ pkgpython_PYTHON =\
 	src/workspace.py \
 	$(eol)
 
+.PHONY: spelling
+spelling: $(pkgpython_PYTHON) $(mmpack_lib_sources)
+	$(AM_V_AT) codespell $^
 
 .PHONY: syntax
 syntax: $(pkgpython_PYTHON)
