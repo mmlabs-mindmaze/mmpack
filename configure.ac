@@ -47,6 +47,7 @@ AM_CONDITIONAL(TAP_SUPPORT_IN_CHECK, [test "x$tap_in_check" = xyes])
 MM_CHECK_LIB([mmthr_create], [mmlib], MMLIB, [], [AC_MSG_ERROR([mmlib library required])])
 MM_CHECK_LIB([yaml_parser_initialize], [yaml], YAML, [], [AC_MSG_ERROR([yaml library required])])
 MM_CHECK_LIB([curl_easy_init], [curl], CURL, [], [AC_MSG_ERROR([curl library required])])
+PKG_CHECK_MODULES_EXT(LIBARCHIVE, [libarchive], [], [AC_MSG_ERROR([libarchive library required])])
 
 AC_DEF_API_EXPORT_ATTRS
 AC_SET_HOSTSYSTEM

@@ -7,10 +7,12 @@ AM_CPPFLAGS = \
 	-DSRCDIR=\"$(srcdir)\" \
 	-DBUILDDIR=\"$(builddir)\" \
 	$(CHECK_CPPFLAGS) \
+	$(LIBARCHIVE_CPPFLAGS) \
 	$(eol)
 
 AM_CFLAGS = \
 	$(CHECK_CFLAGS) \
+	$(LIBARCHIVE_CFLAGS) \
 	$(MM_WARNFLAGS) \
 	$(eol)
 
@@ -71,6 +73,8 @@ mmpack_lib_sources = \
 	src/mmstring.h \
 	src/package-utils.c \
 	src/package-utils.h \
+	src/pkg-fs-utils.c \
+	src/pkg-fs-utils.h \
 	src/settings.c \
 	src/settings.h \
 	src/sha256.c \
@@ -91,6 +95,7 @@ pkgdata_DATA = \
 
 mmpack_LDADD = \
 	$(CURL_LIB) \
+	$(LIBARCHIVE_LIBS) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
 	$(eol)
@@ -144,6 +149,7 @@ unittests_tap_SOURCES = \
 unittests_tap_LDADD = \
 	$(CHECK_LIBS) \
 	$(CURL_LIB) \
+	$(LIBARCHIVE_LIBS) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
 	$(eol)
