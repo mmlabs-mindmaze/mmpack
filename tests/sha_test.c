@@ -37,6 +37,29 @@ struct {
 };
 #define NUM_HASH_CASES	MM_NELEM(sha_cases)
 
+static
+struct {
+	char name[64];
+	char target[64];
+	char refhash[SHA_HEXSTR_LEN+1];
+} symlink_cases[] = {
+	{.name = "a_link", .target = "zero_len",
+	 .refhash = "sym12e7edfc58ec6ca9b28efd3a01175c7cdb4178921aab352ea0ec56b6cdab6"},
+	{.name = "b_link", .target = "small_file",
+	 .refhash = "sym25cb6d2a9304d3ed60ea1aa2b31a2c7804c98ddf31fb818a45a36433a2f1c"},
+	{.name = "links/adir/alink", .target = "../../a_link",
+	 .refhash = "sym7b78bd196680eb6e467c9a6511fe34de1afee733ce6e947b38916f962c3ca"},
+	{.name = "links/bdir/blink", .target = "../adir",
+	 .refhash = "sym4d47f0664d0e100b078e25fc66994ee7251f172062040dcadc4fe4cd85f20"},
+	{.name = "links/some dir/foo", .target = "to_non_existent",
+	 .refhash = "sym3f6baef51ad2c2a21443bd3178d9f8bb7bbfcdd8b49146643272d1c572709"},
+	{.name = "links/some dir/bar", .target = "../adir/to_non_existent",
+	 .refhash = "sym8df1ae2bd59950b09421be20f3c2f1e7e1c4d04ae872b9704664178b86ad6"},
+	{.name = "c_link", .target = "links/adir",
+	 .refhash = "sym07c53c8f582a56708b4cb455a997a043a56da57ea3d94d23d0fc1369fddce"},
+};
+#define NUM_SYMLINK_CASES       MM_NELEM(symlink_cases)
+
 /**************************************************************************
  *                                                                        *
  *                    setup and cleanup test environment                  *
@@ -110,6 +133,16 @@ void sha_setup(void)
 		create_rand_file(filename, sha_cases[i].len);
 		gen_ref_hash(sha_cases[i].refhash, filename);
 	}
+
+	// Create subfolder for symbolic links
+	mm_mkdir(HASHFILE_DIR"/links/adir", 0755, MM_RECURSIVE);
+	mm_mkdir(HASHFILE_DIR"/links/bdir", 0755, MM_RECURSIVE);
+	mm_mkdir(HASHFILE_DIR"/links/some dir", 0755, MM_RECURSIVE);
+
+	for (i = 0; i < NUM_SYMLINK_CASES; i++) {
+		sprintf(filename, "%s/%s", HASHFILE_DIR, symlink_cases[i].name);
+		mm_symlink(symlink_cases[i].target, filename);
+	}
 }
 
 
@@ -155,6 +188,17 @@ START_TEST(hashfile_without_parent)
 END_TEST
 
 
+START_TEST(hash_symlink)
+{
+	mmstr* hash = mmstr_alloca(SHA_HEXSTR_LEN);
+	const mmstr* filename = mmstr_alloca_from_cstr(symlink_cases[_i].name);
+	const char* refhash = symlink_cases[_i].refhash;
+
+	ck_assert(sha_compute(hash, filename, hashfile_dir) == 0);
+	ck_assert_str_eq(hash, refhash);
+}
+END_TEST
+
 /**************************************************************************
  *                                                                        *
  *                         test suite creation                            *
@@ -169,6 +213,7 @@ TCase* create_sha_tcase(void)
 
 	tcase_add_loop_test(tc, hashfile_without_parent, 0, NUM_HASH_CASES);
 	tcase_add_loop_test(tc, hashfile_with_parent, 0, NUM_HASH_CASES);
+	tcase_add_loop_test(tc, hash_symlink, 0, NUM_SYMLINK_CASES);
 
 	return tc;
 }

@@ -355,6 +355,54 @@ int sha_fd_compute(mmstr* hash, int fd)
 }
 
 
+static
+int sha_regfile_compute(mmstr* hash, const mmstr* path)
+{
+	int fd;
+	int rv = 0;
+
+	if (  (fd = mm_open(path, O_RDONLY, 0)) < 0
+	   || sha_fd_compute(hash, fd)) {
+		rv = -1;
+	}
+	mm_close(fd);
+
+	return rv;
+}
+
+
+static
+int sha_symlink_compute(mmstr* hash, const mmstr* path, size_t target_size)
+{
+	unsigned char md[SHA256_BLOCK_SIZE];
+	SHA256_CTX ctx;
+	char* buff;
+	int len;
+	int rv = -1;
+
+	buff = mm_malloca(target_size);
+	if (mm_readlink(path, buff, target_size))
+		goto exit;
+
+	sha256_init(&ctx);
+	sha256_update(&ctx, buff, target_size-1);
+	sha256_final(&ctx, md);
+
+	len = conv_to_hexstr(hash, md, sizeof(md));
+	mmstr_setlen(hash, len);
+
+	hash[0] = 's';
+	hash[1] = 'y';
+	hash[2] = 'm';
+
+	rv = 0;
+
+exit:
+	mm_freea(buff);
+	return rv;
+}
+
+
 /**
  * sha_compute() - compute SHA256 hash on specified file
  * @hash:       mmstr* buffer receiving the hexadecimal form of hash. The
@@ -379,8 +427,8 @@ int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent)
 {
 	mmstr* fullpath = NULL;
 	size_t len;
-	int fd = -1;
 	int rv = 0;
+	struct mm_stat st;
 
 	if (parent != NULL) {
 		len = mmstrlen(filename) + mmstrlen(parent) + 1;
@@ -390,13 +438,20 @@ int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent)
 		filename = fullpath;
 	}
 
-	/* Open file and compute hash and close */
-	if (  (fd = mm_open(filename, O_RDONLY, 0)) < 0
-	   || sha_fd_compute(hash, fd)) {
+	if (mm_stat(filename, &st, MM_NOFOLLOW)) {
 		rv = -1;
+		goto exit;
 	}
-	mm_close(fd);
 
+	if (S_ISREG(st.mode)) {
+		rv = sha_regfile_compute(hash, filename);
+	} else if (S_ISLNK(st.mode)) {
+		rv = sha_symlink_compute(hash, filename, st.size);
+	} else {
+		rv = mm_raise_error(EINVAL, "%s is neither a regular file or symlink");
+	}
+
+exit:
 	mmstr_freea(fullpath);
 	return rv;
 }

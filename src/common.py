@@ -147,12 +147,20 @@ def mm_representer(dumper, data):
 def sha256sum(filename: str) -> str:
     ''' compute the SHA-256 hash a file
 
+    If file is a symlink, the hash string will be the hash of the target path
+    with "sym" replacing the 3 first characters of SHA256 string
+
     Args:
         filename: path of file whose hash must be computed
     Returns:
         a string containing hexadecimal value of hash
     '''
     sha = sha256()
+    if os.path.islink(filename):
+        # Compute sha256 of symlink target and replace begining with "sym"
+        sha.update(os.readlink(filename).encode('utf-8'))
+        shastr = sha.hexdigest()
+        return "sym" + shastr[3:]
     sha.update(open(filename, 'rb').read())
     return sha.hexdigest()
 
