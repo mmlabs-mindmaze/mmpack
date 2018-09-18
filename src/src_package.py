@@ -329,7 +329,7 @@ class SrcPackage(object):
         tmp = [x for x in self.install_files_list if x not in ventilated]
         self.install_files_list = tmp
 
-        # check that at least on file is present in each ot the custom packages
+        # check that at least on file is present in each of the custom packages
         # raise an error if the described package was expecting one
         # Note: meta-packages are empty and accepted
         for binpkg in self._packages:

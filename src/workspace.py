@@ -76,7 +76,7 @@ class Workspace(object):
 
 
 def is_valid_prefix(prefix: str) -> bool:
-    'returns wether given prefix is a valid path for mmpack prefix'
+    'returns whether given prefix is a valid path for mmpack prefix'
     return os.path.exists(prefix + '/var/lib/mmpack/')
 
 

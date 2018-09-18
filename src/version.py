@@ -26,7 +26,7 @@ class Version(LooseVersion):  # pylint: disable=too-few-public-methods
     '''
     def is_any(self):
         ''' LooseVersion asserts its string description contains at least one
-            digit. We neeed to explicitely request its string description to
+            digit. We need to explicitly request its string description to
             prevent raising a TypeError
         '''
         return str(self) == "any"

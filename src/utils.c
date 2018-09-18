@@ -107,7 +107,7 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 
 	lastptr = baseptr-1;
 
-	// Remove trailing seperator
+	// Remove trailing separator
 	while (lastptr > path && is_path_separator(*lastptr))
 		lastptr--;
 

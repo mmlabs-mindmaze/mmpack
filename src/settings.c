@@ -114,7 +114,7 @@ exit:
  * will succeed. However, if @filename exists but is not readable, the
  * function will fail.
  *
- * Return: 0 in case of sucess, -1 otherwise.
+ * Return: 0 in case of success, -1 otherwise.
  */
 LOCAL_SYMBOL
 int settings_load(struct settings* settings, const char* filename)

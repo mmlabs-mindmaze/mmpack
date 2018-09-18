@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 		.execname = argv[0],
 	};
 
-	/* Parse commmand line options and check command is supplied */
+	/* Parse command line options and check command is supplied */
 	arg_index = mmarg_parse(&parser, argc, argv);
 	if (arg_index+1 > argc) {
 		fprintf(stderr, "Invalid number of argument."
