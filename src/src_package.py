@@ -193,7 +193,7 @@ class SrcPackage(object):
             (cpu_arch, dist) = get_host_arch()
             host_arch = '{0}-{1}'.format(cpu_arch, dist)
             binpkg = BinaryPackage(binpkg_name, self.version,
-                                   self.name, host_arch)
+                                   self.name, host_arch, self.tag)
             self._format_description(binpkg, binpkg_name, pkg_type)
             self._packages[binpkg_name] = binpkg
             dprint('created package ' + binpkg_name)
@@ -214,7 +214,8 @@ class SrcPackage(object):
         # create skeleton for explicit packages
         for pkg in self._specs.keys():
             if pkg != 'general':
-                binpkg = BinaryPackage(pkg, self.version, self.name, host_arch)
+                binpkg = BinaryPackage(pkg, self.version, self.name,
+                                       host_arch, self.tag)
                 self._format_description(binpkg, pkg)
 
                 if 'depends' in self._specs[pkg]:

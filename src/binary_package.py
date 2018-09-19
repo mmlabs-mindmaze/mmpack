@@ -18,21 +18,6 @@ import yaml
 from workspace import Workspace
 
 
-def _get_specs_provides(pkgname: str) -> Dict[str, Dict[str, Version]]:
-    ' TODOC '
-    # TODO: also work with the last package published
-    wrk = Workspace()
-    provide_spec_name = '{0}/mmpack/{1}.provides'.format(wrk.sources,
-                                                         pkgname)
-    try:
-        specs_provides = yaml.load(open(provide_spec_name, 'rb').read())
-    except FileNotFoundError:
-        # return an empty dict if nothing has been provided
-        specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
-
-    return specs_provides
-
-
 def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     '''
     filter function for tar creation that will remove all file attributes
@@ -55,18 +40,38 @@ class BinaryPackage(object):
     '''
     Binary package class
     '''
-    def __init__(self, name: str, version: Version, source: str, arch: str):
+    def __init__(self, name: str, version: Version, source: str, arch: str,
+                 tag: str):
+        # pylint: disable=too-many-arguments
         self.name = name
         self.version = version
         self.source = source
         self.arch = arch
+        self.tag = tag
 
         self.description = ''
         self._dependencies = {'sysdepends': {}, 'depends': {}}
         self._provides = {'elf': {}, 'pe': {}, 'python': {}}
         self.install_files = []
 
-    def _gen_info(self, pkgdir: str) -> None:
+    def _get_specs_provides(self,
+                            pkgname: str) -> Dict[str, Dict[str, Version]]:
+        ' TODOC '
+        # TODO: also work with the last package published
+        wrk = Workspace()
+        provide_spec_name = '{0}/{1}-{2}/mmpack/{3}.provides' \
+                            .format(wrk.sources, self.source, self.tag,
+                                    pkgname)
+        dprint('reading symbols from ' + provide_spec_name)
+        try:
+            specs_provides = yaml.load(open(provide_spec_name, 'rb').read())
+        except FileNotFoundError:
+            # return an empty dict if nothing has been provided
+            specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
+
+        return specs_provides
+
+    def _gen_info(self, pkgdir: str):
         pushdir(pkgdir)
 
         # Create file containing of hashes of all installed files
@@ -163,7 +168,7 @@ class BinaryPackage(object):
             ValueError: if a specified version is invalid or if a symbol in
                         the spec file is not found provided by the package
         '''
-        specs_provides = _get_specs_provides(self.name)
+        specs_provides = self._get_specs_provides(self.name)
 
         for inst_file in self.install_files:
             file_type = filetype(inst_file)
