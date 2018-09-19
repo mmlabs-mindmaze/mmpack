@@ -92,10 +92,26 @@ class BinaryPackage(object):
                 'sumsha256sums': sha256sum('MMPACK/sha256sums')}
         info.update(self._dependencies)
         yaml_serialize({self.name: info}, 'MMPACK/info')
-
         popdir()
 
-    def _populate(self, instdir: str, pkgdir: str) -> None:
+    def _gen_symbols(self, pkgdir: str):
+        pushdir(pkgdir)
+        if self._provides['pe'] and self._provides['elf']:
+            raise AssertionError(self.name + 'cannot contain symbols for two '
+                                 'different architectures at the same time')
+        if self._provides['pe']:
+            yaml_serialize(self._provides['pe'], 'MMPACK/symbols')
+        elif self._provides['elf']:
+            yaml_serialize(self._provides['elf'], 'MMPACK/symbols')
+        popdir()
+
+    def _gen_pyobjects(self, pkgdir: str):
+        pushdir(pkgdir)
+        if self._provides['python']:
+            yaml_serialize(self._provides['python'], 'MMPACK/pyobjects')
+        popdir()
+
+    def _populate(self, instdir: str, pkgdir: str):
         for instfile in self.install_files:
             src = instdir + instfile
             dst = pkgdir + '/' + instfile
@@ -127,10 +143,11 @@ class BinaryPackage(object):
         dprint('link {0} in {1}'.format(self.name, stagedir))
         self._populate(instdir, stagedir)
         self._gen_info(stagedir)
-        # TODO: generate a metadata file with the list of symbols provided
+        self._gen_symbols(stagedir)
+        self._gen_pyobjects(stagedir)
         return self._make_archive(instdir)
 
-    def add_depend(self, name: str, version: Version) -> None:
+    def add_depend(self, name: str, version: Version):
         '''
         Add mmpack package as a dependency with a minimal version
         '''
@@ -139,7 +156,7 @@ class BinaryPackage(object):
         if not curr_version or curr_version < version:
             dependencies[name] = version
 
-    def add_sysdepend(self, name: str, version: Version) -> None:
+    def add_sysdepend(self, name: str, version: Version):
         '''
         Add a system dependencies to the binary package
         '''
