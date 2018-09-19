@@ -172,7 +172,7 @@ class SrcPackage(object):
             if key == 'name':
                 self.name = value
             elif key == 'version':
-                self.version = value
+                self.version = Version(value)
             elif key == 'maintainer':
                 self.maintainer = value
             elif key == 'url':

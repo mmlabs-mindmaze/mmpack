@@ -10,6 +10,7 @@ for path in mmpack.__path__:
 
 # import as if from mmpack package
 from src_package import SrcPackage
+from version import Version
 
 class TestSrcPackageClass(unittest.TestCase):
     def test_package_simple(self):
@@ -20,7 +21,7 @@ class TestSrcPackageClass(unittest.TestCase):
         test_pkg.parse_specfile()
 
         self.assertEqual(test_pkg.name, 'simple')
-        self.assertEqual(test_pkg.version, '1.0.0')
+        self.assertEqual(test_pkg.version, Version('1.0.0'))
         self.assertEqual(test_pkg.maintainer, 'mmpack.test@mindmaze.ch')
         self.assertEqual(test_pkg.url, 'ssh://git@intranet.mindmaze.ch:7999/~mmpack.test/simple.git')
         self.assertRegexpMatches(test_pkg.description,
@@ -35,7 +36,7 @@ class TestSrcPackageClass(unittest.TestCase):
 
         # test the general section values
         self.assertEqual(test_pkg.name, 'full')
-        self.assertEqual(test_pkg.version, '1.0.0')
+        self.assertEqual(test_pkg.version, Version('1.0.0'))
         self.assertEqual(test_pkg.maintainer, 'mmpack.test@mindmaze.ch')
         self.assertEqual(test_pkg.url, 'ssh://git@intranet.mindmaze.ch:7999/~mmpack.test/full.git')
         self.assertEqual(test_pkg.description,

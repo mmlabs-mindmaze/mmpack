@@ -14,6 +14,8 @@ Still LooseVersion expects *at least* one digit within the version string.
 '''
 
 from distutils.version import LooseVersion
+import yaml
+from common import mm_representer
 
 
 class Version(LooseVersion):  # pylint: disable=too-few-public-methods
@@ -66,3 +68,6 @@ class Version(LooseVersion):  # pylint: disable=too-few-public-methods
         if self.is_any() or other.is_any():
             return True
         return not self.__lt__(other)
+
+
+yaml.add_representer(Version, mm_representer)
