@@ -9,10 +9,11 @@ from os.path import isfile
 from glob import glob
 from typing import Dict
 import tarfile
-from common import sha256sum, yaml_serialize, pushdir, popdir, dprint
+from common import sha256sum, yaml_serialize, pushdir, popdir, dprint, \
+         filetype
 from version import Version
 from dependencies import scan_dependencies
-from elf_utils import elf_symbols_list
+from elf_utils import elf_symbols_list, elf_soname
 import yaml
 from workspace import Workspace
 
@@ -142,6 +143,12 @@ class BinaryPackage(object):
         if not curr_version or curr_version < version:
             dependencies[name] = version
 
+    def _provides_symbol(self, symbol_type: str, symbol: str) -> str:
+        for name, entry in self._provides[symbol_type].items():
+            if symbol in entry['symbols'].keys():
+                return name
+        return None
+
     def gen_provides(self):
         ''' Go through the install files, look for what this package provides
 
@@ -159,23 +166,34 @@ class BinaryPackage(object):
         specs_provides = _get_specs_provides(self.name)
 
         for inst_file in self.install_files:
-            self._provides['elf'].update(elf_symbols_list(inst_file,
-                                                          self.version))
-
-        for symbol, str_version in specs_provides['elf'].items():
-            version = Version(str_version)  # will raise an error if malformed
-            if symbol not in self._provides['elf']:
-                raise ValueError('Specified elf symbol {0} not found '
-                                 'in package files'.format(symbol))
-
-            if version < self.version:
-                self._provides['elf'][symbol] = version
-            elif version > self.version:
-                raise ValueError('Specified version of symbol {0} ({1})'
-                                 'is greater than current version ({2})'
-                                 .format(symbol, version, self.version))
+            file_type = filetype(inst_file)
+            if file_type == 'elf':
+                soname = elf_soname(inst_file)
+                entry = {soname: {'depends': self.name,
+                                  'symbols': {}}}
+                entry[soname]['symbols'].update(elf_symbols_list(inst_file,
+                                                                 self.version))
+                self._provides['elf'].update(entry)
             else:
-                self._provides['elf'][symbol] = self.version
+                if file_type == 'pe' or file_type == 'python':
+                    dprint('[WARN] skipping file: ' + inst_file)
+
+        for symbol_type in specs_provides:
+            for symbol, str_version in specs_provides[symbol_type].items():
+                # type conversion will raise an error if malformed
+                name = self._provides_symbol(symbol_type, symbol)
+                if not name:
+                    raise ValueError('Specified elf symbol {0} not found '
+                                     'in package files'.format(symbol))
+
+                version = Version(str_version)
+                if version <= self.version:
+                    entry = self._provides[symbol_type][name]
+                    entry['symbols'][symbol] = version
+                else:  # version > self.version:
+                    raise ValueError('Specified version of symbol {0} ({1})'
+                                     'is greater than current version ({2})'
+                                     .format(symbol, version, self.version))
 
     def gen_sysdeps(self) -> None:
         ''' Go through the install files and search for external dependencies
