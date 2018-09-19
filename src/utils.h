@@ -15,11 +15,12 @@ typedef enum {
 
 os_id get_os_id(void);
 
-#define MMPACK_STATEDIR_RELPATH "/var/lib/mmpack"
+#define MMPACK_STATEDIR_RELPATH "var/lib/mmpack"
 #define INSTALLED_INDEX_RELPATH MMPACK_STATEDIR_RELPATH "/installed.yaml"
 #define REPO_INDEX_RELPATH      MMPACK_STATEDIR_RELPATH "/binindex.yaml"
-#define PKGS_CACHEDIR_RELPATH   "/var/cache/mmpack/pkgs"
-#define CFG_RELPATH             "/etc/mmpack-config.yaml"
+#define METADATA_RELPATH        MMPACK_STATEDIR_RELPATH "/metadata"
+#define PKGS_CACHEDIR_RELPATH   "var/cache/mmpack/pkgs"
+#define CFG_RELPATH             "etc/mmpack-config.yaml"
 
 mmstr* get_default_mmpack_prefix(void);
 mmstr* get_config_filename(void);

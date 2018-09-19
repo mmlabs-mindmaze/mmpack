@@ -127,19 +127,21 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 LOCAL_SYMBOL
 int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 {
+	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH)
+	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH)
 	mmstr* repo_index_path;
 	mmstr* installed_index_path;
-	size_t prefixlen = mmstrlen(ctx->prefix);
+	int len;
 
 	// Form the path of installed package from prefix
-	installed_index_path = mmstr_alloca(prefixlen + sizeof(INSTALLED_INDEX_RELPATH));
-	mmstrcpy(installed_index_path, ctx->prefix);
-	mmstrcat_cstr(installed_index_path, INSTALLED_INDEX_RELPATH);
+	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;
+	installed_index_path = mmstr_alloca(len);
+	mmstr_join_path(installed_index_path, ctx->prefix, inst_relpath);
 
 	// Form the path of repo package list cache from prefix
-	repo_index_path = mmstr_alloca(prefixlen + sizeof(REPO_INDEX_RELPATH));
-	mmstrcpy(repo_index_path, ctx->prefix);
-	mmstrcat_cstr(repo_index_path, REPO_INDEX_RELPATH);
+	len = mmstrlen(ctx->prefix) + mmstrlen(repo_relpath) + 1;
+	repo_index_path = mmstr_alloca(len);
+	mmstr_join_path(repo_index_path, ctx->prefix, repo_relpath);
 
 	// populate the package lists
 	if (  installed_index_populate(ctx, installed_index_path)
