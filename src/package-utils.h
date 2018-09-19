@@ -62,9 +62,17 @@ typedef enum {
 	REMOVE_PKG = -1,
 } action;
 
+
+/**
+ * struct action - action to take on prefix hierarchy
+ * @action:     type of action to perform
+ * @pkg:        pointer to package to install
+ * @pathname:   path to downloaded mpk file if not NULL
+ */
 struct action {
 	action action;
 	struct mmpkg const * pkg;
+	const mmstr* pathname;
 };
 
 struct action_stack {

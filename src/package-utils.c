@@ -299,6 +299,14 @@ struct action_stack * mmpack_action_stack_create(void)
 LOCAL_SYMBOL
 void mmpack_action_stack_destroy(struct action_stack * stack)
 {
+	int i;
+
+	if (!stack)
+		return;
+
+	for (i = 0; i < stack->index; i++)
+		mmstr_free(stack->actions[i].pathname);
+
 	free(stack);
 }
 
