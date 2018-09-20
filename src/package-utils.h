@@ -93,10 +93,12 @@ struct mmpkg * mmpkg_create(char const * name);
 void mmpkg_destroy(struct mmpkg * pkg);
 void mmpkg_dump(struct mmpkg const * pkg);
 int mmpkg_is_valid(struct mmpkg const * pkg);
+void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
 
 struct mmpkg_dep * mmpkg_dep_create(char const * name);
 void mmpkg_dep_destroy(struct mmpkg_dep * dep);
 void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
+void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
 struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * name,
                                 mmstr const * max_version);

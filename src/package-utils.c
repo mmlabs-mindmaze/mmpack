@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <curl/curl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <yaml.h>
@@ -208,6 +209,23 @@ int mmpkg_is_valid(struct mmpkg const * pkg)
 
 
 LOCAL_SYMBOL
+void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
+{
+	fprintf(fp, "%s:\n"
+	            "    version: %s\n"
+	            "    source: %s\n"
+	            "    sumsha256sums: %s\n",
+		    pkg->name, pkg->version, pkg->source, pkg->sumsha);
+
+	fprintf(fp, "    depends:");
+	mmpkg_dep_save_to_index(pkg->mpkdeps, fp, 2/*indentation level*/);
+
+	fprintf(fp, "    sysdepends:");
+	mmpkg_dep_save_to_index(pkg->sysdeps, fp, 2/*indentation level*/);
+}
+
+
+LOCAL_SYMBOL
 struct mmpkg_dep * mmpkg_dep_create(char const * name)
 {
 	struct mmpkg_dep * dep = malloc(sizeof(*dep));
@@ -243,6 +261,25 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type)
 		printf("\t\t [%s] %s [%s -> %s]\n", type, d->name,
 		       d->min_version, d->max_version);
 		d = d->next;
+	}
+}
+
+
+LOCAL_SYMBOL
+void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
+{
+	if (!dep) {
+		fprintf(fp, " {}\n");
+		return;
+	}
+
+	fprintf(fp, "\n");
+	while (dep) {
+		// Print name , minver and maxver at lvl indentation level
+		// (ie 4*lvl spaces are inserted before)
+		fprintf(fp, "%.*s%s: [%s, %s]\n", lvl*4, " ",
+		        dep->name, dep->min_version, dep->max_version);
+		dep = dep->next;
 	}
 }
 

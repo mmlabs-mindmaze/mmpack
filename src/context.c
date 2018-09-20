@@ -145,6 +145,39 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 }
 
 
+LOCAL_SYMBOL
+int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
+{
+	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH)
+	struct it_iterator iter;
+	struct it_entry* entry;
+	mmstr* installed_index_path;
+	const struct mmpkg* pkg;
+	int len;
+	FILE* fp;
+
+	// Form the path of installed package from prefix
+	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;
+	installed_index_path = mmstr_alloca(len);
+	mmstr_join_path(installed_index_path, ctx->prefix, inst_relpath);
+
+	fp = fopen(installed_index_path, "wb");
+	if (!fp)
+		return -1;
+
+	// Save all package listed in ctx->installed to file
+	entry = it_iter_first(&iter, &ctx->installed);
+	while (entry) {
+		pkg = entry->value;
+		mmpkg_save_to_index(pkg, fp);
+		entry = it_iter_next(&iter);
+	}
+
+	fclose(fp);
+	return 0;
+}
+
+
 /**
  * mmpack_ctx_get_pkgcachedir() - get prefix dir where to download packages
  * @ctx:	initialized mmpack context
