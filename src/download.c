@@ -8,6 +8,7 @@
 
 #include "download.h"
 
+#include <mmerrno.h>
 #include <mmsysio.h>
 
 #include "context.h"
