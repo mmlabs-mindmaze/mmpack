@@ -287,7 +287,7 @@ int mmpack_parse_index_package(yaml_parser_t* parser, struct mmpkg * pkg)
 
 		switch(token.type) {
 		case YAML_BLOCK_END_TOKEN:
-			if (!mmpkg_is_valid(pkg))
+			if (mmpkg_check_valid(pkg, 0))
 				goto error;
 			goto exit;
 
@@ -405,6 +405,9 @@ int mmpack_parse_index(yaml_parser_t* parser, struct indextable * index,
 					entry = indextable_lookup_create(installed_list, pkg->name);
 					assert(entry != NULL);
 					entry->value = pkg;
+				} else if (mmpkg_check_valid(pkg, 1)) {
+					exitvalue = -1;
+					goto exit;
 				}
 			}
 			type = -1;

@@ -198,13 +198,26 @@ void mmpkg_dump(struct mmpkg const * pkg)
 
 
 LOCAL_SYMBOL
-int mmpkg_is_valid(struct mmpkg const * pkg)
+int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache)
 {
-	return (  pkg->name != NULL
-	       && pkg->version != NULL
-	       && pkg->filename != NULL
-	       && pkg->sha256 != NULL
-	       && pkg->size != 0);
+	if (  !pkg->version
+	   || !pkg->sumsha
+	   || !pkg->source)
+		return mm_raise_error(EINVAL, "Invalid package data for %s."
+		                              " Missing fields.", pkg->name);
+
+	if (!in_repo_cache)
+		return 0;
+
+	if (  !pkg->sha256
+	   || !pkg->size
+	   || !pkg->filename)
+		return mm_raise_error(EINVAL, "Invalid package data for %s."
+		                              " Missing fields needed in"
+		                              " repository package index.",
+		                              pkg->name);
+
+	return 0;
 }
 
 
