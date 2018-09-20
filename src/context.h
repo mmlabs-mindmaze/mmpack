@@ -14,6 +14,14 @@ struct mmpack_opts {
 	const char* prefix;
 };
 
+/**
+ * struct mmpack_ctx - context of a mmpack prefix
+ * @curl:       common curl handle for reuse
+ * @binindex:   binary index of all package available (in repo or installed)
+ * @installed:  list of installed package (store in an index table)
+ * @prefix:     path to the root of folder to use for prefix
+ * @pkgcachedir: path to dowloaded package cache folder
+ */
 struct mmpack_ctx {
 	CURL * curl;
 	struct indextable binindex;

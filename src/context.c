@@ -102,13 +102,6 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 		entry = it_iter_next(&iter);
 	}
 	indextable_deinit(&ctx->binindex);
-
-	entry = it_iter_first(&iter, &ctx->installed);
-	while (entry != NULL) {
-		struct mmpkg * pkg = entry->value;
-		mmpkg_destroy(pkg);
-		entry = it_iter_next(&iter);
-	}
 	indextable_deinit(&ctx->installed);
 
 	settings_deinit(&ctx->settings);

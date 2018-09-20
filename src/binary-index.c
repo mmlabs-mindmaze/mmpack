@@ -334,7 +334,8 @@ exit:
  *   ...
  */
 static
-int mmpack_parse_index(yaml_parser_t* parser, struct indextable * index)
+int mmpack_parse_index(yaml_parser_t* parser, struct indextable * index,
+                       struct indextable* installed_list)
 {
 	int exitvalue, type;
 	yaml_token_t token;
@@ -372,6 +373,13 @@ int mmpack_parse_index(yaml_parser_t* parser, struct indextable * index)
 				/* prepend new version */
 				pkg->next_version = entry->value;
 				entry->value = pkg;
+
+				/* Add to installed list if it is provided in argument for update */
+				if (installed_list) {
+					entry = indextable_lookup_create(installed_list, pkg->name);
+					assert(entry != NULL);
+					entry->value = pkg;
+				}
 			}
 			type = -1;
 			break;
@@ -392,7 +400,8 @@ exit:
 
 
 static
-int index_populate(char const * index_filename, struct indextable * index)
+int index_populate(char const * index_filename, struct indextable * binindex,
+                   struct indextable * installed)
 {
 	int rv = -1;
 	FILE * index_fh;
@@ -408,7 +417,7 @@ int index_populate(char const * index_filename, struct indextable * index)
 	}
 
 	yaml_parser_set_input_file(&parser, index_fh);
-	rv = mmpack_parse_index(&parser, index);
+	rv = mmpack_parse_index(&parser, binindex, installed);
 
 	fclose(index_fh);
 
@@ -421,7 +430,7 @@ exit:
 LOCAL_SYMBOL
 int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
 {
-	return index_populate(index_filename, &ctx->binindex);
+	return index_populate(index_filename, &ctx->binindex, NULL);
 }
 
 
@@ -447,8 +456,19 @@ void installed_index_dump(struct indextable const * installed)
 }
 
 
+/**
+ * installed_index_populate() - parse index of installed package
+ * @ctx:        mmpack context
+ * @filename:   path to installed package index file
+ *
+ * This function will parse the index of index package and reference the
+ * packages found there in the binary-index. Additionally it will fill the
+ * indextable holding the list of installed package
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
 LOCAL_SYMBOL
-int installed_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
+int installed_index_populate(struct mmpack_ctx * ctx, char const * filename)
 {
-	return index_populate(index_filename, &ctx->installed);
+	return index_populate(filename, &ctx->binindex, &ctx->installed);
 }
