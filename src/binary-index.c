@@ -26,14 +26,25 @@ enum field_type {
 	FIELD_FILENAME,
 	FIELD_SHA,
 	FIELD_SIZE,
+	FIELD_SOURCE,
+	FIELD_DESC,
+	FIELD_SUMSHA,
 };
 
 static
 const char* scalar_field_names[] = {
 	[FIELD_VERSION] = "version",
 	[FIELD_FILENAME] = "filename",
+	// sha256: hash of the mpk file (useful only to check the download)
 	[FIELD_SHA] = "sha256",
 	[FIELD_SIZE] = "size",
+	[FIELD_SOURCE] = "source",
+	[FIELD_DESC] = "description",
+	// sumsha256sums: hash of the MMPACK/sha256sums which is an
+	// invariant of the unpacked files collectively. This is used to
+	// assess that packages from different source are actually the
+	// same, even in their installed (unpacked) form
+	[FIELD_SUMSHA] = "sumsha256sums",
 };
 
 
@@ -67,6 +78,18 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg, enum field_type type,
 
 	case FIELD_SHA:
 		field = &pkg->sha256;
+		break;
+
+	case FIELD_SOURCE:
+		field = &pkg->source;
+		break;
+
+	case FIELD_DESC:
+		field = &pkg->desc;
+		break;
+
+	case FIELD_SUMSHA:
+		field = &pkg->sumsha;
 		break;
 
 	case FIELD_SIZE:

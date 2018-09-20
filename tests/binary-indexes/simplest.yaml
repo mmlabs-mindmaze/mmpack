@@ -11,5 +11,6 @@ pkg-a:
         libgcc1: ["1:6.3.0-18+deb9u1", "1:6.3.0-18+deb9u1"]
     version: 0.0.1
     filename: pool/pkg-a_0.0.1_amd64-gnu-linux.mpk
-    size: 42 
+    size: 42
+    sumsha256sums: a001e00000000000000000000000000000000000000000000000000000000000
     sha256: fec4d632375388675fcbc40484569b5359ab6e948472de974c1234d6e2756567

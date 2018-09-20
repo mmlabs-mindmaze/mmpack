@@ -173,6 +173,9 @@ void mmpkg_destroy(struct mmpkg * pkg)
 	mmstr_free(pkg->version);
 	mmstr_free(pkg->filename);
 	mmstr_free(pkg->sha256);
+	mmstr_free(pkg->source);
+	mmstr_free(pkg->desc);
+	mmstr_free(pkg->sumsha);
 
 	mmpkg_dep_destroy(pkg->mpkdeps);
 	mmpkg_dep_destroy(pkg->sysdeps);

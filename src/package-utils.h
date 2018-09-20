@@ -39,6 +39,9 @@ struct mmpkg {
 	mmstr const * version;
 	mmstr const * filename;
 	mmstr const * sha256;
+	mmstr const * source;
+	mmstr const * desc;
+	mmstr const * sumsha;
 	size_t size;
 
 	pkg_state state;
