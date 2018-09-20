@@ -43,7 +43,8 @@ struct mmpkg {
 
 	pkg_state state;
 
-	struct mmpkg_dep * dependencies;
+	struct mmpkg_dep * mpkdeps;
+	struct mmpkg_dep * sysdeps;
 	struct mmpkg * next_version;
 };
 
@@ -51,8 +52,6 @@ struct mmpkg_dep {
 	mmstr const * name;
 	mmstr const * min_version; /* inclusive */
 	mmstr const * max_version; /* exclusive */
-
-	int is_system_package;
 
 	struct mmpkg_dep * next;
 };
@@ -94,7 +93,7 @@ int mmpkg_is_valid(struct mmpkg const * pkg);
 
 struct mmpkg_dep * mmpkg_dep_create(char const * name);
 void mmpkg_dep_destroy(struct mmpkg_dep * dep);
-void mmpkg_dep_dump(struct mmpkg_dep const * deps);
+void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 
 struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * name,
                                 mmstr const * max_version);

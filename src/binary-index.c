@@ -94,12 +94,16 @@ void mmpkg_append_dependency_rec(struct mmpkg_dep * dep, struct mmpkg_dep * d)
 }
 
 static
-void mmpkg_insert_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep)
+void mmpkg_insert_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep,
+                             int is_system_package)
 {
-	if (pkg->dependencies == NULL)
-		pkg->dependencies = dep;
+	struct mmpkg_dep** deps;
+
+	deps = is_system_package ? &pkg->sysdeps : &pkg->mpkdeps;
+	if (*deps == NULL)
+		*deps = dep;
 	else
-		mmpkg_append_dependency_rec(pkg->dependencies, dep);
+		mmpkg_append_dependency_rec(*deps, dep);
 }
 
 /* parse a single mmpack or system dependency
@@ -147,8 +151,7 @@ exit:
 	yaml_token_delete(&token);
 
 	if (exitvalue == 0) {
-		dep->is_system_package = is_system_package;
-		mmpkg_insert_dependency(pkg, dep);
+		mmpkg_insert_dependency(pkg, dep, is_system_package);
 	}
 
 	return exitvalue;

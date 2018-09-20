@@ -174,7 +174,8 @@ void mmpkg_destroy(struct mmpkg * pkg)
 	mmstr_free(pkg->filename);
 	mmstr_free(pkg->sha256);
 
-	mmpkg_dep_destroy(pkg->dependencies);
+	mmpkg_dep_destroy(pkg->mpkdeps);
+	mmpkg_dep_destroy(pkg->sysdeps);
 	mmpkg_destroy(pkg->next_version);
 
 	free(pkg);
@@ -186,7 +187,8 @@ void mmpkg_dump(struct mmpkg const * pkg)
 {
 	printf("# %s (%s)\n", pkg->name, pkg->version);
 	printf("\tdependencies:\n");
-	mmpkg_dep_dump(pkg->dependencies);
+	mmpkg_dep_dump(pkg->mpkdeps, "MMP");
+	mmpkg_dep_dump(pkg->sysdeps, "SYS");
 	printf("\n");
 }
 
@@ -230,13 +232,12 @@ void mmpkg_dep_destroy(struct mmpkg_dep * dep)
 
 
 LOCAL_SYMBOL
-void mmpkg_dep_dump(struct mmpkg_dep const * deps)
+void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type)
 {
 	struct mmpkg_dep const * d = deps;
 
 	while (d != NULL) {
-		printf("\t\t [%s] %s [%s -> %s]\n",
-		       d->is_system_package ? "SYS":"MMP", d->name,
+		printf("\t\t [%s] %s [%s -> %s]\n", type, d->name,
 		       d->min_version, d->max_version);
 		d = d->next;
 	}
@@ -358,7 +359,6 @@ struct mmpkg_dep * mmpkg_dep_append_copy(struct mmpkg_dep * deps,
 	new->name = mmstrdup(new_deps->name);
 	new->min_version = mmstrdup(min_version);
 	new->max_version = mmstrdup(max_version);
-	new->is_system_package = new_deps->is_system_package;
 	new->next = NULL;  /* ensure there is no bad chaining leftover */
 
 	if (deps == NULL)
@@ -548,11 +548,6 @@ struct mmpkg_dep * mmpkg_dep_filter(struct mmpack_ctx * ctx,
 		else if (rv < 0)
 			return NULL;
 
-		if (new_dep->is_system_package) {
-			/* TODO: handle system packages */
-			continue;
-		}
-
 		*new_dependencies = 1;
 		/* we got deps_in from the global index table, which is read-only.
 		 * duplicate it so it can be changed later */
@@ -571,7 +566,7 @@ static
 int mmpkg_depends_on(struct mmpkg const * pkg, mmstr const * name)
 {
 	struct mmpkg_dep const * d;
-	for (d = pkg->dependencies ; d != NULL ; d = d->next) {
+	for (d = pkg->mpkdeps ; d != NULL ; d = d->next) {
 		if (mmstrequal(d->name, name))
 			return 1;
 	}
@@ -591,7 +586,7 @@ void mmpack_print_dependencies_on_conflict(struct action_stack const * actions,
 	printf("Package details: \n");
 	mmpkg_dump(pkg);
 
-	for (d = pkg->dependencies ; d != NULL ; d = d->next) {
+	for (d = pkg->mpkdeps ; d != NULL ; d = d->next) {
 		for (i = 0 ; i < actions->index ; i++) {
 			a = &actions->actions[i];
 
@@ -675,7 +670,7 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
 		}
 
 		/* merge this package dependency into the global dependency list */
-		tmp = mmpkg_dep_filter(ctx, actions, pkg->dependencies, deps, &new_dependencies);
+		tmp = mmpkg_dep_filter(ctx, actions, pkg->mpkdeps, deps, &new_dependencies);
 		if (tmp == NULL) {
 			mm_raise_error(EAGAIN, "Failure while resolving package: %s\n"
 			                       "Try resolving the conflicting dependency manally first",
