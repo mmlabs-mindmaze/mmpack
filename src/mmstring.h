@@ -145,10 +145,7 @@ mmstr* mmstr_realloc(mmstr* str, int new_maxlen)
 	if (s && (new_maxlen <= s->max))
 		return s->buf;
 
-	s = realloc(s, MMSTR_NEEDED_SIZE(new_maxlen));
-	if (!s)
-		return NULL;
-
+	s = mm_realloc(s, MMSTR_NEEDED_SIZE(new_maxlen));
 	s->max = new_maxlen;
 	return s->buf;
 }
