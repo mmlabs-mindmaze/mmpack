@@ -260,6 +260,14 @@ mmstr* mmstrcpy_realloc(mmstr* restrict dst, const mmstr* restrict src)
 }
 
 
+static inline NONNULL_ARGS(2)
+mmstr* mmstrcat_realloc(mmstr* restrict dst, const mmstr* restrict src)
+{
+	dst = mmstr_realloc(dst, mmstrlen(dst) + mmstrlen(src));
+	return mmstrcat(dst, src);
+}
+
+
 /**
  * mmstr_copy_realloc() - copy data to a string, resizing dest if needed
  * @dst:        destination string (may be NULL)
