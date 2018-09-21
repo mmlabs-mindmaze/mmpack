@@ -146,13 +146,13 @@ mmstr* mmstr_join_path(mmstr* restrict dst,
 
 /**
  * open_file_in_prefix() - open file in specified folder
- * @prefix:     folder from where to open the file
- * @relpath:    path relative to @prefix of the file to open
+ * @prefix:     folder from where to open the file (may be NULL)
+ * @path:       path relative to @prefix of the file to open
  * @oflag:      control flags how to open the file (same as mm_open())
  *
- * This function opens a file descriptor for file located at @relpath
- * relatively to a folder specified by @prefix. @oflag are the same that
- * can be passed to mm_open().
+ * This function opens a file descriptor for file located at @path
+ * relatively to a folder specified by @prefix if not NULL. @oflag are the
+ * same that can be passed to mm_open().
  *
  * If file may be created (ie @oflag contains O_CREAT), and the parent dir
  * do not exist, the parent dir will be created as well (and recursively)
@@ -161,14 +161,16 @@ mmstr* mmstr_join_path(mmstr* restrict dst,
  * of success. Otherwise -1 is returned with error state set accordingly.
  */
 LOCAL_SYMBOL
-int open_file_in_prefix(const mmstr* prefix, const mmstr* relpath, int oflag)
+int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 {
 	int fd = -1;
-	mmstr *path, *dirpath;
+	mmstr *tmp, *dirpath;
 
-	// Form path of file in prefix
-	path = mmstr_alloca(mmstrlen(prefix) + mmstrlen(relpath) + 1);
-	mmstr_join_path(path, prefix, relpath);
+	if (prefix) {
+		// Form path of file in prefix
+		tmp = mmstr_alloca(mmstrlen(prefix) + mmstrlen(path) + 1);
+		path = mmstr_join_path(tmp, prefix, path);
+	}
 
 	// If file may have to be created, try create parent dir if needed
 	if (oflag & O_CREAT) {
