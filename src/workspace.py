@@ -14,12 +14,13 @@ from common import shell, dprint
 @singleton
 class Workspace(object):
     'global mmpack workspace singleton class'
-    def __init__(self):
+    def __init__(self, prefix=''):
         self.config = xdg_config_home + '/mmpack-config.yml'
         self.sources = xdg_cache_home + '/mmpack-sources'
         self.build = xdg_cache_home + '/mmpack-build'
         self.staging = xdg_cache_home + '/mmpack-staging'
         self.packages = xdg_data_home + '/mmpack-packages'
+        self.prefix = prefix
 
         # create the directories if they do not exist
         os.makedirs(xdg_config_home, exist_ok=True)
