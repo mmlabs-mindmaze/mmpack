@@ -55,7 +55,7 @@ int create_initial_prefix_cfg(const mmstr* prefix, const char* url)
 	if (fd < 0)
 		return -1;
 
-	len = sprintf(line, "remote: %s", url);
+	len = sprintf(line, "repository: %s", url);
 	mm_write(fd, line, len);
 
 	mm_close(fd);
