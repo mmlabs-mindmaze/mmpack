@@ -646,8 +646,8 @@ struct mmpkg_dep* dep_create_from_request(const struct pkg_request* req)
 	const char* version = req->version ? req->version : "any";
 
 	dep = mmpkg_dep_create(req->name);
-	dep->min_version = mmstrdup(version);
-	dep->max_version = mmstrdup(version);
+	dep->min_version = mmstr_malloc_from_cstr(version);
+	dep->max_version = mmstr_malloc_from_cstr(version);
 
 	return dep;
 }
