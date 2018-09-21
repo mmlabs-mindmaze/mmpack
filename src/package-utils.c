@@ -666,6 +666,28 @@ struct mmpkg_dep* dep_create_from_request(const struct pkg_request* req)
 }
 
 
+static
+struct mmpkg_dep* create_dependencies_from_reqlist(struct mmpack_ctx* ctx,
+                                                   const struct pkg_request* req,
+                                                   struct action_stack const * actions)
+{
+	struct mmpkg_dep* deps = NULL;
+	struct mmpkg_dep* curr_dep;
+
+	while (req != NULL) {
+		curr_dep = dep_create_from_request(req);
+		if (dependency_already_met(ctx, actions, curr_dep) == 1) {
+			mmpkg_dep_destroy(curr_dep);
+		} else {
+			curr_dep->next = deps;
+			deps = curr_dep;
+		}
+		req = req->next;
+	}
+
+	return deps;
+}
+
 /**
  * mmpkg_get_install_list() -  parse package dependencies and return install order
  * @ctx:     the mmpack context
@@ -701,13 +723,7 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
 	actions = mmpack_action_stack_create();
 
 	/* create initial dependency list from pkg_request list */
-	deps = dep_create_from_request(req);
-	curr_dep = deps;
-	while (req->next) {
-		req = req->next;
-		curr_dep->next = dep_create_from_request(req);
-		curr_dep = curr_dep->next;
-	}
+	deps = create_dependencies_from_reqlist(ctx, req, actions);
 
 	while (deps != NULL) {
 		/* handle the last dependency introduced */
