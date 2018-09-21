@@ -157,7 +157,7 @@ def sha256sum(filename: str) -> str:
     '''
     sha = sha256()
     if os.path.islink(filename):
-        # Compute sha256 of symlink target and replace begining with "sym"
+        # Compute sha256 of symlink target and replace beginning with "sym"
         sha.update(os.readlink(filename).encode('utf-8'))
         shastr = sha.hexdigest()
         return "sym" + shastr[3:]
