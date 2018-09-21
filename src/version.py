@@ -69,5 +69,8 @@ class Version(LooseVersion):  # pylint: disable=too-few-public-methods
             return True
         return not self.__lt__(other)
 
+    def __repr__(self):
+        return str(self)
+
 
 yaml.add_representer(Version, mm_representer)
