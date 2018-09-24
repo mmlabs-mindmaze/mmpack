@@ -290,7 +290,7 @@ void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
 	while (dep) {
 		// Print name , minver and maxver at lvl indentation level
 		// (ie 4*lvl spaces are inserted before)
-		fprintf(fp, "%.*s%s: [%s, %s]\n", lvl*4, " ",
+		fprintf(fp, "%*s%s: [%s, %s]\n", lvl*4, " ",
 		        dep->name, dep->min_version, dep->max_version);
 		dep = dep->next;
 	}
