@@ -442,7 +442,7 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 
 	// Change current directory to prefix... All the prefix relpath can
 	// now be used directly.
-	getcwd(old_currdir, sizeof(old_currdir));
+	mm_getcwd(old_currdir, sizeof(old_currdir));
 	if (  mm_chdir(ctx->prefix)
 	   || mm_mkdir(METADATA_RELPATH, 0777, MM_RECURSIVE))
 		return -1;
