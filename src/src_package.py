@@ -239,7 +239,8 @@ class SrcPackage(object):
         sources_archive_name = '{0}-{1}-src.tar.gz' \
                                .format(self.srcname, self.tag)
         iprint('cloning ' + self.url)
-        cmd = 'git clone --quiet {0} {1}'.format(self.url, self.srcname)
+        cmd = 'git clone --quiet --branch {0} {1} {2}' \
+              .format(self.tag, self.url, self.srcname)
         shell(cmd)
         pushdir(self.srcname)
         cmd = 'git archive --format=tar.gz --prefix={0}/ {1}' \
