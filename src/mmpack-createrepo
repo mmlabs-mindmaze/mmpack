@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+# @mindmaze_header@
+#
+
+
+get_repo_entry () {
+	local mpkfile=$1
+        local size=$(stat -c %s $mpkfile)
+	local cksum=$(sha256sum $mpkfile | cut -f1 -d' ')
+	tar -xf $mpkfile -O ./MMPACK/info
+	echo "    filename: $mpkfile"
+	echo "    size: $size"
+	echo "    sha256: $cksum"
+}
+
+print_usage () {
+	echo "Usage: $0 <srv_datadir> [mpkpooldir]"
+}
+
+# Check arguments
+if [ $# -gt 2 ] || [ $# -eq 0 ]
+then
+	print_usage
+	exit 1
+fi
+
+case $1 in
+	-h|--help)
+		print_usage
+		exit 0
+		;;
+	-*)
+		echo unsupported option $1
+		exit 1
+		;;
+esac
+
+
+srvdata=$1
+pooldir=${2:-"$srvdata/pool"}
+pooldir_relpath=$(realpath --relative-to=$srvdata $pooldir)
+
+# Create repo index
+cd $srvdata
+for mpkfile in $pooldir_relpath/*.mpk
+do
+	get_repo_entry $mpkfile
+done > binary-index

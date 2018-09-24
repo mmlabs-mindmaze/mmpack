@@ -23,6 +23,7 @@ am__v_RM_1 = -@rm -vf
 
 bin_PROGRAMS = mmpack
 bin_SCRIPTS = mmpack-build
+dist_bin_SCRIPTS = src/mmpack-createrepo
 
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST += \
