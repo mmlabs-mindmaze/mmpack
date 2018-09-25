@@ -35,6 +35,7 @@ EXTRA_DIST += \
 pkgpython_PYTHON =\
 	src/binary_package.py \
 	src/common.py \
+	src/dpkg.py \
 	src/decorators.py \
 	src/dependencies.py \
 	src/elf_utils.py \
