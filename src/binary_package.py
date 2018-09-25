@@ -51,7 +51,7 @@ class BinaryPackage(object):
 
         self.description = ''
         self._dependencies = {'sysdepends': {}, 'depends': {}}
-        self._provides = {'elf': {}, 'pe': {}, 'python': {}}
+        self.provides = {'elf': {}, 'pe': {}, 'python': {}}
         self.install_files = []
 
     def _get_specs_provides(self,
@@ -96,19 +96,19 @@ class BinaryPackage(object):
 
     def _gen_symbols(self, pkgdir: str):
         pushdir(pkgdir)
-        if self._provides['pe'] and self._provides['elf']:
+        if self.provides['pe'] and self.provides['elf']:
             raise AssertionError(self.name + 'cannot contain symbols for two '
                                  'different architectures at the same time')
-        if self._provides['pe']:
-            yaml_serialize(self._provides['pe'], 'MMPACK/symbols')
-        elif self._provides['elf']:
-            yaml_serialize(self._provides['elf'], 'MMPACK/symbols')
+        if self.provides['pe']:
+            yaml_serialize(self.provides['pe'], 'MMPACK/symbols')
+        elif self.provides['elf']:
+            yaml_serialize(self.provides['elf'], 'MMPACK/symbols')
         popdir()
 
     def _gen_pyobjects(self, pkgdir: str):
         pushdir(pkgdir)
-        if self._provides['python']:
-            yaml_serialize(self._provides['python'], 'MMPACK/pyobjects')
+        if self.provides['python']:
+            yaml_serialize(self.provides['python'], 'MMPACK/pyobjects')
         popdir()
 
     def _populate(self, instdir: str, pkgdir: str):
@@ -166,7 +166,7 @@ class BinaryPackage(object):
             dependencies[name] = version
 
     def _provides_symbol(self, symbol_type: str, symbol: str) -> str:
-        for name, entry in self._provides[symbol_type].items():
+        for name, entry in self.provides[symbol_type].items():
             if symbol in entry['symbols'].keys():
                 return name
         return None
@@ -195,7 +195,7 @@ class BinaryPackage(object):
                                   'symbols': {}}}
                 entry[soname]['symbols'].update(elf_symbols_list(inst_file,
                                                                  self.version))
-                self._provides['elf'].update(entry)
+                self.provides['elf'].update(entry)
             else:
                 if file_type == 'pe' or file_type == 'python':
                     dprint('[WARN] skipping file: ' + inst_file)
@@ -210,7 +210,7 @@ class BinaryPackage(object):
 
                 version = Version(str_version)
                 if version <= self.version:
-                    entry = self._provides[symbol_type][name]
+                    entry = self.provides[symbol_type][name]
                     entry['symbols'][symbol] = version
                 else:  # version > self.version:
                     raise ValueError('Specified version of symbol {0} ({1})'
