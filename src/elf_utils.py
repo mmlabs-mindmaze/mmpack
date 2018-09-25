@@ -14,8 +14,7 @@ from common import shell
 
 
 def elf_deps(filename):
-    ''' Parse given elf file and return its dependency *library* list
-    '''
+    'Parse given elf file and return its dependency soname list'
     elffile = ELFFile(open(filename, 'rb'))
 
     librarylist = []
@@ -26,6 +25,53 @@ def elf_deps(filename):
                     librarylist.append(tag.needed)
 
     return sorted(librarylist)
+
+
+def elf_undefined_symbols(filename):
+    '''Parse given elf file and return its undefined symbols list
+
+    We require 3 sections for the elf file:
+        - .gnu.version_r: lists the needed libraries version
+        - .gnu.version: contains an index into .gnu.version_r:
+        - .dynsym: contains the list of all symbols
+
+    If the nth symbol from .dynsym has an entry (nth -> index)
+    the the symbol name is required to be of version .gnu.version_r[index]
+
+    This is the reason why we need to iterate over all symbols with enumerate()
+    '''
+    elffile = ELFFile(open(filename, 'rb'))
+
+    undefined_symbols_list = []
+
+    gnu_version_r = elffile.get_section_by_name('.gnu.version_r')
+
+    version = {}
+    gnu_version = elffile.get_section_by_name('.gnu.version')
+    for nsym, sym in enumerate(gnu_version.iter_symbols()):
+        index = sym['ndx']
+        if index not in ('VER_NDX_LOCAL', 'VER_NDX_GLOBAL'):
+            index = int(index)
+            # In GNU versioning mode, the highest bit is used to
+            # store wether the symbol is hidden or not
+            if index & 0x8000:
+                index &= ~0x8000
+            version[nsym] = index
+
+    dyn = elffile.get_section_by_name('.dynsym')
+    for nsym, sym in enumerate(dyn.iter_symbols()):
+        if (sym['st_info']['bind'] == 'STB_GLOBAL'
+                and sym['st_shndx'] == 'SHN_UNDEF'):
+            symbol_str = sym.name
+            if nsym in version:
+                index = version[nsym]
+                version_name = gnu_version_r.get_version(index)[1].name
+                # objdump and readelf note this as <name>@@<version>
+                # debian notes this with only a single @ in between
+                symbol_str += '@' + version_name
+            undefined_symbols_list += [symbol_str]
+
+    return undefined_symbols_list
 
 
 def elf_soname(filename: str) -> str:
