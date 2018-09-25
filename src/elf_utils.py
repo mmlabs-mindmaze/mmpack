@@ -13,7 +13,7 @@ from elftools.elf.dynamic import DynamicSection
 from common import shell
 
 
-def elf_deps(filename):
+def elf_soname_deps(filename):
     'Parse given elf file and return its dependency soname list'
     elffile = ELFFile(open(filename, 'rb'))
 
@@ -119,7 +119,7 @@ def _dpkg_get_pkg_version(dpkg_name: str) -> str:
 def elf_dpkg_deps(filename):
     'Parse given elf file and return its dependency debian package dict'
     packagedict = {}
-    librarylist = elf_deps(filename)
+    librarylist = elf_soname_deps(filename)
     for lib in librarylist:
         cmd = ['dpkg', '--search'] + [lib]
         ret = subprocess.run(cmd, check=False, stdout=subprocess.PIPE)

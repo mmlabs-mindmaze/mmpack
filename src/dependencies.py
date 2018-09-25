@@ -5,7 +5,7 @@ helper module containing functions to scan for dependencies within files
 
 
 from common import shell, remove_duplicates, filetype, get_host_arch
-from elf_utils import elf_dpkg_deps, elf_deps
+from elf_utils import elf_dpkg_deps, elf_soname_deps
 
 
 def mmpack_pkg_provides(filename):
@@ -13,7 +13,7 @@ def mmpack_pkg_provides(filename):
     '''
 
     packagelist = []
-    for lib in elf_deps(filename):
+    for lib in elf_soname_deps(filename):
         cmd = 'mmpack provides ' + lib
         packagelist += shell(cmd).split(',')
 
