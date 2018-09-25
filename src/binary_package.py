@@ -7,12 +7,11 @@ packaging as mmpack file.
 import os
 from os.path import isfile
 from glob import glob
-from typing import Dict
+from typing import List, Dict
 import tarfile
 from common import sha256sum, yaml_serialize, pushdir, popdir, dprint, \
          filetype
 from version import Version
-from dependencies import scan_dependencies
 from elf_utils import elf_symbols_list, elf_soname
 import yaml
 from workspace import Workspace
@@ -227,12 +226,16 @@ class BinaryPackage(object):
                                      'is greater than current version ({2})'
                                      .format(symbol, version, self.version))
 
-    def gen_sysdeps(self) -> None:
-        ''' Go through the install files and search for external dependencies
+    def _find_link_deps(self, target: str, binpkgs: List['BinaryPackages']):
+        for pkg in binpkgs:
+            if target in pkg.install_files and pkg.name != self.name:
+                self.add_depend(pkg.name, pkg.version, pkg.version)
 
-        FIXME: only handle elf deps ...
-        '''
+    def gen_dependencies(self, binpkgs: List['BinaryPackages']):
+        'Go through the install files and search for dependencies.'
         for inst_file in self.install_files:
-            dep = scan_dependencies(inst_file)
-            if dep:
-                self.add_sysdepend(dep)
+            if os.path.islink(inst_file):
+                target = os.path.join(os.path.dirname(inst_file),
+                                      os.readlink(inst_file))
+                self._find_link_deps(target, binpkgs)
+                continue

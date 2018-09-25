@@ -37,7 +37,6 @@ pkgpython_PYTHON =\
 	src/common.py \
 	src/dpkg.py \
 	src/decorators.py \
-	src/dependencies.py \
 	src/elf_utils.py \
 	src/mmpack_config.py \
 	src/mmpack_pkg_create.py \
