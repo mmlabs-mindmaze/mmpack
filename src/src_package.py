@@ -469,10 +469,12 @@ class SrcPackage(object):
         instdir = self._local_install_path(True)
         pushdir(instdir)
 
+        # we need all of the provide infos before starting the dependencies
         for pkgname, binpkg in self._packages.items():
-            # TODO: generate dependencies
-            binpkg.gen_sysdeps()
             binpkg.gen_provides()
+
+        for pkgname, binpkg in self._packages.items():
+            binpkg.gen_dependencies(self._packages.values())
             binpkg.create(instdir)
             iprint('generated package: {}'.format(pkgname))
         popdir()  # local install path

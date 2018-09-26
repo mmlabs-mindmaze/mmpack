@@ -10,9 +10,11 @@ from glob import glob
 from typing import List, Dict
 import tarfile
 from common import sha256sum, yaml_serialize, pushdir, popdir, dprint, \
-         filetype
+         filetype, remove_duplicates
+from dpkg import dpkg_find_dependency
 from version import Version
-from elf_utils import elf_symbols_list, elf_soname
+from elf_utils import elf_symbols_list, elf_soname, elf_undefined_symbols, \
+         elf_soname_deps
 import yaml
 from workspace import Workspace
 
@@ -32,6 +34,44 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     tarinfo.uname = tarinfo.gname = 'root'
     tarinfo.mtime = 0
     return tarinfo
+
+
+def _mmpack_elf_minversion(soname: str, metadata_file: str,
+                           symbols: List[str]) -> Version:
+    min_version = None
+    metadata = yaml.load(open(metadata_file, 'rb').read())
+    for sym in list(symbols):  # iterate over a shallow copy of the list
+        if sym in metadata[soname]['symbols']:
+            metadata_version = Version(metadata[soname]['symbols'][sym])
+            if min_version:
+                min_version = max(min_version, metadata_version)
+            else:
+                min_version = metadata_version
+            symbols.remove(sym)  # remove symbol from the list
+
+    return min_version
+
+
+def _mmpack_elf_deps(soname: str,
+                     symbols: List[str]) -> (str, Version, Version):
+    wrk = Workspace()
+
+    pkg_name_guess = soname.split('.')[0] + soname.split('.')[2]
+    symbols_path = wrk.prefix + '/var/lib/mmpack/metadata/'
+    mmpack_installed_file = wrk.prefix + '/var/lib/mmpack/installed.yaml'
+    try:  # guess the package name from the soname
+        symbols_filename = symbols_path + pkg_name_guess + '.symbols'
+        version = _mmpack_elf_minversion(soname, symbols_filename, symbols)
+        return (pkg_name_guess, version, Version('any'))
+    except FileNotFoundError:
+        symfiles = glob(symbols_path + '**.symbols')
+        mmpack_installed = yaml.load(open(mmpack_installed_file, 'rb').read())
+        for pkgname in mmpack_installed:
+            symbols_filename = symbols_path + pkgname + '.symbols'
+            if symbols_filename in symfiles:
+                version = _mmpack_elf_minversion(soname, symbols_filename,
+                                                 symbols)
+                return (pkgname, version, Version('any'))
 
 
 class BinaryPackage(object):
@@ -226,6 +266,46 @@ class BinaryPackage(object):
                                      'is greater than current version ({2})'
                                      .format(symbol, version, self.version))
 
+    def _gen_elf_deps(self, soname: str, symbol_list: List[str],
+                      binpkgs: List['BinaryPackages']):
+        '''
+            Args:
+                binpkgs: the list of packages currently being generated
+        '''
+        # provided in the same package
+        if soname in self.provides['elf']:
+            for sym in self.provides['elf'][soname]:
+                if sym in symbol_list:
+                    symbol_list.remove(sym)
+            return
+
+        # provided by one of the packages being generated at the same time
+        for pkg in binpkgs:
+            if soname in pkg.provides['elf']:
+                self.add_depend(pkg.name, self.version, self.version)
+
+                for sym in pkg.provides['elf'][soname]:
+                    if sym in symbol_list:
+                        symbol_list.remove(sym)
+                return
+
+        # provided by another mmpack package present in the prefix
+        try:
+            mmpack_dep, minv, maxv = _mmpack_elf_deps(soname, symbol_list)
+            self.add_depend(mmpack_dep, minv, maxv)
+            return
+        except FileNotFoundError:
+            pass
+
+        # provided by the host system
+        dpkg_dep = dpkg_find_dependency(soname, symbol_list)
+        if not dpkg_dep:
+            # <soname> dependency could not be met with any available means
+            errmsg = 'Could not find package providing ' + soname
+            raise AssertionError(errmsg)
+
+        self.add_sysdepend(dpkg_dep)
+
     def _find_link_deps(self, target: str, binpkgs: List['BinaryPackages']):
         for pkg in binpkgs:
             if target in pkg.install_files and pkg.name != self.name:
@@ -233,9 +313,29 @@ class BinaryPackage(object):
 
     def gen_dependencies(self, binpkgs: List['BinaryPackages']):
         'Go through the install files and search for dependencies.'
+        deps = []
+        symbols = []
         for inst_file in self.install_files:
             if os.path.islink(inst_file):
                 target = os.path.join(os.path.dirname(inst_file),
                                       os.readlink(inst_file))
                 self._find_link_deps(target, binpkgs)
                 continue
+
+            file_type = filetype(inst_file)
+            if file_type == 'elf':
+                symbols += elf_undefined_symbols(inst_file)
+                deps += elf_soname_deps(inst_file)
+
+        remove_duplicates(deps)
+        remove_duplicates(symbols)
+        for dep in deps:
+            self._gen_elf_deps(dep, symbols, binpkgs)
+            if not symbols:
+                break
+
+        if symbols:
+            errmsg = 'Failed to process all of ' + self.name + ' symbols\n'
+            errmsg += 'Remaining symbols:\n\t'
+            errmsg += '\n\t'.join(symbols)
+            raise AssertionError(errmsg)
