@@ -20,6 +20,16 @@
 #include "mm-alloc.h"
 #include "package-utils.h"
 
+struct pkglist_entry {
+	struct mmpkg pkg;
+	struct pkglist_entry* next;
+};
+
+struct pkglist {
+	const mmstr* pkg_name;
+	struct pkglist_entry head;
+};
+
 
 /* standard isdigit() is locale dependent making it unnecessarily slow.
  * This macro is here to keep the semantic of isdigit() as usually known by
@@ -156,22 +166,15 @@ int get_local_system_install_state(char const * name, char const * version)
 
 
 static
-struct mmpkg * mmpkg_create(char const * name)
+void mmpkg_init(struct mmpkg* pkg, const mmstr* name)
 {
-	struct mmpkg * pkg = malloc(sizeof(*pkg));
-	memset(pkg, 0, sizeof(*pkg));
-	pkg->name = mmstr_malloc_from_cstr(name);
-	return pkg;
+	*pkg = (struct mmpkg) {.name = name};
 }
 
 
 static
-void mmpkg_destroy(struct mmpkg * pkg)
+void mmpkg_deinit(struct mmpkg * pkg)
 {
-	if (pkg == NULL)
-		return;
-
-	mmstr_free(pkg->name);
 	mmstr_free(pkg->version);
 	mmstr_free(pkg->filename);
 	mmstr_free(pkg->sha256);
@@ -181,9 +184,8 @@ void mmpkg_destroy(struct mmpkg * pkg)
 
 	mmpkg_dep_destroy(pkg->mpkdeps);
 	mmpkg_dep_destroy(pkg->sysdeps);
-	mmpkg_destroy(pkg->next_version);
 
-	free(pkg);
+	mmpkg_init(pkg, NULL);
 }
 
 
@@ -297,7 +299,83 @@ void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
 	}
 }
 
+/**************************************************************************
+ *                                                                        *
+ *                          Package list                                  *
+ *                                                                        *
+ **************************************************************************/
 
+/**
+ * pkglist_create() - create a new package list
+ * @name:       package name to which the package list will be associated
+ *
+ * Return: pointer to package list
+ */
+static
+struct pkglist* pkglist_create(const mmstr* name)
+{
+	struct pkglist* list;
+
+	list = mm_malloc(sizeof(*list));
+	*list = (struct pkglist){.pkg_name = mmstrdup(name)};
+	mmpkg_init(&list->head.pkg, list->pkg_name);
+
+	return list;
+}
+
+
+/**
+ * pkglist_destroy() - destroy package list and underlying resources
+ * @list:       package list to destroy
+ *
+ * This function free the package list as well as the package data
+ */
+static
+void pkglist_destroy(struct pkglist* list)
+{
+	struct pkglist_entry *entry, *next;
+
+	if (!list)
+		return;
+
+	next = list->head.next;
+	while (next) {
+		entry = next;
+		next = entry->next;
+
+		mmpkg_deinit(&entry->pkg);
+		free(entry);
+	}
+
+	mmpkg_deinit(&list->head.pkg);
+	mmstr_free(list->pkg_name);
+	free(list);
+}
+
+
+/**
+ * pkglist_add_pkg() - allocate a new package to a package list
+ * @list:       package list to which a new package is required
+ *
+ * This function create a new package and add it to @list. Its name field
+ * will be initialized to the package name whose @list is associated.
+ *
+ * Return: a pointer to new package in list
+ */
+static
+struct mmpkg* pkglist_add_pkg(struct pkglist* list)
+{
+	struct pkglist_entry* entry;
+
+	entry = mm_malloc(sizeof(*entry));
+	mmpkg_init(&entry->pkg, list->pkg_name);
+
+	// Add new entry to the list
+	entry->next = list->head.next;
+	list->head.next = entry;
+
+	return &entry->pkg;
+}
 
 /**************************************************************************
  *                                                                        *
@@ -316,11 +394,12 @@ void binindex_deinit(struct binindex* binindex)
 {
 	struct it_iterator iter;
 	struct it_entry * entry;
+	struct pkglist* pkglist;
 
 	entry = it_iter_first(&iter, &binindex->pkg_list_table);
 	while (entry != NULL) {
-		struct mmpkg * pkg = entry->value;
-		mmpkg_destroy(pkg);
+		pkglist = entry->value;
+		pkglist_destroy(pkglist);
 		entry = it_iter_next(&iter);
 	}
 
@@ -345,10 +424,10 @@ void binindex_dump(struct binindex const * binindex)
 
 /**
  * binindex_get_latest_pkg() - get the latest possible version of given package
- *                             inferior to geven maximum
+ *                             inferior to given maximum
  * binindex:    binary package index
  * name:        package name
- * max_version: exclusive maximum boundary
+ * max_version: inclusive maximum boundary
  *
  * Return: NULL on error, a pointer to the found package otherwise
  */
@@ -358,23 +437,54 @@ struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr co
 {
 	struct it_entry * entry;
 	struct mmpkg * pkg, * latest_pkg;
+	struct pkglist_entry* pkgentry;
+	struct pkglist* list;
+	const char* latest_version = "any";
 
 	entry = indextable_lookup(&binindex->pkg_list_table, name);
 	if (entry == NULL || entry->value == NULL)
 		return NULL;
 
-	latest_pkg = entry->value;
-	pkg = latest_pkg->next_version;
+	list = entry->value;
+	pkgentry = &list->head;
+	latest_version = "any";
+	latest_pkg = NULL;
 
-	while (pkg != NULL) {
-		if (pkg_version_compare(latest_pkg->version, pkg->version) < 0
-		    && pkg_version_compare(pkg->version, max_version) < 0)
+	while (pkgentry != NULL) {
+		pkg = &pkgentry->pkg;
+		if (  pkg_version_compare(latest_version, pkg->version) <= 0
+		   && pkg_version_compare(pkg->version, max_version) <= 0) {
 			latest_pkg = pkg;
+			latest_version = pkg->version;
+		}
 
-		pkg = pkg->next_version;
+		pkgentry = pkgentry->next;
 	}
 
 	return latest_pkg;
+}
+
+
+static
+struct mmpkg* binindex_add_pkg(struct binindex* binindex, const char* name)
+{
+	struct pkglist* pkglist;
+	struct it_entry* entry;
+	struct indextable* idx = &binindex->pkg_list_table;
+	mmstr* pkg_name = mmstr_alloca_from_cstr(name);
+
+	entry = indextable_lookup_create(idx, pkg_name);
+	pkglist = entry->value;
+
+	// Create package list if not existing yet
+	if (!pkglist) {
+		pkglist = pkglist_create(pkg_name);
+		entry->key = pkglist->pkg_name;
+		entry->value = pkglist;
+		return &pkglist->head.pkg;
+	}
+
+	return pkglist_add_pkg(pkglist);
 }
 
 
@@ -748,20 +858,10 @@ int mmpack_parse_index(yaml_parser_t* parser, struct binindex * binindex,
 
 		case YAML_SCALAR_TOKEN:
 			if (type == YAML_KEY_TOKEN) {
-				pkg = mmpkg_create((char const *) token.data.scalar.value);
+				pkg = binindex_add_pkg(binindex, (char const *) token.data.scalar.value);
 				exitvalue = mmpack_parse_index_package(parser, pkg);
-				if (exitvalue != 0) {
-					mmpkg_destroy(pkg);
+				if (exitvalue != 0)
 					goto exit;
-				}
-
-				/* insert into indextable */
-				entry = indextable_lookup_create(&binindex->pkg_list_table, pkg->name);
-				assert(entry != NULL);
-
-				/* prepend new version */
-				pkg->next_version = entry->value;
-				entry->value = pkg;
 
 				/* Add to installed list if it is provided in argument for update */
 				if (installed_list) {

@@ -48,7 +48,6 @@ struct mmpkg {
 
 	struct mmpkg_dep * mpkdeps;
 	struct mmpkg_dep * sysdeps;
-	struct mmpkg * next_version;
 };
 
 struct mmpkg_dep {
