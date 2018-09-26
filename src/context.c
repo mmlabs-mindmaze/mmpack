@@ -16,7 +16,6 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 
-#include "binary-index.h"
 #include "common.h"
 #include "context.h"
 #include "indextable.h"

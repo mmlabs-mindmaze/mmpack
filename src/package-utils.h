@@ -73,4 +73,10 @@ void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * name,
                                 mmstr const * max_version);
 
+int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename);
+void binary_index_dump(struct indextable const * binindex);
+
+int installed_index_populate(struct mmpack_ctx * ctx, char const * index_filename);
+void installed_index_dump(struct indextable const * installed);
+
 #endif /* PACKAGE_UTILS_H */
