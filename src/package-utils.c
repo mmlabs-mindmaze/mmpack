@@ -155,7 +155,7 @@ int get_local_system_install_state(char const * name, char const * version)
 }
 
 
-LOCAL_SYMBOL
+static
 struct mmpkg * mmpkg_create(char const * name)
 {
 	struct mmpkg * pkg = malloc(sizeof(*pkg));
@@ -165,7 +165,7 @@ struct mmpkg * mmpkg_create(char const * name)
 }
 
 
-LOCAL_SYMBOL
+static
 void mmpkg_destroy(struct mmpkg * pkg)
 {
 	if (pkg == NULL)
@@ -198,7 +198,7 @@ void mmpkg_dump(struct mmpkg const * pkg)
 }
 
 
-LOCAL_SYMBOL
+static
 int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache)
 {
 	if (  !pkg->version

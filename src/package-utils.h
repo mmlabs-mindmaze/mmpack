@@ -63,10 +63,7 @@ struct binindex {
 	struct indextable pkg_list_table;
 };
 
-struct mmpkg * mmpkg_create(char const * name);
-void mmpkg_destroy(struct mmpkg * pkg);
 void mmpkg_dump(struct mmpkg const * pkg);
-int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
 
 struct mmpkg_dep * mmpkg_dep_create(char const * name);
