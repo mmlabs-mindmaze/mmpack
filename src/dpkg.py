@@ -200,7 +200,13 @@ def dpkg_parse_symbols(filename: str, target_soname: str,
             dependency_template = main_dependency_template
 
     if '#MINVER#' in dependency_template:
-        minver = '(>= {0})'.format(str(minversion))
+        if minversion:
+            minver = '(>= {0})'.format(str(minversion))
+        else:
+            # may happen if linked without --as-needed flag:
+            # the library is needed, but none of its symbols
+            # are used
+            minver = ''
         dependency_template = dependency_template.replace('#MINVER#', minver)
 
     return dependency_template
