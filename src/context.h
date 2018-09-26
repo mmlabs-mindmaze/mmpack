@@ -8,6 +8,7 @@
 #include <curl/curl.h>
 
 #include "indextable.h"
+#include "package-utils.h"
 #include "settings.h"
 
 struct mmpack_opts {
@@ -24,7 +25,7 @@ struct mmpack_opts {
  */
 struct mmpack_ctx {
 	CURL * curl;
-	struct indextable binindex;
+	struct binindex binindex;
 	struct indextable installed;
 	struct settings settings;
 	mmstr* prefix;
@@ -40,7 +41,7 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx);
 static inline
 int mmpack_ctx_is_init(struct mmpack_ctx const * ctx)
 {
-	return (ctx != NULL && ctx->binindex.num_buckets != 0);
+	return (ctx != NULL && ctx->prefix != NULL);
 }
 
 #endif /* CONTEXT_H */

@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#include "context.h"
+#include "indextable.h"
 #include "mmstring.h"
 #include "utils.h"
 
@@ -59,6 +59,10 @@ struct mmpkg_dep {
 	struct mmpkg_dep * next;
 };
 
+struct binindex {
+	struct indextable pkg_list_table;
+};
+
 struct mmpkg * mmpkg_create(char const * name);
 void mmpkg_destroy(struct mmpkg * pkg);
 void mmpkg_dump(struct mmpkg const * pkg);
@@ -70,13 +74,13 @@ void mmpkg_dep_destroy(struct mmpkg_dep * dep);
 void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
-struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * name,
+struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr const * name,
                                 mmstr const * max_version);
 
-int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename);
-void binary_index_dump(struct indextable const * binindex);
-
-int installed_index_populate(struct mmpack_ctx * ctx, char const * index_filename);
-void installed_index_dump(struct indextable const * installed);
+void binindex_init(struct binindex* binindex);
+void binindex_deinit(struct binindex* binindex);
+int binindex_populate(struct binindex* binindex, char const * index_filename,
+                   struct indextable * installed);
+void binindex_dump(struct binindex const * binindex);
 
 #endif /* PACKAGE_UTILS_H */

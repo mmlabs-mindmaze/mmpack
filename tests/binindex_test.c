@@ -8,13 +8,12 @@
 
 #include <check.h>
 
-#include "context.h"
 #include "package-utils.h"
 #include "testcases.h"
 
 #define TEST_BININDEX_DIR SRCDIR"/tests/binary-indexes"
 
-static struct mmpack_ctx ctx;
+static struct binindex binary_index;
 
 static const char * binindexes[] = {
 	TEST_BININDEX_DIR"/simplest.yaml",
@@ -27,23 +26,22 @@ static const char * binindexes[] = {
 static
 void ctx_setup(void)
 {
-	struct mmpack_opts opts = {.prefix = NULL };
-	mmpack_ctx_init(&ctx, &opts);
+	binindex_init(&binary_index);
 }
 
 static
 void ctx_teardown(void)
 {
-	mmpack_ctx_deinit(&ctx);
+	binindex_deinit(&binary_index);
 }
 
 START_TEST(test_binindex_parsing)
 {
 	int rv;
 
-	rv = binary_index_populate(&ctx, binindexes[_i]);
+	rv = binindex_populate(&binary_index, binindexes[_i], NULL);
 	ck_assert(rv == 0);
-	binary_index_dump(&ctx.binindex);
+	binindex_dump(&binary_index);
 }
 END_TEST
 

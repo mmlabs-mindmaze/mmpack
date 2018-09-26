@@ -397,6 +397,7 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
 	struct action_stack * actions = NULL;
 	struct mmpkg_dep * deps = NULL;
 	struct mmpkg_dep *curr_dep;
+	struct binindex* binindex = &ctx->binindex;
 	int new_dependencies;
 
 	actions = mmpack_action_stack_create();
@@ -411,7 +412,7 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
 			curr_dep = curr_dep->next;
 
 		/* get the corresponding package, at its latest possible version */
-		pkg = mmpkg_get_latest(ctx, curr_dep->name, curr_dep->max_version);
+		pkg = binindex_get_latest_pkg(binindex, curr_dep->name, curr_dep->max_version);
 		if (pkg == NULL) {
 			mm_raise_error(ENODATA, "Cannot resolve dependency: %s", curr_dep->name);
 			goto error;

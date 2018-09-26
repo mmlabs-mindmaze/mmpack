@@ -66,7 +66,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	if (read_user_config(ctx))
 		return -1;
 
-	indextable_init(&ctx->binindex, -1, -1);
+	binindex_init(&ctx->binindex);
 	indextable_init(&ctx->installed, -1, -1);
 
 	prefix = opts->prefix;
@@ -83,9 +83,6 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 LOCAL_SYMBOL
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 {
-	struct it_iterator iter;
-	struct it_entry * entry;
-
 	mmstr_free(ctx->prefix);
 	mmstr_free(ctx->pkgcachedir);
 
@@ -93,14 +90,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 		curl_easy_cleanup(ctx->curl);
 		ctx->curl = NULL;
 	}
-
-	entry = it_iter_first(&iter, &ctx->binindex);
-	while (entry != NULL) {
-		struct mmpkg * pkg = entry->value;
-		mmpkg_destroy(pkg);
-		entry = it_iter_next(&iter);
-	}
-	indextable_deinit(&ctx->binindex);
+	binindex_deinit(&ctx->binindex);
 	indextable_deinit(&ctx->installed);
 
 	settings_deinit(&ctx->settings);
@@ -136,8 +126,8 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	mmstr_join_path(repo_index_path, ctx->prefix, repo_relpath);
 
 	// populate the package lists
-	if (  installed_index_populate(ctx, installed_index_path)
-	   || binary_index_populate(ctx, repo_index_path))
+	if (  binindex_populate(&ctx->binindex, installed_index_path, &ctx->installed)
+	   || binindex_populate(&ctx->binindex, repo_index_path, NULL))
 		return -1;
 
 	return 0;

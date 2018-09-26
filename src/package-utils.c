@@ -16,6 +16,7 @@
 #include <mmlib.h>
 
 #include "common.h"
+#include "indextable.h"
 #include "mm-alloc.h"
 #include "package-utils.h"
 
@@ -297,25 +298,68 @@ void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
 }
 
 
+
+/**************************************************************************
+ *                                                                        *
+ *                      Binary package index                              *
+ *                                                                        *
+ **************************************************************************/
+LOCAL_SYMBOL
+void binindex_init(struct binindex* binindex)
+{
+	indextable_init(&binindex->pkg_list_table, -1, -1);
+}
+
+
+LOCAL_SYMBOL
+void binindex_deinit(struct binindex* binindex)
+{
+	struct it_iterator iter;
+	struct it_entry * entry;
+
+	entry = it_iter_first(&iter, &binindex->pkg_list_table);
+	while (entry != NULL) {
+		struct mmpkg * pkg = entry->value;
+		mmpkg_destroy(pkg);
+		entry = it_iter_next(&iter);
+	}
+
+	indextable_deinit(&binindex->pkg_list_table);
+}
+
+
+LOCAL_SYMBOL
+void binindex_dump(struct binindex const * binindex)
+{
+
+	struct it_iterator iter;
+	struct it_entry * entry;
+
+	entry = it_iter_first(&iter, &binindex->pkg_list_table);
+	while (entry != NULL) {
+		mmpkg_dump(entry->value);
+		entry = it_iter_next(&iter);
+	}
+}
+
+
 /**
- * mmpkg_get_latest() - get the latest possible version of given package
- *                      inferior to geven maximum
- * ctx:         mmapck context
+ * binindex_get_latest_pkg() - get the latest possible version of given package
+ *                             inferior to geven maximum
+ * binindex:    binary package index
  * name:        package name
  * max_version: exclusive maximum boundary
  *
  * Return: NULL on error, a pointer to the found package otherwise
  */
 LOCAL_SYMBOL
-struct mmpkg const * mmpkg_get_latest(struct mmpack_ctx * ctx, mmstr const * name,
-                                      mmstr const * max_version)
+struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr const * name,
+                                             mmstr const * max_version)
 {
 	struct it_entry * entry;
 	struct mmpkg * pkg, * latest_pkg;
 
-	assert(mmpack_ctx_is_init(ctx));
-
-	entry = indextable_lookup(&ctx->binindex, name);
+	entry = indextable_lookup(&binindex->pkg_list_table, name);
 	if (entry == NULL || entry->value == NULL)
 		return NULL;
 
@@ -679,7 +723,7 @@ exit:
  *   ...
  */
 static
-int mmpack_parse_index(yaml_parser_t* parser, struct indextable * index,
+int mmpack_parse_index(yaml_parser_t* parser, struct binindex * binindex,
                        struct indextable* installed_list)
 {
 	int exitvalue, type;
@@ -712,7 +756,7 @@ int mmpack_parse_index(yaml_parser_t* parser, struct indextable * index,
 				}
 
 				/* insert into indextable */
-				entry = indextable_lookup_create(index, pkg->name);
+				entry = indextable_lookup_create(&binindex->pkg_list_table, pkg->name);
 				assert(entry != NULL);
 
 				/* prepend new version */
@@ -747,8 +791,8 @@ exit:
 }
 
 
-static
-int index_populate(char const * index_filename, struct indextable * binindex,
+LOCAL_SYMBOL
+int binindex_populate(struct binindex* binindex, char const * index_filename,
                    struct indextable * installed)
 {
 	int rv = -1;
@@ -772,51 +816,4 @@ int index_populate(char const * index_filename, struct indextable * binindex,
 exit:
 	yaml_parser_delete(&parser);
 	return rv;
-}
-
-
-LOCAL_SYMBOL
-int binary_index_populate(struct mmpack_ctx * ctx, char const * index_filename)
-{
-	return index_populate(index_filename, &ctx->binindex, NULL);
-}
-
-
-LOCAL_SYMBOL
-void binary_index_dump(struct indextable const * binindex)
-{
-
-	struct it_iterator iter;
-	struct it_entry * entry;
-
-	entry = it_iter_first(&iter, binindex);
-	while (entry != NULL) {
-		mmpkg_dump(entry->value);
-		entry = it_iter_next(&iter);
-	}
-}
-
-
-LOCAL_SYMBOL
-void installed_index_dump(struct indextable const * installed)
-{
-	return binary_index_dump(installed);
-}
-
-
-/**
- * installed_index_populate() - parse index of installed package
- * @ctx:        mmpack context
- * @filename:   path to installed package index file
- *
- * This function will parse the index of index package and reference the
- * packages found there in the binary-index. Additionally it will fill the
- * indextable holding the list of installed package
- *
- * Return: 0 in case of success, -1 otherwise
- */
-LOCAL_SYMBOL
-int installed_index_populate(struct mmpack_ctx * ctx, char const * filename)
-{
-	return index_populate(filename, &ctx->binindex, &ctx->installed);
 }
