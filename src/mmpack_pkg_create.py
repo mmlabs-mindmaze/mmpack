@@ -4,7 +4,7 @@ Create a mmpack package
 
 Usage:
 mmpack pkg-create [--url <path or git url>] [--tag <tag>]
-                  [--prefix <prefix>]
+                  [--prefix <prefix>] [--skip-build-tests]
 
 If no url was given, look through the tree for a mmpack folder, and use the
 containing folder as root directory.
@@ -85,11 +85,15 @@ def parse_options(argv):
     parser.add_argument('-p', '--prefix',
                         action='store', dest='prefix', type=str,
                         help='prefix within which to work')
+    parser.add_argument('--skip-build-tests',
+                        action='store_true', dest='skip_tests',
+                        help='indicate that build tests must not be run')
     args = parser.parse_args(argv)
 
     ctx = {'url': args.url,
            'tag': args.tag,
-           'prefix': args.prefix}
+           'prefix': args.prefix,
+           'skip_tests': args.skip_tests}
 
     if not ctx['url']:
         ctx['url'] = find_project_root_folder()
@@ -119,7 +123,7 @@ def main():
     package.load_specfile()
     package.parse_specfile()
 
-    package.local_install(src_pkg)
+    package.local_install(src_pkg, ctx['skip_tests'])
     package.ventilate()
     package.generate_binary_packages()
 

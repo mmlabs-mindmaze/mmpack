@@ -5,5 +5,9 @@ set -e
 cd $BUILDDIR
 cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $OPTS
 make
-make test
+
+if [ "$SKIP_TESTS" != "True" ] ; then
+	make test
+fi
+
 make install DESTDIR=$DESTDIR

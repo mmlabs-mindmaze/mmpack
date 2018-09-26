@@ -16,5 +16,9 @@ fi
 cd $BUILDDIR
 $SRCDIR/configure --prefix=$PREFIX $OPTS
 make
-make check
+
+if [ "$SKIP_TESTS" != "True" ] ; then
+	make check
+fi
+
 make install DESTDIR=$DESTDIR

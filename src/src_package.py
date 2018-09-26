@@ -276,12 +276,13 @@ class SrcPackage(object):
 
         return sources_archive_name
 
-    def _build_env(self):
+    def _build_env(self, skip_tests: bool):
         build_env = os.environ.copy()
         build_env['SRCDIR'] = self._local_build_path()
         build_env['BUILDDIR'] = self._local_build_path() + '/build'
         build_env['DESTDIR'] = self._local_install_path()
         build_env['PREFIX'] = _get_install_prefix()
+        build_env['SKIP_TESTS'] = str(skip_tests)
         if self.build_options:
             build_env['OPTS'] = self.build_options
         return build_env
@@ -290,7 +291,7 @@ class SrcPackage(object):
         tmp = [x for x in self.install_files_list if not os.path.isdir(x)]
         self.install_files_list = tmp
 
-    def local_install(self, source_pkg: str) -> None:
+    def local_install(self, source_pkg: str, skip_tests: bool=False) -> None:
         ''' local installation of the package from the source package
 
         guesses build system if none given.
@@ -323,7 +324,7 @@ class SrcPackage(object):
         build_script = ['/bin/sh',
                         '{0}/build-{1}'.format(PKGDATADIR, self.build_system)]
         dprint('[shell] {0}'.format(' '.join(build_script)))
-        ret = run(build_script, stdout=PIPE, env=self._build_env())
+        ret = run(build_script, stdout=PIPE, env=self._build_env(skip_tests))
         if ret.returncode != 0:
             errmsg = 'Failed to build ' + self.name + '\n'
             errmsg += 'Stderr:\n'

@@ -4,5 +4,9 @@ set -e
 
 cd $SRCDIR
 make         $OPTS PREFIX=$PREFIX
-make check   $OPTS PREFIX=$PREFIX
+
+if [ "$SKIP_TESTS" != "True" ] ; then
+	make check   $OPTS PREFIX=$PREFIX
+fi
+
 make install $OPTS PREFIX=$PREFIX DESTDIR=$DESTDIR
