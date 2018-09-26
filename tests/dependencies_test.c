@@ -8,6 +8,7 @@
 
 #include <check.h>
 
+#include "action-solver.h"
 #include "binary-index.h"
 #include "common.h"
 #include "context.h"

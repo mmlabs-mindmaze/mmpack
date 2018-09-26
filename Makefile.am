@@ -58,6 +58,8 @@ syntax: $(pkgpython_PYTHON)
 
 
 mmpack_lib_sources = \
+	src/action-solver.c \
+	src/action-solver.h \
 	src/binary-index.c \
 	src/binary-index.h \
 	src/common.h \
