@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+#
+# check-dpkg-installed
+#
+# Copyright © 2001 Joey Hess <joeyh@debian.org>
+# Copyright © 2006-2009, 2011-2015 Guillem Jover <guillem@debian.org>
+# Copyright © 2007-2011 Raphael Hertzog <hertzog@debian.org>
+# Copyright © 2018 Mindmaze SA
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# Large parts of this program have been copied from dpkg-checkbuilddeps
+# scripts (from dpkg-dev package)
+
+use strict;
+use warnings;
+
+use Dpkg ();
+use Dpkg::ErrorHandling;
+use Dpkg::Arch qw(get_host_arch);
+use Dpkg::Deps;
+
+
+my $num_args = $#ARGV + 1;
+if ($num_args > 1) {
+	print "Usage: check-dpkg-installed [dependency_string]\n";
+        exit 1;
+}
+
+# If no argument is supplied, it is likely due to an empty dependency
+# string
+if ($num_args == 0) {
+	exit 0;
+}
+
+my $host_arch = get_host_arch();
+my $admindir = $Dpkg::ADMINDIR;
+
+
+# Parse dependency string and generate a dependency list
+my $deps = deps_parse($ARGV[0], reduce_restrictions => 1,
+                     host_arch => $host_arch);
+error('error occurred while parsing dependencies')
+	unless defined $deps;
+
+# See it the parsed dependency list is fullfilled
+my $facts = parse_status("$admindir/status");
+my @unmet = test_depends($deps, $facts);
+if (@unmet) {
+	errormsg('Unmet dependencies: %s',
+	         join(' ', map { $_->output() } @unmet));
+	exit 1;
+}
+
+
+
+# status file parser that returns a Dpkg::Deps::KnownFacts
+sub parse_status {
+	my $status = shift;
+
+	my $facts = Dpkg::Deps::KnownFacts->new();
+	local $/ = '';
+	open(my $status_fh, '<', $status)
+		or syserr(g_('cannot open %s'), $status);
+	while (<$status_fh>) {
+		next unless /^Status: .*ok installed$/m;
+
+		my ($package) = /^Package: (.*)$/m;
+		my ($version) = /^Version: (.*)$/m;
+		my ($arch) = /^Architecture: (.*)$/m;
+		my ($multiarch) = /^Multi-Arch: (.*)$/m;
+		$facts->add_installed_package($package, $version, $arch,
+		                              $multiarch);
+
+		if (/^Provides: (.*)$/m) {
+			my $provides = deps_parse($1, reduce_arch => 1, union => 1);
+			next if not defined $provides;
+			foreach (grep { $_->isa('Dpkg::Deps::Simple') }
+                                 $provides->get_deps())
+			{
+				$facts->add_provided_package($_->{package},
+                                    $_->{relation}, $_->{version},
+                                    $package);
+			}
+		}
+	}
+	close $status_fh;
+
+	return $facts;
+}
+
+# This function checks the dependencies passed in as the first parameter
+# against the list of package installed passed in second parameter known as
+# facts.
+#
+# The function return the list of unmet dependencies (which can be empty)
+sub test_depends {
+    my ($dep_list, $facts) = @_;
+
+    $dep_list->simplify_deps($facts);
+    if ($dep_list->is_empty()) {
+        return ();
+    } else {
+        return $dep_list->get_deps();
+    }
+}
