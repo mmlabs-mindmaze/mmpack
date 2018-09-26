@@ -42,6 +42,26 @@ def _is_dynamic_library(filename: str) -> str:
         return filetype(filename)
 
 
+def _unpack_deps_version(item):
+    ''' helper to allow simpler mmpack dependency syntax
+
+    expected full mmpack dependency syntax is:
+        <name>: [min_version, max_version]
+
+    this allows the additional with implicit 'any' as maximum:
+        <name>: min_version
+        <name>: any
+    '''
+    try:
+        name, minv, maxv = item
+        return (name, Version(minv), Version(maxv))
+    except ValueError:
+        name, minv = item  # if that fails, let the exception be raised
+        minv = Version(minv)
+        maxv = Version('any')
+        return (name, minv, maxv)
+
+
 class SrcPackage(object):
     # pylint: disable=too-many-instance-attributes
     '''
@@ -220,12 +240,12 @@ class SrcPackage(object):
 
                 if 'depends' in self._specs[pkg]:
                     for dep in self._specs[pkg]['depends']:
-                        name, version = list(dep.items())[0]
-                        binpkg.add_depend(name, Version(version))
+                        item = list(dep.items())[0]
+                        name, minv, maxv = _unpack_deps_version(item)
+                        binpkg.add_depend(name, minv, maxv)
                 if sysdeps_key in self._specs[pkg]:
                     for dep in self._specs[pkg][sysdeps_key]:
-                        name, version = list(dep.items())[0]
-                        binpkg.add_sysdepend(name, Version(version))
+                        binpkg.add_sysdepend(dep)
                 self._packages[pkg] = binpkg
 
     def create_source_archive(self) -> str:

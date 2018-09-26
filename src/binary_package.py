@@ -50,7 +50,13 @@ class BinaryPackage(object):
         self.tag = tag
 
         self.description = ''
-        self._dependencies = {'sysdepends': {}, 'depends': {}}
+        # * System dependencies are stored as opaque strings.
+        #   Those are supposed to be handles by system tools,
+        #   => format is a list of strings.
+        # * mmpack dependencies are expressed as the triplet
+        #   dependency name, min and max version (inclusive)
+        #   => format is a dict {depname: [min, max], ...}
+        self._dependencies = {'sysdepends': [], 'depends': {}}
         self.provides = {'elf': {}, 'pe': {}, 'python': {}}
         self.install_files = []
 
@@ -147,23 +153,27 @@ class BinaryPackage(object):
         self._gen_pyobjects(stagedir)
         return self._make_archive(instdir)
 
-    def add_depend(self, name: str, version: Version):
+    def add_depend(self, name: str, minver: Version,
+                   maxver: Version=Version('any')):
         '''
         Add mmpack package as a dependency with a minimal version
         '''
         dependencies = self._dependencies['depends']
-        curr_version = dependencies.get(name)
-        if not curr_version or curr_version < version:
-            dependencies[name] = version
+        if name not in dependencies:
+            dependencies[name] = [minver, maxver]
+        else:
+            curr_minver, curr_maxver = dependencies.get(name)
+            minver = max(curr_minver, minver)
+            maxver = min(curr_maxver, maxver)
+            dependencies[name] = [minver, maxver]
 
-    def add_sysdepend(self, name: str, version: Version):
+    def add_sysdepend(self, opaque_dep: str):
         '''
         Add a system dependencies to the binary package
         '''
         dependencies = self._dependencies['sysdepends']
-        curr_version = dependencies.get(name)
-        if not curr_version or curr_version < version:
-            dependencies[name] = version
+        if opaque_dep not in dependencies:
+            dependencies.append(opaque_dep)
 
     def _provides_symbol(self, symbol_type: str, symbol: str) -> str:
         for name, entry in self.provides[symbol_type].items():
@@ -225,4 +235,4 @@ class BinaryPackage(object):
         for inst_file in self.install_files:
             dep = scan_dependencies(inst_file)
             if dep:
-                self._dependencies['sysdepends'].update(dep)
+                self.add_sysdepend(dep)
