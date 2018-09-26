@@ -13,7 +13,7 @@ import yaml
 from workspace import Workspace
 from binary_package import BinaryPackage
 from common import shell, pushdir, popdir, dprint, iprint, get_host_arch, \
-         filetype
+         is_dynamic_library
 from elf_utils import elf_soname
 from version import Version
 from settings import PKGDATADIR
@@ -31,15 +31,6 @@ def _get_install_prefix() -> str:
         return '/m/'
     else:  # if not windows, then linux
         return '/run/mmpack/'
-
-
-def _is_dynamic_library(filename: str) -> str:
-    'Return filetype if format conforms to lib*.so* '
-    basename = os.path.basename(filename)
-    if ('/lib/' in filename
-            and basename.startswith('lib')
-            and '.so' in basename):
-        return filetype(filename)
 
 
 def _unpack_deps_version(item):
@@ -369,7 +360,7 @@ class SrcPackage(object):
         pushdir(self._local_install_path(True))
         ventilated = []
         for file in self.install_files_list:
-            libtype = _is_dynamic_library(file)
+            libtype = is_dynamic_library(file)
             if libtype == 'elf':
                 soname = elf_soname(file)
                 tmp = soname.split('.')

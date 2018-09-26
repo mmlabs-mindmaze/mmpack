@@ -10,7 +10,7 @@ from glob import glob
 from typing import List, Dict
 import tarfile
 from common import sha256sum, yaml_serialize, pushdir, popdir, dprint, \
-         filetype, remove_duplicates
+         filetype, remove_duplicates, is_dynamic_library
 from dpkg import dpkg_find_dependency
 from version import Version
 from elf_utils import elf_symbols_list, elf_soname, elf_undefined_symbols, \
@@ -237,7 +237,7 @@ class BinaryPackage(object):
         specs_provides = self._get_specs_provides(self.name)
 
         for inst_file in self.install_files:
-            file_type = filetype(inst_file)
+            file_type = is_dynamic_library(inst_file)
             if file_type == 'elf':
                 soname = elf_soname(inst_file)
                 entry = {soname: {'depends': self.name,

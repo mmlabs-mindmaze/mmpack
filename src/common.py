@@ -189,3 +189,12 @@ def get_host_arch() -> (str, str):
         dist = 'windows'
 
     return (cpu_arch, dist)
+
+
+def is_dynamic_library(filename: str) -> str:
+    'Return filetype if format conforms to lib*.so* '
+    basename = os.path.basename(filename)
+    if ('/lib/' in filename
+            and basename.startswith('lib')
+            and '.so' in basename):
+        return filetype(filename)
