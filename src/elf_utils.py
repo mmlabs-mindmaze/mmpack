@@ -93,7 +93,6 @@ def elf_soname(filename: str) -> str:
 def elf_symbols_list(filename, default_version):
     ''' Parse given elf file and return its exported symbols as a dictionary.
         dict keys are symbols name, values will be the symbols version
-        they are initialized unset (None) in this function
     '''
     try:
         elffile = ELFFile(open(filename, 'rb'))
@@ -103,9 +102,12 @@ def elf_symbols_list(filename, default_version):
     symbols = {}
     dyn = elffile.get_section_by_name('.dynsym')
     for sym in dyn.iter_symbols():
-        if (sym['st_info']['bind'] == 'STB_GLOBAL' and
-                sym['st_other']['visibility'] == 'STV_PROTECTED'):
-            symbols[sym.__dict__['name']] = default_version
+        if (sym['st_info']['bind'] == 'STB_GLOBAL'
+                and sym['st_size'] != 0
+                and (sym['st_other']['visibility'] == 'STV_PROTECTED'
+                     or sym['st_other']['visibility'] == 'STV_DEFAULT')
+                and sym['st_shndx'] != 'SHN_UNDEF'):
+            symbols[sym.name] = default_version
 
     return symbols
 
