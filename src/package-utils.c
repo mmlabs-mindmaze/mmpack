@@ -30,6 +30,12 @@ struct pkglist {
 	struct pkglist_entry head;
 };
 
+struct pkg_iter {
+	struct it_iterator iter;
+	struct it_entry * entry;
+	struct pkglist_entry* pkglist_elt;
+};
+
 
 /* standard isdigit() is locale dependent making it unnecessarily slow.
  * This macro is here to keep the semantic of isdigit() as usually known by
@@ -377,6 +383,60 @@ struct mmpkg* pkglist_add_pkg(struct pkglist* list)
 	return &entry->pkg;
 }
 
+
+/**************************************************************************
+ *                                                                        *
+ *              Iterator of packages in a binary package index            *
+ *                                                                        *
+ **************************************************************************/
+
+static
+struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
+                             const struct binindex* binindex)
+{
+	struct pkglist* pkglist;
+	struct it_entry* entry;
+	struct pkglist_entry* head;
+
+	entry = it_iter_first(&pkg_iter->iter, &binindex->pkg_list_table);
+	if (!entry)
+		return NULL;
+
+	pkglist = entry->value;
+	head = &pkglist->head;
+
+	pkg_iter->entry = entry;
+	pkg_iter->pkglist_elt = head->next;
+
+	return &head->pkg;
+}
+
+
+static
+struct mmpkg* pkg_iter_next(struct pkg_iter* pkg_iter)
+{
+	struct pkglist* pkglist;
+	struct it_entry* entry;
+	struct pkglist_entry* elt;
+
+	elt = pkg_iter->pkglist_elt;
+	if (elt)
+		goto exit;
+
+	entry = it_iter_next(&pkg_iter->iter);
+	if (!entry)
+		return NULL;
+
+	pkglist = entry->value;
+	elt = &pkglist->head;
+	pkg_iter->entry = entry;
+
+exit:
+	pkg_iter->pkglist_elt = elt->next;
+	return &elt->pkg;
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                      Binary package index                              *
@@ -410,14 +470,13 @@ void binindex_deinit(struct binindex* binindex)
 LOCAL_SYMBOL
 void binindex_dump(struct binindex const * binindex)
 {
+	struct pkg_iter iter;
+	struct mmpkg* pkg;
 
-	struct it_iterator iter;
-	struct it_entry * entry;
-
-	entry = it_iter_first(&iter, &binindex->pkg_list_table);
-	while (entry != NULL) {
-		mmpkg_dump(entry->value);
-		entry = it_iter_next(&iter);
+	pkg = pkg_iter_first(&iter, binindex);
+	while (pkg != NULL) {
+		mmpkg_dump(pkg);
+		pkg = pkg_iter_next(&iter);
 	}
 }
 
