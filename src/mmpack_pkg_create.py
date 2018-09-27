@@ -31,6 +31,7 @@ import yaml
 
 from common import shell, pushdir, popdir
 from src_package import SrcPackage
+from workspace import Workspace
 
 
 def find_project_root_folder() -> str:
@@ -108,6 +109,14 @@ def parse_options(argv):
     if ctx['srcname'].endswith('.git'):
         ctx['srcname'] = ctx['srcname'][:-4]
     ctx['srcname'] += '-' + ctx['tag']
+
+    # set workspace prefix
+    if not args.prefix:
+        try:
+            args.prefix = os.environ['MMPACK_PREFIX']
+        except KeyError:
+            pass
+    Workspace(args.prefix)
 
     return ctx
 
