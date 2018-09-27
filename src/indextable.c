@@ -128,7 +128,7 @@ uint32_t compute_hash(const void* data, int len)
 
 
 static
-struct it_bucket* indextable_get_buckethead(struct indextable* table, uint32_t hash)
+struct it_bucket* indextable_get_buckethead(const struct indextable* table, uint32_t hash)
 {
 	// num_bucket is power of 2, so hash % num == hash & (num - 1)
 	return &table->buckets[hash & (table->num_buckets - 1)];
@@ -584,7 +584,7 @@ int indextable_remove(struct indextable* table, const mmstr* key)
  * indextable_remove().
  */
 LOCAL_SYMBOL
-struct it_entry* indextable_lookup(struct indextable* table, const mmstr* key)
+struct it_entry* indextable_lookup(const struct indextable* table, const mmstr* key)
 {
 	struct it_bucket* bucket;
 	uint32_t hash;

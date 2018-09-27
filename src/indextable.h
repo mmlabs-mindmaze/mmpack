@@ -58,7 +58,7 @@ int indextable_double_size(struct indextable* table);
 struct it_entry* indextable_insert(struct indextable* table, const mmstr* key);
 int indextable_remove(struct indextable* table, const mmstr* key);
 struct it_entry* indextable_lookup_create(struct indextable* table, const mmstr* key);
-struct it_entry* indextable_lookup(struct indextable* table, const mmstr* key);
+struct it_entry* indextable_lookup(const struct indextable* table, const mmstr* key);
 
 struct it_entry* it_iter_first(struct it_iterator* iter, struct indextable const * table);
 struct it_entry* it_iter_next(struct it_iterator* iter);
