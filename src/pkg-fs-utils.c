@@ -208,8 +208,8 @@ int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
 
 	// Change destination
 	mmstr_basename(basename, path);
-	mmstrcpy_realloc(path, metadata_prefix);
-	mmstrcat_realloc(path, basename);
+	path = mmstrcpy_realloc(path, metadata_prefix);
+	path = mmstrcat_realloc(path, basename);
 
 	*pathname = path;
 
