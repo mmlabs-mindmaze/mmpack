@@ -20,6 +20,12 @@
 #include "mm-alloc.h"
 #include "package-utils.h"
 
+struct rdepends {
+	int num;
+	int nmax;
+	const mmstr** names;
+};
+
 struct pkglist_entry {
 	struct mmpkg pkg;
 	struct pkglist_entry* next;
@@ -28,6 +34,7 @@ struct pkglist_entry {
 struct pkglist {
 	const mmstr* pkg_name;
 	struct pkglist_entry head;
+	struct rdepends rdeps;
 };
 
 struct pkg_iter {
@@ -305,6 +312,60 @@ void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
 	}
 }
 
+
+/**************************************************************************
+ *                                                                        *
+ *                          Reverse dependency                            *
+ *                                                                        *
+ **************************************************************************/
+
+static
+void rdepends_init(struct rdepends* rdeps)
+{
+	*rdeps = (struct rdepends){0};
+}
+
+
+static
+void rdepends_deinit(struct rdepends* rdeps)
+{
+	free(rdeps->names);
+	rdepends_init(rdeps);
+}
+
+
+/**
+ * rdepends_add() - add a package name to an set of reverse dependencies
+ * @rdeps:      reverse dependencies to update
+ * @pkgname:    package name to add as reverse dependency
+ *
+ * This add @pkgname to the set of reverse dependencies. If @pkgname is
+ * already in the set, nothing is done.
+ */
+static
+void rdepends_add(struct rdepends* rdeps, const mmstr* pkgname)
+{
+	int i, nmax;
+
+	// Check the reverse dependency has not been added yet. The test is
+	// done simply on the pointer value because package name always
+	// come from member of pkglist unique in the binary index
+	for (i = 0; i < rdeps->num; i++)
+		if (rdeps->names[i] == pkgname)
+			return;
+
+	// Resize if too small
+	if (rdeps->num+1 > rdeps->nmax) {
+		nmax = rdeps->nmax ? rdeps->nmax * 2 : 8;
+		rdeps->names = mm_realloc(rdeps->names,
+		                          nmax * sizeof(*rdeps->names));
+		rdeps->nmax = nmax;
+	}
+
+	rdeps->names[rdeps->num++] = pkgname;
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                          Package list                                  *
@@ -325,6 +386,7 @@ struct pkglist* pkglist_create(const mmstr* name)
 	list = mm_malloc(sizeof(*list));
 	*list = (struct pkglist){.pkg_name = mmstrdup(name)};
 	mmpkg_init(&list->head.pkg, list->pkg_name);
+	rdepends_init(&list->rdeps);
 
 	return list;
 }
@@ -355,6 +417,7 @@ void pkglist_destroy(struct pkglist* list)
 
 	mmpkg_deinit(&list->head.pkg);
 	mmstr_free(list->pkg_name);
+	rdepends_deinit(&list->rdeps);
 	free(list);
 }
 
@@ -564,6 +627,42 @@ struct mmpkg* binindex_add_pkg(struct binindex* binindex, const char* name)
 	}
 
 	return pkglist_add_pkg(pkglist);
+}
+
+
+/**
+ * binindex_compute_rdepends() - compute reverse dependencies of binindex
+ * @binindex:   binary index to update
+ *
+ * This function computes the reverse dependencies in a loose way: it
+ * computes the reverse dependencies between the package list. In other
+ * words it establishes the following link: if a name A is in the reverse
+ * dependency of package list named B, there is at least one version of a
+ * package of A in the binary index @binindex that depends on one or more
+ * version of B.
+ */
+LOCAL_SYMBOL
+void binindex_compute_rdepends(struct binindex* binindex)
+{
+	struct pkg_iter iter;
+	struct mmpkg* pkg;
+	struct pkglist* pkglist;
+	struct mmpkg_dep * dep;
+
+	pkg = pkg_iter_first(&iter, binindex);
+	while (pkg != NULL) {
+		// For each dependency of package, add the package name in
+		// the reverse dependency of dependency's package list
+		dep = pkg->mpkdeps;
+		while (dep) {
+			pkglist = binindex_get_pkglist(binindex, dep->name);
+			assert(pkglist != NULL);
+			rdepends_add(&pkglist->rdeps, pkg->name);
+
+			dep = dep->next;
+		}
+		pkg = pkg_iter_next(&iter);
+	}
 }
 
 

@@ -83,6 +83,7 @@ void binindex_deinit(struct binindex* binindex);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
                       struct install_state* state);
 void binindex_dump(struct binindex const * binindex);
+void binindex_compute_rdepends(struct binindex* binindex);
 
 int install_state_init(struct install_state* state);
 void install_state_deinit(struct install_state* state);
