@@ -3,7 +3,8 @@
 set -e
 
 cd $SRCDIR
-make         $OPTS PREFIX=$PREFIX
+export LDFLAGS="-Wl,--as-needed $LDFLAGS"
+make $OPTS PREFIX=$PREFIX
 
 if [ "$SKIP_TESTS" != "True" ] ; then
 	make check   $OPTS PREFIX=$PREFIX
