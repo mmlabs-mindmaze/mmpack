@@ -482,6 +482,28 @@ void binindex_dump(struct binindex const * binindex)
 
 
 /**
+ * binindex_get_pkglist() - obtain a package list of given name
+ * @binindex:    binary index to query
+ * @pkg_name:    package name whose list is query
+ *
+ * Return: a pointer to the package list associated to @pkg_name if found.
+ * NULL if no package with name @pkg_name can be found in the binary index.
+ */
+static
+struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
+                                     const mmstr* pkg_name)
+{
+	struct it_entry* entry;
+
+	entry = indextable_lookup(&binindex->pkg_list_table, pkg_name);
+	if (entry == NULL)
+		return NULL;
+
+	return entry->value;
+}
+
+
+/**
  * binindex_get_latest_pkg() - get the latest possible version of given package
  *                             inferior to given maximum
  * binindex:    binary package index
@@ -494,17 +516,15 @@ LOCAL_SYMBOL
 struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr const * name,
                                              mmstr const * max_version)
 {
-	struct it_entry * entry;
 	struct mmpkg * pkg, * latest_pkg;
 	struct pkglist_entry* pkgentry;
 	struct pkglist* list;
 	const char* latest_version = "any";
 
-	entry = indextable_lookup(&binindex->pkg_list_table, name);
-	if (entry == NULL || entry->value == NULL)
+	list = binindex_get_pkglist(binindex, name);
+	if (list == NULL)
 		return NULL;
 
-	list = entry->value;
 	pkgentry = &list->head;
 	latest_version = "any";
 	latest_pkg = NULL;
