@@ -123,15 +123,13 @@ int dependency_already_met(struct mmpack_ctx * ctx,
                            struct mmpkg_dep const * dep)
 {
 	int i;
-	struct it_entry * entry;
 	struct mmpkg const * pkg;
 
 	assert(dep != NULL);
 
 	/* is a version of the package already installed ? */
-	entry = indextable_lookup(&ctx->installed, dep->name);
-	if (entry != NULL && entry->value != NULL) {
-		pkg = entry->value;
+	pkg = install_state_get_pkg(&ctx->installed, dep->name);
+	if (pkg != NULL) {
 		if (pkg_version_compare(pkg->version, dep->max_version) <= 0
 		    && pkg_version_compare(dep->min_version, pkg->version) <= 0)
 			return 1;

@@ -26,7 +26,7 @@ struct mmpack_opts {
 struct mmpack_ctx {
 	CURL * curl;
 	struct binindex binindex;
-	struct indextable installed;
+	struct install_state installed;
 	struct settings settings;
 	mmstr* prefix;
 	mmstr* pkgcachedir;

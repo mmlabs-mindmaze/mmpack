@@ -834,12 +834,11 @@ exit:
  */
 static
 int mmpack_parse_index(yaml_parser_t* parser, struct binindex * binindex,
-                       struct indextable* installed_list)
+                       struct install_state* state)
 {
 	int exitvalue, type;
 	yaml_token_t token;
 	struct mmpkg * pkg;
-	struct it_entry* entry;
 
 	exitvalue = -1;
 	type = -1;
@@ -864,10 +863,8 @@ int mmpack_parse_index(yaml_parser_t* parser, struct binindex * binindex,
 					goto exit;
 
 				/* Add to installed list if it is provided in argument for update */
-				if (installed_list) {
-					entry = indextable_lookup_create(installed_list, pkg->name);
-					assert(entry != NULL);
-					entry->value = pkg;
+				if (state) {
+					install_state_add_pkg(state, pkg);
 				} else if (mmpkg_check_valid(pkg, 1)) {
 					exitvalue = -1;
 					goto exit;
@@ -893,7 +890,7 @@ exit:
 
 LOCAL_SYMBOL
 int binindex_populate(struct binindex* binindex, char const * index_filename,
-                   struct indextable * installed)
+                      struct install_state* state)
 {
 	int rv = -1;
 	FILE * index_fh;
@@ -909,11 +906,98 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 	}
 
 	yaml_parser_set_input_file(&parser, index_fh);
-	rv = mmpack_parse_index(&parser, binindex, installed);
+	rv = mmpack_parse_index(&parser, binindex, state);
 
 	fclose(index_fh);
 
 exit:
 	yaml_parser_delete(&parser);
 	return rv;
+}
+
+
+/**************************************************************************
+ *                                                                        *
+ *                              Install state                             *
+ *                                                                        *
+ **************************************************************************/
+
+LOCAL_SYMBOL
+int install_state_init(struct install_state* state)
+{
+	return indextable_init(&state->idx, -1, -1);
+}
+
+
+LOCAL_SYMBOL
+void install_state_deinit(struct install_state* state)
+{
+	indextable_deinit(&state->idx);
+}
+
+
+/**
+ * install_state_get_pkg() - query the package installed under a name
+ * @state:      install state to query
+ * @name:       package name to query
+ *
+ * Return: a pointer to the struct mmpkg installed if found, NULL if no package
+ * with @name is in the install state.
+ */
+LOCAL_SYMBOL
+const struct mmpkg* install_state_get_pkg(const struct install_state* state,
+                                          const mmstr* name)
+{
+	struct it_entry* entry;
+
+	entry = indextable_lookup(&state->idx, name);
+	if (entry == NULL)
+		return NULL;
+
+	return entry->value;
+}
+
+
+/**
+ * install_state_add_pkg() - add or replace package
+ * @state:      install state to modify
+ * @pkg:        package to add to install state
+ */
+LOCAL_SYMBOL
+void install_state_add_pkg(struct install_state* state,
+                           const struct mmpkg* pkg)
+{
+	struct it_entry* entry;
+
+	entry = indextable_lookup_create(&state->idx, pkg->name);
+	entry->value = (void*)pkg;
+}
+
+
+/**
+ * install_state_rm_pkgname() - remove package from the install state
+ * @state:      install state to modify
+ * @pkgname:    name of package to remove from @state
+ */
+LOCAL_SYMBOL
+void install_state_rm_pkgname(struct install_state* state,
+                              const mmstr* pkgname)
+{
+	indextable_remove(&state->idx, pkgname);
+}
+
+
+LOCAL_SYMBOL
+void install_state_save_to_index(struct install_state* state, FILE* fp)
+{
+	struct it_iterator iter;
+	struct it_entry* entry;
+	const struct mmpkg* pkg;
+
+	entry = it_iter_first(&iter, &state->idx);
+	while (entry) {
+		pkg = entry->value;
+		mmpkg_save_to_index(pkg, fp);
+		entry = it_iter_next(&iter);
+	}
 }

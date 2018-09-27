@@ -67,7 +67,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 		return -1;
 
 	binindex_init(&ctx->binindex);
-	indextable_init(&ctx->installed, -1, -1);
+	install_state_init(&ctx->installed);
 
 	prefix = opts->prefix;
 	if (!prefix)
@@ -91,7 +91,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 		ctx->curl = NULL;
 	}
 	binindex_deinit(&ctx->binindex);
-	indextable_deinit(&ctx->installed);
+	install_state_deinit(&ctx->installed);
 
 	settings_deinit(&ctx->settings);
 }
@@ -138,10 +138,7 @@ LOCAL_SYMBOL
 int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 {
 	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH)
-	struct it_iterator iter;
-	struct it_entry* entry;
 	mmstr* installed_index_path;
-	const struct mmpkg* pkg;
 	int len;
 	FILE* fp;
 
@@ -154,14 +151,7 @@ int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 	if (!fp)
 		return -1;
 
-	// Save all package listed in ctx->installed to file
-	entry = it_iter_first(&iter, &ctx->installed);
-	while (entry) {
-		pkg = entry->value;
-		mmpkg_save_to_index(pkg, fp);
-		entry = it_iter_next(&iter);
-	}
-
+	install_state_save_to_index(&ctx->installed, fp);
 	fclose(fp);
 	return 0;
 }

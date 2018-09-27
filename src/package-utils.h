@@ -62,6 +62,11 @@ struct binindex {
 	struct indextable pkg_list_table;
 };
 
+struct install_state {
+	struct indextable idx;
+};
+
+
 void mmpkg_dump(struct mmpkg const * pkg);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
 
@@ -76,7 +81,17 @@ struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr co
 void binindex_init(struct binindex* binindex);
 void binindex_deinit(struct binindex* binindex);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
-                   struct indextable * installed);
+                      struct install_state* state);
 void binindex_dump(struct binindex const * binindex);
+
+int install_state_init(struct install_state* state);
+void install_state_deinit(struct install_state* state);
+const struct mmpkg* install_state_get_pkg(const struct install_state* state,
+                                          const mmstr* name);
+void install_state_add_pkg(struct install_state* state,
+                           const struct mmpkg* pkg);
+void install_state_rm_pkg(struct install_state* state,
+                          const struct mmpkg* pkg);
+void install_state_save_to_index(struct install_state* state, FILE* fp);
 
 #endif /* PACKAGE_UTILS_H */

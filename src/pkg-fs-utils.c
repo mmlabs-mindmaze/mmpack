@@ -388,17 +388,12 @@ int install_package(struct mmpack_ctx* ctx,
                     const struct mmpkg* pkg, const mmstr* mpkfile)
 {
 	int rv;
-	struct it_entry* entry;
 
 	rv = pkg_unpack_files(pkg, mpkfile);
 	if (rv)
 		return -1;
 
-	// Add package to the installed package list of context
-	entry = indextable_lookup_create(&ctx->installed, pkg->name);
-	assert(entry->value == NULL);
-	entry->value = (void*)pkg;
-
+	install_state_add_pkg(&ctx->installed, pkg);
 	return rv;
 }
 
