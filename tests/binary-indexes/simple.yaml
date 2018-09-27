@@ -25,8 +25,8 @@ pkg-a:
     description: ''
     source: test-pkg
     sysdepends:
-        libc6: [2.24-11+deb9u3, 2.24-11+deb9u3]
-        libgcc1: ["1:6.3.0-18+deb9u1", "1:6.3.0-18+deb9u1"]
+        - libc6 (>= 2.24-11+deb9u3)
+        - libgcc1
     version: 0.0.1
     filename: pool/pkg-a_0.0.1_amd64-gnu-linux.mpk
     size: 1

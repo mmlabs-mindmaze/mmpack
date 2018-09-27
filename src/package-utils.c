@@ -609,8 +609,7 @@ void mmpkg_insert_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep,
 static
 int mmpack_parse_dependency(yaml_parser_t* parser,
                             struct mmpkg * pkg,
-                            struct mmpkg_dep * dep,
-                            int is_system_package)
+                            struct mmpkg_dep * dep)
 {
 	int exitvalue;
 	yaml_token_t token;
@@ -647,7 +646,7 @@ exit:
 	yaml_token_delete(&token);
 
 	if (exitvalue == 0) {
-		mmpkg_insert_dependency(pkg, dep, is_system_package);
+		mmpkg_insert_dependency(pkg, dep, 0);
 	}
 
 	return exitvalue;
@@ -664,8 +663,7 @@ exit:
  */
 static
 int mmpack_parse_deplist(yaml_parser_t* parser,
-                         struct mmpkg * pkg,
-                         int is_system_package)
+                         struct mmpkg * pkg)
 {
 	int exitvalue, type;
 	yaml_token_t token;
@@ -697,7 +695,7 @@ int mmpack_parse_deplist(yaml_parser_t* parser,
 		case YAML_FLOW_SEQUENCE_START_TOKEN:
 				if (dep == NULL)
 					goto exit;
-				exitvalue = mmpack_parse_dependency(parser, pkg, dep, is_system_package);
+				exitvalue = mmpack_parse_dependency(parser, pkg, dep);
 				if (exitvalue != 0)
 					goto exit;
 				dep = NULL;
@@ -720,6 +718,58 @@ int mmpack_parse_deplist(yaml_parser_t* parser,
 				break;
 			}
 		break;
+
+		default: /* ignore */
+			break;
+		}
+
+		yaml_token_delete(&token);
+	};
+
+	/* reach end of file prematurely */
+	exitvalue = -1;
+
+exit:
+	yaml_token_delete(&token);
+	if (exitvalue != 0)
+		mmpkg_dep_destroy(dep);
+
+	return exitvalue;
+}
+
+/*
+ * parse a list of mmpack or system dependency
+ * eg:
+ *   sysdepends:
+ *     - pkg-b
+ *     - pkg-d (>= 1.0.0)
+ *     ...
+ */
+static
+int mmpack_parse_sysdeplist(yaml_parser_t* parser,
+                            struct mmpkg * pkg)
+{
+	int exitvalue;
+	yaml_token_t token;
+	struct mmpkg_dep * dep;
+	char const * name;
+
+	exitvalue = 0;
+	dep = NULL;
+	while (1) {
+		if (!yaml_parser_scan(parser, &token))
+			goto exit;
+
+		switch(token.type) {
+		case YAML_BLOCK_END_TOKEN:
+		case YAML_KEY_TOKEN:
+			goto exit;
+
+		case YAML_SCALAR_TOKEN:
+			name = (char const *) token.data.scalar.value;
+			dep = mmpkg_dep_create(name);
+			mmpkg_insert_dependency(pkg, dep, 1);
+			break;
 
 		default: /* ignore */
 			break;
@@ -779,10 +829,10 @@ int mmpack_parse_index_package(yaml_parser_t* parser, struct mmpkg * pkg)
 			switch (type) {
 			case YAML_KEY_TOKEN:
 				if (STR_EQUAL(data, data_len, "depends")) {
-					if (mmpack_parse_deplist(parser, pkg, 0) < 0)
+					if (mmpack_parse_deplist(parser, pkg) < 0)
 						goto error;
 				} else if (STR_EQUAL(data, data_len, "sysdepends")) {
-					if (mmpack_parse_deplist(parser, pkg, 1) < 0)
+					if (mmpack_parse_sysdeplist(parser, pkg) < 0)
 						goto error;
 				} else {
 					scalar_field = get_scalar_field_type(data);
