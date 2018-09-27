@@ -1229,3 +1229,84 @@ void install_state_save_to_index(struct install_state* state, FILE* fp)
 		entry = it_iter_next(&iter);
 	}
 }
+
+
+/**************************************************************************
+ *                                                                        *
+ *                      Reverse dependency iterator                       *
+ *                                                                        *
+ **************************************************************************/
+
+/**
+ * rdeps_iter_first() - initialize iterator of a set of reverse dependencies
+ * @iter:       pointer to an iterator structure
+ * @pkg:        package whose reverse dependencies are requested
+ * @binindex:   binary package index
+ * @state:      install state to use combined with @binindex, to test which
+ *              installed package is depending on @pkg
+ *
+ * Return: the pointer to first package in the set of reverse dependencies
+ * of @pkg if not empty, NULL otherwise.
+ */
+LOCAL_SYMBOL
+const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
+                                     const struct mmpkg* pkg,
+                                     const struct binindex* binindex,
+                                     const struct install_state* state)
+{
+	const struct pkglist* list;
+
+	list = binindex_get_pkglist(binindex, pkg->name);
+	assert(list != NULL);
+
+	*iter = (struct rdeps_iter) {
+		.pkg_name = pkg->name,
+		.state = state,
+		.rdeps_names = list->rdeps.names,
+		.rdeps_index = list->rdeps.num,
+	};
+
+	return rdeps_iter_next(iter);
+}
+
+
+/**
+ * rdeps_iter_next() - get next element in a set of reverse dependencies
+ * @iter:       pointer to an initialized iterator structure
+ *
+ * This function return the next reverse dependency in the iterator @iter
+ * initialized by rdeps_iter_first().
+ *
+ * NOTE: It is guaranteed than no elements in the reverse dependency set can
+ * be missed even if the install_state element passed in argument to
+ * rdeps_iter_first() is modified between two calls to rdeps_iter_next() or
+ * after rdeps_iter_first() using same @iter pointer, PROVIDED that the
+ * modification done in install state is only package removals.
+ *
+ * Return: the pointer to next package in the set of reverse dependencies if
+ * it is not the last item, NULL otherwise.
+ */
+LOCAL_SYMBOL
+const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
+{
+	const struct mmpkg* rdep_pkg;
+	const struct mmpkg_dep* dep;
+	const mmstr* rdep_name;
+
+	while (--iter->rdeps_index >= 0) {
+		rdep_name = iter->rdeps_names[iter->rdeps_index];
+		rdep_pkg = install_state_get_pkg(iter->state, rdep_name);
+
+		// Loop over dependencies of candidate package to see if it
+		// really depends on target package name
+		dep = rdep_pkg->mpkdeps;
+		while (dep) {
+			if (mmstrequal(dep->name, iter->pkg_name))
+				return rdep_pkg;
+
+			dep = dep->next;
+		}
+	}
+
+	return NULL;
+}

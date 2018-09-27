@@ -67,6 +67,14 @@ struct install_state {
 };
 
 
+struct rdeps_iter {
+	const struct install_state* state;
+	const mmstr* pkg_name;
+	const mmstr** rdeps_names;
+	int rdeps_index;
+};
+
+
 void mmpkg_dump(struct mmpkg const * pkg);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
 
@@ -94,5 +102,11 @@ void install_state_add_pkg(struct install_state* state,
 void install_state_rm_pkg(struct install_state* state,
                           const struct mmpkg* pkg);
 void install_state_save_to_index(struct install_state* state, FILE* fp);
+
+const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
+                                     const struct mmpkg* pkg,
+                                     const struct binindex* binindex,
+                                     const struct install_state* state);
+const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter);
 
 #endif /* PACKAGE_UTILS_H */
