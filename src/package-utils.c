@@ -939,6 +939,7 @@ int mmpack_parse_sysdeplist(yaml_parser_t* parser,
 			goto exit;
 
 		switch(token.type) {
+		case YAML_FLOW_SEQUENCE_END_TOKEN:
 		case YAML_BLOCK_END_TOKEN:
 		case YAML_KEY_TOKEN:
 			goto exit;

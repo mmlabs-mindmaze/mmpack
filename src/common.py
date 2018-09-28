@@ -127,7 +127,6 @@ def yaml_serialize(obj: Union[list, dict], filename: str) -> None:
     'Save object as yaml file of given name'
     with open(filename, 'w+') as outfile:
         yaml.dump(obj, outfile,
-                  default_flow_style=False,
                   allow_unicode=True,
                   indent=4)
     dprint('wrote {0}'.format(filename))
