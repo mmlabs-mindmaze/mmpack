@@ -14,15 +14,9 @@ from workspace import Workspace
 from binary_package import BinaryPackage
 from common import *
 from elf_utils import elf_soname
+from file_utils import *
 from version import Version
 from settings import PKGDATADIR
-
-
-# compiled regex for ventilating files
-BIN_PKG_FILE_RE = re.compile(r'.*(/bin/.*|/man/*\.1)')
-DOC_PKG_FILE_RE = re.compile(r'.*(/man/.*\.[^123]|/doc/.*)')
-DEVEL_PKG_FILE_RE = re.compile(r'.*(/man/.*\.(2|3)|/include/.*|\.so)')
-DEBUG_PKG_FILE_RE = re.compile(r'.*\.debug')
 
 
 def _get_install_prefix() -> str:
@@ -428,22 +422,22 @@ class SrcPackage(object):
         self._ventilate_pkg_create()
 
         tmplist = []
-        for file in self.install_files_list:
-            if BIN_PKG_FILE_RE.match(file):
+        for filename in self.install_files_list:
+            if is_binary(filename) or is_exec_manpage(filename):
                 pkg = self._binpkg_get_create(bin_pkg_name)
-            elif DOC_PKG_FILE_RE.match(file):
+            elif is_documentation(filename) or is_doc_manpage(filename):
                 pkg = self._binpkg_get_create(doc_pkg_name)
-            elif DEVEL_PKG_FILE_RE.match(file):
+            elif is_include(filename) or is_devel_manpage(filename):
                 pkg = self._binpkg_get_create(devel_pkg_name)
-            elif DEBUG_PKG_FILE_RE.match(file):
+            elif is_debugsym(filename):
                 pkg = self._binpkg_get_create(debug_pkg_name)
             else:
                 # skip this. It will be put in a default fallback
                 # package at the end of the ventilation process
                 continue
 
-            pkg.install_files.append(file)
-            tmplist.append(file)
+            pkg.install_files.append(filename)
+            tmplist.append(filename)
 
         tmplist = [x for x in self.install_files_list if x not in tmplist]
         self.install_files_list = tmplist
