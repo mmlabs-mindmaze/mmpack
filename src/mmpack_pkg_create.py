@@ -116,7 +116,8 @@ def parse_options(argv):
             args.prefix = os.environ['MMPACK_PREFIX']
         except KeyError:
             pass
-    Workspace(args.prefix)
+    if args.prefix:
+        Workspace().prefix = args.prefix
 
     return ctx
 
