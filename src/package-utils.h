@@ -101,8 +101,8 @@ const struct mmpkg* install_state_get_pkg(const struct install_state* state,
                                           const mmstr* name);
 void install_state_add_pkg(struct install_state* state,
                            const struct mmpkg* pkg);
-void install_state_rm_pkg(struct install_state* state,
-                          const struct mmpkg* pkg);
+void install_state_rm_pkgname(struct install_state* state,
+                              const mmstr* pkgname);
 void install_state_save_to_index(struct install_state* state, FILE* fp);
 
 const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
