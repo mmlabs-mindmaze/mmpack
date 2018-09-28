@@ -19,6 +19,61 @@
 #include "pkg-fs-utils.h"
 #include "utils.h"
 
+struct filelist_elt {
+	struct filelist_elt* next;
+	struct mmstring str;
+};
+
+struct filelist {
+	struct filelist_elt* head;
+};
+
+
+/**************************************************************************
+ *                                                                        *
+ *                              file list                                 *
+ *                                                                        *
+ **************************************************************************/
+static
+void filelist_init(struct filelist* files)
+{
+	*files = (struct filelist) {0};
+}
+
+
+static
+void filelist_deinit(struct filelist* files)
+{
+	struct filelist_elt *elt, *next;
+
+	elt = files->head;
+
+	while (elt) {
+		next = elt->next;
+		free(elt);
+		elt = next;
+	}
+}
+
+
+static
+int filelist_add_file(struct filelist* files, const mmstr* path)
+{
+	struct filelist_elt* elt;
+	int pathlen;
+
+	pathlen = mmstrlen(path);
+	elt = mm_malloc(sizeof(*elt) + pathlen + 1);
+	elt->str.max = pathlen;
+	mmstrcpy(elt->str.buf, path);
+
+	// push element to list
+	elt->next = files->head;
+	files->head = elt;
+
+	return 0;
+}
+
 
 /**************************************************************************
  *                                                                        *
@@ -284,6 +339,107 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
 
 /**************************************************************************
  *                                                                        *
+ *                          Packages files removal                        *
+ *                                                                        *
+ **************************************************************************/
+
+#define UNPACK_MAXPATH  512
+
+/**
+ * pkg_list_rm_files() - list files a package to be removed
+ * @pkg:        package about to be removed
+ * @files:      pointer to initialized filelist to populate
+ *
+ * Return: 0 in case of success, -1 otherwise with error
+ */
+static
+int pkg_list_rm_files(const struct mmpkg* pkg, struct filelist* files)
+{
+	int len, rv = -1;
+	FILE* fp;
+	mmstr* path;
+	mmstr* metadata_prefix;
+
+	path = mmstr_malloc(UNPACK_MAXPATH);
+
+	// Set the metadata prefix (var/lib/mmpack/metadata/<pkgname>.)
+	len = mmstrlen(metadata_dirpath) + mmstrlen(pkg->name) + 2;
+	metadata_prefix = mmstr_alloca(len);
+	mmstr_join_path(metadata_prefix, metadata_dirpath, pkg->name);
+	mmstrcat_cstr(metadata_prefix, ".");
+
+	// Open package's sha256sums file to get file list
+	mmstrcpy(path, metadata_prefix);
+	mmstrcat_cstr(path, "sha256sums");
+	fp = fopen(path, "rb");
+	if (fp == NULL) {
+		mm_raise_from_errno("Can't open %s", path);
+		goto exit;
+	}
+
+	// Add immediately the path of sha256sums
+	filelist_add_file(files, path);
+
+	while (fscanf(fp, "%"MM_STRINGIFY(UNPACK_MAXPATH)"[^:]: %*s ", path) == 1) {
+		mmstr_update_len_from_buffer(path);
+
+		// Check the path has not been truncated
+		if (mmstrlen(path) == UNPACK_MAXPATH) {
+			mm_raise_error(ENAMETOOLONG, "Path of file"
+			               " installed by %s has been truncated"
+			               " (truncated path: %s)",
+			               pkg->name, path);
+			goto exit;
+		}
+
+		if (redirect_metadata(&path, metadata_prefix) == SKIP_UNPACK)
+			continue;
+
+		// Skip folder (path terminated with '/')
+		if (is_path_separator(path[mmstrlen(path)-1]))
+			continue;
+
+		filelist_add_file(files, path);
+	}
+
+	fclose(fp);
+	rv = 0;
+
+exit:
+	mmstr_free(path);
+	return rv;
+}
+
+
+static
+int rm_files_from_list(struct filelist* files)
+{
+	struct filelist_elt *elt;
+	const mmstr* path;
+
+	elt = files->head;
+
+	while (elt) {
+		path = elt->str.buf;
+
+		if (mm_unlink(path)) {
+			// If this has failed because the file is not found,
+			// nothing prevent us to continue (maybe the user
+			// has removed the file by mistake... but this
+			// should not block). If something else, let's halt
+			if (mm_get_lasterror_number() != ENOENT)
+				return -1;
+		}
+
+		elt = elt->next;
+	}
+
+	return 0;
+}
+
+
+/**************************************************************************
+ *                                                                        *
  *                            Packages retrieval                          *
  *                                                                        *
  **************************************************************************/
@@ -399,6 +555,38 @@ int install_package(struct mmpack_ctx* ctx,
 }
 
 
+/**
+ * remove_package() - remove a package from the prefix
+ * @ctx:        mmpack context
+ * @pkg:        package to remove
+ *
+ * This function removes a package from a prefix hierarchy. The list of
+ * installed package of context @ctx will be updated.
+ *
+ * NOTE: this function assumes current directory is the prefix path
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+static
+int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
+{
+	int rv = 0;
+	struct filelist files;
+
+	filelist_init(&files);
+
+	if (  pkg_list_rm_files(pkg, &files)
+	   || rm_files_from_list(&files)) {
+		rv = -1;
+	}
+
+	filelist_deinit(&files);
+
+	install_state_rm_pkgname(&ctx->installed, pkg->name);
+	return rv;
+}
+
+
 static
 int apply_action(struct mmpack_ctx* ctx, struct action* act)
 {
@@ -412,7 +600,7 @@ int apply_action(struct mmpack_ctx* ctx, struct action* act)
 		break;
 
 	case REMOVE_PKG:
-		rv = mm_raise_error(ENOTSUP, "Package removal unavailable");
+		rv = remove_package(ctx, act->pkg);
 		break;
 
 	default:
