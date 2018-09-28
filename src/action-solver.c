@@ -452,6 +452,70 @@ error:
 }
 
 
+/**
+ * remove_package() - remove a package and its reverse dependencies
+ * @pkgname:    name of package to remove
+ * @binindex:   index of binary packages
+ * @state:      temporary install state used to track removed packages
+ * @stack:
+ */
+static
+void remove_package(const mmstr* pkgname, struct binindex* binindex,
+                    struct install_state* state, struct action_stack** stack)
+{
+	struct rdeps_iter iter;
+	const struct mmpkg* rdep_pkg;
+	const struct mmpkg* pkg;
+
+	// Check this has not already been done
+	pkg = install_state_get_pkg(state, pkgname);
+	if (!pkg)
+		return;
+
+	// Mark it now remove from state (this avoid infinite loop in the
+	// case of circular dependency)
+	install_state_rm_pkgname(state, pkgname);
+
+	// First remove recursively the reverse dependencies
+	rdep_pkg = rdeps_iter_first(&iter, pkg, binindex, state);
+	while (rdep_pkg) {
+		remove_package(rdep_pkg->name, binindex, state, stack);
+		rdep_pkg = rdeps_iter_next(&iter);
+	}
+
+	*stack = mmpack_action_stack_push(*stack, REMOVE_PKG, pkg);
+}
+
+
+/**
+ * mmpkg_get_remove_list() -  compute a remove order
+ * @ctx:     the mmpack context
+ * @reqlist: requested package list to be removed
+ *
+ * Returns: an action stack of the actions to be applied in order to remove
+ * the list of package in @reqlist in the right order.
+ */
+LOCAL_SYMBOL
+struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
+                                           const struct pkg_request* reqlist)
+{
+	struct install_state state;
+	struct action_stack * actions = NULL;
+	const struct pkg_request* req;
+
+	actions = mmpack_action_stack_create();
+
+	// Copy the current install state of prefix context in order to
+	// simulate the operation done on installed package list
+	install_state_copy(&state, &ctx->installed);
+
+	for (req = reqlist; req; req = req->next)
+		remove_package(req->name, &ctx->binindex, &state, &actions);
+
+	return actions;
+}
+
+
 LOCAL_SYMBOL
 void mmpack_action_stack_dump(struct action_stack * stack)
 {

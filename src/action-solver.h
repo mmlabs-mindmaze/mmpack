@@ -40,6 +40,8 @@ struct pkg_request {
 
 struct action_stack * mmpkg_get_install_list(struct mmpack_ctx * ctx,
                                              const struct pkg_request* req);
+struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
+                                           const struct pkg_request* reqlist);
 
 struct action_stack * mmpack_action_stack_create(void);
 void mmpack_action_stack_destroy(struct action_stack * stack);
