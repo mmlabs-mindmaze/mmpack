@@ -73,6 +73,8 @@ def _mmpack_elf_deps(soname: str,
                                                  symbols)
                 return (pkgname, version, Version('any'))
 
+    raise FileNotFoundError('no installed mmpack package provides ' + soname)
+
 
 class BinaryPackage(object):
     # pylint: disable=too-many-instance-attributes
