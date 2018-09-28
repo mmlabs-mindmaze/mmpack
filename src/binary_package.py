@@ -296,7 +296,10 @@ class BinaryPackage(object):
             mmpack_dep, minv, maxv = _mmpack_elf_deps(soname, symbol_list)
             self.add_depend(mmpack_dep, minv, maxv)
             return
-        except FileNotFoundError:
+
+        # FileNotFoundError: invalid guessed symbol file name
+        # KeyError: file does not contain soname
+        except (FileNotFoundError, KeyError):
             pass
 
         # provided by the host system
