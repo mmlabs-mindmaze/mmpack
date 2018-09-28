@@ -15,6 +15,18 @@ typedef enum {
 
 os_id get_os_id(void);
 
+static inline
+int is_path_separator(char c)
+{
+#if defined(_WIN32)
+	return (c == '\\' || c == '/');
+#else
+	return (c == '/');
+#endif
+}
+
+
+
 #define MMPACK_STATEDIR_RELPATH "var/lib/mmpack"
 #define INSTALLED_INDEX_RELPATH MMPACK_STATEDIR_RELPATH "/installed.yaml"
 #define REPO_INDEX_RELPATH      MMPACK_STATEDIR_RELPATH "/binindex.yaml"

@@ -31,17 +31,6 @@
  *                                                                        *
  **************************************************************************/
 static
-int is_path_separator(char c)
-{
-#if defined(_WIN32)
-	return (c == '\\' || c == '/');
-#else
-	return (c == '/');
-#endif
-}
-
-
-static
 const char* get_last_nonsep_ptr(const mmstr* path)
 {
 	const char* c = path + mmstrlen(path) - 1;
