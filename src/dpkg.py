@@ -209,7 +209,7 @@ def dpkg_parse_symbols(filename: str, target_soname: str,
             minver = ''
         dependency_template = dependency_template.replace('#MINVER#', minver)
 
-    return dependency_template
+    return dependency_template.strip()
 
 
 def dpkg_find_dependency(soname: str, symbol_list: List[str]) -> str:
