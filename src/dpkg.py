@@ -8,32 +8,10 @@ import re
 from glob import glob
 from typing import List
 
+from common import parse_soname
 from elf_utils import elf_symbols_list
 from settings import DPKG_METADATA_PREFIX
 from version import Version
-
-
-def parse_soname(soname: str) -> (str, str):
-    ''''helper to parse soname
-    www.debian.org/doc/debian-policy/ch-sharedlibs.html
-    '''
-    # try format: <name>.so.<major-version>
-    try:
-        name, major = soname.split('.so.')
-        return (name, major)
-    except ValueError:
-        pass
-
-    # try format: <name>-<version>.so
-    # return the full version (not only the major part)
-    if soname.endswith('.so'):
-        soname = soname[:-len('.so')]
-        split = soname.split('-')
-        name = '-'.join(split[0:-1])
-        version = split[-1]
-        return (name, version)
-
-    raise ValueError('failed to parse SONAME: ' + soname)
 
 
 def dpkg_find_shlibs_file(target_soname: str):

@@ -355,9 +355,8 @@ class SrcPackage(object):
             libtype = is_dynamic_library(file)
             if libtype == 'elf':
                 soname = elf_soname(file)
-                tmp = soname.split('.')
-                tmp.remove('so')
-                binpkgname = ''.join(tmp)  # libxxx.0.1.2 -> libxxx<ABI>
+                name, version = parse_soname(soname)
+                binpkgname = name + version  # libxxx.0.1.2 -> libxxx<ABI>
                 pkg = self._binpkg_get_create(binpkgname, 'library')
                 pkg.install_files.append(file)
                 ventilated.append(file)

@@ -202,3 +202,26 @@ def is_dynamic_library(filename: str) -> str:
     basename = os.path.basename(filename)
     if filename.startswith('lib/lib') and '.so' in basename:
         return filetype(filename)
+
+
+def parse_soname(soname: str) -> (str, str):
+    ''''helper to parse soname
+    www.debian.org/doc/debian-policy/ch-sharedlibs.html
+    '''
+    # try format: <name>.so.<major-version>
+    try:
+        name, major = soname.split('.so.')
+        return (name, major)
+    except ValueError:
+        pass
+
+    # try format: <name>-<version>.so
+    # return the full version (not only the major part)
+    if soname.endswith('.so'):
+        soname = soname[:-len('.so')]
+        split = soname.split('-')
+        name = '-'.join(split[0:-1])
+        version = split[-1]
+        return (name, version)
+
+    raise ValueError('failed to parse SONAME: ' + soname)
