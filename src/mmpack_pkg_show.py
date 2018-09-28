@@ -60,7 +60,7 @@ def main():
 
     print('Files:')
     for file in pkg_archive.getnames():
-        if not file.startswith('./MMPACK'):
+        if 'MMPACK' not in file:
             print('\t' + file)
 
 

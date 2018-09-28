@@ -325,7 +325,7 @@ class SrcPackage(object):
         popdir()  # local build directory
 
         pushdir(self._local_install_path(True))
-        self.install_files_list = glob('./**', recursive=True)
+        self.install_files_list = glob('**', recursive=True)
         self._strip_dirs_from_install_files()
         popdir()
 

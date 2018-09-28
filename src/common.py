@@ -192,9 +192,14 @@ def get_host_arch() -> (str, str):
 
 
 def is_dynamic_library(filename: str) -> str:
-    'Return filetype if format conforms to lib*.so* '
+    '''Return filetype if format conforms to a library
+
+    eg. lib/libxxx.so.1.2.3
+    - expects there is no leading './' in the pathname
+    - is directly in the 'lib' directory
+    - name starts with 'lib'
+    - contains .so within name (maybe not at the end)
+    '''
     basename = os.path.basename(filename)
-    if ('/lib/' in filename
-            and basename.startswith('lib')
-            and '.so' in basename):
+    if filename.startswith('lib/lib') and '.so' in basename:
         return filetype(filename)
