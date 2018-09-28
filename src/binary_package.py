@@ -9,12 +9,10 @@ from os.path import isfile
 from glob import glob
 from typing import List, Dict
 import tarfile
-from common import sha256sum, yaml_serialize, pushdir, popdir, dprint, \
-         filetype, remove_duplicates, is_dynamic_library
+from common import *
 from dpkg import dpkg_find_dependency
 from version import Version
-from elf_utils import elf_symbols_list, elf_soname, elf_undefined_symbols, \
-         elf_soname_deps
+from elf_utils import *
 import yaml
 from workspace import Workspace
 

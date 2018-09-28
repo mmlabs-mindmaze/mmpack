@@ -12,8 +12,7 @@ from typing import List
 import yaml
 from workspace import Workspace
 from binary_package import BinaryPackage
-from common import shell, pushdir, popdir, dprint, iprint, get_host_arch, \
-         is_dynamic_library
+from common import *
 from elf_utils import elf_soname
 from version import Version
 from settings import PKGDATADIR
