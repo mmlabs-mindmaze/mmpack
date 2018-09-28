@@ -1164,6 +1164,14 @@ int install_state_init(struct install_state* state)
 
 
 LOCAL_SYMBOL
+int install_state_copy(struct install_state* restrict dst,
+                       const struct install_state* restrict src)
+{
+	return indextable_copy(&dst->idx, &src->idx);
+}
+
+
+LOCAL_SYMBOL
 void install_state_deinit(struct install_state* state)
 {
 	indextable_deinit(&state->idx);

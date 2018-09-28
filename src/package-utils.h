@@ -94,6 +94,8 @@ void binindex_dump(struct binindex const * binindex);
 void binindex_compute_rdepends(struct binindex* binindex);
 
 int install_state_init(struct install_state* state);
+int install_state_copy(struct install_state* restrict dst,
+                       const struct install_state* restrict src);
 void install_state_deinit(struct install_state* state);
 const struct mmpkg* install_state_get_pkg(const struct install_state* state,
                                           const mmstr* name);

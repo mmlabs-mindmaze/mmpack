@@ -53,6 +53,8 @@ struct indextable {
 };
 
 int indextable_init(struct indextable* table, int capacity, int num_extra);
+int indextable_copy(struct indextable* restrict table,
+                    const struct indextable* restrict src);
 void indextable_deinit(struct indextable* table);
 int indextable_double_size(struct indextable* table);
 struct it_entry* indextable_insert(struct indextable* table, const mmstr* key);

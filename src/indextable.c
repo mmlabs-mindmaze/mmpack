@@ -416,6 +416,32 @@ int indextable_init(struct indextable* table, int capacity, int num_extra)
 
 
 /**
+ * indextable_copy() - initialize index table with a copy of a table
+ * @table:      pointer to an index table structure
+ * @src:        index table from which the data must be copied
+ *
+ * This function allocates and initializes the internals of an index table
+ * @table as copy of @src.
+ *
+ * Return: 0 in case of success, -1 if allocation failed
+ */
+LOCAL_SYMBOL
+int indextable_copy(struct indextable* restrict table,
+                    const struct indextable* restrict src)
+{
+	size_t size;
+
+	*table = *src;
+
+	size = table->buckets_len_max * sizeof(*table->buckets);
+	table->buckets = mm_aligned_alloc(64, size);
+	memcpy(table->buckets, src->buckets, size);
+
+	return 0;
+}
+
+
+/**
  * indextable_deinit() - free up internals of index table
  * @table:         initialized index table
  */
