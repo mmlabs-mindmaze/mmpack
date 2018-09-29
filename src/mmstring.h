@@ -72,6 +72,22 @@ void mmstr_setlen(mmstr* str, int len)
 }
 
 
+/**
+ * mmstr_update_len_from_buffer() - update len when modified externally
+ * @str:        string to update
+ *
+ * This function updates the len field of the mmstring when the string
+ * buffer has been modified externally.
+ */
+static inline NONNULL_ARGS(1)
+void mmstr_update_len_from_buffer(mmstr* str)
+{
+	struct mmstring* s = MMSTR_HDR(str);
+
+	s->len = strlen(s->buf);
+}
+
+
 static inline
 mmstr* mmstr_init(void* ptr, int maxlen)
 {
