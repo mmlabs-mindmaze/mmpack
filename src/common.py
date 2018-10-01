@@ -104,7 +104,7 @@ def git_root():
 
 def remove_duplicates(lst):
     'remove duplicates from list (in place)'
-    for elt in lst:
+    for elt in list(lst):
         while lst and lst.count(elt) > 1:
             lst.remove(elt)
 
