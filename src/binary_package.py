@@ -34,13 +34,12 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     return tarinfo
 
 
-def _mmpack_elf_minversion(soname: str, metadata_file: str,
+def _mmpack_elf_minversion(metadata: Dict[str, Dict[str, Version]],
                            symbols: List[str]) -> Version:
     min_version = None
-    metadata = yaml.load(open(metadata_file, 'rb').read())
     for sym in list(symbols):  # iterate over a shallow copy of the list
-        if sym in metadata[soname]['symbols']:
-            metadata_version = Version(metadata[soname]['symbols'][sym])
+        if sym in metadata['symbols']:
+            metadata_version = Version(metadata['symbols'][sym])
             if min_version:
                 min_version = max(min_version, metadata_version)
             else:
@@ -53,25 +52,22 @@ def _mmpack_elf_minversion(soname: str, metadata_file: str,
 def _mmpack_elf_deps(soname: str,
                      symbols: List[str]) -> (str, Version, Version):
     wrk = Workspace()
-
-    pkg_name_guess = soname.split('.')[0] + soname.split('.')[2]
     symbols_path = wrk.prefix + '/var/lib/mmpack/metadata/'
-    mmpack_installed_file = wrk.prefix + '/var/lib/mmpack/installed.yaml'
-    try:  # guess the package name from the soname
-        symbols_filename = symbols_path + pkg_name_guess + '.symbols'
-        version = _mmpack_elf_minversion(soname, symbols_filename, symbols)
-        return (pkg_name_guess, version, Version('any'))
-    except FileNotFoundError:
-        symfiles = glob(symbols_path + '**.symbols')
-        mmpack_installed = yaml.load(open(mmpack_installed_file, 'rb').read())
-        if not mmpack_installed:
-            pass
-        for pkgname in mmpack_installed:
-            symbols_filename = symbols_path + pkgname + '.symbols'
-            if symbols_filename in symfiles:
-                version = _mmpack_elf_minversion(soname, symbols_filename,
-                                                 symbols)
-                return (pkgname, version, Version('any'))
+
+    # Start list by symbol file based on a guess of package name that might
+    # provide soname and add all other symbol file that can be found
+    libname, soversion = parse_soname(soname)
+    symfiles = [symbols_path + libname + soversion + '.symbols']
+    symfiles.append(glob(symbols_path + '**.symbols'))
+
+    for symfile in symfiles:
+        try:
+            metadata = yaml.load(open(symfile, 'rb').read())
+        except FileNotFoundError:
+            continue
+        if soname in metadata:
+            version = _mmpack_elf_minversion(metadata[soname], symbols)
+            return (metadata[soname]['depends'], version, Version('any'))
 
     raise FileNotFoundError('no installed mmpack package provides ' + soname)
 
