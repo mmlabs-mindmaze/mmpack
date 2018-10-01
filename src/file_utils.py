@@ -19,6 +19,8 @@ def is_manpage(filename: str) -> int:
     match = re.match(r'.*man\d?/.*(\d)', filename)
     if match:
         return int(match.groups(0)[0])
+    else:
+        return -1
 
 
 def is_exec_manpage(filename: str) -> bool:
