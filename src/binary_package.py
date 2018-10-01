@@ -64,6 +64,8 @@ def _mmpack_elf_deps(soname: str,
     except FileNotFoundError:
         symfiles = glob(symbols_path + '**.symbols')
         mmpack_installed = yaml.load(open(mmpack_installed_file, 'rb').read())
+        if not mmpack_installed:
+            pass
         for pkgname in mmpack_installed:
             symbols_filename = symbols_path + pkgname + '.symbols'
             if symbols_filename in symfiles:
