@@ -272,6 +272,7 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
 
 		rv = pkg_unpack_entry(a, entry, path);
 	} while (rv == 0);
+	mmstr_free(path);
 
 	// Cleanup
 	archive_read_close(a);
