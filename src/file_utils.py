@@ -4,6 +4,7 @@ Helpers to find out what files are
 '''
 
 import re
+from os.path import islink
 
 
 def is_manpage(filename: str) -> int:
@@ -56,3 +57,13 @@ def is_documentation(filename: str) -> bool:
 def is_binary(filename: str) -> bool:
     'returns whether a file should be part of a binary package'
     return 'bin/' in filename
+
+
+def is_libdevel(filename: str) -> bool:
+    'returns whether a file is soname symlink'
+    return filename.endswith('.so') and islink(filename)
+
+
+def is_devel(path: str) -> bool:
+    'returns whether a file is development files'
+    return is_libdevel(path) or is_include(path) or is_devel_manpage(path)

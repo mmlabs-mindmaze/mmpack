@@ -425,7 +425,7 @@ class SrcPackage(object):
                 pkg = self._binpkg_get_create(bin_pkg_name)
             elif is_documentation(filename) or is_doc_manpage(filename):
                 pkg = self._binpkg_get_create(doc_pkg_name)
-            elif is_include(filename) or is_devel_manpage(filename):
+            elif is_devel(filename):
                 pkg = self._binpkg_get_create(devel_pkg_name)
             elif is_debugsym(filename):
                 pkg = self._binpkg_get_create(debug_pkg_name)
