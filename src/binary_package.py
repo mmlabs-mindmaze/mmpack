@@ -119,6 +119,10 @@ class BinaryPackage(object):
         return specs_provides
 
     def _gen_info(self, pkgdir: str):
+        '''
+        This generate the info file and sha256sums. It must be the last step
+        before calling _make_archive().
+        '''
         pushdir(pkgdir)
 
         # Create file containing of hashes of all installed files
@@ -189,9 +193,9 @@ class BinaryPackage(object):
 
         dprint('link {0} in {1}'.format(self.name, stagedir))
         self._populate(instdir, stagedir)
-        self._gen_info(stagedir)
         self._gen_symbols(stagedir)
         self._gen_pyobjects(stagedir)
+        self._gen_info(stagedir)
         return self._make_archive(instdir)
 
     def add_depend(self, name: str, minver: Version,
