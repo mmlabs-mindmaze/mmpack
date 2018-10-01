@@ -134,7 +134,7 @@ class BinaryPackage(object):
 
             # Add file with checksum
             cksums[filename] = sha256sum(filename)
-        yaml_serialize(cksums, 'MMPACK/sha256sums')
+        yaml_serialize(cksums, 'MMPACK/sha256sums', use_block_style=True)
 
         # Create info file
         info = {'version': self.version,

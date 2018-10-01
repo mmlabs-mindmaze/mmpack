@@ -123,10 +123,16 @@ def filetype(filename):
     return os.path.splitext(filename)[1][1:].strip().lower()
 
 
-def yaml_serialize(obj: Union[list, dict], filename: str) -> None:
+def yaml_serialize(obj: Union[list, dict], filename: str,
+                   use_block_style: bool=False) -> None:
     'Save object as yaml file of given name'
+    default_flow_style = None
+    if use_block_style:
+        default_flow_style = False
+
     with open(filename, 'w+') as outfile:
         yaml.dump(obj, outfile,
+                  default_flow_style=default_flow_style,
                   allow_unicode=True,
                   indent=4)
     dprint('wrote {0}'.format(filename))
