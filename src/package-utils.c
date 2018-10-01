@@ -909,7 +909,7 @@ int mmpack_parse_deplist(yaml_parser_t* parser,
 
 exit:
 	yaml_token_delete(&token);
-	if (exitvalue != 0)
+	if (dep != NULL)  /* dep is set to NULL after being used */
 		mmpkg_dep_destroy(dep);
 
 	return exitvalue;
