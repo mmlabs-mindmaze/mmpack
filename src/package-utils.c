@@ -240,6 +240,8 @@ int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache)
 LOCAL_SYMBOL
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 {
+	const struct mmpkg_dep* dep;
+
 	fprintf(fp, "%s:\n"
 	            "    version: %s\n"
 	            "    source: %s\n"
@@ -249,8 +251,11 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 	fprintf(fp, "    depends:");
 	mmpkg_dep_save_to_index(pkg->mpkdeps, fp, 2/*indentation level*/);
 
-	fprintf(fp, "    sysdepends:");
-	mmpkg_dep_save_to_index(pkg->sysdeps, fp, 2/*indentation level*/);
+	fprintf(fp, "    sysdepends: [");
+	for (dep = pkg->sysdeps; dep != NULL; dep = dep->next) {
+		fprintf(fp, "'%s'%s", dep->name, dep->next ? ", " : "");
+	}
+	fprintf(fp, "]\n");
 }
 
 
