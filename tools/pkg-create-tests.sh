@@ -10,7 +10,7 @@ deactivate 2>/dev/null
 set -ex
 
 cd $(dirname $0)/../build
-source venv/bin/activate
+. venv/bin/activate
 
 URL_LIST='
 ssh://git@intranet.mindmaze.ch:7999/~ganne/mmlib.git

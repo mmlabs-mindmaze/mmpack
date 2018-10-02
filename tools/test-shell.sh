@@ -3,25 +3,26 @@
 # usage:
 # test-shell.sh [repository name]
 
-REPOSITORY=${1:-"mindmaze-srv-fr-01"}
+REPOSITORY=${1:-"http://mindmaze-srv-fr-01"}
+MMPACK_PREFIX=$(mktemp -d)
 
 {
 cat << EOF
 # generate random prefix name
-export MMPACK_PREFIX=$(mktemp -d)
+export MMPACK_PREFIX=${MMPACK_PREFIX}
 
 # system environment execution
-PATH="${MMPACK_PREFIX}/bin:${PATH}"
-LD_LIBRARY_PATH="${MMPACK_PREFIX}/lib:${LD_LIBRARY_PATH}"
-LIBRARY_PATH="${MMPACK_PREFIX}/lib:${LIBRARY_PATH}"
-C_INCLUDE_PATH="${MMPACK_PREFIX}/include:${C_INCLUDE_PATH}"
+export PATH="${MMPACK_PREFIX}/bin:${PATH}"
+export LD_LIBRARY_PATH="${MMPACK_PREFIX}/lib:${LD_LIBRARY_PATH}"
+export LIBRARY_PATH="${MMPACK_PREFIX}/lib:${LIBRARY_PATH}"
+export CPATH="${MMPACK_PREFIX}/include:${CPATH}"
 
 # source mmpack python virtualenv
 . venv/bin/activate
 
 # create mmpack prefix
-mmpack mkprefix "http://$REPOSITORY"
+mmpack mkprefix "$REPOSITORY"
 
 exec < /dev/tty
 EOF
-} | sh -i
+} | $SHELL -i
