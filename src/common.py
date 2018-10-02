@@ -231,3 +231,8 @@ def parse_soname(soname: str) -> (str, str):
         return (name, version)
 
     raise ValueError('failed to parse SONAME: ' + soname)
+
+
+def yaml_load(filename: str):
+    'helper: load yaml file with BasicLoader'
+    return yaml.load(open(filename, 'rb').read(), Loader=yaml.BaseLoader)

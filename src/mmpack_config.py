@@ -6,6 +6,7 @@ TODOC
 import sys
 from pprint import pprint
 import yaml
+from common import yaml_load
 from workspace import Workspace
 
 
@@ -18,7 +19,7 @@ def show():
     'dump whole configuration'
     wrk = Workspace()
     try:
-        config = yaml.load(open(wrk.config, 'rb').read())
+        config = yaml_load(wrk.config)
     except IOError:
         # could not find config file
         # create one and return it

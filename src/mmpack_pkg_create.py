@@ -27,9 +27,8 @@ import os
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from glob import glob
-import yaml
 
-from common import shell, pushdir, popdir
+from common import shell, pushdir, popdir, yaml_load
 from src_package import SrcPackage
 from workspace import Workspace
 
@@ -65,7 +64,7 @@ def read_from_mmpack_files(root_dir: str, key: str) -> str:
         return None
 
     for specfile in glob('*.yaml'):
-        specs = yaml.load(open(specfile, 'rb').read())
+        specs = yaml_load(specfile)
         if key in specs:
             return specs[key]
 

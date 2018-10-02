@@ -9,7 +9,6 @@ import re
 from subprocess import PIPE, run
 import tarfile
 from typing import List
-import yaml
 from workspace import Workspace
 from binary_package import BinaryPackage
 from common import *
@@ -113,7 +112,7 @@ class SrcPackage(object):
             specfile = '{0}/{1}/mmpack/specs'.format(wrk.sources,
                                                      self.srcname)
         dprint('loading specfile: ' + specfile)
-        self._specs = yaml.load(open(specfile, 'rb').read())
+        self._specs = yaml_load(specfile)
 
     def _get_matching_files(self, pcre: str) -> List[str]:
         ''' given some pcre, return the list of matching files from

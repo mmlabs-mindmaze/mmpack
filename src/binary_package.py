@@ -62,7 +62,7 @@ def _mmpack_elf_deps(soname: str,
 
     for symfile in symfiles:
         try:
-            metadata = yaml.load(open(symfile, 'rb').read())
+            metadata = yaml_load(symfile)
         except FileNotFoundError:
             continue
         if soname in metadata:
@@ -107,7 +107,7 @@ class BinaryPackage(object):
                                     pkgname)
         dprint('reading symbols from ' + provide_spec_name)
         try:
-            specs_provides = yaml.load(open(provide_spec_name, 'rb').read())
+            specs_provides = yaml_load(provide_spec_name)
         except FileNotFoundError:
             # return an empty dict if nothing has been provided
             specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
