@@ -316,7 +316,7 @@ class BinaryPackage(object):
 
     def gen_dependencies(self, binpkgs: List['BinaryPackages']):
         'Go through the install files and search for dependencies.'
-        deps = []
+        deps = set()
         symbols = []
         for inst_file in self.install_files:
             if os.path.islink(inst_file):
@@ -328,9 +328,8 @@ class BinaryPackage(object):
             file_type = filetype(inst_file)
             if file_type == 'elf':
                 symbols += elf_undefined_symbols(inst_file)
-                deps += elf_soname_deps(inst_file)
+                deps.update(elf_soname_deps(inst_file))
 
-        remove_duplicates(deps)
         remove_duplicates(symbols)
         for dep in deps:
             self._gen_elf_deps(dep, symbols, binpkgs)

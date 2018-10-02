@@ -17,14 +17,14 @@ def elf_soname_deps(filename):
     'Parse given elf file and return its dependency soname list'
     elffile = ELFFile(open(filename, 'rb'))
 
-    librarylist = []
+    libraryset = set()
     for section in elffile.iter_sections():
         if isinstance(section, DynamicSection):
             for tag in section.iter_tags():
                 if tag.entry.d_tag == 'DT_NEEDED':
-                    librarylist.append(tag.needed)
+                    libraryset.add(tag.needed)
 
-    return sorted(librarylist)
+    return libraryset
 
 
 def elf_undefined_symbols(filename):
