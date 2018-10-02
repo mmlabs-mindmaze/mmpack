@@ -89,11 +89,11 @@ class BinaryPackage(object):
         self.description = ''
         # * System dependencies are stored as opaque strings.
         #   Those are supposed to be handles by system tools,
-        #   => format is a list of strings.
+        #   => format is a set of strings.
         # * mmpack dependencies are expressed as the triplet
         #   dependency name, min and max version (inclusive)
         #   => format is a dict {depname: [min, max], ...}
-        self._dependencies = {'sysdepends': [], 'depends': {}}
+        self._dependencies = {'sysdepends': set(), 'depends': {}}
         self.provides = {'elf': {}, 'pe': {}, 'python': {}}
         self.install_files = set()
 
@@ -212,9 +212,7 @@ class BinaryPackage(object):
         '''
         Add a system dependencies to the binary package
         '''
-        dependencies = self._dependencies['sysdepends']
-        if opaque_dep not in dependencies:
-            dependencies.append(opaque_dep)
+        self._dependencies['sysdepends'].add(opaque_dep)
 
     def _provides_symbol(self, symbol_type: str, symbol: str) -> str:
         for name, entry in self.provides[symbol_type].items():
