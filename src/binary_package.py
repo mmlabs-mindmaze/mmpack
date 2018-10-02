@@ -95,7 +95,7 @@ class BinaryPackage(object):
         #   => format is a dict {depname: [min, max], ...}
         self._dependencies = {'sysdepends': [], 'depends': {}}
         self.provides = {'elf': {}, 'pe': {}, 'python': {}}
-        self.install_files = []
+        self.install_files = set()
 
     def _get_specs_provides(self,
                             pkgname: str) -> Dict[str, Dict[str, Version]]:

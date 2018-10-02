@@ -8,7 +8,7 @@ from glob import glob
 import re
 from subprocess import PIPE, run
 import tarfile
-from typing import List
+from typing import Set
 from workspace import Workspace
 from binary_package import BinaryPackage
 from common import *
@@ -69,7 +69,7 @@ class SrcPackage(object):
         self._specs = None  # raw dictionary version of the specfile
         # dict of (name, BinaryPackage) generated from the source package
         self._packages = {}
-        self.install_files_list = []
+        self.install_files_set = set()
         self._metadata_files_list = []
 
     def _local_build_path(self) -> str:
@@ -116,18 +116,18 @@ class SrcPackage(object):
         dprint('loading specfile: ' + specfile)
         self._specs = yaml_load(specfile)
 
-    def _get_matching_files(self, pcre: str) -> List[str]:
-        ''' given some pcre, return the list of matching files from
-            self.install_files_list.
-            Those files are removed from the source install file list.
+    def _get_matching_files(self, pcre: str) -> Set[str]:
+        ''' given some pcre, return the set of matching files from
+            self.install_files_set.
+            Those files are removed from the source install file set.
         '''
-        matching_list = []
-        for inst_file in self.install_files_list:
+        matching_set = set()
+        for inst_file in self.install_files_set:
             if re.match(pcre, inst_file):
-                matching_list.append(inst_file)
-                self.install_files_list.remove(inst_file)
+                matching_set.add(inst_file)
 
-        return matching_list
+        self.install_files_set.difference_update(matching_set)
+        return matching_set
 
     def _format_description(self, binpkg: BinaryPackage, pkgname: str,
                             pkg_type: str=None):
@@ -273,8 +273,8 @@ class SrcPackage(object):
         return build_env
 
     def _strip_dirs_from_install_files(self):
-        tmp = [x for x in self.install_files_list if not os.path.isdir(x)]
-        self.install_files_list = tmp
+        tmp = {x for x in self.install_files_set if not os.path.isdir(x)}
+        self.install_files_set = tmp
 
     def local_install(self, source_pkg: str, skip_tests: bool=False) -> None:
         ''' local installation of the package from the source package
@@ -319,7 +319,7 @@ class SrcPackage(object):
         popdir()  # local build directory
 
         pushdir(self._local_install_path(True))
-        self.install_files_list = glob('**', recursive=True)
+        self.install_files_set = set(glob('**', recursive=True))
         self._strip_dirs_from_install_files()
         popdir()
 
@@ -327,15 +327,10 @@ class SrcPackage(object):
         ''' Ventilates files explicited in the specfile before
             giving them to the default target.
         '''
-        ventilated = []
         for binpkg in self._packages:
             for regex in self._packages[binpkg]['files']:
-                for file in self.install_files_list:
-                    if re.match(regex, file):
-                        self._packages[binpkg].install_files.append(file)
-                        ventilated.append(file)
-        tmp = [x for x in self.install_files_list if x not in ventilated]
-        self.install_files_list = tmp
+                matching_set = self._get_matching_files(regex)
+                self._packages[binpkg].install_files.update(matching_set)
 
         # check that at least on file is present in each of the custom packages
         # raise an error if the described package was expecting one
@@ -351,27 +346,26 @@ class SrcPackage(object):
             the creation of a new package.
             Eg. a dynamic library will be given its own binary package
         '''
-        ventilated = []
-        for file in self.install_files_list:
+        ventilated = set()
+        for file in self.install_files_set:
             libtype = is_dynamic_library(file)
             if libtype == 'elf':
                 soname = elf_soname(file)
                 name, version = parse_soname(soname)
                 binpkgname = name + version  # libxxx.0.1.2 -> libxxx<ABI>
                 pkg = self._binpkg_get_create(binpkgname, 'library')
-                pkg.install_files.append(file)
-                ventilated.append(file)
+                pkg.install_files.add(file)
+                ventilated.add(file)
 
                 # add the soname file to the same package
                 so_filename = os.path.dirname(file) + '/' + soname
-                pkg.install_files.append(so_filename)
-                ventilated.append(so_filename)
+                pkg.install_files.add(so_filename)
+                ventilated.add(so_filename)
             elif libtype == 'pe':
                 errmsg = '{}: pe format not supported'.format(file)
                 raise NotImplementedError(errmsg)
 
-        tmplist = [x for x in self.install_files_list if x not in ventilated]
-        self.install_files_list = tmplist
+        self.install_files_set.difference_update(ventilated)
 
     def _get_fallback_package(self, bin_pkg_name: str) -> BinaryPackage:
         '''
@@ -422,8 +416,8 @@ class SrcPackage(object):
         self._ventilate_custom_packages()
         self._ventilate_pkg_create()
 
-        tmplist = []
-        for filename in self.install_files_list:
+        tmpset = set()
+        for filename in self.install_files_set:
             if is_binary(filename) or is_exec_manpage(filename):
                 pkg = self._binpkg_get_create(bin_pkg_name)
             elif is_documentation(filename) or is_doc_manpage(filename):
@@ -437,16 +431,15 @@ class SrcPackage(object):
                 # package at the end of the ventilation process
                 continue
 
-            pkg.install_files.append(filename)
-            tmplist.append(filename)
+            pkg.install_files.add(filename)
+            tmpset.add(filename)
 
-        tmplist = [x for x in self.install_files_list if x not in tmplist]
-        self.install_files_list = tmplist
+        self.install_files_set.difference_update(tmpset)
 
         # deal with the remaining files:
-        if self.install_files_list:
+        if self.install_files_set:
             pkg = self._get_fallback_package(bin_pkg_name)
-            pkg.install_files += self.install_files_list
+            pkg.install_files.update(self.install_files_set)
 
         popdir()
 
