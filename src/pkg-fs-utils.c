@@ -254,11 +254,16 @@ int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
 	mmstr* basename = mmstr_map_on_array(tmp_data);
 	mmstr* path = *pathname;
 
-	if (!STR_STARTS_WITH(path, (size_t)mmstrlen(path), "./MMPACK"))
+	if (mmstrlen(path) == 0)
+		return SKIP_UNPACK;
+
+	// Keep path NOT starting with MMPACK untouched
+	if (!STR_STARTS_WITH(path, (size_t)mmstrlen(path), "MMPACK"))
 		return 0;
 
-	if (  mmstrequal(path, mmstr_alloca_from_cstr("./MMPACK/info"))
-	   || mmstrequal(path, mmstr_alloca_from_cstr("./MMPACK/")))
+	// MMPACK/info is not installed and MMPACK/ must not be created
+	if (  mmstrequal(path, mmstr_alloca_from_cstr("MMPACK/info"))
+	   || mmstrequal(path, mmstr_alloca_from_cstr("MMPACK/")))
 		return SKIP_UNPACK;
 
 	// Change destination
@@ -318,10 +323,11 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
 			break;
 		}
 
-		// Obtain the pathname of the file being extracted and
-		// redirect to metadata folder if it is a metadata file
+		// Obtain the pathname (with leading "./" stripped) of the
+		// file being extracted and redirect to metadata folder if
+		// it is a metadata file
 		entry_path = archive_entry_pathname_utf8(entry);
-		path = mmstrcpy_cstr_realloc(path, entry_path);
+		path = mmstrcpy_cstr_realloc(path, entry_path+2);
 		if (redirect_metadata(&path, metadata_prefix) == SKIP_UNPACK)
 			continue;
 
