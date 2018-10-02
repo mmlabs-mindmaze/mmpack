@@ -348,7 +348,6 @@ class SrcPackage(object):
             the creation of a new package.
             Eg. a dynamic library will be given its own binary package
         '''
-        pushdir(self._local_install_path(True))
         ventilated = []
         for file in self.install_files_list:
             libtype = is_dynamic_library(file)
@@ -370,7 +369,6 @@ class SrcPackage(object):
 
         tmplist = [x for x in self.install_files_list if x not in ventilated]
         self.install_files_list = tmplist
-        popdir()
 
     def _get_fallback_package(self, bin_pkg_name: str) -> BinaryPackage:
         '''
@@ -410,6 +408,8 @@ class SrcPackage(object):
           There is no conflict between the source and the binary package names
           because the packages types are different.
         '''
+        pushdir(self._local_install_path(True))
+
         bin_pkg_name = self.name
         doc_pkg_name = self.name + '-doc'
         devel_pkg_name = self.name + '-devel'
@@ -444,6 +444,8 @@ class SrcPackage(object):
         if self.install_files_list:
             pkg = self._get_fallback_package(bin_pkg_name)
             pkg.install_files += self.install_files_list
+
+        popdir()
 
     def generate_binary_packages(self):
         'create all the binary packages'
