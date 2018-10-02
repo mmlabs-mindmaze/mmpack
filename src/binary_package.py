@@ -57,8 +57,8 @@ def _mmpack_elf_deps(soname: str,
     # Start list by symbol file based on a guess of package name that might
     # provide soname and add all other symbol file that can be found
     libname, soversion = parse_soname(soname)
-    symfiles = [symbols_path + libname + soversion + '.symbols']
-    symfiles.append(glob(symbols_path + '**.symbols'))
+    symfiles = {symbols_path + libname + soversion + '.symbols'}
+    symfiles.update(set(glob(symbols_path + '**.symbols')))
 
     for symfile in symfiles:
         try:
