@@ -7,7 +7,7 @@ packaging as mmpack file.
 import os
 from os.path import isfile
 from glob import glob
-from typing import List, Dict
+from typing import List, Dict, Set
 import tarfile
 from common import *
 from dpkg import dpkg_find_dependency
@@ -35,7 +35,7 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
 
 
 def _mmpack_elf_minversion(metadata: Dict[str, Dict[str, Version]],
-                           symbols: List[str]) -> Version:
+                           symbols: Set[str]) -> Version:
     min_version = None
     for sym in list(symbols):  # iterate over a shallow copy of the list
         if sym in metadata['symbols']:
@@ -50,7 +50,7 @@ def _mmpack_elf_minversion(metadata: Dict[str, Dict[str, Version]],
 
 
 def _mmpack_elf_deps(soname: str,
-                     symbols: List[str]) -> (str, Version, Version):
+                     symbols: Set[str]) -> (str, Version, Version):
     wrk = Workspace()
     symbols_path = wrk.prefix + '/var/lib/mmpack/metadata/'
 
@@ -266,7 +266,7 @@ class BinaryPackage(object):
                                      'is greater than current version ({2})'
                                      .format(symbol, version, self.version))
 
-    def _gen_elf_deps(self, soname: str, symbol_list: List[str],
+    def _gen_elf_deps(self, soname: str, symbol_set: Set[str],
                       binpkgs: List['BinaryPackages']):
         '''
             Args:
@@ -275,8 +275,7 @@ class BinaryPackage(object):
         # provided in the same package
         if soname in self.provides['elf']:
             for sym in self.provides['elf'][soname]:
-                if sym in symbol_list:
-                    symbol_list.remove(sym)
+                symbol_set.discard(sym)
             return
 
         # provided by one of the packages being generated at the same time
@@ -285,13 +284,12 @@ class BinaryPackage(object):
                 self.add_depend(pkg.name, self.version, self.version)
 
                 for sym in pkg.provides['elf'][soname]:
-                    if sym in symbol_list:
-                        symbol_list.remove(sym)
+                    symbol_set.discard(sym)
                 return
 
         # provided by another mmpack package present in the prefix
         try:
-            mmpack_dep, minv, maxv = _mmpack_elf_deps(soname, symbol_list)
+            mmpack_dep, minv, maxv = _mmpack_elf_deps(soname, symbol_set)
             self.add_depend(mmpack_dep, minv, maxv)
             return
 
@@ -301,7 +299,7 @@ class BinaryPackage(object):
             pass
 
         # provided by the host system
-        dpkg_dep = dpkg_find_dependency(soname, symbol_list)
+        dpkg_dep = dpkg_find_dependency(soname, symbol_set)
         if not dpkg_dep:
             # <soname> dependency could not be met with any available means
             errmsg = 'Could not find package providing ' + soname
@@ -317,7 +315,7 @@ class BinaryPackage(object):
     def gen_dependencies(self, binpkgs: List['BinaryPackages']):
         'Go through the install files and search for dependencies.'
         deps = set()
-        symbols = []
+        symbols = set()
         for inst_file in self.install_files:
             if os.path.islink(inst_file):
                 target = os.path.join(os.path.dirname(inst_file),
@@ -327,10 +325,9 @@ class BinaryPackage(object):
 
             file_type = filetype(inst_file)
             if file_type == 'elf':
-                symbols += elf_undefined_symbols(inst_file)
+                symbols.update(elf_undefined_symbols(inst_file))
                 deps.update(elf_soname_deps(inst_file))
 
-        remove_duplicates(symbols)
         for dep in deps:
             self._gen_elf_deps(dep, symbols, binpkgs)
             if not symbols:

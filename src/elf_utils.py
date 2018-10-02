@@ -28,7 +28,7 @@ def elf_soname_deps(filename):
 
 
 def elf_undefined_symbols(filename):
-    '''Parse given elf file and return its undefined symbols list
+    '''Parse given elf file and return its undefined symbols set
 
     We require 3 sections for the elf file:
         - .gnu.version_r: lists the needed libraries version
@@ -42,7 +42,7 @@ def elf_undefined_symbols(filename):
     '''
     elffile = ELFFile(open(filename, 'rb'))
 
-    undefined_symbols_list = []
+    undefined_symbols_set = set()
 
     gnu_version_r = elffile.get_section_by_name('.gnu.version_r')
 
@@ -69,9 +69,9 @@ def elf_undefined_symbols(filename):
                 # objdump and readelf note this as <name>@@<version>
                 # debian notes this with only a single @ in between
                 symbol_str += '@' + version_name
-            undefined_symbols_list += [symbol_str]
+            undefined_symbols_set.add(symbol_str)
 
-    return undefined_symbols_list
+    return undefined_symbols_set
 
 
 def elf_soname(filename: str) -> str:
