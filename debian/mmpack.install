@@ -1,0 +1,3 @@
+/usr/bin/mmpack
+/usr/lib/*/mmpack/mount-mmpack-prefix
+/usr/share/mmpack/check-dpkg-installed

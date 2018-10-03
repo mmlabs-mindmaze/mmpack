@@ -1,0 +1,5 @@
+/usr/bin/mmpack-build
+/usr/bin/mmpack-createrepo
+/usr/lib/python3*
+/usr/share/bash-completion/completions/mmpack-build_completion
+/usr/share/mmpack/build-*
