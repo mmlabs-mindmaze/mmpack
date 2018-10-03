@@ -1,0 +1,44 @@
+# vi:syntax=sh
+#
+# completion script for mmpack commands (to be sourced)
+_mmpack_list_commands() {
+	mmpack --help | sed -n 's/^\s*mmpack \[options\] \([^ ]*\).*/\1/p'
+}
+_mmpack_options() {
+	local short_opts=$(mmpack --help | sed -n 's/\s*-\([a-zA-Z]\),.*/-\1/p')
+	local long_opts=$(mmpack --help | sed -n 's/.*--\([^= ]*\).*/--\1/p')
+	echo "$short_opts" "$long_opts"
+}
+
+_mmpack_install_completion() {
+	sed -n 's/^\([a-zA-Z0-9_-]*\):$/\1/p' $MMPACK_PREFIX/var/lib/mmpack/binindex.yaml
+}
+
+_mmpack_remove_completion() {
+	sed -n 's/^\([a-zA-Z0-9_-]*\):$/\1/p' $MMPACK_PREFIX/var/lib/mmpack/installed.yaml
+}
+
+_mmpack_subcmd_completion() {
+	case "$1" in
+	"install") _mmpack_install_completion ;;
+	"remove") _mmpack_remove_completion ;;
+	*) ;;
+	esac
+}
+
+_mmpack_completion() {
+    COMPREPLY=()
+    local mmpack_commands="$(_mmpack_list_commands)"
+    # completion for mmpack
+    if [ $COMP_CWORD -eq 1 ]; then
+        mmpack_options="$(_mmpack_options )"
+        COMPREPLY=( $( compgen -W "$mmpack_commands $mmpack_options" -- "${COMP_WORDS[1]}" ) )
+        return
+    fi
+    # completion for mmpack <command>'s options
+    local cmd="$(echo "${COMP_WORDS[1]}" | tr -d '[:space:]')"
+    if [ "$(echo $mmpack_commands | grep -w "$cmd")" ] ; then
+        COMPREPLY=( $( compgen -W "$(_mmpack_subcmd_completion "$cmd")" -- "${COMP_WORDS[COMP_CWORD]}" ) )
+    fi
+}
+complete -F _mmpack_completion mmpack
