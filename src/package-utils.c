@@ -1310,6 +1310,8 @@ const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
 	while (--iter->rdeps_index >= 0) {
 		rdep_name = iter->rdeps_names[iter->rdeps_index];
 		rdep_pkg = install_state_get_pkg(iter->state, rdep_name);
+		if (!rdep_pkg)
+			continue;
 
 		// Loop over dependencies of candidate package to see if it
 		// really depends on target package name
