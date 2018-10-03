@@ -12,5 +12,5 @@
 
 int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[]);
 
-#endif /* MMPACK_UPDATE_H */
+#endif /* MMPACK_INSTALL_H */
 
