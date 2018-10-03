@@ -264,6 +264,7 @@ class SrcPackage(object):
         build_env['BUILDDIR'] = self._local_build_path() + '/build'
         build_env['DESTDIR'] = self._local_install_path()
         build_env['PREFIX'] = _get_install_prefix()
+        build_env['LD_RUN_PATH'] = os.path.join(_get_install_prefix(), 'lib')
         build_env['SKIP_TESTS'] = str(skip_tests)
         if self.build_options:
             build_env['OPTS'] = self.build_options
