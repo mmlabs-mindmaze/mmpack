@@ -74,7 +74,8 @@ int main(int argc, char* argv[])
 		rv = mmpack_update_all(&ctx);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "install")) {
 		rv = mmpack_install(&ctx, cmd_argc, cmd_argv);
-	} else if (STR_EQUAL(cmd, strlen(cmd), "remove")) {
+	} else if (STR_EQUAL(cmd, strlen(cmd), "remove")
+	           || STR_EQUAL(cmd, strlen(cmd), "uninstall")) {
 		rv = mmpack_remove(&ctx, cmd_argc, cmd_argv);
 	} else {
 		fprintf(stderr, "Invalid command: %s."
