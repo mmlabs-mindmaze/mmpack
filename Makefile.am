@@ -76,6 +76,8 @@ mmpack_lib_sources = \
 	src/mmpack-mkprefix.h \
 	src/mmpack-remove.c \
 	src/mmpack-remove.h \
+	src/mmpack-search.c \
+	src/mmpack-search.h \
 	src/mmpack-update.c \
 	src/mmpack-update.h \
 	src/mmstring.h \

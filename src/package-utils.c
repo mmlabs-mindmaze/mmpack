@@ -510,6 +510,28 @@ exit:
  *                      Binary package index                              *
  *                                                                        *
  **************************************************************************/
+
+LOCAL_SYMBOL
+int binindex_foreach(struct binindex * binindex,
+                     int (*cb)(const struct mmpkg*, void *),
+                     void * data)
+{
+	int rv;
+	struct pkg_iter iter;
+	struct mmpkg* pkg;
+
+	pkg = pkg_iter_first(&iter, binindex);
+	while (pkg != NULL) {
+		rv = cb(pkg, data);
+		if (rv != 0)
+			return rv;
+		pkg = pkg_iter_next(&iter);
+	}
+
+	return 0;
+}
+
+
 LOCAL_SYMBOL
 void binindex_init(struct binindex* binindex)
 {
