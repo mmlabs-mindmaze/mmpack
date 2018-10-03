@@ -130,6 +130,7 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	   || binindex_populate(&ctx->binindex, repo_index_path, NULL))
 		return -1;
 
+	binindex_compute_rdepends(&ctx->binindex);
 	return 0;
 }
 
