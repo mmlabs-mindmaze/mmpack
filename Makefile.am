@@ -22,6 +22,7 @@ am__v_RM_0 = -rm -f
 am__v_RM_1 = -@rm -vf
 
 bin_PROGRAMS = mmpack
+pkglibexec_PROGRAMS = mount-mmpack-prefix
 bin_SCRIPTS = mmpack-build
 dist_bin_SCRIPTS = src/mmpack-createrepo
 dist_pkgdata_SCRIPTS = src/check-dpkg-installed
@@ -106,6 +107,10 @@ mmpack_LDADD = \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
 	$(LIBARCHIVE_LIBS) \
+	$(eol)
+
+mount_mmpack_prefix_SOURCES = \
+	src/mount-prefix-linux.c \
 	$(eol)
 
 mmpack-build: src/mmpack-build.in Makefile
