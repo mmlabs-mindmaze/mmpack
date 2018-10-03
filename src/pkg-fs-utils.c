@@ -309,7 +309,8 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
 	}
 
 	// Loop over each entry in the archive and process them
-	do {
+	rv = 0;
+	while (rv == 0) {
 		r = archive_read_next_header(a, &entry);
 		if (r == ARCHIVE_EOF) {
 			rv = READ_ARCHIVE_EOF;
@@ -332,7 +333,7 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
 			continue;
 
 		rv = pkg_unpack_entry(a, entry, path);
-	} while (rv == 0);
+	}
 	mmstr_free(path);
 
 	// Cleanup
