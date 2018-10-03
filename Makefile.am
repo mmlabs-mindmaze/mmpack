@@ -101,6 +101,7 @@ pkgdata_DATA = \
 	src/build-autotools \
 	src/build-cmake \
 	src/build-makefile \
+	src/build-python \
 	$(eol)
 
 mmpack_LDADD = \

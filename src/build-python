@@ -1,0 +1,25 @@
+# vi:syntax=sh
+#
+# doc:
+# https://packaging.python.org/guides/distributing-packages-using-setuptools/#id72
+
+set -e
+
+tmp_instdir=$(mktemp -d)
+
+if [ "$SKIP_TESTS" != "True" ] ; then
+	python3 $SRCDIR/setup.py --no-user-cfg check
+fi
+
+# create a binary distribution into a temporary directory
+# we will get a tar file which we then unpack into DESTDIR
+#
+# python distutils options
+# setup.py bdist : create a built (binary) distribution
+# --no-user-cfg : ignore pydistutils.cfg in your home directory
+# --bdist-base : temporary directory for creating built distributions
+# --dist-dir : directory to put final built distributions in
+# --format : select the types of built distribution to generate
+python3 $SRCDIR/setup.py --no-user-cfg bdist --bdist-base $BUILDDIR --dist-dir $tmp_instdir --format=tar
+tar xf $tmp_instdir/* -C $DESTDIR
+rm -rf $tmp_instdir

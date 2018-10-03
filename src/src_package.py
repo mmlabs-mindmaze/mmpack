@@ -99,6 +99,8 @@ class SrcPackage(object):
             self.build_system = 'cmake'
         elif os.path.exists('Makefile'):
             self.build_system = 'makefile'
+        elif os.path.exists('setup.py'):
+            self.build_system = 'python'
         else:
             raise RuntimeError('could not guess project build system')
 
