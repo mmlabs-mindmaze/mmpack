@@ -69,9 +69,15 @@ def is_pkgconfig(filename: str) -> bool:
     return 'pkgconfig/' in filename
 
 
+def is_cmake_pkg_desc(filename: str) -> bool:
+    'returns whether a file is a CMake package file descriptor'
+    return filename.endswith('.cmake')
+
+
 def is_devel(path: str) -> bool:
     'returns whether a file is development files'
     return (is_libdevel(path)
             or is_include(path)
             or is_devel_manpage(path)
-            or is_pkgconfig(path))
+            or is_pkgconfig(path)
+            or is_cmake_pkg_desc(path))
