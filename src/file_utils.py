@@ -64,6 +64,14 @@ def is_libdevel(filename: str) -> bool:
     return filename.endswith('.so') and islink(filename)
 
 
+def is_pkgconfig(filename: str) -> bool:
+    'returns whether a file a pkgconfig file'
+    return 'pkgconfig/' in filename
+
+
 def is_devel(path: str) -> bool:
     'returns whether a file is development files'
-    return is_libdevel(path) or is_include(path) or is_devel_manpage(path)
+    return (is_libdevel(path)
+            or is_include(path)
+            or is_devel_manpage(path)
+            or is_pkgconfig(path))
