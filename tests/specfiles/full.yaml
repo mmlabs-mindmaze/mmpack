@@ -34,11 +34,11 @@ custom-package:
   - custom-dep: any
   - other-custom-dep: 2.0.0
   sysdepends-debian:
-  - debian-dep: any
-  - other-debian-dep: 2.0.0
+  - debian-dep
+  - other-debian-dep
   sysdepends-msys:
-  - windows-dep: any
-  - other-windows-dep: 2.0.0
+  - windows-dep
+  - other-windows-dep
   description: |
     This should overload the general description.
     Meaning this is the only description for this package
@@ -57,10 +57,10 @@ custom-package:
 #                     'files': ['/custom-package-file-1',
 #                               '/custom-package-file-2',
 #                               '.*/custom-package-regex/.*'],
-#                     'sysdepends-debian': [{'debian-dep': 'any'},
-#                                           {'other-debian-dep': '2.0.0'}],
-#                     'sysdepends-msys': [{'windows-dep': 'any'},
-#                                         {'other-windows-dep': '2.0.0'}]},
+#                     'sysdepends-debian': ['debian-dep',
+#                                           'other-debian-dep'],
+#                     'sysdepends-msys': ['windows-dep',
+#                                         'other-windows-dep']},
 #  'full': {'depends': [{'util-stuff': 'any'}, {'other-util-stuff': '1.0.0'}],
 #           'description': 'This should follow the general description\n',
 #           'files': ['/full-binary-package-file-2',
