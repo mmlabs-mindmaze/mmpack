@@ -36,7 +36,7 @@ struct keyval {
 static
 int randint(int min, int max)
 {
-	return min + random() % (max - min + 1);
+	return min + rand() % (max - min + 1);
 }
 
 
@@ -106,7 +106,7 @@ void testdata_setup(void)
 		key = mmstr_init(strdata, keylen);
 		fill_random_key(key);
 
-		keyvals[i].lval = random();
+		keyvals[i].lval = rand();
 		keyvals[i].key = key;
 
 		strdata += MMSTR_NEEDED_SIZE(keylen);
