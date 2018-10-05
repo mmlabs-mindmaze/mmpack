@@ -116,9 +116,16 @@ mmpack_LDADD = \
 	$(LIBARCHIVE_LIBS) \
 	$(eol)
 
-mount_mmpack_prefix_SOURCES = \
-	src/mount-prefix-linux.c \
-	$(eol)
+
+mount_mmpack_prefix_SOURCES =
+
+if OS_KERNEL_LINUX
+mount_mmpack_prefix_SOURCES += src/mount-prefix-linux.c
+endif
+
+if OS_KERNEL_NT
+mount_mmpack_prefix_SOURCES += src/mount-prefix-nt.c
+endif
 
 mmpack-build: src/mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@
