@@ -32,7 +32,6 @@ typedef enum {
 } pkg_state;
 
 int pkg_version_compare(char const * v1, char const * v2);
-pkg_state get_local_system_install_state(char const * name, char const * version);
 
 struct mmpkg {
 	mmstr const * name;
