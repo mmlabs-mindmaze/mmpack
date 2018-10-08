@@ -133,8 +133,9 @@ mmpack-build: src/mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@
 	$(AM_V_GEN)chmod a+x $@
 
+CYGPATH_PKGDATADIR=$(shell $(CYGPATH_W) '$(pkgdatadir)' | sed 's/\\/\\\\/g')
 src/settings.py: src/settings.py.in Makefile
-	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' < $< > $@
+	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(CYGPATH_PKGDATADIR),g' < $< > $@
 
 #
 # TESTS RULES

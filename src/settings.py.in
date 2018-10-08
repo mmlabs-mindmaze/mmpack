@@ -10,9 +10,9 @@ try:
 except KeyError:
     CFG_HOME = os.environ['HOME'] + '/.config'
 
-CONFIG_PATH = CFG_HOME + "/mmpack-config.yml"
+CONFIG_PATH = CFG_HOME + '/mmpack-config.yml'
 
 DPKG_METADATA_PREFIX = '/var/lib/dpkg/info'
 
 # variables taken from autotools
-PKGDATADIR = "<pkgdatadir>"
+PKGDATADIR = r'<pkgdatadir>'
