@@ -3,12 +3,14 @@
 set -e
 set -x
 
-testdir=$(pwd)
+testdir=$(pwd)/venv
+python_minor=$(python3 -c 'import sys; print(sys.version_info.minor)')
+python_testdir="$testdir/lib/python3.${python_minor}"
 
-virtualenv --python=python3 --system-site-packages venv
-make install prefix=$testdir/venv
-. venv/bin/activate
+mkdir -p venv
+make install prefix=$testdir
+export PYTHONPATH="$python_testdir:$python_testdir/site-packages:$PYTHONPATH"
 
 cd $srcdir
 
-python tests/pytests.py
+python3 tests/pytests.py
