@@ -34,7 +34,7 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     return tarinfo
 
 
-def _mmpack_elf_minversion(metadata: Dict[str, Dict[str, Version]],
+def _mmpack_lib_minversion(metadata: Dict[str, Dict[str, Version]],
                            symbols: Set[str]) -> Version:
     min_version = None
     for sym in list(symbols):  # iterate over a shallow copy of the list
@@ -49,7 +49,7 @@ def _mmpack_elf_minversion(metadata: Dict[str, Dict[str, Version]],
     return min_version
 
 
-def _mmpack_elf_deps(soname: str,
+def _mmpack_lib_deps(soname: str,
                      symbols: Set[str]) -> (str, Version, Version):
     wrk = Workspace()
     symbols_path = wrk.prefix + '/var/lib/mmpack/metadata/'
@@ -66,7 +66,7 @@ def _mmpack_elf_deps(soname: str,
         except FileNotFoundError:
             continue
         if soname in metadata:
-            version = _mmpack_elf_minversion(metadata[soname], symbols)
+            version = _mmpack_lib_minversion(metadata[soname], symbols)
             return (metadata[soname]['depends'], version, Version('any'))
 
     raise FileNotFoundError('no installed mmpack package provides ' + soname)
@@ -266,30 +266,30 @@ class BinaryPackage(object):
                                      'is greater than current version ({2})'
                                      .format(symbol, version, self.version))
 
-    def _gen_elf_deps(self, soname: str, symbol_set: Set[str],
-                      binpkgs: List['BinaryPackages']):
+    def _gen_lib_deps(self, soname: str, fileformat: str,
+                      symbol_set: Set[str], binpkgs: List['BinaryPackages']):
         '''
             Args:
                 binpkgs: the list of packages currently being generated
         '''
         # provided in the same package
-        if soname in self.provides['elf']:
-            for sym in self.provides['elf'][soname]:
+        if soname in self.provides[fileformat]:
+            for sym in self.provides[fileformat][soname]:
                 symbol_set.discard(sym)
             return
 
         # provided by one of the packages being generated at the same time
         for pkg in binpkgs:
-            if soname in pkg.provides['elf']:
+            if soname in pkg.provides[fileformat]:
                 self.add_depend(pkg.name, self.version, self.version)
 
-                for sym in pkg.provides['elf'][soname]:
+                for sym in pkg.provides[fileformat][soname]:
                     symbol_set.discard(sym)
                 return
 
         # provided by another mmpack package present in the prefix
         try:
-            mmpack_dep, minv, maxv = _mmpack_elf_deps(soname, symbol_set)
+            mmpack_dep, minv, maxv = _mmpack_lib_deps(soname, symbol_set)
             self.add_depend(mmpack_dep, minv, maxv)
             return
 
@@ -314,8 +314,8 @@ class BinaryPackage(object):
 
     def gen_dependencies(self, binpkgs: List['BinaryPackages']):
         'Go through the install files and search for dependencies.'
-        deps = set()
-        symbols = set()
+        deps = {'elf': set(), 'pe': set(), 'python': set()}
+        symbols = {'elf': set(), 'pe': set(), 'python': set()}
         for inst_file in self.install_files:
             if os.path.islink(inst_file):
                 target = os.path.join(os.path.dirname(inst_file),
@@ -325,16 +325,20 @@ class BinaryPackage(object):
 
             file_type = filetype(inst_file)
             if file_type == 'elf':
-                symbols.update(elf_undefined_symbols(inst_file))
-                deps.update(elf_soname_deps(inst_file))
+                symbols['elf'].update(elf_undefined_symbols(inst_file))
+                deps['elf'].update(elf_soname_deps(inst_file))
 
-        for dep in deps:
-            self._gen_elf_deps(dep, symbols, binpkgs)
-            if not symbols:
-                break
+        for fileformat in ('elf', 'pe', 'python'):
+            for dep in deps[fileformat]:
+                self._gen_lib_deps(dep, fileformat,
+                                   symbols[fileformat], binpkgs)
+                if not symbols[fileformat]:
+                    break
 
-        if symbols:
-            errmsg = 'Failed to process all of ' + self.name + ' symbols\n'
-            errmsg += 'Remaining symbols:\n\t'
-            errmsg += '\n\t'.join(symbols)
-            raise AssertionError(errmsg)
+        for fileformat in ('elf', 'pe', 'python'):
+            if symbols[fileformat]:
+                errmsg = 'Failed to process all {0} of {1} symbols\n' \
+                         .format(fileformat, self.name)
+                errmsg += 'Remaining symbols:\n\t'
+                errmsg += '\n\t'.join(symbols[fileformat])
+                raise AssertionError(errmsg)
