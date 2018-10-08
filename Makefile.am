@@ -129,6 +129,7 @@ endif
 
 mmpack-build: src/mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@
+	$(AM_V_GEN)chmod a+x $@
 
 src/settings.py: src/settings.py.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' < $< > $@
