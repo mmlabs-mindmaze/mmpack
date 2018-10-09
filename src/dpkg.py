@@ -3,13 +3,13 @@
 helper module containing dpkg files parsing functions
 '''
 
+import importlib
 import os
 import re
 from glob import glob
 from typing import List
 
 from common import parse_soname
-from elf_utils import elf_symbols_list
 from settings import DPKG_METADATA_PREFIX
 from version import Version
 
@@ -41,7 +41,8 @@ def dpkg_find_shlibs_file(target_soname: str):
 
 
 def _prune_soname_symbols(library_path: str, symbols_list: List[str]):
-    for sym in elf_symbols_list(library_path, None):
+    elf = importlib.import_module('elf_utils')
+    for sym in elf.symbols_list(library_path, None):
         if sym in symbols_list:
             symbols_list.remove(sym)
 

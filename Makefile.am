@@ -48,6 +48,7 @@ pkgpython_PYTHON =\
 	src/mmpack_pkg_create.py \
 	src/mmpack_pkg_check.py \
 	src/mmpack_pkg_show.py \
+	src/pe_utils.py \
 	src/src_package.py \
 	src/settings.py \
 	src/version.py \

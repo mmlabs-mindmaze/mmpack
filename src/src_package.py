@@ -3,6 +3,7 @@
 Class to handle source packages, build them and generates binary packages.
 '''
 
+import importlib
 import os
 from glob import glob
 import re
@@ -12,7 +13,6 @@ from typing import Set
 from workspace import Workspace
 from binary_package import BinaryPackage
 from common import *
-from elf_utils import elf_soname
 from file_utils import *
 from version import Version
 from settings import PKGDATADIR
@@ -349,8 +349,9 @@ class SrcPackage(object):
         ventilated = set()
         for file in self.install_files_set:
             libtype = is_dynamic_library(file)
-            if libtype == 'elf':
-                soname = elf_soname(file)
+            if libtype in ('elf', 'pe'):
+                format_module = importlib.import_module(libtype + '_utils')
+                soname = format_module.soname(file)
                 name, version = parse_soname(soname)
                 binpkgname = name + version  # libxxx.0.1.2 -> libxxx<ABI>
                 pkg = self._binpkg_get_create(binpkgname, 'library')
@@ -361,9 +362,6 @@ class SrcPackage(object):
                 so_filename = os.path.dirname(file) + '/' + soname
                 pkg.install_files.add(so_filename)
                 ventilated.add(so_filename)
-            elif libtype == 'pe':
-                errmsg = '{}: pe format not supported'.format(file)
-                raise NotImplementedError(errmsg)
 
         self.install_files_set.difference_update(ventilated)
 

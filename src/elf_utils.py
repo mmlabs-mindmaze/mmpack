@@ -4,16 +4,13 @@ helper module containing elf parsing functions
 '''
 
 import os
-import subprocess
 
 from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
 from elftools.elf.dynamic import DynamicSection
 
-from common import shell
 
-
-def elf_soname_deps(filename):
+def soname_deps(filename):
     'Parse given elf file and return its dependency soname list'
     elffile = ELFFile(open(filename, 'rb'))
 
@@ -27,7 +24,7 @@ def elf_soname_deps(filename):
     return libraryset
 
 
-def elf_undefined_symbols(filename):
+def undefined_symbols(filename):
     '''Parse given elf file and return its undefined symbols set
 
     We require 3 sections for the elf file:
@@ -74,7 +71,7 @@ def elf_undefined_symbols(filename):
     return undefined_symbols_set
 
 
-def elf_soname(filename: str) -> str:
+def soname(filename: str) -> str:
     ''' Return the SONAME of given library
 
     Raises:
@@ -90,7 +87,7 @@ def elf_soname(filename: str) -> str:
     raise ELFError('SONAME not found in library: ' + libname)
 
 
-def elf_symbols_list(filename, default_version):
+def symbols_list(filename, default_version):
     ''' Parse given elf file and return its exported symbols as a dictionary.
         dict keys are symbols name, values will be the symbols version
     '''
@@ -110,50 +107,3 @@ def elf_symbols_list(filename, default_version):
             symbols[sym.name] = default_version
 
     return symbols
-
-
-def _dpkg_get_pkg_version(dpkg_name: str) -> str:
-    cmd = 'dpkg --status {} | grep "^Version:"'.format(dpkg_name)
-    version_line = shell(cmd)
-    return version_line[len('Version:'):].strip()
-
-
-def elf_dpkg_deps(filename):
-    'Parse given elf file and return its dependency debian package dict'
-    packagedict = {}
-    librarylist = elf_soname_deps(filename)
-    for lib in librarylist:
-        cmd = ['dpkg', '--search'] + [lib]
-        ret = subprocess.run(cmd, check=False, stdout=subprocess.PIPE)
-        if ret.returncode == 0:
-            for package in ret.stdout.decode('utf-8').split('\n'):
-                try:
-                    pkg, arch = package.split(':')[0:2]
-                    if arch in ['amd64', 'x86_64']:
-                        version = _dpkg_get_pkg_version(':'.join([pkg, arch]))
-                        packagedict.update({pkg: version})
-                except ValueError:
-                    continue
-
-    return packagedict
-
-
-def elf_build_id(libname):
-    ''' Parse given elf file and return its build-id
-
-        Note: if compiled with gcc, default is to pass --build-id=uuid to the
-        linker. However, with this is not the case and the build-id section
-        is not present by default and must be added manually.
-
-        Raises:
-            Exception if no build-id section is found within the elf file
-    '''
-    with open(libname, 'rb') as libfile:
-        elffile = ELFFile(libfile)
-    dyn = elffile.get_section_by_name('.note.gnu.build-id')
-
-    for note in dyn.iter_notes():
-        if note['n_type'] == 'NT_GNU_BUILD_ID':
-            return note['n_desc']
-
-    raise Exception('build-id not found within library: {0}'.format(libname))

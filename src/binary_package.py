@@ -4,16 +4,16 @@ Class to handle binary packages, their dependencies, symbol interface, and
 packaging as mmpack file.
 '''
 
+import importlib
 import os
 from os.path import isfile
 from glob import glob
 from typing import List, Dict, Set
 import tarfile
 from common import *
-from dpkg import dpkg_find_dependency
 from version import Version
-from elf_utils import *
 import yaml
+from dpkg import dpkg_find_dependency
 from workspace import Workspace
 
 
@@ -238,13 +238,14 @@ class BinaryPackage(object):
 
         for inst_file in self.install_files:
             file_type = is_dynamic_library(inst_file)
-            if file_type == 'elf':
-                soname = elf_soname(inst_file)
+            if file_type in ('elf', 'pe'):
+                fmt_mod = importlib.import_module(file_type + '_utils')
+                soname = fmt_mod.soname(inst_file)
                 entry = {soname: {'depends': self.name,
                                   'symbols': {}}}
-                entry[soname]['symbols'].update(elf_symbols_list(inst_file,
-                                                                 self.version))
-                self.provides['elf'].update(entry)
+                entry[soname]['symbols'].update(
+                    fmt_mod.symbols_list(inst_file, self.version))
+                self.provides[file_type].update(entry)
             else:
                 if file_type == 'pe' or file_type == 'python':
                     dprint('[WARN] skipping file: ' + inst_file)
@@ -299,6 +300,7 @@ class BinaryPackage(object):
             pass
 
         # provided by the host system
+        # TODO: switch on the host package manager
         dpkg_dep = dpkg_find_dependency(soname, symbol_set)
         if not dpkg_dep:
             # <soname> dependency could not be met with any available means
@@ -324,9 +326,10 @@ class BinaryPackage(object):
                 continue
 
             file_type = filetype(inst_file)
-            if file_type == 'elf':
-                symbols['elf'].update(elf_undefined_symbols(inst_file))
-                deps['elf'].update(elf_soname_deps(inst_file))
+            if file_type in ('elf', 'pe'):
+                fmt_mod = importlib.import_module(file_type + '_utils')
+                symbols[file_type].update(fmt_mod.undefined_symbols(inst_file))
+                deps[file_type].update(fmt_mod.soname_deps(inst_file))
 
         for fileformat in ('elf', 'pe', 'python'):
             for dep in deps[fileformat]:
