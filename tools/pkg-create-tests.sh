@@ -5,12 +5,18 @@
 
 REPOSITORY="mindmaze-srv-fr-01"
 
-deactivate 2>/dev/null
-
 set -ex
 
 cd $(dirname $0)/../build
-. venv/bin/activate
+
+testdir=$(pwd)/venv
+python_minor=$(python3 -c 'import sys; print(sys.version_info.minor)')
+python_testdir="$testdir/lib/python3.${python_minor}"
+
+export VIRTUAL_ENV=$testdir
+export PYTHONPATH="$python_testdir:$python_testdir/site-packages:$PYTHONPATH"
+export PATH="$testdir/bin:$PATH"
+export LD_LIBRARY_PATH="$testdir/lib:$LD_LIBRARY_PATH"
 
 URL_LIST='
 ssh://git@intranet.mindmaze.ch:7999/~ganne/mmlib.git
