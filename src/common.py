@@ -13,7 +13,7 @@ from hashlib import sha256
 import platform
 import yaml
 from decorators import run_once
-from xdg.BaseDirectory import xdg_data_home
+from xdg import XDG_DATA_HOME
 
 CONFIG = {'debug': True, 'verbose': True}
 
@@ -27,7 +27,7 @@ def _init_logger_if_not():
     If verbose flag is set, it will log up to DEBUG level
     otherwise, only up to INFO level.
     '''
-    log_file = xdg_data_home + '/mmpack.log'
+    log_file = XDG_DATA_HOME + '/mmpack.log'
     log_handler = logging.handlers.TimedRotatingFileHandler(log_file)
     logger = logging.getLogger()
     logger.addHandler(log_handler)

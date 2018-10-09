@@ -52,6 +52,7 @@ pkgpython_PYTHON =\
 	src/settings.py \
 	src/version.py \
 	src/workspace.py \
+	src/xdg.py \
 	$(eol)
 
 .PHONY: spelling

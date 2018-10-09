@@ -5,7 +5,7 @@ os helpers to manipulate the paths and environments
 
 import os
 import sys
-from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_home
+from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
 
 from decorators import singleton
 from common import shell, dprint
@@ -15,15 +15,15 @@ from common import shell, dprint
 class Workspace(object):
     'global mmpack workspace singleton class'
     def __init__(self):
-        self.config = xdg_config_home + '/mmpack-config.yml'
-        self.sources = xdg_cache_home + '/mmpack-sources'
-        self.build = xdg_cache_home + '/mmpack-build'
-        self.staging = xdg_cache_home + '/mmpack-staging'
-        self.packages = xdg_data_home + '/mmpack-packages'
+        self.config = XDG_CONFIG_HOME + '/mmpack-config.yml'
+        self.sources = XDG_CACHE_HOME + '/mmpack-sources'
+        self.build = XDG_CACHE_HOME + '/mmpack-build'
+        self.staging = XDG_CACHE_HOME + '/mmpack-staging'
+        self.packages = XDG_DATA_HOME + '/mmpack-packages'
         self.prefix = ''
 
         # create the directories if they do not exist
-        os.makedirs(xdg_config_home, exist_ok=True)
+        os.makedirs(XDG_CONFIG_HOME, exist_ok=True)
         os.makedirs(self.build, exist_ok=True)
         os.makedirs(self.sources, exist_ok=True)
         os.makedirs(self.packages, exist_ok=True)
