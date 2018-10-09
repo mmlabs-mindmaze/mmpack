@@ -23,7 +23,7 @@ void fill_pkgreq_from_cmdarg(struct pkg_request *req, const char* arg)
 {
 	const char* v;
 
-	// Find the first occurence of '='
+	// Find the first occurrence of '='
 	v = strchr(arg, '=');
 	if (v != NULL) {
 		// The package name is before the '=' character

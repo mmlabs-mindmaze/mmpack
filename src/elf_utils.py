@@ -53,7 +53,7 @@ def elf_undefined_symbols(filename):
         if index not in ('VER_NDX_LOCAL', 'VER_NDX_GLOBAL'):
             index = int(index)
             # In GNU versioning mode, the highest bit is used to
-            # store wether the symbol is hidden or not
+            # store whether the symbol is hidden or not
             if index & 0x8000:
                 index &= ~0x8000
             version[nsym] = index
