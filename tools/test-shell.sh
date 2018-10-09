@@ -1,7 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 #
 # usage:
 # test-shell.sh [repository name]
+
+cd $(dirname $0)/../build
 
 REPOSITORY=${1:-"http://mindmaze-srv-fr-01"}
 MMPACK_PREFIX=$(mktemp -d)
@@ -18,10 +20,20 @@ export LIBRARY_PATH="${MMPACK_PREFIX}/lib:${LIBRARY_PATH}"
 export CPATH="${MMPACK_PREFIX}/include:${CPATH}"
 
 # source mmpack python virtualenv
-. venv/bin/activate
+testdir=$(pwd)/venv
+python_minor=$(python3 -c 'import sys; print(sys.version_info.minor)')
+python_testdir="${testdir}/lib/python3.${python_minor}"
+
+export VIRTUAL_ENV=${testdir}
+export PYTHONPATH="${python_testdir}:$python_testdir}/site-packages:${PYTHONPATH}"
+export PATH="${testdir}/bin:${PATH}"
+export LD_LIBRARY_PATH="${testdir}/lib:${LD_LIBRARY_PATH}"
 
 # create mmpack prefix
-mmpack mkprefix "$REPOSITORY"
+mmpack mkprefix "${REPOSITORY}"
+
+# update PS1
+export PS1='\u@\h:\w\$ [mmpack] '
 
 exec < /dev/tty
 EOF
