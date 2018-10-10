@@ -306,7 +306,7 @@ class SrcPackage(object):
             errmsg = 'Unknown build system: ' + self.build_system
             raise NotImplementedError(errmsg)
 
-        build_script = ['/bin/sh',
+        build_script = ['sh',
                         '{0}/build-{1}'.format(PKGDATADIR, self.build_system)]
         dprint('[shell] {0}'.format(' '.join(build_script)))
         ret = run(build_script, stdout=PIPE, env=self._build_env(skip_tests))
