@@ -16,6 +16,8 @@
 
 #include "mmpack-mkprefix.h"
 
+static int force_mkprefix = 0;
+
 
 static char mkprefix_doc[] =
 	"mmpack mkprefix allows you to create a new prefix folder which "
@@ -24,11 +26,13 @@ static char mkprefix_doc[] =
 	"prefix in a folder that has been already setup.";
 
 static const struct mmarg_opt cmdline_optv[] = {
+	{"f|force", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &force_mkprefix},
+	 "Force setting up prefix folder even if it was already setup"},
 };
 
 
 static
-int create_initial_empty_files(const mmstr* prefix)
+int create_initial_empty_files(const mmstr* prefix, int force_create)
 {
 	int fd, oflag;
 	const mmstr *instlist_relpath, *repocache_relpath;
@@ -36,7 +40,7 @@ int create_initial_empty_files(const mmstr* prefix)
 	instlist_relpath = mmstr_alloca_from_cstr(INSTALLED_INDEX_RELPATH);
 	repocache_relpath = mmstr_alloca_from_cstr(REPO_INDEX_RELPATH);
 
-	oflag = O_WRONLY|O_CREAT|O_EXCL;
+	oflag = O_WRONLY|O_CREAT| (force_create ? O_TRUNC : O_EXCL);
 
 	// Create initial empty installed package list
 	fd = open_file_in_prefix(prefix, instlist_relpath, oflag);
@@ -55,13 +59,14 @@ int create_initial_empty_files(const mmstr* prefix)
 
 
 static
-int create_initial_prefix_cfg(const mmstr* prefix, const char* url)
+int create_initial_prefix_cfg(const mmstr* prefix, const char* url,
+                              int force_create)
 {
 	const mmstr* cfg_relpath = mmstr_alloca_from_cstr(CFG_RELPATH);
 	char line[256];
 	int fd, len, oflag;
 
-	oflag = O_WRONLY|O_CREAT|O_EXCL;
+	oflag = O_WRONLY|O_CREAT|(force_create ? O_TRUNC : O_EXCL);
 	fd = open_file_in_prefix(prefix, cfg_relpath, oflag);
 	if (fd < 0)
 		return -1;
@@ -99,8 +104,8 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 	url = argv[arg_index];
 
-	if (  create_initial_empty_files(prefix)
-	   || create_initial_prefix_cfg(prefix, url) )
+	if (  create_initial_empty_files(prefix, force_mkprefix)
+	   || create_initial_prefix_cfg(prefix, url, force_mkprefix) )
 		return -1;
 
 	return 0;
