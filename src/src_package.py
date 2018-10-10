@@ -270,6 +270,13 @@ class SrcPackage(object):
         build_env['SKIP_TESTS'] = str(skip_tests)
         if self.build_options:
             build_env['OPTS'] = self.build_options
+
+        _, dist = get_host_arch()
+        if dist == 'windows':
+            build_env['MSYSTEM'] = 'MINGW64'
+            for var in ('SRCDIR', 'BUILDDIR', 'DESTDIR',
+                        'PREFIX', 'ACLOCAL_PATH'):
+                build_env[var] = shell('cygpath -u ' + build_env[var]).strip()
         return build_env
 
     def _strip_dirs_from_install_files(self):
