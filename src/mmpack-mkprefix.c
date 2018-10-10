@@ -6,6 +6,7 @@
 # include <config.h>
 #endif
 
+#include <mmargparse.h>
 #include <mmerrno.h>
 #include <mmsysio.h>
 
@@ -14,6 +15,16 @@
 #include "utils.h"
 
 #include "mmpack-mkprefix.h"
+
+
+static char mkprefix_doc[] =
+	"mmpack mkprefix allows you to create a new prefix folder which "
+	"will pull packages from the repository whose URL is provided on "
+	"command line. By default the command will prevent to create a "
+	"prefix in a folder that has been already setup.";
+
+static const struct mmarg_opt cmdline_optv[] = {
+};
 
 
 static
@@ -66,14 +77,27 @@ int create_initial_prefix_cfg(const mmstr* prefix, const char* url)
 LOCAL_SYMBOL
 int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
+	int arg_index;
 	const mmstr* prefix = ctx->prefix;
 	const char* url;
+	struct mmarg_parser parser = {
+		.doc = mkprefix_doc,
+		.args_doc = MKPREFIX_SYNOPSIS,
+		.optv = cmdline_optv,
+		.num_opt = MM_NELEM(cmdline_optv),
+		.execname = "mmpack",
+	};
 
-	if (argc < 2) {
-		fprintf(stderr, "Missing argument for mkprefix command\n");
+	arg_index = mmarg_parse(&parser, argc, (char**)argv);
+
+	// Check url argument is supplied
+	if (arg_index+1 > argc) {
+		fprintf(stderr, "Missing argument for mkprefix command.\n"
+		                "Run \"mmpack mkprefix --help\" to see usage\n");
 		return -1;
 	}
-	url = argv[1];
+
+	url = argv[arg_index];
 
 	if (  create_initial_empty_files(prefix)
 	   || create_initial_prefix_cfg(prefix, url) )
