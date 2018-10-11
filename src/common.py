@@ -189,7 +189,7 @@ def get_host_arch() -> (str, str):
         aarch64-debian
         i386-windows
     '''
-    cpu_arch = platform.machine()
+    cpu_arch = platform.machine().lower()
     if cpu_arch == 'x86_64':
         cpu_arch = 'amd64'
 
