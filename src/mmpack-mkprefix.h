@@ -7,7 +7,7 @@
 
 #include "context.h"
 
-#define MKPREFIX_SYNOPSIS       "mkprefix [mkprefix-opts]"
+#define MKPREFIX_SYNOPSIS       "mkprefix [mkprefix-opts] <prefix-path>"
 
 int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[]);
 

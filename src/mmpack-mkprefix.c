@@ -20,11 +20,12 @@ static int force_mkprefix = 0;
 static const char* repo_url = NULL;
 
 static char mkprefix_doc[] =
-	"mmpack mkprefix allows you to create a new prefix folder which "
-	"will pull packages from the repository whose URL is optionally "
-	"set by --url. If not present, the URL is inherited by the global "
-	"user configuration of mmpack. By default the command will prevent "
-	"to create a prefix in a folder that has been already setup.";
+	"mmpack mkprefix allows you to create a new prefix in folder "
+	"specified by <prefix-path> which will pull packages from the "
+	"repository whose URL is optionally set by --url. If not present, "
+	"the URL is inherited by the global user configuration of mmpack. "
+	"By default the command will prevent to create a prefix in a "
+	"folder that has been already setup.";
 
 static const struct mmarg_opt cmdline_optv[] = {
 	{"f|force", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &force_mkprefix},
@@ -100,11 +101,13 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 	arg_index = mmarg_parse(&parser, argc, (char**)argv);
 
-	if (arg_index != argc) {
+	if (arg_index+1 != argc) {
 		fprintf(stderr, "Bad usage of mkprefix command.\n"
 		                "Run \"mmpack mkprefix --help\" to see usage\n");
 		return -1;
 	}
+
+	prefix = mmstr_alloca_from_cstr(argv[arg_index]);
 
 	if (  create_initial_empty_files(prefix, force_mkprefix)
 	   || create_initial_prefix_cfg(prefix, repo_url, force_mkprefix) )
