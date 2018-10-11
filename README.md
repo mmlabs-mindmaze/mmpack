@@ -1,67 +1,106 @@
-# RFC: package manager
+# **mmpack** package manager
 
-I intend to fill it with comments, bits of code or snippets
-until the time a clear picture emerge and this can be presented
-for comments (before the real coding)
+**mmpack** is a cross-platform package manager.
 
-This is open for all and any comments all the time though.
-Email me: gabriel.ganne@mindmaze.ch
+It is designed to work without any need for root access, and to allow multiple
+coexisting project versions within project prefixes (virtualenv-like sandboxes).
 
-# A few decisions:
-* targets *debian* and *windows*
-* python3
-* all files will be in **yaml** if in any format
-* mmpack is the entry point for **all** mmpack-reladed commands (git-like)
-* python **MUST** comply with pycodestyle, and *SHOULD* comply with pylint
-* use pre-defined package build tree (rpmbuild style)
-* use debian way of handling symbols and dependencies
-* do not handle any system packages (but have dependencies upon them).
+Please not that **mmpack** is now in *alpha*: there are no guarantees on any
+of its interfaces.
+
+If you have questions, requests, issues, pull-requests ...
+Please email me: `gabriel.ganne@mindmaze.ch`
+
+## goal
+
+* Allow simpler package creation
+* Help when multiple unstable code versions must coexist
+* Help for demo packaging and deployment
+* Help with cross-platform development
+
+## usage
+
+### package installation
+
+#### *mmpack* command
+
+```
+Usage:
+  mmpack [options] mkprefix <repo-url>
+  mmpack [options] update
+  mmpack [options] install <pkg1>[=<version1>] [<pkg2>[=<version2>] [...]]
+  mmpack [options] remove <pkg1> [<pkg2> [<pkg3> [...]]]
+
+Options:
+  -p PATH, --prefix=PATH      Use PATH as install prefix.
+  -h, --help                  print this message and exit
+```
+
+### pakage creation
+
+#### *mmpack-build* command
+```
+Usage:
+mmpack <command> [command-options]
+
+Show full mmpack help
+mmpack --help
+
+List all mmpack commands:
+mmpack --list-commands
+
+More infos about a specific command:
+mmpack <command> --help
+```
+
+#### *mmpack-build pkg-create* subcommand
+```
+usage: mmpack-build pkg-create [-h] [-s URL] [-t TAG] [-p PREFIX]
+                               [--skip-build-tests]
+
+Create a mmpack package
+
+Usage:
+mmpack pkg-create [--url <path or git url>] [--tag <tag>]
+                  [--prefix <prefix>] [--skip-build-tests]
+
+If no url was given, look through the tree for a mmpack folder, and use the
+containing folder as root directory.
+
+Otherwise, clone the project from given git url.
+If a tag was specified, use it (checkout on the given tag).
+
+If a prefix is given, work within it instead.
+
+Examples:
+# From any subfolder of the project
+$ mmpack pkg-create
+
+# From anywhere
+$ mmpack pkg-create --url ssh://git@intranet.mindmaze.ch:7999/~user/XXX.git --tag v1.0.0-custom-tag-target
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s URL, --url URL     project git url
+  -t TAG, --tag TAG     project tag
+  -p PREFIX, --prefix PREFIX
+                        prefix within which to work
+  --skip-build-tests    indicate that build tests must not be run
+```
+
+## design decisions
+* Targets *debian* and *windows*
+* Python3
+* All files will be in **yaml** if in any format
+* Python **MUST** comply with pycodestyle, and *SHOULD* comply with pylint
+* Use pre-defined package build tree (rpmbuild style)
+* Use debian way of handling symbols and dependencies
+* Do not handle any system packages (but have dependencies upon them).
   Should one be needed and not installed, abort and request its installation
-* enforce tag and version format: tag **MUST** be of format "vx.y.z[-whatever]"
-  version will be extracted with format x.y.z from the tag.
-  tag string **CANNOT** contain the '/' (slash) character.
-  See: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+* Use python unittest module (not pytest)
 
-# Ideas
-* build server for cross compilation
-* virtualenv-like feature
-* create new package from previous one
-
-# SGP
-[Original SGP link](https://www.google.co://intranet.mindmaze.ch/confluence/display/SD/Package+Manager+--+SGP+Level+1)
-
-* Business Case	
-    * Package management:
-        * Automate packaging for:
-            * Linux packages (Debian 8, Debian 9)
-            * Windows 10
-            * Android ?
-        * Support packages dependencies downloads.
-        * Provides fetchable repository mechanism per released version and tags (though git).
-            * installation with dependencies. (How to deal with system deps?)
-            * upgrades.
-            * Support release vs debug packages. (to which point?)
-            * Support development packages vs binary packages.
-            * Automated installation feasible for Jenkins, or a regular user. (UC: Automatic Reinstallation of a dev MMPRO)
-            * Flag certain packages as 3rd parties.
-    * Package View:
-        * Permits to browse and download packages in prettified pages. (For release validation and on need)
-    * Cross-platform (more or less):
-        * Works on Debian 8, Debian 9, Windows 10. Ubuntu ?
-        * Compatible with work using Microsoft Visual Studio, Unity 3D, CLion (Cmake).
-    * Multiprojects:
-        * Co-installation of different projects packages set.
-    * Easy to use
-        * Compatible with Johnny?
-        * Possible to install without root/admin access.
-        * Fast setup time.
-        * Package generation feasible by Jenkins, but (rather) easy by a regular dev.
-        * Support available packages from several lists.
-* Scope:
-    * Automate packaged dependencies management.
-    * Same (more or less) setup on both windows/linux.
-    * Rather easy creation of package.
-    * Automation of package creation.
-* Out of scope:
-    * System packages that requires root installation (siso packages).
-    * Cross-compilation.
+# Planned work
+* Build server for cross compilation
+* Create new package from previous one
+* Add reference mindmaze repository
+* Add mmpack *update* command
