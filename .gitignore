@@ -47,6 +47,7 @@ build-aux/*
 *.la
 *.lo
 /mmpack
+/mount-mmpack-prefix
 
 # generated files
 /mmpack-build
