@@ -71,6 +71,10 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 exit:
 	mmpack_action_stack_destroy(act_stack);
+	for (i = 0; i < nreq && reqlist; i++) {
+		mmstr_free(reqlist[i].name);
+		mmstr_free(reqlist[i].version);
+	}
 	mm_freea(reqlist);
 	return rv;
 }
