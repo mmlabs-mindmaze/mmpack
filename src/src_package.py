@@ -274,9 +274,10 @@ class SrcPackage(object):
         _, dist = get_host_arch()
         if dist == 'windows':
             build_env['MSYSTEM'] = 'MINGW64'
-            for var in ('SRCDIR', 'BUILDDIR', 'DESTDIR',
-                        'PREFIX', 'ACLOCAL_PATH'):
+            for var in ('SRCDIR', 'BUILDDIR', 'DESTDIR', 'PREFIX'):
                 build_env[var] = shell('cygpath -u ' + build_env[var]).strip()
+            for var in 'ACLOCAL_PATH':
+                build_env[var] = shell('cygpath -up ' + build_env[var]).strip()
         return build_env
 
     def _strip_dirs_from_install_files(self):
