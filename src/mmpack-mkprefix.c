@@ -17,17 +17,20 @@
 #include "mmpack-mkprefix.h"
 
 static int force_mkprefix = 0;
-
+static const char* repo_url = NULL;
 
 static char mkprefix_doc[] =
 	"mmpack mkprefix allows you to create a new prefix folder which "
-	"will pull packages from the repository whose URL is provided on "
-	"command line. By default the command will prevent to create a "
-	"prefix in a folder that has been already setup.";
+	"will pull packages from the repository whose URL is optionally "
+	"set by --url. If not present, the URL is inherited by the global "
+	"user configuration of mmpack. By default the command will prevent "
+	"to create a prefix in a folder that has been already setup.";
 
 static const struct mmarg_opt cmdline_optv[] = {
 	{"f|force", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &force_mkprefix},
 	 "Force setting up prefix folder even if it was already setup"},
+	{"url", MMOPT_NEEDSTR, NULL, {.sptr = &repo_url},
+	 "Specify @URL as the address of package repository"},
 };
 
 
@@ -71,8 +74,11 @@ int create_initial_prefix_cfg(const mmstr* prefix, const char* url,
 	if (fd < 0)
 		return -1;
 
-	len = sprintf(line, "repository: %s", url);
-	mm_write(fd, line, len);
+	// Optionally write URL (if null, it will inherit from user config)
+	if (url) {
+		len = sprintf(line, "repository: %s", url);
+		mm_write(fd, line, len);
+	}
 
 	mm_close(fd);
 	return 0;
@@ -84,7 +90,6 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	int arg_index;
 	const mmstr* prefix = ctx->prefix;
-	const char* url;
 	struct mmarg_parser parser = {
 		.doc = mkprefix_doc,
 		.args_doc = MKPREFIX_SYNOPSIS,
@@ -95,17 +100,14 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 	arg_index = mmarg_parse(&parser, argc, (char**)argv);
 
-	// Check url argument is supplied
-	if (arg_index+1 > argc) {
-		fprintf(stderr, "Missing argument for mkprefix command.\n"
+	if (arg_index != argc) {
+		fprintf(stderr, "Bad usage of mkprefix command.\n"
 		                "Run \"mmpack mkprefix --help\" to see usage\n");
 		return -1;
 	}
 
-	url = argv[arg_index];
-
 	if (  create_initial_empty_files(prefix, force_mkprefix)
-	   || create_initial_prefix_cfg(prefix, url, force_mkprefix) )
+	   || create_initial_prefix_cfg(prefix, repo_url, force_mkprefix) )
 		return -1;
 
 	return 0;
