@@ -149,6 +149,14 @@ def mm_representer(dumper, data):
     return dumper.represent_data(repr(data))
 
 
+def _set_representer(dumper, data):
+    'dump python set as list'
+    return dumper.represent_data(repr(list(data)))
+
+
+yaml.add_representer(set, _set_representer)
+
+
 def sha256sum(filename: str) -> str:
     ''' compute the SHA-256 hash a file
 
