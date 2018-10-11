@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 		.args_doc = arguments_docs,
 		.optv = cmdline_optv,
 		.num_opt = MM_NELEM(cmdline_optv),
-		.execname = argv[0],
+		.execname = "mmpack",
 	};
 
 	/* Parse command line options and check command is supplied */
