@@ -90,7 +90,7 @@ LOCAL_SYMBOL
 int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	int arg_index;
-	const mmstr* prefix = ctx->prefix;
+	const mmstr* prefix;
 	struct mmarg_parser parser = {
 		.doc = mkprefix_doc,
 		.args_doc = MKPREFIX_SYNOPSIS,
@@ -98,6 +98,7 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		.num_opt = MM_NELEM(cmdline_optv),
 		.execname = "mmpack",
 	};
+	(void) ctx;  /* silence unused warning */
 
 	arg_index = mmarg_parse(&parser, argc, (char**)argv);
 
