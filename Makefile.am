@@ -6,6 +6,7 @@ AM_CPPFLAGS = \
 	-I$(srcdir)/src \
 	-DSRCDIR=\"$(srcdir)\" \
 	-DBUILDDIR=\"$(builddir)\" \
+	-DLIBEXECDIR=\"$(pkglibexecdir)\" \
 	$(CHECK_CPPFLAGS) \
 	$(LIBARCHIVE_CPPFLAGS) \
 	$(eol)
@@ -82,6 +83,8 @@ mmpack_lib_sources = \
 	src/mmpack-mkprefix.h \
 	src/mmpack-remove.c \
 	src/mmpack-remove.h \
+	src/mmpack-runprefix.c \
+	src/mmpack-runprefix.h \
 	src/mmpack-search.c \
 	src/mmpack-search.h \
 	src/mmpack-update.c \

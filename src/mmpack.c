@@ -18,6 +18,7 @@
 #include "mmpack-install.h"
 #include "mmpack-mkprefix.h"
 #include "mmpack-remove.h"
+#include "mmpack-runprefix.h"
 #include "mmpack-search.h"
 #include "mmpack-update.h"
 
@@ -28,7 +29,8 @@ static const char arguments_docs[] =
 	"[options] "MKPREFIX_SYNOPSIS"\n"
 	"[options] "UPDATE_SYNOPSIS"\n"
 	"[options] "INSTALL_SYNOPSIS"\n"
-	"[options] "REMOVE_SYNOPSIS;
+	"[options] "REMOVE_SYNOPSIS"\n"
+	"[options] "RUNPREFIX_SYNOPSIS"\n";
 
 static struct mmpack_opts cmdline_opts;
 
@@ -78,6 +80,8 @@ int main(int argc, char* argv[])
 	} else if (STR_EQUAL(cmd, strlen(cmd), "remove")
 	           || STR_EQUAL(cmd, strlen(cmd), "uninstall")) {
 		rv = mmpack_remove(&ctx, cmd_argc, cmd_argv);
+	} else if (STR_EQUAL(cmd, strlen(cmd), "runprefix")) {
+		rv = mmpack_runprefix(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "search")) {
 		rv = mmpack_search(&ctx, cmd_argc, cmd_argv);
 	} else {
