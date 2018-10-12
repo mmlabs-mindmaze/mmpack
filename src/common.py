@@ -112,8 +112,10 @@ def remove_duplicates(lst):
 def filetype(filename):
     'get file type'
     file_type = shell('file  --brief --preserve-date {}'.format(filename))
+    file_type = file_type.lower()
+
     # try to read file type first
-    if file_type.startswith('ELF '):
+    if file_type.startswith('elf '):
         return 'elf'
     elif file_type.startswith('pe'):
         return 'pe'
