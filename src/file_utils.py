@@ -61,7 +61,9 @@ def is_binary(filename: str) -> bool:
 
 def is_libdevel(filename: str) -> bool:
     'returns whether a file is soname symlink'
-    return filename.endswith('.so') and islink(filename)
+    return ((filename.endswith('.so') and islink(filename))
+            or filename.endswith('.dll.a')
+            or filename.endswith('.lib'))
 
 
 def is_pkgconfig(filename: str) -> bool:
