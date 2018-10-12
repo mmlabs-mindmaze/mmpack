@@ -231,16 +231,24 @@ def parse_soname(soname: str) -> (str, str):
     except ValueError:
         pass
 
-    # try format: <name>-<version>.so
+    # try format: <name>-<version>.[so|dll]
     # return the full version (not only the major part)
     if soname.endswith('.so'):
         soname = soname[:-len('.so')]
-        split = soname.split('-')
-        name = '-'.join(split[0:-1])
-        version = split[-1]
-        return (name, version)
+    elif soname.endswith('.dll'):
+        soname = soname[:-len('.dll')]
+    else:
+        raise ValueError('failed to parse SONAME: ' + soname)
 
-    raise ValueError('failed to parse SONAME: ' + soname)
+    split = soname.split('-')
+    if len(split) == 1:
+        version = '0'
+    else:
+        version = split[-1]
+    name = '-'.join(split[0:-1])
+    version = split[-1]
+
+    return (name, version)
 
 
 def yaml_load(filename: str):
