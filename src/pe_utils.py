@@ -4,7 +4,6 @@ helper module containing pe parsing functions
 '''
 
 import os
-from typing import Set
 
 import pefile
 
@@ -14,7 +13,7 @@ def soname(filename: str) -> str:
     return os.path.basename(filename)
 
 
-def soname_deps(filename) -> Set(str):
+def soname_deps(filename):
     'Parse given pe file and return its dependency soname list'
     pe_file = pefile.PE(filename)
 
