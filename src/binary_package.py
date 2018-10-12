@@ -255,8 +255,9 @@ class BinaryPackage(object):
                 # type conversion will raise an error if malformed
                 name = self._provides_symbol(symbol_type, symbol)
                 if not name:
-                    raise ValueError('Specified elf symbol {0} not found '
-                                     'in package files'.format(symbol))
+                    raise ValueError('Specified {0} symbol {1} not found '
+                                     'in package files'
+                                     .format(symbol_type, symbol))
 
                 version = Version(str_version)
                 if version <= self.version:
