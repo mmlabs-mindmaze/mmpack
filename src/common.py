@@ -214,8 +214,10 @@ def is_dynamic_library(filename: str) -> str:
     - contains .so within name (maybe not at the end)
     '''
     basename = os.path.basename(filename)
-    if filename.startswith('lib/lib') and '.so' in basename:
+    if ((filename.startswith('lib/lib') and '.so' in basename)
+            or (filename.startswith('bin/') and basename.endswith('.dll'))):
         return filetype(filename)
+    return None
 
 
 def parse_soname(soname: str) -> (str, str):
