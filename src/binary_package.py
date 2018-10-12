@@ -250,7 +250,16 @@ class BinaryPackage(object):
                 if file_type == 'pe' or file_type == 'python':
                     dprint('[WARN] skipping file: ' + inst_file)
 
+        if get_host_dist() == 'windows':
+            # if windows, then pe
+            host_symbol_list = ('pe', 'python')
+        else:
+            # if not windows, then (linux) elf
+            host_symbol_list = ('elf', 'python')
         for symbol_type in specs_provides:
+            if symbol_type not in host_symbol_list:
+                continue
+
             for symbol, str_version in specs_provides[symbol_type].items():
                 # type conversion will raise an error if malformed
                 name = self._provides_symbol(symbol_type, symbol)
