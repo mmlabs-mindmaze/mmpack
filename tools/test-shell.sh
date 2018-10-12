@@ -3,9 +3,18 @@
 # usage:
 # test-shell.sh [repository name]
 
+distrib() {
+	if [ "$(cat /etc/os-release  | grep "^ID=")" == "ID=debian" ]; then
+		echo debian
+	else
+		echo windows
+	fi
+}
+
 cd $(dirname $0)/../build
 
 REPOSITORY=${1:-"http://mindmaze-srv-fr-01"}
+DIST=$(distrib)
 MMPACK_PREFIX=$(mktemp -d)
 
 # source mmpack python virtualenv
@@ -28,7 +37,7 @@ export VIRTUAL_ENV=${testdir}
 export PYTHONPATH="${python_testdir}:$python_testdir}/site-packages:${PYTHONPATH}"
 
 # create mmpack prefix
-mmpack mkprefix "${REPOSITORY}"
+mmpack mkprefix --url="$REPOSITORY/$DIST" $MMPACK_PREFIX
 
 # update PS1
 export PS1='\u@\h:\w\$ [mmpack] '

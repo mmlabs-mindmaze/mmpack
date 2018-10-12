@@ -3,11 +3,20 @@
 # quick helper to create some pacakges
 # this is intended do be called manually
 
-REPOSITORY="mindmaze-srv-fr-01"
-
 set -ex
 
+distrib() {
+	if [ "$(cat /etc/os-release  | grep "^ID=")" == "ID=debian" ]; then
+		echo debian
+	else
+		echo windows
+	fi
+}
+
 cd $(dirname $0)/../build
+
+REPOSITORY="${1:-mindmaze-srv-fr-01}"
+DIST=$(distrib)
 
 testdir=$(pwd)/venv
 python_minor=$(python3 -c 'import sys; print(sys.version_info.minor)')
@@ -31,14 +40,14 @@ do
 done
 
 # upload packages
-scp ./venv/bin/mmpack-createrepo ~/.local/share/mmpack-packages/*.mpk root@${REPOSITORY}:/var/www/html/
-ssh root@${REPOSITORY} /var/www/html/mmpack-createrepo /var/www/html/ /var/www/html/
+scp ./venv/bin/mmpack-createrepo ~/.local/share/mmpack-packages/*.mpk root@${REPOSITORY}:/var/www/html/$DIST
+ssh root@${REPOSITORY} /var/www/html/mmpack-createrepo /var/www/html/$DIST /var/www/html/$DIST
 
 # install them within a prefix
 
 tmp_prefix=$(mktemp -d)
 export MMPACK_PREFIX="$tmp_prefix"
-./mmpack mkprefix "http://$REPOSITORY"
+./mmpack mkprefix --url="http://$REPOSITORY/$DIST" $MMPACK_PREFIX
 ./mmpack update
 ./mmpack install mcpanel-devel eegdev-devel
 
