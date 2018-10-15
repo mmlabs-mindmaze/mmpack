@@ -3,14 +3,31 @@
 helper module containing pe parsing functions
 '''
 
+from glob import glob
 import os
 
 import pefile
+
+from decorators import singleton
 
 
 def soname(filename: str) -> str:
     'Return the SONAME of given library'
     return os.path.basename(filename)
+
+
+@singleton
+class SystemLibs(set):
+    'cache of system libraries'
+    def __init__(self):
+        # pylint: disable=super-init-not-called
+        for libdir in ('/usr/x86_64-w64-mingw32/lib',  # linux
+                       '/mingw64/x86_64-w64-mingw32/lib'):  # mingw64
+            for lib in glob(libdir + '/lib*.a'):
+                # strip path,  'lib', and '.a'
+                # then add '.dll' and convert to lowercase
+                dllname = lib[(len(libdir) + 4):-2] + '.dll'
+                self.add(dllname.lower())
 
 
 def soname_deps(filename):
@@ -20,7 +37,9 @@ def soname_deps(filename):
     soname_set = set()
     try:
         for dll in pe_file.DIRECTORY_ENTRY_IMPORT:
-            soname_set.add(soname(dll.dll.decode('utf-8')))
+            dll = dll.dll.decode('utf-8')
+            if dll not in SystemLibs():
+                soname_set.add(dll)
     except AttributeError:  # parsed pe file has no IMPORT section
         pass
 
@@ -54,6 +73,9 @@ def undefined_symbols(filename):
 
     undefined_symbols_set = set()
     for dll in pe_file.DIRECTORY_ENTRY_IMPORT:
+        if dll.dll.decode('utf-8').lower() in SystemLibs():
+            continue
+
         for sym in dll.imports:
             undefined_symbols_set.add(sym.name.decode('utf-8'))
 
