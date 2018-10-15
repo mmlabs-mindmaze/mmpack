@@ -41,3 +41,20 @@ def symbols_list(filename, default_version):
         return {}
 
     return export_dict
+
+
+def undefined_symbols(filename):
+    'Parse given pe file and return its undefined symbols set'
+    # pefile populates its objects while parsing the file
+    # (which is a bad idea)
+    # as a result, pe_file does not have all its attributes
+    # defined by default
+    # pylint: disable=no-member
+    pe_file = pefile.PE(filename)
+
+    undefined_symbols_set = set()
+    for dll in pe_file.DIRECTORY_ENTRY_IMPORT:
+        for sym in dll.imports:
+            undefined_symbols_set.add(sym.name.decode('utf-8'))
+
+    return undefined_symbols_set
