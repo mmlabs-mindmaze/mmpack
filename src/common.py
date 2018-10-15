@@ -180,7 +180,27 @@ def sha256sum(filename: str) -> str:
     return sha.hexdigest()
 
 
-def get_host_arch() -> (str, str):
+def get_host_arch() -> str:
+    'return the host arch'
+    arch = platform.machine().lower()
+    if arch == 'x86_64':
+        arch = 'amd64'
+
+    return arch
+
+
+def get_host_dist() -> str:
+    'return host distribution'
+    try:
+        for line in open("/etc/os-release", "r"):
+            if line.startswith('ID='):
+                return line[3:].strip()
+    except FileNotFoundError:
+        # if not linux, then windows
+        return 'windows'
+
+
+def get_host_arch_dist() -> str:
     ''' return the host arch
 
     Format is <cpu arch>-<os>, and the values are converted if necessary.
@@ -191,19 +211,8 @@ def get_host_arch() -> (str, str):
         aarch64-debian
         i386-windows
     '''
-    cpu_arch = platform.machine().lower()
-    if cpu_arch == 'x86_64':
-        cpu_arch = 'amd64'
 
-    try:
-        for line in open("/etc/os-release", "r"):
-            if line.startswith('ID='):
-                dist = line[3:].strip()
-    except FileNotFoundError:
-        # if not linux, then windows
-        dist = 'windows'
-
-    return (cpu_arch, dist)
+    return '{0}-{1}'.format(get_host_arch(), get_host_dist())
 
 
 def is_dynamic_library(filename: str) -> str:

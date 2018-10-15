@@ -194,8 +194,7 @@ class SrcPackage(object):
                            pkg_type: str=None) -> BinaryPackage:
         'Returns the newly create BinaryPackage if any'
         if binpkg_name not in self._packages:
-            (cpu_arch, dist) = get_host_arch()
-            host_arch = '{0}-{1}'.format(cpu_arch, dist)
+            host_arch = get_host_arch_dist()
             binpkg = BinaryPackage(binpkg_name, self.version,
                                    self.name, host_arch, self.tag)
             self._format_description(binpkg, binpkg_name, pkg_type)
@@ -211,9 +210,8 @@ class SrcPackage(object):
         '''
         self._parse_specfile_general()
 
-        (cpu_arch, dist) = get_host_arch()
-        host_arch = '{0}-{1}'.format(cpu_arch, dist)
-        sysdeps_key = 'sysdepends-' + dist
+        host_arch = get_host_arch_dist()
+        sysdeps_key = 'sysdepends-' + get_host_dist()
 
         # create skeleton for explicit packages
         for pkg in self._specs.keys():
@@ -271,8 +269,7 @@ class SrcPackage(object):
         if self.build_options:
             build_env['OPTS'] = self.build_options
 
-        _, dist = get_host_arch()
-        if dist == 'windows':
+        if get_host_dist() == 'windows':
             build_env['MSYSTEM'] = 'MINGW64'
             for var in ('SRCDIR', 'BUILDDIR', 'DESTDIR', 'PREFIX'):
                 build_env[var] = shell('cygpath -u ' + build_env[var]).strip()
