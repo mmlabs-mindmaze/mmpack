@@ -42,7 +42,7 @@ def soname_deps(filename):
     soname_set = set()
     try:
         for dll in pe_file.DIRECTORY_ENTRY_IMPORT:
-            dll = dll.dll.decode('utf-8')
+            dll = dll.dll.decode('utf-8').lower()
             if dll not in SystemLibs():
                 soname_set.add(dll)
     except AttributeError:  # parsed pe file has no IMPORT section
