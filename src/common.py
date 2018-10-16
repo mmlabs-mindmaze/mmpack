@@ -153,7 +153,7 @@ def mm_representer(dumper, data):
 
 def _set_representer(dumper, data):
     'dump python set as list'
-    return dumper.represent_data(repr(list(data)))
+    return dumper.represent_data(list(data))
 
 
 yaml.add_representer(set, _set_representer)
