@@ -13,7 +13,9 @@ import tarfile
 from common import *
 from version import Version
 import yaml
+from pacman import pacman_find_dependency
 from dpkg import dpkg_find_dependency
+from settings import DPKG_PREFIX, PACMAN_PREFIX
 from workspace import Workspace
 
 
@@ -32,6 +34,16 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     tarinfo.uname = tarinfo.gname = 'root'
     tarinfo.mtime = 0
     return tarinfo
+
+
+def _sysdep_find_dependency(soname: str, symbol_set: List[str]) -> str:
+    wrk = Workspace()
+    if os.path.exists(DPKG_PREFIX):
+        return dpkg_find_dependency(soname, symbol_set)
+    elif os.path.exists(wrk.cygroot() + PACMAN_PREFIX):
+        return pacman_find_dependency(soname)
+
+    raise FileNotFoundError('Could not find system package manager')
 
 
 def _mmpack_lib_minversion(metadata: Dict[str, Dict[str, Version]],
@@ -310,14 +322,13 @@ class BinaryPackage(object):
             pass
 
         # provided by the host system
-        # TODO: switch on the host package manager
-        dpkg_dep = dpkg_find_dependency(soname, symbol_set)
-        if not dpkg_dep:
+        sysdep = _sysdep_find_dependency(soname, symbol_set)
+        if not sysdep:
             # <soname> dependency could not be met with any available means
             errmsg = 'Could not find package providing ' + soname
             raise AssertionError(errmsg)
 
-        self.add_sysdepend(dpkg_dep)
+        self.add_sysdepend(sysdep)
 
     def _find_link_deps(self, target: str, binpkgs: List['BinaryPackages']):
         for pkg in binpkgs:

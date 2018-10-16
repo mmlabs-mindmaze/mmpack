@@ -12,7 +12,10 @@ except KeyError:
 
 CONFIG_PATH = CFG_HOME + '/mmpack-config.yml'
 
-DPKG_METADATA_PREFIX = '/var/lib/dpkg/info'
+DPKG_PREFIX = '/var/lib/dpkg'
+DPKG_METADATA_PREFIX = DPKG_PREFIX + '/info'
+
+PACMAN_PREFIX = '\\var\\lib\\pacman'
 
 # variables taken from autotools
 PKGDATADIR = r'<pkgdatadir>'

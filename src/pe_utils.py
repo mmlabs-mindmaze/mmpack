@@ -9,6 +9,7 @@ import os
 import pefile
 
 from decorators import singleton
+from workspace import Workspace
 
 
 def soname(filename: str) -> str:
@@ -21,8 +22,12 @@ class SystemLibs(set):
     'cache of system libraries'
     def __init__(self):
         # pylint: disable=super-init-not-called
-        for libdir in ('/usr/x86_64-w64-mingw32/lib',  # linux
-                       '/mingw64/x86_64-w64-mingw32/lib'):  # mingw64
+
+        wrk = Workspace()
+        # give linux paths in linux format, and mingw paths in windows format
+        # glob will return an empty list if the path does not exist
+        for libdir in ('/usr/x86_64-w64-mingw32/lib',
+                       wrk.cygroot() + '\\mingw64\\x86_64-w64-mingw32\\lib'):
             for lib in glob(libdir + '/lib*.a'):
                 # strip path,  'lib', and '.a'
                 # then add '.dll' and convert to lowercase
