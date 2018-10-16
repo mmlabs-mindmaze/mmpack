@@ -132,7 +132,7 @@ def yaml_serialize(obj: Union[list, dict], filename: str,
     if use_block_style:
         default_flow_style = False
 
-    with open(filename, 'w+') as outfile:
+    with open(filename, 'w+', newline='\n') as outfile:
         yaml.dump(obj, outfile,
                   default_flow_style=default_flow_style,
                   allow_unicode=True,
