@@ -104,9 +104,14 @@ def parse_options(argv):
         ctx['tag'] = shell('git rev-parse --abbrev-ref HEAD').strip()
 
     # create a srcname from the arguments
-    ctx['srcname'] = os.path.basename(ctx['url'])
-    if ctx['srcname'].endswith('.git'):
+    # remove trailing path separators
+    if ctx['url'].endswith('.git'):
+        ctx['srcname'] = os.path.basename(ctx['url'])
         ctx['srcname'] = ctx['srcname'][:-4]
+    else:
+        ctx['srcname'] = os.path.normpath(ctx['url'])
+        ctx['srcname'] = os.path.basename(ctx['srcname'])
+
     ctx['srcname'] += '-' + ctx['tag']
 
     # set workspace prefix
