@@ -5,9 +5,11 @@ helper module containing pe parsing functions
 
 from glob import glob
 import os
+from typing import Set
 
 import pefile
 
+from common import shell
 from decorators import singleton
 from workspace import Workspace
 
@@ -85,3 +87,17 @@ def undefined_symbols(filename):
             undefined_symbols_set.add(sym.name.decode('utf-8'))
 
     return undefined_symbols_set
+
+
+def get_dll_from_soname(library_name: str) -> str:
+    'get dll from soname'
+    # FIXME: workaround
+    path = shell('which ' + library_name).strip()
+    return shell('cygpath -m ' + path).strip()
+
+
+def prune_symbols(filename: str, symbol_set: Set[str]):
+    'remove from <symbol_set> those provided by <soname>'
+    exported = symbols_list(filename, None)
+    for sym in exported:
+        symbol_set.discard(sym)

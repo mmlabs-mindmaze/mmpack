@@ -36,12 +36,12 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     return tarinfo
 
 
-def _sysdep_find_dependency(soname: str, symbol_set: List[str]) -> str:
+def _sysdep_find_dependency(soname: str, symbol_set: Set[str]) -> str:
     wrk = Workspace()
     if os.path.exists(DPKG_PREFIX):
         return dpkg_find_dependency(soname, symbol_set)
     elif os.path.exists(wrk.cygroot() + PACMAN_PREFIX):
-        return pacman_find_dependency(soname)
+        return pacman_find_dependency(soname, symbol_set)
 
     raise FileNotFoundError('Could not find system package manager')
 
