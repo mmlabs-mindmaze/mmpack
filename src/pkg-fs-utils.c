@@ -18,6 +18,7 @@
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
 #include "utils.h"
+#include "sysdeps.h"
 
 struct filelist_elt {
 	struct filelist_elt* next;
@@ -619,6 +620,35 @@ int apply_action(struct mmpack_ctx* ctx, struct action* act)
 }
 
 
+static
+int check_new_sysdeps(struct action_stack* stack)
+{
+	int i, rv;
+	struct mmpkg_dep* dep;
+	struct strset sysdeps;
+
+	strset_init(&sysdeps, STRSET_FOREIGN_STRINGS);
+
+	// Add all system dependencies to the set if a package is installed
+	for (i = 0; i < stack->index; i++) {
+		if (stack->actions[i].action != INSTALL_PKG)
+			continue;
+
+		// Add all sysdeps if the package
+		dep = stack->actions[i].pkg->sysdeps;
+		while (dep) {
+			strset_add(&sysdeps, dep->name);
+			dep = dep->next;
+		}
+	}
+
+	rv = check_sysdeps_installed(&sysdeps);
+
+	strset_deinit(&sysdeps);
+	return rv;
+}
+
+
 /**
  * apply_action_stack() - execute the action listed in the stack
  * @ctx:        mmpack contect to use
@@ -630,6 +660,9 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 {
 	int i, rv;
 	char old_currdir[512];
+
+	if (check_new_sysdeps(stack) != DEPS_OK)
+		return -1;
 
 	// Change current directory to prefix... All the prefix relpath can
 	// now be used directly.

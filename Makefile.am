@@ -8,6 +8,7 @@ AM_CPPFLAGS = \
 	-DBUILDDIR=\"$(builddir)\" \
 	-DLIBEXECDIR=\"$(pkglibexecdir)\" \
 	-DEXEEXT=\"$(EXEEXT)\" \
+	-DPKGDATADIR=\"$(pkgdatadir)\" \
 	$(CHECK_CPPFLAGS) \
 	$(LIBARCHIVE_CPPFLAGS) \
 	$(eol)
@@ -100,6 +101,8 @@ mmpack_lib_sources = \
 	src/settings.h \
 	src/sha256.c \
 	src/sha256.h \
+	src/sysdeps.c \
+	src/sysdeps.h \
 	src/utils.c \
 	src/utils.h \
 	$(eol)
