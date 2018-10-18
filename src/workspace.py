@@ -8,7 +8,7 @@ import sys
 from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
 
 from decorators import singleton
-from common import shell, dprint
+from common import shell, dprint, ShellException
 
 
 @singleton
@@ -20,6 +20,7 @@ class Workspace(object):
         self.build = XDG_CACHE_HOME + '/mmpack-build'
         self.staging = XDG_CACHE_HOME + '/mmpack-staging'
         self.packages = XDG_DATA_HOME + '/mmpack-packages'
+        self._cygpath_root = None
         self.prefix = ''
 
         # create the directories if they do not exist
@@ -27,6 +28,20 @@ class Workspace(object):
         os.makedirs(self.build, exist_ok=True)
         os.makedirs(self.sources, exist_ok=True)
         os.makedirs(self.packages, exist_ok=True)
+
+    def cygroot(self) -> str:
+        '''under msys, returns stripped output of: cygpath -w '/'
+           under linux, returns an empty string
+        '''
+        if self._cygpath_root is not None:
+            return self._cygpath_root
+
+        try:
+            self._cygpath_root = shell("cygpath -w '/' ").strip()
+        except ShellException:
+            self._cygpath_root = ''
+
+        return self._cygpath_root
 
     def builddir(self, srcpkg: str):
         'get package build directory. Create it if needed.'
