@@ -78,13 +78,16 @@ void mmstr_setlen(mmstr* str, int len)
  *
  * This function updates the len field of the mmstring when the string
  * buffer has been modified externally.
+ *
+ * Return: the updated string length.
  */
 static inline NONNULL_ARGS(1)
-void mmstr_update_len_from_buffer(mmstr* str)
+int mmstr_update_len_from_buffer(mmstr* str)
 {
 	struct mmstring* s = MMSTR_HDR(str);
 
 	s->len = strlen(s->buf);
+	return s->len;
 }
 
 
