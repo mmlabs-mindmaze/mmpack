@@ -97,6 +97,15 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 }
 
 
+static
+int set_installed(struct mmpkg* pkg, void * data)
+{
+	(void) data;
+
+	pkg->state = MMPACK_PKG_INSTALLED;
+	return 0;
+}
+
 /**
  * mmpack_ctx_init_pkglist() - parse repo cache and installed package list
  * @ctx:        initialized mmpack-context
@@ -126,8 +135,11 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	mmstr_join_path(repo_index_path, ctx->prefix, repo_relpath);
 
 	// populate the package lists
-	if (  binindex_populate(&ctx->binindex, installed_index_path, &ctx->installed)
-	   || binindex_populate(&ctx->binindex, repo_index_path, NULL))
+	if (binindex_populate(&ctx->binindex, installed_index_path, &ctx->installed))
+		return -1;
+	binindex_foreach(&ctx->binindex, set_installed, NULL);
+
+	if (binindex_populate(&ctx->binindex, repo_index_path, NULL))
 		return -1;
 
 	binindex_compute_rdepends(&ctx->binindex);

@@ -21,8 +21,10 @@ int binindex_cb(struct mmpkg* pkg, void * data)
 {
 	char * pkg_name = (char *) data;
 
-	if (strstr(pkg->name, pkg_name) != 0)
-		printf("%s (%s)\n", pkg->name, pkg->version);
+	if (strstr(pkg->name, pkg_name) != 0) {
+		printf("%s (%s) %s\n", pkg->name, pkg->version,
+		       pkg->state == MMPACK_PKG_INSTALLED ? "[installed]":"");
+	}
 
 	return 0;
 }
