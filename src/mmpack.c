@@ -30,7 +30,8 @@ static const char arguments_docs[] =
 	"[options] "UPDATE_SYNOPSIS"\n"
 	"[options] "INSTALL_SYNOPSIS"\n"
 	"[options] "REMOVE_SYNOPSIS"\n"
-	"[options] "RUNPREFIX_SYNOPSIS"\n";
+	"[options] "RUNPREFIX_SYNOPSIS"\n"
+	"[options] "SEARCH_SYNOPSIS"\n";
 
 static struct mmpack_opts cmdline_opts;
 
