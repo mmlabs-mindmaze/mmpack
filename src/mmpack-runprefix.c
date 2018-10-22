@@ -16,7 +16,7 @@
 
 #include "mmpack-runprefix.h"
 
-#define MOUNT_PREFIX_BIN        LIBEXECDIR"/mount-mmpack-prefix"
+#define MOUNT_PREFIX_BIN        LIBEXECDIR"/mount-mmpack-prefix"EXEEXT
 
 LOCAL_SYMBOL
 int mmpack_runprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])

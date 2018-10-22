@@ -7,6 +7,7 @@ AM_CPPFLAGS = \
 	-DSRCDIR=\"$(srcdir)\" \
 	-DBUILDDIR=\"$(builddir)\" \
 	-DLIBEXECDIR=\"$(pkglibexecdir)\" \
+	-DEXEEXT=\"$(EXEEXT)\" \
 	$(CHECK_CPPFLAGS) \
 	$(LIBARCHIVE_CPPFLAGS) \
 	$(eol)
