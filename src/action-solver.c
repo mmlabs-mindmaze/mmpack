@@ -412,7 +412,7 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
 		/* get the corresponding package, at its latest possible version */
 		pkg = binindex_get_latest_pkg(binindex, curr_dep->name, curr_dep->max_version);
 		if (pkg == NULL) {
-			mm_raise_error(ENODATA, "Cannot resolve dependency: %s", curr_dep->name);
+			mm_raise_error(MM_ENOTFOUND, "Cannot resolve dependency: %s", curr_dep->name);
 			goto error;
 		}
 
