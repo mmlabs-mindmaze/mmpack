@@ -463,7 +463,7 @@ exit:
 
 LOCAL_SYMBOL
 int binindex_foreach(struct binindex * binindex,
-                     int (*cb)(const struct mmpkg*, void *),
+                     int (*cb)(struct mmpkg*, void *),
                      void * data)
 {
 	int rv;

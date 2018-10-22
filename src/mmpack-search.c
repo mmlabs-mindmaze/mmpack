@@ -17,7 +17,7 @@
 
 
 static
-int binindex_cb(const struct mmpkg* pkg, void * data)
+int binindex_cb(struct mmpkg* pkg, void * data)
 {
 	char * pkg_name = (char *) data;
 

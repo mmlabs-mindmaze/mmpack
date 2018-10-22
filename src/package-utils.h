@@ -61,7 +61,7 @@ struct binindex {
 	struct indextable pkg_list_table;
 };
 int binindex_foreach(struct binindex * binindex,
-                     int (*cb)(const struct mmpkg*, void *),
+                     int (*cb)(struct mmpkg*, void *),
                      void * data);
 
 struct install_state {
