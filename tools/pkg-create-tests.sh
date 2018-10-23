@@ -20,7 +20,7 @@ upload() {
 }
 
 createpkg() {
-	mmpack-build pkg-create --skip-build-tests --url $1 --tag mmpack
+	mmpack-build pkg-create --skip-build-tests --url $1 --tag ${2:-mmpack}
 }
 
 cd $(dirname $0)/../build
@@ -49,6 +49,14 @@ ssh-copy-id root@${REPOSITORY}
 # install them within a prefix
 mmpack mkprefix --url="http://$REPOSITORY/$DIST" $MMPACK_PREFIX
 mmpack update
+
+# smoke test first
+createpkg ssh://git@intranet.mindmaze.ch:7999/~ganne/mmpack-hello-world.git master
+upload
+mmpack install mmpack-hello-world
+hello-world
+head-libexec-world || echo "failed as expected"
+mmpack runprefix head-libexec-world  # this one should work
 
 createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/rtfilter.git"
 createpkg "ssh://git@intranet.mindmaze.ch:7999/~ganne/mmlib.git"
