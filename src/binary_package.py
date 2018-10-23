@@ -33,6 +33,10 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     tarinfo.uid = tarinfo.gid = 0
     tarinfo.uname = tarinfo.gname = 'root'
     tarinfo.mtime = 0
+
+    if tarinfo.name.lower().endswith('.dll'):
+        tarinfo.mode = 0o755
+
     return tarinfo
 
 
