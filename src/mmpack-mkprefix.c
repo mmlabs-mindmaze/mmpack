@@ -111,8 +111,12 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	prefix = mmstr_alloca_from_cstr(argv[arg_index]);
 
 	if (  create_initial_empty_files(prefix, force_mkprefix)
-	   || create_initial_prefix_cfg(prefix, repo_url, force_mkprefix) )
+	   || create_initial_prefix_cfg(prefix, repo_url, force_mkprefix) ) {
+		error("Failed to create mmpack prefix: %s\n", prefix);
 		return -1;
+	}
+
+	info("Created mmpack prefix: %s\n", prefix);
 
 	return 0;
 }
