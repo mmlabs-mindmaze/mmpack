@@ -16,12 +16,18 @@
 #include "package-utils.h"
 
 
-static
-int binindex_cb(struct mmpkg* pkg, void * data)
-{
-	char * pkg_name = (char *) data;
+struct cb_data {
+	const char * pkg_name;
+	int found;
+};
 
-	if (strstr(pkg->name, pkg_name) != 0) {
+static
+int binindex_cb(struct mmpkg* pkg, void * void_data)
+{
+	struct cb_data * data = (struct cb_data *) void_data;
+
+	if (strstr(pkg->name, data->pkg_name) != 0) {
+		data->found = 1;
 		printf("%s (%s) %s\n", pkg->name, pkg->version,
 		       pkg->state == MMPACK_PKG_INSTALLED ? "[installed]":"");
 	}
@@ -32,21 +38,24 @@ int binindex_cb(struct mmpkg* pkg, void * data)
 LOCAL_SYMBOL
 int mmpack_search(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	char * pkg_name;
+	struct cb_data data;
 
 	if (argc < 2) {
 		fprintf(stderr, "missing package argument in command line\n"
 		                "Usage:\n\tmmpack search "SEARCH_SYNOPSIS"\n");
 		return -1;
 	}
-	pkg_name = (char *) argv[1];
+	data.pkg_name = argv[1];
 
 	if (mmpack_ctx_init_pkglist(ctx)) {
 		fprintf(stderr, "Failed to load package lists\n");
 		goto exit;
 	}
 
-	binindex_foreach(&ctx->binindex, binindex_cb, pkg_name);
+	data.found = 0;
+	binindex_foreach(&ctx->binindex, binindex_cb, &data);
+	if (!data.found)
+		printf("No package found maching pattern: \"%s\"\n", data.pkg_name);
 
 exit:
 	return 0;
