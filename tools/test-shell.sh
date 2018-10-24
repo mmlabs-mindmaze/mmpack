@@ -34,7 +34,7 @@ export LIBRARY_PATH="${MMPACK_PREFIX}/lib:${LIBRARY_PATH}"
 export CPATH="${MMPACK_PREFIX}/include:${CPATH}"
 
 export VIRTUAL_ENV=${testdir}
-export PYTHONPATH="${python_testdir}:$python_testdir}/site-packages:${PYTHONPATH}"
+export PYTHONPATH="${python_testdir}:${python_testdir}/site-packages:${PYTHONPATH}"
 
 # create mmpack prefix
 mmpack mkprefix --url="$REPOSITORY/$DIST" $MMPACK_PREFIX
