@@ -7,10 +7,12 @@
 
 #include <assert.h>
 #include <mmerrno.h>
+#include <stdio.h>
 
 #include "action-solver.h"
 #include "context.h"
 #include "package-utils.h"
+#include "utils.h"
 
 
 #define DEFAULT_STACK_SZ 10
@@ -529,4 +531,43 @@ void mmpack_action_stack_dump(struct action_stack * stack)
 
 		mmpkg_dump(stack->actions[i].pkg);
 	}
+}
+
+
+LOCAL_SYMBOL
+int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack)
+{
+	int i, rv;
+
+	if (stack->index == 0) {
+		printf("Nothing to do.\n");
+		return 0;
+	}
+
+	printf("Transaction summary:\n");
+
+	for (i =  0 ; i < stack->index ; i++) {
+		if (stack->actions[i].action == INSTALL_PKG)
+			printf("INSTALL: ");
+		else if (stack->actions[i].action == REMOVE_PKG)
+			printf("REMOVE: ");
+
+		printf("%s (%s)\n", stack->actions[i].pkg->name,
+		                  stack->actions[i].pkg->version);
+	}
+
+	if (nreq == stack->index) {
+		/* mmpack is installing as many packages as requested:
+		 * - they are exactly the one requested
+		 * - they introduce no additional dependencies
+		 *
+		 * proceed with install without confirmation */
+		return 0;
+	}
+
+	rv = prompt_user_confirm();
+	if (rv != 0)
+		printf("Abort.\n");
+
+	return rv;
 }

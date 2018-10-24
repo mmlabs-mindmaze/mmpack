@@ -446,3 +446,27 @@ exit:
 	mmstr_freea(fullpath);
 	return rv;
 }
+
+
+/**
+ * prompt_user_confirm() - interactively ask user for confirmation
+ *
+ * Interpret invalid or empty answer as denial.
+ *
+ * Return: 0 on acceptance, 0 otherwise
+ */
+LOCAL_SYMBOL
+int prompt_user_confirm(void)
+{
+	int rv;
+	char line[64];
+	char answer;
+
+	printf("Do you want to proceed? [y/N] ");
+	fgets(line, sizeof(line), stdin);
+	rv = sscanf(line, "%c\n", &answer);
+	if (rv != 0 && rv != EOF && answer == 'y')
+		return 0;
+
+	return -1;
+}

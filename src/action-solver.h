@@ -48,4 +48,6 @@ void mmpack_action_stack_destroy(struct action_stack * stack);
 struct action * mmpack_action_stack_pop(struct action_stack * stack);
 void mmpack_action_stack_dump(struct action_stack * actions);
 
+int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack);
+
 #endif

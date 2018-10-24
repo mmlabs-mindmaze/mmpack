@@ -53,4 +53,6 @@ int open_file_in_prefix(const mmstr* prefix, const mmstr* relpath, int oflag);
 #define info(...) fprintf(stdout, __VA_ARGS__)
 #define error(...) fprintf(stderr, __VA_ARGS__)
 
+int prompt_user_confirm(void);
+
 #endif /* UTILS_H */
