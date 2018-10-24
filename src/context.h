@@ -13,6 +13,7 @@
 
 struct mmpack_opts {
 	const char* prefix;
+	const char* version;
 };
 
 /**

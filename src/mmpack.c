@@ -38,6 +38,8 @@ static struct mmpack_opts cmdline_opts;
 static const struct mmarg_opt cmdline_optv[] = {
 	{"p|prefix", MMOPT_NEEDSTR, NULL, {.sptr = &cmdline_opts.prefix},
 	 "Use @PATH as install prefix."},
+	{"version", MMOPT_NOVAL, "set", {.sptr = &cmdline_opts.version},
+	 "Display mmpack version"},
 };
 
 int main(int argc, char* argv[])
@@ -54,8 +56,17 @@ int main(int argc, char* argv[])
 		.execname = "mmpack",
 	};
 
-	/* Parse command line options and check command is supplied */
+	/* Parse command line options */
+	rv = 0;
 	arg_index = mmarg_parse(&parser, argc, argv);
+
+	/* handle non-command options */
+	if (cmdline_opts.version) {
+		printf("%s\n", PACKAGE_STRING);
+		goto exit;
+	}
+
+	/* Check command is supplied */
 	if (arg_index+1 > argc) {
 		fprintf(stderr, "Invalid number of argument."
 		                " Run \"%s --help\" to see Usage\n", argv[0]);
