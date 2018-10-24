@@ -463,7 +463,8 @@ int prompt_user_confirm(void)
 	char answer;
 
 	printf("Do you want to proceed? [y/N] ");
-	fgets(line, sizeof(line), stdin);
+	if (fgets(line, sizeof(line), stdin) == NULL)
+		return -1;
 	rv = sscanf(line, "%c\n", &answer);
 	if (rv != 0 && rv != EOF && answer == 'y')
 		return 0;
