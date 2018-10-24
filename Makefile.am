@@ -198,3 +198,24 @@ completion_DATA = \
 	src/mmpack_completion \
 	src/mmpack-build_completion \
 	$(eol)
+
+#
+# DOC RULES
+#
+
+RST_MAN_PAGES = \
+	docs/mmpack.rst \
+	$(eof)
+EXTRA_DIST += $(RST_MAN_PAGES)
+
+nodist_man_MANS = \
+	docs/mmpack.1 \
+	$(eol)
+
+CLEANFILES += $(nodist_man_MANS)
+
+.rst.1:
+	$(MKDIR_P) docs
+	$(AM_V_GEN) $(RST2MAN) $< > $@
+
+$(dist_man_MANS): $(RST_MAN_PAGES)

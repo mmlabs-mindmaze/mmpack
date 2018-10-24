@@ -2,3 +2,4 @@
 /usr/lib/*/mmpack/mount-mmpack-prefix
 /usr/share/mmpack/check-dpkg-installed
 /usr/share/bash-completion/completions/mmpack_completion
+/usr/share/man/man1/mmpack.1

@@ -18,6 +18,9 @@ MM_CC_WARNFLAGS
 MM_OUTPUT_DEF
 
 # Check for programs
+AC_CHECK_PROGS(RST2MAN, [rst2man rst2man3], [none])
+AS_IF([test $RST2MAN = none], [AC_MSG_ERROR([rst2man is required for doc generation])])
+
 AC_PROG_CC_C99
 AM_PROG_CC_C_O
 LT_INIT([win32-dll disable-static])
