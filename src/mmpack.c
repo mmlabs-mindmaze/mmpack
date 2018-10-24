@@ -23,7 +23,15 @@
 #include "mmpack-update.h"
 
 static const char mmpack_doc[] =
-	"TODO write a proper tool description";
+	"mmpack is a cross-platform package manager."
+	"\n\n"
+	"It is designed to work without any need for root access, and to allow "
+	"multiple coexisting project versions within project prefixes (akin to "
+	"python's virtualenv sandboxes)"
+	"\n\n"
+	"mmpack is the entry point for many package management commands (update, "
+	"install, remove...)."
+;
 
 static const char arguments_docs[] =
 	"[options] "MKPREFIX_SYNOPSIS"\n"
