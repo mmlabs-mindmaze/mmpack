@@ -70,6 +70,10 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (!act_stack)
 		goto exit;
 
+	rv = confirm_action_stack_if_needed(nreq, act_stack);
+	if (rv != 0)
+		goto exit;
+
 	rv = apply_action_stack(ctx, act_stack);
 
 exit:
