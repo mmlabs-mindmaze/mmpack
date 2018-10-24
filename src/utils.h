@@ -5,6 +5,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdio.h>
 #include "mmstring.h"
 
 typedef enum {
@@ -49,5 +50,7 @@ mmstr* mmstr_join_path(mmstr* restrict dst,
 
 int open_file_in_prefix(const mmstr* prefix, const mmstr* relpath, int oflag);
 
-#endif /* UTILS_H */
+#define info(...) fprintf(stdout, __VA_ARGS__)
+#define error(...) fprintf(stderr, __VA_ARGS__)
 
+#endif /* UTILS_H */
