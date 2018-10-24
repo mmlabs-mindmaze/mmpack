@@ -31,5 +31,7 @@ int mmpack_update_all(struct mmpack_ctx * ctx)
 		return -1;
 	}
 
+	printf("Updated package list from repository: %s\n", url);
+
 	return 0;
 }
