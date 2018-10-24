@@ -506,6 +506,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		if (act->action != INSTALL_PKG)
 			continue;
 
+		info("Downloading %s ... ", pkg->name);
+
 		// Get filename of downloaded package and store the path in
 		// a field of action structure being analyzed
 		mmstr_basename(pkgbase, pkg->filename);
@@ -524,6 +526,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		                         NULL, mpkfile)
 		   || check_file_pkg(pkg, mpkfile))
 			rv = -1;
+
+		info("OK\n");
 	}
 
 	return rv;
@@ -554,11 +558,13 @@ int install_package(struct mmpack_ctx* ctx,
 {
 	int rv;
 
+	info("Installing package %s ... ", pkg->name);
 	rv = pkg_unpack_files(pkg, mpkfile);
 	if (rv)
 		return -1;
 
 	install_state_add_pkg(&ctx->installed, pkg);
+	info("OK\n");
 	return rv;
 }
 
@@ -581,6 +587,8 @@ int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 	int rv = 0;
 	struct filelist files;
 
+	info("Removing package %s ... ", pkg->name);
+
 	filelist_init(&files);
 
 	if (  pkg_list_rm_files(pkg, &files)
@@ -591,6 +599,8 @@ int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 	filelist_deinit(&files);
 
 	install_state_rm_pkgname(&ctx->installed, pkg->name);
+
+	info("OK\n");
 	return rv;
 }
 
