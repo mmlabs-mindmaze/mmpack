@@ -3,5 +3,6 @@
 /usr/share/mmpack/check-dpkg-installed
 /usr/share/bash-completion/completions/mmpack_completion
 /usr/share/man/man1/mmpack.1
+/usr/share/man/man1/mmpack-install.1
 /usr/share/man/man1/mmpack-mkprefix.1
 /usr/share/man/man1/mmpack-update.1
