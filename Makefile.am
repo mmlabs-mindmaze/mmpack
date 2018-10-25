@@ -208,6 +208,7 @@ RST_MAN_PAGES = \
 	docs/mmpack-install.rst \
 	docs/mmpack-mkprefix.rst \
 	docs/mmpack-remove.rst \
+	docs/mmpack-runprefix.rst \
 	docs/mmpack-update.rst \
 	$(eof)
 EXTRA_DIST += $(RST_MAN_PAGES)
@@ -217,6 +218,7 @@ nodist_man_MANS = \
 	docs/mmpack-install.1 \
 	docs/mmpack-mkprefix.1 \
 	docs/mmpack-remove.1 \
+	docs/mmpack-runprefix.1 \
 	docs/mmpack-update.1 \
 	$(eol)
 
