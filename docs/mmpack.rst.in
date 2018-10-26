@@ -82,6 +82,7 @@ EXAMPLE
 
 SEE ALSO
 ========
+``mmpack-build``\(1),
 ``mmpack-install``\(1),
 ``mmpack-mkprefix``\(1),
 ``mmpack-remove``\(1),

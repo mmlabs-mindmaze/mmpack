@@ -3,3 +3,5 @@
 /usr/lib/python3*
 /usr/share/bash-completion/completions/mmpack-build_completion
 /usr/share/mmpack/build-*
+/usr/share/man/man1/mmpack-build.1
+/usr/share/man/man1/mmpack-build-*.1
