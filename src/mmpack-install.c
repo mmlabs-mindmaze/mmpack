@@ -18,6 +18,8 @@
 #include "pkg-fs-utils.h"
 
 
+static int is_yes_assumed = 0;
+
 static char install_doc[] =
 	"\"mmpack install\" downloads and installs given packages and "
 	"their dependencies into the current prefix. If mmpack finds "
@@ -25,6 +27,8 @@ static char install_doc[] =
 	"and request said packages.";
 
 static const struct mmarg_opt cmdline_optv[] = {
+	{"y|assume-yes", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &is_yes_assumed},
+	 "assume \"yes\" as answer to all prompts and run non-interactively"},
 };
 
 
@@ -89,9 +93,11 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (!act_stack)
 		goto exit;
 
-	rv = confirm_action_stack_if_needed(nreq, act_stack);
-	if (rv != 0)
-		goto exit;
+	if (!is_yes_assumed) {
+		rv = confirm_action_stack_if_needed(nreq, act_stack);
+		if (rv != 0)
+			goto exit;
+	}
 
 	rv = apply_action_stack(ctx, act_stack);
 
