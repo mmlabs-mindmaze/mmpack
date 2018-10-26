@@ -137,6 +137,13 @@ if OS_KERNEL_NT
 mount_mmpack_prefix_SOURCES += src/mount-prefix-nt.c
 endif
 
+# dev debian-only helper function, not part of any target
+# requires root permissions to run
+.PHONY: setcap
+setcap:
+	$(AM_V_at) mkdir -p /run/mmpack
+	$(AM_V_GEN) setcap cap_sys_admin+ep $(libexecdir)/mmpack/mount-mmpack-prefix
+
 mmpack-build: src/mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@
 	$(AM_V_GEN)chmod a+x $@
