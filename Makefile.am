@@ -203,16 +203,16 @@ completion_DATA = \
 # DOC RULES
 #
 
-RST_MAN_PAGES = \
-	docs/mmpack.rst \
-	docs/mmpack-install.rst \
-	docs/mmpack-mkprefix.rst \
-	docs/mmpack-remove.rst \
-	docs/mmpack-runprefix.rst \
-	docs/mmpack-search.rst \
-	docs/mmpack-update.rst \
+RST_MAN_PAGES_IN = \
+	docs/mmpack.rst.in \
+	docs/mmpack-install.rst.in \
+	docs/mmpack-mkprefix.rst.in \
+	docs/mmpack-remove.rst.in \
+	docs/mmpack-runprefix.rst.in \
+	docs/mmpack-search.rst.in \
+	docs/mmpack-update.rst.in \
 	$(eof)
-EXTRA_DIST += $(RST_MAN_PAGES)
+EXTRA_DIST += $(RST_MAN_PAGES_IN)
 
 nodist_man_MANS = \
 	docs/mmpack.1 \
@@ -224,10 +224,11 @@ nodist_man_MANS = \
 	docs/mmpack-update.1 \
 	$(eol)
 
-CLEANFILES += $(nodist_man_MANS)
+%.1: %.rst.in
+	$(AM_V_at) $(MKDIR_P) docs
+	$(AM_V_at) $(SED) -e 's,<version>,$(VERSION),g' < $< > $@.rst
+	$(AM_V_GEN) $(RST2MAN) $@.rst > $@
 
-.rst.1:
-	$(MKDIR_P) docs
-	$(AM_V_GEN) $(RST2MAN) $< > $@
+CLEANFILES += $(nodist_man_MANS) $(nodist_man_MANS:.1=.1.rst)
 
-$(dist_man_MANS): $(RST_MAN_PAGES)
+$(dist_man_MANS): $(RST_MAN_PAGES_IN)
