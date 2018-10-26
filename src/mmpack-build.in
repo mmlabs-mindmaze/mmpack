@@ -4,7 +4,7 @@
 
 PYTHON=${PYTHON:-python3}
 
-cmd=$1
+cmd=${1:-pkg-create}
 mmpack_moduledir=<pythondir>/mmpack
 if [ -n "$VIRTUAL_ENV" ] ; then
 	mmpack_moduledir="lib/python${mmpack_moduledir#*/lib/python}"

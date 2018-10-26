@@ -32,6 +32,8 @@ the archive files. Packages come in two varieties: binary packages, used to
 encapsulate software to be installed, and source packages, containing the source
 code and recipe necessary to produce binary packages.
 
+If no command is explicit, default to **pkg-create**.
+
 OPTIONS
 =======
 
