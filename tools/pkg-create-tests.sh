@@ -64,7 +64,7 @@ createpkg "ssh://git@intranet.mindmaze.ch:7999/~ganne/mmlib.git"
 
 upload
 mmpack install rtfilter-devel xdffileio-devel
-mmpack install librtfilter1  # win32 workaround
+mmpack install librtfilter1 libxdffileio0 # win32 workaround
 
 createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/mcpanel.git"
 createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/eegdev.git"
@@ -72,7 +72,7 @@ createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/eegdev.git"
 upload
 
 mmpack install mcpanel-devel eegdev-devel
-mmpack install libmcpanel0 libeegdev0 libxdffileio0  # win32 workaround
+mmpack install libmcpanel0 libeegdev0  # win32 workaround
 
 # create eegview package which depends on mcpanel and eegdev
 createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/eegview.git"
