@@ -33,6 +33,14 @@ static const char mmpack_doc[] =
 	"install, remove...)."
 ;
 
+/*
+ * TODO: user commands to implement
+ * - config
+ * - download
+ * - info/show
+ * - reinstall
+ * - upgrade
+ */
 static const char arguments_docs[] =
 	"[options] "MKPREFIX_SYNOPSIS"\n"
 	"[options] "UPDATE_SYNOPSIS"\n"

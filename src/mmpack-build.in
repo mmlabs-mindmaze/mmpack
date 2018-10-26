@@ -24,35 +24,23 @@ list_commands() {
 
 print_usage() {
 	cat << ENDOFDOC
-This is a stub for all mmpack commands
+This is a stub for all mmpack-build commands
 
 Usage:
-mmpack <command> [command-options]
+mmpack-build <command> [command-options]
 
 Show full mmpack help
-mmpack --help
+mmpack-build --help
 
 List all mmpack commands:
-mmpack --list-commands
+mmpack-build --list-commands
 
 More infos about a specific command:
-mmpack <command> --help
+mmpack-build <command> --help
 
 TODO:
-- user commands to implement
-  * config
-  * download
-  * info/show
-  * install
-  * reinstall
-  * search
-  * uninstall
-  * update/make-cache
-  * upgrade
-
 - package creation commands to implement:
   * pkg-check
-  * pkg-create
   * pkg-show
 
 - package DB commands to implement:
@@ -69,8 +57,6 @@ case $1 in
 	--list-commands) list_commands ; exit 0 ;;
 	-h|--help) print_usage ; exit 0 ;;
 esac
-
-
 
 
 # check command is provided
