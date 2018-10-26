@@ -10,7 +10,7 @@ try:
 except KeyError:
     CFG_HOME = os.environ['HOME'] + '/.config'
 
-CONFIG_PATH = CFG_HOME + '/mmpack-config.yml'
+CONFIG_PATH = CFG_HOME + '/mmpack-config.yaml'
 
 DPKG_PREFIX = '/var/lib/dpkg'
 DPKG_METADATA_PREFIX = DPKG_PREFIX + '/info'

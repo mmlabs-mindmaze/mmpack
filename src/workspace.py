@@ -15,7 +15,7 @@ from common import shell, dprint, ShellException
 class Workspace(object):
     'global mmpack workspace singleton class'
     def __init__(self):
-        self.config = XDG_CONFIG_HOME + '/mmpack-config.yml'
+        self.config = XDG_CONFIG_HOME + '/mmpack-config.yaml'
         self.sources = XDG_CACHE_HOME + '/mmpack-sources'
         self.build = XDG_CACHE_HOME + '/mmpack-build'
         self.staging = XDG_CACHE_HOME + '/mmpack-staging'
