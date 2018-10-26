@@ -1,0 +1,32 @@
+===============
+mmpack-search
+===============
+
+----------------
+search packages
+----------------
+
+:Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
+         Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
+:Date: 2018-10-25
+:Version: 1.0.0
+:Manual section: 1
+
+SYNOPSIS
+========
+
+``mmpack search`` *pattern*
+
+DESCRIPTION
+===========
+**mmpack-search** searchs given pattern within all the available package names.
+
+
+SEE ALSO
+========
+``mmpack``\(1),
+``mmpack-install``\(1),
+``mmpack-mkprefix``\(1),
+``mmpack-remove``\(1),
+``mmpack-runprefix``\(1),
+``mmpack-update``\(1),
