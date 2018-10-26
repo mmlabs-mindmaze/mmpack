@@ -17,6 +17,8 @@ SYNOPSIS
 
 ``mmpack install`` *pkg1* [= *version1*] [*pkg2* [= *version2*] [...]]
 
+``mmpack install`` -h|--help
+
 DESCRIPTION
 ===========
 **mmpack-install** installs given packages and their dependencies into the
@@ -29,6 +31,10 @@ If **mmpack** finds additional packages required for the transaction
 (dependencies) it will ask for user confimation before proceeding (default
 answer is negative). Otherwise it will proceed to the installation.
 
+OPTIONS
+=======
+-h|--help
+  Show help and exit
 
 SEE ALSO
 ========

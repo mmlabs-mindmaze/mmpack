@@ -8,6 +8,7 @@
 
 #include "mmpack-install.h"
 
+#include <mmargparse.h>
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
@@ -16,6 +17,15 @@
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
 
+
+static char install_doc[] =
+	"\"mmpack install\" downloads and installs given packages and "
+	"their dependencies into the current prefix. If mmpack finds "
+	"missing systems dependencies, then it will abort the installation "
+	"and request said packages.";
+
+static const struct mmarg_opt cmdline_optv[] = {
+};
 
 
 static
@@ -41,16 +51,25 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct pkg_request* reqlist = NULL;
 	struct action_stack* act_stack = NULL;
-	int i, nreq, rv = -1;
+	int i, nreq, arg_index, rv = -1;
 	const char** req_args;
+	struct mmarg_parser parser = {
+		.doc = install_doc,
+		.args_doc = INSTALL_SYNOPSIS,
+		.optv = cmdline_optv,
+		.num_opt = MM_NELEM(cmdline_optv),
+		.execname = "mmpack",
+	};
 
-	if (argc < 2) {
+	arg_index = mmarg_parse(&parser, argc, (char**)argv);
+	if (arg_index+1 < argc) {
 		fprintf(stderr, "missing package list argument in command line\n"
-		                "Usage:\n\tmmpack "INSTALL_SYNOPSIS"\n");
+		                "Run \"mmpack install --help\" to see usage\n");
 		return -1;
 	}
-	nreq = argc - 1;
-	req_args = argv + 1;
+
+	nreq = argc - arg_index;
+	req_args = argv + arg_index;
 
 	if (mmpack_ctx_init_pkglist(ctx)) {
 		fprintf(stderr, "Failed to load package lists\n");

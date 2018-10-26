@@ -8,7 +8,7 @@
 #include "context.h"
 
 #define INSTALL_SYNOPSIS \
-	"install <pkg1>[=<version1>] [<pkg2>[=<version2>] [...]]"
+	"install [inst-opts] <pkg1>[=<version1>] [<pkg2>[=<version2>] [...]]"
 
 int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[]);
 
