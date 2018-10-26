@@ -50,6 +50,17 @@ static const struct mmarg_opt cmdline_optv[] = {
 	 "Display mmpack version"},
 };
 
+
+static
+void init_stdout(void)
+{
+#if defined(_WIN32)
+	// Make stream unbuffered
+	setbuf(stdout, NULL);
+#endif
+}
+
+
 int main(int argc, char* argv[])
 {
 	int rv, arg_index, cmd_argc;
@@ -84,6 +95,8 @@ int main(int argc, char* argv[])
 	cmd = argv[arg_index];
 	cmd_argv = (const char**)argv + arg_index;
 	cmd_argc = argc - arg_index;
+
+	init_stdout();
 
 	/* Initialize context according to command line options */
 	rv = mmpack_ctx_init(&ctx, &cmdline_opts);
