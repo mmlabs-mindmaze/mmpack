@@ -213,6 +213,7 @@ completion_DATA = \
 RST_MAN_PAGES_IN = \
 	docs/mmpack.rst.in \
 	docs/mmpack-build.rst.in \
+	docs/mmpack-build-pkg-create.rst.in \
 	docs/mmpack-install.rst.in \
 	docs/mmpack-mkprefix.rst.in \
 	docs/mmpack-remove.rst.in \
@@ -225,6 +226,7 @@ EXTRA_DIST += $(RST_MAN_PAGES_IN)
 nodist_man_MANS = \
 	docs/mmpack.1 \
 	docs/mmpack-build.1 \
+	docs/mmpack-build-pkg-create.1 \
 	docs/mmpack-install.1 \
 	docs/mmpack-mkprefix.1 \
 	docs/mmpack-remove.1 \
