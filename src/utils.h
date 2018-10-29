@@ -35,6 +35,7 @@ int is_path_separator(char c)
 #define METADATA_RELPATH        MMPACK_STATEDIR_RELPATH "/metadata"
 #define PKGS_CACHEDIR_RELPATH   "var/cache/mmpack/pkgs"
 #define CFG_RELPATH             "etc/mmpack-config.yaml"
+#define LOG_RELPATH             "var/log/mmpack.log"
 
 mmstr* get_default_mmpack_prefix(void);
 mmstr* get_config_filename(void);

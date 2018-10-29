@@ -39,12 +39,19 @@ static
 int create_initial_empty_files(const mmstr* prefix, int force_create)
 {
 	int fd, oflag;
-	const mmstr *instlist_relpath, *repocache_relpath;
+	const mmstr *instlist_relpath, *repocache_relpath, *log_relpath;
 
 	instlist_relpath = mmstr_alloca_from_cstr(INSTALLED_INDEX_RELPATH);
 	repocache_relpath = mmstr_alloca_from_cstr(REPO_INDEX_RELPATH);
+	log_relpath = mmstr_alloca_from_cstr(LOG_RELPATH);
 
 	oflag = O_WRONLY|O_CREAT| (force_create ? O_TRUNC : O_EXCL);
+
+	// Create initial empty log file
+	fd = open_file_in_prefix(prefix, log_relpath, oflag);
+	mm_close(fd);
+	if (fd < 0)
+		return -1;
 
 	// Create initial empty installed package list
 	fd = open_file_in_prefix(prefix, instlist_relpath, oflag);

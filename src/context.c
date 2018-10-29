@@ -200,6 +200,36 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 
 
 /**
+ * mmpack_ctx_use_prefix_log() - redirect stderr to prefix log
+ * @ctx:        initialized mmpack context
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+static
+int mmpack_ctx_use_prefix_log(struct mmpack_ctx * ctx)
+{
+	STATIC_CONST_MMSTR(log_relpath, LOG_RELPATH)
+	int fd, oflags;
+
+	oflags = O_WRONLY|O_CREAT|O_APPEND;
+	fd = open_file_in_prefix(ctx->prefix, log_relpath, oflags);
+	if (fd < 0)
+		goto error;
+
+	if (mm_dup2(fd, STDERR_FILENO) < 0)
+		goto error;
+
+	mm_close(fd);
+	return 0;
+
+error:
+	mm_close(fd);
+	error("Unable to redirect log to %s/%s", ctx->prefix, log_relpath);
+	return -1;
+}
+
+
+/**
  * mmpack_ctx_use_prefix() - load prefix settings and packages indices
  * @ctx:	initialized mmpack context
  *
@@ -209,6 +239,9 @@ LOCAL_SYMBOL
 int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx)
 {
 	if (read_prefix_config(ctx))
+		return -1;
+
+	if (mmpack_ctx_use_prefix_log(ctx))
 		return -1;
 
 	return mmpack_ctx_init_pkglist(ctx);
