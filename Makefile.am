@@ -61,7 +61,7 @@ pkgpython_PYTHON =\
 	$(eol)
 
 .PHONY: spelling
-spelling: $(pkgpython_PYTHON) $(mmpack_lib_sources)
+spelling: $(pkgpython_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN)
 	$(AM_V_AT) codespell $^
 
 .PHONY: syntax
