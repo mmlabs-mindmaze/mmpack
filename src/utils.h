@@ -5,6 +5,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <mmlog.h>
 #include <stdio.h>
 #include "mmstring.h"
 
@@ -50,8 +51,10 @@ mmstr* mmstr_join_path(mmstr* restrict dst,
 
 int open_file_in_prefix(const mmstr* prefix, const mmstr* relpath, int oflag);
 
-#define info(...) fprintf(stdout, __VA_ARGS__)
-#define error(...) fprintf(stderr, __VA_ARGS__)
+void report_user_and_log(int mmlog_level, const char* fmt, ...);
+
+#define info(fmt, ...) report_user_and_log(MMLOG_INFO, fmt, ## __VA_ARGS__)
+#define error(fmt, ...) report_user_and_log(MMLOG_ERROR, fmt, ## __VA_ARGS__)
 
 int prompt_user_confirm(void);
 

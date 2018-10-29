@@ -7,10 +7,12 @@
 #endif
 
 #include <mmlib.h>
+#include <mmlog.h>
 #include <mmsysio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include <mmerrno.h>
 #include <mmlib.h>
@@ -21,7 +23,7 @@
 #include "sha256.h"
 #include "utils.h"
 
-
+#define MSG_MAXLEN              128
 #define HASH_UPDATE_SIZE        512
 
 
@@ -448,6 +450,12 @@ exit:
 }
 
 
+/**************************************************************************
+ *                                                                        *
+ *                            user/log interaction                        *
+ *                                                                        *
+ **************************************************************************/
+
 /**
  * prompt_user_confirm() - interactively ask user for confirmation
  *
@@ -470,4 +478,54 @@ int prompt_user_confirm(void)
 		return 0;
 
 	return -1;
+}
+
+
+/**
+ * report_user_and_log() - print message to user and log it
+ * @mmlog_level:        mmlog level to set to the logged message
+ * @fmt:                printf-like format string
+ *
+ * This function format a message duplicates it both to standard output for
+ * the user and in the log (through mmlog which will decorate the message and
+ * send it to standard error).
+ *
+ * The message may or may not be terminated by a linefeed character. If
+ * there is one, the message sent to log (mmlog facility) will be anyway
+ * stripped from it terminating LF. This behavior allows sending sending
+ * multipart message to user, while the log contains only self-contained
+ * one-liners.
+ */
+LOCAL_SYMBOL
+void report_user_and_log(int mmlog_level, const char* fmt, ...)
+{
+	char msg[MSG_MAXLEN+2];
+	int lastchar_idx, msglen, has_lf;
+	va_list ap;
+
+	va_start(ap, fmt);
+	msglen = vsnprintf(msg, MSG_MAXLEN+1, fmt, ap);
+	va_end(ap);
+
+	// Ensure msglen represents the length of buffer in msg even in
+	// case of truncation or error
+	msglen = MAX(msglen, 0);
+	msglen = MIN(msglen, MSG_MAXLEN);
+
+	// See if there was a trailing linefeed and remove it temporary if
+	// so (because mmlog assume one-liner be added in log)
+	lastchar_idx = (msglen == 0) ? 0 : msglen - 1;
+	has_lf = (msg[lastchar_idx] == '\n');
+	if (has_lf)
+		msg[lastchar_idx] = '\0';
+
+	// log message with mmlog (to STDERR)
+	mmlog_log(mmlog_level, PACKAGE_NAME, msg);
+
+	// restore trailing linefeed if there was one
+	if (has_lf)
+		msg[lastchar_idx] = '\n';
+
+	// Write message to standard output
+	fwrite(msg, 1, msglen, stdout);
 }
