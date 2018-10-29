@@ -22,16 +22,16 @@ int mmpack_update_all(struct mmpack_ctx * ctx)
 	const mmstr* prefix = ctx->prefix;
 
 	if (!url) {
-		fprintf(stderr, "Repository URL unspecified\n");
+		error("Repository URL unspecified\n");
 		return -1;
 	}
 
 	if (download_from_repo(ctx, url, pkglist, prefix, cacheindex)) {
-		fprintf(stderr, "Failed to download package list\n");
+		error("Failed to download package list\n");
 		return -1;
 	}
 
-	printf("Updated package list from repository: %s\n", url);
+	info("Updated package list from repository: %s\n", url);
 
 	return 0;
 }

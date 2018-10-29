@@ -303,8 +303,8 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
 
 	// Open binary package in the archive stream
 	if (archive_read_open_filename(a, mpk_filename, READ_ARCHIVE_BLOCK)) {
-		fprintf(stderr, "opening mpk %s failed: %s\n",
-		                mpk_filename, archive_error_string(a));
+		mm_raise_error(archive_errno(a), "opening mpk %s failed: %s",
+		               mpk_filename, archive_error_string(a));
 		archive_read_free(a);
 		return -1;
 	}
@@ -319,8 +319,8 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
 		}
 
 		if (r != ARCHIVE_OK) {
-			fprintf(stderr, "reading mpk %s failed: %s\n",
-			                mpk_filename, archive_error_string(a));
+			mm_raise_error(archive_errno(a), "reading mpk %s failed: %s",
+			               mpk_filename, archive_error_string(a));
 			rv = -1;
 			break;
 		}
@@ -518,11 +518,18 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 			continue;
 
 		// Dowload package from repo and store it in prefix
-		// package cachedir and check hash
-		if (  download_from_repo(ctx, repo_url, pkg->filename,
-		                         NULL, mpkfile)
-		   || check_file_pkg(pkg, mpkfile))
-			rv = -1;
+		// package cachedir
+		if (download_from_repo(ctx, repo_url, pkg->filename,
+		                       NULL, mpkfile)) {
+			error("Failed!\n");
+			return -1;
+		}
+
+		// verify integrity of what has been downloaded
+		if (check_file_pkg(pkg, mpkfile)) {
+			error("Integrity check failed!\n");
+			return -1;
+		}
 
 		info("OK\n");
 	}
@@ -557,8 +564,10 @@ int install_package(struct mmpack_ctx* ctx,
 
 	info("Installing package %s ... ", pkg->name);
 	rv = pkg_unpack_files(pkg, mpkfile);
-	if (rv)
+	if (rv) {
+		error("Failed!\n");
 		return -1;
+	}
 
 	install_state_add_pkg(&ctx->installed, pkg);
 	info("OK\n");
@@ -597,7 +606,11 @@ int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 
 	install_state_rm_pkgname(&ctx->installed, pkg->name);
 
-	info("OK\n");
+	if (rv)
+		error("Failed!\n");
+	else
+		info("OK\n");
+
 	return rv;
 }
 
