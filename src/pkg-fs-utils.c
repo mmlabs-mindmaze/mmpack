@@ -503,7 +503,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		if (act->action != INSTALL_PKG)
 			continue;
 
-		info("Downloading %s ... ", pkg->name);
+		info("Downloading %s (%s)... ", pkg->name, pkg->version);
 
 		// Get filename of downloaded package and store the path in
 		// a field of action structure being analyzed
@@ -562,7 +562,7 @@ int install_package(struct mmpack_ctx* ctx,
 {
 	int rv;
 
-	info("Installing package %s ... ", pkg->name);
+	info("Installing package %s (%s)... ", pkg->name, pkg->version);
 	rv = pkg_unpack_files(pkg, mpkfile);
 	if (rv) {
 		error("Failed!\n");
