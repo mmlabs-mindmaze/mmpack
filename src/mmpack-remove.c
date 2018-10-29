@@ -17,6 +17,8 @@
 #include "pkg-fs-utils.h"
 
 
+static int is_yes_assumed = 0;
+
 static char remove_doc[] =
 	"\"mmpack remove\" removes given packages and the packages depending upon "
 	"them from the current prefix. First mmpack* adds all given packages and "
@@ -26,6 +28,8 @@ static char remove_doc[] =
 	"Otherwise it will proceed to the removal.";
 
 static const struct mmarg_opt cmdline_optv[] = {
+	{"y|assume-yes", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &is_yes_assumed},
+	 "assume \"yes\" as answer to all prompts and run non-interactively"},
 };
 
 static
@@ -89,9 +93,11 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (!act_stack)
 		goto exit;
 
-	rv = confirm_action_stack_if_needed(nreq, act_stack);
-	if (rv != 0)
-		goto exit;
+	if (!is_yes_assumed) {
+		rv = confirm_action_stack_if_needed(nreq, act_stack);
+		if (rv != 0)
+			goto exit;
+	}
 
 	rv = apply_action_stack(ctx, act_stack);
 

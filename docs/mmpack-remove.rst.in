@@ -17,7 +17,7 @@ SYNOPSIS
 
 ``mmpack install`` -h|--help
 
-``mmpack remove`` *pkg1* [*pkg2* [...]]
+``mmpack remove`` [-y|--assume-yes] *pkg1* [*pkg2* [...]]
 
 DESCRIPTION
 ===========
@@ -36,6 +36,9 @@ OPTIONS
 =======
 -h|--help
   Show help and exit
+
+-y|--assume-yes
+  Assume yes as answer to all prompts and run non-interactively.
 
 SEE ALSO
 ========
