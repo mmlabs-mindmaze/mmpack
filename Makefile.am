@@ -123,7 +123,6 @@ mmpack_LDADD = \
 	$(LIBARCHIVE_LIBS) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
-	$(LIBARCHIVE_LIBS) \
 	$(eol)
 
 
