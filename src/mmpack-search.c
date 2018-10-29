@@ -55,7 +55,7 @@ int mmpack_search(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	data.found = 0;
 	binindex_foreach(&ctx->binindex, binindex_cb, &data);
 	if (!data.found)
-		printf("No package found maching pattern: \"%s\"\n", data.pkg_name);
+		printf("No package found matching pattern: \"%s\"\n", data.pkg_name);
 
 exit:
 	return 0;

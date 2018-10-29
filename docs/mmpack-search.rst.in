@@ -19,7 +19,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-search** searchs given pattern within all the available package names.
+**mmpack-search** searches given pattern within all the available package names.
 
 
 SEE ALSO

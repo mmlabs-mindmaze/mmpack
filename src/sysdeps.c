@@ -73,7 +73,7 @@ mmstr* dpkg_concat_sysdeps(const struct strset* sysdeps)
 
 	// Concatenate all subsequent sysdeps preceded by comma
 	for (; dep != NULL; dep = strset_iter_next(&iter)) {
-		// Resize fulldeps string to accomodate the new elt
+		// Resize fulldeps string to accommodate the new elt
 		len = mmstrlen(dep) + 2;
 		fulldeps = mmstr_realloc(fulldeps, mmstrlen(fulldeps) + len);
 
