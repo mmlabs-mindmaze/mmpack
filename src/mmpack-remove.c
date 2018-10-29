@@ -6,6 +6,7 @@
 # include <config.h>
 #endif
 
+#include <mmargparse.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -15,6 +16,17 @@
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
 
+
+static char remove_doc[] =
+	"\"mmpack remove\" removes given packages and the packages depending upon "
+	"them from the current prefix. First mmpack* adds all given packages and "
+	"the packages depending upon them to the current transaction. If any "
+	"additional package is required, it will ask for user confirmation "
+	"before proceeding (default answer is negative). "
+	"Otherwise it will proceed to the removal.";
+
+static const struct mmarg_opt cmdline_optv[] = {
+};
 
 static
 void warn_uninstalled_package(const struct mmpack_ctx* ctx,
@@ -37,16 +49,26 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct pkg_request* reqlist = NULL;
 	struct action_stack* act_stack = NULL;
-	int i, nreq, rv = -1;
+	int i, nreq, arg_index, rv = -1;
 	const char** req_args;
 
-	if (argc < 2) {
+	struct mmarg_parser parser = {
+		.doc = remove_doc,
+		.args_doc = REMOVE_SYNOPSIS,
+		.optv = cmdline_optv,
+		.num_opt = MM_NELEM(cmdline_optv),
+		.execname = "mmpack",
+	};
+
+	arg_index = mmarg_parse(&parser, argc, (char**)argv);
+	if (arg_index+1 < argc) {
 		fprintf(stderr, "missing package list argument in command line\n"
-		                "Usage:\n\tmmpack "REMOVE_SYNOPSIS"\n");
-		return -1;
+		                "Run \"mmpack remove --help\" to see usage\n");
+	return -1;
 	}
-	nreq = argc - 1;
-	req_args = argv + 1;
+
+	nreq = argc - arg_index;
+	req_args = argv + arg_index;
 
 	if (mmpack_ctx_init_pkglist(ctx)) {
 		fprintf(stderr, "Failed to load package lists\n");
