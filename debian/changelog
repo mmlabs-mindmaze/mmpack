@@ -1,3 +1,10 @@
+mmpack (0.0.1) unstable; urgency=medium
+
+  [ Gabriel Ganne ]
+  * initial beta release
+
+ -- Gabriel Ganne <gabriel.ganne@mindmaze.ch>  Tue, 30 Oct 2018 11:40:23 +0100
+
 mmpack (0.0) UNRELEASED; urgency=medium
 
   * Initial release.
