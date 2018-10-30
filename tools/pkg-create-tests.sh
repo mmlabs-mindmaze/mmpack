@@ -58,6 +58,10 @@ hello-world
 head-libexec-world || echo "failed as expected"
 mmpack runprefix head-libexec-world  # this one should work
 
+if [ -n "$SMOKE" ] ; then
+	exit
+fi
+
 createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/rtfilter.git"
 createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/xdffileio.git"
 createpkg "ssh://git@intranet.mindmaze.ch:7999/~ganne/mmlib.git"
