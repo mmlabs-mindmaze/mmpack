@@ -65,7 +65,7 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	};
 
 	arg_index = mmarg_parse(&parser, argc, (char**)argv);
-	if (arg_index+1 < argc) {
+	if (arg_index+1 > argc) {
 		fprintf(stderr, "missing package list argument in command line\n"
 		                "Run \"mmpack remove --help\" to see usage\n");
 	return -1;
