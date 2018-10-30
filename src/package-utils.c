@@ -242,8 +242,11 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type)
 	struct mmpkg_dep const * d = deps;
 
 	while (d != NULL) {
-		printf("\t\t [%s] %s [%s -> %s]\n", type, d->name,
-		       d->min_version, d->max_version);
+		if (STR_STARTS_WITH(type, strlen(type), "SYS"))
+			printf("\t\t [%s] %s\n", type, d->name);
+		else
+			printf("\t\t [%s] %s [%s -> %s]\n", type, d->name,
+			       d->min_version, d->max_version);
 		d = d->next;
 	}
 }
