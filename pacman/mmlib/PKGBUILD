@@ -1,7 +1,7 @@
 # Maintainer: Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
 pkgname=("${MINGW_PACKAGE_PREFIX}-libmmlib0" "${MINGW_PACKAGE_PREFIX}-mmlib-devel")
 pkgbase=mmlib
-pkgver=0.3.4
+pkgver=1.0.0
 pkgrel=1
 pkgdesc="MindMaze helper library
   mmlib is the general purpose library providing helper functions to other
