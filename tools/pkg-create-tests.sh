@@ -53,7 +53,7 @@ mmpack update
 # smoke test first
 createpkg ssh://git@intranet.mindmaze.ch:7999/~ganne/mmpack-hello-world.git master
 upload
-mmpack install mmpack-hello-world
+mmpack install -y mmpack-hello-world
 hello-world
 head-libexec-world || echo "failed as expected"
 mmpack runprefix head-libexec-world  # this one should work
@@ -63,16 +63,16 @@ createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/xdffileio.git"
 createpkg "ssh://git@intranet.mindmaze.ch:7999/~ganne/mmlib.git"
 
 upload
-mmpack install rtfilter-devel xdffileio-devel
-mmpack install librtfilter1 libxdffileio0 # win32 workaround
+mmpack install -y rtfilter-devel xdffileio-devel
+mmpack install -y librtfilter1 libxdffileio0 # win32 workaround
 
 createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/mcpanel.git"
 createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/eegdev.git"
 
 upload
 
-mmpack install mcpanel-devel eegdev-devel
-mmpack install libmcpanel0 libeegdev0  # win32 workaround
+mmpack install -y mcpanel-devel eegdev-devel
+mmpack install -y libmcpanel0 libeegdev0  # win32 workaround
 
 # create eegview package which depends on mcpanel and eegdev
 createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/eegview.git"
