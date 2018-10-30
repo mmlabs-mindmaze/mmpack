@@ -1,10 +1,10 @@
 ===============
-mmpack-search
+mmpack-show
 ===============
 
-----------------
-search packages
-----------------
+-------------
+show packages
+-------------
 
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
@@ -15,11 +15,11 @@ search packages
 SYNOPSIS
 ========
 
-``mmpack search`` *pattern*
+``mmpack show`` *package*
 
 DESCRIPTION
 ===========
-**mmpack-search** searches given pattern within all the available package names.
+**mmpack-show** show given package metadatas.
 
 
 SEE ALSO
@@ -29,5 +29,4 @@ SEE ALSO
 ``mmpack-mkprefix``\(1),
 ``mmpack-remove``\(1),
 ``mmpack-runprefix``\(1),
-``mmpack-show``\(1),
 ``mmpack-update``\(1),

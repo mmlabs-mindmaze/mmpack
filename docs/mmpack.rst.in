@@ -88,4 +88,5 @@ SEE ALSO
 ``mmpack-remove``\(1),
 ``mmpack-runprefix``\(1),
 ``mmpack-search``\(1),
+``mmpack-show``\(1),
 ``mmpack-update``\(1),
