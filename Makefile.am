@@ -142,8 +142,7 @@ endif
 # requires root permissions to run
 .PHONY: setcap
 setcap:
-	$(AM_V_at) mkdir -p /run/mmpack
-	$(AM_V_GEN) setcap cap_sys_admin+ep $(libexecdir)/mmpack/mount-mmpack-prefix
+	$(AM_V_GEN) setcap cap_dac_override,cap_sys_admin+ep $(libexecdir)/mmpack/mount-mmpack-prefix
 
 mmpack-build: src/mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@

@@ -19,6 +19,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/mount.h>
+#include <sys/stat.h>
 
 
 #define MOUNT_TARGET    "/run/mmpack"
@@ -47,6 +48,12 @@ int main(int argc, char* argv[])
 	// Do NOT propagate mount or umount events
 	if (mount("none", "/", NULL, MS_REC|MS_PRIVATE, NULL)) {
 		perror("Cannot change the propagation of mount events");
+		return EXIT_FAILURE;
+	}
+
+	// Create mmpack mount point if it does not exists yet
+	if (mkdir(MOUNT_TARGET, 0777) != 0 && errno != EEXIST) {
+		perror("Could not create "MOUNT_TARGET);
 		return EXIT_FAILURE;
 	}
 

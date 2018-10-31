@@ -1,10 +1,7 @@
 #!/bin/sh
 set -e
 
-# Create mmpack mount point if it does not exists yet
-mkdir -p /run/mmpack
-
 # Provides capability to mount helper to create mount namespace
-setcap cap_sys_admin+ep /usr/lib/*/mmpack/mount-mmpack-prefix
+setcap cap_dac_override,cap_sys_admin+ep /usr/lib/*/mmpack/mount-mmpack-prefix
 
 #DEBHELPER#
