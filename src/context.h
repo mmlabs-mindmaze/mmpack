@@ -19,6 +19,7 @@ struct mmpack_opts {
 /**
  * struct mmpack_ctx - context of a mmpack prefix
  * @curl:       common curl handle for reuse
+ * @curl:       buffer where curl may write error message
  * @binindex:   binary index of all package available (in repo or installed)
  * @installed:  list of installed package (store in an index table)
  * @prefix:     path to the root of folder to use for prefix
@@ -26,6 +27,7 @@ struct mmpack_opts {
  */
 struct mmpack_ctx {
 	CURL * curl;
+	char curl_errbuf[CURL_ERROR_SIZE];
 	struct binindex binindex;
 	struct install_state installed;
 	struct settings settings;

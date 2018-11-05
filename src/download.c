@@ -14,6 +14,70 @@
 #include "context.h"
 #include "utils.h"
 
+// On systems (Win32 that do not define EREMOTEIO, alias it to EIO
+#if !defined(EREMOTEIO)
+# define EREMOTEIO      EIO
+#endif
+
+/**
+ * get_error_from_curl() - retrieve error code and message from curl
+ * @curl:               curl handle used for last transfer
+ * @last_retcode:       return code of the last curl failed transfer
+ * @errbuf:             error buffer set (with CURLOPT_ERRORBUFFER) for the
+ *                      last transfer. This buffer acts also as output of
+ *                      the function, hold the error message to print
+ *
+ * Return: error code to set in mm_raise_error()
+ */
+static
+int get_error_from_curl(CURL* curl, int last_retcode, char* errbuf)
+{
+	long respcode, os_errno;
+	int len;
+
+	// Handle specifically when server returns HTTP error (ie >= 400)
+	if (last_retcode == CURLE_HTTP_RETURNED_ERROR) {
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &respcode);
+		if (respcode == 404) {
+			strcpy(errbuf, "Remote resource not found");
+			return MM_ENOTFOUND;
+		} else {
+			sprintf(errbuf, "Server replied error %li", respcode);
+			return EREMOTEIO;
+		};
+	}
+
+	// Fill error message from return code if not set yet
+	len = strlen(errbuf);
+	if (len == 0)
+		strcpy(errbuf, curl_easy_strerror(last_retcode));
+
+	// Translate curl error if not HTTP error
+	switch (last_retcode) {
+	case CURLE_URL_MALFORMAT:
+		return MM_EBADFMT;
+
+	case CURLE_NOT_BUILT_IN:
+	case CURLE_FUNCTION_NOT_FOUND:
+		return ENOSYS;
+
+	case CURLE_COULDNT_RESOLVE_PROXY:
+	case CURLE_COULDNT_RESOLVE_HOST:
+		return MM_ENOTFOUND;
+
+	case CURLE_REMOTE_ACCESS_DENIED:
+	case CURLE_LOGIN_DENIED:
+		return EACCES;
+
+	default:
+		curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &os_errno);
+		if (os_errno == 0)
+			os_errno = EREMOTEIO;
+		return (int)os_errno;
+	}
+}
+
+
 static
 size_t write_download_data(char* buffer, size_t size, size_t nmemb, void* data)
 {
@@ -51,6 +115,7 @@ CURL* get_curl_handle(struct mmpack_ctx * ctx)
 		curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
 		curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 1L);
 		curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, write_download_data);
+		curl_easy_setopt(ctx->curl, CURLOPT_ERRORBUFFER, ctx->curl_errbuf);
 	}
 
 	return ctx->curl;
@@ -66,6 +131,7 @@ int download_from_repo(struct mmpack_ctx * ctx,
 	CURL* curl;
 	CURLcode res;
 	int fd, oflag, rv = -1;
+	int err;
 
 	curl = get_curl_handle(ctx);
 	if (!curl)
@@ -82,11 +148,13 @@ int download_from_repo(struct mmpack_ctx * ctx,
 		goto exit;
 
 	// Perform the download
+	ctx->curl_errbuf[0] = '\0';
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &fd);
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	res = curl_easy_perform(curl);
-	if(res != CURLE_OK) {
-		mm_raise_from_errno("Failed to download %s", curl_easy_strerror(res));
+	if (res != CURLE_OK) {
+		err = get_error_from_curl(curl, res, ctx->curl_errbuf);
+		mm_raise_error(err, "Failed to download %s (%s)", url, ctx->curl_errbuf);
 		goto exit;
 	}
 	rv = 0;
