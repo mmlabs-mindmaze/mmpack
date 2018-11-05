@@ -49,6 +49,7 @@ CURL* get_curl_handle(struct mmpack_ctx * ctx)
 
 		// Common config
 		curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
+		curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 1L);
 		curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, write_download_data);
 	}
 
