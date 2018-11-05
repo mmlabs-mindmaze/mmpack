@@ -61,16 +61,13 @@ int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	}
 	data.pkg_name = argv[1];
 
-	if (mmpack_ctx_init_pkglist(ctx)) {
-		fprintf(stderr, "Failed to load package lists\n");
-		goto exit;
-	}
+	if (mmpack_ctx_init_pkglist(ctx))
+		return -1;
 
 	data.found = 0;
 	binindex_foreach(&ctx->binindex, binindex_cb, &data);
 	if (!data.found)
 		printf("No package found matching: \"%s\"\n", data.pkg_name);
 
-exit:
 	return 0;
 }

@@ -136,14 +136,18 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 
 	// populate the package lists
 	if (binindex_populate(&ctx->binindex, installed_index_path, &ctx->installed))
-		return -1;
+		goto error;
 	binindex_foreach(&ctx->binindex, set_installed, NULL);
 
 	if (binindex_populate(&ctx->binindex, repo_index_path, NULL))
-		return -1;
+		goto error;
 
 	binindex_compute_rdepends(&ctx->binindex);
 	return 0;
+
+error:
+	fprintf(stderr, "Failed to load package lists\n");
+	return -1;
 }
 
 

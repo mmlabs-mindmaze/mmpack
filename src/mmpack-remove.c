@@ -74,10 +74,8 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	nreq = argc - arg_index;
 	req_args = argv + arg_index;
 
-	if (mmpack_ctx_init_pkglist(ctx)) {
-		fprintf(stderr, "Failed to load package lists\n");
+	if (mmpack_ctx_init_pkglist(ctx))
 		goto exit;
-	}
 
 	// Fill package requested to be removed from cmd arguments
 	reqlist = mm_malloca(nreq * sizeof(*reqlist));
