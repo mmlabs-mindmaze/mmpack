@@ -38,6 +38,7 @@ struct mmpack_ctx {
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts);
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx);
 int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx);
+int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx);
 int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx);
 const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx);
 

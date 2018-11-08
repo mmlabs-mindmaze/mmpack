@@ -76,7 +76,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	ctx->prefix = mmstr_malloc_from_cstr(prefix);
 
 	mmstr_free(default_prefix);
-	return read_prefix_config(ctx);
+	return 0;
 }
 
 
@@ -196,4 +196,20 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 	mmstr_join_path(ctx->pkgcachedir, ctx->prefix, pkgcache_relpath);
 
 	return ctx->pkgcachedir;
+}
+
+
+/**
+ * mmpack_ctx_use_prefix() - load prefix settings and packages indices
+ * @ctx:	initialized mmpack context
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx)
+{
+	if (read_prefix_config(ctx))
+		return -1;
+
+	return mmpack_ctx_init_pkglist(ctx);
 }

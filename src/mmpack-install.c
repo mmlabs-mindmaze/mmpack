@@ -75,7 +75,8 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	nreq = argc - arg_index;
 	req_args = argv + arg_index;
 
-	if (mmpack_ctx_init_pkglist(ctx))
+	// Load prefix configuration and caches
+	if (mmpack_ctx_use_prefix(ctx))
 		goto exit;
 
 	// Fill package requested to be installed from cmd arguments

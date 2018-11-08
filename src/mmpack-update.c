@@ -18,9 +18,15 @@ int mmpack_update_all(struct mmpack_ctx * ctx)
 {
 	STATIC_CONST_MMSTR(cacheindex, REPO_INDEX_RELPATH)
 	STATIC_CONST_MMSTR(pkglist, "binary-index")
-	const mmstr* url = ctx->settings.repo_url;
-	const mmstr* prefix = ctx->prefix;
+	const mmstr* url;
+	const mmstr* prefix;
 
+	// Load prefix configuration and caches
+	if (mmpack_ctx_use_prefix(ctx))
+		return -1;
+
+	prefix = ctx->prefix;
+	url = ctx->settings.repo_url;
 	if (!url) {
 		error("Repository URL unspecified\n");
 		return -1;
