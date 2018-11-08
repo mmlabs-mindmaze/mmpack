@@ -414,16 +414,15 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
 		/* get the corresponding package, at its latest possible version */
 		pkg = binindex_get_latest_pkg(binindex, curr_dep->name, curr_dep->max_version);
 		if (pkg == NULL) {
-			mm_raise_error(MM_ENOTFOUND, "Cannot resolve dependency: %s", curr_dep->name);
+			error("Cannot find package: %s\n", curr_dep->name);
 			goto error;
 		}
 
 		/* merge this package dependency into the global dependency list */
 		tmp = mmpkg_dep_filter(ctx, actions, pkg->mpkdeps, deps, &new_dependencies);
 		if (tmp == NULL) {
-			mm_raise_error(EAGAIN, "Failure while resolving package: %s\n"
-			                       "Try resolving the conflicting dependency manally first",
-			                       pkg->name);
+			error("Failure while resolving package: %s\n", pkg->name);
+			printf("Try resolving the conflicting dependency manally first\n");
 			mmpack_print_dependencies_on_conflict(actions, pkg);
 			goto error;
 		}
