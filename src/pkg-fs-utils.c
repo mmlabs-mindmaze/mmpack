@@ -463,14 +463,11 @@ int check_file_pkg(const struct mmpkg* pkg, const mmstr* filename)
 {
 	mmstr* sha = mmstr_alloca(SHA_HEXSTR_LEN);
 
-	if (sha_compute(sha, filename, NULL)) {
-		fprintf(stderr, "Cannot compute SHA-256 of %s: %s\n",
-		        filename, mmstrerror(mm_get_lasterror_number()));
+	if (sha_compute(sha, filename, NULL))
 		return -1;
-	}
 
 	if (!mmstrequal(sha, pkg->sha256)) {
-		fprintf(stderr, "bad SHA-256 detected %s \n", filename);
+		mm_raise_error(EBADMSG, "bad SHA-256 detected %s", filename);
 		return -1;
 	}
 

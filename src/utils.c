@@ -441,11 +441,15 @@ int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent)
 	} else if (S_ISLNK(st.mode)) {
 		rv = sha_symlink_compute(hash, filename, st.size);
 	} else {
-		rv = mm_raise_error(EINVAL, "%s is neither a regular file or symlink");
+		rv = mm_raise_error(EINVAL, "%s is neither a regular file "
+		                            "or symlink", filename);
 	}
 
 exit:
 	mmstr_freea(fullpath);
+	if (rv == -1)
+		mmlog_error("Cannot compute SHA-256 of %s", filename);
+
 	return rv;
 }
 
