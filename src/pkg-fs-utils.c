@@ -503,8 +503,6 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		if (act->action != INSTALL_PKG)
 			continue;
 
-		info("Downloading %s (%s)... ", pkg->name, pkg->version);
-
 		// Get filename of downloaded package and store the path in
 		// a field of action structure being analyzed
 		mmstr_basename(pkgbase, pkg->filename);
@@ -514,8 +512,13 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 
 		// Skip if there is a valid package already downloaded
 		if (  mm_check_access(mpkfile, F_OK) == 0
-		   && check_file_pkg(pkg, mpkfile) == 0)
+		   && check_file_pkg(pkg, mpkfile) == 0) {
+			mmlog_info("Going to install %s (%s) from cache",
+			           pkg->name, pkg->version);
 			continue;
+		}
+
+		info("Downloading %s (%s)... ", pkg->name, pkg->version);
 
 		// Dowload package from repo and store it in prefix
 		// package cachedir
