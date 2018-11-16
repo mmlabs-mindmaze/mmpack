@@ -1,0 +1,29 @@
+======================
+mmpack-check-integrity
+======================
+
+------------------------
+check-integrity packages
+------------------------
+
+:Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
+         Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
+:Date: 2018-11-16
+:Version: <version>
+:Manual section: 1
+
+SYNOPSIS
+========
+
+``mmpack check-integrity`` [*package*]
+
+DESCRIPTION
+===========
+**mmpack-check-integrity** check package integrity, or all packages if none given
+
+
+SEE ALSO
+========
+``mmpack``\(1),
+``mmpack-install``\(1),
+``mmpack-remove``\(1),

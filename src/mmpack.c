@@ -15,6 +15,7 @@
 #include <mmsysio.h>
 
 #include "common.h"
+#include "mmpack-check-integrity.h"
 #include "mmpack-install.h"
 #include "mmpack-mkprefix.h"
 #include "mmpack-remove.h"
@@ -42,6 +43,7 @@ static const char mmpack_doc[] =
  * - upgrade
  */
 static const char arguments_docs[] =
+	"[options] "CHECK_INTEGRITY_SYNOPSIS"\n"
 	"[options] "INSTALL_SYNOPSIS"\n"
 	"[options] "MKPREFIX_SYNOPSIS"\n"
 	"[options] "REMOVE_SYNOPSIS"\n"
@@ -114,7 +116,9 @@ int main(int argc, char* argv[])
 		goto exit;
 
 	/* Dispatch command */
-	if (STR_EQUAL(cmd, strlen(cmd), "mkprefix")) {
+	if (STR_EQUAL(cmd, strlen(cmd), "check-integrity")) {
+		rv = mmpack_check_integrity(&ctx, cmd_argc, cmd_argv);
+	} else if (STR_EQUAL(cmd, strlen(cmd), "mkprefix")) {
 		rv = mmpack_mkprefix(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "update")) {
 		rv = mmpack_update_all(&ctx);

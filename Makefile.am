@@ -80,6 +80,8 @@ mmpack_lib_sources = \
 	src/indextable.c \
 	src/indextable.h \
 	src/mm-alloc.h \
+	src/mmpack-check-integrity.c \
+	src/mmpack-check-integrity.h \
 	src/mmpack-install.c \
 	src/mmpack-install.h \
 	src/mmpack-mkprefix.c \
@@ -214,6 +216,7 @@ RST_MAN_PAGES_IN = \
 	docs/mmpack.rst.in \
 	docs/mmpack-build.rst.in \
 	docs/mmpack-build-pkg-create.rst.in \
+	docs/mmpack-check-integrity.rst.in \
 	docs/mmpack-install.rst.in \
 	docs/mmpack-mkprefix.rst.in \
 	docs/mmpack-remove.rst.in \
@@ -228,6 +231,7 @@ nodist_man_MANS = \
 	docs/mmpack.1 \
 	docs/mmpack-build.1 \
 	docs/mmpack-build-pkg-create.1 \
+	docs/mmpack-check-integrity.1 \
 	docs/mmpack-install.1 \
 	docs/mmpack-mkprefix.1 \
 	docs/mmpack-remove.1 \

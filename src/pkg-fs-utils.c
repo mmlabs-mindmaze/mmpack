@@ -465,26 +465,106 @@ int rm_files_from_list(struct filelist* files)
  *                                                                        *
  **************************************************************************/
 /**
- * check_file_pkg() - Check integrity of downloaded package
- * @pkg:        package information as provided by repository
- * @filename:   location downloaded package
+ * check_file_pkg() - Check integrity of given file
+ * @ref_sha: reference file sha256 to compare against
+ * @parent: prefix directory to prepend to @filename to get the
+ *          final path of the file to hash. This may be NULL
+ * @filename: path of file whose hash must be computed
  *
  * Return: 0 if no issue has been found, -1 otherwise
  */
 static
-int check_file_pkg(const struct mmpkg* pkg, const mmstr* filename)
+int check_file_pkg(const mmstr * ref_sha, const mmstr * parent,
+                   const mmstr * filename)
 {
 	mmstr* sha = mmstr_alloca(SHA_HEXSTR_LEN);
 
-	if (sha_compute(sha, filename, NULL))
+	if (sha_compute(sha, filename, parent))
 		return -1;
 
-	if (!mmstrequal(sha, pkg->sha256)) {
+	if (!mmstrequal(sha, ref_sha)) {
 		mm_raise_error(EBADMSG, "bad SHA-256 detected %s", filename);
 		return -1;
 	}
 
 	return 0;
+}
+
+
+static
+size_t get_map_size(int fd)
+{
+	uint64_t size;
+	struct mm_stat buf;
+
+	if (mm_fstat(fd, &buf) != 0)
+		return MM_PAGESZ;
+
+	size = buf.size;
+
+	/* upper power of two */
+	return 1 << (64 - __builtin_clzl (size - 1));
+}
+
+
+/**
+ * check_pkg() - check integrity of installed package from its list of sha256
+ * @parent: prefix directory to prepend to @filename to get the
+ *          final path of the file to hash. This may be NULL
+ * @sumsha: sha256sums file name
+ *
+ * Return: 0 if no issue has been found, -1 otherwise
+ */
+LOCAL_SYMBOL
+int check_pkg(mmstr const * parent, mmstr const * sumsha)
+{
+	mmstr * filename;
+	mmstr * ref_sha;
+	char * line, * eol;
+	size_t line_len, filename_len;
+	int fd;
+	void * map;
+
+	fd = mm_open(sumsha, O_RDONLY, 0);
+	if (fd == -1)
+		return -1;
+
+	map = mm_mapfile(fd, 0, get_map_size(fd), MM_MAP_READ|MM_MAP_SHARED);
+
+	line = map;
+	filename = ref_sha = NULL;
+	while((eol = strchr(line, '\n')) != NULL) {
+		line_len = eol - line;
+
+		if (line_len < SHA_HEXSTR_LEN) {
+			mm_raise_error(EBADMSG, "Error while parsing SHA-256 file");
+			break;
+		}
+		ref_sha = mmstr_copy_realloc(ref_sha, &line[line_len - SHA_HEXSTR_LEN],
+		                            SHA_HEXSTR_LEN);
+
+		/* 2 is for len(': ') */
+		if (line_len <= SHA_HEXSTR_LEN + 2) {
+			mm_raise_error(EBADMSG, "Error while parsing SHA-256 file");
+			break;;
+		}
+		filename_len = line_len - SHA_HEXSTR_LEN - 2;
+		filename = mmstr_copy_realloc(filename, line, filename_len);
+		if (is_mmpack_metadata(filename))
+			goto check_continue;
+
+		if (check_file_pkg(ref_sha, parent, filename) != 0)
+			break;
+
+check_continue:
+		line = eol + 1;
+	}
+	mmstr_free(filename);
+	mmstr_free(ref_sha);
+	mm_unmap(map);
+	mm_close(fd);
+
+	return (eol == NULL) ? 0 : -1;
 }
 
 
@@ -525,7 +605,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 
 		// Skip if there is a valid package already downloaded
 		if (  mm_check_access(mpkfile, F_OK) == 0
-		   && check_file_pkg(pkg, mpkfile) == 0) {
+		   && check_file_pkg(pkg->sha256, NULL, mpkfile) == 0) {
 			mmlog_info("Going to install %s (%s) from cache",
 			           pkg->name, pkg->version);
 			continue;
@@ -542,7 +622,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		}
 
 		// verify integrity of what has been downloaded
-		if (check_file_pkg(pkg, mpkfile)) {
+		if (check_file_pkg(pkg->sha256, NULL, mpkfile)) {
 			error("Integrity check failed!\n");
 			return -1;
 		}
