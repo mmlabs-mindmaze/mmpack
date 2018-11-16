@@ -7,7 +7,7 @@ import importlib
 import os
 from glob import glob
 import re
-from subprocess import PIPE, run
+from subprocess import STDOUT, run
 import tarfile
 from typing import Set
 from workspace import Workspace
@@ -314,12 +314,13 @@ class SrcPackage(object):
 
         build_script = ['sh',
                         '{0}/build-{1}'.format(PKGDATADIR, self.build_system)]
+        log_file = open('build.log', 'wb')
         dprint('[shell] {0}'.format(' '.join(build_script)))
-        ret = run(build_script, stdout=PIPE, env=self._build_env(skip_tests))
+        ret = run(build_script, env=self._build_env(skip_tests),
+                  stderr=STDOUT, stdout=log_file)
         if ret.returncode != 0:
             errmsg = 'Failed to build ' + self.name + '\n'
-            errmsg += 'Stderr:\n'
-            errmsg += ret.stderr.decode('utf-8')
+            errmsg += 'See build.log file for what went wrong\n'
             raise RuntimeError(errmsg)
 
         popdir()  # local build directory
