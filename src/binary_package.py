@@ -130,6 +130,18 @@ class BinaryPackage(object):
 
         return specs_provides
 
+    def _symbol_file(self) -> str:
+        os.makedirs('var/lib/mmpack/metadata/', exist_ok=True)
+        return 'var/lib/mmpack/metadata/{}.symbols'.format(self.name)
+
+    def _pyobjects_file(self) -> str:
+        os.makedirs('var/lib/mmpack/metadata/', exist_ok=True)
+        return 'var/lib/mmpack/metadata/{}.pyobjects'.format(self.name)
+
+    def _sha256sums_file(self) -> str:
+        os.makedirs('var/lib/mmpack/metadata/', exist_ok=True)
+        return 'var/lib/mmpack/metadata/{}.sha256sums'.format(self.name)
+
     def _gen_info(self, pkgdir: str):
         '''
         This generate the info file and sha256sums. It must be the last step
@@ -146,13 +158,13 @@ class BinaryPackage(object):
 
             # Add file with checksum
             cksums[filename] = sha256sum(filename)
-        yaml_serialize(cksums, 'MMPACK/sha256sums', use_block_style=True)
+        yaml_serialize(cksums, self._sha256sums_file(), use_block_style=True)
 
         # Create info file
         info = {'version': self.version,
                 'source': self.source,
                 'description': self.description,
-                'sumsha256sums': sha256sum('MMPACK/sha256sums')}
+                'sumsha256sums': sha256sum(self._sha256sums_file())}
         info.update(self._dependencies)
         yaml_serialize({self.name: info}, 'MMPACK/info')
         popdir()
@@ -163,15 +175,15 @@ class BinaryPackage(object):
             raise AssertionError(self.name + 'cannot contain symbols for two '
                                  'different architectures at the same time')
         if self.provides['pe']:
-            yaml_serialize(self.provides['pe'], 'MMPACK/symbols')
+            yaml_serialize(self.provides['pe'], self._symbol_file())
         elif self.provides['elf']:
-            yaml_serialize(self.provides['elf'], 'MMPACK/symbols')
+            yaml_serialize(self.provides['elf'], self._symbol_file())
         popdir()
 
     def _gen_pyobjects(self, pkgdir: str):
         pushdir(pkgdir)
         if self.provides['python']:
-            yaml_serialize(self.provides['python'], 'MMPACK/pyobjects')
+            yaml_serialize(self.provides['python'], self._pyobjects_file())
         popdir()
 
     def _populate(self, instdir: str, pkgdir: str):

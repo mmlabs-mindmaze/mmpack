@@ -236,6 +236,19 @@ int pkg_unpack_entry(struct archive *a, struct archive_entry* entry,
 
 
 /**
+ * is_mmpack_metadata() - given file is an internal mmpack metadata
+ * @path: full path to the file
+ *
+ * Return: 1 if the file is an internal mmpack metadata, 0 otherwise
+ */
+LOCAL_SYMBOL
+int is_mmpack_metadata(mmstr const * path)
+{
+	return STR_STARTS_WITH(path, (size_t) mmstrlen(path), "MMPACK");
+}
+
+
+/**
  * redirect_metadata() - modify path of inspected file if metadata
  * @pathname:   pointer to mmstr* holding the original path on input and
  *              modified path on output
@@ -259,7 +272,7 @@ int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
 		return SKIP_UNPACK;
 
 	// Keep path NOT starting with MMPACK untouched
-	if (!STR_STARTS_WITH(path, (size_t)mmstrlen(path), "MMPACK"))
+	if (!is_mmpack_metadata(path))
 		return 0;
 
 	// MMPACK/info is not installed and MMPACK/ must not be created
