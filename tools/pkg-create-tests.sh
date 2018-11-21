@@ -15,6 +15,7 @@ distrib() {
 
 upload() {
 	scp ./venv/bin/mmpack-createrepo ~/.local/share/mmpack-packages/*.mpk root@${REPOSITORY}:/var/www/html/$DIST
+	scp ./venv/bin/mmpack-createrepo ~/.local/share/mmpack-packages/*_src.tar.gz root@${REPOSITORY}:/var/www/html/$DIST
 	ssh root@${REPOSITORY} /var/www/html/mmpack-createrepo /var/www/html/$DIST /var/www/html/$DIST
 	mmpack update
 }
