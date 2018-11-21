@@ -22,6 +22,7 @@ _mmpack_subcmd_completion() {
 	case "$1" in
 	"install") _mmpack_install_completion ;;
 	"remove") _mmpack_remove_completion ;;
+	"source") _mmpack_install_completion ;;
 	*) ;;
 	esac
 }

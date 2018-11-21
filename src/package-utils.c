@@ -562,7 +562,7 @@ struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr co
 	struct mmpkg * pkg, * latest_pkg;
 	struct pkglist_entry* pkgentry;
 	struct pkglist* list;
-	const char* latest_version = "any";
+	const char* latest_version;
 
 	list = binindex_get_pkglist(binindex, name);
 	if (list == NULL)

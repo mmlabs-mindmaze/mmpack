@@ -22,6 +22,7 @@
 #include "mmpack-runprefix.h"
 #include "mmpack-search.h"
 #include "mmpack-show.h"
+#include "mmpack-source.h"
 #include "mmpack-update.h"
 
 static const char mmpack_doc[] =
@@ -50,6 +51,7 @@ static const char arguments_docs[] =
 	"[options] "RUNPREFIX_SYNOPSIS"\n"
 	"[options] "SEARCH_SYNOPSIS"\n"
 	"[options] "SHOW_SYNOPSIS"\n"
+	"[options] "SOURCE_SYNOPSIS"\n"
 	"[options] "UPDATE_SYNOPSIS"\n"
 ;
 
@@ -134,6 +136,8 @@ int main(int argc, char* argv[])
 	} else if (STR_EQUAL(cmd, strlen(cmd), "show")
 	           || STR_EQUAL(cmd, strlen(cmd), "info")) {
 		rv = mmpack_show(&ctx, cmd_argc, cmd_argv);
+	} else if (STR_EQUAL(cmd, strlen(cmd), "source")) {
+		rv = mmpack_source(&ctx, cmd_argc, cmd_argv);
 	} else {
 		fprintf(stderr, "Invalid command: %s."
 		                " Run \"%s --help\" to see Usage\n", cmd, argv[0]);

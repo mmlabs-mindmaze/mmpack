@@ -94,6 +94,8 @@ mmpack_lib_sources = \
 	src/mmpack-search.h \
 	src/mmpack-show.c \
 	src/mmpack-show.h \
+	src/mmpack-source.c \
+	src/mmpack-source.h \
 	src/mmpack-update.c \
 	src/mmpack-update.h \
 	src/mmstring.h \
@@ -223,6 +225,7 @@ RST_MAN_PAGES_IN = \
 	docs/mmpack-runprefix.rst.in \
 	docs/mmpack-search.rst.in \
 	docs/mmpack-show.rst.in \
+	docs/mmpack-source.rst.in \
 	docs/mmpack-update.rst.in \
 	$(eof)
 EXTRA_DIST += $(RST_MAN_PAGES_IN)
@@ -238,6 +241,7 @@ nodist_man_MANS = \
 	docs/mmpack-runprefix.1 \
 	docs/mmpack-search.1 \
 	docs/mmpack-show.1 \
+	docs/mmpack-source.1 \
 	docs/mmpack-update.1 \
 	$(eol)
 
