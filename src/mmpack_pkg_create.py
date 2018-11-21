@@ -112,8 +112,6 @@ def parse_options(argv):
         ctx['srcname'] = os.path.normpath(ctx['url'])
         ctx['srcname'] = os.path.basename(ctx['srcname'])
 
-    ctx['srcname'] += '-' + ctx['tag']
-
     # set workspace prefix
     if not args.prefix:
         try:
@@ -130,7 +128,7 @@ def main():
     'entry point to create a mmpack package'
     ctx = parse_options(sys.argv[1:])
 
-    package = SrcPackage(srcname=ctx['srcname'], url=ctx['url'],
+    package = SrcPackage(name=ctx['srcname'], url=ctx['url'],
                          tag=ctx['tag'])
     src_pkg = package.create_source_archive()
 

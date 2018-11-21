@@ -50,11 +50,13 @@ class SrcPackage(object):
     '''
     Source package class.
     '''
-    def __init__(self, srcname: str, url: str=None, tag: str=None):
+    def __init__(self, name: str, url: str=None, tag: str=None):
         # pylint: disable=too-many-arguments
-        self.srcname = srcname
-        self.name = None
+        self.name = name
         self.tag = tag
+        self.srcname = name
+        if tag:
+            self.srcname += '_' + tag
         self.version = None
         self.url = url
         self.maintainer = None
@@ -75,7 +77,7 @@ class SrcPackage(object):
     def _local_build_path(self) -> str:
         'internal helper: build and return the local build path'
         wrk = Workspace()
-        return wrk.builddir(self.name) + '/{0}-{1}'.format(self.name, self.tag)
+        return wrk.builddir(self.name) + '/{0}_{1}'.format(self.name, self.tag)
 
     def _local_install_path(self, withprefix: bool=False) -> str:
         'internal helper: build and return the local install path'
@@ -239,7 +241,7 @@ class SrcPackage(object):
         wrk = Workspace()
         wrk.srcclean(self.srcname)
         pushdir(wrk.sources)
-        sources_archive_name = '{0}-{1}-src.tar.gz' \
+        sources_archive_name = '{0}_{1}_src.tar.gz' \
                                .format(self.srcname, self.tag)
         iprint('cloning ' + self.url)
         cmd = 'git clone --quiet --branch {0} {1} {2}' \
@@ -258,6 +260,20 @@ class SrcPackage(object):
         popdir()  # workspace sources directory
 
         return sources_archive_name
+
+    def _rename_source_package(self):
+        'copy source package to package repository'
+        wrk = Workspace()
+        pushdir(wrk.sources)
+
+        old_src_name = '{0}_{1}_src.tar.gz'.format(self.srcname, self.tag)
+        new_src_name = '{0}_{1}_src.tar.gz'.format(self.name, self.version)
+        cmd = 'mv -vf {0}/{1} {0}/{2}'.format(wrk.packages,
+                                              old_src_name,
+                                              new_src_name)
+        shell(cmd)
+
+        popdir()  # repository name
 
     def _build_env(self, skip_tests: bool):
         build_env = os.environ.copy()
@@ -301,6 +317,11 @@ class SrcPackage(object):
         archive.extractall(wrk.builddir(self.name))
         archive.close()
         popdir()  # workspace packages directory
+
+        # we're ready to build, so we have all the informations at hand
+        # name the source package correctly with its version name
+        # and copy it with the other generated packages
+        self._rename_source_package()
 
         pushdir(self._local_build_path())
         os.makedirs('build')
