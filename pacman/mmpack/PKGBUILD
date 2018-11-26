@@ -34,23 +34,9 @@ package_mmpack() {
     local instdir=${srcdir}/dest/${MINGW_PREFIX}
 
     mkdir -p ${pkgdir}/${MINGW_PREFIX}
-    cp -rf ${instdir}/bin ${pkgdir}/${MINGW_PREFIX}
-    cp -rf ${instdir}/libexec ${pkgdir}/${MINGW_PREFIX}
+    cp -rvf ${instdir}/* ${pkgdir}/${MINGW_PREFIX}
 
-	mkdir -p {pkgdir}/${MINGW_PREFIX}/share/mmpack
-	cp -rf ${instdir}/share/mmpack/check-dpkg-installed {pkgdir}/${MINGW_PREFIX}/share/mmpack/
 
-	mkdir -p {pkgdir}/${MINGW_PREFIX}/share/man/man1
-	cp -rf ${instdir}/share/man/man1/mmpack.1 {pkgdir}/${MINGW_PREFIX}/share/man/man1/
-	cp -rf ${instdir}/share/man/man1/mmpack-install.1 {pkgdir}/${MINGW_PREFIX}/share/man/man1/
-	cp -rf ${instdir}/share/man/man1/mmpack-mkprefix.1 {pkgdir}/${MINGW_PREFIX}/share/man/man1/
-	cp -rf ${instdir}/share/man/man1/mmpack-remove.1 {pkgdir}/${MINGW_PREFIX}/share/man/man1/
-	cp -rf ${instdir}/share/man/man1/mmpack-runprefix.1 {pkgdir}/${MINGW_PREFIX}/share/man/man1/
-	cp -rf ${instdir}/share/man/man1/mmpack-search.1 {pkgdir}/${MINGW_PREFIX}/share/man/man1/
-	cp -rf ${instdir}/share/man/man1/mmpack-update.1 {pkgdir}/${MINGW_PREFIX}/share/man/man1/
-
-	mkdir -p ${pkgdir}/${MINGW_PREFIX}/share/bash-completion/completions/
-    cp -rf ${instdir}/share/bash-completion/completions/mmpack_completion ${pkgdir}/${MINGW_PREFIX}/share/bash-completion/completions/
 }
 
 eval "package_${MINGW_PACKAGE_PREFIX}-mmpack() { package_mmpack; }"
