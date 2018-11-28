@@ -26,6 +26,12 @@ class Version(LooseVersion):  # pylint: disable=too-few-public-methods
       - Use string comparison otherwise: "1x" < "1y"
     * adds "any" as version wildcard
     '''
+    def __init__(self, string):
+        if '_' in string:
+            errmsg = '''Underscores ('_') are prohibited in version strings'''
+            raise SyntaxError(errmsg)
+        super().__init__(string)
+
     def is_any(self):
         ''' LooseVersion asserts its string description contains at least one
             digit. We need to explicitly request its string description to

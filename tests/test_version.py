@@ -64,3 +64,8 @@ class TestVersionClass(unittest.TestCase):
         self.assertLess(Version("any"), Version("nodigits"))
         self.assertLess(Version("1.0.0"), Version("nodigits"))
         self.assertGreater(Version("nodigits"), Version("1.0.0"))
+
+    def test_prohibited(self):
+        'test that underscores are rejected by the version class'
+        with self.assertRaises(SyntaxError):
+            Version('1_2.3')
