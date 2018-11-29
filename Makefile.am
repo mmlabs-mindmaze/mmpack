@@ -55,7 +55,7 @@ pkgpython_PYTHON =\
 	src/pe_utils.py \
 	src/src_package.py \
 	src/settings.py \
-	src/version.py \
+	src/mm_version.py \
 	src/workspace.py \
 	src/xdg.py \
 	$(eol)

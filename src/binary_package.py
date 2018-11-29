@@ -11,7 +11,7 @@ from glob import glob
 from typing import List, Dict, Set
 import tarfile
 from common import *
-from version import Version
+from mm_version import Version
 import yaml
 from pacman import pacman_find_dependency
 from dpkg import dpkg_find_dependency

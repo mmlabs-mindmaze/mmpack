@@ -8,7 +8,7 @@ for path in mmpack.__path__:
     sys.path.insert(0, path)
 
 # import as if from mmpack package
-from version import Version
+from mm_version import Version
 from distutils.version import LooseVersion
 
 class TestVersionClass(unittest.TestCase):

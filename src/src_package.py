@@ -14,7 +14,7 @@ from workspace import Workspace
 from binary_package import BinaryPackage
 from common import *
 from file_utils import *
-from version import Version
+from mm_version import Version
 from settings import PKGDATADIR
 
 

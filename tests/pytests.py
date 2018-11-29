@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+import copy
 
 
 class TapTestResult(unittest.TestResult):
@@ -71,7 +72,14 @@ if __name__ == '__main__':
     pattern = 'test_*{0}*.py'.format(case_filter)
 
     loader = unittest.TestLoader()
+
+    # python unittest dicover modifies sys.path
+    # (See: https://bugs.python.org/issue24247)
+    # to prevent path mixup between the package being tested and an eventual
+    # installed package, prevent any such change
+    path_backup = copy.deepcopy(sys.path)
     tests = loader.discover(tests_dir, pattern=pattern)
+    sys.path = path_backup
 
     runner = TapTestRunner()
     runner.run(tests)

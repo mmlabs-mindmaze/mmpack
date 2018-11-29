@@ -11,7 +11,7 @@ from typing import List
 
 from common import parse_soname
 from settings import DPKG_METADATA_PREFIX
-from version import Version
+from mm_version import Version
 
 
 def dpkg_find_shlibs_file(target_soname: str):

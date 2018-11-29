@@ -10,7 +10,7 @@ for path in mmpack.__path__:
 
 # import as if from mmpack package
 from src_package import SrcPackage
-from version import Version
+from mm_version import Version
 
 class TestSrcPackageClass(unittest.TestCase):
     def test_package_simple(self):
