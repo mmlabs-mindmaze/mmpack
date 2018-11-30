@@ -318,7 +318,7 @@ class SrcPackage(object):
         archive.close()
         popdir()  # workspace packages directory
 
-        # we're ready to build, so we have all the informations at hand
+        # we're ready to build, so we have all the information at hand
         # name the source package correctly with its version name
         # and copy it with the other generated packages
         self._rename_source_package()
