@@ -21,7 +21,7 @@ upload() {
 }
 
 createpkg() {
-	mmpack-build pkg-create --skip-build-tests --url $1 --tag ${2:-mmpack}
+	mmpack-build pkg-create --skip-build-tests --url $1 --tag ${2:-master}
 }
 
 cd $(dirname $0)/../build
@@ -52,7 +52,7 @@ mmpack mkprefix --url="http://$REPOSITORY/$DIST" $MMPACK_PREFIX
 mmpack update
 
 # smoke test first
-createpkg ssh://git@intranet.mindmaze.ch:7999/~ganne/mmpack-hello-world.git master
+createpkg ssh://git@intranet.mindmaze.ch:7999/~ganne/mmpack-hello-world.git
 upload
 mmpack install -y mmpack-hello-world
 hello-world
@@ -63,16 +63,16 @@ if [ -n "$SMOKE" ] ; then
 	exit
 fi
 
-createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/rtfilter.git"
-createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/xdffileio.git"
-createpkg "ssh://git@intranet.mindmaze.ch:7999/~ganne/mmlib.git"
+createpkg "ssh://intranet.mindmaze.ch:29418/rtfilter.git"
+createpkg "ssh://intranet.mindmaze.ch:29418/xdffileio.git"
+createpkg "ssh://intranet.mindmaze.ch:29418/mmlib.git"
 
 upload
 mmpack install -y rtfilter-devel xdffileio-devel
 mmpack install -y librtfilter1 libxdffileio0 # win32 workaround
 
-createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/mcpanel.git"
-createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/eegdev.git"
+createpkg "ssh://intranet.mindmaze.ch:29418/mcpanel.git"
+createpkg "ssh://intranet.mindmaze.ch:29418/eegdev.git"
 
 upload
 
@@ -80,5 +80,5 @@ mmpack install -y mcpanel-devel eegdev-devel
 mmpack install -y libmcpanel0 libeegdev0  # win32 workaround
 
 # create eegview package which depends on mcpanel and eegdev
-createpkg "ssh://git@intranet.mindmaze.ch:7999/ed/eegview.git"
+createpkg "ssh://intranet.mindmaze.ch:29418/eegview.git"
 upload
