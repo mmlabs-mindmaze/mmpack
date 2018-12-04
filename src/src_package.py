@@ -334,7 +334,9 @@ class SrcPackage(object):
             raise NotImplementedError(errmsg)
 
         build_script = ['sh',
-                        '{0}/build-{1}'.format(PKGDATADIR, self.build_system)]
+                        '{0}{1}/build-{2}'.format(wrk.cygroot(),
+                                                  PKGDATADIR,
+                                                  self.build_system)]
         log_file = open('build.log', 'wb')
         dprint('[shell] {0}'.format(' '.join(build_script)))
         ret = run(build_script, env=self._build_env(skip_tests),
