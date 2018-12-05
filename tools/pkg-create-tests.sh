@@ -68,8 +68,8 @@ createpkg "ssh://intranet.mindmaze.ch:29418/xdffileio.git"
 createpkg "ssh://intranet.mindmaze.ch:29418/mmlib.git"
 
 upload
-mmpack install -y rtfilter-devel xdffileio-devel
-mmpack install -y librtfilter1 libxdffileio0 # win32 workaround
+mmpack install -y rtfilter-devel xdffileio-devel mmlib-devel
+mmpack install -y librtfilter1 libxdffileio0 libmmlib0 # win32 workaround
 
 createpkg "ssh://intranet.mindmaze.ch:29418/mcpanel.git"
 createpkg "ssh://intranet.mindmaze.ch:29418/eegdev.git"
