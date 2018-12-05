@@ -358,7 +358,7 @@ class SrcPackage(object):
             giving them to the default target.
         '''
         for binpkg in self._packages:
-            for regex in self._packages[binpkg]['files']:
+            for regex in self._specs[binpkg]['files']:
                 matching_set = self._get_matching_files(regex)
                 self._packages[binpkg].install_files.update(matching_set)
 
