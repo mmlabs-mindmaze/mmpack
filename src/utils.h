@@ -59,4 +59,25 @@ void report_user_and_log(int mmlog_level, const char* fmt, ...);
 
 int prompt_user_confirm(void);
 
+
+/**************************************************************************
+ *                                                                        *
+ *                            string list                                 *
+ *                                                                        *
+ **************************************************************************/
+
+struct strlist_elt {
+	struct strlist_elt* next;
+	struct mmstring str;
+};
+
+struct strlist {
+	struct strlist_elt* head;
+};
+
+void strlist_init(struct strlist* list);
+void strlist_deinit(struct strlist* list);
+int strlist_add(struct strlist* list, const mmstr* str);
+
+
 #endif /* UTILS_H */

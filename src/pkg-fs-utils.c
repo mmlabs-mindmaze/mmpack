@@ -20,62 +20,6 @@
 #include "utils.h"
 #include "sysdeps.h"
 
-struct strlist_elt {
-	struct strlist_elt* next;
-	struct mmstring str;
-};
-
-struct strlist {
-	struct strlist_elt* head;
-};
-
-
-/**************************************************************************
- *                                                                        *
- *                            string list                                 *
- *                                                                        *
- **************************************************************************/
-static
-void strlist_init(struct strlist* list)
-{
-	*list = (struct strlist) {0};
-}
-
-
-static
-void strlist_deinit(struct strlist* list)
-{
-	struct strlist_elt *elt, *next;
-
-	elt = list->head;
-
-	while (elt) {
-		next = elt->next;
-		free(elt);
-		elt = next;
-	}
-}
-
-
-static
-int strlist_add(struct strlist* list, const mmstr* str)
-{
-	struct strlist_elt* elt;
-	int len;
-
-	len = mmstrlen(str);
-	elt = mm_malloc(sizeof(*elt) + len + 1);
-	elt->str.max = len;
-	mmstrcpy(elt->str.buf, str);
-
-	// push element to list
-	elt->next = list->head;
-	list->head = elt;
-
-	return 0;
-}
-
-
 /**************************************************************************
  *                                                                        *
  *                      Packages files unpacking                          *
