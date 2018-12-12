@@ -22,8 +22,10 @@ START_TEST(test_parse_settings)
 
 	rv = settings_load(&settings, TEST_CONFIG);
 	ck_assert(rv == 0);
-	ck_assert(settings.repo_url != NULL);
-	ck_assert_str_eq(settings.repo_url, "http://another.host.com/");
+	ck_assert_int_eq(settings_num_repo(&settings), 3);
+	ck_assert_str_eq(settings_get_repo_url(&settings, 0), "http://another.host.com/");
+	ck_assert_str_eq(settings_get_repo_url(&settings, 1), "https://www.awesome.com");
+	ck_assert_str_eq(settings_get_repo_url(&settings, 2), "http://mmpack.is.cool:8888/");
 
 	settings_deinit(&settings);
 }

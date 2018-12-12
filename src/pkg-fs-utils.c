@@ -529,7 +529,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 	mmstr* mpkfile = NULL;
 	const struct mmpkg* pkg;
 	struct action* act;
-	const mmstr* repo_url = ctx->settings.repo_url;
+	const mmstr* repo_url;
 	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 	int len, i, rv;
 
@@ -559,6 +559,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 
 		// Dowload package from repo and store it in prefix
 		// package cachedir
+		repo_url = settings_get_repo_url(&ctx->settings, pkg->repo_index);
 		if (download_from_repo(ctx, repo_url, pkg->filename,
 		                       NULL, mpkfile)) {
 			error("Failed!\n");

@@ -13,31 +13,44 @@
 #include "utils.h"
 
 
+static
+int download_repo_index(struct mmpack_ctx * ctx, int repo_index)
+{
+	STATIC_CONST_MMSTR(pkglist, "binary-index");
+	const mmstr* cacheindex;
+	const mmstr* url;
+
+	url = settings_get_repo_url(&ctx->settings, repo_index);
+	cacheindex = mmpack_ctx_get_cache_index(ctx, repo_index);
+
+	if (download_from_repo(ctx, url, pkglist, NULL, cacheindex)) {
+		error("Failed to download package list from %s\n", url);
+		return -1;
+	}
+
+	info("Updated package list from repository: %s\n", url);
+	return 0;
+}
+
+
 LOCAL_SYMBOL
 int mmpack_update_all(struct mmpack_ctx * ctx)
 {
-	STATIC_CONST_MMSTR(cacheindex, REPO_INDEX_RELPATH)
-	STATIC_CONST_MMSTR(pkglist, "binary-index")
-	const mmstr* url;
-	const mmstr* prefix;
+	int i, num_repo;
 
 	// Load prefix configuration
 	if (mmpack_ctx_use_prefix(ctx, CTX_SKIP_PKGLIST))
 		return -1;
 
-	prefix = ctx->prefix;
-	url = ctx->settings.repo_url;
-	if (!url) {
+	num_repo = settings_num_repo(&ctx->settings);
+	if (num_repo == 0) {
 		error("Repository URL unspecified\n");
 		return -1;
 	}
 
-	if (download_from_repo(ctx, url, pkglist, prefix, cacheindex)) {
-		error("Failed to download package list\n");
-		return -1;
-	}
-
-	info("Updated package list from repository: %s\n", url);
+	for (i = 0; i < num_repo; i++)
+		if (download_repo_index(ctx, i))
+			return -1;
 
 	return 0;
 }

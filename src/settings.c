@@ -21,15 +21,15 @@
 
 enum {
 	UNKNOWN_FIELD = -1,
-	REPOSITORY,
+	REPOSITORIES,
 };
 
 
 static
 int get_field_type(const char* name, int len)
 {
-	if (STR_EQUAL(name, len, "repository"))
-		return REPOSITORY;
+	if (STR_EQUAL(name, len, "repositories"))
+		return REPOSITORIES;
 	else
 		return UNKNOWN_FIELD;
 }
@@ -39,16 +39,62 @@ static
 int set_settings_field(struct settings* s, int field_type,
                        const char* data, int len)
 {
+	(void)s;
+	(void)data;
+	(void)len;
+
 	switch(field_type) {
-	case REPOSITORY:
-		s->repo_url = mmstr_copy_realloc(s->repo_url, data, len);
-		break;
 	default:
 		// Unknown field are silently ignored
 		break;
 	}
 
 	return 0;
+}
+
+
+static
+void fill_repositories(yaml_parser_t* parser, struct settings* settings)
+{
+	yaml_token_t token;
+	const char* data;
+	int datalen;
+	struct strlist repo_list;
+	mmstr* url = NULL;
+
+	strlist_init(&repo_list);
+	while (1) {
+		if (!yaml_parser_scan(parser, &token))
+			goto exit;
+
+		switch(token.type) {
+		case YAML_FLOW_SEQUENCE_END_TOKEN:
+		case YAML_BLOCK_END_TOKEN:
+		case YAML_KEY_TOKEN:
+			goto exit;
+
+		case YAML_SCALAR_TOKEN:
+			data = (const char*)token.data.scalar.value;
+			datalen = token.data.scalar.length;
+
+			url = mmstr_copy_realloc(url, data, datalen);
+			strlist_add(&repo_list, url);
+			break;
+
+		default:
+			// silently ignore error
+			break;
+		}
+		yaml_token_delete(&token);
+	}
+
+exit:
+	mmstr_free(url);
+	yaml_token_delete(&token);
+
+	// Replace repo list in settings
+	strlist_deinit(&settings->repo_list);
+	settings->repo_list = repo_list;
 }
 
 
@@ -79,6 +125,13 @@ int parse_config(yaml_parser_t* parser, struct settings* settings)
 			case YAML_VALUE_TOKEN:
 				type = YAML_VALUE_TOKEN;
 				break;
+			case YAML_FLOW_SEQUENCE_START_TOKEN:
+			case YAML_BLOCK_SEQUENCE_START_TOKEN:
+				if (  type == YAML_VALUE_TOKEN
+				   && field_type == REPOSITORIES) {
+					fill_repositories(parser, settings);
+				}
+				break;
 			case YAML_SCALAR_TOKEN:
 				data = (const char*)token.data.scalar.value;
 				datalen = token.data.scalar.length;
@@ -89,8 +142,7 @@ int parse_config(yaml_parser_t* parser, struct settings* settings)
 						goto exit;
 				}
 				break;
-			default:
-				type = -1;
+			default: // ignore
 				break;
 		}
 
@@ -151,13 +203,49 @@ LOCAL_SYMBOL
 void settings_init(struct settings* settings)
 {
 	*settings = (struct settings){0};
+
+	strlist_init(&settings->repo_list);
 }
 
 
 LOCAL_SYMBOL
 void settings_deinit(struct settings* settings)
 {
-	mmstr_free(settings->repo_url);
+	strlist_deinit(&settings->repo_list);
 
 	*settings = (struct settings){0};
+}
+
+
+LOCAL_SYMBOL
+int settings_num_repo(const struct settings* settings)
+{
+	struct strlist_elt* elt;
+	int num;
+
+	num = 0;
+	for (elt = settings->repo_list.head; elt; elt = elt->next)
+		num++;
+
+	return num;
+}
+
+
+LOCAL_SYMBOL
+const mmstr* settings_get_repo_url(const struct settings* settings, int index)
+{
+	struct strlist_elt* elt;
+	const mmstr* url = NULL;
+	int i;
+
+	elt = settings->repo_list.head;
+	for (i = 0; i <= index; i++) {
+		if (!elt)
+			return NULL;
+
+		url = elt->str.buf;
+		elt = elt->next;
+	}
+
+	return url;
 }

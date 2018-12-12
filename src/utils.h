@@ -39,6 +39,7 @@ int is_path_separator(char c)
 
 mmstr* get_default_mmpack_prefix(void);
 mmstr* get_config_filename(void);
+mmstr* set_cacheindex_relpath(mmstr* str, int repo_index);
 
 #define SHA_HEXSTR_LEN (32*2) // string of SHA-256 in hexa (\0 NOT incl.)
 
