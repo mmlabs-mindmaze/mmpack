@@ -43,6 +43,10 @@ struct pkg_iter {
 	struct pkglist_entry* pkglist_elt;
 };
 
+struct parsing_ctx {
+	yaml_parser_t parser;
+	struct install_state* state;
+};
 
 /* standard isdigit() is locale dependent making it unnecessarily slow.
  * This macro is here to keep the semantic of isdigit() as usually known by
@@ -765,7 +769,7 @@ void mmpkg_insert_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep,
  *   pkg-b: [0.0.2, any]
  */
 static
-int mmpack_parse_dependency(yaml_parser_t* parser,
+int mmpack_parse_dependency(struct parsing_ctx* ctx,
                             struct mmpkg * pkg,
                             struct mmpkg_dep * dep)
 {
@@ -774,7 +778,7 @@ int mmpack_parse_dependency(yaml_parser_t* parser,
 
 	exitvalue = -1;
 	while (1) {
-		if (!yaml_parser_scan(parser, &token))
+		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto exit;
 
 		switch(token.type) {
@@ -820,7 +824,7 @@ exit:
  *     ...
  */
 static
-int mmpack_parse_deplist(yaml_parser_t* parser,
+int mmpack_parse_deplist(struct parsing_ctx* ctx,
                          struct mmpkg * pkg)
 {
 	int exitvalue, type;
@@ -831,7 +835,7 @@ int mmpack_parse_deplist(yaml_parser_t* parser,
 	dep = NULL;
 	type = -1;
 	while (1) {
-		if (!yaml_parser_scan(parser, &token))
+		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto exit;
 
 		switch(token.type) {
@@ -853,7 +857,7 @@ int mmpack_parse_deplist(yaml_parser_t* parser,
 		case YAML_FLOW_SEQUENCE_START_TOKEN:
 				if (dep == NULL)
 					goto exit;
-				exitvalue = mmpack_parse_dependency(parser, pkg, dep);
+				exitvalue = mmpack_parse_dependency(ctx, pkg, dep);
 				if (exitvalue != 0)
 					goto exit;
 				dep = NULL;
@@ -904,7 +908,7 @@ exit:
  *     ...
  */
 static
-int mmpack_parse_sysdeplist(yaml_parser_t* parser,
+int mmpack_parse_sysdeplist(struct parsing_ctx* ctx,
                             struct mmpkg * pkg)
 {
 	int exitvalue;
@@ -915,7 +919,7 @@ int mmpack_parse_sysdeplist(yaml_parser_t* parser,
 	exitvalue = 0;
 	dep = NULL;
 	while (1) {
-		if (!yaml_parser_scan(parser, &token))
+		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto exit;
 
 		switch(token.type) {
@@ -951,7 +955,7 @@ exit:
 
 /* parse a single package entry */
 static
-int mmpack_parse_index_package(yaml_parser_t* parser, struct mmpkg * pkg)
+int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 {
 	int exitvalue, type;
 	yaml_token_t token;
@@ -964,12 +968,12 @@ int mmpack_parse_index_package(yaml_parser_t* parser, struct mmpkg * pkg)
 	type = -1;
 	scalar_field = FIELD_UNKNOWN;
 	do {
-		if (!yaml_parser_scan(parser, &token))
+		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto error;
 
 		switch(token.type) {
 		case YAML_BLOCK_END_TOKEN:
-			if (mmpkg_check_valid(pkg, 0))
+			if (mmpkg_check_valid(pkg, ctx->state ? 1 : 0))
 				goto error;
 			goto exit;
 
@@ -988,10 +992,10 @@ int mmpack_parse_index_package(yaml_parser_t* parser, struct mmpkg * pkg)
 			switch (type) {
 			case YAML_KEY_TOKEN:
 				if (STR_EQUAL(data, data_len, "depends")) {
-					if (mmpack_parse_deplist(parser, pkg) < 0)
+					if (mmpack_parse_deplist(ctx, pkg) < 0)
 						goto error;
 				} else if (STR_EQUAL(data, data_len, "sysdepends")) {
-					if (mmpack_parse_sysdeplist(parser, pkg) < 0)
+					if (mmpack_parse_sysdeplist(ctx, pkg) < 0)
 						goto error;
 				} else {
 					scalar_field = get_scalar_field_type(data);
@@ -1042,8 +1046,7 @@ exit:
  *   ...
  */
 static
-int mmpack_parse_index(yaml_parser_t* parser, struct binindex * binindex,
-                       struct install_state* state)
+int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 {
 	int exitvalue, type;
 	yaml_token_t token;
@@ -1052,7 +1055,7 @@ int mmpack_parse_index(yaml_parser_t* parser, struct binindex * binindex,
 	exitvalue = -1;
 	type = -1;
 	while (1) {
-		if (!yaml_parser_scan(parser, &token))
+		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto exit;
 
 		switch(token.type) {
@@ -1067,17 +1070,13 @@ int mmpack_parse_index(yaml_parser_t* parser, struct binindex * binindex,
 		case YAML_SCALAR_TOKEN:
 			if (type == YAML_KEY_TOKEN) {
 				pkg = binindex_add_pkg(binindex, (char const *) token.data.scalar.value);
-				exitvalue = mmpack_parse_index_package(parser, pkg);
+				exitvalue = mmpack_parse_index_package(ctx, pkg);
 				if (exitvalue != 0)
 					goto exit;
 
 				/* Add to installed list if it is provided in argument for update */
-				if (state) {
-					install_state_add_pkg(state, pkg);
-				} else if (mmpkg_check_valid(pkg, 1)) {
-					exitvalue = -1;
-					goto exit;
-				}
+				if (ctx->state)
+					install_state_add_pkg(ctx->state, pkg);
 			}
 			type = -1;
 			break;
@@ -1103,9 +1102,9 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 {
 	int rv = -1;
 	FILE * index_fh;
-	yaml_parser_t parser;
+	struct parsing_ctx ctx = {.state = state};
 
-	if (!yaml_parser_initialize(&parser))
+	if (!yaml_parser_initialize(&ctx.parser))
 		return mm_raise_error(ENOMEM, "failed to init yaml parse");
 
 	index_fh = fopen(index_filename, "r");
@@ -1114,13 +1113,13 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 		goto exit;
 	}
 
-	yaml_parser_set_input_file(&parser, index_fh);
-	rv = mmpack_parse_index(&parser, binindex, state);
+	yaml_parser_set_input_file(&ctx.parser, index_fh);
+	rv = mmpack_parse_index(&ctx, binindex);
 
 	fclose(index_fh);
 
 exit:
-	yaml_parser_delete(&parser);
+	yaml_parser_delete(&ctx.parser);
 	return rv;
 }
 
