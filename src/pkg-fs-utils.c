@@ -20,34 +20,34 @@
 #include "utils.h"
 #include "sysdeps.h"
 
-struct filelist_elt {
-	struct filelist_elt* next;
+struct strlist_elt {
+	struct strlist_elt* next;
 	struct mmstring str;
 };
 
-struct filelist {
-	struct filelist_elt* head;
+struct strlist {
+	struct strlist_elt* head;
 };
 
 
 /**************************************************************************
  *                                                                        *
- *                              file list                                 *
+ *                            string list                                 *
  *                                                                        *
  **************************************************************************/
 static
-void filelist_init(struct filelist* files)
+void strlist_init(struct strlist* list)
 {
-	*files = (struct filelist) {0};
+	*list = (struct strlist) {0};
 }
 
 
 static
-void filelist_deinit(struct filelist* files)
+void strlist_deinit(struct strlist* list)
 {
-	struct filelist_elt *elt, *next;
+	struct strlist_elt *elt, *next;
 
-	elt = files->head;
+	elt = list->head;
 
 	while (elt) {
 		next = elt->next;
@@ -58,19 +58,19 @@ void filelist_deinit(struct filelist* files)
 
 
 static
-int filelist_add_file(struct filelist* files, const mmstr* path)
+int strlist_add(struct strlist* list, const mmstr* str)
 {
-	struct filelist_elt* elt;
-	int pathlen;
+	struct strlist_elt* elt;
+	int len;
 
-	pathlen = mmstrlen(path);
-	elt = mm_malloc(sizeof(*elt) + pathlen + 1);
-	elt->str.max = pathlen;
-	mmstrcpy(elt->str.buf, path);
+	len = mmstrlen(str);
+	elt = mm_malloc(sizeof(*elt) + len + 1);
+	elt->str.max = len;
+	mmstrcpy(elt->str.buf, str);
 
 	// push element to list
-	elt->next = files->head;
-	files->head = elt;
+	elt->next = list->head;
+	list->head = elt;
 
 	return 0;
 }
@@ -367,14 +367,14 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
 #define UNPACK_MAXPATH  512
 
 /**
- * pkg_list_rm_files() - list files a package to be removed
+ * pkg_list_rm_files() - list files of a package to be removed
  * @pkg:        package about to be removed
- * @files:      pointer to initialized filelist to populate
+ * @files:      pointer to initialized strlist to populate
  *
  * Return: 0 in case of success, -1 otherwise with error
  */
 static
-int pkg_list_rm_files(const struct mmpkg* pkg, struct filelist* files)
+int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 {
 	int len, rv = -1;
 	FILE* fp;
@@ -399,7 +399,7 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct filelist* files)
 	}
 
 	// Add immediately the path of sha256sums
-	filelist_add_file(files, path);
+	strlist_add(files, path);
 
 	while (fscanf(fp, "%"MM_STRINGIFY(UNPACK_MAXPATH)"[^:]: %*s ", path) == 1) {
 		mmstr_update_len_from_buffer(path);
@@ -420,7 +420,7 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct filelist* files)
 		if (is_path_separator(path[mmstrlen(path)-1]))
 			continue;
 
-		filelist_add_file(files, path);
+		strlist_add(files, path);
 	}
 
 	fclose(fp);
@@ -433,9 +433,9 @@ exit:
 
 
 static
-int rm_files_from_list(struct filelist* files)
+int rm_files_from_list(struct strlist* files)
 {
-	struct filelist_elt *elt;
+	struct strlist_elt *elt;
 	const mmstr* path;
 
 	elt = files->head;
@@ -687,18 +687,18 @@ static
 int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 {
 	int rv = 0;
-	struct filelist files;
+	struct strlist files;
 
 	info("Removing package %s ... ", pkg->name);
 
-	filelist_init(&files);
+	strlist_init(&files);
 
 	if (  pkg_list_rm_files(pkg, &files)
 	   || rm_files_from_list(&files)) {
 		rv = -1;
 	}
 
-	filelist_deinit(&files);
+	strlist_deinit(&files);
 
 	install_state_rm_pkgname(&ctx->installed, pkg->name);
 
