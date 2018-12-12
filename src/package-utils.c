@@ -385,29 +385,75 @@ void pkglist_destroy(struct pkglist* list)
 
 
 /**
- * pkglist_add_pkg() - allocate a new package to a package list
- * @list:       package list to which a new package is required
+ * pkglist_add_or_modify() - allocate or modifyt a package to list
+ * @list:       package list to modify
+ * @pkg:        package source holding the field values to update
  *
- * This function create a new package and add it to @list. Its name field
- * will be initialized to the package name whose @list is associated.
+ * This function search for a package whose version and sumsha field match
+ * the one provided in @pkg. If one is found, the fields that are
+ * repository specific (ie not present in installed package list cache) are
+ * updated in the repo_index field of the package found is not set yet (ie
+ * the package information comes from the installed package list).
+ *
+ * If no matching package can be found in @list, a new package is created
+ * and added to @list.  All of its fields are initialized from @pkg.
+ *
+ * The value strings of fields that have been updated or set (for a new
+ * package) are taken over from @pkg into the package in the list. Hence
+ * those are set to NULL in @pkg.
  *
  * Return: a pointer to new package in list
  */
 static
-struct mmpkg* pkglist_add_pkg(struct pkglist* list)
+void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 {
 	struct pkglist_entry* entry;
+	struct mmpkg* pkg_in_list;
 
-	entry = mm_malloc(sizeof(*entry));
-	mmpkg_init(&entry->pkg, list->pkg_name);
+	// Check package list head has been set
+	if (!list->head.pkg.version) {
+		entry = &list->head;
+		goto copypkg;
+	}
+
+	// Loop over entry and check whether there is an identical package
+	// (ie has the same sumsha and version).
+	for (entry = &list->head; entry != NULL; entry = entry->next) {
+		// Check the entry match version and sumsha
+		if (  !mmstrequal(pkg->version, entry->pkg.version)
+		   || !mmstrequal(pkg->sumsha, entry->pkg.sumsha))
+			continue;
+
+		// Update repo specific fields if repo index is not set
+		pkg_in_list = &entry->pkg;
+		if (pkg_in_list->repo_index == -1) {
+			pkg_in_list->repo_index = pkg->repo_index;
+			pkg_in_list->size = pkg->size;
+			pkg_in_list->sha256 = pkg->sha256;
+			pkg_in_list->filename = pkg->filename;
+
+			// Unset string field in source package since the
+			// string are taken over by the pkg in list
+			pkg->sha256 = NULL;
+			pkg->filename = NULL;
+		}
+		return;
+	}
 
 	// Add new entry to the list
+	entry = mm_malloc(sizeof(*entry));
 	entry->next = list->head.next;
 	list->head.next = entry;
 
-	return &entry->pkg;
-}
+copypkg:
+	// copy the whole package structure
+	entry->pkg = *pkg;
+	entry->pkg.name = list->pkg_name;
 
+	// reset package fields since they have been taken over by the new
+	// entry
+	mmpkg_init(pkg, NULL);
+}
 
 /**************************************************************************
  *                                                                        *
@@ -592,25 +638,23 @@ struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr co
 
 
 static
-struct mmpkg* binindex_add_pkg(struct binindex* binindex, const char* name)
+void binindex_add_pkg(struct binindex* binindex, struct mmpkg* pkg)
 {
 	struct pkglist* pkglist;
 	struct it_entry* entry;
 	struct indextable* idx = &binindex->pkg_list_table;
-	mmstr* pkg_name = mmstr_alloca_from_cstr(name);
 
-	entry = indextable_lookup_create(idx, pkg_name);
+	entry = indextable_lookup_create(idx, pkg->name);
 	pkglist = entry->value;
 
 	// Create package list if not existing yet
 	if (!pkglist) {
-		pkglist = pkglist_create(pkg_name);
+		pkglist = pkglist_create(pkg->name);
 		entry->key = pkglist->pkg_name;
 		entry->value = pkglist;
-		return &pkglist->head.pkg;
 	}
 
-	return pkglist_add_pkg(pkglist);
+	pkglist_add_or_modify(pkglist, pkg);
 }
 
 
@@ -1050,8 +1094,12 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 {
 	int exitvalue, type;
 	yaml_token_t token;
-	struct mmpkg * pkg;
+	struct mmpkg pkg;
+	mmstr* name = NULL;
+	const char* valuestr;
+	int valuelen;
 
+	mmpkg_init(&pkg, NULL);
 	exitvalue = -1;
 	type = -1;
 	while (1) {
@@ -1068,11 +1116,18 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 			break;
 
 		case YAML_SCALAR_TOKEN:
+			valuestr = (const char*)token.data.scalar.value;
+			valuelen = token.data.scalar.length;
 			if (type == YAML_KEY_TOKEN) {
-				pkg = binindex_add_pkg(binindex, (char const *) token.data.scalar.value);
-				exitvalue = mmpack_parse_index_package(ctx, pkg);
+				name = mmstr_copy_realloc(name, valuestr, valuelen);
+				mmpkg_init(&pkg, name);
+				pkg.repo_index = ctx->repo_index;
+				exitvalue = mmpack_parse_index_package(ctx, &pkg);
 				if (exitvalue != 0)
 					goto exit;
+
+				binindex_add_pkg(binindex, &pkg);
+				mmpkg_deinit(&pkg);
 			}
 			type = -1;
 			break;
@@ -1087,6 +1142,8 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 
 exit:
 	yaml_token_delete(&token);
+	mmpkg_deinit(&pkg);
+	mmstr_free(name);
 
 	return exitvalue;
 }

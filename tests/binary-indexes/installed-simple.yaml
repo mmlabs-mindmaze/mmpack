@@ -1,0 +1,36 @@
+pkg-c:
+    depends:
+        pkg-d: [0.0.4, 0.0.4]
+        pkg-e: [0.0.5, 0.0.5]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.3
+    sumsha256sums: c001e00000000000000000000000000000000000000000000000000000000000
+
+pkg-d:
+    depends:
+        pkg-f: [0.0.6, any]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.4
+    sumsha256sums: d001e00000000000000000000000000000000000000000000000000000000000
+
+pkg-e:
+    depends:
+        pkg-f: [0.0.6, 0.0.6]
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.5
+    sumsha256sums: e001e00000000000000000000000000000000000000000000000000000000000
+
+pkg-f:
+    depends: {}
+    description: ''
+    source: test-pkg
+    sysdepends: {}
+    version: 0.0.6
+    sumsha256sums: f001e00000000000000000000000000000000000000000000000000000000000
+

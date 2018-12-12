@@ -42,6 +42,7 @@ struct mmpkg {
 	mmstr const * desc;
 	mmstr const * sumsha;
 	size_t size;
+	int repo_index;
 
 	pkg_state state;
 
