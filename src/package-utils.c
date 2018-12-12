@@ -45,7 +45,7 @@ struct pkg_iter {
 
 struct parsing_ctx {
 	yaml_parser_t parser;
-	struct install_state* state;
+	int repo_index;
 };
 
 /* standard isdigit() is locale dependent making it unnecessarily slow.
@@ -973,7 +973,7 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 
 		switch(token.type) {
 		case YAML_BLOCK_END_TOKEN:
-			if (mmpkg_check_valid(pkg, ctx->state ? 1 : 0))
+			if (mmpkg_check_valid(pkg, ctx->repo_index < 0 ? 0 : 1))
 				goto error;
 			goto exit;
 
@@ -1073,10 +1073,6 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 				exitvalue = mmpack_parse_index_package(ctx, pkg);
 				if (exitvalue != 0)
 					goto exit;
-
-				/* Add to installed list if it is provided in argument for update */
-				if (ctx->state)
-					install_state_add_pkg(ctx->state, pkg);
 			}
 			type = -1;
 			break;
@@ -1096,13 +1092,22 @@ exit:
 }
 
 
+/**
+ * binindex_populate() - populate package database from package list
+ * @binindex:   binary package index to populate
+ * @index_filename: repository package list file
+ * @repo_index: index of the repository list being read (use -1 if package
+ *              list is the list of installed package)
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int binindex_populate(struct binindex* binindex, char const * index_filename,
-                      struct install_state* state)
+                      int repo_index)
 {
 	int rv = -1;
 	FILE * index_fh;
-	struct parsing_ctx ctx = {.state = state};
+	struct parsing_ctx ctx = {.repo_index = repo_index};
 
 	if (!yaml_parser_initialize(&ctx.parser))
 		return mm_raise_error(ENOMEM, "failed to init yaml parse");

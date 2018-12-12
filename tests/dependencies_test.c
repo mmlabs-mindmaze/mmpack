@@ -56,7 +56,7 @@ START_TEST(test_valid_dependencies)
 	struct pkg_request req;
 	char const * pkg;
 
-	rv = binindex_populate(&ctx.binindex, valid_binindexes[_i], NULL);
+	rv = binindex_populate(&ctx.binindex, valid_binindexes[_i], 0);
 	ck_assert(rv == 0);
 
 	req = (struct pkg_request){.name = "pkg-a", .version = "0.0.1"};
@@ -80,7 +80,7 @@ START_TEST(test_valid_dependencies_multiple_req)
 	struct action_stack * actions;
 	struct pkg_request req[2];
 
-	rv = binindex_populate(&ctx.binindex, TEST_BININDEX_DIR"/simple.yaml", NULL);
+	rv = binindex_populate(&ctx.binindex, TEST_BININDEX_DIR"/simple.yaml", 0);
 	ck_assert(rv == 0);
 
 	req[0] = (struct pkg_request){.name = "pkg-b", .next = &req[1]};
@@ -99,7 +99,7 @@ START_TEST(test_invalid_dependencies)
 	struct action_stack * actions;
 	struct pkg_request req;
 
-	rv = binindex_populate(&ctx.binindex, invalid_binindexes[_i], NULL);
+	rv = binindex_populate(&ctx.binindex, invalid_binindexes[_i], 0);
 	ck_assert(rv == 0);
 
 	req = (struct pkg_request){.name = "pkg-a", .version = "0.0.1"};

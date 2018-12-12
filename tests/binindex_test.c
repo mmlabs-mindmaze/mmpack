@@ -39,7 +39,7 @@ START_TEST(test_binindex_parsing)
 {
 	int rv;
 
-	rv = binindex_populate(&binary_index, binindexes[_i], NULL);
+	rv = binindex_populate(&binary_index, binindexes[_i], 0);
 	ck_assert(rv == 0);
 	binindex_dump(&binary_index);
 }

@@ -91,7 +91,7 @@ struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr co
 void binindex_init(struct binindex* binindex);
 void binindex_deinit(struct binindex* binindex);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
-                      struct install_state* state);
+                      int repo_index);
 void binindex_dump(struct binindex const * binindex);
 void binindex_compute_rdepends(struct binindex* binindex);
 
