@@ -57,7 +57,7 @@ int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	}
 
 	/* Load prefix configuration and caches */
-	if (mmpack_ctx_use_prefix(ctx))
+	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
 	pkg = binindex_get_latest_pkg(&ctx->binindex,

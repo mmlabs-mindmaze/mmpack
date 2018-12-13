@@ -147,7 +147,7 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	return 0;
 
 error:
-	fprintf(stderr, "Failed to load package lists\n");
+	error("Failed to load package lists\n");
 	return -1;
 }
 
@@ -233,17 +233,24 @@ error:
 /**
  * mmpack_ctx_use_prefix() - load prefix settings and packages indices
  * @ctx:	initialized mmpack context
+ * @flags:      0 or CTX_SKIP_PKGLIST
+ *
+ * If flags is set to CTX_SKIP_PKGLIST, the function will not try to load
+ * package list.
  *
  * Return: 0 in case of success, -1 otherwise
  */
 LOCAL_SYMBOL
-int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx)
+int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 {
 	if (read_prefix_config(ctx))
 		return -1;
 
 	if (mmpack_ctx_use_prefix_log(ctx))
 		return -1;
+
+	if (flags & CTX_SKIP_PKGLIST)
+		return 0;
 
 	return mmpack_ctx_init_pkglist(ctx);
 }

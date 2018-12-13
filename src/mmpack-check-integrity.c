@@ -89,7 +89,7 @@ int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc, char const* argv[]
 	};
 
 	/* Load prefix configuration and caches */
-	if (mmpack_ctx_use_prefix(ctx))
+	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
 	binindex_foreach(&ctx->binindex, binindex_cb, (void *) &data);

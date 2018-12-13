@@ -62,7 +62,7 @@ int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	data.pkg_name = argv[1];
 
 	// Load prefix configuration and caches
-	if (mmpack_ctx_use_prefix(ctx))
+	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
 	data.found = 0;

@@ -21,8 +21,8 @@ int mmpack_update_all(struct mmpack_ctx * ctx)
 	const mmstr* url;
 	const mmstr* prefix;
 
-	// Load prefix configuration and caches
-	if (mmpack_ctx_use_prefix(ctx))
+	// Load prefix configuration
+	if (mmpack_ctx_use_prefix(ctx, CTX_SKIP_PKGLIST))
 		return -1;
 
 	prefix = ctx->prefix;
