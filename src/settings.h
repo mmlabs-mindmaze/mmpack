@@ -5,9 +5,11 @@
 #define SETTINGS_H
 
 #include "utils.h"
+#include "mmstring.h"
 
 struct settings {
 	struct strlist repo_list;
+	mmstr* default_prefix;
 };
 
 void settings_init(struct settings* settings);

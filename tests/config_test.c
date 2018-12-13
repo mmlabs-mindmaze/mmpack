@@ -27,6 +27,8 @@ START_TEST(test_parse_settings)
 	ck_assert_str_eq(settings_get_repo_url(&settings, 1), "https://www.awesome.com");
 	ck_assert_str_eq(settings_get_repo_url(&settings, 2), "http://mmpack.is.cool:8888/");
 
+	ck_assert_str_eq(settings.default_prefix, "a/path/to/prefix");
+
 	settings_deinit(&settings);
 }
 END_TEST

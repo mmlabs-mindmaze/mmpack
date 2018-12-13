@@ -59,7 +59,6 @@ LOCAL_SYMBOL
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 {
 	const char* prefix;
-	mmstr* default_prefix = get_default_mmpack_prefix();
 
 	memset(ctx, 0, sizeof(*ctx));
 	settings_init(&ctx->settings);
@@ -71,11 +70,10 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 
 	prefix = opts->prefix;
 	if (!prefix)
-		prefix = mm_getenv("MMPACK_PREFIX", default_prefix);
+		prefix = mm_getenv("MMPACK_PREFIX", ctx->settings.default_prefix);
 
 	ctx->prefix = mmstr_malloc_from_cstr(prefix);
 
-	mmstr_free(default_prefix);
 	return 0;
 }
 

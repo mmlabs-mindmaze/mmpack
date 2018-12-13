@@ -2,6 +2,8 @@
 repositories: [ "http://this.is.awasome", "http://localhost:8888/" ]
 distractor: dummy
 
+default-prefix: "a/path/to/prefix"
+
 repositories:
   - http://another.host.com/
   - https://www.awesome.com
