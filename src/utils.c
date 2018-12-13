@@ -569,15 +569,23 @@ int strlist_add(struct strlist* list, const mmstr* str)
 	struct strlist_elt* elt;
 	int len;
 
+	// Create the new element
 	len = mmstrlen(str);
 	elt = mm_malloc(sizeof(*elt) + len + 1);
 	elt->str.max = len;
 	mmstrcpy(elt->str.buf, str);
+	elt->next = NULL;
 
-	// push element to list
-	elt->next = list->head;
-	list->head = elt;
+	// Set as new head if list is empty
+	if (list->head == NULL) {
+		list->head = elt;
+		list->last = elt;
+		return 0;
+	}
 
+	// Add new element at the end of list
+	list->last->next = elt;
+	list->last = elt;
 	return 0;
 }
 

@@ -73,6 +73,7 @@ struct strlist_elt {
 
 struct strlist {
 	struct strlist_elt* head;
+	struct strlist_elt* last;
 };
 
 void strlist_init(struct strlist* list);
