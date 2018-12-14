@@ -13,6 +13,7 @@
 
 #define _GNU_SOURCE
 #include <errno.h>
+#include <glob.h>
 #include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,32 @@
 
 
 #define MOUNT_TARGET    "/run/mmpack"
+
+
+static
+void try_run_packaged_tool(char* argv[])
+{
+	int saved_error;
+	glob_t res;
+	size_t i;
+
+	saved_error = errno;
+
+	if (glob("/usr/lib/*/mmpack/mount-mmpack-prefix", 0, NULL, &res)) {
+		errno = saved_error;
+		return;
+	}
+
+	for (i = 0; i < res.gl_pathc; i++) {
+		argv[0] = res.gl_pathv[i];
+		execvp(argv[0], argv);
+	}
+
+	globfree(&res);
+
+	errno = saved_error;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -41,6 +68,7 @@ int main(int argc, char* argv[])
 
 	// Create a new mount namespace
 	if (unshare(CLONE_NEWNS)) {
+		try_run_packaged_tool(argv);
 		perror("unshare failed");
 		return EXIT_FAILURE;
 	}
