@@ -6,7 +6,8 @@
 set -ex
 
 distrib() {
-	if [ "$(cat /etc/os-release  | grep "^ID=")" == "ID=debian" ]; then
+	grep -q "^ID=debian" /etc/os-release
+	if [ $? -eq 0 ]; then
 		echo debian
 	else
 		echo windows
@@ -24,7 +25,10 @@ createpkg() {
 	mmpack-build pkg-create --skip-build-tests --url $1 --tag ${2:-master}
 }
 
-cd $(dirname $0)/../build
+if [ ! -d venv ] ; then
+	echo "must run from build folder after make check"
+	exit 1
+fi
 
 REPOSITORY="${1:-mindmaze-srv-fr-01}"
 DIST=$(distrib)
@@ -44,8 +48,11 @@ export CPATH="${MMPACK_PREFIX}/include:${CPATH}"
 export VIRTUAL_ENV=${testdir}
 export PYTHONPATH="${python_testdir}:$python_testdir}/site-packages:${PYTHONPATH}"
 
-# *start* by copying ssh id
-ssh-copy-id root@${REPOSITORY}
+# Ensure we can ssh without asking password all the time
+if ! ssh -o "PasswordAuthentication no" root@${REPOSITORY} true; then
+	echo "Cannot ssh as root to ${REPOSITORY} using pubkey"
+	exit 1
+fi
 
 # install them within a prefix
 mmpack mkprefix --url="http://$REPOSITORY/$DIST" $MMPACK_PREFIX
