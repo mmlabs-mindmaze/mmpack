@@ -17,6 +17,7 @@
 #include "common.h"
 #include "mmpack-check-integrity.h"
 #include "mmpack-install.h"
+#include "mmpack-list.h"
 #include "mmpack-mkprefix.h"
 #include "mmpack-remove.h"
 #include "mmpack-runprefix.h"
@@ -46,6 +47,7 @@ static const char mmpack_doc[] =
 static const char arguments_docs[] =
 	"[options] "CHECK_INTEGRITY_SYNOPSIS"\n"
 	"[options] "INSTALL_SYNOPSIS"\n"
+	"[options] "LIST_SYNOPSIS"\n"
 	"[options] "MKPREFIX_SYNOPSIS"\n"
 	"[options] "REMOVE_SYNOPSIS"\n"
 	"[options] "RUNPREFIX_SYNOPSIS"\n"
@@ -138,6 +140,8 @@ int main(int argc, char* argv[])
 		rv = mmpack_show(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "source")) {
 		rv = mmpack_source(&ctx, cmd_argc, cmd_argv);
+	} else if (STR_EQUAL(cmd, strlen(cmd), "list")) {
+		rv = mmpack_list(&ctx, cmd_argc, cmd_argv);
 	} else {
 		fprintf(stderr, "Invalid command: %s."
 		                " Run \"%s --help\" to see Usage\n", cmd, argv[0]);

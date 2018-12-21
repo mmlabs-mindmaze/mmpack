@@ -90,6 +90,8 @@ mmpack_lib_sources = \
 	src/mmpack-check-integrity.h \
 	src/mmpack-install.c \
 	src/mmpack-install.h \
+	src/mmpack-list.c \
+	src/mmpack-list.h \
 	src/mmpack-mkprefix.c \
 	src/mmpack-mkprefix.h \
 	src/mmpack-remove.c \

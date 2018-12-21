@@ -18,9 +18,14 @@ _mmpack_remove_completion() {
 	sed -n 's/^\([a-zA-Z0-9_-]*\):$/\1/p' $MMPACK_PREFIX/var/lib/mmpack/installed.yaml
 }
 
+_mmpack_list_completion() {
+	echo 'all available upgradable installed extras'
+}
+
 _mmpack_subcmd_completion() {
 	case "$1" in
 	"install") _mmpack_install_completion ;;
+	"list") _mmpack_list_completion ;;
 	"remove") _mmpack_remove_completion ;;
 	"source") _mmpack_install_completion ;;
 	*) ;;
