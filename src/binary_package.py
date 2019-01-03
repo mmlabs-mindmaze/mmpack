@@ -16,7 +16,7 @@ import yaml
 from pacman import pacman_find_dependency
 from dpkg import dpkg_find_dependency
 from settings import DPKG_PREFIX, PACMAN_PREFIX
-from workspace import Workspace
+from workspace import Workspace, get_staging_dir
 
 
 def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
@@ -193,10 +193,8 @@ class BinaryPackage(object):
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             os.link(src, dst, follow_symlinks=False)
 
-    def _make_archive(self, pkgdir: str) -> str:
-        wrk = Workspace()
-        pkgdir = wrk.stagedir(self.name)
-        mpkfile = "{0}/{1}_{2}_{3}.mpk".format(wrk.packages, self.name,
+    def _make_archive(self, pkgdir: str, dstdir: str) -> str:
+        mpkfile = "{0}/{1}_{2}_{3}.mpk".format(dstdir, self.name,
                                                self.version, self.arch)
         tar = tarfile.open(mpkfile, 'w:xz')
         dprint('[tar] {0} -> {1}'.format(pkgdir, mpkfile))
@@ -205,14 +203,21 @@ class BinaryPackage(object):
 
         return mpkfile
 
-    def create(self, instdir: str) -> str:
+    def create(self, instdir: str, pkgbuilddir: str) -> str:
         '''
         Gather all the package data, generates metadata files
         (including exposed symbols), and create the mmpack package
         file.
+
+        Args:
+            instdir: folder from which the package must be populated
+            pkgbuilddir: build folder of source package. The staging file for
+                         the package as well as the created binary package file
+                         will be located in this folder.
+        Return:
+            the path of the created binary package file (in pkgbuilddir)
         '''
-        wrk = Workspace()
-        stagedir = wrk.stagedir(self.name)
+        stagedir = get_staging_dir(pkgbuilddir, self.name)
         os.makedirs(stagedir + '/MMPACK', exist_ok=True)
 
         dprint('link {0} in {1}'.format(self.name, stagedir))
@@ -220,7 +225,7 @@ class BinaryPackage(object):
         self._gen_symbols(stagedir)
         self._gen_pyobjects(stagedir)
         self._gen_info(stagedir)
-        return self._make_archive(instdir)
+        return self._make_archive(stagedir, pkgbuilddir)
 
     def add_depend(self, name: str, minver: Version,
                    maxver: Version=Version('any')):

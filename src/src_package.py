@@ -7,10 +7,11 @@ import importlib
 import os
 from glob import glob
 import re
+import shutil
 from subprocess import STDOUT, run
 import tarfile
 from typing import Set
-from workspace import Workspace
+from workspace import Workspace, get_local_install_dir
 from binary_package import BinaryPackage
 from common import *
 from file_utils import *
@@ -74,14 +75,20 @@ class SrcPackage(object):
         self.install_files_set = set()
         self._metadata_files_list = []
 
-    def _local_build_path(self) -> str:
-        'internal helper: build and return the local build path'
+    def _pkgbuild_path(self) -> str:
+        'internal helper: return the package build path'
         wrk = Workspace()
-        return wrk.builddir(self.name) + '/{0}_{1}'.format(self.name, self.tag)
+        return wrk.builddir(srcpkg=self.name, tag=self.tag)
+
+    def _unpack_path(self) -> str:
+        ''' internal helper: get the local build path, ie, the place
+        where the sources are unpacked and compiled
+        '''
+        return self._pkgbuild_path() + '/' + self.name
 
     def _local_install_path(self, withprefix: bool=False) -> str:
         'internal helper: build and return the local install path'
-        installdir = self._local_build_path() + '/install'
+        installdir = get_local_install_dir(self._pkgbuild_path())
         if withprefix:
             installdir += _get_install_prefix()
 
@@ -94,7 +101,7 @@ class SrcPackage(object):
         Raises:
             RuntimeError: could not guess project build system
         '''
-        pushdir(self._local_build_path())
+        pushdir(self._unpack_path())
         if os.path.exists('configure.ac'):
             self.build_system = 'autotools'
         elif os.path.exists('CMakeLists.txt'):
@@ -249,7 +256,7 @@ class SrcPackage(object):
         shell(cmd)
         pushdir(self.srcname)
         cmd = 'git archive --format=tar.gz --prefix={0}/ {1}' \
-              ' > {2}/{3}'.format(self.srcname, self.tag,
+              ' > {2}/{3}'.format(self.name, self.tag,
                                   wrk.sources, sources_archive_name)
         shell(cmd)
         popdir()  # repository name
@@ -277,8 +284,8 @@ class SrcPackage(object):
 
     def _build_env(self, skip_tests: bool):
         build_env = os.environ.copy()
-        build_env['SRCDIR'] = self._local_build_path()
-        build_env['BUILDDIR'] = self._local_build_path() + '/build'
+        build_env['SRCDIR'] = self._unpack_path()
+        build_env['BUILDDIR'] = self._unpack_path() + '/build'
         build_env['DESTDIR'] = self._local_install_path()
         build_env['PREFIX'] = _get_install_prefix()
         build_env['LD_RUN_PATH'] = os.path.join(_get_install_prefix(), 'lib')
@@ -310,11 +317,11 @@ class SrcPackage(object):
             NotImplementedError: the specified build system is not supported
         '''
         wrk = Workspace()
-        wrk.clean(self.name)
+        wrk.clean(self.name, self.tag)
 
         pushdir(wrk.packages)
         archive = tarfile.open(source_pkg, 'r:gz')
-        archive.extractall(wrk.builddir(self.name))
+        archive.extractall(self._pkgbuild_path())
         archive.close()
         popdir()  # workspace packages directory
 
@@ -323,7 +330,7 @@ class SrcPackage(object):
         # and copy it with the other generated packages
         self._rename_source_package()
 
-        pushdir(self._local_build_path())
+        pushdir(self._unpack_path())
         os.makedirs('build')
         os.makedirs(self._local_install_path(), exist_ok=True)
 
@@ -480,9 +487,11 @@ class SrcPackage(object):
         for pkgname, binpkg in self._packages.items():
             binpkg.gen_provides()
 
+        wrk = Workspace()
         for pkgname, binpkg in self._packages.items():
             binpkg.gen_dependencies(self._packages.values())
-            binpkg.create(instdir)
+            pkgfile = binpkg.create(instdir, self._pkgbuild_path())
+            shutil.copy(pkgfile, wrk.packages)
             iprint('generated package: {}'.format(pkgname))
         popdir()  # local install path
 
