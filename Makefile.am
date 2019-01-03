@@ -54,18 +54,24 @@ pkgpython_PYTHON =\
 	src/pacman.py \
 	src/pe_utils.py \
 	src/src_package.py \
-	src/settings.py \
 	src/mm_version.py \
 	src/workspace.py \
 	src/xdg.py \
 	$(eol)
+
+nodist_pkgpython_PYTHON =\
+	src/settings.py \
+	$(eol)
+
+CLEANFILES += $(nodist_pkgpython_PYTHON)
+
 
 .PHONY: spelling
 spelling: $(pkgpython_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN)
 	$(AM_V_AT) codespell $^
 
 .PHONY: syntax
-syntax: $(pkgpython_PYTHON)
+syntax: $(pkgpython_PYTHON) $(nodist_pkgpython_PYTHON)
 	$(srcdir)/tools/check-pyfile $^
 
 
@@ -117,7 +123,7 @@ mmpack_SOURCES = \
 	$(mmpack_lib_sources) \
 	src/mmpack.c \
 	$(eol)
-pkgdata_DATA = \
+dist_pkgdata_DATA = \
 	src/build-autotools \
 	src/build-cmake \
 	src/build-makefile \
@@ -152,7 +158,7 @@ mmpack-build: src/mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@
 	$(AM_V_GEN)chmod a+x $@
 
-src/settings.py: src/settings.py.in Makefile
+%.py : %.py.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' < $< > $@
 
 #
@@ -204,7 +210,7 @@ unittests_tap_LDADD = \
 	$(eol)
 
 completiondir = $(datadir)/bash-completion/completions
-completion_DATA = \
+dist_completion_DATA = \
 	src/mmpack_completion \
 	src/mmpack-build_completion \
 	$(eol)
