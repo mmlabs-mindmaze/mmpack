@@ -68,7 +68,7 @@ CLEANFILES += $(nodist_pkgpython_PYTHON)
 
 .PHONY: spelling
 spelling: $(pkgpython_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN)
-	$(AM_V_AT) codespell $^
+	$(AM_V_at) codespell $^
 
 .PHONY: syntax
 syntax: $(pkgpython_PYTHON) $(nodist_pkgpython_PYTHON)
@@ -156,7 +156,7 @@ setcap:
 
 mmpack-build: src/mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@
-	$(AM_V_GEN)chmod a+x $@
+	$(AM_V_at)chmod a+x $@
 
 %.py : %.py.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' < $< > $@
