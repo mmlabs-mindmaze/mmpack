@@ -235,26 +235,9 @@ RST_MAN_PAGES_IN = \
 	$(eof)
 EXTRA_DIST += $(RST_MAN_PAGES_IN)
 
-nodist_man_MANS = \
-	docs/mmpack.1 \
-	docs/mmpack-build.1 \
-	docs/mmpack-build-pkg-create.1 \
-	docs/mmpack-check-integrity.1 \
-	docs/mmpack-install.1 \
-	docs/mmpack-mkprefix.1 \
-	docs/mmpack-remove.1 \
-	docs/mmpack-runprefix.1 \
-	docs/mmpack-search.1 \
-	docs/mmpack-show.1 \
-	docs/mmpack-source.1 \
-	docs/mmpack-update.1 \
-	$(eol)
+nodist_man_MANS = $(RST_MAN_PAGES_IN:.rst.in=.1)
+CLEANFILES += $(nodist_man_MANS)
 
 %.1: %.rst.in
 	$(AM_V_at) $(MKDIR_P) docs
-	$(AM_V_at) $(SED) -e 's,<version>,$(VERSION),g' < $< > $@.rst
-	$(AM_V_GEN) $(RST2MAN) $@.rst > $@
-
-CLEANFILES += $(nodist_man_MANS) $(nodist_man_MANS:.1=.1.rst)
-
-$(dist_man_MANS): $(RST_MAN_PAGES_IN)
+	$(AM_V_GEN) $(SED) -e 's,<version>,$(VERSION),g' < $< | $(RST2MAN) > $@
