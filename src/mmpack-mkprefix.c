@@ -77,7 +77,7 @@ int create_initial_prefix_cfg(const mmstr* prefix, const char* url,
 
 	// Optionally write URL (if null, it will inherit from user config)
 	if (url) {
-		len = sprintf(line, "repository: \n  - %s", url);
+		len = sprintf(line, "repositories: \n  - %s\n", url);
 		mm_write(fd, line, len);
 	}
 
