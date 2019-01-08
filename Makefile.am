@@ -47,6 +47,7 @@ pkgpython_PYTHON =\
 	src/decorators.py \
 	src/elf_utils.py \
 	src/file_utils.py \
+	src/mmpack_clean.py \
 	src/mmpack_config.py \
 	src/mmpack_pkg_create.py \
 	src/mmpack_pkg_check.py \
@@ -224,6 +225,7 @@ dist_completion_DATA = \
 RST_MAN_PAGES_IN = \
 	docs/mmpack.rst.in \
 	docs/mmpack-build.rst.in \
+	docs/mmpack-build-clean.rst.in \
 	docs/mmpack-build-pkg-create.rst.in \
 	docs/mmpack-check-integrity.rst.in \
 	docs/mmpack-install.rst.in \
