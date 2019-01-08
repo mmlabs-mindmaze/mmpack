@@ -54,6 +54,9 @@ if ! ssh -o "PasswordAuthentication no" root@${REPOSITORY} true; then
 	exit 1
 fi
 
+# wipe clean mmpack working directory
+mmpack-build clean --wipe
+
 # install them within a prefix
 mmpack mkprefix --url="http://$REPOSITORY/$DIST" $MMPACK_PREFIX
 mmpack update
