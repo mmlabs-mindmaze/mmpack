@@ -83,6 +83,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 {
 	mmstr_free(ctx->prefix);
 	mmstr_free(ctx->pkgcachedir);
+	mmstr_free(ctx->cacheindex);
 
 	if (ctx->curl != NULL) {
 		curl_easy_cleanup(ctx->curl);
