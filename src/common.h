@@ -28,4 +28,10 @@
 	(len >= (sizeof(const_str) - 1) \
 	 && memcmp(str, const_str, sizeof(const_str) - 1) == 0)
 
+#ifdef _WIN32
+#define MOUNT_TARGET "/m/"
+#else
+#define MOUNT_TARGET "/run/mmpack"
+#endif
+
 #endif /* COMMON_H */

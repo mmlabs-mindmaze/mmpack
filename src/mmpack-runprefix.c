@@ -11,6 +11,7 @@
 #include <mmsysio.h>
 #include <string.h>
 
+#include "common.h"
 #include "context.h"
 #include "mmstring.h"
 
@@ -49,5 +50,14 @@ int mmpack_runprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// from args, the NULL termination will be added to new_argv
 	memcpy(new_argv+2, args, (nargs+1) * sizeof(*args));
 
-	return mm_execv(new_argv[0], 0, NULL, 0, new_argv, NULL);
+	// Add prefix path to environment variables
+	if (mm_setenv("PATH", MOUNT_TARGET"/bin", MM_ENV_PREPEND) == 0
+	    && mm_setenv("CPATH", MOUNT_TARGET"/include", MM_ENV_PREPEND) == 0
+	    && mm_setenv("LIBRARY_PATH", MOUNT_TARGET"/lib", MM_ENV_PREPEND) == 0
+	    && mm_setenv("MANPATH", MOUNT_TARGET"/share/man", MM_ENV_PREPEND) == 0
+	    /* XXX: check PYTHONPATH value once a pure-python mmpack package has been created */
+	    && mm_setenv("PYTHONPATH", MOUNT_TARGET"/lib/python3/site-packages", MM_ENV_PREPEND) == 0)
+		return mm_execv(new_argv[0], 0, NULL, 0, new_argv, NULL);
+	else
+		return -1;
 }

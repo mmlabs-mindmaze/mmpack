@@ -22,9 +22,7 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 
-
-#define MOUNT_TARGET    "/run/mmpack"
-
+#include "common.h"
 
 static
 void try_run_packaged_tool(char* argv[])
