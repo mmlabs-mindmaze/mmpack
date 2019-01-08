@@ -88,7 +88,7 @@ class Workspace(object):
         'clean sources, build, staging, and all packages'
         self.srcclean()
         self.clean()
-        shell('rm -vf {0}/*'.format(self.packages))
+        shell('rm -vrf {0}/*'.format(self.packages))
 
 
 def is_valid_prefix(prefix: str) -> bool:
