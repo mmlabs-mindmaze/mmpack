@@ -28,8 +28,8 @@ import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from glob import glob
 
-from common import shell, pushdir, popdir, yaml_load
-from src_package import SrcPackage
+from common import pushdir, popdir, yaml_load
+from src_package import create_source_from_git
 from workspace import Workspace
 
 
@@ -99,18 +99,6 @@ def parse_options(argv):
         ctx['url'] = find_project_root_folder()
         if not ctx['url']:
             raise ValueError('did not find project to package')
-    if not ctx['tag']:
-        # use current branch name
-        ctx['tag'] = shell('git rev-parse --abbrev-ref HEAD').strip()
-
-    # create a srcname from the arguments
-    # remove trailing path separators
-    if ctx['url'].endswith('.git'):
-        ctx['srcname'] = os.path.basename(ctx['url'])
-        ctx['srcname'] = ctx['srcname'][:-4]
-    else:
-        ctx['srcname'] = os.path.normpath(ctx['url'])
-        ctx['srcname'] = os.path.basename(ctx['srcname'])
 
     # set workspace prefix
     if not args.prefix:
@@ -128,14 +116,9 @@ def main():
     'entry point to create a mmpack package'
     ctx = parse_options(sys.argv[1:])
 
-    package = SrcPackage(name=ctx['srcname'], url=ctx['url'],
-                         tag=ctx['tag'])
-    src_pkg = package.create_source_archive()
+    package = create_source_from_git(url=ctx['url'], tag=ctx['tag'])
 
-    package.load_specfile()
-    package.parse_specfile()
-
-    package.local_install(src_pkg, ctx['skip_tests'])
+    package.local_install(ctx['skip_tests'])
     package.ventilate()
     package.generate_binary_packages()
 

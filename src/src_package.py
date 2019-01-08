@@ -9,7 +9,7 @@ from glob import glob
 import re
 import shutil
 from subprocess import STDOUT, run
-import tarfile
+from tempfile import mkdtemp
 from typing import Set
 from workspace import Workspace, get_local_install_dir
 from binary_package import BinaryPackage
@@ -46,20 +46,68 @@ def _unpack_deps_version(item):
         return (name, minv, maxv)
 
 
+def create_source_from_git(url: str, tag: str=None):
+    ''' Create a source package from git clone
+
+    Returns: An initialized source package
+    '''
+
+    wrk = Workspace()
+
+    tag_cmd = ''
+    if tag:
+        tag_cmd = '--branch ' + tag
+
+    iprint('cloning ' + url)
+    clonedir = mkdtemp(dir=wrk.sources)
+    shell('git clone --quiet {0} {1} {2}'.format(tag_cmd, url, clonedir))
+
+    pushdir(clonedir)
+
+    # Get tag name if not set yet (use current branch)
+    if not tag:
+        tag = shell('git rev-parse --abbrev-ref HEAD').strip()
+
+    # Get package name and version
+    specs = yaml_load('mmpack/specs')
+    name = specs['general']['name']
+    version = specs['general']['version']
+
+    wrk.clean(name, tag)
+
+    srcpkg = SrcPackage(name, tag)
+    builddir = srcpkg.pkgbuild_path()
+    unpackdir = srcpkg.unpack_path()
+
+    # Create source package tarball
+    src_tarball = '{0}/{1}_{2}_src.tar.gz'.format(builddir, name, version)
+    cmd = 'git archive --format=tar.gz --prefix={0}/ {1} > {2}' \
+          .format(name, tag, src_tarball)
+    shell(cmd)
+    shutil.copy(src_tarball, wrk.packages)
+
+    iprint('moving cloned files from {0} to {1}'.format(clonedir, builddir))
+    shutil.move(clonedir, unpackdir)
+
+    srcpkg.load_specfile()
+    srcpkg.parse_specfile()
+
+    popdir()  # clone dir
+
+    return srcpkg
+
+
 class SrcPackage(object):
     # pylint: disable=too-many-instance-attributes
     '''
     Source package class.
     '''
-    def __init__(self, name: str, url: str=None, tag: str=None):
+    def __init__(self, name: str, tag: str=None):
         # pylint: disable=too-many-arguments
         self.name = name
         self.tag = tag
-        self.srcname = name
-        if tag:
-            self.srcname += '_' + tag
         self.version = None
-        self.url = url
+        self.url = None
         self.maintainer = None
 
         self.description = ''
@@ -75,20 +123,20 @@ class SrcPackage(object):
         self.install_files_set = set()
         self._metadata_files_list = []
 
-    def _pkgbuild_path(self) -> str:
-        'internal helper: return the package build path'
+    def pkgbuild_path(self) -> str:
+        'Get the package build path'
         wrk = Workspace()
         return wrk.builddir(srcpkg=self.name, tag=self.tag)
 
-    def _unpack_path(self) -> str:
-        ''' internal helper: get the local build path, ie, the place
+    def unpack_path(self) -> str:
+        ''' Get the local build path, ie, the place
         where the sources are unpacked and compiled
         '''
-        return self._pkgbuild_path() + '/' + self.name
+        return self.pkgbuild_path() + '/' + self.name
 
     def _local_install_path(self, withprefix: bool=False) -> str:
         'internal helper: build and return the local install path'
-        installdir = get_local_install_dir(self._pkgbuild_path())
+        installdir = get_local_install_dir(self.pkgbuild_path())
         if withprefix:
             installdir += _get_install_prefix()
 
@@ -101,7 +149,7 @@ class SrcPackage(object):
         Raises:
             RuntimeError: could not guess project build system
         '''
-        pushdir(self._unpack_path())
+        pushdir(self.unpack_path())
         if os.path.exists('configure.ac'):
             self.build_system = 'autotools'
         elif os.path.exists('CMakeLists.txt'):
@@ -118,10 +166,8 @@ class SrcPackage(object):
     def load_specfile(self, specfile: str=None) -> None:
         ''' Load the specfile and store it as its dictionary equivalent
         '''
-        wrk = Workspace()
         if not specfile:
-            specfile = '{0}/{1}/mmpack/specs'.format(wrk.sources,
-                                                     self.srcname)
+            specfile = self.unpack_path() + '/mmpack/specs'
         dprint('loading specfile: ' + specfile)
         self._specs = yaml_load(specfile)
 
@@ -240,52 +286,10 @@ class SrcPackage(object):
                         binpkg.add_sysdepend(dep)
                 self._packages[pkg] = binpkg
 
-    def create_source_archive(self) -> str:
-        ''' Create git archive (source package).
-
-        Returns: the name of the archive file
-        '''
-        wrk = Workspace()
-        wrk.srcclean(self.srcname)
-        pushdir(wrk.sources)
-        sources_archive_name = '{0}_{1}_src.tar.gz' \
-                               .format(self.srcname, self.tag)
-        iprint('cloning ' + self.url)
-        cmd = 'git clone --quiet --branch {0} {1} {2}' \
-              .format(self.tag, self.url, self.srcname)
-        shell(cmd)
-        pushdir(self.srcname)
-        cmd = 'git archive --format=tar.gz --prefix={0}/ {1}' \
-              ' > {2}/{3}'.format(self.name, self.tag,
-                                  wrk.sources, sources_archive_name)
-        shell(cmd)
-        popdir()  # repository name
-
-        # copy source package to package repository
-        cmd = 'cp -vf {0} {1}'.format(sources_archive_name, wrk.packages)
-        shell(cmd)
-        popdir()  # workspace sources directory
-
-        return sources_archive_name
-
-    def _rename_source_package(self):
-        'copy source package to package repository'
-        wrk = Workspace()
-        pushdir(wrk.sources)
-
-        old_src_name = '{0}_{1}_src.tar.gz'.format(self.srcname, self.tag)
-        new_src_name = '{0}_{1}_src.tar.gz'.format(self.name, self.version)
-        cmd = 'mv -vf {0}/{1} {0}/{2}'.format(wrk.packages,
-                                              old_src_name,
-                                              new_src_name)
-        shell(cmd)
-
-        popdir()  # repository name
-
     def _build_env(self, skip_tests: bool):
         build_env = os.environ.copy()
-        build_env['SRCDIR'] = self._unpack_path()
-        build_env['BUILDDIR'] = self._unpack_path() + '/build'
+        build_env['SRCDIR'] = self.unpack_path()
+        build_env['BUILDDIR'] = self.unpack_path() + '/build'
         build_env['DESTDIR'] = self._local_install_path()
         build_env['PREFIX'] = _get_install_prefix()
         build_env['LD_RUN_PATH'] = os.path.join(_get_install_prefix(), 'lib')
@@ -305,7 +309,7 @@ class SrcPackage(object):
         tmp = {x for x in self.install_files_set if not os.path.isdir(x)}
         self.install_files_set = tmp
 
-    def local_install(self, source_pkg: str, skip_tests: bool=False) -> None:
+    def local_install(self, skip_tests: bool=False) -> None:
         ''' local installation of the package from the source package
 
         guesses build system if none given.
@@ -317,20 +321,8 @@ class SrcPackage(object):
             NotImplementedError: the specified build system is not supported
         '''
         wrk = Workspace()
-        wrk.clean(self.name, self.tag)
 
-        pushdir(wrk.packages)
-        archive = tarfile.open(source_pkg, 'r:gz')
-        archive.extractall(self._pkgbuild_path())
-        archive.close()
-        popdir()  # workspace packages directory
-
-        # we're ready to build, so we have all the information at hand
-        # name the source package correctly with its version name
-        # and copy it with the other generated packages
-        self._rename_source_package()
-
-        pushdir(self._unpack_path())
+        pushdir(self.unpack_path())
         os.makedirs('build')
         os.makedirs(self._local_install_path(), exist_ok=True)
 
@@ -353,7 +345,7 @@ class SrcPackage(object):
             errmsg += 'See build.log file for what went wrong\n'
             raise RuntimeError(errmsg)
 
-        popdir()  # local build directory
+        popdir()  # unpack directory
 
         pushdir(self._local_install_path(True))
         self.install_files_set = set(glob('**', recursive=True))
@@ -490,7 +482,7 @@ class SrcPackage(object):
         wrk = Workspace()
         for pkgname, binpkg in self._packages.items():
             binpkg.gen_dependencies(self._packages.values())
-            pkgfile = binpkg.create(instdir, self._pkgbuild_path())
+            pkgfile = binpkg.create(instdir, self.pkgbuild_path())
             shutil.copy(pkgfile, wrk.packages)
             iprint('generated package: {}'.format(pkgname))
         popdir()  # local install path
