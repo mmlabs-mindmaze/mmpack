@@ -3,14 +3,18 @@
 Create a mmpack package
 
 Usage:
-mmpack pkg-create [--git-url <path or url of a git repo>] [--tag <tag>]
-                  [--prefix <prefix>] [--skip-build-tests]
+mmpack pkg-create [--git-url <path or url of a git repo> | --src <tarball>]
+                  [--tag <tag>] [--prefix <prefix>] [--skip-build-tests]
 
-If no url was given, look through the tree for a mmpack folder, and use the
-containing folder as root directory.
+If neither git url or source tarball was given, look through the tree for a
+mmpack folder, and use the containing folder as root directory.
 
-Otherwise, clone the project from given git url.
-If a tag was specified, use it (checkout on the given tag).
+Otherwise, if git repository url is provided, clone the project from given
+git url. If a tag was specified, use it (checkout on the given tag).
+
+If source tarbal is specified, build packages from the unpacked archive.
+If tag is specified, it will indicated the name of sub folder in the cache
+to use to build the packages.
 
 If a prefix is given, work within it instead.
 
@@ -29,7 +33,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from glob import glob
 
 from common import pushdir, popdir, yaml_load
-from src_package import create_source_from_git
+from src_package import create_source_from_git, load_source_from_tar
 from workspace import Workspace
 
 
@@ -76,9 +80,13 @@ def parse_options(argv):
     'parse and check options'
     parser = ArgumentParser(description=__doc__,
                             formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('--git-url',
-                        action='store', dest='url', type=str,
-                        help='project git url/path')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--git-url',
+                       action='store', dest='url', type=str,
+                       help='project git url/path')
+    group.add_argument('--src',
+                       action='store', dest='srctar', type=str,
+                       help='source package tarball')
     parser.add_argument('-t', '--tag',
                         action='store', dest='tag', type=str,
                         help='project tag')
@@ -91,11 +99,12 @@ def parse_options(argv):
     args = parser.parse_args(argv)
 
     ctx = {'url': args.url,
+           'srctar': args.srctar,
            'tag': args.tag,
            'prefix': args.prefix,
            'skip_tests': args.skip_tests}
 
-    if not ctx['url']:
+    if not ctx['url'] and not ctx['srctar']:
         ctx['url'] = find_project_root_folder()
         if not ctx['url']:
             raise ValueError('did not find project to package')
@@ -116,7 +125,10 @@ def main():
     'entry point to create a mmpack package'
     ctx = parse_options(sys.argv[1:])
 
-    package = create_source_from_git(url=ctx['url'], tag=ctx['tag'])
+    if ctx['url']:
+        package = create_source_from_git(url=ctx['url'], tag=ctx['tag'])
+    else:
+        package = load_source_from_tar(tarpath=ctx['srctar'], tag=ctx['tag'])
 
     package.local_install(ctx['skip_tests'])
     package.ventilate()

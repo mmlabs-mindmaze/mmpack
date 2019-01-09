@@ -97,6 +97,49 @@ def create_source_from_git(url: str, tag: str=None):
     return srcpkg
 
 
+def load_source_from_tar(tarpath: str, tag: str=None):
+    ''' Load mmpack source package from a tarball.
+
+    Returns: An initialized source package
+    '''
+
+    wrk = Workspace()
+
+    if not tag:
+        tag = 'from_tar'
+
+    tmpdir = mkdtemp(dir=wrk.sources)
+
+    iprint('extracting temporarily to ' + tmpdir)
+    shell('tar --strip-components=1 -xf {0} -C {1}'
+          .format(tarpath, tmpdir))
+
+    # Get package name and version
+    specs = yaml_load(tmpdir + '/mmpack/specs')
+    name = specs['general']['name']
+    version = specs['general']['version']
+
+    wrk.clean(name, tag)
+
+    srcpkg = SrcPackage(name, tag)
+    builddir = srcpkg.pkgbuild_path()
+    unpackdir = srcpkg.unpack_path()
+
+    # Create source package tarball (ensure that source are properly
+    # renamed)
+    src_tarball = '{0}/{1}_{2}_src.tar.gz'.format(builddir, name, version)
+    shutil.copy(tarpath, src_tarball)
+    shutil.copy(src_tarball, wrk.packages)
+
+    iprint('moving unpacked files from {0} to {1}'.format(tmpdir, builddir))
+    shutil.move(tmpdir, unpackdir)
+
+    srcpkg.load_specfile()
+    srcpkg.parse_specfile()
+
+    return srcpkg
+
+
 class SrcPackage(object):
     # pylint: disable=too-many-instance-attributes
     '''

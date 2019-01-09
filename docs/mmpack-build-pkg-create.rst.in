@@ -17,7 +17,7 @@ SYNOPSIS
 
 ``mmpack-build pkg-create`` -h|--help
 
-``mmpack-build pkg-create`` [--skip-build-tests] [--git-url= *url*] [-t|--tag *tag*]
+``mmpack-build pkg-create`` [--skip-build-tests] [--git-url= *url* | --src= *tarball*] [-t|--tag *tag*]
 
 DESCRIPTION
 ===========
@@ -38,12 +38,17 @@ OPTIONS
   * a git url of the repository to build
   * a path to a local git repository
 
+--src= *tarball*
+  path to a source package tarball
+
 -t|--tag= *tag*
   The project's tag to use.
-  This can actually be any king of object recognized by the git --tag option:
+  If --git-url is specified, this can actually be any kind of object recognized by the git --tag option:
   * a git tag
   * a commit sha1
   * a branch name
+  If --src, this can be any string which will be used to identify a
+  package build in the cache folder
 
 SEE ALSO
 ========
