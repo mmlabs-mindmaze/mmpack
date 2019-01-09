@@ -47,6 +47,7 @@ pkgpython_PYTHON =\
 	src/decorators.py \
 	src/elf_utils.py \
 	src/file_utils.py \
+	src/mmpack_builddep.py \
 	src/mmpack_clean.py \
 	src/mmpack_config.py \
 	src/mmpack_pkg_create.py \
@@ -177,7 +178,8 @@ mmpack-build: src/mmpack-build.in Makefile
 	$(AM_V_at)chmod a+x $@
 
 %.py : %.py.in Makefile
-	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' < $< > $@
+	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' \
+		-e 's,<libexecdir>,$(libexecdir),g' < $< > $@
 
 #
 # TESTS RULES
