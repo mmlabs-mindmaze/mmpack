@@ -8,7 +8,24 @@ import sys
 from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
 
 from decorators import singleton
-from common import shell, dprint, ShellException
+from common import shell, dprint, ShellException, pushdir, popdir
+
+
+def find_project_root_folder() -> str:
+    ''' Look for folder named 'mmpack' in the current directory
+        or any parent folder.
+    '''
+    pwd = os.getcwd()
+    if os.path.exists('mmpack'):
+        return pwd
+
+    parent, current = os.path.split(pwd)
+    if not current:
+        return None
+    pushdir(parent)
+    root_folder = find_project_root_folder()
+    popdir()
+    return root_folder
 
 
 @singleton

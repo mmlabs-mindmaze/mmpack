@@ -34,24 +34,7 @@ from glob import glob
 
 from common import pushdir, popdir, yaml_load
 from src_package import create_source_from_git, load_source_from_tar
-from workspace import Workspace
-
-
-def find_project_root_folder() -> str:
-    ''' Look for folder named 'mmpack' in the current directory
-        or any parent folder.
-    '''
-    pwd = os.getcwd()
-    if os.path.exists('mmpack'):
-        return pwd
-
-    parent, current = os.path.split(pwd)
-    if not current:
-        return None
-    pushdir(parent)
-    root_folder = find_project_root_folder()
-    popdir()
-    return root_folder
+from workspace import Workspace, find_project_root_folder
 
 
 def read_from_mmpack_files(root_dir: str, key: str) -> str:
