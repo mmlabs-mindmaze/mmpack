@@ -101,7 +101,7 @@ int dpkg_check_sysdeps_installed(const struct strset* sysdeps)
 
 	// Execute check-dpkg-installed script with sysdeps in arg and
 	// check return value indeed 0 (success)
-	argv[2] = strdeps;
+	argv[1] = strdeps;
 	rv = execute_cmd(argv, 0, NULL);
 
 	if (rv > 0)
