@@ -17,7 +17,7 @@ SYNOPSIS
 
 ``mmpack-build pkg-create`` -h|--help
 
-``mmpack-build pkg-create`` [--skip-build-tests] [-s|--url= *url*] [-t|--tag *tag*]
+``mmpack-build pkg-create`` [--skip-build-tests] [--git-url= *url*] [-t|--tag *tag*]
 
 DESCRIPTION
 ===========
@@ -33,7 +33,7 @@ OPTIONS
   If passed, do not run the default test target after the build.
   Ie. make check or make test depending on the build system.
 
--s|--url= *url*
+--git-url= *url*
   Can be either:
   * a git url of the repository to build
   * a path to a local git repository

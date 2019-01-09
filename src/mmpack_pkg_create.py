@@ -3,7 +3,7 @@
 Create a mmpack package
 
 Usage:
-mmpack pkg-create [--url <path or git url>] [--tag <tag>]
+mmpack pkg-create [--git-url <path or url of a git repo>] [--tag <tag>]
                   [--prefix <prefix>] [--skip-build-tests]
 
 If no url was given, look through the tree for a mmpack folder, and use the
@@ -76,9 +76,9 @@ def parse_options(argv):
     'parse and check options'
     parser = ArgumentParser(description=__doc__,
                             formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('-s', '--url',
+    parser.add_argument('--git-url',
                         action='store', dest='url', type=str,
-                        help='project git url')
+                        help='project git url/path')
     parser.add_argument('-t', '--tag',
                         action='store', dest='tag', type=str,
                         help='project tag')
