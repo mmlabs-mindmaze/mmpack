@@ -29,7 +29,7 @@ am__v_RM_0 = -rm -f
 am__v_RM_1 = -@rm -vf
 
 bin_PROGRAMS = mmpack
-pkglibexec_PROGRAMS = mount-mmpack-prefix
+pkglibexec_PROGRAMS = mount-mmpack-prefix mmpack-check-sysdep
 bin_SCRIPTS = mmpack-build
 dist_bin_SCRIPTS = src/mmpack-createrepo
 dist_pkgdata_SCRIPTS = src/check-dpkg-installed
@@ -150,6 +150,21 @@ endif
 if OS_KERNEL_NT
 mount_mmpack_prefix_SOURCES += src/mount-prefix-nt.c
 endif
+
+mmpack_check_sysdep_SOURCES = \
+	src/indextable.h \
+	src/indextable.c \
+	src/mmpack-check-sysdep.c \
+	src/sha256.c \
+	src/sysdeps.h \
+	src/sysdeps.c \
+	src/utils.c \
+	$(eol)
+
+mmpack_check_sysdep_LDADD = \
+	$(MMLIB_LIB) \
+	$(eol)
+
 
 # dev debian-only helper function, not part of any target
 # requires root permissions to run
