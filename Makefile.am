@@ -247,6 +247,7 @@ RST_MAN_PAGES_IN = \
 	docs/mmpack-build-pkg-create.rst.in \
 	docs/mmpack-check-integrity.rst.in \
 	docs/mmpack-install.rst.in \
+	docs/mmpack-list.rst.in \
 	docs/mmpack-mkprefix.rst.in \
 	docs/mmpack-remove.rst.in \
 	docs/mmpack-runprefix.rst.in \
