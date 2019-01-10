@@ -26,9 +26,9 @@ Description: MindMaze package manager
 
 Package: mmpack-build
 Section: devel
-Architecture: all
-Multi-Arch: foreign
-Depends: mmpack (>= ${source:Version}), ${misc:Depends}, ${python3:Depends}
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: mmpack (>= ${source:Version}), ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
 Description: MindMaze package development tools
  This package provides the infrastructure for handling the build,
  installation and removal of mmpack software packages.

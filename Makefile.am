@@ -40,7 +40,8 @@ EXTRA_DIST += \
 	src/settings.py.in \
 	$(eol)
 
-pkgpython_PYTHON =\
+mmpackbuilddir = $(pkgdatadir)/python
+mmpackbuild_PYTHON =\
 	src/binary_package.py \
 	src/common.py \
 	src/dpkg.py \
@@ -61,19 +62,19 @@ pkgpython_PYTHON =\
 	src/xdg.py \
 	$(eol)
 
-nodist_pkgpython_PYTHON =\
+nodist_mmpackbuild_PYTHON =\
 	src/settings.py \
 	$(eol)
 
-CLEANFILES += $(nodist_pkgpython_PYTHON)
+CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 
 .PHONY: spelling
-spelling: $(pkgpython_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN)
+spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN)
 	$(AM_V_at) codespell $^
 
 .PHONY: syntax
-syntax: $(pkgpython_PYTHON) $(nodist_pkgpython_PYTHON)
+syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON)
 	$(srcdir)/tools/check-pyfile $^
 
 
@@ -174,7 +175,7 @@ setcap:
 	$(AM_V_GEN) setcap cap_dac_override,cap_sys_admin+ep $(libexecdir)/mmpack/mount-mmpack-prefix
 
 mmpack-build: src/mmpack-build.in Makefile
-	$(AM_V_GEN)$(SED) -e 's,<pythondir>,$(pythondir),g' < $< > $@
+	$(AM_V_GEN)$(SED) -e 's,<mmpackbuilddir>,$(mmpackbuilddir),g' < $< > $@
 	$(AM_V_at)chmod a+x $@
 
 %.py : %.py.in Makefile
