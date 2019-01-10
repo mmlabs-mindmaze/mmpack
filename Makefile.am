@@ -66,6 +66,7 @@ nodist_mmpackbuild_PYTHON =\
 	src/settings.py \
 	$(eol)
 
+BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON)
 CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 

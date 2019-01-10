@@ -3,13 +3,6 @@
 set -e
 set -x
 
-testdir=$(pwd)/venv
-python_testdir="$testdir/share/mmpack/python"
+export PYTHONPATH="src:$srcdir/src:$PYTHONPATH"
 
-mkdir -p venv
-make install prefix=$testdir
-export PYTHONPATH="$python_testdir:$python_testdir:$PYTHONPATH"
-
-cd $srcdir
-
-python3 tests/pytests.py
+python3 $srcdir/tests/pytests.py

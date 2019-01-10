@@ -4,7 +4,8 @@
 # test-shell.sh [repository name]
 
 distrib() {
-	if [ "$(cat /etc/os-release  | grep "^ID=")" == "ID=debian" ]; then
+	grep -q "^ID=debian" /etc/os-release
+	if [ $? -eq 0 ]; then
 		echo debian
 	else
 		echo windows
@@ -17,10 +18,10 @@ REPOSITORY=${1:-"http://mindmaze-srv-fr-01"}
 DIST=$(distrib)
 MMPACK_PREFIX=$(mktemp -d)
 
-# source mmpack python virtualenv
-testdir=$(pwd)/venv
-python_minor=$(python3 -c 'import sys; print(sys.version_info.minor)')
-python_testdir="${testdir}/lib/python3.${python_minor}"
+# local install to test prefix
+testdir=$(pwd)/local-install
+make install prefix=$testdir
+[[ $? -eq 0 ]] || exit -1
 
 {
 cat << EOF
@@ -34,7 +35,6 @@ export LIBRARY_PATH="${MMPACK_PREFIX}/lib:${LIBRARY_PATH}"
 export CPATH="${MMPACK_PREFIX}/include:${CPATH}"
 
 export VIRTUAL_ENV=${testdir}
-export PYTHONPATH="${python_testdir}:${python_testdir}/site-packages:${PYTHONPATH}"
 
 # create mmpack prefix
 mmpack mkprefix --url="$REPOSITORY/$DIST" $MMPACK_PREFIX
@@ -48,3 +48,7 @@ source ../src/mmpack-build_completion
 exec < /dev/tty
 EOF
 } | $SHELL -i
+
+# clean to remove the prefix value used in the local install
+rm -rf $testdir
+make clean
