@@ -86,13 +86,13 @@ def create_source_from_git(url: str, tag: str=None):
     shell(cmd)
     shutil.copy(src_tarball, wrk.packages)
 
+    popdir()  # clone dir
+
     iprint('moving cloned files from {0} to {1}'.format(clonedir, builddir))
     shutil.move(clonedir, unpackdir)
 
     srcpkg.load_specfile()
     srcpkg.parse_specfile()
-
-    popdir()  # clone dir
 
     return srcpkg
 
