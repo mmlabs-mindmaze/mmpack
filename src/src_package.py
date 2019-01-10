@@ -375,13 +375,19 @@ class SrcPackage(object):
             errmsg = 'Unknown build system: ' + self.build_system
             raise NotImplementedError(errmsg)
 
-        build_script = ['sh',
-                        '{0}{1}/build-{2}'.format(wrk.cygroot(),
-                                                  PKGDATADIR,
-                                                  self.build_system)]
+        # Use build script provided in mmpack installed data folder unless
+        # it is custom build system. The script is then obtained from
+        # mmpack folder in the unpacked sources.
+        build_script = '{0}{1}/build-{2}'\
+                       .format(wrk.cygroot(), PKGDATADIR, self.build_system)
+        if self.build_system == 'custom':
+            build_script = 'mmpack/build'
+
+        build_cmd = ['sh', build_script]
+
         log_file = open('build.log', 'wb')
-        dprint('[shell] {0}'.format(' '.join(build_script)))
-        ret = run(build_script, env=self._build_env(skip_tests),
+        dprint('[shell] {0}'.format(' '.join(build_cmd)))
+        ret = run(build_cmd, env=self._build_env(skip_tests),
                   stderr=STDOUT, stdout=log_file)
         if ret.returncode != 0:
             errmsg = 'Failed to build ' + self.name + '\n'
