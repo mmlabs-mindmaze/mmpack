@@ -244,6 +244,7 @@ dist_completion_DATA = \
 RST_MAN_PAGES_IN = \
 	docs/mmpack.rst.in \
 	docs/mmpack-build.rst.in \
+	docs/mmpack-build-builddep.rst.in \
 	docs/mmpack-build-clean.rst.in \
 	docs/mmpack-build-pkg-create.rst.in \
 	docs/mmpack-check-integrity.rst.in \
