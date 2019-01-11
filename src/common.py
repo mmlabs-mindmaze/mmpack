@@ -109,22 +109,6 @@ def remove_duplicates(lst):
             lst.remove(elt)
 
 
-def filetype(filename):
-    'get file type'
-    file_type = shell('file  --brief --preserve-date {}'.format(filename))
-    file_type = file_type.lower()
-
-    # try to read file type first
-    if file_type.startswith('elf '):
-        return 'elf'
-    elif file_type.startswith('pe'):
-        return 'pe'
-
-    # return file extension otherwise
-    # eg. python, c-header, ...
-    return os.path.splitext(filename)[1][1:].strip().lower()
-
-
 def yaml_serialize(obj: Union[list, dict], filename: str,
                    use_block_style: bool=False) -> None:
     'Save object as yaml file of given name'
@@ -213,22 +197,6 @@ def get_host_arch_dist() -> str:
     '''
 
     return '{0}-{1}'.format(get_host_arch(), get_host_dist())
-
-
-def is_dynamic_library(filename: str) -> str:
-    '''Return filetype if format conforms to a library
-
-    eg. lib/libxxx.so.1.2.3
-    - expects there is no leading './' in the pathname
-    - is directly in the 'lib' directory
-    - name starts with 'lib'
-    - contains .so within name (maybe not at the end)
-    '''
-    basename = os.path.basename(filename)
-    if ((filename.startswith('lib/lib') and '.so' in basename)
-            or (filename.startswith('bin/') and basename.endswith('.dll'))):
-        return filetype(filename)
-    return None
 
 
 def parse_soname(soname: str) -> (str, str):

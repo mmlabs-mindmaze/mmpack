@@ -11,6 +11,7 @@ from glob import glob
 from typing import List, Dict, Set
 import tarfile
 from common import *
+from file_utils import filetype, is_dynamic_library
 from mm_version import Version
 import yaml
 from pacman import pacman_find_dependency

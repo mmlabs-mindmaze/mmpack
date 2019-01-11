@@ -4,7 +4,41 @@ Helpers to find out what files are
 '''
 
 import re
-from os.path import islink
+from os.path import islink, basename, splitext
+
+from common import shell
+
+
+def filetype(filename):
+    'get file type'
+    file_type = shell('file  --brief --preserve-date {}'.format(filename))
+    file_type = file_type.lower()
+
+    # try to read file type first
+    if file_type.startswith('elf '):
+        return 'elf'
+    elif file_type.startswith('pe'):
+        return 'pe'
+
+    # return file extension otherwise
+    # eg. python, c-header, ...
+    return splitext(filename)[1][1:].strip().lower()
+
+
+def is_dynamic_library(filename: str) -> str:
+    '''Return filetype if format conforms to a library
+
+    eg. lib/libxxx.so.1.2.3
+    - expects there is no leading './' in the pathname
+    - is directly in the 'lib' directory
+    - name starts with 'lib'
+    - contains .so within name (maybe not at the end)
+    '''
+    base = basename(filename)
+    if ((filename.startswith('lib/lib') and '.so' in base)
+            or (filename.startswith('bin/') and base.endswith('.dll'))):
+        return filetype(filename)
+    return None
 
 
 def is_manpage(filename: str) -> int:
