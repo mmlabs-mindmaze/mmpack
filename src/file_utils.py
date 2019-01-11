@@ -6,18 +6,17 @@ Helpers to find out what files are
 import re
 from os.path import islink, basename, splitext
 
-from common import shell
-
 
 def filetype(filename):
     'get file type'
-    file_type = shell('file  --brief --preserve-date {}'.format(filename))
-    file_type = file_type.lower()
+    # Open file and read magic number
+    with open(filename, 'rb', buffering=0) as file:
+        magic = file.read(4)
 
     # try to read file type first
-    if file_type.startswith('elf '):
+    if magic[:4] == b'\x7fELF':
         return 'elf'
-    elif file_type.startswith('pe'):
+    elif magic[:2] == b'MZ':
         return 'pe'
 
     # return file extension otherwise
