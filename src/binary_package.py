@@ -189,7 +189,7 @@ class BinaryPackage(object):
 
     def _populate(self, instdir: str, pkgdir: str):
         for instfile in self.install_files:
-            src = instdir + instfile
+            src = instdir + '/' + instfile
             dst = pkgdir + '/' + instfile
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             os.link(src, dst, follow_symlinks=False)

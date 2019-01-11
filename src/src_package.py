@@ -21,9 +21,9 @@ from settings import PKGDATADIR
 
 def _get_install_prefix() -> str:
     if os.name == 'nt':
-        return '/m/'
+        return '/m'
     else:  # if not windows, then linux
-        return '/run/mmpack/'
+        return '/run/mmpack'
 
 
 def _unpack_deps_version(item):
