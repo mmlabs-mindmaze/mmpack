@@ -44,7 +44,7 @@ def main():
     if 'build-depends' in specs:
         mmpack_builddeps += specs['build-depends']
 
-    build_sysdeps_key = 'build-sysdepends-' + get_host_dist()
+    build_sysdeps_key = 'build-depends-' + get_host_dist()
 
     # append platform-specific mmpack packages
     # eg. one required package is not available on this platform
