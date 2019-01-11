@@ -54,13 +54,13 @@ def create_source_from_git(url: str, tag: str=None):
 
     wrk = Workspace()
 
-    tag_cmd = ''
+    git_opts = '--quiet --depth=1'
     if tag:
-        tag_cmd = '--branch ' + tag
+        git_opts += ' --branch ' + tag
 
     iprint('cloning ' + url)
     clonedir = mkdtemp(dir=wrk.sources)
-    shell('git clone --quiet {0} {1} {2}'.format(tag_cmd, url, clonedir))
+    shell('git clone {0} {1} {2}'.format(git_opts, url, clonedir))
 
     pushdir(clonedir)
 
