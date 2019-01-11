@@ -1,12 +1,21 @@
-# These are the pip names of the packages needed for mmppack-build
+# These are the pip names of the packages needed for mmpack-build and
+# gerrit-mmpack-merge
 # Please always use the system packages when possible
 
+# debian: python3-yaml
+# pacman: mingw-w64-x86_64-python3-yaml
+PyYAML
+
+[mmpack-build]
 # debian: python3-pyelftools
 pyelftools
 
 # debian: python3-pefile
 pefile
 
-# debian: python3-yaml
-# pacman: mingw-w64-x86_64-python3-yaml
-PyYAML
+[gerrit-mmpack-merge]
+# debian: python3-gerritlib
+gerritlib
+
+# debian: python3-paramiko
+paramiko

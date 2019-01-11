@@ -2,6 +2,7 @@ mmpack (0.0.1+next) UNRELEASED; urgency=medium
 
   * Preparing next version
   * Create mmpack-repo-tools package
+  * Create mmpack-gerrit-builder package
 
  -- Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>  Mon, 18 Feb 2019 09:22:10 +0100
 

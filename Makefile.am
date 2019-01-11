@@ -31,7 +31,10 @@ am__v_RM_1 = -@rm -vf
 bin_PROGRAMS = mmpack
 pkglibexec_PROGRAMS = mount-mmpack-prefix mmpack-check-sysdep
 bin_SCRIPTS = mmpack-build
-dist_bin_SCRIPTS = src/repository/mmpack-createrepo
+dist_bin_SCRIPTS = \
+	src/repository/mmpack-createrepo \
+	devtools/mmpack-build-slave.sh \
+	$(eol)
 dist_pkgdata_SCRIPTS = src/mmpack/check-dpkg-installed
 
 CLEANFILES = $(bin_SCRIPTS)
@@ -68,7 +71,7 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 
 .PHONY: syntax
-syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON)
+syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) devtools/gerrit-mmpack-build.py
 	$(srcdir)/devtools/check-pyfile $^
 
 
@@ -192,7 +195,7 @@ mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 # Those should only make sense as helpers in a development context
 
 .PHONY: spelling
-spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN)
+spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN) devtools/gerrit-mmpack-build.py
 	$(AM_V_at) codespell $^
 
 # dev debian-only helper function, not part of any target

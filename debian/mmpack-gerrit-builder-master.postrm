@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "purge" ] ; then
+	if getent passwd mmpack-builder >/dev/null; then
+		deluser --quiet mmpack-builder || echo "Could not remove mmpack-builder user."
+	fi
+fi
+#DEBHELPER#
+exit 0

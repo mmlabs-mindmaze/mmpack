@@ -38,13 +38,38 @@ Description: MindMaze package development tools
  This package contains the tools needed to build mmpack package from source
 
 Package: mmpack-repo-tools
-Section: utils
 Architecture: all
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${misc:Depends}, tar
+Depends: ${misc:Depends}
 Description: MindMaze repository management tools
  This package provides the infrastructure for handling the build,
  installation and removal of mmpack software packages.
  .
  This package contains the tools needed to manage repositories of mmpack
  packages
+
+Package: mmpack-gerrit-builder-master
+Section: devel
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}, adduser
+Depends: mmpack-repo-tools (= ${binary:Version}),
+ ${misc:Depends}, ${python3:Depends}, git
+Description: MindMaze package repository update tools (master)
+ This package provides the infrastructure for handling the build,
+ installation and removal of mmpack software packages.
+ .
+ This package contains the tools needed to update repository upon git repo
+ update (master server)
+
+Package: mmpack-gerrit-builder-slave
+Section: devel
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}, adduser
+Depends: mmpack-build (>= ${source:Version}), mmpack (>= ${source:Version}),
+ ${misc:Depends}
+Description: MindMaze package repository update (slave)
+ This package provides the infrastructure for handling the build,
+ installation and removal of mmpack software packages.
+ .
+ This package contains the tools needed to update repository upon git repo
+ update (slave server)
