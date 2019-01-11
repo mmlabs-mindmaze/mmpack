@@ -15,13 +15,13 @@ build mmpack packages
 SYNOPSIS
 ========
 
-``mmpack`` --version
+``mmpack-build`` --version
 
-``mmpack`` -h|--help
+``mmpack-build`` -h|--help
 
-``mmpack`` --list-commands
+``mmpack-build`` --list-commands
 
-``mmpack`` *mmpack-build-command* [*mmpack-build-command options*]
+``mmpack-build`` *command* [*command options*]
 
 DESCRIPTION
 ===========
@@ -43,9 +43,9 @@ OPTIONS
 -h|--help
   Show help and exit
 
-mmpack-command
-  Run given **mmpack-build** command. Possible commands are:
-  *pkg-create*
+command
+  Run given **mmpack-build** command. Most common commands are:
+  **pkg-create**, **clean**, **builddep**
 
 ENVIRONMENT
 ===========
@@ -75,20 +75,20 @@ EXAMPLE
 =======
 
 | # create mmpack package from local sources during development on a branch named *feature*
-| mmpack-build pkg-create --url=/path/to/sources --tag=feature
+| mmpack-build pkg-create --git-url=/path/to/sources --tag=feature
 |
 | # same but also skipping the tests
-| mmpack-build pkg-create --url=/path/to/sources --tag=feature --skip-build-tests
+| mmpack-build pkg-create --git-url=/path/to/sources --tag=feature --skip-build-tests
 |
 | # create arbitrary project on tag v1.2.3 from git server
-| mmpack-build pkg-create --url=ssh://git@intranet.mindmaze.ch:7999/project.git --tag=v1.2.3
+| mmpack-build pkg-create --git-url=ssh://git@intranet.mindmaze.ch:7999/project.git --tag=v1.2.3
+|
+| # create packages from source tarball
+| mmpack-build pkg-create --src=project_1.2.3_src.tar.gz
 
 SEE ALSO
 ========
 ``mmpack``\(1),
-``mmpack-install``\(1),
-``mmpack-mkprefix``\(1),
-``mmpack-remove``\(1),
-``mmpack-runprefix``\(1),
-``mmpack-search``\(1),
-``mmpack-update``\(1),
+``mmpack-build-pkg-create``\(1),
+``mmpack-build-clean``\(1),
+``mmpack-build-builddep``\(1),
