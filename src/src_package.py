@@ -10,6 +10,7 @@ import re
 import shutil
 from subprocess import STDOUT, run
 from tempfile import mkdtemp
+import tarfile
 from typing import Set
 from workspace import Workspace, get_local_install_dir
 from binary_package import BinaryPackage
@@ -110,8 +111,8 @@ def load_source_from_tar(tarpath: str, tag: str=None):
     tmpdir = mkdtemp(dir=wrk.sources)
 
     iprint('extracting temporarily to ' + tmpdir)
-    shell('tar -xf {0} -C {1}'
-          .format(tarpath, tmpdir))
+    tar = tarfile.open(tarpath, 'r:xz')
+    tar.extractall(path=tmpdir)
 
     # Get package name and version
     specs = yaml_load(tmpdir + '/mmpack/specs')
