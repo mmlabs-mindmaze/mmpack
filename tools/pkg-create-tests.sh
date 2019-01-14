@@ -15,25 +15,21 @@ distrib() {
 }
 
 upload() {
-	scp ./venv/bin/mmpack-createrepo ~/.local/share/mmpack-packages/*.mpk root@${REPOSITORY}:/var/www/html/$DIST
-	scp ./venv/bin/mmpack-createrepo ~/.local/share/mmpack-packages/*_src.tar.gz root@${REPOSITORY}:/var/www/html/$DIST
+	scp ./local-install/bin/mmpack-createrepo ~/.local/share/mmpack-packages/*.mpk root@${REPOSITORY}:/var/www/html/$DIST
+	scp ./local-install/bin/mmpack-createrepo ~/.local/share/mmpack-packages/*_src.tar.gz root@${REPOSITORY}:/var/www/html/$DIST
 	ssh root@${REPOSITORY} /var/www/html/mmpack-createrepo /var/www/html/$DIST /var/www/html/$DIST
 	mmpack update
 }
 
 createpkg() {
-	mmpack-build pkg-create --skip-build-tests --url $1 --tag ${2:-master}
+	mmpack-build pkg-create --skip-build-tests --git-url $1 --tag ${2:-master}
 }
-
-if [ ! -d venv ] ; then
-	echo "must run from build folder after make check"
-	exit 1
-fi
 
 REPOSITORY="${1:-mindmaze-srv-fr-01}"
 DIST=$(distrib)
 
-testdir=$(pwd)/venv
+testdir=$(pwd)/local-install
+make install prefix=$testdir
 python_minor=$(python3 -c 'import sys; print(sys.version_info.minor)')
 python_testdir="$testdir/lib/python3.${python_minor}"
 
@@ -92,3 +88,7 @@ mmpack install -y libmcpanel0 libeegdev0  # win32 workaround
 # create eegview package which depends on mcpanel and eegdev
 createpkg "ssh://intranet.mindmaze.ch:29418/eegview.git"
 upload
+
+# clean to remove the prefix value used in the local install
+rm -rf $testdir
+make clean
