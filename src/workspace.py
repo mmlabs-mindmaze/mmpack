@@ -68,7 +68,7 @@ class Workspace(object):
 
     def srcclean(self, srcpkg: str=''):
         '''remove all copied sources
-           if pkg is explicited, will only clean given package
+           if pkg is explicit, will only clean given package
         '''
         if srcpkg:
             dprint('cleaning {0} sources'.format(srcpkg))
@@ -77,7 +77,7 @@ class Workspace(object):
 
     def clean(self, srcpkg: str='', tag: str=''):
         '''remove all temporary build objects keep generated packages.
-           if srcpkg is explicited, will only clean given package. If tag
+           if srcpkg is explicit, will only clean given package. If tag
            is further explicted, only tag specific subfolder of srcpkg is
            cleaned.
         '''

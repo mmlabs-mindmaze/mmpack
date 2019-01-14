@@ -402,7 +402,7 @@ class SrcPackage(object):
         popdir()
 
     def _ventilate_custom_packages(self):
-        ''' Ventilates files explicited in the specfile before
+        ''' Ventilates files explicit in the specfile before
             giving them to the default target.
         '''
         for binpkg in self._packages:

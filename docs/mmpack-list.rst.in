@@ -18,7 +18,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-list** lists informations about the installed or available packages.
+**mmpack-list** lists information about the installed or available packages.
 
 With no argument specified, defaults to **all** which lists all installed and
 available packages.

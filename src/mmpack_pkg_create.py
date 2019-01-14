@@ -12,7 +12,7 @@ mmpack folder, and use the containing folder as root directory.
 Otherwise, if git repository url is provided, clone the project from given
 git url. If a tag was specified, use it (checkout on the given tag).
 
-If source tarbal is specified, build packages from the unpacked archive.
+If source tarball is specified, build packages from the unpacked archive.
 If tag is specified, it will indicated the name of sub folder in the cache
 to use to build the packages.
 

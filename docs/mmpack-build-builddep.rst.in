@@ -27,7 +27,7 @@ It will also check for the presence of mentioned system packages.
 
 **mmpack-build-builddep** will succeed if all the system packages are already
 installed and if all the mmpack packages are already present or successfully
-added by the current comand.
+added by the current command.
 It will fail otherwise.
 
 
