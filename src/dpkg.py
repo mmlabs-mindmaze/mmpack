@@ -9,7 +9,7 @@ import re
 from glob import glob
 from typing import List
 
-from common import parse_soname
+from common import parse_soname, get_host_arch
 from settings import DPKG_METADATA_PREFIX
 from mm_version import Version
 
@@ -68,8 +68,11 @@ def dpkg_parse_shlibs(filename: str, target_soname: str,
     # read library file to prune symbols
     # assert the existence of <pkgname>*.list
     pkgname = dependency_template.split(' ')[0]
-    dpkg_list_file = glob(DPKG_METADATA_PREFIX + '/'
-                          + pkgname + '**:amd64.list')[0]
+    glob_search_pattern = '{}/{}**:{}.list' \
+                          .format(DPKG_METADATA_PREFIX,
+                                  pkgname,
+                                  get_host_arch())
+    dpkg_list_file = glob(glob_search_pattern)[0]
     for line in open(dpkg_list_file):
         line = line.strip('\n')
         if target_soname in line:
@@ -91,12 +94,17 @@ def dpkg_find_symbols_file(target_soname: str) -> str:
     guess_pkgname = name + version
     symbols_soname_regex = re.compile(r'\b{0}\b .*'.format(target_soname))
 
-    guess = glob(DPKG_METADATA_PREFIX + '/'
-                 + guess_pkgname + '**:amd64.symbols')
+    glob_search_pattern = '{}/{}**:{}.symbols' \
+                          .format(DPKG_METADATA_PREFIX,
+                                  guess_pkgname,
+                                  get_host_arch())
+    guess = glob(glob_search_pattern)
     if guess and os.path.exists(guess[0]):
         return guess[0]
 
-    for symbols_file in glob(DPKG_METADATA_PREFIX + '/**:amd64.symbols'):
+    glob_search_pattern = '{}/**:{}.symbols' \
+                          .format(DPKG_METADATA_PREFIX, get_host_arch())
+    for symbols_file in glob(glob_search_pattern):
         if symbols_soname_regex.search(open(symbols_file).read()):
             return symbols_file
 
