@@ -81,8 +81,7 @@ def create_source_from_git(url: str, tag: str=None):
 
     # Create source package tarball
     src_tarball = '{0}/{1}_{2}_src.tar.gz'.format(builddir, name, version)
-    cmd = 'git archive --format=tar.gz --prefix={0}/ {1} > {2}' \
-          .format(name, tag, src_tarball)
+    cmd = 'git archive --format=tar.gz {} > {}'.format(tag, src_tarball)
     shell(cmd)
     shutil.copy(src_tarball, wrk.packages)
 
@@ -111,7 +110,7 @@ def load_source_from_tar(tarpath: str, tag: str=None):
     tmpdir = mkdtemp(dir=wrk.sources)
 
     iprint('extracting temporarily to ' + tmpdir)
-    shell('tar --strip-components=1 -xf {0} -C {1}'
+    shell('tar -xf {0} -C {1}'
           .format(tarpath, tmpdir))
 
     # Get package name and version
