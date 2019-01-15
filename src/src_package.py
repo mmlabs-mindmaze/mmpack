@@ -406,9 +406,10 @@ class SrcPackage(object):
             giving them to the default target.
         '''
         for binpkg in self._packages:
-            for regex in self._specs[binpkg]['files']:
-                matching_set = self._get_matching_files(regex)
-                self._packages[binpkg].install_files.update(matching_set)
+            if 'files' in self._specs[binpkg]:
+                for regex in self._specs[binpkg]['files']:
+                    matching_set = self._get_matching_files(regex)
+                    self._packages[binpkg].install_files.update(matching_set)
 
         # check that at least on file is present in each of the custom packages
         # raise an error if the described package was expecting one
