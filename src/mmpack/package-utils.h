@@ -70,6 +70,10 @@ struct install_state {
 };
 
 
+struct pkglist_iter {
+	struct pkglist_entry* next;
+};
+
 struct rdeps_iter {
 	const struct install_state* state;
 	const mmstr* pkg_name;
@@ -114,5 +118,10 @@ const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
                                      const struct binindex* binindex,
                                      const struct install_state* state);
 const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter);
+
+const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
+                                       const mmstr* pkgname,
+                                       const struct binindex* binindex);
+const struct mmpkg* pkglist_iter_next(struct pkglist_iter* iter);
 
 #endif /* PACKAGE_UTILS_H */

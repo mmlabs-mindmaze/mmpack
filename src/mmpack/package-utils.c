@@ -1366,3 +1366,54 @@ const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
 
 	return NULL;
 }
+
+
+/**************************************************************************
+ *                                                                        *
+ *                        package listing iterator                        *
+ *                                                                        *
+ **************************************************************************/
+
+/**
+ * pkglist_iter_first() - init list iterator of packages with same name
+ * @iter:       iterator structure to initialize
+ * @pkgname:    name of all package in the list
+ * @binindex:   binary package index
+ *
+ * Return: the pointer to the first package in the list. This can be NULL
+ * if no package can be found of name @pkgname.
+ */
+LOCAL_SYMBOL
+const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
+                                       const mmstr* pkgname,
+                                       const struct binindex* binindex)
+{
+	struct pkglist* list;
+
+	list = binindex_get_pkglist(binindex, pkgname);
+	if (!list)
+		return NULL;
+
+	iter->next = list->head.next;
+	return &list->head.pkg;
+}
+
+
+/**
+ * pkglist_iter_next() - get next element in a list of same name packages
+ * @iter:       pointer to an initialized iterator structure
+ *
+ * Return: the pointer to the next package in the list. This can be NULL
+ * if no more package can be found of name @pkgname.
+ */
+LOCAL_SYMBOL
+const struct mmpkg* pkglist_iter_next(struct pkglist_iter* iter)
+{
+	struct pkglist_entry* entry = iter->next;
+
+	if (!entry)
+		return NULL;
+
+	iter->next = entry->next;
+	return &entry->pkg;
+}
