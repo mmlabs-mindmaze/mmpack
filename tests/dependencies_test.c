@@ -22,6 +22,7 @@ static const char * valid_binindexes[] = {
 	TEST_BININDEX_DIR"/simplest.yaml",
 	TEST_BININDEX_DIR"/simple.yaml",
 	TEST_BININDEX_DIR"/circular.yaml",
+	TEST_BININDEX_DIR"/complex-dependency.yaml",
 };
 #define NUM_VALID_BININDEXES MM_NELEM(valid_binindexes)
 
@@ -29,10 +30,10 @@ static const char * valid_mmpack_deps[][7] = {
 	{"pkg-a", NULL},
 	{"pkg-f", "pkg-e", "pkg-d", "pkg-c", "pkg-b", "pkg-a", NULL},
 	{"pkg-c", "pkg-a", "pkg-b", NULL},
+	{"pkg-a", "pkg-b", "pkg-c", "pkg-d", "pkg-e", NULL},
 };
 
 static const char * invalid_binindexes[] = {
-	TEST_BININDEX_DIR"/dependency-issue.yaml",
 	TEST_BININDEX_DIR"/unsolvable-dependencies.yaml",
 };
 #define NUM_INVALID_BININDEXES MM_NELEM(invalid_binindexes)

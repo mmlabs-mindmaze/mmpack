@@ -14,7 +14,102 @@
 #include "package-utils.h"
 #include "utils.h"
 
+enum {
+	DONE,
+	CONTINUE,
+};
 
+enum solver_state {
+	VALIDATION,
+	SELECTION,
+	INSTALL_DEPS,
+	NEXT,
+	BACKTRACK,
+};
+
+/**
+ * struct proc_frame - processing data frame
+ * @ipkg:       index of package currently selected for installation
+ * @state:      next step to perform
+ * @dep:        current compiled dependency being processed
+ *
+ * This structure hold the data to keep track the processing of one node
+ * while walking in the directed graph that represents the binary index.
+ * For example, when installing a package, its dependencies must be
+ * inspected. The struct proc_frame keep track which dependencies is being
+ * inspected. If one on the dependences must installed a new struct
+ * proc_frame is created and must be stacked.
+ */
+struct proc_frame {
+	int ipkg;
+	enum solver_state state;
+	struct compiled_dep* dep;
+};
+
+
+/**
+ * struct decision_state - snapshot of processing state at decision time
+ * @last_decstate_sz:   previous top index of decstate_store of solver
+ * @ops_stack_size:     top index of ops_stack of solver
+ * @curr_frame:         current processing data frame
+ * @pkg_index:          index of chosen package in dependency being processed
+ * @num_proc_frame:     current depth of processing stack
+ * @proc_frames:        content of processing stack (length @num_proc_frame)
+ *
+ * Structure representing a snapshot of the internal data of solver needed
+ * to go back at the time of previous decision.
+ */
+struct decision_state {
+	size_t last_decstate_sz;
+	size_t ops_stack_size;
+	struct proc_frame curr_frame;
+	int pkg_index;
+	int num_proc_frame;
+	struct proc_frame proc_frames[];
+};
+
+
+/**
+ * struct planned_op - data representing a change in inst_lut and stage_lut
+ * @action:     type of action: STAGE, INSTALL or REMOVE
+ * @id:         package name id involved by the change
+ * @pkg:        pointer to package installed or removed
+ */
+struct planned_op {
+	enum {STAGE, INSTALL, REMOVE} action;
+	int id;
+	struct mmpkg* pkg;
+};
+
+
+/**
+ * struct solver - solver context
+ * @binindex:   binary index used to inspect dependencies
+ * @inst_lut:   lookup table of installed package
+ * @stage_lut:  lookup table of package staged to be installed
+ * @processing_stack: stack of processing frames
+ * @decstate_store:   previous decision states store
+ * @last_decstate_sz: decision state store size before last decision
+ * @ops_stack:  stack of planned operations
+ * @num_proc_frame:   current depth of processing stack
+ */
+struct solver {
+	struct binindex* binindex;
+	struct mmpkg** inst_lut;
+	struct mmpkg** stage_lut;
+	struct buffer processing_stack;
+	struct buffer decstate_store;
+	size_t last_decstate_sz;
+	struct buffer ops_stack;
+	int num_proc_frame;
+};
+
+
+/**************************************************************************
+ *                                                                        *
+ *                             Action stack                               *
+ *                                                                        *
+ **************************************************************************/
 #define DEFAULT_STACK_SZ 10
 LOCAL_SYMBOL
 struct action_stack * mmpack_action_stack_create(void)
@@ -82,295 +177,508 @@ struct action * mmpack_action_stack_pop(struct action_stack * stack)
 }
 
 
+
+/**************************************************************************
+ *                                                                        *
+ *                            solver context                              *
+ *                                                                        *
+ **************************************************************************/
+
+
 static
-struct mmpkg_dep * mmpkg_dep_append_copy(struct mmpkg_dep * deps,
-                                         struct mmpkg_dep const * new_deps,
-                                         mmstr const * min_version,
-                                         mmstr const * max_version)
+void solver_init(struct solver* solver, struct mmpack_ctx* ctx)
 {
-	struct mmpkg_dep * d;
-	struct mmpkg_dep * new = mm_malloc(sizeof(*new));
-	new->name = mmstrdup(new_deps->name);
-	new->min_version = mmstrdup(min_version);
-	new->max_version = mmstrdup(max_version);
-	new->next = NULL;  /* ensure there is no bad chaining leftover */
+	size_t size;
 
-	if (deps == NULL)
-		return new;
+	*solver = (struct solver) {.binindex = &ctx->binindex};
 
-	d = deps;
-	while (d->next)
-		d = d->next;
+	size = ctx->binindex.num_pkgname * sizeof(*solver->inst_lut);
+	solver->inst_lut = mm_malloc(size);
+	solver->stage_lut = mm_malloc(size);
 
-	d->next = new;
+	install_state_fill_lookup_table(&ctx->installed, &ctx->binindex,
+	                                solver->inst_lut);
+	memset(solver->stage_lut, 0, size);
+	buffer_init(&solver->processing_stack);
+	buffer_init(&solver->decstate_store);
+	buffer_init(&solver->ops_stack);
+}
 
-	return deps;
+
+static
+void solver_deinit(struct solver* solver)
+{
+	buffer_deinit(&solver->ops_stack);
+	buffer_deinit(&solver->decstate_store);
+	buffer_deinit(&solver->processing_stack);
+	free(solver->inst_lut);
+	free(solver->stage_lut);
 }
 
 
 /**
- * dependency_already_met() - check whether a dependency has already been met
- * @ctx:     mmpack context
- * @actions: currently planned actions
- * @dep:     the dependency being investigated
+ * solver_revert_planned_ops() - undo latest actions up to a previous state
+ * @solver:     solver context to update
+ * @prev_size:  size of the ops_stack up to which action must be undone
  *
- * Return:
- *    1 if dependency has already been met
- *    0 if not
- *   -1 on version conflict
+ * This function undo the actions stored in the planned operation stack in
+ * @solver from top to @prev_size. After this function, @solver->stage_lut
+ * and solver->inst_lut will be the same as it was when @prev_size was the
+ * actual size of @solver->ops_stack.
  */
 static
-int dependency_already_met(struct mmpack_ctx * ctx,
-                           struct action_stack const * actions,
-                           struct mmpkg_dep const * dep)
+void solver_revert_planned_ops(struct solver* solver, size_t prev_size)
 {
-	int i;
-	struct mmpkg const * pkg;
+	struct buffer* ops_stack = &solver->ops_stack;
+	struct planned_op op;
 
-	assert(dep != NULL);
+	while (ops_stack->size > prev_size) {
+		buffer_pop(ops_stack, &op, sizeof(op));
 
-	/* is a version of the package already installed ? */
-	pkg = install_state_get_pkg(&ctx->installed, dep->name);
-	if (pkg != NULL) {
-		if (pkg_version_compare(pkg->version, dep->max_version) <= 0
-		    && pkg_version_compare(dep->min_version, pkg->version) <= 0)
-			return 1;
+		switch (op.action) {
+		case STAGE:
+			solver->stage_lut[op.id] = NULL;
+			break;
 
-		/* package found installed, but with an incompatible version */
-		return -1;
-	}
+		case INSTALL:
+			solver->inst_lut[op.id] = NULL;
+			break;
 
-	/* package not already installed in the system, but maybe its installation
-	 * has already been planned */
-	for (i = 0 ; i < actions->index ; i++) {
-		pkg = actions->actions[i].pkg;
-		if (!mmstrequal(pkg->name, dep->name))
-			continue;
+		case REMOVE:
+			solver->inst_lut[op.id] = op.pkg;
+			break;
 
-		if (pkg_version_compare(pkg->version, dep->max_version) <= 0
-		    && pkg_version_compare(dep->min_version, pkg->version) <= 0)
-			return 1;
-
-		/* package was planned to be installed, but with an incompatible version */
-		return -1;
-	}
-
-	/* dependency not met */
-	return 0;
-}
-
-
-static
-struct mmpkg_dep * mmpkg_dep_lookup(struct mmpkg_dep * deplist,
-                                    struct mmpkg_dep const * dep)
-{
-	while (deplist != NULL) {
-		if (mmstrequal(deplist->name, dep->name))
-			return deplist;
-
-		deplist = deplist->next;
-	}
-
-	return NULL;
-}
-
-
-static
-struct mmpkg_dep * mmpkg_dep_remove(struct mmpkg_dep * deps, mmstr const * name)
-{
-	struct mmpkg_dep * tmp;
-	struct mmpkg_dep * d = deps;
-
-	tmp = NULL;
-	while (d != NULL) {
-		if (mmstrequal(d->name, name)) {
-			if (tmp == NULL)
-				deps = d->next;
-			else
-				tmp->next = d->next;
-
-			d->next = NULL;
-			mmpkg_dep_destroy(d);
-			return deps;
+		default:
+			mm_crash("Unexpected action type: %i", op.action);
 		}
-		tmp = d;
-		d = d->next;
 	}
-
-	assert(0);  /* should always remove an existing element */
-	return deps;
 }
 
-
-static
-struct mmpkg_dep * mmpkg_dep_update(struct mmpkg_dep * deps_out,
-                                    struct mmpkg_dep const * new_dep)
-{
-	mmstr const * min_version, * max_version;
-	struct mmpkg_dep * tmp, * old_dep;
-	old_dep = mmpkg_dep_lookup(deps_out, new_dep);
-	assert(old_dep != NULL);
-
-	/* min = MAX(old->min, new->min) */
-	if (pkg_version_compare(old_dep->min_version, new_dep->min_version) > 0)
-		min_version = old_dep->min_version;
-	else
-		min_version = new_dep->min_version;
-
-	/* max = MIN(old->max, new->max) */
-	if (pkg_version_compare(old_dep->max_version, new_dep->max_version) < 0)
-		max_version = old_dep->max_version;
-	else
-		max_version = new_dep->max_version;
-
-	/* FAIL if min > max */
-	if (pkg_version_compare(min_version, max_version) > 0)
-		return NULL;
-
-	/* create a copy of the new dependency at the end of the list */
-	tmp = mmpkg_dep_append_copy(deps_out, new_dep, min_version, max_version);
-	if (tmp == NULL)
-		return NULL;
-	deps_out = tmp;
-
-
-	return mmpkg_dep_remove(deps_out, new_dep->name);
-}
 
 /**
- * mmpkg_dep_filter() - only keep unmet dependencies from given read-only dependency list.
- * @ctx:             the mmpack context
- * @actions:         the already staged actions
- * deps_in:          the list of dependencies to be filtered
- * deps_out:         the list of dependencies which will receive the new dependencies
- * new_dependencies: flag telling if a new dependency has been added to deps_out
+ * solver_stage_pkg_install() - mark a package intended to be installed
+ * @solver:     solver context to update
+ * @id:         package name id
+ * @pkg:        pointer to package intended to be installed
  *
- * The deps_in is expected to be taken directly from the indextable, and as such
- * MUST NOT be touched in any way. The deps_out list will be increased with a
- * copy of the dependency read from deps_in.
- *
- * Return: the filtered list, newly allocated on success, NULL on failure.
+ * This function will update the lookup table of staged package in @solver
+ * and will register the change in @solver->ops_stack.
  */
 static
-struct mmpkg_dep * mmpkg_dep_filter(struct mmpack_ctx * ctx,
-                                    struct action_stack const * actions,
-                                    struct mmpkg_dep const * deps_in,
-                                    struct mmpkg_dep * deps_out,
-                                    int * new_dependencies)
+void solver_stage_pkg_install(struct solver* solver, int id,
+                              struct mmpkg* pkg)
 {
-	int rv;
-	struct mmpkg_dep * tmp;
-	struct mmpkg_dep const * new_dep;
+	struct planned_op op = {.action = STAGE, .pkg = pkg, .id = id};
 
-	*new_dependencies = 0;
-
-	for (new_dep = deps_in ; new_dep != NULL ; new_dep = new_dep->next) {
-		/* check whether the dependency is already in the unmet dependency list
-		 * if it is, move it to the end of the list, and stop investigating it */
-		if (mmpkg_dep_lookup(deps_out, new_dep)) {
-			deps_out = mmpkg_dep_update(deps_out, new_dep);
-			continue;
-		}
-
-		/* check whether the dependency is already installed, or already staged in
-		 * the action stack */
-		rv = dependency_already_met(ctx, actions, new_dep);
-		if (rv > 0)
-			continue;
-		else if (rv < 0)
-			return NULL;
-
-		*new_dependencies = 1;
-		/* we got deps_in from the global index table, which is read-only.
-		 * duplicate it so it can be changed later */
-		tmp = mmpkg_dep_append_copy(deps_out, new_dep,
-		                            new_dep->min_version, new_dep->max_version);
-		if (tmp == NULL)
-			return NULL;
-		deps_out = tmp;
-	}
-
-	return deps_out;
+	solver->stage_lut[id] = pkg;
+	buffer_push(&solver->ops_stack, &op, sizeof(op));
 }
 
 
+/**
+ * solver_commit_pkg_install() - register the package install operation
+ * @solver:     solver context to update
+ * @id:         package name id
+ *
+ * This function will update the lookup table of install package in @solver
+ * and will register the change in @solver->ops_stack. This function can
+ * only be called after solver_stage_pkg_install() has been called for the
+ * same @id.
+ */
 static
-int mmpkg_depends_on(struct mmpkg const * pkg, mmstr const * name)
+void solver_commit_pkg_install(struct solver* solver, int id)
 {
-	struct mmpkg_dep const * d;
-	for (d = pkg->mpkdeps ; d != NULL ; d = d->next) {
-		if (mmstrequal(d->name, name))
-			return 1;
-	}
+	struct mmpkg* pkg = solver->stage_lut[id];
+	struct planned_op op = {.action = INSTALL, .pkg = pkg, .id = id};
 
+	solver->inst_lut[id] = pkg;
+	buffer_push(&solver->ops_stack, &op, sizeof(op));
+}
+
+
+/**
+ * solver_save_decision_state() - save solver state associated with a decision
+ * @solver:     solver context to update
+ * @frame:      pointer to the current processing frame
+ *
+ * This function is called when a choice is presented to the solver (to
+ * choose installing a package or another). It stores the necessary
+ * information of @solver to possibly backtrack on the decision later.
+ */
+static
+void solver_save_decision_state(struct solver* solver,
+                                struct proc_frame* frame)
+{
+	struct decision_state* state;
+	struct proc_frame* proc_frames = solver->processing_stack.base;
+	size_t state_sz;
+	int i, nframe;
+
+	// There is no point of saving decision since there is no
+	// alternative anymore
+	if (frame->ipkg >= frame->dep->num_pkg-1)
+		return;
+
+	// Reserve the data to store the whole state at decision point
+	nframe = solver->num_proc_frame;
+	state_sz = sizeof(*state) + nframe * sizeof(*proc_frames);
+	state = buffer_reserve_data(&solver->decstate_store, state_sz);
+
+	// Save all state of @solver needed to restore processing at the
+	// moment of the decision
+	state->last_decstate_sz = solver->last_decstate_sz;
+	state->ops_stack_size = solver->ops_stack.size;
+	state->num_proc_frame = nframe;
+	state->curr_frame = *frame;
+	for (i = 0; i < nframe; i++)
+		state->proc_frames[i] = proc_frames[i];
+
+	buffer_inc_size(&solver->decstate_store, state_sz);
+	solver->last_decstate_sz = state_sz;
+}
+
+
+/**
+ * solver_backtrack_on_decision() - revisit decision and restore state
+ * @solver:     solver context to update
+ * @frame:      pointer to processing frame
+ *
+ * This function should be called when a it has been realized that
+ * constraints are not satisfiable. It restores the state saved at the
+ * latest decision point and pick the next decision alternative.
+ *
+ * Return: an non-negative package index corresponding to the new package
+ * alternative to try. If the return value is negative, there is no more
+ * decision to revisit, hence it means that the global requirements are not
+ * satisfiable.
+ */
+static
+int solver_backtrack_on_decision(struct solver* solver,
+                                 struct proc_frame* frame)
+{
+	struct decision_state* state;
+	struct proc_frame* proc_frames = solver->processing_stack.base;
+	int i, nframe;
+
+	// If decision stack is empty, the overall problem is not satisfiable
+	if (solver->last_decstate_sz == 0)
+		return -1;
+
+	state = buffer_dec_size(&solver->decstate_store, solver->last_decstate_sz);
+
+	solver->last_decstate_sz = state->last_decstate_sz;
+	solver_revert_planned_ops(solver, state->ops_stack_size);
+	*frame = state->curr_frame;
+	nframe = state->num_proc_frame;
+
+	solver->num_proc_frame = nframe;
+	solver->processing_stack.size = nframe * sizeof(*proc_frames);
+	for (i = 0; i < nframe; i++)
+		proc_frames[i] = state->proc_frames[i];
+
+	frame->ipkg++;
 	return 0;
 }
 
 
+/**
+ * solver_add_deps_to_process() - Add new dependencies to process
+ * @solver:     solver context to update
+ * @frame:      pointer to the current processing frame
+ * @deps:       compiled dependencies to process
+ */
 static
-void mmpack_print_dependencies_on_conflict(struct action_stack const * actions,
-                                           struct mmpkg const * pkg)
+void solver_add_deps_to_process(struct solver* solver,
+                                struct proc_frame* frame,
+                                struct compiled_dep* deps)
 {
-	int i;
-	struct mmpkg_dep const * d;
-	struct action const * a;
+	if (!deps)
+		return;
 
-	printf("Package details: \n");
-	mmpkg_dump(pkg);
+	buffer_push(&solver->processing_stack, frame, sizeof(*frame));
+	solver->num_proc_frame++;
 
-	for (d = pkg->mpkdeps ; d != NULL ; d = d->next) {
-		for (i = 0 ; i < actions->index ; i++) {
-			a = &actions->actions[i];
+	frame->dep = deps;
+	frame->state = VALIDATION;
+}
 
-			if (mmpkg_depends_on(a->pkg, d->name)) {
-				printf("Package already staged with conflicting dependency :\n");
-				mmpkg_dump(a->pkg);
+
+/**
+ * solver_advance_processing() - update processing frame for next step
+ * @solver:     solver context to update
+ * @frame:      pointer to current processing frame. Updated on output
+ *
+ * Return: CONTINUE if there new iteration to run, DONE if the @solver
+ * found a solution.
+ */
+static
+int solver_advance_processing(struct solver* solver,
+                              struct proc_frame* frame)
+{
+	struct buffer* proc_stack = &solver->processing_stack;
+
+	do {
+		if (frame->state == INSTALL_DEPS) {
+			// Mark as installed the package whose dependency list has
+			// just been processed
+			solver_commit_pkg_install(solver,
+			                          frame->dep->pkgname_id);
+			frame->state = NEXT;
+		}
+
+		if (frame->state == NEXT) {
+			frame->dep = compiled_dep_next(frame->dep);
+			if (frame->dep) {
+				frame->state = VALIDATION;
+				break;
 			}
+
+			// Since the end of dependency list is reached, if the
+			// processing stack is empty, then work is finished
+			if (solver->num_proc_frame <= 0)
+				return DONE;
+
+			// Resume the previous processing frame from stack
+			buffer_pop(proc_stack, frame, sizeof(*frame));
+			solver->num_proc_frame--;
+		}
+
+	} while (frame->state == INSTALL_DEPS || frame->state == NEXT);
+
+	return CONTINUE;
+}
+
+
+/**
+ * solver_step_validation() - validate dependency against system state
+ * @solver:     solver context to update
+ * @frame:      pointer to the current processing frame
+ *
+ * The function checks if dependency @frame->dep being processed is not
+ * already fullfiled by the system state or conflicts with it. It updates
+ * @frame->state to point to the next processing step to perform.
+ *
+ * Return: 0 in case of success, -1 if backtracking is necessary.
+ */
+static
+int solver_step_validation(struct solver* solver, struct proc_frame* frame)
+{
+	int id, is_staged;
+	struct mmpkg* pkg;
+
+	// Get package either installed or planned to be installed
+	id = frame->dep->pkgname_id;
+	pkg = solver->stage_lut[id];
+	is_staged = 1;
+	if (!pkg) {
+		pkg = solver->inst_lut[id];
+		is_staged = 0;
+	}
+
+	if (pkg) {
+		// check package is suitable
+		if (compiled_dep_pkg_match(frame->dep, pkg)) {
+			frame->state = NEXT;
+			return 0;
+		}
+
+		if (is_staged) {
+			frame->state = BACKTRACK;
+			return -1;
 		}
 	}
+
+	frame->ipkg = 0;
+	frame->state = SELECTION;
+	return 0;
 }
 
 
+/**
+ * solver_step_select_pkg() - select the package to install
+ * @solver:     solver context to update
+ * @frame:      pointer to the current processing frame
+ *
+ * The function select the package attempted to be installed to fulfill
+ * @frame->dep.  It updates @frame->state to point to the next processing
+ * step to perform.
+ */
 static
-struct mmpkg_dep* dep_create_from_request(const struct pkg_request* req)
+void solver_step_select_pkg(struct solver* solver, struct proc_frame* frame)
 {
-	struct mmpkg_dep * dep = NULL;
-	const char* version = req->version ? req->version : "any";
+	struct mmpkg *pkg;
+	int id = frame->dep->pkgname_id;
 
-	dep = mmpkg_dep_create(req->name);
-	dep->min_version = mmstr_malloc_from_cstr(version);
-	dep->max_version = mmstr_malloc_from_cstr(version);
+	// backup current state, ie before selected package is staged
+	solver_save_decision_state(solver, frame);
 
-	return dep;
+	pkg = frame->dep->pkgs[frame->ipkg];
+	solver_stage_pkg_install(solver, id, pkg);
+	frame->state = INSTALL_DEPS;
 }
 
 
+/**
+ * solver_step_install_deps() - perform dependency installation queing
+ * @solver:     solver context to update
+ * @frame:      pointer to the current processing frame
+ *
+ * The function queues for processing the dependencies of the package
+ * staged for installation.
+ * on.
+ */
 static
-struct mmpkg_dep* create_dependencies_from_reqlist(struct mmpack_ctx* ctx,
-                                                   const struct pkg_request* req,
-                                                   struct action_stack const * actions)
+void solver_step_install_deps(struct solver* solver, struct proc_frame* frame)
 {
-	struct mmpkg_dep* deps = NULL;
-	struct mmpkg_dep* curr_dep;
+	struct compiled_dep* deps;
+	struct mmpkg* pkg;
 
-	while (req != NULL) {
-		curr_dep = dep_create_from_request(req);
-		if (dependency_already_met(ctx, actions, curr_dep) == 1) {
-			mmpkg_dep_destroy(curr_dep);
-		} else {
-			curr_dep->next = deps;
-			deps = curr_dep;
+	pkg = frame->dep->pkgs[frame->ipkg];
+
+	deps = binindex_compile_pkgdeps(solver->binindex, pkg);
+	solver_add_deps_to_process(solver, frame, deps);
+}
+
+
+/**
+ * solver_solver_deps() - determine a solution given dependency list
+ * @solver:     solver context to update
+ * @initial_deps: initial dependency list to try to solve
+ *
+ * This function is the heart of the package dependency resolution. It
+ * takes @initial_deps which is a list of compiled dependencies that
+ * represent the constraints of the problem being solved and try to find
+ * the actions (package install, removal, upgrade) that lead to those
+ * requirements being met.
+ *
+ * Return: 0 if a solution has been found, -1 if no solution could be found
+ */
+static
+int solver_solve_deps(struct solver* solver, struct compiled_dep* initial_deps)
+{
+	struct proc_frame frame = {.dep = initial_deps, .state = VALIDATION};
+
+	mm_check(initial_deps != NULL);
+
+	while (solver_advance_processing(solver, &frame) != DONE) {
+		if (frame.state == BACKTRACK)
+			if (solver_backtrack_on_decision(solver, &frame))
+				return -1;
+
+		if (frame.state == VALIDATION)
+			if (solver_step_validation(solver, &frame))
+				continue;
+
+		if (frame.state == SELECTION)
+			solver_step_select_pkg(solver, &frame);
+
+		if (frame.state == INSTALL_DEPS)
+			solver_step_install_deps(solver, &frame);
+	};
+
+	return 0;
+}
+
+
+/**
+ * solver_create_action_stack() - Create a action stack from solution
+ * @solver:     solver context to query
+ *
+ * Return: action stack corresponding to the solution previously found by
+ * @solver.
+ */
+static
+struct action_stack* solver_create_action_stack(struct solver* solver)
+{
+	struct action_stack* stk;
+	struct planned_op* ops;
+	struct mmpkg* pkg;
+	int i, num_ops;
+
+	stk = mmpack_action_stack_create();
+
+	ops = solver->ops_stack.base;
+	num_ops = solver->ops_stack.size / sizeof(*ops);
+
+	for (i = 0; i < num_ops; i++) {
+		pkg = ops[i].pkg;
+		switch(ops[i].action) {
+		case STAGE:
+			// ignore
+			break;
+
+		case INSTALL:
+			stk = mmpack_action_stack_push(stk, INSTALL_PKG, pkg);
+			break;
+
+		case REMOVE:
+			stk = mmpack_action_stack_push(stk, REMOVE_PKG, pkg);
+			break;
+
+		default:
+			mm_crash("Unexpected action type: %i", ops[i].action);
 		}
-		req = req->next;
 	}
 
-	return deps;
+	return stk;
 }
+
+
+/**************************************************************************
+ *                                                                        *
+ *                         package installation requests                  *
+ *                                                                        *
+ **************************************************************************/
+
+/**
+ * request_to_compdep() - compile a dependency list from install request
+ * @reqlist:    installation request list to convert
+ * @binindex:   binary index to use to compiled the dependencies
+ * @buff:       buffer to use to hold the compiled dependency list
+ *
+ * Return: pointer to the compiled dependency just created in case of
+ * success. NULL if the package name in a request cannot be found.
+ */
+static
+struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
+                                            const struct binindex* binindex,
+                                            struct buffer* buff)
+{
+	STATIC_CONST_MMSTR(any_version, "any")
+	struct mmpkg_dep dep = {0};
+	struct compiled_dep* compdep = NULL;
+	const struct pkg_request* req;
+
+	mm_check(reqlist != NULL);
+
+	for (req = reqlist; req != NULL; req = req->next) {
+		dep.name = req->name;
+		dep.min_version = req->version ? req->version : any_version;
+		dep.max_version = dep.min_version;
+
+		// Append to buff a new compiled dependency
+		compdep = binindex_compile_dep(binindex, &dep, buff);
+		if (!compdep) {
+			error("Cannot find package: %s\n", req->name);
+			return NULL;
+		}
+		if (compdep->num_pkg == 0) {
+			error("Cannot find version %s of package %s\n",
+			      req->version, req->name);
+			return NULL;
+		}
+	}
+
+	// mark last element as termination
+	compdep->next_entry_delta = 0;
+	return buff->base;
+}
+
 
 /**
  * mmpkg_get_install_list() -  parse package dependencies and return install order
  * @ctx:     the mmpack context
- * @req:     requested package list to be installed
+ * @reqlist:     requested package list to be installed
  *
  * In brief, this function will initialize a dependency ordered list with a
  * single element: the package passed as argument.
@@ -390,68 +698,38 @@ struct mmpkg_dep* create_dependencies_from_reqlist(struct mmpack_ctx* ctx,
  */
 LOCAL_SYMBOL
 struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
-                                            const struct pkg_request* req)
+                                            const struct pkg_request* reqlist)
 {
-	void * tmp;
-	struct mmpkg const * pkg;
-	struct action_stack * actions = NULL;
-	struct mmpkg_dep * deps = NULL;
-	struct mmpkg_dep *curr_dep;
-	struct binindex* binindex = &ctx->binindex;
-	int new_dependencies;
+	int rv;
+	struct compiled_dep *deplist;
+	struct solver solver;
+	struct action_stack* stack = NULL;
+	struct buffer deps_buffer;
 
-	actions = mmpack_action_stack_create();
+	buffer_init(&deps_buffer);
+	solver_init(&solver, ctx);
 
-	/* create initial dependency list from pkg_request list */
-	deps = create_dependencies_from_reqlist(ctx, req, actions);
+	// create initial dependency list from pkg_request list
+	deplist = compdeps_from_reqlist(reqlist, &ctx->binindex, &deps_buffer);
+	if (!deplist)
+		goto exit;
 
-	while (deps != NULL) {
-		/* handle the last dependency introduced */
-		curr_dep = deps;
-		while (curr_dep->next != NULL)
-			curr_dep = curr_dep->next;
+	rv = solver_solve_deps(&solver, deplist);
+	if (rv == 0)
+		stack = solver_create_action_stack(&solver);
 
-		/* get the corresponding package, at its latest possible version */
-		pkg = binindex_get_latest_pkg(binindex, curr_dep->name, curr_dep->max_version);
-		if (pkg == NULL) {
-			error("Cannot find package: %s\n", curr_dep->name);
-			goto error;
-		}
-
-		/* merge this package dependency into the global dependency list */
-		tmp = mmpkg_dep_filter(ctx, actions, pkg->mpkdeps, deps, &new_dependencies);
-		if (tmp == NULL) {
-			error("Failure while resolving package: %s\n", pkg->name);
-			printf("Try resolving the conflicting dependency manally first\n");
-			mmpack_print_dependencies_on_conflict(actions, pkg);
-			goto error;
-		}
-		deps = tmp;
-
-		/* if the package required yet unmet dependency, consider those first.
-		 * leave this one in the dependency list for now */
-		if (!new_dependencies) {
-			/* current package can be installed.
-			 * - add it on top of the stack
-			 * - remove it from the list */
-			tmp = mmpack_action_stack_push(actions, INSTALL_PKG, pkg);
-			if (tmp == NULL)
-				goto error;
-			actions = tmp;
-
-			deps = mmpkg_dep_remove(deps, pkg->name);
-		}
-	}
-
-	return actions;
-
-error:
-	mmpack_action_stack_destroy(actions);
-	mmpkg_dep_destroy(deps);
-
-	return NULL;
+exit:
+	solver_deinit(&solver);
+	buffer_deinit(&deps_buffer);
+	return stack;
 }
 
+
+/**************************************************************************
+ *                                                                        *
+ *                         package removal requests                       *
+ *                                                                        *
+ **************************************************************************/
 
 /**
  * remove_package() - remove a package and its reverse dependencies
