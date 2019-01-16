@@ -11,7 +11,9 @@ _mmpack_options() {
 }
 
 _mmpack_install_completion() {
-	sed -n 's/^\([a-zA-Z0-9_-]*\):$/\1/p' $MMPACK_PREFIX/var/lib/mmpack/binindex.yaml
+	for file in $(find $MMPACK_PREFIX/var/lib/mmpack/ -name "binindex.yaml.*") ; do
+		sed -n 's/^\([a-zA-Z0-9_-]*\):$/\1/p' $file
+	done
 }
 
 _mmpack_remove_completion() {
