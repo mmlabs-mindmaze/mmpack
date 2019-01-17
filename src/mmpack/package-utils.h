@@ -58,8 +58,19 @@ struct mmpkg_dep {
 	struct mmpkg_dep * next;
 };
 
+
+/**
+ * struct binindex - structure holding all known binary package
+ * @pkgname_idx:        index table mapping package name to package name ID.
+ * @pkgname_table:      table of list of package sharing the same name. This
+ *                      table is indexed by the package name ID.
+ * @num_pkgname:        number of different package in struct binindex. This
+ *                      corresponds to the length of @pkgname_table.
+ */
 struct binindex {
-	struct indextable pkg_list_table;
+	struct indextable pkgname_idx;
+	struct pkglist* pkgname_table;
+	int num_pkgname;
 };
 int binindex_foreach(struct binindex * binindex,
                      int (*cb)(struct mmpkg*, void *),
@@ -71,7 +82,7 @@ struct install_state {
 
 
 struct pkglist_iter {
-	struct pkglist_entry* next;
+	struct pkglist_entry* curr;
 };
 
 struct rdeps_iter {
@@ -100,6 +111,7 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
                       int repo_index);
 void binindex_dump(struct binindex const * binindex);
 void binindex_compute_rdepends(struct binindex* binindex);
+int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
 
 int install_state_init(struct install_state* state);
 int install_state_copy(struct install_state* restrict dst,

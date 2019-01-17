@@ -33,13 +33,13 @@ struct pkglist_entry {
 
 struct pkglist {
 	const mmstr* pkg_name;
-	struct pkglist_entry head;
+	struct pkglist_entry* head;
 	struct rdepends rdeps;
 };
 
 struct pkg_iter {
-	struct it_iterator iter;
-	struct it_entry * entry;
+	struct pkglist* curr_list;
+	struct pkglist* list_ptr_bound;
 	struct pkglist_entry* pkglist_elt;
 };
 
@@ -348,52 +348,43 @@ void rdepends_add(struct rdepends* rdeps, const mmstr* pkgname)
  **************************************************************************/
 
 /**
- * pkglist_create() - create a new package list
+ * pkglist_init() - initialize a new package list
+ * @list:       package list struct to initialize
  * @name:       package name to which the package list will be associated
  *
  * Return: pointer to package list
  */
 static
-struct pkglist* pkglist_create(const mmstr* name)
+void pkglist_init(struct pkglist* list, const mmstr* name)
 {
-	struct pkglist* list;
-
-	list = mm_malloc(sizeof(*list));
 	*list = (struct pkglist){.pkg_name = mmstrdup(name)};
-	mmpkg_init(&list->head.pkg, list->pkg_name);
 	rdepends_init(&list->rdeps);
-
-	return list;
 }
 
 
 /**
- * pkglist_destroy() - destroy package list and underlying resources
- * @list:       package list to destroy
+ * pkglist_deinit() - deinit package list and free underlying resources
+ * @list:       package list to deinit
  *
  * This function free the package list as well as the package data
  */
 static
-void pkglist_destroy(struct pkglist* list)
+void pkglist_deinit(struct pkglist* list)
 {
 	struct pkglist_entry *entry, *next;
 
-	if (!list)
-		return;
-
-	next = list->head.next;
-	while (next) {
-		entry = next;
+	entry = list->head;
+	while (entry) {
 		next = entry->next;
 
 		mmpkg_deinit(&entry->pkg);
 		free(entry);
+
+		entry = next;
 	}
 
-	mmpkg_deinit(&list->head.pkg);
 	mmstr_free(list->pkg_name);
 	rdepends_deinit(&list->rdeps);
-	free(list);
 }
 
 
@@ -423,15 +414,9 @@ void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 	struct pkglist_entry* entry;
 	struct mmpkg* pkg_in_list;
 
-	// Check package list head has been set
-	if (!list->head.pkg.version) {
-		entry = &list->head;
-		goto copypkg;
-	}
-
 	// Loop over entry and check whether there is an identical package
 	// (ie has the same sumsha and version).
-	for (entry = &list->head; entry != NULL; entry = entry->next) {
+	for (entry = list->head; entry != NULL; entry = entry->next) {
 		// Check the entry match version and sumsha
 		if (  !mmstrequal(pkg->version, entry->pkg.version)
 		   || !mmstrequal(pkg->sumsha, entry->pkg.sumsha))
@@ -455,10 +440,9 @@ void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 
 	// Add new entry to the list
 	entry = mm_malloc(sizeof(*entry));
-	entry->next = list->head.next;
-	list->head.next = entry;
+	entry->next = list->head;
+	list->head = entry;
 
-copypkg:
 	// copy the whole package structure
 	entry->pkg = *pkg;
 	entry->pkg.name = list->pkg_name;
@@ -475,49 +459,42 @@ copypkg:
  **************************************************************************/
 
 static
-struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
-                             const struct binindex* binindex)
+struct mmpkg* pkg_iter_next(struct pkg_iter* pkg_iter)
 {
-	struct pkglist* pkglist;
-	struct it_entry* entry;
-	struct pkglist_entry* head;
+	struct pkglist* curr_list;
+	struct pkglist_entry* elt;
 
-	entry = it_iter_first(&pkg_iter->iter, &binindex->pkg_list_table);
-	if (!entry)
-		return NULL;
+	elt = pkg_iter->pkglist_elt;
+	if (elt == NULL) {
+		do {
+			curr_list = ++pkg_iter->curr_list;
+			if (curr_list >= pkg_iter->list_ptr_bound)
+				return NULL;
 
-	pkglist = entry->value;
-	head = &pkglist->head;
+			elt = curr_list->head;
+		} while (elt == NULL);
+	}
 
-	pkg_iter->entry = entry;
-	pkg_iter->pkglist_elt = head->next;
-
-	return &head->pkg;
+	pkg_iter->pkglist_elt = elt->next;
+	return &elt->pkg;
 }
 
 
 static
-struct mmpkg* pkg_iter_next(struct pkg_iter* pkg_iter)
+struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
+                             const struct binindex* binindex)
 {
-	struct pkglist* pkglist;
-	struct it_entry* entry;
-	struct pkglist_entry* elt;
+	struct pkglist* first_list;
+	int num_pkgname;
 
-	elt = pkg_iter->pkglist_elt;
-	if (elt)
-		goto exit;
+	num_pkgname = binindex->num_pkgname;
+	first_list = binindex->pkgname_table;
 
-	entry = it_iter_next(&pkg_iter->iter);
-	if (!entry)
-		return NULL;
+	pkg_iter->curr_list = first_list - 1;
+	pkg_iter->list_ptr_bound = first_list + num_pkgname;
+	pkg_iter->pkglist_elt = NULL;;
 
-	pkglist = entry->value;
-	elt = &pkglist->head;
-	pkg_iter->entry = entry;
-
-exit:
-	pkg_iter->pkglist_elt = elt->next;
-	return &elt->pkg;
+	return pkg_iter_next(pkg_iter);
 }
 
 
@@ -551,25 +528,25 @@ int binindex_foreach(struct binindex * binindex,
 LOCAL_SYMBOL
 void binindex_init(struct binindex* binindex)
 {
-	indextable_init(&binindex->pkg_list_table, -1, -1);
+	*binindex = (struct binindex) {0};
+	indextable_init(&binindex->pkgname_idx, -1, -1);
 }
 
 
 LOCAL_SYMBOL
 void binindex_deinit(struct binindex* binindex)
 {
-	struct it_iterator iter;
-	struct it_entry * entry;
-	struct pkglist* pkglist;
+	int i;
 
-	entry = it_iter_first(&iter, &binindex->pkg_list_table);
-	while (entry != NULL) {
-		pkglist = entry->value;
-		pkglist_destroy(pkglist);
-		entry = it_iter_next(&iter);
-	}
+	for (i = 0; i < binindex->num_pkgname; i++)
+		pkglist_deinit(&binindex->pkgname_table[i]);
 
-	indextable_deinit(&binindex->pkg_list_table);
+	free(binindex->pkgname_table);
+	binindex->pkgname_table = NULL;
+
+	indextable_deinit(&binindex->pkgname_idx);
+
+	binindex->num_pkgname = 0;
 }
 
 
@@ -601,11 +578,11 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
 {
 	struct it_entry* entry;
 
-	entry = indextable_lookup(&binindex->pkg_list_table, pkg_name);
+	entry = indextable_lookup(&binindex->pkgname_idx, pkg_name);
 	if (entry == NULL)
 		return NULL;
 
-	return entry->value;
+	return binindex->pkgname_table + entry->ivalue;
 }
 
 
@@ -631,7 +608,7 @@ struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr co
 	if (list == NULL)
 		return NULL;
 
-	pkgentry = &list->head;
+	pkgentry = list->head;
 	latest_version = "any";
 	latest_pkg = NULL;
 
@@ -650,23 +627,63 @@ struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr co
 }
 
 
+/**
+ * binindex_get_pkgname_id() - obtain a id of a package name
+ * @binindex:    binary index to query
+ * @name:        package name whose is queried
+ *
+ * This function will obtain the id of a package name. It cannot fail
+ * because even if the package name is not yet known in @binindex, an empty
+ * package list will be created and an id reserved for @name.
+ *
+ * Return: the id of package name.
+ */
+LOCAL_SYMBOL
+int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name)
+{
+	struct pkglist* new_tab;
+	struct pkglist* pkglist;
+	struct indextable* idx;
+	struct it_entry* entry;
+	struct it_entry defval = {.key = name, .ivalue = -1};
+	size_t tab_sz;
+	int pkgname_id;
+
+	idx = &binindex->pkgname_idx;
+	entry = indextable_lookup_create_default(idx, name, defval);
+	pkgname_id = entry->ivalue;
+
+	// Create package list if not existing yet
+	if (pkgname_id == -1) {
+		// Rezize pkgname table
+		tab_sz = (binindex->num_pkgname + 1) * sizeof(*new_tab);
+		new_tab = mm_realloc(binindex->pkgname_table, tab_sz);
+		binindex->pkgname_table = new_tab;
+
+		// Assign an new pkgname id
+		pkgname_id = binindex->num_pkgname++;
+
+		// Initialize the package list associated to id
+		pkglist = &binindex->pkgname_table[pkgname_id];
+		pkglist_init(pkglist, name);
+
+		// Reference the new package list in the index table
+		entry->ivalue = pkgname_id;
+		entry->key = pkglist->pkg_name;
+	}
+
+	return pkgname_id;
+}
+
+
 static
 void binindex_add_pkg(struct binindex* binindex, struct mmpkg* pkg)
 {
 	struct pkglist* pkglist;
-	struct it_entry* entry;
-	struct indextable* idx = &binindex->pkg_list_table;
+	int pkgname_id;
 
-	entry = indextable_lookup_create(idx, pkg->name);
-	pkglist = entry->value;
-
-	// Create package list if not existing yet
-	if (!pkglist) {
-		pkglist = pkglist_create(pkg->name);
-		entry->key = pkglist->pkg_name;
-		entry->value = pkglist;
-	}
-
+	pkgname_id = binindex_get_pkgname_id(binindex, pkg->name);
+	pkglist = &binindex->pkgname_table[pkgname_id];
 	pkglist_add_or_modify(pkglist, pkg);
 }
 
@@ -1391,11 +1408,11 @@ const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
 	struct pkglist* list;
 
 	list = binindex_get_pkglist(binindex, pkgname);
-	if (!list)
+	if (!list || !list->head)
 		return NULL;
 
-	iter->next = list->head.next;
-	return &list->head.pkg;
+	iter->curr = list->head;
+	return &list->head->pkg;
 }
 
 
@@ -1409,11 +1426,11 @@ const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
 LOCAL_SYMBOL
 const struct mmpkg* pkglist_iter_next(struct pkglist_iter* iter)
 {
-	struct pkglist_entry* entry = iter->next;
+	struct pkglist_entry* entry = iter->curr->next;
 
 	if (!entry)
 		return NULL;
 
-	iter->next = entry->next;
+	iter->curr = entry;
 	return &entry->pkg;
 }
