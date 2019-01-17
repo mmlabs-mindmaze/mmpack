@@ -455,14 +455,15 @@ void indextable_deinit(struct indextable* table)
 
 
 /**
- * indextable_lookup_create() - search for an entry and create if none
+ * indextable_lookup_create_default() - search for an entry and create if none
  * @table:      initialized index table structure
  * @key:        string of the key
+ * @defval:     initial content of returned entry if a new one is created
  *
- * This creates a new entry associated to @key if it was not existing yet
- * in the table @table. Otherwise, if already present, no new entry is created
- * and the existing one is returned. If a new entry is created, its field
- * value is ensured to be initialized to NULL.
+ * This creates a new entry associated to @key if it was not existing yet in
+ * the table @table. Otherwise, if already present, no new entry is created and
+ * the existing one is returned. If a new entry is created, its content will be
+ * copied from @defval.
  *
  * Return: pointer to the new entry if a new one is created, or pointer to the
  * existing one. In case of memory allocation problem, NULL is returned. The
@@ -470,8 +471,9 @@ void indextable_deinit(struct indextable* table)
  * the next call to indextable_lookup_create() or indextable_insert().
  */
 LOCAL_SYMBOL
-struct it_entry* indextable_lookup_create(struct indextable* table,
-                                          const mmstr* key)
+struct it_entry* indextable_lookup_create_default(struct indextable* table,
+                                                  const mmstr* key,
+                                                  struct it_entry defval)
 {
 	struct it_bucket *bucket;
 	struct it_entry* entry;
@@ -495,10 +497,34 @@ struct it_entry* indextable_lookup_create(struct indextable* table,
 	}
 
 	// Initialize it since it is a new entry
-	entry->key = key;
-	entry->value = NULL;
+	*entry = defval;
 
 	return entry;
+}
+
+
+/**
+ * indextable_lookup_create() - search for an entry and create if none
+ * @table:      initialized index table structure
+ * @key:        string of the key
+ *
+ * This creates a new entry associated to @key if it was not existing yet
+ * in the table @table. Otherwise, if already present, no new entry is created
+ * and the existing one is returned. If a new entry is created, its field
+ * value is ensured to be initialized to NULL.
+ *
+ * Return: pointer to the new entry if a new one is created, or pointer to the
+ * existing one. In case of memory allocation problem, NULL is returned. The
+ * pointer to the entry is valid until the table grows, so for safety, until
+ * the next call to indextable_lookup_create() or indextable_insert().
+ */
+LOCAL_SYMBOL
+struct it_entry* indextable_lookup_create(struct indextable* table,
+                                          const mmstr* key)
+{
+	struct it_entry defval = {.key = key, .value = NULL};
+
+	return indextable_lookup_create_default(table, key, defval);
 }
 
 
