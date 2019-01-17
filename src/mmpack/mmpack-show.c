@@ -39,7 +39,7 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 
 		printf("Dependencies:\n");
 		mmpkg_dep_dump(pkg->mpkdeps, "MMPACK");
-		mmpkg_dep_dump(pkg->sysdeps, "SYSTEM");
+		mmpkg_sysdeps_dump(&pkg->sysdeps, "SYSTEM");
 
 		printf("\nDescription:\n");
 		printf("%s\n", pkg->desc);

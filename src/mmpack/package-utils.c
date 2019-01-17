@@ -136,6 +136,7 @@ static
 void mmpkg_init(struct mmpkg* pkg, const mmstr* name)
 {
 	*pkg = (struct mmpkg) {.name = name};
+	strlist_init(&pkg->sysdeps);
 }
 
 
@@ -150,9 +151,21 @@ void mmpkg_deinit(struct mmpkg * pkg)
 	mmstr_free(pkg->sumsha);
 
 	mmpkg_dep_destroy(pkg->mpkdeps);
-	mmpkg_dep_destroy(pkg->sysdeps);
+	strlist_deinit(&pkg->sysdeps);
 
 	mmpkg_init(pkg, NULL);
+}
+
+
+LOCAL_SYMBOL
+void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type)
+{
+	const struct strlist_elt* d = sysdeps->head;
+
+	while (d != NULL) {
+		printf("\t\t [%s] %s\n", type, d->str.buf);
+		d = d->next;
+	}
 }
 
 
@@ -162,7 +175,7 @@ void mmpkg_dump(struct mmpkg const * pkg)
 	printf("# %s (%s)\n", pkg->name, pkg->version);
 	printf("\tdependencies:\n");
 	mmpkg_dep_dump(pkg->mpkdeps, "MMP");
-	mmpkg_dep_dump(pkg->sysdeps, "SYS");
+	mmpkg_sysdeps_dump(&pkg->sysdeps, "SYS");
 	printf("\n");
 }
 
@@ -194,7 +207,7 @@ int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache)
 LOCAL_SYMBOL
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 {
-	const struct mmpkg_dep* dep;
+	const struct strlist_elt* elt;
 
 	fprintf(fp, "%s:\n"
 	            "    version: %s\n"
@@ -206,8 +219,8 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 	mmpkg_dep_save_to_index(pkg->mpkdeps, fp, 2/*indentation level*/);
 
 	fprintf(fp, "    sysdepends: [");
-	for (dep = pkg->sysdeps; dep != NULL; dep = dep->next) {
-		fprintf(fp, "'%s'%s", dep->name, dep->next ? ", " : "");
+	for (elt = pkg->sysdeps.head; elt != NULL; elt = elt->next) {
+		fprintf(fp, "'%s'%s", elt->str.buf, elt->next ? ", " : "");
 	}
 	fprintf(fp, "]\n");
 }
@@ -796,17 +809,14 @@ void mmpkg_append_dependency_rec(struct mmpkg_dep * dep, struct mmpkg_dep * d)
 }
 
 static
-void mmpkg_insert_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep,
-                             int is_system_package)
+void mmpkg_add_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep)
 {
-	struct mmpkg_dep** deps;
-
-	deps = is_system_package ? &pkg->sysdeps : &pkg->mpkdeps;
-	if (*deps == NULL)
-		*deps = dep;
+	if (pkg->mpkdeps == NULL)
+		pkg->mpkdeps = dep;
 	else
-		mmpkg_append_dependency_rec(*deps, dep);
+		mmpkg_append_dependency_rec(pkg->mpkdeps, dep);
 }
+
 
 /* parse a single mmpack or system dependency
  * eg:
@@ -852,7 +862,7 @@ exit:
 	yaml_token_delete(&token);
 
 	if (exitvalue == 0) {
-		mmpkg_insert_dependency(pkg, dep, 0);
+		mmpkg_add_dependency(pkg, dep);
 	}
 
 	return exitvalue;
@@ -957,11 +967,9 @@ int mmpack_parse_sysdeplist(struct parsing_ctx* ctx,
 {
 	int exitvalue;
 	yaml_token_t token;
-	struct mmpkg_dep * dep;
-	char const * name;
+	char const * expr;
 
 	exitvalue = 0;
-	dep = NULL;
 	while (1) {
 		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto exit;
@@ -973,9 +981,8 @@ int mmpack_parse_sysdeplist(struct parsing_ctx* ctx,
 			goto exit;
 
 		case YAML_SCALAR_TOKEN:
-			name = (char const *) token.data.scalar.value;
-			dep = mmpkg_dep_create(name);
-			mmpkg_insert_dependency(pkg, dep, 1);
+			expr = (char const *) token.data.scalar.value;
+			strlist_add(&pkg->sysdeps, expr);
 			break;
 
 		default: /* ignore */
@@ -990,9 +997,6 @@ int mmpack_parse_sysdeplist(struct parsing_ctx* ctx,
 
 exit:
 	yaml_token_delete(&token);
-	if (exitvalue != 0)
-		mmpkg_dep_destroy(dep);
-
 	return exitvalue;
 }
 

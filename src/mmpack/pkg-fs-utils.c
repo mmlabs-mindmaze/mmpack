@@ -685,7 +685,7 @@ static
 int check_new_sysdeps(struct action_stack* stack)
 {
 	int i, rv;
-	struct mmpkg_dep* dep;
+	struct strlist_elt* dep;
 	struct strset sysdeps;
 
 	strset_init(&sysdeps, STRSET_FOREIGN_STRINGS);
@@ -696,9 +696,9 @@ int check_new_sysdeps(struct action_stack* stack)
 			continue;
 
 		// Add all sysdeps if the package
-		dep = stack->actions[i].pkg->sysdeps;
+		dep = stack->actions[i].pkg->sysdeps.head;
 		while (dep) {
-			strset_add(&sysdeps, dep->name);
+			strset_add(&sysdeps, dep->str.buf);
 			dep = dep->next;
 		}
 	}

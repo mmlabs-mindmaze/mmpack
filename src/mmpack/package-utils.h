@@ -47,7 +47,7 @@ struct mmpkg {
 	pkg_state state;
 
 	struct mmpkg_dep * mpkdeps;
-	struct mmpkg_dep * sysdeps;
+	struct strlist sysdeps;
 };
 
 struct mmpkg_dep {
@@ -80,6 +80,7 @@ struct rdeps_iter {
 
 void mmpkg_dump(struct mmpkg const * pkg);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
+void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);
 
 struct mmpkg_dep * mmpkg_dep_create(char const * name);
 void mmpkg_dep_destroy(struct mmpkg_dep * dep);
