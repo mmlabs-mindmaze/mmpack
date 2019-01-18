@@ -1,0 +1,14 @@
+# vi:syntax=sh
+
+set -e
+
+meson --prefix=$PREFIX $BUILDDIR $SRCDIR
+
+cd $BUILDDIR
+ninja
+
+if [ "$SKIP_TESTS" != "True" ] ; then
+	ninja test
+fi
+
+ninja install
