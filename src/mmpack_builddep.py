@@ -9,7 +9,7 @@ import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from subprocess import run
 
-from common import get_host_dist, yaml_load
+from common import get_host_dist, yaml_load, dprint
 from settings import LIBEXECDIR
 from workspace import find_project_root_folder
 
@@ -31,6 +31,40 @@ def parse_option(argv):
                         action='store', dest='prefix', type=str,
                         help='prefix within which to work')
     return parser.parse_args(argv)
+
+
+def process_dependencies(system_builddeps, mmpack_builddeps,
+                         prefix: str, assumeyes: bool):
+    ''' process given dependencies
+
+    1/ check sysdeps for presence
+    2/ install mmpack deps if missing
+    '''
+    # check sysdeps first
+    if system_builddeps:
+        sysdep_cmd = [LIBEXECDIR + '/mmpack/mmpack-check-sysdep']
+        sysdep_cmd += system_builddeps
+        ret = run(sysdep_cmd)
+        if ret.returncode:
+            return ret.returncode
+
+    if not mmpack_builddeps:
+        return 0
+
+    # install missing mmpack packages
+    # forward options to mmpack install
+    cmd = 'mmpack'
+    if prefix:
+        cmd += ' --prefix=' + prefix
+    cmd += ' install '
+    if assumeyes:
+        cmd += '-y '
+
+    cmd += ' '.join(mmpack_builddeps)
+    dprint('[shell] {0}'.format(cmd))
+    ret = run(cmd, shell=True)
+
+    return ret.returncode
 
 
 def main():
@@ -55,30 +89,8 @@ def main():
         if 'system' in sysbuilddeps:
             system_builddeps = sysbuilddeps['system']
 
-    # check sysdeps first
-    if system_builddeps:
-        sysdep_cmd = [LIBEXECDIR + '/mmpack/mmpack-check-sysdep']
-        sysdep_cmd += system_builddeps
-        ret = run(sysdep_cmd)
-        if ret.returncode:
-            return ret.returncode
-
-    if not mmpack_builddeps:
-        return 0
-
-    # install missing mmpack packages
-    # forward options to mmpack install
-    cmd = 'mmpack'
-    if options.prefix:
-        cmd += ' --prefix=' + options.prefix
-    cmd += ' install '
-    if options.assumeyes:
-        cmd += '-y '
-
-    cmd += ' '.join(mmpack_builddeps)
-    ret = run(cmd, shell=True)
-
-    return ret.returncode
+    return process_dependencies(system_builddeps, mmpack_builddeps,
+                                options.prefix, options.assumeyes)
 
 
 if __name__ == '__main__':
