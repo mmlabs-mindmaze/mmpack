@@ -1,0 +1,12 @@
+# These are the pip names of the packages needed for mmppack-build
+# Please always use the system packages when possible
+
+# debian: python3-pyelftools
+elftools
+
+# debian: python3-pefile
+pypefile
+
+# debian: python3-yaml
+# pacman: mingw-w64-x86_64-python3-yaml
+PyYAML
