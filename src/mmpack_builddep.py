@@ -33,6 +33,28 @@ def parse_option(argv):
     return parser.parse_args(argv)
 
 
+def general_specs_builddeps(general):
+    ''' extract the system and mmpack build dependencies from the specs
+
+    Args: the *general* section of the specs only
+    '''
+    build_sysdeps_key = 'build-depends-' + get_host_dist()
+    mmpack_builddeps = []
+    system_builddeps = []
+
+    if 'build-depends' in general:
+        mmpack_builddeps += general['build-depends']
+
+    if build_sysdeps_key in general:
+        sysbuilddeps = general[build_sysdeps_key]
+        if 'mmpack' in sysbuilddeps:
+            mmpack_builddeps.append(sysbuilddeps['mmpack'])
+        if 'system' in sysbuilddeps:
+            system_builddeps = sysbuilddeps['system']
+
+    return system_builddeps, mmpack_builddeps
+
+
 def process_dependencies(system_builddeps, mmpack_builddeps,
                          prefix: str, assumeyes: bool):
     ''' process given dependencies
@@ -72,22 +94,7 @@ def main():
     options = parse_option(sys.argv[1:])
     specs = yaml_load(options.specfile)['general']
 
-    mmpack_builddeps = []
-    system_builddeps = []
-
-    if 'build-depends' in specs:
-        mmpack_builddeps += specs['build-depends']
-
-    build_sysdeps_key = 'build-depends-' + get_host_dist()
-
-    # append platform-specific mmpack packages
-    # eg. one required package is not available on this platform
-    if build_sysdeps_key in specs:
-        sysbuilddeps = specs[build_sysdeps_key]
-        if 'mmpack' in sysbuilddeps:
-            mmpack_builddeps.append(sysbuilddeps['mmpack'])
-        if 'system' in sysbuilddeps:
-            system_builddeps = sysbuilddeps['system']
+    system_builddeps, mmpack_builddeps = general_specs_builddeps(specs)
 
     return process_dependencies(system_builddeps, mmpack_builddeps,
                                 options.prefix, options.assumeyes)

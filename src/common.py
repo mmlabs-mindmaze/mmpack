@@ -8,7 +8,7 @@ import logging.handlers
 import os
 import sys
 from subprocess import PIPE, run
-from typing import Union
+from typing import Union, Dict
 from hashlib import sha256
 import platform
 import yaml
@@ -233,3 +233,14 @@ def parse_soname(soname: str) -> (str, str):
 def yaml_load(filename: str):
     'helper: load yaml file with BasicLoader'
     return yaml.load(open(filename, 'rb').read(), Loader=yaml.BaseLoader)
+
+
+def env_path_prepend(env: Dict[str, str], varname: str, value: str):
+    ''' prepend value to the varname key ov given environment
+
+    varname does not need to already be present within the env
+    '''
+    previous = env.get(varname, None)
+    env[varname] = value
+    if previous:
+        env[varname] += os.pathsep + previous

@@ -79,17 +79,17 @@ def parse_options(argv):
     parser.add_argument('--skip-build-tests',
                         action='store_true', dest='skip_tests',
                         help='indicate that build tests must not be run')
+    parser.add_argument('--build-deps',
+                        action='store_true', dest='build_deps',
+                        help='check and install build dependencies')
+    parser.add_argument('-y', '--yes',
+                        action='store_true', dest='assumeyes',
+                        help='always assume yes to any prompted question')
     args = parser.parse_args(argv)
 
-    ctx = {'url': args.url,
-           'srctar': args.srctar,
-           'tag': args.tag,
-           'prefix': args.prefix,
-           'skip_tests': args.skip_tests}
-
-    if not ctx['url'] and not ctx['srctar']:
-        ctx['url'] = find_project_root_folder()
-        if not ctx['url']:
+    if not args.url and not args.srctar:
+        args.url = find_project_root_folder()
+        if not args.url:
             raise ValueError('did not find project to package')
 
     # set workspace prefix
@@ -101,19 +101,22 @@ def parse_options(argv):
     if args.prefix:
         Workspace().prefix = args.prefix
 
-    return ctx
+    return args
 
 
 def main():
     'entry point to create a mmpack package'
-    ctx = parse_options(sys.argv[1:])
+    args = parse_options(sys.argv[1:])
 
-    if ctx['url']:
-        package = create_source_from_git(url=ctx['url'], tag=ctx['tag'])
+    if args.url:
+        package = create_source_from_git(url=args.url, tag=args.tag)
     else:
-        package = load_source_from_tar(tarpath=ctx['srctar'], tag=ctx['tag'])
+        package = load_source_from_tar(tarpath=args.srctar, tag=args.tag)
 
-    package.local_install(ctx['skip_tests'])
+    if args.build_deps:
+        package.install_builddeps(prefix=args.prefix, assumeyes=args.assumeyes)
+
+    package.local_install(args.skip_tests)
     package.ventilate()
     package.generate_binary_packages()
 

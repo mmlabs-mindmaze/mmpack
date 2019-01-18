@@ -18,6 +18,7 @@ from common import *
 from file_utils import *
 from mm_version import Version
 from settings import PKGDATADIR
+from mmpack_builddep import process_dependencies, general_specs_builddeps
 
 
 def _get_install_prefix() -> str:
@@ -330,6 +331,8 @@ class SrcPackage(object):
                 self._packages[pkg] = binpkg
 
     def _build_env(self, skip_tests: bool):
+        wrk = Workspace()
+
         build_env = os.environ.copy()
         build_env['SRCDIR'] = self.unpack_path()
         build_env['BUILDDIR'] = self.unpack_path() + '/build'
@@ -339,6 +342,17 @@ class SrcPackage(object):
         build_env['SKIP_TESTS'] = str(skip_tests)
         if self.build_options:
             build_env['OPTS'] = self.build_options
+
+        # enrich the env with the necessary variables to build using
+        # the headers and libraries of the prefix
+        if wrk.prefix:
+            # XXX: might need to also extend PATH.
+            #      however, those binaries require mmpack runprefix to run
+            env_path_prepend(build_env, 'CPATH', wrk.prefix + '/include')
+            env_path_prepend(build_env, 'LIBRARY_PATH', wrk.prefix + '/lib')
+            tmp = os.environ.get('LDFLAGS', '')
+            build_env['LDFLAGS'] = '-Wl,-rpath-link={}/lib '.format(wrk.prefix)
+            build_env['LDFLAGS'] += tmp
 
         if get_host_dist() == 'windows':
             build_env['MSYSTEM'] = 'MINGW64'
@@ -351,6 +365,21 @@ class SrcPackage(object):
     def _strip_dirs_from_install_files(self):
         tmp = {x for x in self.install_files_set if not os.path.isdir(x)}
         self.install_files_set = tmp
+
+    def install_builddeps(self, prefix: str, assumeyes: bool):
+        ''' install mmpack build-deps within given prefix
+
+        !!! Requires a prefix already set up !!!
+        '''
+        cmd = 'mmpack --prefix={} update'.format(prefix)
+        shell(cmd)
+
+        # append platform-specific mmpack packages
+        # eg. one required package is not available on this platform
+        general = self._specs['general']
+        system_builddeps, mmpack_builddeps = general_specs_builddeps(general)
+        process_dependencies(system_builddeps, mmpack_builddeps,
+                             prefix, assumeyes)
 
     def local_install(self, skip_tests: bool=False) -> None:
         ''' local installation of the package from the source package
