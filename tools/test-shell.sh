@@ -4,8 +4,7 @@
 # test-shell.sh [repository name]
 
 distrib() {
-	grep -q "^ID=debian" /etc/os-release
-	if [ $? -eq 0 ]; then
+	if grep -q "^ID=debian" /etc/os-release ; then
 		echo debian
 	else
 		echo windows
