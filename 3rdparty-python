@@ -2,10 +2,10 @@
 # Please always use the system packages when possible
 
 # debian: python3-pyelftools
-elftools
+pyelftools
 
 # debian: python3-pefile
-pypefile
+pefile
 
 # debian: python3-yaml
 # pacman: mingw-w64-x86_64-python3-yaml
