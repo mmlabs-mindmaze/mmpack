@@ -8,16 +8,21 @@ from os.path import islink, basename, splitext
 
 
 def filetype(filename):
-    'get file type'
-    # Open file and read magic number
-    with open(filename, 'rb', buffering=0) as file:
-        magic = file.read(4)
+    '''get file type
 
-    # try to read file type first
-    if magic[:4] == b'\x7fELF':
-        return 'elf'
-    elif magic[:2] == b'MZ':
-        return 'pe'
+    This performs the exact same operation as:
+    file  --brief --preserve-date <filename>
+    '''
+    if not islink(filename):
+        # Open file and read magic number
+        with open(filename, 'rb', buffering=0) as file:
+            magic = file.read(4)
+
+        # try to read file type first
+        if magic[:4] == b'\x7fELF':
+            return 'elf'
+        elif magic[:2] == b'MZ':
+            return 'pe'
 
     # return file extension otherwise
     # eg. python, c-header, ...
@@ -34,8 +39,9 @@ def is_dynamic_library(filename: str) -> str:
     - contains .so within name (maybe not at the end)
     '''
     base = basename(filename)
-    if ((filename.startswith('lib/lib') and '.so' in base)
-            or (filename.startswith('bin/') and base.endswith('.dll'))):
+    if (not islink(filename)
+            and ((filename.startswith('lib/lib') and '.so' in base)
+                 or (filename.startswith('bin/') and base.endswith('.dll')))):
         return filetype(filename)
     return None
 
