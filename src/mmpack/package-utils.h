@@ -48,6 +48,7 @@ struct mmpkg {
 
 	struct mmpkg_dep * mpkdeps;
 	struct strlist sysdeps;
+	struct compiled_dep* compdep;
 };
 
 struct mmpkg_dep {
@@ -56,6 +57,26 @@ struct mmpkg_dep {
 	mmstr const * max_version; /* exclusive */
 
 	struct mmpkg_dep * next;
+};
+
+
+/**
+ * struct compiled_dep - compiled dependency
+ * @pkgname_id: ID of package name
+ * @num_pkg:    number of package alternatives that may match the requirement
+ * @next_entry_delta: relative compiled_dep pointer offset from the current one to
+ *              the next compiled_dep in the list.
+ * @pkgs:       array of package alternatives that amy match the requirement
+ *
+ * This structure represents a processed version of struct mmpkg_dep in the
+ * context of a particular binary index. It is meant to be serialized in a
+ * bigger buffer representing all the dependencies of a particular package.
+ */
+struct compiled_dep {
+	int pkgname_id;
+	short num_pkg;
+	short next_entry_delta;
+	struct mmpkg* pkgs[];
 };
 
 
@@ -112,6 +133,11 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 void binindex_dump(struct binindex const * binindex);
 void binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
+struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
+                                          const struct mmpkg_dep* dep,
+                                          struct buffer* buff);
+struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
+                                              struct mmpkg* pkg);
 
 int install_state_init(struct install_state* state);
 int install_state_copy(struct install_state* restrict dst,
@@ -135,5 +161,42 @@ const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
                                        const mmstr* pkgname,
                                        const struct binindex* binindex);
 const struct mmpkg* pkglist_iter_next(struct pkglist_iter* iter);
+
+
+static inline
+size_t compiled_dep_size(int num_pkg)
+{
+	size_t size;
+
+	size = sizeof(struct compiled_dep);
+	size += num_pkg * sizeof(struct mmpkg);
+
+	return ROUND_UP(size, sizeof(struct compiled_dep));
+}
+
+
+static inline
+struct compiled_dep* compiled_dep_next(struct compiled_dep* compdep)
+{
+	// delta 0 means end of list
+	if (compdep->next_entry_delta == 0)
+		return NULL;
+
+	return compdep + compdep->next_entry_delta;
+}
+
+
+static inline
+int compiled_dep_pkg_match(const struct compiled_dep* compdep,
+                           const struct mmpkg* pkg)
+{
+	int i;
+
+	for (i = 0; i < compdep->num_pkg; i++)
+		if (compdep->pkgs[i] == pkg)
+			return 1;
+
+	return 0;
+}
 
 #endif /* PACKAGE_UTILS_H */

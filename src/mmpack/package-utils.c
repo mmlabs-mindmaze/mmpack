@@ -35,6 +35,7 @@ struct pkglist {
 	const mmstr* pkg_name;
 	struct pkglist_entry* head;
 	struct rdepends rdeps;
+	int num_pkg;
 };
 
 struct pkg_iter {
@@ -152,6 +153,7 @@ void mmpkg_deinit(struct mmpkg * pkg)
 
 	mmpkg_dep_destroy(pkg->mpkdeps);
 	strlist_deinit(&pkg->sysdeps);
+	free(pkg->compdep);
 
 	mmpkg_init(pkg, NULL);
 }
@@ -285,6 +287,24 @@ void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
 		        dep->name, dep->min_version, dep->max_version);
 		dep = dep->next;
 	}
+}
+
+
+/**
+ * mmpkg_dep_match_version() - test if a package meet requirement of dependency
+ * @pkg:        pointer to package (may be NULL)
+ * @dep:        pointer to dependency
+ *
+ * NOTE: if @pkg is not NULL, it is assumed to have the same name as @dep.
+ *
+ * Return: 1 if @pkg is not NULL and meet requirement of @dep, 0 otherwise
+ */
+static
+int mmpkg_dep_match_version(const struct mmpkg_dep* dep, const struct mmpkg* pkg)
+{
+	return (  pkg != NULL
+	       && pkg_version_compare(pkg->version, dep->max_version) <= 0
+	       && pkg_version_compare(dep->min_version, pkg->version) <= 0);
 }
 
 
@@ -450,6 +470,8 @@ void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 	// reset package fields since they have been taken over by the new
 	// entry
 	mmpkg_init(pkg, NULL);
+
+	list->num_pkg++;
 }
 
 /**************************************************************************
@@ -673,6 +695,118 @@ int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name)
 	}
 
 	return pkgname_id;
+}
+
+
+/**
+ * binindex_compile_dep() - compile a dependency on a buffer
+ * @binindex:   binary index with which the dependencies must be compiled
+ * @dep:        dependency to compile into context of @binindex
+ * @buff:       struct buffer on which the dependency must be appended
+ *
+ * This function synthetizes the information pointed to by @dep and
+ * confront it with the content of binary index specified by @binindex.
+ * This essentially generates an array of package pointer of @binindex
+ * which meet the version requirements of @dep.
+ *
+ * Return: the pointer to compiled dependency located on data buffer managed
+ * by @buff. NULL is returned if the package named in @dep could not found.
+ */
+LOCAL_SYMBOL
+struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
+                                          const struct mmpkg_dep* dep,
+                                          struct buffer* buff)
+{
+	struct pkglist_entry* entry;
+	struct pkglist* list;
+	size_t need_size, used_size;
+	struct compiled_dep* compdep;
+	short num_pkg;
+
+	list = binindex_get_pkglist(binindex, dep->name);
+	if (!list)
+		return NULL;
+
+	// Ensure we can add a new element that could have as many
+	// possible package as there is in the pkglist
+	need_size = compiled_dep_size(list->num_pkg);
+	compdep = buffer_reserve_data(buff, need_size);
+
+	// Fill compiled dependency by inspected version of all package
+	// sharing the same package name.
+	num_pkg = 0;
+	for (entry = list->head; entry != NULL; entry = entry->next) {
+		if (!mmpkg_dep_match_version(dep, &entry->pkg))
+			continue;
+
+		compdep->pkgs[num_pkg++] = &entry->pkg;
+	}
+	used_size = compiled_dep_size(num_pkg);
+
+	compdep->pkgname_id = list - binindex->pkgname_table;
+	compdep->num_pkg = num_pkg;
+	compdep->next_entry_delta = used_size / sizeof(*compdep);
+
+	// Advance in the buffer after the compiled_dep we have just set
+	buffer_inc_size(buff, used_size);
+
+	return compdep;
+}
+
+
+/**
+ * binindex_compile_pkgdeps() - get buffer of dependencies of package
+ * @binindex:   binary index with which the dependencies must be compiled
+ * @pkg:        package whose dependencies must be compiled
+ *
+ * This function function will inspect the direct dependencies listed in
+ * @pkg and will generate a buffer containing the serialized compiled
+ * version of dependencies. In other word, for each dependency of @pkg, the
+ * resulting buffer will contain a serialized struct compiled_dep
+ * representing the synthetized information in the dependency.
+ *
+ * To iterate over all dependencies in the returned buffer, use
+ * compiled_dep_next().
+ *
+ * Note that the returned buffer is cached in a field of @pkg. Hence
+ * subsequent calls to the function will return the cached buffer and no
+ * computation are involved. This also implies that this function must be
+ * only once all package from all repositories have been loaded in
+ * @binindex, otherwise the buffer will contain only partial results.
+ *
+ * return: buffer of serialized compiled dependencies of @pkg among the
+ * packages known in @binindex.
+ */
+LOCAL_SYMBOL
+struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
+                                              struct mmpkg* pkg)
+{
+	struct mmpkg_dep* dep;
+	struct buffer buff;
+	// Init to NULL only to fix an illegitimate warning in gcc with
+	// Wmaybe-uninitialized
+	struct compiled_dep* compdep = NULL;
+
+	// If no dependencencies return NULL
+	if (!pkg->mpkdeps)
+		return NULL;
+
+	// If already compiled, return the result
+	if (pkg->compdep != NULL)
+		return pkg->compdep;
+
+	buffer_init(&buff);
+
+	// Compile all the dependencies, stacked in a single buffer
+	for (dep = pkg->mpkdeps; dep != NULL; dep = dep->next)
+		compdep = binindex_compile_dep(binindex, dep, &buff);
+
+	// Set last element as termination of the list
+	compdep->next_entry_delta = 0;
+
+	pkg->compdep = buffer_take_data_ownership(&buff);
+
+	return pkg->compdep;
 }
 
 
