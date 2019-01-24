@@ -4,7 +4,6 @@ os helpers to manipulate the paths and environments
 '''
 
 import os
-import sys
 from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
 
 from decorators import singleton
@@ -108,26 +107,3 @@ def get_staging_dir(builddir: str, binpkg_name: str):
 def is_valid_prefix(prefix: str) -> bool:
     'returns whether given prefix is a valid path for mmpack prefix'
     return os.path.exists(prefix + '/var/lib/mmpack/')
-
-
-def push_prefix(prefix: str):
-    ''' Prepend given prefix to all relevant os environment variables
-        Since python is launched in its own process, directly write to
-        os.environ.
-    '''
-    # system environment execution
-    os.environ['PATH'] = '{0}/bin:{1}'.format(prefix, os.environ.get('PATH'))
-    os.environ['LD_LIBRARY_PATH'] = '{0}/lib:{1}' \
-                                    .format(prefix,
-                                            os.environ.get('LD_LIBRARY_PATH'))
-    os.environ['LIBRARY_PATH'] = '{0}/lib:{1}' \
-                                 .format(prefix,
-                                         os.environ.get('LIBRARY_PATH'))
-    os.environ['CPATH'] = '{0}/include:{1}' \
-                          .format(prefix, os.environ.get('CPATH'))
-
-    pythonpath = '/lib/python/{:d}.{:d}'.format(sys.version_info.major,
-                                                sys.version_info.minor)
-    os.environ['PYTHONPATH'] = '{0}/{1}:{2}' \
-                               .format(prefix, pythonpath,
-                                       os.environ.get('PYTHONPATH'))
