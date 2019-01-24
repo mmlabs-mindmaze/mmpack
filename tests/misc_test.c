@@ -6,10 +6,12 @@
 #endif
 
 #include <check.h>
+#include <stdint.h>
 
 #include "mmstring.h"
 #include "testcases.h"
 #include "utils.h"
+#include "common.h"
 
 
 /**************************************************************************
@@ -87,6 +89,24 @@ START_TEST(parse_basename)
 }
 END_TEST
 
+
+START_TEST(next_pow2)
+{
+	ck_assert(next_pow2_u64(0) == 1);
+	ck_assert(next_pow2_u64(1) == 1);
+	ck_assert(next_pow2_u64(2) == 2);
+	ck_assert(next_pow2_u64(3) == 4);
+	ck_assert(next_pow2_u64(4) == 4);
+	ck_assert(next_pow2_u64(5) == 8);
+	ck_assert(next_pow2_u64(6) == 8);
+	ck_assert(next_pow2_u64(7) == 8);
+	ck_assert(next_pow2_u64(8) == 8);
+	ck_assert(next_pow2_u64(0xFFFFFFFFull) == 0x100000000ull);
+	ck_assert(next_pow2_u64(0x100000000ull) == 0x100000000ull);
+	ck_assert(next_pow2_u64(0x100000001ull) == 0x200000000ull);
+}
+END_TEST
+
 /**************************************************************************
  *                                                                        *
  *                          Test suite setup                              *
@@ -99,6 +119,7 @@ TCase* create_misc_tcase(void)
 
 	tcase_add_test(tc, parse_dirname);
 	tcase_add_test(tc, parse_basename);
+	tcase_add_test(tc, next_pow2);
 
 	return tc;
 }

@@ -12,6 +12,7 @@
 #include <mmsysio.h>
 #include <mmerrno.h>
 
+#include "common.h"
 #include "context.h"
 #include "download.h"
 #include "mmstring.h"
@@ -438,16 +439,12 @@ int check_file_pkg(const mmstr * ref_sha, const mmstr * parent,
 static
 size_t get_map_size(int fd)
 {
-	uint64_t size;
 	struct mm_stat buf;
 
 	if (mm_fstat(fd, &buf) != 0)
 		return MM_PAGESZ;
 
-	size = buf.size;
-
-	/* upper power of two */
-	return 1 << (64 - __builtin_clzl (size - 1));
+	return next_pow2_u64(buf.size);
 }
 
 
