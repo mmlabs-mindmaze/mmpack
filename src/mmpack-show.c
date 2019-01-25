@@ -33,6 +33,7 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 
 		printf("Package file: %s\n", pkg->filename);
 		printf("SHA256: %s\n", pkg->sha256);
+		printf("SUMSHA256: %s\n", pkg->sumsha);
 
 		printf("Source package: %s\n", pkg->source);
 
