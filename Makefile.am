@@ -3,7 +3,7 @@ ACLOCAL_AMFLAGS = -I m4 --install
 EXTRA_DIST = autogen.sh
 
 AM_CPPFLAGS = \
-	-I$(srcdir)/src \
+	-I$(srcdir)/src/mmpack \
 	-DSRCDIR=\"$(srcdir)\" \
 	-DBUILDDIR=\"$(builddir)\" \
 	-DLIBEXECDIR=\"$(pkglibexecdir)\" \
@@ -31,39 +31,39 @@ am__v_RM_1 = -@rm -vf
 bin_PROGRAMS = mmpack
 pkglibexec_PROGRAMS = mount-mmpack-prefix mmpack-check-sysdep
 bin_SCRIPTS = mmpack-build
-dist_bin_SCRIPTS = src/mmpack-createrepo
-dist_pkgdata_SCRIPTS = src/check-dpkg-installed
+dist_bin_SCRIPTS = src/repository/mmpack-createrepo
+dist_pkgdata_SCRIPTS = src/mmpack/check-dpkg-installed
 
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST += \
-	src/mmpack-build.in \
-	src/settings.py.in \
+	src/mmpack-build/mmpack-build.in \
+	src/mmpack-build/settings.py.in \
 	$(eol)
 
 mmpackbuilddir = $(pkgdatadir)/python
 mmpackbuild_PYTHON =\
-	src/binary_package.py \
-	src/common.py \
-	src/dpkg.py \
-	src/decorators.py \
-	src/elf_utils.py \
-	src/file_utils.py \
-	src/mmpack_builddep.py \
-	src/mmpack_clean.py \
-	src/mmpack_config.py \
-	src/mmpack_pkg_create.py \
-	src/mmpack_pkg_check.py \
-	src/mmpack_pkg_show.py \
-	src/pacman.py \
-	src/pe_utils.py \
-	src/src_package.py \
-	src/mm_version.py \
-	src/workspace.py \
-	src/xdg.py \
+	src/mmpack-build/binary_package.py \
+	src/mmpack-build/common.py \
+	src/mmpack-build/dpkg.py \
+	src/mmpack-build/decorators.py \
+	src/mmpack-build/elf_utils.py \
+	src/mmpack-build/file_utils.py \
+	src/mmpack-build/mmpack_builddep.py \
+	src/mmpack-build/mmpack_clean.py \
+	src/mmpack-build/mmpack_config.py \
+	src/mmpack-build/mmpack_pkg_create.py \
+	src/mmpack-build/mmpack_pkg_check.py \
+	src/mmpack-build/mmpack_pkg_show.py \
+	src/mmpack-build/pacman.py \
+	src/mmpack-build/pe_utils.py \
+	src/mmpack-build/src_package.py \
+	src/mmpack-build/mm_version.py \
+	src/mmpack-build/workspace.py \
+	src/mmpack-build/xdg.py \
 	$(eol)
 
 nodist_mmpackbuild_PYTHON =\
-	src/settings.py \
+	src/mmpack-build/settings.py \
 	$(eol)
 
 BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON)
@@ -76,64 +76,64 @@ spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN)
 
 .PHONY: syntax
 syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON)
-	$(srcdir)/tools/check-pyfile $^
+	$(srcdir)/devtools/check-pyfile $^
 
 
 mmpack_lib_sources = \
-	src/action-solver.c \
-	src/action-solver.h \
-	src/common.h \
-	src/context.c \
-	src/context.h \
-	src/download.c \
-	src/download.h \
-	src/indextable.c \
-	src/indextable.h \
-	src/mm-alloc.h \
-	src/mmpack-check-integrity.c \
-	src/mmpack-check-integrity.h \
-	src/mmpack-install.c \
-	src/mmpack-install.h \
-	src/mmpack-list.c \
-	src/mmpack-list.h \
-	src/mmpack-mkprefix.c \
-	src/mmpack-mkprefix.h \
-	src/mmpack-remove.c \
-	src/mmpack-remove.h \
-	src/mmpack-run.c \
-	src/mmpack-run.h \
-	src/mmpack-search.c \
-	src/mmpack-search.h \
-	src/mmpack-show.c \
-	src/mmpack-show.h \
-	src/mmpack-source.c \
-	src/mmpack-source.h \
-	src/mmpack-update.c \
-	src/mmpack-update.h \
-	src/mmstring.h \
-	src/package-utils.c \
-	src/package-utils.h \
-	src/pkg-fs-utils.c \
-	src/pkg-fs-utils.h \
-	src/settings.c \
-	src/settings.h \
-	src/sha256.c \
-	src/sha256.h \
-	src/sysdeps.c \
-	src/sysdeps.h \
-	src/utils.c \
-	src/utils.h \
+	src/mmpack/action-solver.c \
+	src/mmpack/action-solver.h \
+	src/mmpack/common.h \
+	src/mmpack/context.c \
+	src/mmpack/context.h \
+	src/mmpack/download.c \
+	src/mmpack/download.h \
+	src/mmpack/indextable.c \
+	src/mmpack/indextable.h \
+	src/mmpack/mm-alloc.h \
+	src/mmpack/mmpack-check-integrity.c \
+	src/mmpack/mmpack-check-integrity.h \
+	src/mmpack/mmpack-install.c \
+	src/mmpack/mmpack-install.h \
+	src/mmpack/mmpack-list.c \
+	src/mmpack/mmpack-list.h \
+	src/mmpack/mmpack-mkprefix.c \
+	src/mmpack/mmpack-mkprefix.h \
+	src/mmpack/mmpack-remove.c \
+	src/mmpack/mmpack-remove.h \
+	src/mmpack/mmpack-run.c \
+	src/mmpack/mmpack-run.h \
+	src/mmpack/mmpack-search.c \
+	src/mmpack/mmpack-search.h \
+	src/mmpack/mmpack-show.c \
+	src/mmpack/mmpack-show.h \
+	src/mmpack/mmpack-source.c \
+	src/mmpack/mmpack-source.h \
+	src/mmpack/mmpack-update.c \
+	src/mmpack/mmpack-update.h \
+	src/mmpack/mmstring.h \
+	src/mmpack/package-utils.c \
+	src/mmpack/package-utils.h \
+	src/mmpack/pkg-fs-utils.c \
+	src/mmpack/pkg-fs-utils.h \
+	src/mmpack/settings.c \
+	src/mmpack/settings.h \
+	src/mmpack/sha256.c \
+	src/mmpack/sha256.h \
+	src/mmpack/sysdeps.c \
+	src/mmpack/sysdeps.h \
+	src/mmpack/utils.c \
+	src/mmpack/utils.h \
 	$(eol)
 
 mmpack_SOURCES = \
 	$(mmpack_lib_sources) \
-	src/mmpack.c \
+	src/mmpack/mmpack.c \
 	$(eol)
 dist_pkgdata_DATA = \
-	src/build-autotools \
-	src/build-cmake \
-	src/build-makefile \
-	src/build-python \
+	src/mmpack-build/build-autotools \
+	src/mmpack-build/build-cmake \
+	src/mmpack-build/build-makefile \
+	src/mmpack-build/build-python \
 	$(eol)
 
 mmpack_LDADD = \
@@ -147,21 +147,21 @@ mmpack_LDADD = \
 mount_mmpack_prefix_SOURCES =
 
 if OS_KERNEL_LINUX
-mount_mmpack_prefix_SOURCES += src/mount-prefix-linux.c
+mount_mmpack_prefix_SOURCES += src/mmpack/mount-prefix-linux.c
 endif
 
 if OS_KERNEL_NT
-mount_mmpack_prefix_SOURCES += src/mount-prefix-nt.c
+mount_mmpack_prefix_SOURCES += src/mmpack/mount-prefix-nt.c
 endif
 
 mmpack_check_sysdep_SOURCES = \
-	src/indextable.h \
-	src/indextable.c \
-	src/mmpack-check-sysdep.c \
-	src/sha256.c \
-	src/sysdeps.h \
-	src/sysdeps.c \
-	src/utils.c \
+	src/mmpack/indextable.h \
+	src/mmpack/indextable.c \
+	src/mmpack/mmpack-check-sysdep.c \
+	src/mmpack/sha256.c \
+	src/mmpack/sysdeps.h \
+	src/mmpack/sysdeps.c \
+	src/mmpack/utils.c \
 	$(eol)
 
 mmpack_check_sysdep_LDADD = \
@@ -175,11 +175,12 @@ mmpack_check_sysdep_LDADD = \
 setcap:
 	$(AM_V_GEN) setcap cap_dac_override,cap_sys_admin+ep $(libexecdir)/mmpack/mount-mmpack-prefix
 
-mmpack-build: src/mmpack-build.in Makefile
+mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<mmpackbuilddir>,$(mmpackbuilddir),g' < $< > $@
 	$(AM_V_at)chmod a+x $@
 
 %.py : %.py.in Makefile
+	$(AM_V_at)$(MKDIR_P) $(dir $@)
 	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' \
 		-e 's,<libexecdir>,$(libexecdir),g' < $< > $@
 
@@ -233,8 +234,8 @@ unittests_tap_LDADD = \
 
 completiondir = $(datadir)/bash-completion/completions
 dist_completion_DATA = \
-	src/mmpack_completion \
-	src/mmpack-build_completion \
+	src/mmpack/mmpack_completion \
+	src/mmpack-build/mmpack-build_completion \
 	$(eol)
 
 #

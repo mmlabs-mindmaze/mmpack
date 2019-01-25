@@ -48,6 +48,7 @@ build-aux/*
 *.lo
 /mmpack
 /mount-mmpack-prefix
+/mmpack-check-sysdep
 
 # generated files
 /mmpack-build

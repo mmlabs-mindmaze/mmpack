@@ -3,6 +3,6 @@
 set -e
 set -x
 
-export PYTHONPATH="src:$srcdir/src:$PYTHONPATH"
+export PYTHONPATH="src/mmpack-build:$srcdir/src/mmpack-build:$PYTHONPATH"
 
 python3 $srcdir/tests/pytests.py

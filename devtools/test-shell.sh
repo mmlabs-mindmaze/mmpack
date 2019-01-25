@@ -41,8 +41,8 @@ mmpack mkprefix --url="$REPOSITORY/$DIST" $MMPACK_PREFIX
 # update PS1
 export PS1='\u@\h:\w\$ [mmpack] '
 
-source ../src/mmpack_completion
-source ../src/mmpack-build_completion
+source ../src/mmpack/mmpack_completion
+source ../src/mmpack-build/mmpack-build_completion
 
 exec < /dev/tty
 EOF

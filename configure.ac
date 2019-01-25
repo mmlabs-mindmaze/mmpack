@@ -2,7 +2,7 @@
 
 # Setup autoconf
 AC_INIT(mmpack,[0.0.1],[gabriel.ganne@mindmaze.ch])
-AC_CONFIG_SRCDIR([src/mmpack-update.c])
+AC_CONFIG_SRCDIR([src/mmpack/mmpack-update.c])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([config/config.h])
