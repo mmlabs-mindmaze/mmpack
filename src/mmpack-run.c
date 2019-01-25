@@ -30,6 +30,13 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		NULL,
 	};
 
+	if (argc == 2
+	    && (STR_EQUAL(argv[1], strlen(argv[1]), "--help")
+	        || STR_EQUAL(argv[1], strlen(argv[1]), "-h"))) {
+		fprintf(stderr, "Usage:\n\tmmpack "RUN_SYNOPSIS"\n");
+		return 0;
+	}
+
 	// Copy command argument if supplied or launch default shell
 	if (argv[1] != NULL) {
 		args = argv + 1;

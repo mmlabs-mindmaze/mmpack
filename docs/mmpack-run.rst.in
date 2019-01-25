@@ -15,12 +15,12 @@ run command in prefix
 SYNOPSIS
 ========
 
-``mmpack run`` [*command*]
+``mmpack run`` [-h|--help] [*command*]
 
 DESCRIPTION
 ===========
 **mmpack-run** runs given command within current prefix.
-If no gommand was given, it will open an interactive shell within the current
+If no command was given, it will open an interactive shell within the current
 prefix instead.
 
 
@@ -28,6 +28,9 @@ OPTIONS
 =======
 **command**
   The command to run, as if to the shell prompt.
+
+-h|--help
+  Show help and exit
 
 EXAMPLE
 =======
