@@ -62,7 +62,7 @@ upload
 mmpack install -y mmpack-hello-world
 hello-world
 head-libexec-world || echo "failed as expected"
-mmpack runprefix head-libexec-world  # this one should work
+mmpack run head-libexec-world  # this one should work
 
 if [ -n "$SMOKE" ] ; then
 	exit

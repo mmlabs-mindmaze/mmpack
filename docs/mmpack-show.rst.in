@@ -28,5 +28,5 @@ SEE ALSO
 ``mmpack-install``\(1),
 ``mmpack-mkprefix``\(1),
 ``mmpack-remove``\(1),
-``mmpack-runprefix``\(1),
+``mmpack-run``\(1),
 ``mmpack-update``\(1),

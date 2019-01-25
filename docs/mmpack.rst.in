@@ -49,7 +49,7 @@ OPTIONS
 
 mmpack-command
   Run given **mmpack** command.  Possible commands are:
-  install, mkprefix, remove, runprefix, search, update
+  install, mkprefix, remove, run, search, update
 
 ENVIRONMENT
 ===========
@@ -86,7 +86,7 @@ SEE ALSO
 ``mmpack-install``\(1),
 ``mmpack-mkprefix``\(1),
 ``mmpack-remove``\(1),
-``mmpack-runprefix``\(1),
+``mmpack-run``\(1),
 ``mmpack-search``\(1),
 ``mmpack-show``\(1),
 ``mmpack-source``\(1),

@@ -20,7 +20,7 @@
 #include "mmpack-list.h"
 #include "mmpack-mkprefix.h"
 #include "mmpack-remove.h"
-#include "mmpack-runprefix.h"
+#include "mmpack-run.h"
 #include "mmpack-search.h"
 #include "mmpack-show.h"
 #include "mmpack-source.h"
@@ -50,7 +50,7 @@ static const char arguments_docs[] =
 	"[options] "LIST_SYNOPSIS"\n"
 	"[options] "MKPREFIX_SYNOPSIS"\n"
 	"[options] "REMOVE_SYNOPSIS"\n"
-	"[options] "RUNPREFIX_SYNOPSIS"\n"
+	"[options] "RUN_SYNOPSIS"\n"
 	"[options] "SEARCH_SYNOPSIS"\n"
 	"[options] "SHOW_SYNOPSIS"\n"
 	"[options] "SOURCE_SYNOPSIS"\n"
@@ -131,8 +131,8 @@ int main(int argc, char* argv[])
 	} else if (STR_EQUAL(cmd, strlen(cmd), "remove")
 	           || STR_EQUAL(cmd, strlen(cmd), "uninstall")) {
 		rv = mmpack_remove(&ctx, cmd_argc, cmd_argv);
-	} else if (STR_EQUAL(cmd, strlen(cmd), "runprefix")) {
-		rv = mmpack_runprefix(&ctx, cmd_argc, cmd_argv);
+	} else if (STR_EQUAL(cmd, strlen(cmd), "run")) {
+		rv = mmpack_run(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "search")) {
 		rv = mmpack_search(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "show")

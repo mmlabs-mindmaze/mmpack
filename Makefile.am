@@ -100,8 +100,8 @@ mmpack_lib_sources = \
 	src/mmpack-mkprefix.h \
 	src/mmpack-remove.c \
 	src/mmpack-remove.h \
-	src/mmpack-runprefix.c \
-	src/mmpack-runprefix.h \
+	src/mmpack-run.c \
+	src/mmpack-run.h \
 	src/mmpack-search.c \
 	src/mmpack-search.h \
 	src/mmpack-show.c \
@@ -252,7 +252,7 @@ RST_MAN_PAGES_IN = \
 	docs/mmpack-list.rst.in \
 	docs/mmpack-mkprefix.rst.in \
 	docs/mmpack-remove.rst.in \
-	docs/mmpack-runprefix.rst.in \
+	docs/mmpack-run.rst.in \
 	docs/mmpack-search.rst.in \
 	docs/mmpack-show.rst.in \
 	docs/mmpack-source.rst.in \

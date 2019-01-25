@@ -15,12 +15,12 @@
 #include "context.h"
 #include "mmstring.h"
 
-#include "mmpack-runprefix.h"
+#include "mmpack-run.h"
 
 #define MOUNT_PREFIX_BIN        LIBEXECDIR"/mount-mmpack-prefix"EXEEXT
 
 LOCAL_SYMBOL
-int mmpack_runprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
+int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	int nargs;
 	const char** args;

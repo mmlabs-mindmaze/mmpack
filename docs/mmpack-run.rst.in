@@ -1,6 +1,6 @@
-================
-mmpack-runprefix
-================
+==========
+mmpack-run
+==========
 
 ---------------------
 run command in prefix
@@ -15,11 +15,13 @@ run command in prefix
 SYNOPSIS
 ========
 
-``mmpack runprefix`` *command*
+``mmpack run`` [*command*]
 
 DESCRIPTION
 ===========
-**mmpack-runprefix** runs given command within current prefix.
+**mmpack-run** runs given command within current prefix.
+If no gommand was given, it will open an interactive shell within the current
+prefix instead.
 
 
 OPTIONS
@@ -31,7 +33,7 @@ EXAMPLE
 =======
 
 | # create a bash shell within current prefix
-| mmpack runprefix bash
+| mmpack run bash
 
 
 SEE ALSO

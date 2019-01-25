@@ -347,7 +347,7 @@ class SrcPackage(object):
         # the headers and libraries of the prefix
         if wrk.prefix:
             # XXX: might need to also extend PATH.
-            #      however, those binaries require mmpack runprefix to run
+            #      however, those binaries require mmpack run to run
             env_path_prepend(build_env, 'CPATH', wrk.prefix + '/include')
             env_path_prepend(build_env, 'LIBRARY_PATH', wrk.prefix + '/lib')
             tmp = os.environ.get('LDFLAGS', '')

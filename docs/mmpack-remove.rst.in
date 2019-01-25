@@ -45,6 +45,6 @@ SEE ALSO
 ``mmpack``\(1),
 ``mmpack-mkprefix``\(1),
 ``mmpack-install``\(1),
-``mmpack-runprefix``\(1),
+``mmpack-run``\(1),
 ``mmpack-search``\(1),
 ``mmpack-update``\(1),
