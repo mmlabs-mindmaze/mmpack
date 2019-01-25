@@ -15,12 +15,16 @@ search packages
 SYNOPSIS
 ========
 
-``mmpack search`` *pattern*
+``mmpack search`` [-h|--help] *pattern*
 
 DESCRIPTION
 ===========
 **mmpack-search** searches given pattern within all the available package names.
 
+OPTIONS
+=======
+-h|--help
+  Show help and exit
 
 SEE ALSO
 ========

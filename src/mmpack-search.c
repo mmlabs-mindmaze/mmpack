@@ -41,7 +41,15 @@ int mmpack_search(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct cb_data data;
 
+	if (argc != 2
+	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")
+	    || STR_EQUAL(argv[1], strlen(argv[1]), "-h")) {
+		fprintf(stderr, "Usage:\n\tmmpack "SEARCH_SYNOPSIS"\n");
+		return argc != 2 ? -1 : 0;
+	}
+
 	if (argc < 2) {
+
 		fprintf(stderr, "missing package argument in command line\n"
 		                "Usage:\n\tmmpack search "SEARCH_SYNOPSIS"\n");
 		return -1;
