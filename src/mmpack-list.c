@@ -119,7 +119,7 @@ static
 int mmpack_list_parse_options(int argc, const char* argv[], struct cb_data * data)
 {
 	*data = (struct cb_data) {
-		.subcommand = LIST_ALL,
+		.subcommand = LIST_INSTALLED,
 		.pkg_name_pattern = "",
 	};
 

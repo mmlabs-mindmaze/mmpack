@@ -20,10 +20,12 @@ DESCRIPTION
 ===========
 **mmpack-list** lists information about the installed or available packages.
 
-With no argument specified, defaults to **all** which lists all installed and
-available packages.
+With no argument specified, defaults to **installed** which lists all installed
+packages only.
 
-**mmpack list available** list all the packages that are provided through any
+**mmpack list all** lists both installed and available packages
+
+**mmpack list available** lists all the packages that are provided through any
 of the registered repositories.
 
 **mmpack list upgradable** lists all installed packages that could be upgraded.
