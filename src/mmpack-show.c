@@ -54,10 +54,12 @@ int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct cb_data data;
 
-	if (argc < 2) {
+	if (argc != 2
+	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")
+	    || STR_EQUAL(argv[1], strlen(argv[1]), "-h")) {
 		fprintf(stderr, "missing package argument in command line\n"
 		                "Usage:\n\tmmpack show "SHOW_SYNOPSIS"\n");
-		return -1;
+		return argc != 2 ? -1 : 0;
 	}
 	data.pkg_name = argv[1];
 

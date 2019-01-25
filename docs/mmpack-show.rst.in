@@ -15,12 +15,16 @@ show packages
 SYNOPSIS
 ========
 
-``mmpack show`` *package*
+``mmpack show`` [-h|--help] *package*
 
 DESCRIPTION
 ===========
 **mmpack-show** show given package metadatas.
 
+OPTIONS
+=======
+-h|--help
+  Show help and exit
 
 SEE ALSO
 ========
