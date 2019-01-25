@@ -15,12 +15,16 @@ source packages
 SYNOPSIS
 ========
 
-``mmpack source`` *package*
+``mmpack source`` [-h|--help] *package*
 
 DESCRIPTION
 ===========
 **mmpack-source** download given package sources into current directory.
 
+OPTIONS
+=======
+-h|--help
+  Show help and exit
 
 SEE ALSO
 ========

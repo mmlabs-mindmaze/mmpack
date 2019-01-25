@@ -51,10 +51,12 @@ int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct mmpkg const * pkg;
 
-	if (argc < 2) {
+	if (argc != 2
+	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")
+	    || STR_EQUAL(argv[1], strlen(argv[1]), "-h")) {
 		fprintf(stderr, "missing package argument in command line\n"
 		                "Usage:\n\tmmpack source "SOURCE_SYNOPSIS"\n");
-		return -1;
+		return argc != 2 ? -1 : 0;
 	}
 
 	/* Load prefix configuration and caches */
