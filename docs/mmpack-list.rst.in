@@ -14,7 +14,7 @@ list packages
 SYNOPSIS
 ========
 
-``mmpack list`` [all|available|upgradable|installed|extras] [*pattern*]
+``mmpack list`` [-h|--help] [all|available|upgradable|installed|extras] [*pattern*]
 
 DESCRIPTION
 ===========
@@ -40,6 +40,10 @@ such packages was installed manually from an archive.
 Additionally, if a package, or a package pattern is given, the results will be
 filtered by that pattern.
 
+OPTIONS
+=======
+-h|--help
+  Show help and exit
 
 SEE ALSO
 ========

@@ -136,8 +136,14 @@ int mmpack_list_parse_options(int argc, const char* argv[], struct cb_data * dat
 			data->subcommand = LIST_INSTALLED;
 		else if (STR_EQUAL(argv[1], len, "upgradable"))
 			data->subcommand = LIST_UPGRADABLE;
-		else
+		else if (STR_EQUAL(argv[1], len, "--help")
+		         || STR_EQUAL(argv[1], len, "-h"))
+			return 1;
+		else {
+			fprintf(stderr, "invalid list subcommand\n");
 			return -1;
+		}
+
 
 		if (argc == 3)
 			data->pkg_name_pattern = argv[2];
@@ -152,12 +158,13 @@ int mmpack_list_parse_options(int argc, const char* argv[], struct cb_data * dat
 LOCAL_SYMBOL
 int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
+	int rv;
 	struct cb_data data;
 
-	if (mmpack_list_parse_options(argc, argv, &data) < 0) {
-		fprintf(stderr, "invalid list subcommand\n"
-				"Usage:\n\tmmpack "LIST_SYNOPSIS"\n");
-		return -1;
+	rv = mmpack_list_parse_options(argc, argv, &data);
+	if (rv != 0) {
+		fprintf(stderr, "Usage:\n\tmmpack "LIST_SYNOPSIS"\n");
+		return rv < 0 ? -1 : 0;
 	}
 
 	/* Load prefix configuration and caches */
