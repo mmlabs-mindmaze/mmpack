@@ -34,9 +34,16 @@ int download_repo_index(struct mmpack_ctx * ctx, int repo_index)
 
 
 LOCAL_SYMBOL
-int mmpack_update_all(struct mmpack_ctx * ctx)
+int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 {
 	int i, num_repo;
+
+	if (argc == 2
+	    && (STR_EQUAL(argv[1], strlen(argv[1]), "--help")
+	        || STR_EQUAL(argv[1], strlen(argv[1]), "-h"))) {
+		fprintf(stderr, "Usage:\n\tmmpack "UPDATE_SYNOPSIS"\n");
+		return 0;
+	}
 
 	// Load prefix configuration
 	if (mmpack_ctx_use_prefix(ctx, CTX_SKIP_PKGLIST))

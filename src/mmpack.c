@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 	} else if (STR_EQUAL(cmd, strlen(cmd), "mkprefix")) {
 		rv = mmpack_mkprefix(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "update")) {
-		rv = mmpack_update_all(&ctx);
+		rv = mmpack_update_all(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "install")) {
 		rv = mmpack_install(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "remove")

@@ -15,12 +15,17 @@ update command
 SYNOPSIS
 ========
 
-``mmpack update``
+``mmpack update [-h|--help]``
 
 DESCRIPTION
 ===========
 
 **mmpack-update** update local package list from repository list in config file.
+
+OPTIONS
+=======
+-h|--help
+  Show help and exit
 
 FILES
 =====
