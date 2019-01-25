@@ -88,6 +88,14 @@ int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc, char const* argv[]
 		.error = 0,
 	};
 
+	if (argc > 2
+	    || (argc == 2
+	        && (STR_EQUAL(argv[1], strlen(argv[1]), "--help")
+	            || STR_EQUAL(argv[1], strlen(argv[1]), "-h")))) {
+		fprintf(stderr, "Usage:\n\tmmpack "CHECK_INTEGRITY_SYNOPSIS"\n");
+		return argc > 2;
+	}
+
 	/* Load prefix configuration and caches */
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;

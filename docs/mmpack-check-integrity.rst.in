@@ -15,12 +15,16 @@ check-integrity packages
 SYNOPSIS
 ========
 
-``mmpack check-integrity`` [*package*]
+``mmpack check-integrity`` [-h|--help] [*package*]
 
 DESCRIPTION
 ===========
 **mmpack-check-integrity** check package integrity, or all packages if none given
 
+OPTIONS
+=======
+-h|--help
+  Show help and exit
 
 SEE ALSO
 ========
