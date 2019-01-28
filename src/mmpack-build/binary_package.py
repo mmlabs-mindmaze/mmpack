@@ -116,18 +116,25 @@ class BinaryPackage(object):
 
     def _get_specs_provides(self,
                             pkgname: str) -> Dict[str, Dict[str, Version]]:
-        ' TODOC '
+        ''' return a dict containing the specified interface of given package
+
+        Look for a <pkgname>.provides file within the project's mmpack folder,
+        load it and return its parsed values as a dictionary.
+
+        return an empty interface dict if none was specified.
+        '''
         # TODO: also work with the last package published
         wrk = Workspace()
         provide_spec_name = '{0}/{1}-{2}/mmpack/{3}.provides' \
                             .format(wrk.sources, self.source, self.tag,
                                     pkgname)
         dprint('reading symbols from ' + provide_spec_name)
+        specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
         try:
-            specs_provides = yaml_load(provide_spec_name)
+            specs_provides.update(yaml_load(provide_spec_name))
         except FileNotFoundError:
             # return an empty dict if nothing has been provided
-            specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
+            pass
 
         return specs_provides
 
