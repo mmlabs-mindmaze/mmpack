@@ -41,7 +41,6 @@ mmpack-build <command> --help
 TODO:
 - package creation commands to implement:
   * pkg-check
-  * pkg-show
 
 - package DB commands to implement:
   * provides
