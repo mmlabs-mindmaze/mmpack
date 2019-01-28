@@ -1,8 +1,11 @@
 # @mindmaze_header@
 '''
-install source package dependencies.
+Install given source package build dependencies.
+Uses current repository to find mmpack specfile if none given.
 
-TODOC
+System packages will be checked for only; command will fail if any
+system dependency is unmet. All the available mmpack packages found
+missing will be proposed for install within the current prefix.
 '''
 
 import sys
