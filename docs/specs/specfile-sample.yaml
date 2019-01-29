@@ -67,7 +67,7 @@ sample-doc:
     - .*/man/.*\.[^123]  # all man pages not above
     - .*/doc/.*
 
-# the debug package should be generated automatically and not explicited
+# the debug package should be generated automatically and not explicit
 sample-debug:
   depends:
     - sample  # automatically added
@@ -76,7 +76,7 @@ sample-debug:
     - .*\.debug  
 
 
-# Additionnally, packages can be generated around some files.
+# Additionally, packages can be generated around some files.
 # For example, if the compilation of the package yields a library
 # then an additional package will be generated around it.
 # Eg:
