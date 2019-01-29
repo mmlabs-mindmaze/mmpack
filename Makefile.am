@@ -50,7 +50,6 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/file_utils.py \
 	src/mmpack-build/mmpack_builddep.py \
 	src/mmpack-build/mmpack_clean.py \
-	src/mmpack-build/mmpack_config.py \
 	src/mmpack-build/mmpack_pkg_create.py \
 	src/mmpack-build/mmpack_pkg_check.py \
 	src/mmpack-build/pacman.py \
