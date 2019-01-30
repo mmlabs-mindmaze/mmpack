@@ -1436,6 +1436,44 @@ void install_state_save_to_index(struct install_state* state, FILE* fp)
 }
 
 
+/**
+ * install_state_fill_lookup_table() - fill an table of installed package
+ * @state:      install state to dump
+ * @binindex:   binary index associated with install state (used for package
+ *              name to id resolution)
+ * @installed:  lookup table of length binindex->num_pkgname
+ *
+ * This function will fill a lookup table @installed whose each element correspond
+ * to the package installed for a package name id if one is installed, NULL
+ * if not.
+ */
+LOCAL_SYMBOL
+void install_state_fill_lookup_table(const struct install_state* state,
+                                     struct binindex* binindex,
+                                     struct mmpkg** installed)
+{
+	struct it_iterator iter;
+	struct it_entry* entry;
+	struct mmpkg* pkg;
+	int id;
+
+	// Set initially to all uninstalled
+	memset(installed, 0, binindex->num_pkgname * sizeof(*installed));
+
+	// Loop over the indextable... For each package package installed
+	// update the element in @installed table corresponding to its
+	// package id
+	entry = it_iter_first(&iter, &state->idx);
+	while (entry) {
+		pkg = entry->value;
+		id = binindex_get_pkgname_id(binindex, pkg->name);
+		installed[id] = pkg;
+		entry = it_iter_next(&iter);
+	}
+}
+
+
+
 /**************************************************************************
  *                                                                        *
  *                      Reverse dependency iterator                       *

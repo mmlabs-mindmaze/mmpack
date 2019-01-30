@@ -143,6 +143,9 @@ int install_state_init(struct install_state* state);
 int install_state_copy(struct install_state* restrict dst,
                        const struct install_state* restrict src);
 void install_state_deinit(struct install_state* state);
+void install_state_fill_lookup_table(const struct install_state* state,
+                                     struct binindex* binindex,
+                                     struct mmpkg** installed);
 const struct mmpkg* install_state_get_pkg(const struct install_state* state,
                                           const mmstr* name);
 void install_state_add_pkg(struct install_state* state,
