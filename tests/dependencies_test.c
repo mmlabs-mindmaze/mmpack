@@ -33,6 +33,7 @@ static const char * valid_mmpack_deps[][7] = {
 
 static const char * invalid_binindexes[] = {
 	TEST_BININDEX_DIR"/dependency-issue.yaml",
+	TEST_BININDEX_DIR"/unsolvable-dependencies.yaml",
 };
 #define NUM_INVALID_BININDEXES MM_NELEM(invalid_binindexes)
 
