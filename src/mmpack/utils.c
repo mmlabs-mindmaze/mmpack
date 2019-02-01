@@ -564,16 +564,17 @@ void strlist_deinit(struct strlist* list)
 
 
 LOCAL_SYMBOL
-int strlist_add(struct strlist* list, const mmstr* str)
+int strlist_add(struct strlist* list, const char* str)
 {
 	struct strlist_elt* elt;
 	int len;
 
 	// Create the new element
-	len = mmstrlen(str);
+	len = strlen(str);
 	elt = mm_malloc(sizeof(*elt) + len + 1);
 	elt->str.max = len;
-	mmstrcpy(elt->str.buf, str);
+	elt->str.len = len;
+	memcpy(elt->str.buf, str, len + 1);
 	elt->next = NULL;
 
 	// Set as new head if list is empty

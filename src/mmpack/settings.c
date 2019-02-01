@@ -61,9 +61,7 @@ void fill_repositories(yaml_parser_t* parser, struct settings* settings)
 {
 	yaml_token_t token;
 	const char* data;
-	int datalen;
 	struct strlist repo_list;
-	mmstr* url = NULL;
 
 	strlist_init(&repo_list);
 	while (1) {
@@ -78,10 +76,7 @@ void fill_repositories(yaml_parser_t* parser, struct settings* settings)
 
 		case YAML_SCALAR_TOKEN:
 			data = (const char*)token.data.scalar.value;
-			datalen = token.data.scalar.length;
-
-			url = mmstr_copy_realloc(url, data, datalen);
-			strlist_add(&repo_list, url);
+			strlist_add(&repo_list, data);
 			break;
 
 		default:
@@ -92,7 +87,6 @@ void fill_repositories(yaml_parser_t* parser, struct settings* settings)
 	}
 
 exit:
-	mmstr_free(url);
 	yaml_token_delete(&token);
 
 	// Replace repo list in settings

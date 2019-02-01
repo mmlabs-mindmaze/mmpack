@@ -79,7 +79,7 @@ struct strlist {
 
 void strlist_init(struct strlist* list);
 void strlist_deinit(struct strlist* list);
-int strlist_add(struct strlist* list, const mmstr* str);
+int strlist_add(struct strlist* list, const char* str);
 
 
 #endif /* UTILS_H */
