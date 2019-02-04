@@ -432,7 +432,10 @@ static
 void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 {
 	struct pkglist_entry* entry;
+	struct pkglist_entry** pnext;
 	struct mmpkg* pkg_in_list;
+	const mmstr* next_version;
+	int vercmp;
 
 	// Loop over entry and check whether there is an identical package
 	// (ie has the same sumsha and version).
@@ -458,10 +461,18 @@ void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 		return;
 	}
 
+	// Find where to insert entry (package version are sorted)
+	for (pnext = &list->head; *pnext != NULL; pnext = &(*pnext)->next) {
+		next_version = (*pnext)->pkg.version;
+		vercmp = pkg_version_compare(next_version, pkg->version);
+		if (vercmp < 0)
+			break;
+	}
+
 	// Add new entry to the list
 	entry = mm_malloc(sizeof(*entry));
-	entry->next = list->head;
-	list->head = entry;
+	entry->next = *pnext;
+	*pnext = entry;
 
 	// copy the whole package structure
 	entry->pkg = *pkg;
