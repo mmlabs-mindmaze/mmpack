@@ -264,3 +264,59 @@ CLEANFILES += $(nodist_man_MANS)
 %.1: %.rst.in
 	$(AM_V_at) $(MKDIR_P) docs
 	$(AM_V_GEN) $(SED) -e 's,<version>,$(VERSION),g' < $< | $(RST2MAN) > $@
+
+#
+# optional doc rules: generate internal function documentation
+# Skipped if --enable-sphinxdoc=no
+#
+if BUILD_SPHINXDOC
+SPHINXBUILD   = sphinx-build
+
+sphinx_verbose = $(sphinx_verbose_@AM_V@)
+sphinx_verbose_ = $(sphinx_verbose_@AM_DEFAULT_V@)
+sphinx_verbose_0 = -q
+
+ALLSPHINXOPTS = -d $(sphinx_verbose) $(srcdir)
+
+# Due to a dependency bug in sphinx-build, we use the -M option instead of
+# the usual -b one. This hidden option sums up to the same as -b with makefile
+# dependency support ... except that it does not support -W option which turns
+# warnings into errors !
+# => do this with a simple grep line on the output
+
+index.rst: $(srcdir)/docs/gen-devdoc-mmpack.sh $(filter %.c, $(mmpack_lib_sources))
+	$(AM_V_GEN) $^ > $@
+
+conf.py: $(srcdir)/docs/conf.py
+	$(AM_V_GEN) cp -uv $^ $@
+
+sphinx-build.log: conf.py index.rst
+	@$(RM) -f html-buildstamp
+	$(AM_V_GEN) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) srctree=$(srcdir) $(SPHINXBUILD) -b html -c $(srcdir)/docs/ $(builddir) $(builddir)/html &> $@
+
+# eg. "src/mmpack-build/common.py" -> "common.rst"
+mmpackbuild_doc_tmp = $(notdir $(mmpackbuild_PYTHON))
+mmpackbuild_docfile = $(mmpackbuild_doc_tmp:.py=.rst)
+$(mmpackbuild_docfile): modules.rst
+modules.rst: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON)
+	$(AM_V_GEN) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) sphinx-apidoc -o . $(srcdir)/src/mmpack-build/
+
+html-local: html-buildstamp
+html-buildstamp: sphinx-build.log $(mmpackbuild_docfile)
+	@rm -vf $@
+	@if [ "$(shell grep -c WARNING: sphinx-build.log)" != "0" ] ; then \
+		grep WARNING: sphinx-build.log; \
+		false; \
+	fi
+	@echo
+	@echo "Build finished. The HTML pages are in $(builddir)/html."
+	@touch $@
+
+html-local: html-buildstamp
+
+html-clean:
+	$(RM) -rf html html-buildstamp sphinx-build.log conf.py index.rst $(mmpackbuild_docfile) modules.rst
+
+clean-local: html-clean
+
+endif # BUILD_SPHINXDOC
