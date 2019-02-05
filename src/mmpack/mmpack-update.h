@@ -7,7 +7,7 @@
 
 #include "context.h"
 
-#define UPDATE_SYNOPSIS "update [-h|--help]"
+#define UPDATE_SYNOPSIS "update"
 
 int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv);
 
