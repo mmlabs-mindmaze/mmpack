@@ -23,7 +23,7 @@
 struct rdepends {
 	int num;
 	int nmax;
-	const mmstr** names;
+	int* ids;
 };
 
 struct pkglist_entry {
@@ -325,7 +325,7 @@ void rdepends_init(struct rdepends* rdeps)
 static
 void rdepends_deinit(struct rdepends* rdeps)
 {
-	free(rdeps->names);
+	free(rdeps->ids);
 	rdepends_init(rdeps);
 }
 
@@ -333,32 +333,30 @@ void rdepends_deinit(struct rdepends* rdeps)
 /**
  * rdepends_add() - add a package name to an set of reverse dependencies
  * @rdeps:      reverse dependencies to update
- * @pkgname:    package name to add as reverse dependency
+ * @pkgname_id: package name to add as reverse dependency
  *
  * This add @pkgname to the set of reverse dependencies. If @pkgname is
  * already in the set, nothing is done.
  */
 static
-void rdepends_add(struct rdepends* rdeps, const mmstr* pkgname)
+void rdepends_add(struct rdepends* rdeps, int pkgname_id)
 {
 	int i, nmax;
 
-	// Check the reverse dependency has not been added yet. The test is
-	// done simply on the pointer value because package name always
-	// come from member of pkglist unique in the binary index
+	// Check the reverse dependency has not been added yet.
 	for (i = 0; i < rdeps->num; i++)
-		if (rdeps->names[i] == pkgname)
+		if (rdeps->ids[i] == pkgname_id)
 			return;
 
 	// Resize if too small
 	if (rdeps->num+1 > rdeps->nmax) {
 		nmax = rdeps->nmax ? rdeps->nmax * 2 : 8;
-		rdeps->names = mm_realloc(rdeps->names,
-		                          nmax * sizeof(*rdeps->names));
+		rdeps->ids = mm_realloc(rdeps->ids,
+		                        nmax * sizeof(*rdeps->ids));
 		rdeps->nmax = nmax;
 	}
 
-	rdeps->names[rdeps->num++] = pkgname;
+	rdeps->ids[rdeps->num++] = pkgname_id;
 }
 
 
@@ -863,7 +861,7 @@ void binindex_compute_rdepends(struct binindex* binindex)
 		while (dep) {
 			pkglist = binindex_get_pkglist(binindex, dep->name);
 			assert(pkglist != NULL);
-			rdepends_add(&pkglist->rdeps, pkg->name);
+			rdepends_add(&pkglist->rdeps, pkg->name_id);
 
 			dep = dep->next;
 		}
@@ -1499,8 +1497,9 @@ void install_state_fill_lookup_table(const struct install_state* state,
  * @iter:       pointer to an iterator structure
  * @pkg:        package whose reverse dependencies are requested
  * @binindex:   binary package index
- * @state:      install state to use combined with @binindex, to test which
- *              installed package is depending on @pkg
+ * @inst_lut:   lookup table of installed package, used combined with
+ *              @binindex, to test which installed package is depending
+ *              on @pkg
  *
  * Return: the pointer to first package in the set of reverse dependencies
  * of @pkg if not empty, NULL otherwise.
@@ -1509,18 +1508,20 @@ LOCAL_SYMBOL
 const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
                                      const struct mmpkg* pkg,
                                      const struct binindex* binindex,
-                                     const struct install_state* state)
+                                     struct mmpkg** inst_lut)
 {
 	const struct pkglist* list;
 
-	list = binindex_get_pkglist(binindex, pkg->name);
-	assert(list != NULL);
+	assert(pkg->name_id < binindex->num_pkgname);
+
+	list = &binindex->pkgname_table[pkg->name_id];
 
 	*iter = (struct rdeps_iter) {
-		.pkg_name = pkg->name,
-		.state = state,
-		.rdeps_names = list->rdeps.names,
+		.binindex = binindex,
+		.install_lut = inst_lut,
+		.rdeps_ids = list->rdeps.ids,
 		.rdeps_index = list->rdeps.num,
+		.pkgname_id = list->id,
 	};
 
 	return rdeps_iter_next(iter);
@@ -1546,24 +1547,24 @@ const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
 LOCAL_SYMBOL
 const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
 {
-	const struct mmpkg* rdep_pkg;
-	const struct mmpkg_dep* dep;
-	const mmstr* rdep_name;
+	struct mmpkg* rdep_pkg;
+	struct compiled_dep* dep;
+	int rdep_id;
 
 	while (--iter->rdeps_index >= 0) {
-		rdep_name = iter->rdeps_names[iter->rdeps_index];
-		rdep_pkg = install_state_get_pkg(iter->state, rdep_name);
+		rdep_id = iter->rdeps_ids[iter->rdeps_index];
+		rdep_pkg = iter->install_lut[rdep_id];
 		if (!rdep_pkg)
 			continue;
 
 		// Loop over dependencies of candidate package to see if it
 		// really depends on target package name
-		dep = rdep_pkg->mpkdeps;
+		dep = binindex_compile_pkgdeps(iter->binindex, rdep_pkg);
 		while (dep) {
-			if (mmstrequal(dep->name, iter->pkg_name))
+			if (dep->pkgname_id == iter->pkgname_id)
 				return rdep_pkg;
 
-			dep = dep->next;
+			dep = compiled_dep_next(dep);
 		}
 	}
 

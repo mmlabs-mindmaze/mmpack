@@ -581,6 +581,43 @@ int solver_solve_deps(struct solver* solver, struct compiled_dep* initial_deps)
 
 
 /**
+ * remove_package() - remove a package and its reverse dependencies
+ * @solver:     solver context to update
+ * @pkgname_id: id of package name to remove
+ */
+static
+void solver_remove_pkgname(struct solver* solver, int pkgname_id)
+{
+	struct rdeps_iter iter;
+	const struct mmpkg* rdep_pkg;
+	struct mmpkg* pkg;
+	struct planned_op op = {.action = REMOVE, .id = pkgname_id};
+
+	// Check this has not already been done
+	pkg = solver->inst_lut[pkgname_id];
+	if (!pkg)
+		return;
+
+	// Mark it now remove from installed lookup table (this avoids infinite
+	// loop in the case of circular dependency)
+	solver->inst_lut[pkgname_id] = NULL;
+
+	// First remove recursively the reverse dependencies
+	rdep_pkg = rdeps_iter_first(&iter, pkg, solver->binindex, solver->inst_lut);
+	while (rdep_pkg) {
+		solver_remove_pkgname(solver, rdep_pkg->name_id);
+		rdep_pkg = rdeps_iter_next(&iter);
+	}
+
+	// Add package removal to planned operation stack
+	op.pkg = pkg;
+	buffer_push(&solver->ops_stack, &op, sizeof(op));
+}
+
+
+
+
+/**
  * solver_create_action_stack() - Create a action stack from solution
  * @solver:     solver context to query
  *
@@ -732,41 +769,6 @@ exit:
  **************************************************************************/
 
 /**
- * remove_package() - remove a package and its reverse dependencies
- * @pkgname:    name of package to remove
- * @binindex:   index of binary packages
- * @state:      temporary install state used to track removed packages
- * @stack:
- */
-static
-void remove_package(const mmstr* pkgname, struct binindex* binindex,
-                    struct install_state* state, struct action_stack** stack)
-{
-	struct rdeps_iter iter;
-	const struct mmpkg* rdep_pkg;
-	const struct mmpkg* pkg;
-
-	// Check this has not already been done
-	pkg = install_state_get_pkg(state, pkgname);
-	if (!pkg)
-		return;
-
-	// Mark it now remove from state (this avoid infinite loop in the
-	// case of circular dependency)
-	install_state_rm_pkgname(state, pkgname);
-
-	// First remove recursively the reverse dependencies
-	rdep_pkg = rdeps_iter_first(&iter, pkg, binindex, state);
-	while (rdep_pkg) {
-		remove_package(rdep_pkg->name, binindex, state, stack);
-		rdep_pkg = rdeps_iter_next(&iter);
-	}
-
-	*stack = mmpack_action_stack_push(*stack, REMOVE_PKG, pkg);
-}
-
-
-/**
  * mmpkg_get_remove_list() -  compute a remove order
  * @ctx:     the mmpack context
  * @reqlist: requested package list to be removed
@@ -778,19 +780,21 @@ LOCAL_SYMBOL
 struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
                                            const struct pkg_request* reqlist)
 {
-	struct install_state state;
 	struct action_stack * actions = NULL;
 	const struct pkg_request* req;
+	struct solver solver;
+	int id;
 
-	actions = mmpack_action_stack_create();
+	solver_init(&solver, ctx);
 
-	// Copy the current install state of prefix context in order to
-	// simulate the operation done on installed package list
-	install_state_copy(&state, &ctx->installed);
+	for (req = reqlist; req; req = req->next) {
+		id = binindex_get_pkgname_id(solver.binindex, req->name);
+		solver_remove_pkgname(&solver, id);
+	}
 
-	for (req = reqlist; req; req = req->next)
-		remove_package(req->name, &ctx->binindex, &state, &actions);
+	actions = solver_create_action_stack(&solver);
 
+	solver_deinit(&solver);
 	return actions;
 }
 

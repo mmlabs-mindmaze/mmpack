@@ -107,11 +107,20 @@ struct pkglist_iter {
 	struct pkglist_entry* curr;
 };
 
+
+/**
+ * struct rdeps_iter - data to iterate over reverse dependency
+ * @binindex:   binaray index in context which the reverse deps are scanned
+ * @install_lut: lookup table of installed packages
+ * @rdeps_ids:  array of potential reverse dependencies of @pkgname_id
+ * @pkgname_id; id of name of package whose reverse dependencies are listed
+ */
 struct rdeps_iter {
-	const struct install_state* state;
-	const mmstr* pkg_name;
-	const mmstr** rdeps_names;
+	const struct binindex* binindex;
+	struct mmpkg** install_lut;
+	const int* rdeps_ids;
 	int rdeps_index;
+	int pkgname_id;
 };
 
 
@@ -158,7 +167,7 @@ void install_state_save_to_index(struct install_state* state, FILE* fp);
 const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
                                      const struct mmpkg* pkg,
                                      const struct binindex* binindex,
-                                     const struct install_state* state);
+                                     struct mmpkg** inst_lut);
 const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter);
 
 const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
