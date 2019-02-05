@@ -34,6 +34,7 @@ typedef enum {
 int pkg_version_compare(char const * v1, char const * v2);
 
 struct mmpkg {
+	int name_id;
 	mmstr const * name;
 	mmstr const * version;
 	mmstr const * filename;

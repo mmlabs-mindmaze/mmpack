@@ -36,6 +36,7 @@ struct pkglist {
 	struct pkglist_entry* head;
 	struct rdepends rdeps;
 	int num_pkg;
+	int id;
 };
 
 struct pkg_iter {
@@ -371,13 +372,14 @@ void rdepends_add(struct rdepends* rdeps, const mmstr* pkgname)
  * pkglist_init() - initialize a new package list
  * @list:       package list struct to initialize
  * @name:       package name to which the package list will be associated
+ * @id:         id attributed to package name
  *
  * Return: pointer to package list
  */
 static
-void pkglist_init(struct pkglist* list, const mmstr* name)
+void pkglist_init(struct pkglist* list, const mmstr* name, int id)
 {
-	*list = (struct pkglist){.pkg_name = mmstrdup(name)};
+	*list = (struct pkglist){.pkg_name = mmstrdup(name), .id = id};
 	rdepends_init(&list->rdeps);
 }
 
@@ -477,6 +479,7 @@ void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 	// copy the whole package structure
 	entry->pkg = *pkg;
 	entry->pkg.name = list->pkg_name;
+	entry->pkg.name_id = list->id;
 
 	// reset package fields since they have been taken over by the new
 	// entry
@@ -698,7 +701,7 @@ int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name)
 
 		// Initialize the package list associated to id
 		pkglist = &binindex->pkgname_table[pkgname_id];
-		pkglist_init(pkglist, name);
+		pkglist_init(pkglist, name, pkgname_id);
 
 		// Reference the new package list in the index table
 		entry->ivalue = pkgname_id;
