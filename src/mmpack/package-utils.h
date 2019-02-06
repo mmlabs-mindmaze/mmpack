@@ -143,11 +143,16 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 void binindex_dump(struct binindex const * binindex);
 void binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
+struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
+                                              struct mmpkg* pkg,
+                                              struct buffer* buff);
 struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
                                           const struct mmpkg_dep* dep,
                                           struct buffer* buff);
 struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
                                               struct mmpkg* pkg);
+const int* binindex_get_potential_rdeps(const struct binindex* binindex,
+                                        int pkgname_id, int* num_rdeps);
 
 int install_state_init(struct install_state* state);
 int install_state_copy(struct install_state* restrict dst,

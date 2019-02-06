@@ -22,6 +22,7 @@ enum {
 enum solver_state {
 	VALIDATION,
 	SELECTION,
+	UPGRADE_RDEPS,
 	INSTALL_DEPS,
 	NEXT,
 	BACKTRACK,
@@ -51,6 +52,7 @@ struct proc_frame {
  * struct decision_state - snapshot of processing state at decision time
  * @last_decstate_sz:   previous top index of decstate_store of solver
  * @ops_stack_size:     top index of ops_stack of solver
+ * @upgrades_stack_sz:  previous top index of upgrades_stack
  * @curr_frame:         current processing data frame
  * @pkg_index:          index of chosen package in dependency being processed
  * @num_proc_frame:     current depth of processing stack
@@ -62,6 +64,7 @@ struct proc_frame {
 struct decision_state {
 	size_t last_decstate_sz;
 	size_t ops_stack_size;
+	size_t upgrades_stack_sz;
 	struct proc_frame curr_frame;
 	int pkg_index;
 	int num_proc_frame;
@@ -71,14 +74,19 @@ struct decision_state {
 
 /**
  * struct planned_op - data representing a change in inst_lut and stage_lut
- * @action:     type of action: STAGE, INSTALL or REMOVE
+ * @action:     type of action: STAGE, INSTALL, REMOVE or UPGRADE
  * @id:         package name id involved by the change
  * @pkg:        pointer to package installed or removed
+ * @pkg_diff:   pointer difference between new and old package. Valid only
+ *              in the case of UPGRADE
  */
 struct planned_op {
-	enum {STAGE, INSTALL, REMOVE} action;
+	enum {STAGE, INSTALL, REMOVE, UPGRADE} action;
 	int id;
-	struct mmpkg* pkg;
+	union {
+		struct mmpkg* pkg;
+		intptr_t pkg_diff;
+	};
 };
 
 
@@ -90,6 +98,7 @@ struct planned_op {
  * @processing_stack: stack of processing frames
  * @decstate_store:   previous decision states store
  * @last_decstate_sz: decision state store size before last decision
+ * @upgrades_stack:   stack of stored upgrade list
  * @ops_stack:  stack of planned operations
  * @num_proc_frame:   current depth of processing stack
  */
@@ -101,6 +110,7 @@ struct solver {
 	struct buffer decstate_store;
 	size_t last_decstate_sz;
 	struct buffer ops_stack;
+	struct buffer upgrades_stack;
 	int num_proc_frame;
 };
 
@@ -144,7 +154,8 @@ void mmpack_action_stack_destroy(struct action_stack * stack)
 static
 struct action_stack * mmpack_action_stack_push(struct action_stack * stack,
                                                       action action,
-                                                      struct mmpkg const * pkg)
+                                                      struct mmpkg const * pkg,
+                                                      struct mmpkg const * oldpkg)
 {
 	/* increase by DEFAULT_STACK_SZ if full */
 	if ((stack->index + 1) == stack->size) {
@@ -155,6 +166,7 @@ struct action_stack * mmpack_action_stack_push(struct action_stack * stack,
 	stack->actions[stack->index] = (struct action) {
 		.action = action,
 		.pkg = pkg,
+		.oldpkg = oldpkg,
 	};
 	stack->index++;
 
@@ -184,6 +196,50 @@ struct action * mmpack_action_stack_pop(struct action_stack * stack)
  *                                                                        *
  **************************************************************************/
 
+/**
+ * get_compdep_with_id() - get element involving a package from a list
+ * @dep:        list of compiled dependencies
+ * @id:         id of name whose package must be involved in the target dep
+ *
+ * Within a compiled dependency list supplied by @dep, this function search
+ * the element whose depedendency involved @id as package name id.
+ *
+ * Return: the pointer to the compiled dependendency element involving
+ * @id as package name, NULL if no element can be found within @dep.
+ */
+static
+struct compiled_dep* get_compdep_with_id(struct compiled_dep* dep, int id)
+{
+	while (dep) {
+		if (dep->pkgname_id == id)
+			return dep;
+
+		dep = compiled_dep_next(dep);
+	}
+
+	return NULL;
+}
+
+
+/**
+ * solver_clean_upgrade_stack() - free most recent upgrade lists
+ * @solver:     solver context to update
+ * @prev_size:  size of the @solver->upgrades_stack up to which list have
+ *              to be freed
+ */
+static
+void solver_clean_upgrade_stack(struct solver* solver, size_t prev_size)
+{
+	struct compiled_dep* upgrades;
+
+	while (solver->upgrades_stack.size > prev_size) {
+		buffer_pop(&solver->upgrades_stack,
+		           &upgrades, sizeof(upgrades));
+
+		free(upgrades);
+	}
+}
+
 
 static
 void solver_init(struct solver* solver, struct mmpack_ctx* ctx)
@@ -202,12 +258,15 @@ void solver_init(struct solver* solver, struct mmpack_ctx* ctx)
 	buffer_init(&solver->processing_stack);
 	buffer_init(&solver->decstate_store);
 	buffer_init(&solver->ops_stack);
+	buffer_init(&solver->upgrades_stack);
 }
 
 
 static
 void solver_deinit(struct solver* solver)
 {
+	solver_clean_upgrade_stack(solver, 0);
+	buffer_deinit(&solver->upgrades_stack);
 	buffer_deinit(&solver->ops_stack);
 	buffer_deinit(&solver->decstate_store);
 	buffer_deinit(&solver->processing_stack);
@@ -246,6 +305,10 @@ void solver_revert_planned_ops(struct solver* solver, size_t prev_size)
 
 		case REMOVE:
 			solver->inst_lut[op.id] = op.pkg;
+			break;
+
+		case UPGRADE:
+			solver->inst_lut[op.id] -= op.pkg_diff;
 			break;
 
 		default:
@@ -288,10 +351,18 @@ void solver_stage_pkg_install(struct solver* solver, int id,
 static
 void solver_commit_pkg_install(struct solver* solver, int id)
 {
+	struct mmpkg* oldpkg;
 	struct mmpkg* pkg = solver->stage_lut[id];
 	struct planned_op op = {.action = INSTALL, .pkg = pkg, .id = id};
 
+	oldpkg = solver->inst_lut[id];
 	solver->inst_lut[id] = pkg;
+
+	if (oldpkg) {
+		op.action = UPGRADE;
+		op.pkg_diff = pkg - oldpkg;
+	}
+
 	buffer_push(&solver->ops_stack, &op, sizeof(op));
 }
 
@@ -328,6 +399,7 @@ void solver_save_decision_state(struct solver* solver,
 	// moment of the decision
 	state->last_decstate_sz = solver->last_decstate_sz;
 	state->ops_stack_size = solver->ops_stack.size;
+	state->upgrades_stack_sz = solver->upgrades_stack.size;
 	state->num_proc_frame = nframe;
 	state->curr_frame = *frame;
 	for (i = 0; i < nframe; i++)
@@ -368,6 +440,7 @@ int solver_backtrack_on_decision(struct solver* solver,
 
 	solver->last_decstate_sz = state->last_decstate_sz;
 	solver_revert_planned_ops(solver, state->ops_stack_size);
+	solver_clean_upgrade_stack(solver, state->upgrades_stack_sz);
 	*frame = state->curr_frame;
 	nframe = state->num_proc_frame;
 
@@ -418,6 +491,11 @@ int solver_advance_processing(struct solver* solver,
 	struct buffer* proc_stack = &solver->processing_stack;
 
 	do {
+		if (frame->state == UPGRADE_RDEPS) {
+			frame->state = INSTALL_DEPS;
+			break;
+		}
+
 		if (frame->state == INSTALL_DEPS) {
 			// Mark as installed the package whose dependency list has
 			// just been processed
@@ -502,19 +580,155 @@ int solver_step_validation(struct solver* solver, struct proc_frame* frame)
  * The function select the package attempted to be installed to fulfill
  * @frame->dep.  It updates @frame->state to point to the next processing
  * step to perform.
+ *
+ * Return: 0 in case of success, -1 if backtracking is necessary.
  */
 static
-void solver_step_select_pkg(struct solver* solver, struct proc_frame* frame)
+int solver_step_select_pkg(struct solver* solver, struct proc_frame* frame)
 {
-	struct mmpkg *pkg;
+	struct mmpkg *pkg, *oldpkg;
 	int id = frame->dep->pkgname_id;
+
+	// Check that we are not about reinstall the same package. Since
+	// packages are ordered with descending version, this prevents
+	// downgrading as well
+	pkg = frame->dep->pkgs[frame->ipkg];
+	oldpkg = solver->inst_lut[id];
+	if (oldpkg == pkg) {
+		frame->state = BACKTRACK;
+		return -1;
+	}
 
 	// backup current state, ie before selected package is staged
 	solver_save_decision_state(solver, frame);
 
-	pkg = frame->dep->pkgs[frame->ipkg];
 	solver_stage_pkg_install(solver, id, pkg);
-	frame->state = INSTALL_DEPS;
+	frame->state = oldpkg ? UPGRADE_RDEPS : INSTALL_DEPS;
+	return 0;
+}
+
+
+/**
+ * solver_check_upgrade_rdep() - check/upgrade an individual reverse dependency
+ * @solver:     solver context to update
+ * @rdep_id:    package name id of reverse dependency of @pkg
+ * @pkg:        package staged for installation
+ * @buff:       buffer receiving element of compile dep for upgrading the
+ *              reverse dependency if necessary
+ * @last_upgrade_dep: pointer used to update the pointer to last element in
+ *              the upgrade list
+ *
+ * This function reverse dependency specified by @rdep_id is not broken by
+ * the installation of the new package. If a conflict is detected and the
+ * reverse dependency is not staged yet, its upgrade will be append in the
+ * upgrade list being hold by @buff.
+ *
+ * Return: 0 in case of success, -1 if backtracking is necessary.
+ */
+static
+int solver_check_upgrade_rdep(struct solver* solver, int rdep_id,
+                              const struct mmpkg* pkg, struct buffer* buff,
+                              struct compiled_dep** last_upgrade_dep)
+{
+	struct mmpkg *rdep;
+	struct compiled_dep *dep, *upgrade_dep;
+	struct binindex* binindex = solver->binindex;
+	int is_rdep_staged;
+
+	// Get installed reverse dependency (staged or installed)
+	rdep = solver->stage_lut[rdep_id];
+	is_rdep_staged = 1;
+	if (!rdep) {
+		rdep = solver->inst_lut[rdep_id];
+		is_rdep_staged = 0;
+	}
+
+	if (!rdep)
+		return 0;
+
+	// Get compiled_dep of rdep package involving oldpkg
+	dep = binindex_compile_pkgdeps(binindex, rdep);
+	dep = get_compdep_with_id(dep, pkg->name_id);
+	if (!dep || compiled_dep_pkg_match(dep, pkg))
+		return 0;
+
+	// if requirement not fulfilled and reverse dependency is
+	// staged, we must revisit previous decision
+	if (is_rdep_staged)
+		return -1;
+
+	// Requirement not fulfilled but reverse dependency has not
+	// been touched yet. Then let's try to upgrade rdep
+	upgrade_dep = binindex_compile_upgrade(binindex, rdep, buff);
+	if (!upgrade_dep)
+		return -1;
+
+	*last_upgrade_dep = upgrade_dep;
+	return 0;
+}
+
+
+/**
+ * solver_step_upgrade_rdeps() - check/upgrade the reverse deps of package
+ * @solver:     solver context to update
+ * @frame:      pointer to the current processing frame
+ *
+ * This step is executed after a package has been selected for
+ * installation. If this installation is also an upgrade (a package
+ * previously installed will be overwritten), this step check that the
+ * reverse dependencies of the old package are not broken by the
+ * installation of the new package.
+ *
+ * If a conflict is detected involving a package not staged yet, the system
+ * will try to upgrade it to hopefully resolve the conflicts (this will be
+ * backtracked if it appears later not to be a solution).
+ *
+ * Return: 0 in case of success, -1 if backtracking is necessary.
+ */
+static
+int solver_step_upgrade_rdeps(struct solver* solver, struct proc_frame* frame)
+{
+	struct binindex* binindex = solver->binindex;
+	int i, num;
+	const int* rdep_ids;
+	struct mmpkg* newpkg;
+	struct compiled_dep *upgrade_deps, *last_upgrade_dep;
+	struct buffer buff;
+
+	buffer_init(&buff);
+	newpkg = frame->dep->pkgs[frame->ipkg];
+	rdep_ids = binindex_get_potential_rdeps(binindex, newpkg->name_id, &num);
+
+	// Check all reverse dependencies of old package for compatibility with
+	// the new package
+	last_upgrade_dep = NULL;
+	for (i = 0; i < num; i++) {
+		if (solver_check_upgrade_rdep(solver, rdep_ids[i], newpkg,
+		                          &buff, &last_upgrade_dep)) {
+			frame->state = BACKTRACK;
+			goto exit;
+		}
+	}
+
+	// If an upgrade list has been created terminate it and queue it for
+	// processing otherwise resume current processing (install deps)
+	if (last_upgrade_dep) {
+		// terminate last element
+		last_upgrade_dep->next_entry_delta = 0;
+
+		// Push upgrade list for processing
+		upgrade_deps = buffer_take_data_ownership(&buff);
+		buffer_push(&solver->upgrades_stack,
+		            &upgrade_deps, sizeof(upgrade_deps));
+
+		solver_add_deps_to_process(solver, frame, upgrade_deps);
+	} else {
+		frame->state = INSTALL_DEPS;
+	}
+
+exit:
+	buffer_deinit(&buff);
+	return (frame->state == BACKTRACK) ? -1 : 0;
 }
 
 
@@ -570,7 +784,12 @@ int solver_solve_deps(struct solver* solver, struct compiled_dep* initial_deps)
 				continue;
 
 		if (frame.state == SELECTION)
-			solver_step_select_pkg(solver, &frame);
+			if (solver_step_select_pkg(solver, &frame))
+				continue;
+
+		if (frame.state == UPGRADE_RDEPS)
+			if (solver_step_upgrade_rdeps(solver, &frame))
+				continue;
 
 		if (frame.state == INSTALL_DEPS)
 			solver_step_install_deps(solver, &frame);
@@ -629,7 +848,7 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
 {
 	struct action_stack* stk;
 	struct planned_op* ops;
-	struct mmpkg* pkg;
+	struct mmpkg *pkg, *oldpkg;
 	int i, num_ops;
 
 	stk = mmpack_action_stack_create();
@@ -638,18 +857,25 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
 	num_ops = solver->ops_stack.size / sizeof(*ops);
 
 	for (i = 0; i < num_ops; i++) {
-		pkg = ops[i].pkg;
 		switch(ops[i].action) {
 		case STAGE:
 			// ignore
 			break;
 
 		case INSTALL:
-			stk = mmpack_action_stack_push(stk, INSTALL_PKG, pkg);
+			pkg = ops[i].pkg;
+			stk = mmpack_action_stack_push(stk, INSTALL_PKG, pkg, NULL);
 			break;
 
 		case REMOVE:
-			stk = mmpack_action_stack_push(stk, REMOVE_PKG, pkg);
+			pkg = ops[i].pkg;
+			stk = mmpack_action_stack_push(stk, REMOVE_PKG, pkg, NULL);
+			break;
+
+		case UPGRADE:
+			pkg = solver->inst_lut[ops[i].id];
+			oldpkg = pkg - ops[i].pkg_diff;
+			stk = mmpack_action_stack_push(stk, UPGRADE_PKG, pkg, oldpkg);
 			break;
 
 		default:

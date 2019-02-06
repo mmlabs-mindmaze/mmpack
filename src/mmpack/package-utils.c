@@ -711,6 +711,62 @@ int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name)
 
 
 /**
+ * binindex_compile_upgrade() - compile a dep representing a pkg upgrade
+ * @binindex:   binary index with which the dependencies must be compiled
+ * @pkg:        package to upgrade in the context of @binindex
+ * @buff:       struct buffer on which the dependency must be appended
+ *
+ * This function synthetizes the possible package upgrade for @pkg.
+ *
+ * Return: the pointer to compiled dependency located on data buffer managed by
+ * @buff. If the package cannot be upgraded (for example is already the
+ * latest), NULL is returned and size of @buff won't be updated
+ */
+LOCAL_SYMBOL
+struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
+                                              struct mmpkg* pkg,
+                                              struct buffer* buff)
+{
+	struct pkglist_entry* entry;
+	struct pkglist* list;
+	struct compiled_dep* compdep;
+	size_t need_size, used_size;
+	short num_pkg;
+
+	list = &binindex->pkgname_table[pkg->name_id];
+
+	// Ensure we can add a new element that could have as many
+	// possible package as there is in the pkglist
+	need_size = compiled_dep_size(list->num_pkg-1);
+	compdep = buffer_reserve_data(buff, need_size);
+
+	// Fill compiled dependency by inspected version of all package
+	// sharing the same package name.
+	num_pkg = 0;
+	for (entry = list->head; entry != NULL; entry = entry->next) {
+		if (&entry->pkg == pkg)
+			break;
+
+		compdep->pkgs[num_pkg++] = &entry->pkg;
+	}
+
+	if (!num_pkg)
+		return NULL;
+
+	used_size = compiled_dep_size(num_pkg);
+
+	compdep->pkgname_id = list - binindex->pkgname_table;
+	compdep->num_pkg = num_pkg;
+	compdep->next_entry_delta = used_size / sizeof(*compdep);
+
+	// Advance in the buffer after the compiled_dep we have just set
+	buffer_inc_size(buff, used_size);
+
+	return compdep;
+}
+
+
+/**
  * binindex_compile_dep() - compile a dependency on a buffer
  * @binindex:   binary index with which the dependencies must be compiled
  * @dep:        dependency to compile into context of @binindex
@@ -819,6 +875,18 @@ struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
 	pkg->compdep = buffer_take_data_ownership(&buff);
 
 	return pkg->compdep;
+}
+
+
+LOCAL_SYMBOL
+const int* binindex_get_potential_rdeps(const struct binindex* binindex,
+                                        int pkgname_id, int* num_rdeps)
+{
+	struct pkglist* pkglist;
+
+	pkglist = &binindex->pkgname_table[pkgname_id];
+	*num_rdeps = pkglist->rdeps.num;
+	return pkglist->rdeps.ids;
 }
 
 
