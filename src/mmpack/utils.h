@@ -80,6 +80,7 @@ struct strlist {
 void strlist_init(struct strlist* list);
 void strlist_deinit(struct strlist* list);
 int strlist_add(struct strlist* list, const char* str);
+void strlist_remove(struct strlist* list, const mmstr* str);
 
 
 

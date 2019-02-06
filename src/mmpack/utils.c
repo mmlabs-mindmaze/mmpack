@@ -591,6 +591,38 @@ int strlist_add(struct strlist* list, const char* str)
 }
 
 
+LOCAL_SYMBOL
+void strlist_remove(struct strlist* list, const mmstr* str)
+{
+	struct strlist_elt *elt, *prev;
+
+	prev = NULL;
+	elt = list->head;
+	while (elt) {
+		if (mmstrequal(elt->str.buf, str))
+			break;
+
+		prev = elt;
+		elt = elt->next;
+	}
+
+	// Not found
+	if (!elt)
+		return;
+
+	if (prev)
+		prev->next = elt->next;
+	else
+		list->head = elt->next;
+
+	// Update last element if applicable
+	if (!elt->next)
+		list->last = prev;
+
+	free(elt);
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                               buffer                                   *
