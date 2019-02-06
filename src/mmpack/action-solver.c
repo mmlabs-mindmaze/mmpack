@@ -809,6 +809,8 @@ void mmpack_action_stack_dump(struct action_stack * stack)
 			printf("INSTALL: ");
 		else if (stack->actions[i].action == REMOVE_PKG)
 			printf("REMOVE: ");
+		else if (stack->actions[i].action == UPGRADE_PKG)
+			printf("UPGRADE: ");
 
 		mmpkg_dump(stack->actions[i].pkg);
 	}
@@ -819,6 +821,8 @@ LOCAL_SYMBOL
 int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack)
 {
 	int i, rv;
+	const char* operation;
+	const mmstr *old_version, *new_version;
 
 	if (stack->index == 0) {
 		printf("Nothing to do.\n");
@@ -828,13 +832,30 @@ int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack)
 	printf("Transaction summary:\n");
 
 	for (i =  0 ; i < stack->index ; i++) {
+		if (stack->actions[i].action == UPGRADE_PKG) {
+			new_version = stack->actions[i].pkg->version;
+			old_version = stack->actions[i].oldpkg->version;
+			if (pkg_version_compare(new_version, old_version) < 0)
+				operation = "DOWNGRADE";
+			else
+				operation = "UPGRADE";
+
+			printf("%s: %s (%s -> %s)\n", operation,
+			       stack->actions[i].pkg->name,
+			       old_version, new_version);
+			continue;
+		}
+
 		if (stack->actions[i].action == INSTALL_PKG)
 			printf("INSTALL: ");
 		else if (stack->actions[i].action == REMOVE_PKG)
 			printf("REMOVE: ");
 
-		printf("%s (%s)\n", stack->actions[i].pkg->name,
-		                  stack->actions[i].pkg->version);
+		if (stack->actions[i].oldpkg) {
+		} else {
+			printf("%s (%s)\n", stack->actions[i].pkg->name,
+			                  stack->actions[i].pkg->version);
+		}
 	}
 
 	if (nreq == stack->index) {

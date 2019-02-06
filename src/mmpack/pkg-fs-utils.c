@@ -239,7 +239,8 @@ int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
 STATIC_CONST_MMSTR(metadata_dirpath, METADATA_RELPATH)
 
 static
-int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
+int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
+                     struct strlist* files)
 {
 	mmstr* metadata_prefix;
 	const char* entry_path;
@@ -292,6 +293,9 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename)
 			continue;
 
 		rv = pkg_unpack_entry(a, entry, path);
+
+		if (files)
+			strlist_remove(files, path);
 	}
 	mmstr_free(path);
 
@@ -534,7 +538,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 	for (i = 0; (i < act_stk->index) && (rv == 0); i++) {
 		act = &act_stk->actions[i];
 		pkg = act->pkg;
-		if (act->action != INSTALL_PKG)
+		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
 			continue;
 
 		// Get filename of downloaded package and store the path in
@@ -601,7 +605,7 @@ int install_package(struct mmpack_ctx* ctx,
 	int rv;
 
 	info("Installing package %s (%s)... ", pkg->name, pkg->version);
-	rv = pkg_unpack_files(pkg, mpkfile);
+	rv = pkg_unpack_files(pkg, mpkfile, NULL);
 	if (rv) {
 		error("Failed!\n");
 		return -1;
@@ -653,6 +657,57 @@ int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 }
 
 
+/**
+ * upgrade_package() - remove a package from the prefix
+ * @ctx:        mmpack context
+ * @pkg:        package to install
+ * @oldpkg:     package to remove (replaced by installed package)
+ * @mpkfile:    filename of the downloaded package file
+ *
+ * This function upgrades a package in a prefix hierarchy. The list of
+ * installed package of context @ctx will be updated.
+ *
+ * NOTE: this function assumes current directory is the prefix path
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+static
+int upgrade_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg,
+                    const struct mmpkg* oldpkg, const mmstr* mpkfile)
+{
+	int rv = 0;
+	struct strlist files;
+	const char* operation;
+
+	if (pkg_version_compare(pkg->version, oldpkg->version) < 0)
+		operation = "Downgrading";
+	else
+		operation = "Upgrading";
+
+	info("%s package %s (%s) over (%s) ... ", operation,
+	     pkg->name, pkg->version, oldpkg->version);
+
+	strlist_init(&files);
+
+	if (  pkg_list_rm_files(oldpkg, &files)
+	   || pkg_unpack_files(pkg, mpkfile, &files)
+	   || rm_files_from_list(&files)) {
+		rv = -1;
+	}
+
+	strlist_deinit(&files);
+
+	install_state_add_pkg(&ctx->installed, pkg);
+
+	if (rv)
+		error("Failed!\n");
+	else
+		info("OK\n");
+
+	return rv;
+}
+
+
 static
 int apply_action(struct mmpack_ctx* ctx, struct action* act)
 {
@@ -667,6 +722,10 @@ int apply_action(struct mmpack_ctx* ctx, struct action* act)
 
 	case REMOVE_PKG:
 		rv = remove_package(ctx, act->pkg);
+		break;
+
+	case UPGRADE_PKG:
+		rv = upgrade_package(ctx, act->pkg, act->oldpkg, act->pathname);
 		break;
 
 	default:

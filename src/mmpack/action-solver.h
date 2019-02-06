@@ -10,6 +10,7 @@
 
 typedef enum {
 	INSTALL_PKG = 1,
+	UPGRADE_PKG,
 	REMOVE_PKG = -1,
 } action;
 
@@ -17,12 +18,14 @@ typedef enum {
 /**
  * struct action - action to take on prefix hierarchy
  * @action:     type of action to perform
- * @pkg:        pointer to package to install
+ * @pkg:        pointer to package to install or remove
+ * @oldpkg:     pointer to replaced package (applicable for upgrade)
  * @pathname:   path to downloaded mpk file if not NULL
  */
 struct action {
 	action action;
 	struct mmpkg const * pkg;
+	struct mmpkg const * oldpkg;
 	const mmstr* pathname;
 };
 
