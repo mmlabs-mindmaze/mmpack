@@ -216,7 +216,7 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 LOCAL_SYMBOL
 struct mmpkg_dep * mmpkg_dep_create(char const * name)
 {
-	struct mmpkg_dep * dep = malloc(sizeof(*dep));
+	struct mmpkg_dep * dep = mm_malloc(sizeof(*dep));
 	memset(dep, 0, sizeof(*dep));
 	dep->name = mmstr_malloc_from_cstr(name);
 	return dep;

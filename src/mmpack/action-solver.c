@@ -23,7 +23,7 @@ struct action_stack * mmpack_action_stack_create(void)
 	struct action_stack * stack;
 
 	stack_size = sizeof(*stack) + DEFAULT_STACK_SZ * sizeof(*stack->actions);
-	stack = malloc(stack_size);
+	stack = mm_malloc(stack_size);
 	memset(stack, 0, stack_size);
 	stack->size = DEFAULT_STACK_SZ;
 
@@ -89,7 +89,7 @@ struct mmpkg_dep * mmpkg_dep_append_copy(struct mmpkg_dep * deps,
                                          mmstr const * max_version)
 {
 	struct mmpkg_dep * d;
-	struct mmpkg_dep * new = malloc(sizeof(*new));
+	struct mmpkg_dep * new = mm_malloc(sizeof(*new));
 	new->name = mmstrdup(new_deps->name);
 	new->min_version = mmstrdup(min_version);
 	new->max_version = mmstrdup(max_version);
