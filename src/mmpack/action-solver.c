@@ -28,9 +28,12 @@ enum solver_state {
 	BACKTRACK,
 };
 
+#define DO_UPGRADE (1 << 0)
+
 /**
  * struct proc_frame - processing data frame
  * @ipkg:       index of package currently selected for installation
+ * @flags:      flags modify processing behavipr
  * @state:      next step to perform
  * @dep:        current compiled dependency being processed
  *
@@ -42,7 +45,8 @@ enum solver_state {
  * proc_frame is created and must be stacked.
  */
 struct proc_frame {
-	int ipkg;
+	short ipkg;
+	short flags;
 	enum solver_state state;
 	struct compiled_dep* dep;
 };
@@ -471,8 +475,7 @@ void solver_add_deps_to_process(struct solver* solver,
 	buffer_push(&solver->processing_stack, frame, sizeof(*frame));
 	solver->num_proc_frame++;
 
-	frame->dep = deps;
-	frame->state = VALIDATION;
+	*frame = (struct proc_frame) {.dep = deps, .state = VALIDATION};
 }
 
 
@@ -541,7 +544,7 @@ int solver_advance_processing(struct solver* solver,
 static
 int solver_step_validation(struct solver* solver, struct proc_frame* frame)
 {
-	int id, is_staged;
+	int id, is_staged, is_match;
 	struct mmpkg* pkg;
 
 	// Get package either installed or planned to be installed
@@ -555,14 +558,15 @@ int solver_step_validation(struct solver* solver, struct proc_frame* frame)
 
 	if (pkg) {
 		// check package is suitable
-		if (compiled_dep_pkg_match(frame->dep, pkg)) {
-			frame->state = NEXT;
-			return 0;
+		is_match = compiled_dep_pkg_match(frame->dep, pkg);
+		if (is_staged) {
+			frame->state = is_match ? NEXT : BACKTRACK;
+			return is_match ? 0 : -1;
 		}
 
-		if (is_staged) {
-			frame->state = BACKTRACK;
-			return -1;
+		if (is_match && !(frame->flags & DO_UPGRADE)) {
+			frame->state = NEXT;
+			return 0;
 		}
 	}
 
@@ -595,7 +599,7 @@ int solver_step_select_pkg(struct solver* solver, struct proc_frame* frame)
 	pkg = frame->dep->pkgs[frame->ipkg];
 	oldpkg = solver->inst_lut[id];
 	if (oldpkg == pkg) {
-		frame->state = BACKTRACK;
+		frame->state = NEXT;
 		return -1;
 	}
 
@@ -758,6 +762,7 @@ void solver_step_install_deps(struct solver* solver, struct proc_frame* frame)
  * solver_solver_deps() - determine a solution given dependency list
  * @solver:     solver context to update
  * @initial_deps: initial dependency list to try to solve
+ * @proc_flags: processing flags apply on the first frame of processing
  *
  * This function is the heart of the package dependency resolution. It
  * takes @initial_deps which is a list of compiled dependencies that
@@ -768,9 +773,14 @@ void solver_step_install_deps(struct solver* solver, struct proc_frame* frame)
  * Return: 0 if a solution has been found, -1 if no solution could be found
  */
 static
-int solver_solve_deps(struct solver* solver, struct compiled_dep* initial_deps)
+int solver_solve_deps(struct solver* solver, struct compiled_dep* initial_deps,
+                      int proc_flags)
 {
-	struct proc_frame frame = {.dep = initial_deps, .state = VALIDATION};
+	struct proc_frame frame = {
+		.dep = initial_deps,
+		.state = VALIDATION,
+		.flags = proc_flags,
+	};
 
 	mm_check(initial_deps != NULL);
 
@@ -977,13 +987,89 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
 	if (!deplist)
 		goto exit;
 
-	rv = solver_solve_deps(&solver, deplist);
+	rv = solver_solve_deps(&solver, deplist, 0);
 	if (rv == 0)
 		stack = solver_create_action_stack(&solver);
 
 exit:
 	solver_deinit(&solver);
 	buffer_deinit(&deps_buffer);
+	return stack;
+}
+
+
+/**************************************************************************
+ *                                                                        *
+ *                         package upgrades requests                      *
+ *                                                                        *
+ **************************************************************************/
+static
+struct compiled_dep* upgrades_from_reqlist(const struct pkg_request* reqlist,
+                                           const struct solver* solver,
+                                           struct buffer* buff)
+{
+	STATIC_CONST_MMSTR(any_version, "any")
+	struct binindex* binindex = solver->binindex;
+	struct compiled_dep* compdep = NULL;
+	const struct mmpkg* pkg;
+	const struct pkg_request* req;
+	int name_id;
+	struct mmpkg_dep dep = {.max_version = any_version};
+
+	mm_check(reqlist != NULL);
+
+	for (req = reqlist; req != NULL; req = req->next) {
+		name_id = binindex_get_pkgname_id(binindex, req->name);
+		pkg = solver->inst_lut[name_id];
+
+		dep.name = req->name;
+		dep.min_version = pkg->version;
+		compdep = binindex_compile_dep(binindex, &dep, buff);
+		if (!compdep) {
+			error("Cannot find package: %s\n", req->name);
+			return NULL;
+		}
+	}
+	// mark last element as termination
+	compdep->next_entry_delta = 0;
+
+	return buff->base;
+}
+
+
+/**
+ * mmpkg_get_upgrade_list() - get actions to upgrade specified packages
+ * @ctx:         the mmpack context
+ * @reqs:        requested package list to be upgraded (version fields are
+ *               ignored)
+ *
+ * Returns: an action stack of the packages to be installed in the right order
+ *          and at the correct version on success. NULL on error.
+ */
+LOCAL_SYMBOL
+struct action_stack* mmpkg_get_upgrade_list(struct mmpack_ctx * ctx,
+                                            const struct pkg_request* reqs)
+{
+	struct compiled_dep* deplist;
+	struct solver solver;
+	struct action_stack* stack = NULL;
+	struct buffer buff;
+	int rv;
+
+	buffer_init(&buff);
+	solver_init(&solver, ctx);
+
+	deplist = upgrades_from_reqlist(reqs, &solver, &buff);
+	if (!deplist)
+		goto exit;
+
+	rv = solver_solve_deps(&solver, deplist, DO_UPGRADE);
+	if (rv == 0)
+		stack = solver_create_action_stack(&solver);
+
+exit:
+	solver_deinit(&solver);
+	buffer_deinit(&buff);
 	return stack;
 }
 

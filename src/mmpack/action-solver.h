@@ -43,6 +43,8 @@ struct pkg_request {
 
 struct action_stack * mmpkg_get_install_list(struct mmpack_ctx * ctx,
                                              const struct pkg_request* req);
+struct action_stack* mmpkg_get_upgrade_list(struct mmpack_ctx * ctx,
+                                            const struct pkg_request* reqlist);
 struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
                                            const struct pkg_request* reqlist);
 
