@@ -107,6 +107,8 @@ mmpack_lib_sources = \
 	src/mmpack/mmpack-source.h \
 	src/mmpack/mmpack-update.c \
 	src/mmpack/mmpack-update.h \
+	src/mmpack/mmpack-upgrade.c \
+	src/mmpack/mmpack-upgrade.h \
 	src/mmpack/mmstring.h \
 	src/mmpack/package-utils.c \
 	src/mmpack/package-utils.h \
@@ -252,6 +254,7 @@ RST_MAN_PAGES_IN = \
 	docs/mmpack-show.rst.in \
 	docs/mmpack-source.rst.in \
 	docs/mmpack-update.rst.in \
+	docs/mmpack-upgrade.rst.in \
 	$(eof)
 EXTRA_DIST += $(RST_MAN_PAGES_IN)
 

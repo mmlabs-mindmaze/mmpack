@@ -1,0 +1,41 @@
+==============
+mmpack-upgrade
+==============
+
+---------------
+upgrade command
+---------------
+
+:Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
+         Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
+:Date: 2019-02-07
+:Version: <version>
+:Manual section: 1
+
+SYNOPSIS
+========
+
+``mmpack upgrade [-h|--help]``
+
+DESCRIPTION
+===========
+
+**mmpack-upgrade** installs available upgrades of all packages currently
+installed in the current prefix. New packages will be installed if required
+to satisfy dependencies.
+
+OPTIONS
+=======
+-h|--help
+  Show help and exit
+
+
+SEE ALSO
+========
+``mmpack``\(1),
+``mmpack-install``\(1),
+``mmpack-list``\(1),
+``mmpack-mkprefix``\(1),
+``mmpack-remove``\(1),
+``mmpack-search``\(1),
+``mmpack-update``\(1),

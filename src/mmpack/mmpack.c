@@ -25,6 +25,7 @@
 #include "mmpack-show.h"
 #include "mmpack-source.h"
 #include "mmpack-update.h"
+#include "mmpack-upgrade.h"
 
 static const char mmpack_doc[] =
 	"mmpack is a cross-platform package manager."
@@ -55,6 +56,7 @@ static const char arguments_docs[] =
 	"[options] "SHOW_SYNOPSIS"\n"
 	"[options] "SOURCE_SYNOPSIS"\n"
 	"[options] "UPDATE_SYNOPSIS"\n"
+	"[options] "UPGRADE_SYNOPSIS"\n"
 ;
 
 static struct mmpack_opts cmdline_opts;
@@ -126,6 +128,8 @@ int main(int argc, char* argv[])
 		rv = mmpack_mkprefix(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "update")) {
 		rv = mmpack_update_all(&ctx, cmd_argc, cmd_argv);
+	} else if (STR_EQUAL(cmd, strlen(cmd), "upgrade")) {
+		rv = mmpack_upgrade(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "install")) {
 		rv = mmpack_install(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "remove")
