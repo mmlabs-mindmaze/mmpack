@@ -36,6 +36,10 @@ static const char * invalid_binindexes[] = {
 };
 #define NUM_INVALID_BININDEXES MM_NELEM(invalid_binindexes)
 
+STATIC_CONST_MMSTR(pkg_a_name, "pkg-a");
+STATIC_CONST_MMSTR(pkg_b_name, "pkg-b");
+STATIC_CONST_MMSTR(vers001, "0.0.1");
+
 static
 void ctx_setup(void)
 {
@@ -59,7 +63,7 @@ START_TEST(test_valid_dependencies)
 	rv = binindex_populate(&ctx.binindex, valid_binindexes[_i], 0);
 	ck_assert(rv == 0);
 
-	req = (struct pkg_request){.name = "pkg-a", .version = "0.0.1"};
+	req = (struct pkg_request){.name = pkg_a_name, .version = vers001};
 	actions = mmpkg_get_install_list(&ctx, &req);
 	ck_assert(actions != NULL);
 
@@ -83,8 +87,8 @@ START_TEST(test_valid_dependencies_multiple_req)
 	rv = binindex_populate(&ctx.binindex, TEST_BININDEX_DIR"/simple.yaml", 0);
 	ck_assert(rv == 0);
 
-	req[0] = (struct pkg_request){.name = "pkg-b", .next = &req[1]};
-	req[1] = (struct pkg_request){.name = "pkg-a", .version = "0.0.1"};
+	req[0] = (struct pkg_request){.name = pkg_b_name, .next = &req[1]};
+	req[1] = (struct pkg_request){.name = pkg_a_name, .version = vers001};
 	actions = mmpkg_get_install_list(&ctx, req);
 	ck_assert(actions != NULL);
 
@@ -102,7 +106,7 @@ START_TEST(test_invalid_dependencies)
 	rv = binindex_populate(&ctx.binindex, invalid_binindexes[_i], 0);
 	ck_assert(rv == 0);
 
-	req = (struct pkg_request){.name = "pkg-a", .version = "0.0.1"};
+	req = (struct pkg_request){.name = pkg_a_name, .version = vers001};
 	actions = mmpkg_get_install_list(&ctx, &req);
 	ck_assert(actions == NULL);
 }
