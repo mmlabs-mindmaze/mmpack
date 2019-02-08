@@ -185,9 +185,6 @@ mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 # TESTS RULES
 #
 
-clean-local:
-	$(AM_V_RM) -r venv
-
 noinst_PYTHON = tests/pytests.py
 
 TESTS = unittests.tap tests/python-unittests.tap
