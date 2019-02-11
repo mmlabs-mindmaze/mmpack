@@ -162,6 +162,13 @@ void mmpkg_deinit(struct mmpkg * pkg)
 }
 
 
+/**
+ * mmpkg_sysdeps_dump() - dump sysdeps
+ * @sysdeps: system dependencies strlist structure
+ * @type: a string which will prefix the output (eg. "SYSTEM")
+ *
+ * This is intended to use as a debug function
+ */
 LOCAL_SYMBOL
 void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type)
 {
@@ -174,6 +181,12 @@ void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type)
 }
 
 
+/**
+ * mmpkg_dump() - dump mmpack package (DEBUG)
+ * @pkg: mmpkg to dump
+ *
+ * This is intended to use as a debug function
+ */
 LOCAL_SYMBOL
 void mmpkg_dump(struct mmpkg const * pkg)
 {
@@ -258,6 +271,14 @@ void mmpkg_dep_destroy(struct mmpkg_dep * dep)
 }
 
 
+/**
+ * mmpkg_dep_dump() - dump pkg dep
+ * @deps: mmpkg_dep struct to dump
+ * @type: "SYS" if @deps represents system dependencies
+ *        any king of string otherwise; will prefix the line
+ *
+ * This is intended to use as a debug function
+ */
 LOCAL_SYMBOL
 void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type)
 {
@@ -586,6 +607,12 @@ void binindex_deinit(struct binindex* binindex)
 }
 
 
+/**
+ * binindex_dump() - dump binindex (DEBUG)
+ * @binindex: the binindex to dump
+ *
+ * This is intended to use as a debug function
+ */
 LOCAL_SYMBOL
 void binindex_dump(struct binindex const * binindex)
 {

@@ -1102,6 +1102,12 @@ struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
 }
 
 
+/**
+ * mmpack_action_stack_dump() - dump action stack (DEBUG)
+ * @stack: the stack to dump
+ *
+ * This is intended to use as a debug function
+ */
 LOCAL_SYMBOL
 void mmpack_action_stack_dump(struct action_stack * stack)
 {
