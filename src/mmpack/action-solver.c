@@ -536,7 +536,7 @@ int solver_advance_processing(struct solver* solver,
  * @frame:      pointer to the current processing frame
  *
  * The function checks if dependency @frame->dep being processed is not
- * already fullfiled by the system state or conflicts with it. It updates
+ * already fulfilled by the system state or conflicts with it. It updates
  * @frame->state to point to the next processing step to perform.
  *
  * Return: 0 in case of success, -1 if backtracking is necessary.
@@ -737,7 +737,7 @@ exit:
 
 
 /**
- * solver_step_install_deps() - perform dependency installation queing
+ * solver_step_install_deps() - perform dependency installation queueing
  * @solver:     solver context to update
  * @frame:      pointer to the current processing frame
  *

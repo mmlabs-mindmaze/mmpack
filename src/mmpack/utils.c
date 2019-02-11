@@ -647,7 +647,7 @@ void buffer_deinit(struct buffer* buf)
 /**
  * buffer_reserve_data() - ensure data buffer can welcome a new amount
  * @buff:       struct buffer to modify
- * @need_size:  data size to accomodate in addition to the current size
+ * @need_size:  data size to accommodate in addition to the current size
  *
  * Return: pointer to data allocated next to content previously added to
  * @buff. You are guaranteed that up to @need_size can be written to the
@@ -688,7 +688,7 @@ size_t buffer_inc_size(struct buffer* buff, size_t size)
  * This function is the exact opposite of buffer_inc_size(). It reduces the
  * size "used" by the buffer by @size number of bytes. The memory
  * corresponding to the size reduction memory is still allocated by @buff
- * and can be accessed until overwritten explicitely.
+ * and can be accessed until overwritten explicitly.
  *
  * Return: the pointer to new top of buffer.
  */
