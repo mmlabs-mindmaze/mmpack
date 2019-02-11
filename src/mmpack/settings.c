@@ -196,6 +196,12 @@ exit:
 }
 
 
+/**
+ * settings_init() - init settings structure
+ * @settings: the settings structure to initialize
+ *
+ * Should be cleansed by calling settings_deinit()
+ */
 LOCAL_SYMBOL
 void settings_init(struct settings* settings)
 {
@@ -207,6 +213,10 @@ void settings_init(struct settings* settings)
 }
 
 
+/**
+ * settings_deinit() - cleanse settings structure
+ * @settings: the settings structure to clean
+ */
 LOCAL_SYMBOL
 void settings_deinit(struct settings* settings)
 {
@@ -217,6 +227,12 @@ void settings_deinit(struct settings* settings)
 }
 
 
+/**
+ * settings_num_repo() - count the number of repositories in the configuration
+ * @settings: an initialized settings structure
+ *
+ * Returns: the number of repositories
+ */
 LOCAL_SYMBOL
 int settings_num_repo(const struct settings* settings)
 {
@@ -231,6 +247,14 @@ int settings_num_repo(const struct settings* settings)
 }
 
 
+/**
+ * settings_get_repo_url() - pick one url from the settings
+ * @settings: an initialized settings structure
+ * @index: index of the url to get
+ *
+ * Return: a pointer to a mmstr structure describing the url on success
+ *         NULL otherwise
+ */
 LOCAL_SYMBOL
 const mmstr* settings_get_repo_url(const struct settings* settings, int index)
 {
