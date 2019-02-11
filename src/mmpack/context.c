@@ -55,6 +55,15 @@ int read_prefix_config(struct mmpack_ctx* ctx)
 }
 
 
+/**
+ * mmpack_ctx_init() - initialize mmpack context
+ * @ctx: mmpack context
+ * @opts: init options
+ *
+ * The mmpack context must be cleansed by calling mmpack_ctx_deinit()
+ *
+ * Return: 0 on success, -1 on error
+ */
 LOCAL_SYMBOL
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 {
@@ -78,6 +87,10 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 }
 
 
+/**
+ * mmpack_ctx_deinit() - clean mmpack context
+ * @ctx: mmpack context
+ */
 LOCAL_SYMBOL
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 {
