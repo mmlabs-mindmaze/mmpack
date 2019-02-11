@@ -125,6 +125,13 @@ struct solver {
  *                                                                        *
  **************************************************************************/
 #define DEFAULT_STACK_SZ 10
+/**
+ * mmpack_action_stack_create() - create mmpack action stack
+ *
+ * Created object must be destroyed with mmpack_action_stack_destroy()
+ *
+ * Return: an initialized action_stack object.
+ */
 LOCAL_SYMBOL
 struct action_stack * mmpack_action_stack_create(void)
 {
@@ -140,6 +147,10 @@ struct action_stack * mmpack_action_stack_create(void)
 }
 
 
+/**
+ * mmpack_action_stack_destroy() - destroy action stack
+ * @stack: the action stack to destroy
+ */
 LOCAL_SYMBOL
 void mmpack_action_stack_destroy(struct action_stack * stack)
 {
