@@ -629,6 +629,12 @@ void strlist_remove(struct strlist* list, const mmstr* str)
  *                                                                        *
  **************************************************************************/
 
+/**
+ * buffer_init() - initialize buffer structure
+ * @buf: buffer structure to initialize
+ *
+ * To be cleansed by calling buffer_deinit()
+ */
 LOCAL_SYMBOL
 void buffer_init(struct buffer* buf)
 {
@@ -636,6 +642,10 @@ void buffer_init(struct buffer* buf)
 }
 
 
+/**
+ * buffer_deinit() - cleanup buffer structure
+ * @buf: buffer structure to cleanse
+ */
 LOCAL_SYMBOL
 void buffer_deinit(struct buffer* buf)
 {
@@ -700,6 +710,12 @@ void* buffer_dec_size(struct buffer* buf, size_t sz)
 }
 
 
+/**
+ * buffer_push() - push data on top of buffer
+ * @buf: initialized buffer structure
+ * @data: pointer to the data to push
+ * @sz: size of @data
+ */
 LOCAL_SYMBOL
 void buffer_push(struct buffer* buf, const void* data, size_t sz)
 {
@@ -708,6 +724,12 @@ void buffer_push(struct buffer* buf, const void* data, size_t sz)
 }
 
 
+/**
+ * buffer_pop() - pop data from buffer
+ * @buf: initialized buffer structure
+ * @data: pointer to receive the data to pop
+ * @sz: size to pop from the buffer
+ */
 LOCAL_SYMBOL
 void buffer_pop(struct buffer* buf, void* data, size_t sz)
 {
