@@ -953,17 +953,13 @@ struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
  * @ctx:     the mmpack context
  * @reqlist:     requested package list to be installed
  *
- * In brief, this function will initialize a dependency ordered list with a
- * single element: the package passed as argument.
+ * This function will initialize a dependency ordered list from the requested
+ * packages. Then pass those to the core function solver_solve_deps() which
+ * will return an ordered stack of action that are required to make the requested
+ * changes happen.
  *
- * Then while this list is not empty, take the last package of the list.
- * - if it introduces no new dependency, then stage it as an installed action
- *   in the action stack.
- * - if it has unmet *new* dependencies, append those to the dependency list,
- *   let the current dependency unmet in the list.
- *
- * This way, a dependency is removed from the list of needed package only if all
- * its dependency are already met.
+ * The action stack is ordered so that when a package is installed, all its
+ * required dependencies are already met and installed.
  *
  * Returns: an action stack of the packages to be installed in the right order
  *          and at the correct version on success.
