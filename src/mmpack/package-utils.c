@@ -244,6 +244,14 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 }
 
 
+/**
+ * mmpkg_dep_create() - create mmpkg_dep
+ * @name: name of the mmpack package dependency
+ *
+ * To be destroyed by calling mmpkg_dep_destroy()
+ *
+ * Return: an initialized mmpkg_dep structure
+ */
 LOCAL_SYMBOL
 struct mmpkg_dep * mmpkg_dep_create(char const * name)
 {
@@ -254,6 +262,10 @@ struct mmpkg_dep * mmpkg_dep_create(char const * name)
 }
 
 
+/**
+ * mmpkg_dep_destroy() - destroy mmpkg_dep structure
+ * @dep: the mmpkg_dep structure to destroy
+ */
 LOCAL_SYMBOL
 void mmpkg_dep_destroy(struct mmpkg_dep * dep)
 {
