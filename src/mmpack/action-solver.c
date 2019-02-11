@@ -759,7 +759,7 @@ void solver_step_install_deps(struct solver* solver, struct proc_frame* frame)
 
 
 /**
- * solver_solver_deps() - determine a solution given dependency list
+ * solver_solve_deps() - determine a solution given dependency list
  * @solver:     solver context to update
  * @initial_deps: initial dependency list to try to solve
  * @proc_flags: processing flags apply on the first frame of processing
@@ -810,7 +810,7 @@ int solver_solve_deps(struct solver* solver, struct compiled_dep* initial_deps,
 
 
 /**
- * remove_package() - remove a package and its reverse dependencies
+ * solver_remove_pkgname() - remove a package and its reverse dependencies
  * @solver:     solver context to update
  * @pkgname_id: id of package name to remove
  */
@@ -904,7 +904,7 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
  **************************************************************************/
 
 /**
- * request_to_compdep() - compile a dependency list from install request
+ * compdeps_from_reqlist() - compile a dependency list from install request
  * @reqlist:    installation request list to convert
  * @binindex:   binary index to use to compiled the dependencies
  * @buff:       buffer to use to hold the compiled dependency list

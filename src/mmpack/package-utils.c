@@ -58,6 +58,8 @@ struct parsing_ctx {
 
 /**
  * pkg_version_compare() - compare package version string
+ * @v1: version string
+ * @v2: version string
  *
  * This function compare the package version string is a way that take into
  * account the version number. It follows the lexicographic order excepting
@@ -623,9 +625,9 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
 /**
  * binindex_get_latest_pkg() - get the latest possible version of given package
  *                             inferior to given maximum
- * binindex:    binary package index
- * name:        package name
- * max_version: inclusive maximum boundary
+ * @binindex:    binary package index
+ * @name:        package name
+ * @max_version: inclusive maximum boundary
  *
  * Return: NULL on error, a pointer to the found package otherwise
  */

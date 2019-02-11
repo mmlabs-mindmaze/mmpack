@@ -142,7 +142,7 @@ int pkg_unpack_symlink(struct archive_entry *entry, const char* path)
 
 
 /**
- * pkg_unpack_next_entry() - extract archive entry
+ * pkg_unpack_entry() - extract archive entry
  * @a:          archive stream from which to read the entry and file content
  * @entry:      archive entry to read
  * @path:       filename of package file being unpacked (it may be
@@ -515,8 +515,8 @@ check_continue:
 
 /**
  * fetch_pkgs() - download packages that are going to be installed
- * @ctx:        initialized mmpack context
- * @act_stak:   action stack to be applied
+ * @ctx:       initialized mmpack context
+ * @act_stk:   action stack to be applied
  *
  * NOTE: this function assumes current directory is the prefix path
  *
@@ -589,6 +589,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 /**
  * install_package() - install a package in the prefix
  * @ctx:        mmpack context
+ * @pkg:        mmpack package to be installed
  * @mpkfile:    filename of the downloaded package file
  *
  * This function install a package in a prefix hierarchy. The list of installed

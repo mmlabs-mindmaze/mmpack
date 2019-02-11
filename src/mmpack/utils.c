@@ -682,8 +682,8 @@ size_t buffer_inc_size(struct buffer* buff, size_t size)
 
 /**
  * buffer_dec_size() - reduce size used of a buffer
- * @buff:       struct buffer to modify
- * @size:       number of byte to reduce
+ * @buf:      struct buffer to modify
+ * @sz:       number of byte to reduce
  *
  * This function is the exact opposite of buffer_inc_size(). It reduces the
  * size "used" by the buffer by @size number of bytes. The memory

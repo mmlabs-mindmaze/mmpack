@@ -665,7 +665,7 @@ struct it_entry* it_iter_first(struct it_iterator* iter, struct indextable const
 
 
 /**
- * it_iter_first() - get next element in the iteration of index table
+ * it_iter_next() - get next element in the iteration of index table
  * @iter:       pointer to an initialized iterator structure
  *
  * Return: the pointer to next entry if this is not last of iteration, NULL
