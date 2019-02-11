@@ -48,6 +48,17 @@ void warn_uninstalled_package(const struct mmpack_ctx* ctx,
 }
 
 
+/**
+ * mmpack_remove() - main function for the remove command
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * removes given packages and the packages depending upon them from the
+ * current prefix.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {

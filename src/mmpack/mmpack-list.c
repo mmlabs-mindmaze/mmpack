@@ -155,6 +155,16 @@ int mmpack_list_parse_options(int argc, const char* argv[], struct cb_data * dat
 }
 
 
+/**
+ * mmpack_list() - main function for the list command
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * lists information about the installed or available packages.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {

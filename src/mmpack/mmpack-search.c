@@ -36,6 +36,17 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 	return 0;
 }
 
+
+/**
+ * mmpack_search() - main function for the search command
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * searches given pattern within all the available package names.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_search(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {

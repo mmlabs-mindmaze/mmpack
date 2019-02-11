@@ -59,6 +59,18 @@ void clean_reqlist(struct pkg_request* reqlist)
 }
 
 
+/**
+ * mmpack_upgrade() - main function for the upgrade command
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * installs available upgrades of all packages currently installed in the
+ * current prefix. New packages will be installed if required to satisfy
+ * dependencies.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 {
@@ -99,4 +111,3 @@ exit:
 	clean_reqlist(reqlist);
 	return rv;
 }
-

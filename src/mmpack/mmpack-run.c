@@ -19,6 +19,18 @@
 
 #define MOUNT_PREFIX_BIN        LIBEXECDIR"/mount-mmpack-prefix"EXEEXT
 
+/**
+ * mmpack_run() - main function for the command to run commands
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * Runs given command within current prefix.
+ * If no command was given, it will open an interactive shell within the current
+ * prefix instead.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {

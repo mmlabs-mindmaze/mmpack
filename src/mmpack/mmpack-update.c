@@ -33,6 +33,16 @@ int download_repo_index(struct mmpack_ctx * ctx, int repo_index)
 }
 
 
+/**
+ * mmpack_update_all() - main function for the update command
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * update local package list from repository list in config file.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 {

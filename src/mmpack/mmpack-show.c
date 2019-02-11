@@ -50,6 +50,17 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 	return 0;
 }
 
+
+/**
+ * mmpack_show() - main function for the show command
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * show given package metadatas.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {

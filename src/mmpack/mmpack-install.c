@@ -50,6 +50,16 @@ void fill_pkgreq_from_cmdarg(struct pkg_request *req, const char* arg)
 }
 
 
+/**
+ * mmpack_install() - main function for the install command
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * installs given packages and their dependencies into the current prefix.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {

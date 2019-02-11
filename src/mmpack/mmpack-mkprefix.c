@@ -86,6 +86,18 @@ int create_initial_prefix_cfg(const mmstr* prefix, const char* url,
 }
 
 
+/**
+ * mmpack_mkprefix() - main function for the command to create prefixes
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * Allows you to create a new prefix in given folder. Packages will be pulled
+ * from the repository whose URL is given, or the global prefix URL if none
+ * given.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {

@@ -46,6 +46,16 @@ int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 }
 
 
+/**
+ * mmpack_source() - main function for the source command
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * download given package sources into current directory.
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {

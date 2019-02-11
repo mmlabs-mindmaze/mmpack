@@ -78,6 +78,16 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 }
 
 
+/**
+ * mmpack_check_integrity() - main function for the check integrity command
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * check package integrity, or all packages if none given
+ *
+ * Return: 0 on success, -1 otherwise
+ */
 LOCAL_SYMBOL
 int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc, char const* argv[])
 {
