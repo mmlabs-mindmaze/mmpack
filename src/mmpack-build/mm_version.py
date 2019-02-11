@@ -19,12 +19,13 @@ from common import mm_representer
 
 
 class Version(LooseVersion):  # pylint: disable=too-few-public-methods
-    '''
-    Simple version class:
+    ''' Simple version class
+
     * inherited from LooseVersion:
       - recognizes digits so that: "1.2" == "1.02", and "1.2" < "1.10"
       - Use string comparison otherwise: "1x" < "1y"
     * adds "any" as version wildcard
+
     '''
     def __init__(self, string):
         if '_' in string:

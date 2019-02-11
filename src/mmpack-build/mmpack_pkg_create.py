@@ -3,6 +3,7 @@
 Create a mmpack package
 
 Usage:
+
 mmpack pkg-create [--git-url <path or url of a git repo> | --src <tarball>]
                   [--tag <tag>] [--prefix <prefix>] [--skip-build-tests]
 

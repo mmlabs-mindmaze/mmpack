@@ -50,9 +50,11 @@ def _prune_soname_symbols(library_path: str, symbols_list: List[str]):
 def dpkg_parse_shlibs(filename: str, target_soname: str,
                       symbols_list: List[str]) -> str:
     ''' Parse dpkg shlibs file.
+
     Returns: A dependency template:
+
     Raises:
-      AssertionError: symbols could not be found
+        AssertionError: symbols could not be found
     '''
     dependency_template = None
     name, version = parse_soname(target_soname)
@@ -115,7 +117,9 @@ def dpkg_find_symbols_file(target_soname: str) -> str:
 def dpkg_parse_symbols(filename: str, target_soname: str,
                        symbols_list: List[str]) -> str:
     ''' Parse dpkg symbols file.
+
     www.debian.org/doc/debian-policy/ch-sharedlibs.html#s-sharedlibs-symbols
+
     dpkg symbols file format:
         library-soname main-dependency-template
          [| alternative-dependency-template]

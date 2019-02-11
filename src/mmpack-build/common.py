@@ -128,6 +128,7 @@ def mm_representer(dumper, data):
     '''
     enforce yaml interpretation of given complex object type as unicode
     classes which want to benefit must add themselves as follow:
+
       yaml.add_representer(<class-name>, mm_representer)
 
     (Otherwise, they will be printed with a !!python/object tag)
@@ -190,6 +191,7 @@ def get_host_arch_dist() -> str:
     Format is <cpu arch>-<os>, and the values are converted if necessary.
     possible archs: amd64, i386, aarch64, ...
     possible os: debian, windows, ...
+
     Eg.
         amd64-debian
         aarch64-debian
