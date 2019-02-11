@@ -541,6 +541,12 @@ void report_user_and_log(int mmlog_level, const char* fmt, ...)
  *                                                                        *
  **************************************************************************/
 
+/**
+ * strlist_init() - init strlist structure
+ * @list: strlist structure to initialize
+ *
+ * To be cleansed by calling strlist_deinit()
+ */
 LOCAL_SYMBOL
 void strlist_init(struct strlist* list)
 {
@@ -548,6 +554,10 @@ void strlist_init(struct strlist* list)
 }
 
 
+/**
+ * strlist_deinit() - cleanup strlist structure
+ * @list: strlist structure to cleanse
+ */
 LOCAL_SYMBOL
 void strlist_deinit(struct strlist* list)
 {
@@ -563,6 +573,13 @@ void strlist_deinit(struct strlist* list)
 }
 
 
+/**
+ * strlist_add() - add string to the list
+ * @list: initialized strlist structure
+ * @str: string to add (standard char array)
+ *
+ * Return: always return 0
+ */
 LOCAL_SYMBOL
 int strlist_add(struct strlist* list, const char* str)
 {
@@ -591,6 +608,11 @@ int strlist_add(struct strlist* list, const char* str)
 }
 
 
+/**
+ * strlist_remove() - remove string from list
+ * @list: initialized strlist structure
+ * @str: mmstr structure to remove
+ */
 LOCAL_SYMBOL
 void strlist_remove(struct strlist* list, const mmstr* str)
 {
