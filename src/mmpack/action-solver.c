@@ -189,22 +189,6 @@ struct action_stack * mmpack_action_stack_push(struct action_stack * stack,
 }
 
 
-LOCAL_SYMBOL
-struct action * mmpack_action_stack_pop(struct action_stack * stack)
-{
-	struct action * action;
-
-	if (stack->index == 0)
-		return NULL;
-
-	stack->index --;
-	action = &stack->actions[stack->index];
-
-	return action;
-}
-
-
-
 /**************************************************************************
  *                                                                        *
  *                            solver context                              *
