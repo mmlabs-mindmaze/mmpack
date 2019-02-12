@@ -8,11 +8,9 @@
 #include "package-utils.h"
 #include "context.h"
 
-typedef enum {
-	INSTALL_PKG = 1,
-	UPGRADE_PKG,
-	REMOVE_PKG = -1,
-} action;
+#define INSTALL_PKG 1
+#define UPGRADE_PKG 0
+#define REMOVE_PKG -1
 
 
 /**
@@ -23,7 +21,7 @@ typedef enum {
  * @pathname:   path to downloaded mpk file if not NULL
  */
 struct action {
-	action action;
+	int action;
 	struct mmpkg const * pkg;
 	struct mmpkg const * oldpkg;
 	const mmstr* pathname;

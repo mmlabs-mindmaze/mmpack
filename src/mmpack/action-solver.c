@@ -168,7 +168,7 @@ void mmpack_action_stack_destroy(struct action_stack * stack)
 
 static
 struct action_stack * mmpack_action_stack_push(struct action_stack * stack,
-                                                      action action,
+                                                      int action,
                                                       struct mmpkg const * pkg,
                                                       struct mmpkg const * oldpkg)
 {
