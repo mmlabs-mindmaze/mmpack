@@ -101,6 +101,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 	if (ctx->curl != NULL) {
 		curl_easy_cleanup(ctx->curl);
 		ctx->curl = NULL;
+		curl_global_cleanup();
 	}
 	binindex_deinit(&ctx->binindex);
 	install_state_deinit(&ctx->installed);
