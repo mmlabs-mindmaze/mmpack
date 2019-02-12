@@ -1,0 +1,47 @@
+{
+   libssh2-memory-leak
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   fun:libssh2_init
+   ...
+}
+{
+   crypto-load-modules-memory-leak
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:CRYPTO_malloc
+   ...
+   fun:CONF_modules_load_file
+   ...
+}
+{
+   crypto-load-dynamic-memory-leak
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:CRYPTO_malloc
+   ...
+   fun:ENGINE_load_dynamic
+   ...
+}
+{
+   liblzma-dlopen-malloc-memory-leak
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   fun:lzma_stream_decoder
+   ...
+}
+{
+   liblzma-dlopen-calloc-memory-leak
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   ...
+   fun:lzma_stream_decoder
+   ...
+}
