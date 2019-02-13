@@ -122,6 +122,22 @@ CURL* get_curl_handle(struct mmpack_ctx * ctx)
 }
 
 
+/**
+ * download_from_repo() - download resource from specified repository
+ * @ctx:        mmpack context used (used to get curl handle)
+ * @repo:       URL of repository
+ * @repo_relpath: path relative to @repo URL of the resource to download
+ * @prefix:     folder from where to write the downloaded file (may be NULL)
+ * @prefix_relpath: path relative to @prefix of the downloaded file.
+ *
+ * This function downloads the resource located at @repo_relpath relative to
+ * the URL specified by @repo. The downloaded resource will be stored in a path
+ * specified by @prefix_relpath. If @prefix is not NULL, this path is
+ * interpreted relative to the folder specified by @prefix.
+ *
+ * Return: 0 in case of success, -1 otherwise with error state set
+ * accordingly
+ */
 LOCAL_SYMBOL
 int download_from_repo(struct mmpack_ctx * ctx,
                        const mmstr* repo, const mmstr* repo_relpath,
