@@ -61,6 +61,16 @@ const char* get_basename_ptr(const mmstr* path)
 }
 
 
+/**
+ * mmstr_basename() - get basename of a path
+ * @basepath:   mmstr receiving the result (its maxlen must be large enough)
+ * @path:       path whose basename must be computed
+ *
+ * NOTE: If maximum length of @basepath is greater or equal to length of @path,
+ * then it is guaranteed that the result will not overflow @basepath.
+ *
+ * Return: the pointer to @basepath.
+ */
 LOCAL_SYMBOL
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path)
 {
@@ -81,6 +91,16 @@ mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path)
 }
 
 
+/**
+ * mmstr_dirname() - get directory name of a path
+ * @dirpath:    mmstr receiving the result (its maxlen must be large enough)
+ * @path:       path whose dirname must be computed
+ *
+ * NOTE: If maximum length of @dirpath is greater or equal to length of @path,
+ * then it is guaranteed that the result will not overflow @dirpath.
+ *
+ * Return: the pointer to @dirpath.
+ */
 LOCAL_SYMBOL
 mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 {
@@ -106,6 +126,21 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 }
 
 
+/**
+ * mmstr_join_path() - Join 2 path components intelligently
+ * @dst:        mmstr receiving the result (its maxlen must be large enough)
+ * @p1:         first path component
+ * @p2:         second path component
+ *
+ * This function concatenate @p1 and @p2 with exactly one directory separator
+ * (platform specific) between the 2 components.
+ *
+ * NOTE: If maximum length of @dst is greater or equal to length of @p1 plus
+ * length of @p2 plus one, then it is guaranteed that the result will not
+ * overflow @dst.
+ *
+ * Return: the pointer to @dst.
+ */
 LOCAL_SYMBOL
 mmstr* mmstr_join_path(mmstr* restrict dst,
                        const mmstr* restrict p1, const mmstr* restrict p2)
