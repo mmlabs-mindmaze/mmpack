@@ -528,8 +528,7 @@ check_continue:
 static
 int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 {
-	char pkgbase_data[128];
-	mmstr* pkgbase = mmstr_map_on_array(pkgbase_data);
+	mmstr* pkgbase = NULL;
 	mmstr* mpkfile = NULL;
 	const struct mmpkg* pkg;
 	struct action* act;
@@ -537,8 +536,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 	int len, i, rv;
 
-	rv = 0;
-	for (i = 0; (i < act_stk->index) && (rv == 0); i++) {
+	rv = -1;
+	for (i = 0; i < act_stk->index; i++) {
 		act = &act_stk->actions[i];
 		pkg = act->pkg;
 		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
@@ -546,6 +545,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 
 		// Get filename of downloaded package and store the path in
 		// a field of action structure being analyzed
+		pkgbase = mmstr_realloc(pkgbase, mmstrlen(pkg->filename));
 		mmstr_basename(pkgbase, pkg->filename);
 		len = mmstrlen(pkgbase) + mmstrlen(cachedir) + 1;
 		mpkfile = mmstr_malloc(len);
@@ -567,18 +567,21 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		if (download_from_repo(ctx, repo_url, pkg->filename,
 		                       NULL, mpkfile)) {
 			error("Failed!\n");
-			return -1;
+			goto exit;
 		}
 
 		// verify integrity of what has been downloaded
 		if (check_file_pkg(pkg->sha256, NULL, mpkfile)) {
 			error("Integrity check failed!\n");
-			return -1;
+			goto exit;
 		}
 
 		info("OK\n");
 	}
+	rv = 0;
 
+exit:
+	mmstr_free(pkgbase);
 	return rv;
 }
 
