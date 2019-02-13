@@ -209,8 +209,7 @@ int is_mmpack_metadata(mmstr const * path)
 static
 int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
 {
-	char tmp_data[64];
-	mmstr* basename = mmstr_map_on_array(tmp_data);
+	mmstr* basename;
 	mmstr* path = *pathname;
 
 	if (mmstrlen(path) == 0)
@@ -225,10 +224,14 @@ int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
 	   || mmstrequal(path, mmstr_alloca_from_cstr("MMPACK/")))
 		return SKIP_UNPACK;
 
+	basename = mmstr_malloca(mmstrlen(path));
+
 	// Change destination
 	mmstr_basename(basename, path);
 	path = mmstrcpy_realloc(path, metadata_prefix);
 	path = mmstrcat_realloc(path, basename);
+
+	mmstr_freea(basename);
 
 	*pathname = path;
 
