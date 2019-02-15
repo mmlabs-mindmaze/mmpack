@@ -53,16 +53,11 @@ int main(int argc, char* argv[])
 {
 	const char* prefix_path;
 
-	if (argc < 1) {
-		fprintf(stderr, "Missing prefix path\n");
+	if (argc < 3) {
+		fprintf(stderr, "usage %s <prefix> <command>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 	prefix_path = argv[1];
-
-	if (argc < 2) {
-		fprintf(stderr, "Missing command\n");
-		return EXIT_FAILURE;
-	}
 
 	// Create a new mount namespace
 	if (unshare(CLONE_NEWNS)) {
