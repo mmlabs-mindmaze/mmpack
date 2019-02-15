@@ -43,7 +43,7 @@ pooldir_relpath=$(realpath --relative-to=$srvdata $pooldir)
 
 # Create repo index
 cd $srvdata
-for mpkfile in $pooldir_relpath/*.mpk
+for mpkfile in $(find $pooldir_relpath -name \*.mpk)
 do
 	get_repo_entry $mpkfile
 done > binary-index
