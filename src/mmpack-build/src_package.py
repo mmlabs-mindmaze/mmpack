@@ -112,7 +112,7 @@ def load_source_from_tar(tarpath: str, tag: str=None):
     tmpdir = mkdtemp(dir=wrk.sources)
 
     iprint('extracting temporarily to ' + tmpdir)
-    tar = tarfile.open(tarpath, 'r:xz')
+    tar = tarfile.open(tarpath, 'r:*')
     tar.extractall(path=tmpdir)
 
     # Get package name and version
