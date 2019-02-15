@@ -197,8 +197,7 @@ int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	default:
 		/* should not happen.
 		 * Default case has been set to LIST_ALL when parsing options. */
-		abort();
-		break;
+		mm_check(0);
 	}
 
 	if (!data.found) {
