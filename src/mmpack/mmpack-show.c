@@ -42,7 +42,7 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 		mmpkg_sysdeps_dump(&pkg->sysdeps, "SYSTEM");
 
 		printf("\nDescription:\n");
-		printf("%s\n", pkg->desc);
+		printf("%s\n", pkg->desc ? pkg->desc : "none");
 
 		return 1;
 	}
