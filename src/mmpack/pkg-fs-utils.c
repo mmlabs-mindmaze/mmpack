@@ -649,11 +649,13 @@ int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 	if (  pkg_list_rm_files(pkg, &files)
 	   || rm_files_from_list(&files)) {
 		rv = -1;
+		goto exit;
 	}
 
-	strlist_deinit(&files);
-
 	install_state_rm_pkgname(&ctx->installed, pkg->name);
+
+exit:
+	strlist_deinit(&files);
 
 	if (rv)
 		error("Failed!\n");
@@ -798,9 +800,16 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 	// Fetch missing packages
 	rv = fetch_pkgs(ctx, stack);
 
-	// Apply individual action changes
-	for (i = 0; (i < stack->index) && (rv == 0); i++)
+	/* Apply individual action changes
+	 * Stop processing actions on error: the actions are ordered so that a
+	 * package will not be installed if its dependencies fail to be installed
+	 * and not be removed if a back-dependency failed to be removed.
+	 */
+	for (i = 0; i < stack->index; i++) {
 		rv = apply_action(ctx, &stack->actions[i]);
+		if (rv != 0)
+			break;
+	}
 
 	// Store the updated installed package list in prefix
 	if (mmpack_ctx_save_installed_list(ctx))
