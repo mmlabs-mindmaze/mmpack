@@ -59,12 +59,6 @@ int mmpack_search(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return argc != 2 ? -1 : 0;
 	}
 
-	if (argc < 2) {
-
-		fprintf(stderr, "missing package argument in command line\n"
-		                "Usage:\n\tmmpack search "SEARCH_SYNOPSIS"\n");
-		return -1;
-	}
 	data.pkg_name = argv[1];
 
 	// Load prefix configuration and caches
