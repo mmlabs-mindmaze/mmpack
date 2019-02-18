@@ -157,7 +157,7 @@ mmstr* mmstr_join_path(mmstr* restrict dst,
 		mmstr_setlen(dst, mmstrlen(dst)-1);
 
 	// Add one '/' if neither p1 and p2 provide a '/' at the junction
-	if (!sep_start_p2 && !sep_start_p2)
+	if (!sep_end_p1 && !sep_start_p2)
 		mmstrcat_cstr(dst, "/");
 
 	return mmstrcat(dst, p2);
