@@ -67,10 +67,6 @@ BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON)
 CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 
-.PHONY: spelling
-spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN)
-	$(AM_V_at) codespell $^
-
 .PHONY: syntax
 syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON)
 	$(srcdir)/devtools/check-pyfile $^
@@ -170,12 +166,6 @@ mmpack_check_sysdep_LDADD = \
 	$(eol)
 
 
-# dev debian-only helper function, not part of any target
-# requires root permissions to run
-.PHONY: setcap
-setcap:
-	$(AM_V_GEN) setcap cap_dac_override,cap_sys_admin+ep $(libexecdir)/mmpack/mount-mmpack-prefix
-
 mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 	$(AM_V_GEN)$(SED) -e 's,<mmpackbuilddir>,$(mmpackbuilddir),g' < $< > $@
 	$(AM_V_at)chmod a+x $@
@@ -184,6 +174,44 @@ mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
 	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' \
 		-e 's,<libexecdir>,$(libexecdir),g' < $< > $@
+
+#
+# DEVEL TARGETS
+#
+# Those should only make sense as helpers in a development context
+
+.PHONY: spelling
+spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN)
+	$(AM_V_at) codespell $^
+
+# dev debian-only helper function, not part of any target
+# requires root permissions to run
+.PHONY: setcap
+setcap:
+	$(AM_V_GEN) setcap cap_dac_override,cap_sys_admin+ep $(libexecdir)/mmpack/mount-mmpack-prefix
+
+SCAN_BUILD_OPTIONS = \
+	-enable-checker alpha.core.BoolAssignment \
+	-enable-checker alpha.core.IdenticalExpr \
+	-enable-checker alpha.core.SizeofPtr \
+	$(eol)
+
+# if scan-build 6.0 (from backport) is available, add some more checkers
+if HAVE_SCAN_BUILD_6
+SCAN_BUILD_OPTIONS += \
+	-enable-checker alpha.core.PointerArithm \
+	-enable-checker alpha.core.PointerSub \
+	-enable-checker alpha.deadcode.UnreachableCode \
+	-enable-checker alpha.security.MallocOverflow \
+	-enable-checker nullability.NullableDereferenced \
+	-enable-checker nullability.NullablePassedToNonnull \
+	-enable-checker nullability.NullableReturnedFromNonnull \
+	$(eol)
+endif
+
+.PHONY: scan-build
+scan-build:
+	scan-build -analyze-headers $(SCAN_BUILD_OPTIONS) $(MAKE)
 
 #
 # TESTS RULES

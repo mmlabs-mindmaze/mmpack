@@ -63,6 +63,9 @@ AS_CASE([$enable_sphinxdoc],
                          [enable_sphinxdoc=yes], [enable_sphinxdoc=no])])
 AM_CONDITIONAL(BUILD_SPHINXDOC, [test "x$enable_sphinxdoc" = xyes])
 
+AC_CHECK_PROG(SCAN_BUILD_6, [scan-build-6.0], [yes], [no])
+AM_CONDITIONAL(HAVE_SCAN_BUILD_6, [test "x$SCAN_BUILD_6" = xyes])
+
 # Check for libraries
 MM_CHECK_LIB([mmthr_create], [mmlib], MMLIB, [], [AC_MSG_ERROR([mmlib library required])])
 MM_CHECK_LIB([yaml_parser_initialize], [yaml], YAML, [], [AC_MSG_ERROR([yaml library required])])
