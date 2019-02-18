@@ -233,7 +233,7 @@ void solver_clean_upgrade_stack(struct solver* solver, size_t prev_size)
 
 	while (solver->upgrades_stack.size > prev_size) {
 		buffer_pop(&solver->upgrades_stack,
-		           &upgrades, sizeof(upgrades));
+		           &upgrades, sizeof(uintptr_t));
 
 		free(upgrades);
 	}
@@ -718,7 +718,7 @@ int solver_step_upgrade_rdeps(struct solver* solver, struct proc_frame* frame)
 		// Push upgrade list for processing
 		upgrade_deps = buffer_take_data_ownership(&buff);
 		buffer_push(&solver->upgrades_stack,
-		            &upgrade_deps, sizeof(upgrade_deps));
+		            &upgrade_deps, sizeof(uintptr_t));
 
 		solver_add_deps_to_process(solver, frame, upgrade_deps);
 	} else {
