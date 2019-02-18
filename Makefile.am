@@ -89,6 +89,8 @@ mmpack_lib_sources = \
 	src/mmpack/mm-alloc.h \
 	src/mmpack/mmpack-check-integrity.c \
 	src/mmpack/mmpack-check-integrity.h \
+	src/mmpack/mmpack-fix-broken.c \
+	src/mmpack/mmpack-fix-broken.h \
 	src/mmpack/mmpack-install.c \
 	src/mmpack/mmpack-install.h \
 	src/mmpack/mmpack-list.c \
@@ -245,6 +247,7 @@ RST_MAN_PAGES_IN = \
 	docs/mmpack-build-clean.rst.in \
 	docs/mmpack-build-pkg-create.rst.in \
 	docs/mmpack-check-integrity.rst.in \
+	docs/mmpack-fix-broken.rst.in \
 	docs/mmpack-install.rst.in \
 	docs/mmpack-list.rst.in \
 	docs/mmpack-mkprefix.rst.in \

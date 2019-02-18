@@ -29,7 +29,14 @@ struct cb_data {
 };
 
 
-static
+/**
+ * get_sha256sums_file() - get sha256sums file of given package
+ * @prefix: mmpakck prefix to consider
+ * @pkg_name: package name
+ *
+ * Return: an allocated sha256sums full path string
+ */
+LOCAL_SYMBOL
 mmstr * get_sha256sums_file(mmstr const * prefix, char const * pkg_name)
 {
 	size_t sha256sums_len;

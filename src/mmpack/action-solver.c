@@ -166,7 +166,16 @@ void mmpack_action_stack_destroy(struct action_stack * stack)
 }
 
 
-static
+/**
+ * mmpack_action_stack_push() - push described action unto the stack
+ * @stack: initialized stack structure
+ * @action: action to push unto the stack. Eg. INSTALL_PKG
+ * @pkg: package to manipulate
+ * @oldpkg: optional argument for removal cases.
+ *
+ * Return the updated stack pointer
+ */
+LOCAL_SYMBOL
 struct action_stack * mmpack_action_stack_push(struct action_stack * stack,
                                                       int action,
                                                       struct mmpkg const * pkg,

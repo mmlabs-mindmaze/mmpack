@@ -16,6 +16,7 @@
 
 #include "common.h"
 #include "mmpack-check-integrity.h"
+#include "mmpack-fix-broken.h"
 #include "mmpack-install.h"
 #include "mmpack-list.h"
 #include "mmpack-mkprefix.h"
@@ -42,11 +43,11 @@ static const char mmpack_doc[] =
  * TODO: user commands to implement
  * - config
  * - download
- * - reinstall
  * - upgrade
  */
 static const char arguments_docs[] =
 	"[options] "CHECK_INTEGRITY_SYNOPSIS"\n"
+	"[options] "FIX_BROKEN_SYNOPSIS"\n"
 	"[options] "INSTALL_SYNOPSIS"\n"
 	"[options] "LIST_SYNOPSIS"\n"
 	"[options] "MKPREFIX_SYNOPSIS"\n"
@@ -124,6 +125,8 @@ int main(int argc, char* argv[])
 	/* Dispatch command */
 	if (STR_EQUAL(cmd, strlen(cmd), "check-integrity")) {
 		rv = mmpack_check_integrity(&ctx, cmd_argc, cmd_argv);
+	} else if (STR_EQUAL(cmd, strlen(cmd), "fix-broken")) {
+		rv = mmpack_fix_broken(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "mkprefix")) {
 		rv = mmpack_mkprefix(&ctx, cmd_argc, cmd_argv);
 	} else if (STR_EQUAL(cmd, strlen(cmd), "update")) {
