@@ -1,5 +1,4 @@
 /usr/bin/mmpack-build
-/usr/bin/mmpack-createrepo
 /usr/lib/*/mmpack/mmpack-check-sysdep
 /usr/share/mmpack/python/
 /usr/share/bash-completion/completions/mmpack-build_completion

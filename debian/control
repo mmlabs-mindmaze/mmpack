@@ -36,3 +36,15 @@ Description: MindMaze package development tools
  installation and removal of mmpack software packages.
  .
  This package contains the tools needed to build mmpack package from source
+
+Package: mmpack-repo-tools
+Section: utils
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, tar
+Description: MindMaze repository management tools
+ This package provides the infrastructure for handling the build,
+ installation and removal of mmpack software packages.
+ .
+ This package contains the tools needed to manage repositories of mmpack
+ packages
