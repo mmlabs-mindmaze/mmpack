@@ -33,9 +33,37 @@ static const struct mmarg_opt cmdline_optv[] = {
 
 
 static
-void fill_pkgreq_from_cmdarg(struct pkg_request *req, const char* arg)
+int is_file(char const * path)
 {
-	const char* v;
+	struct mm_stat st;
+
+	if (mm_stat(path, &st, 0) != 0)
+		return 0;
+
+	return S_ISREG(st.mode);
+}
+
+
+static
+int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request *req,
+                             const char* arg)
+{
+	const char * v;
+	struct mmpkg * pkg;
+
+	if (is_file(arg)) {
+		pkg = add_pkgfile_to_binindex(&ctx->binindex, arg);
+		if (pkg == NULL)
+			return -1;
+
+		req->pkg = pkg;
+		req->name = NULL;
+		req->version = NULL;
+
+		return 0;
+	}
+
+	req->pkg = NULL;
 
 	// Find the first occurrence of '='
 	v = strchr(arg, '=');
@@ -47,6 +75,8 @@ void fill_pkgreq_from_cmdarg(struct pkg_request *req, const char* arg)
 		req->name = mmstr_malloc_from_cstr(arg);
 		req->version = NULL;
 	}
+
+	return 0;
 }
 
 
@@ -93,7 +123,8 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	reqlist = mm_malloca(nreq * sizeof(*reqlist));
 	memset(reqlist, 0, nreq * sizeof(*reqlist));
 	for (i = 0; i < nreq; i++) {
-		fill_pkgreq_from_cmdarg(&reqlist[i], req_args[i]);
+		if (fill_pkgreq_from_cmdarg(ctx, &reqlist[i], req_args[i]) < 0)
+			goto exit;
 		reqlist[i].next = (i == nreq-1) ? NULL : &reqlist[i+1];
 	}
 
@@ -115,6 +146,7 @@ exit:
 	for (i = 0; i < nreq && reqlist; i++) {
 		mmstr_free(reqlist[i].name);
 		mmstr_free(reqlist[i].version);
+		/* do not free reqlist package */
 	}
 	mm_freea(reqlist);
 	return rv;

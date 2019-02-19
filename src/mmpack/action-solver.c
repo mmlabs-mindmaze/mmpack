@@ -923,12 +923,17 @@ struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
 {
 	STATIC_CONST_MMSTR(any_version, "any")
 	struct mmpkg_dep dep = {0};
-	struct compiled_dep* compdep = NULL;
+	struct compiled_dep* compdep;
 	const struct pkg_request* req;
 
 	mm_check(reqlist != NULL);
 
 	for (req = reqlist; req != NULL; req = req->next) {
+		if (req->pkg != NULL) {
+			compdep = compile_package(binindex, req->pkg, buff);
+			continue;
+		}
+
 		dep.name = req->name;
 		dep.min_version = req->version ? req->version : any_version;
 		dep.max_version = dep.min_version;

@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <curl/curl.h>
+#include <mmsysio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +20,8 @@
 #include "indextable.h"
 #include "mm-alloc.h"
 #include "package-utils.h"
+#include "pkg-fs-utils.h"
+#include "utils.h"
 
 struct rdepends {
 	int num;
@@ -464,7 +467,7 @@ void pkglist_deinit(struct pkglist* list)
  * Return: a pointer to new package in list
  */
 static
-void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
+struct mmpkg * pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 {
 	struct pkglist_entry* entry;
 	struct pkglist_entry** pnext;
@@ -487,14 +490,13 @@ void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 			pkg_in_list->size = pkg->size;
 			pkg_in_list->sha256 = pkg->sha256;
 			pkg_in_list->filename = pkg->filename;
-			pkg_in_list->desc = pkg->desc;
 
 			// Unset string field in source package since the
 			// string are taken over by the pkg in list
 			pkg->sha256 = NULL;
 			pkg->filename = NULL;
 		}
-		return;
+		return pkg_in_list;
 	}
 
 	// Find where to insert entry (package version are sorted)
@@ -520,6 +522,8 @@ void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 	mmpkg_init(pkg, NULL);
 
 	list->num_pkg++;
+
+	return &entry->pkg;
 }
 
 /**************************************************************************
@@ -865,6 +869,41 @@ struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
 
 
 /**
+ * compile_package() - compile a package on an buffer
+ * @binindex: binary index with which the dependencies must be compiled
+ * @pkg: package to compile into context of @binindex
+ * @buff: struct buffer on which the dependency must be appended
+ *
+ * Return: the pointer to compiled dependency located on data buffer managed
+ * by @buff.
+ */
+LOCAL_SYMBOL
+struct compiled_dep * compile_package(const struct binindex* binindex,
+                                      struct mmpkg const * pkg,
+                                      struct buffer* buff)
+{
+	size_t size;
+	struct compiled_dep* compdep;
+	struct pkglist* list;
+
+	list = binindex_get_pkglist(binindex, pkg->name);
+	assert(list != NULL);
+
+	size = compiled_dep_size(1);
+	compdep = buffer_reserve_data(buff, size);
+	compdep->pkgs[0] = (struct mmpkg *) pkg;
+	compdep->pkgname_id = list - binindex->pkgname_table;
+	compdep->num_pkg = 1;
+	compdep->next_entry_delta = size / sizeof(*compdep);
+
+	/* Advance in the buffer after the compiled_dep we have just set */
+	buffer_inc_size(buff, size);
+
+	return compdep;
+}
+
+
+/**
  * binindex_compile_pkgdeps() - get buffer of dependencies of package
  * @binindex:   binary index with which the dependencies must be compiled
  * @pkg:        package whose dependencies must be compiled
@@ -933,14 +972,14 @@ const int* binindex_get_potential_rdeps(const struct binindex* binindex,
 
 
 static
-void binindex_add_pkg(struct binindex* binindex, struct mmpkg* pkg)
+struct mmpkg * binindex_add_pkg(struct binindex* binindex, struct mmpkg* pkg)
 {
 	struct pkglist* pkglist;
 	int pkgname_id;
 
 	pkgname_id = binindex_get_pkgname_id(binindex, pkg->name);
 	pkglist = &binindex->pkgname_table[pkgname_id];
-	pkglist_add_or_modify(pkglist, pkg);
+	return pkglist_add_or_modify(pkglist, pkg);
 }
 
 
@@ -1423,6 +1462,78 @@ exit:
 	mmstr_free(name);
 
 	return exitvalue;
+}
+
+
+static
+mmstr const * parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
+{
+	int rv;
+	char const * delim;
+	char const * base = buffer->base;
+	struct parsing_ctx ctx = {.repo_index = -1};
+
+	if (!yaml_parser_initialize(&ctx.parser)) {
+		mm_raise_error(ENOMEM, "failed to init yaml parse");
+		return NULL;
+	}
+
+	yaml_parser_set_input_string(&ctx.parser, (unsigned char const *) base,
+	                             buffer->size);
+	rv = mmpack_parse_index_package(&ctx, pkg);
+
+	yaml_parser_delete(&ctx.parser);
+	if (rv != 0)
+		return NULL;
+
+	/* additionally, load the package name from the buffer */
+	delim = strchr(base, ':');
+	pkg->name = mmstr_malloc_copy(base, delim - base);
+	pkg->repo_index = -1;
+
+	return pkg->name;
+}
+
+
+/**
+ * add_pkgfile_to_binindex() - add local mmpack package file to binindex
+ * @binindex: initialized mmpack binindex
+ * @filename: path to the mmpack archive
+ *
+ * Return: a pointer to the mmpkg structure that has been inserted.
+ * It belongs the the binindex and will be cleansed during mmpack global
+ * cleanup.
+ */
+LOCAL_SYMBOL
+struct mmpkg * add_pkgfile_to_binindex(struct binindex* binindex,
+                                       char const * filename)
+{
+	int rv;
+	struct buffer buffer;
+	struct mmpkg * pkg;
+	struct mmpkg tmppkg;
+	mmstr const * name;
+
+	pkg = NULL;
+	name = NULL;
+	buffer_init(&buffer);
+	mmpkg_init(&tmppkg, NULL);
+	tmppkg.filename = mmstr_malloc_from_cstr(filename);
+
+	rv = pkg_get_mmpack_info(filename, &buffer);
+	if (rv != 0)
+		goto exit;
+	name = parse_package_info(&tmppkg, &buffer);
+	if (name != NULL)
+		pkg = binindex_add_pkg(binindex, &tmppkg);
+
+	/* TODO: add package to cache ? */
+
+exit:
+	mmstr_free(name);
+	mmpkg_deinit(&tmppkg);
+	buffer_deinit(&buffer);
+	return pkg;
 }
 
 

@@ -310,6 +310,72 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 }
 
 
+/* same as archive_read_data_into_fd(), but into a buffer */
+static
+int unpack_entry_into_buffer(struct archive * archive,
+                             struct archive_entry * entry,
+                             struct buffer * buffer)
+{
+	ssize_t r;
+	int64_t info_size = archive_entry_size(entry);
+
+	if (info_size == 0)
+		return -1;
+
+	buffer_reserve_data(buffer, info_size);
+	buffer_inc_size(buffer, info_size);
+
+	r = archive_read_data(archive, buffer->base, buffer->size);
+	if (r >= ARCHIVE_OK && (size_t) r == buffer->size)
+		return 0;
+
+	return -1;
+}
+
+/**
+ * pkg_get_mmpack_info() - load MMPACK/info file from package into buffer
+ * @mpk_filename: mmpack package to read from
+ * @buffer: buffer structure to receive the raw data
+ *
+ * Open, scans for the MMPACK/info file, and load its data into given buffer
+ * structure. The buffer will be enlarged as needed, and must be freed by the
+ * caller after usage by calling the buffer_deinit() function.
+ *
+ * Return: 0 on success, -1 on error
+ */
+LOCAL_SYMBOL
+int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
+{
+	int rv;
+	struct archive * a;
+	struct archive_entry * entry;
+
+	a = archive_read_new();
+	archive_read_support_filter_all(a);
+	archive_read_support_format_all(a);
+
+	if (archive_read_open_filename(a, mpk_filename, READ_ARCHIVE_BLOCK)) {
+		mm_raise_error(archive_errno(a), "opening mpk %s failed: %s",
+		               mpk_filename, archive_error_string(a));
+		archive_read_free(a);
+		return -1;
+	}
+
+	rv = -1;
+	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
+		if (strcmp(archive_entry_pathname(entry), "./MMPACK/info") == 0) {
+			rv = unpack_entry_into_buffer(a, entry, buffer);
+			break;
+		}
+		archive_read_data_skip(a);
+	}
+
+	archive_read_close(a);
+	archive_read_free(a);
+
+	return rv;
+}
+
 /**************************************************************************
  *                                                                        *
  *                          Packages files removal                        *
@@ -542,6 +608,13 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		pkg = act->pkg;
 		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
 			continue;
+
+		if (pkg->repo_index == -1) {
+			act->pathname = mmstrdup(pkg->filename);
+			mmlog_info("Going to install %s (%s) directly from file",
+			           pkg->name, pkg->version);
+			continue;
+		}
 
 		// Get filename of downloaded package and store the path in
 		// a field of action structure being analyzed

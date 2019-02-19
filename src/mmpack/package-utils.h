@@ -138,6 +138,8 @@ struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr co
 
 void binindex_init(struct binindex* binindex);
 void binindex_deinit(struct binindex* binindex);
+struct mmpkg * add_pkgfile_to_binindex(struct binindex* binindex,
+                                       char const * filename);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
                       int repo_index);
 void binindex_dump(struct binindex const * binindex);
@@ -149,6 +151,9 @@ struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
 struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
                                           const struct mmpkg_dep* dep,
                                           struct buffer* buff);
+struct compiled_dep * compile_package(const struct binindex* binindex,
+                                      struct mmpkg const * pkg,
+                                      struct buffer* buff);
 struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
                                               struct mmpkg* pkg);
 const int* binindex_get_potential_rdeps(const struct binindex* binindex,

@@ -11,5 +11,6 @@
 int is_mmpack_metadata(mmstr const * path);
 int check_pkg(mmstr const * parent, mmstr const * sumsha);
 int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack);
+int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer);
 
 #endif

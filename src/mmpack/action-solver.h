@@ -36,6 +36,7 @@ struct action_stack {
 struct pkg_request {
 	const mmstr* name;
 	const mmstr* version;
+	struct mmpkg const * pkg;
 	struct pkg_request* next;
 };
 
