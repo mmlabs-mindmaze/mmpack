@@ -253,9 +253,9 @@ class SrcPackage(object):
                 raise ValueError('Source package {0} has no description'
                                  .format(pkgname))
             elif not description and pkg_type == 'library':
-                binpkg.description = self.description + '\n'
-                binpkg.description += 'automatically generated around SONAME '
-                binpkg.description += self.name
+                description = self.description + '\n'
+                description += 'automatically generated around SONAME '
+                description += self.name
             binpkg.description = description
 
     def _remove_ignored_files(self):
