@@ -39,12 +39,6 @@ static const char mmpack_doc[] =
 	"install, remove...)."
 ;
 
-/*
- * TODO: user commands to implement
- * - config
- * - download
- * - upgrade
- */
 static const char arguments_docs[] =
 	"[options] "CHECK_INTEGRITY_SYNOPSIS"\n"
 	"[options] "FIX_BROKEN_SYNOPSIS"\n"
