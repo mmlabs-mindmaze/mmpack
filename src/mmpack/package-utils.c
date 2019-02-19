@@ -487,6 +487,7 @@ void pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 			pkg_in_list->size = pkg->size;
 			pkg_in_list->sha256 = pkg->sha256;
 			pkg_in_list->filename = pkg->filename;
+			pkg_in_list->desc = pkg->desc;
 
 			// Unset string field in source package since the
 			// string are taken over by the pkg in list
