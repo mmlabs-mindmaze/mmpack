@@ -4,6 +4,7 @@ __pycache__
 
 # external tool files
 *.swp
+*.swo
 tags
 /cscope.*
 *.unc-backup~
