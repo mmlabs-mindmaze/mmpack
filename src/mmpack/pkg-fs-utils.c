@@ -799,6 +799,8 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 
 	// Fetch missing packages
 	rv = fetch_pkgs(ctx, stack);
+	if (rv != 0)
+		return rv;
 
 	/* Apply individual action changes
 	 * Stop processing actions on error: the actions are ordered so that a
