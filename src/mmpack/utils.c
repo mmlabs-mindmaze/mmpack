@@ -444,7 +444,7 @@ exit:
  *  * @filename if @parent is NULL
  *
  * The computed hash is stored in hexadecimal as a NULL-terminated string
- * in @hash string buffer which must be at least HASH_HEXSTR_SIZE long
+ * in @hash string buffer which must be at least SHA_HEXSTR_LEN long
  * (this include the NULL termination).
  *
  * Return: 0 in case of success, -1 if a problem of file reading has been
