@@ -16,6 +16,7 @@ from decorators import run_once
 from xdg import XDG_DATA_HOME
 
 CONFIG = {'debug': True, 'verbose': True}
+LOGGER = None
 
 
 @run_once
@@ -27,30 +28,32 @@ def _init_logger_if_not():
     If verbose flag is set, it will log up to DEBUG level
     otherwise, only up to INFO level.
     '''
+    global LOGGER  # pylint: disable=global-statement
+
     log_file = XDG_DATA_HOME + '/mmpack.log'
     log_handler = logging.handlers.TimedRotatingFileHandler(log_file)
-    logger = logging.getLogger()
-    logger.addHandler(log_handler)
+    LOGGER = logging.getLogger('mmpack-build')
+    LOGGER.addHandler(log_handler)
 
     if CONFIG['debug']:
-        logger.setLevel(logging.DEBUG)
+        LOGGER.setLevel(logging.DEBUG)
     elif CONFIG['debug'] or CONFIG['verbose']:
-        logger.setLevel(logging.INFO)
+        LOGGER.setLevel(logging.INFO)
     else:
-        logger.setLevel(logging.WARNING)
+        LOGGER.setLevel(logging.WARNING)
 
 
 def eprint(*args, **kwargs):
     'error print: print to stderr'
     _init_logger_if_not()
-    logging.error(*args, **kwargs)
+    LOGGER.error(*args, **kwargs)
     print(*args, file=sys.stderr, **kwargs)
 
 
 def iprint(*args, **kwargs):
     'info print: print only if verbose flag is set'
     _init_logger_if_not()
-    logging.info(*args, **kwargs)
+    LOGGER.info(*args, **kwargs)
     if CONFIG['verbose'] or CONFIG['debug']:
         print(*args, file=sys.stderr, **kwargs)
 
@@ -58,7 +61,7 @@ def iprint(*args, **kwargs):
 def dprint(*args, **kwargs):
     'debug print: standard print and log'
     _init_logger_if_not()
-    logging.debug(*args, **kwargs)
+    LOGGER.debug(*args, **kwargs)
     if CONFIG['debug']:
         print(*args, file=sys.stderr, **kwargs)
 
