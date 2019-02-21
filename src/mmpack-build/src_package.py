@@ -346,10 +346,6 @@ class SrcPackage(object):
         # enrich the env with the necessary variables to build using
         # the headers and libraries of the prefix
         if wrk.prefix:
-            # XXX: might need to also extend PATH.
-            #      however, those binaries require mmpack run to run
-            env_path_prepend(build_env, 'CPATH', wrk.prefix + '/include')
-            env_path_prepend(build_env, 'LIBRARY_PATH', wrk.prefix + '/lib')
             tmp = os.environ.get('LDFLAGS', '')
             build_env['LDFLAGS'] = '-Wl,-rpath-link={}/lib '.format(wrk.prefix)
             build_env['LDFLAGS'] += tmp
@@ -414,6 +410,9 @@ class SrcPackage(object):
             build_script = 'mmpack/build'
 
         build_cmd = ['sh', build_script]
+        if wrk.prefix:
+            run_prefix = [wrk.mmpack_bin(), '--prefix='+wrk.prefix, 'run']
+            build_cmd = run_prefix + build_cmd
 
         log_file = open('build.log', 'wb')
         dprint('[shell] {0}'.format(' '.join(build_cmd)))
