@@ -20,3 +20,5 @@ PACMAN_PREFIX = '\\var\\lib\\pacman'
 # variables taken from autotools
 PKGDATADIR = r'<pkgdatadir>'
 LIBEXECDIR = r'<libexecdir>'
+BINDIR = r'<bindir>'
+EXEEXT = r'<exeext>'

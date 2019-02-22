@@ -371,7 +371,8 @@ class SrcPackage(object):
 
         !!! Requires a prefix already set up !!!
         '''
-        cmd = 'mmpack --prefix={} update'.format(prefix)
+        wrk = Workspace()
+        cmd = '{} --prefix={} update'.format(wrk.mmpack_bin(), prefix)
         shell(cmd)
 
         # append platform-specific mmpack packages

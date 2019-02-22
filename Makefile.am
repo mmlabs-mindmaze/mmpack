@@ -173,7 +173,9 @@ mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 %.py : %.py.in Makefile
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
 	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' \
-		-e 's,<libexecdir>,$(libexecdir),g' < $< > $@
+		-e 's,<libexecdir>,$(libexecdir),g' \
+		-e 's,<bindir>,$(bindir),g' \
+		-e 's,<exeext>,$(EXEEXT),g' < $< > $@
 
 #
 # DEVEL TARGETS

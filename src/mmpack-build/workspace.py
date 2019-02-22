@@ -8,6 +8,7 @@ from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
 
 from decorators import singleton
 from common import shell, dprint, ShellException, pushdir, popdir
+from settings import BINDIR, EXEEXT
 
 
 def find_project_root_folder() -> str:
@@ -36,6 +37,7 @@ class Workspace(object):
         self.build = XDG_CACHE_HOME + '/mmpack/build'
         self.packages = XDG_DATA_HOME + '/mmpack-packages'
         self._cygpath_root = None
+        self._mmpack_bin = None
         self.prefix = ''
 
         # create the directories if they do not exist
@@ -57,6 +59,19 @@ class Workspace(object):
             self._cygpath_root = ''
 
         return self._cygpath_root
+
+    def mmpack_bin(self) -> str:
+        'Get mmpack binary absolute path (maybe transformed with cygpath)'
+        if self._mmpack_bin is not None:
+            return self._mmpack_bin
+
+        mmpack_bin = BINDIR + '/mmpack' + EXEEXT
+        try:
+            self._mmpack_bin = shell("cygpath -w " + mmpack_bin).strip()
+        except ShellException:
+            self._mmpack_bin = mmpack_bin
+
+        return self._mmpack_bin
 
     def builddir(self, srcpkg: str, tag: str):
         'get package build directory. Create it if needed.'
