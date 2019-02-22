@@ -31,7 +31,8 @@ def _init_logger_if_not():
     global LOGGER  # pylint: disable=global-statement
 
     log_file = XDG_DATA_HOME + '/mmpack.log'
-    log_handler = logging.handlers.TimedRotatingFileHandler(log_file)
+    log_handler = logging.handlers.TimedRotatingFileHandler(log_file, when='D',
+                                                            backupCount=30)
     LOGGER = logging.getLogger('mmpack-build')
     LOGGER.addHandler(log_handler)
 
