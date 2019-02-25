@@ -105,4 +105,12 @@ void buffer_push(struct buffer* buf, const void* data, size_t sz);
 void buffer_pop(struct buffer* buf, void* data, size_t sz);
 void* buffer_take_data_ownership(struct buffer* buf);
 
+/**************************************************************************
+ *                                                                        *
+ *                        External cmd execution                          *
+ *                                                                        *
+ **************************************************************************/
+int execute_cmd(char* argv[]);
+int execute_cmd_capture_output(char* argv[], struct buffer* output);
+
 #endif /* UTILS_H */

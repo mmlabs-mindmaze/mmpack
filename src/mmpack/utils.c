@@ -25,6 +25,11 @@
 
 #define MSG_MAXLEN              128
 #define HASH_UPDATE_SIZE        512
+#define BLK_SIZE                512
+
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO 1
+#endif
 
 
 /**************************************************************************
@@ -814,4 +819,91 @@ void* buffer_take_data_ownership(struct buffer* buff)
 
 	return data;
 }
+
+
+/**************************************************************************
+ *                                                                        *
+ *                        External cmd execution                          *
+ *                                                                        *
+ **************************************************************************/
+
+/**
+ * execute_cmd() - execute a external command
+ * @argv:       array of arg to pass to command including program (argv[0])
+ *
+ * Return: the exit code of the called command in case of success, -1 in
+ * case of failure
+ */
+LOCAL_SYMBOL
+int execute_cmd(char* argv[])
+{
+	int status;
+	mm_pid_t pid;
+
+	if (  mm_spawn(&pid, argv[0], 0, NULL, 0, argv, NULL)
+	   || mm_wait_process(pid, &status))
+		return -1;
+
+	if (MM_WSTATUS_SIGNALED & status)
+		return mm_raise_error(EINTR, "Command %s failed", argv[0]);
+
+	return status & MM_WSTATUS_CODEMASK;
+}
+
+
+/**
+ * execute_cmd_capture_output() - execute a command and capture its output
+ * @argv:       array of arg to pass to command including program (argv[0])
+ * @output:     pointer to struct buffer that will hold the output of command
+ *
+ * Return: the exit code of the called command in case of success, -1 in
+ * case of failure
+ */
+LOCAL_SYMBOL
+int execute_cmd_capture_output(char* argv[], struct buffer* output)
+{
+	struct mm_remap_fd fdmap;
+	int pipe_fds[2];
+	void* data;
+	ssize_t rsz;
+	int rv = -1;
+	int status;
+	mm_pid_t pid;
+
+	// Execute external command with STDOUT connected to a pipe
+	mm_pipe(pipe_fds);
+	fdmap.parent_fd = pipe_fds[1];
+	fdmap.child_fd = STDOUT_FILENO;
+	if (mm_spawn(&pid, argv[0], 1, &fdmap, 0, argv, NULL)) {
+		mm_close(pipe_fds[1]);
+		mm_close(pipe_fds[0]);
+		return -1;
+	}
+
+	// Close writing end in this process so that reading end of command
+	// output generates proper end of pipe
+	mm_close(pipe_fds[1]);
+	pipe_fds[1] = -1;
+
+	// Read whole pipe connected to cmd output into buffer
+	do {
+		data = buffer_reserve_data(output, BLK_SIZE);
+		rsz = mm_read(pipe_fds[0], data, BLK_SIZE);
+		if (rsz < 0)
+			goto exit;
+
+		buffer_inc_size(output, rsz);
+	} while (rsz > 0);
+
+	rv = 0;
+
+exit:
+	mm_close(pipe_fds[0]);
+	mm_wait_process(pid, &status);
+	if (MM_WSTATUS_SIGNALED & status)
+		return mm_raise_error(EINTR, "Command %s failed", argv[0]);
+
+	return (rv == -1) ? -1 : status & MM_WSTATUS_CODEMASK;
+}
+
 

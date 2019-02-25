@@ -15,34 +15,6 @@
 #include "utils.h"
 
 
-/**
- * execute_cmd() - execute a command supporting arbitrary fd remapping
- * @argv:       array of arg to pass to command including program (argv[0])
- * @num_map:    number of of &struct mm_remap_fd element in @fdmap
- * @fdmap:      array of &struct mm_remap_fd element
- *
- * Use @num_map and @fdmap like with mm_spawn()
- *
- * Return: the exit code of the called command in case of success, -1 in
- * case of failure
- */
-static
-int execute_cmd(char* argv[], int num_map, const struct mm_remap_fd* fdmap)
-{
-	int status;
-	mm_pid_t pid;
-
-	if (  mm_spawn(&pid, argv[0], num_map, fdmap, 0, argv, NULL)
-	   || mm_wait_process(pid, &status))
-		return -1;
-
-	if (MM_WSTATUS_SIGNALED & status)
-		return mm_raise_error(EINTR, "Command %s failed", argv[0]);
-
-	return status & MM_WSTATUS_CODEMASK;
-}
-
-
 /**************************************************************************
  *                                                                        *
  *                       dpkg-based sysdeps checking                      *
@@ -102,7 +74,7 @@ int dpkg_check_sysdeps_installed(const struct strset* sysdeps)
 	// Execute check-dpkg-installed script with sysdeps in arg and
 	// check return value indeed 0 (success)
 	argv[1] = strdeps;
-	rv = execute_cmd(argv, 0, NULL);
+	rv = execute_cmd(argv);
 
 	if (rv > 0)
 		rv = DEPS_MISSING;
@@ -126,36 +98,29 @@ const mmstr* get_msys2_root(void)
 	static char msys2_root_data[128];
 	mmstr* msys2_root = mmstr_map_on_array(msys2_root_data);
 	char* argv[] = {"cygpath.exe", "-w", "/", NULL};
-	struct mm_remap_fd fdmap;
-	int len, pipe_fds[2];
-	ssize_t rsz;
+	struct buffer cmd_output;
+	int len;
 
 	if (msys2_root[0])
 		return msys2_root;
 
-	mm_pipe(pipe_fds);
-	fdmap.parent_fd = pipe_fds[1];
-	fdmap.child_fd = 1;
-	if (execute_cmd(argv, 1, &fdmap)) {
+	buffer_init(&cmd_output);
+	if (execute_cmd_capture_output(argv, &cmd_output)) {
 		mmlog_warn("Could not execute cygpath. Assuming MSYS2 root"
                            " is "DEFAULT_MSYS2);
 		mmstrcpy_cstr(msys2_root, DEFAULT_MSYS2);
 		goto exit;
 	}
 
-	// Read the output of cygpath to know root of MSYS2
-	rsz = mm_read(pipe_fds[0], msys2_root, mmstr_maxlen(msys2_root));
-	if (rsz < 0)
-		return NULL;
+	mmstr_copy(msys2_root, cmd_output.base, cmd_output.size);
 
-	// Update string len minus possible end of line
-	len = mmstr_update_len_from_buffer(msys2_root);
+	// Remove possible end of line
+	len = mmstrlen(msys2_root);
 	if (msys2_root[len-1] == '\n')
 		mmstr_setlen(msys2_root, len-1);
 
 exit:
-	mm_close(pipe_fds[1]);
-	mm_close(pipe_fds[0]);
+	buffer_deinit(&cmd_output);
 	return msys2_root;
 }
 
