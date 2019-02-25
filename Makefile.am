@@ -122,6 +122,15 @@ mmpack_lib_sources = \
 	src/mmpack/utils.h \
 	$(eol)
 
+if OS_TYPE_WIN32
+
+mmpack_lib_sources += \
+	src/mmpack/path-win32.c \
+	src/mmpack/path-win32.h \
+	$(eol)
+
+endif
+
 mmpack_SOURCES = \
 	$(mmpack_lib_sources) \
 	src/mmpack/mmpack.c \
