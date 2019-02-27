@@ -6,12 +6,13 @@ packaging as mmpack file.
 
 import importlib
 import os
-from os.path import isfile
+from os.path import isfile, basename
 from glob import glob
 from typing import List, Dict, Set
 import tarfile
 from common import *
-from file_utils import filetype, is_dynamic_library
+from file_utils import filetype, is_dynamic_library, \
+    is_importlib, get_linked_dll
 from mm_version import Version
 import yaml
 from pacman import pacman_find_dependency
@@ -364,6 +365,19 @@ class BinaryPackage(object):
             if target in pkg.install_files and pkg.name != self.name:
                 self.add_depend(pkg.name, pkg.version, pkg.version)
 
+    def _find_dll_dep(self, import_lib: str, binpkgs: List['BinaryPackages']):
+        ''' Adds to dependencies the package that hosts the dll associated
+            with import library.
+        '''
+        dll = get_linked_dll(import_lib)
+        for pkg in binpkgs:
+            pkg_dlls = [basename(f).lower() for f in pkg.install_files
+                        if f.endswith(('.dll', '.DLL'))]
+            if dll in pkg_dlls:
+                if pkg.name != self.name:
+                    self.add_depend(pkg.name, pkg.version, pkg.version)
+                return
+
     def gen_dependencies(self, binpkgs: List['BinaryPackages']):
         'Go through the install files and search for dependencies.'
         deps = {'elf': set(), 'pe': set(), 'python': set()}
@@ -373,6 +387,10 @@ class BinaryPackage(object):
                 target = os.path.join(os.path.dirname(inst_file),
                                       os.readlink(inst_file))
                 self._find_link_deps(target, binpkgs)
+                continue
+
+            if is_importlib(inst_file):
+                self._find_dll_dep(inst_file, binpkgs)
                 continue
 
             file_type = filetype(inst_file)

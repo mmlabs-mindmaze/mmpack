@@ -5,6 +5,7 @@ Helpers to find out what files are
 
 import re
 from os.path import islink, basename, splitext
+from subprocess import PIPE, run
 
 
 def filetype(filename):
@@ -27,6 +28,26 @@ def filetype(filename):
     # return file extension otherwise
     # eg. python, c-header, ...
     return splitext(filename)[1][1:].strip().lower()
+
+
+def get_linked_dll(import_lib):
+    'Get dll filename associated with import_lib'
+    ret = run(['strings', import_lib], stdout=PIPE)
+    if ret.returncode != 0:
+        raise RuntimeError('strings command failed on ' + import_lib)
+
+    # Parse output of strings program to keep only dll filename
+    strlist = ret.stdout.decode('utf-8').lower().split()
+    dll_names = set([v for v in strlist if v.endswith('.dll')])
+
+    # Check we have one and only dll
+    if len(dll_names) != 1:
+        raise RuntimeError('Only one imported dll should be'
+                           'found in {}. dll(s) found: {}'
+                           .format(import_lib, dll_names))
+
+    # Get the only element of dll_names set
+    return dll_names.pop()
 
 
 def is_dynamic_library(filename: str) -> str:
@@ -100,9 +121,12 @@ def is_binary(filename: str) -> bool:
 
 def is_libdevel(filename: str) -> bool:
     'returns whether a file is soname symlink'
-    return ((filename.endswith('.so') and islink(filename))
-            or filename.endswith('.dll.a')
-            or filename.endswith('.lib'))
+    return filename.endswith('.so') and islink(filename)
+
+
+def is_importlib(filename: str) -> bool:
+    'returns whether a file is import library of a dll'
+    return filename.endswith('.dll.a') or filename.endswith('.lib')
 
 
 def is_pkgconfig(filename: str) -> bool:
@@ -118,6 +142,7 @@ def is_cmake_pkg_desc(filename: str) -> bool:
 def is_devel(path: str) -> bool:
     'returns whether a file is development files'
     return (is_libdevel(path)
+            or is_importlib(path)
             or is_include(path)
             or is_devel_manpage(path)
             or is_pkgconfig(path)
