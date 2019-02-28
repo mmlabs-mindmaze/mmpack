@@ -193,25 +193,6 @@ class SSH(object):
             if client:
                 client.close()
 
-    def _rec_rmdir(self, sftp_client, remote_dir_path):
-        for filename in sftp_client.listdir(path=remote_dir_path):
-            fullpath = os.path.join(remote_dir_path, filename)
-            if isdir(sftp_client, fullpath):
-                self._rec_rmdir(sftp_client, fullpath)
-            else:
-                sftp_client.remove(fullpath)
-
-    def rmdir(self, remote_dir_path):
-        'Remove the given folder'
-        client = None
-        try:
-            client = self._make_client()
-            sftp_client = client.open_sftp()
-            self._rec_rmdir(sftp_client, remote_dir_path)
-        finally:
-            if client:
-                client.close()
-
 
 def _trigger_build(event):
     'test whether an event is a merge event, or a manual trigger'
@@ -261,7 +242,7 @@ def build_packages(node, workdir, tmpdir):
         node.exec(cmd)
 
         node.get(workdir + '/mmpack-packages', tmpdir)  # retrieve packages
-        node.rmdir(workdir)  # wipe remote tmp directory
+        node.exec('rm -rf ' + workdir)  # wipe remote tmp directory
 
         return 0
     except Exception as e:  # pylint: disable=broad-except
