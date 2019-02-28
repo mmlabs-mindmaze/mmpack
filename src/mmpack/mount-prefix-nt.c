@@ -101,6 +101,50 @@ exit:
 }
 
 
+/**
+ * check_running_mmpack() - check mmpack prefix input
+ * @path: given input path
+ *
+ * This is used to prevent running two different prefixes at the same time
+ *
+ * This only is about prevent two distinct concurrent prefixes on the same
+ * windows session. The same user logged twice independently (with password)
+ * does not have that restriction.
+ *
+ * Returns: 0 on success (path can be used), or a non-zero value
+ * otherwise
+ */
+static
+int check_running_mmpack(WCHAR * path)
+{
+	DWORD rv;
+	WCHAR prev_path[MAX_PATH];
+	WCHAR * norm_prev_path;
+	WCHAR norm_path[MAX_PATH];
+
+	/* get and normalize the folder path of MOUNT_TARGET (M:) */
+	rv = QueryDosDeviceW(MOUNT_TARGET, prev_path, MAX_PATH);
+	if (rv == 0) {
+		switch (GetLastError()) {
+		case ERROR_FILE_NOT_FOUND:
+			return 0;
+
+		default:
+			return -1;
+		}
+	}
+	if (memcmp(prev_path, L"\\??\\", 4 * sizeof(WCHAR)) == 0)
+		norm_prev_path = &prev_path[wcslen(L"\\??\\")];
+	else
+		norm_prev_path = &prev_path[0];
+
+	/* normalize input path */
+	GetFullPathNameW(path, MAX_PATH, norm_path, NULL);
+
+	return wcscmp(norm_prev_path, norm_path);
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                         mount prefix implementation                    *
@@ -123,6 +167,13 @@ int main(void)
 	cmdline = GetCommandLineW();
 	cmdline = copy_first_arg(path, cmdline);
 	cmdline = copy_first_arg(path, cmdline);
+
+	if (check_running_mmpack(path)) {
+		/* TODO: find a way to create a new authenticated session here */
+		fprintf(stderr, "Cannot mount target with different prefixes and "
+		                "on the same session.");
+		return EXIT_FAILURE;
+	}
 
 	// Create temporary drive M: pointing to prefix_path
 	if (!DefineDosDeviceW(DDD_NO_BROADCAST_SYSTEM, MOUNT_TARGET, path)) {
