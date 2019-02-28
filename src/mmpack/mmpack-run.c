@@ -82,7 +82,7 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return -1;
 
 #if defined(_WIN32)
-	// Convert environement path list that has been set/enriched here and
+	// Convert environment path list that has been set/enriched here and
 	// which are meant to be used in POSIX development environment (in
 	// MSYS2 or Cygwin)
 	conv_env_pathlist_win32_to_posix("CPATH");
