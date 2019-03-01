@@ -23,6 +23,7 @@ import shutil
 from tempfile import mkdtemp
 import stat
 from subprocess import PIPE, run
+import tarfile
 import time
 import yaml
 
@@ -223,6 +224,12 @@ def shell(cmd):
         raise ShellException('failed to exec command')
 
 
+def has_mmpack_specfile(srctar):
+    'test whether a source package has mmpack config'
+    tar = tarfile.open(srctar, mode='r:*')
+    return 'mmpack/specs' in tar.getnames()
+
+
 def build_packages(node, workdir, tmpdir):
     '''build project on given branch
 
@@ -271,6 +278,7 @@ def process_event(event, tmpdir):
         logger.info('building {} branch {}'.format(project, branch))
 
         workdir = os.path.join('/tmp/mmpack', project, branch)
+        srctar = tmpdir + '/sources.tar.gz'
 
         # create source archive
         project_git_url = 'ssh://{}@{}:{:d}/{}' \
@@ -280,9 +288,14 @@ def process_event(event, tmpdir):
                                   project)
         cmd = 'GIT_SSH_COMMAND="ssh -i {}" ' \
               .format(CONFIG['gerrit']['keyfile'])
-        cmd += 'git archive --format=tar.gz --remote={0} {1} > {2}/{3}' \
-               .format(project_git_url, branch, tmpdir, 'sources.tar.gz')
+        cmd += 'git archive --format=tar.gz --remote={0} {1} > {2}' \
+               .format(project_git_url, branch, srctar)
         shell(cmd)
+
+        # If project is not packaged with mmpack, just skip
+        if not has_mmpack_specfile(srctar):
+            logger.info('No mmpack packaging, build cancelled')
+            return 0
 
         for node in BUILDER_LIST:
             logger.info('building {} on {} using remote folder {}'
