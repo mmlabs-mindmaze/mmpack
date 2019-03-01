@@ -264,8 +264,9 @@ def process_event(event, tmpdir):
             else:  # use git sha1
                 branch = event['patchSet']['revision']
         except KeyError:
-            logger.error('Malformed event: ' + event)
-            return -1
+            # it is impossible to notify gerrit in such a case
+            logger.error('Malformed event')
+            return 0
 
         logger.info('building {} branch {}'.format(project, branch))
 
