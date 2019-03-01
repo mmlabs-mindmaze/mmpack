@@ -71,13 +71,42 @@ class ShellException(RuntimeError):
     'custom exception for shell command error'
 
 
-def shell(cmd):
-    'Wrapper for subprocess.run'
-    dprint('[shell] {0}'.format(cmd))
-    ret = run(cmd, stdout=PIPE, shell=True)
-    if ret.returncode == 0:
-        return ret.stdout.decode('utf-8')
+def shell(cmd, log=True):
+    '''Wrapper for subprocess.run
+
+    Args:
+        cmd: Can be either a string or a list of strings
+             shell() will pass the command through the shell if and only if
+             the cmd argument is a string
+    Raises:
+        ValueError: if type of cmd is invalid
+        ShellException: if the command run failed
+
+    Returns:
+        the output of the command decoded to utf-8
+    '''
+    if isinstance(cmd, list):
+        run_shell = False
+        logmsg = ' '.join(cmd)
+    elif isinstance(cmd, str):
+        run_shell = True
+        logmsg = cmd
     else:
+        raise ValueError('Invalid shell argument type: ' + str(type(cmd)))
+
+    if log:
+        dprint('[shell] {0}'.format(logmsg))
+
+    try:
+        ret = run(cmd, stdout=PIPE, shell=run_shell)
+        if ret.returncode == 0:
+            return ret.stdout.decode('utf-8')
+        else:
+            errmsg = 'Command "{:.50s}{:s}" failed with error {:d}' \
+                     .format(logmsg, '...' if len(logmsg) > 50 else '',
+                             ret.returncode)
+            raise ShellException(errmsg)
+    except FileNotFoundError:
         raise ShellException('failed to exec command')
 
 
