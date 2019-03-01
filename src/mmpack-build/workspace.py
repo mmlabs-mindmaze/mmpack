@@ -54,7 +54,8 @@ class Workspace(object):
             return self._cygpath_root
 
         try:
-            self._cygpath_root = shell("cygpath -w '/' ").strip()
+            self._cygpath_root = shell(['cygpath', '-w', '/'], log=False)
+            self._cygpath_root = self._cygpath_root.strip()
         except ShellException:
             self._cygpath_root = ''
 
@@ -67,7 +68,8 @@ class Workspace(object):
 
         mmpack_bin = BINDIR + '/mmpack' + EXEEXT
         try:
-            self._mmpack_bin = shell("cygpath -w " + mmpack_bin).strip()
+            self._mmpack_bin = shell(['cygpath', '-w', mmpack_bin], log=False)
+            self._mmpack_bin = self._mmpack_bin.strip()
         except ShellException:
             self._mmpack_bin = mmpack_bin
 
