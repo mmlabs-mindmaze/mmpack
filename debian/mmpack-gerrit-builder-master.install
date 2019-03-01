@@ -1,1 +1,1 @@
-devtools/gerrit-mmpack-build.py         /usr/bin
+devtools/gerrit/* /usr/share/mmpack/gerrit/python

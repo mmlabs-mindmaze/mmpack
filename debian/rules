@@ -25,4 +25,4 @@ override_dh_install:
 
 override_dh_python3:
 	dh_python3 -pmmpack-build --requires=3rdparty-python --depends-section=mmpack-build /usr/share/mmpack/python
-	dh_python3 -pmmpack-gerrit-builder-master --requires=3rdparty-python --depends-section=gerrit-mmpack-merge
+	dh_python3 -pmmpack-gerrit-builder-master --requires=3rdparty-python --depends-section=gerrit-mmpack-merge usr/share/mmpack/gerrit/python

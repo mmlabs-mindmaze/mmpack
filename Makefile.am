@@ -62,6 +62,11 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/xdg.py \
 	$(eol)
 
+mmpack_build_gerrit = \
+	devtools/gerrit/gerrit-mmpack-build.py \
+	devtools/gerrit/gerrit.py \
+	$(eol)
+
 nodist_mmpackbuild_PYTHON =\
 	src/mmpack-build/settings.py \
 	$(eol)
@@ -71,7 +76,7 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 
 .PHONY: syntax
-syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) devtools/gerrit-mmpack-build.py
+syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) devtools/gerrit/gerrit-mmpack-build.py
 	$(srcdir)/devtools/check-pyfile $^
 
 
@@ -195,7 +200,7 @@ mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 # Those should only make sense as helpers in a development context
 
 .PHONY: spelling
-spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN) devtools/gerrit-mmpack-build.py
+spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN) $(mmpack_build_gerrit)
 	$(AM_V_at) codespell $^
 
 # dev debian-only helper function, not part of any target

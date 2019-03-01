@@ -27,7 +27,7 @@ import time
 import yaml
 
 import paramiko
-import gerritlib.gerrit as gerrit
+import gerrit
 
 
 # configuration global variable

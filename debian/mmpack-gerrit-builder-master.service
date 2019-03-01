@@ -4,6 +4,6 @@ After=systemd-user-sessions.service
 
 [Service]
 ExecStartPre=/usr/bin/test -e /etc/gerrit-mmpack-build/config.yaml
-ExecStart=/usr/bin/gerrit-mmpack-build.py
+ExecStart=/usr/share/mmpack/gerrit/python/gerrit-mmpack-build.py
 User=mmpack-builder
 Restart=on-failure
