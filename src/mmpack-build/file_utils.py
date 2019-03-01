@@ -5,7 +5,8 @@ Helpers to find out what files are
 
 import re
 from os.path import islink, basename, splitext
-from subprocess import PIPE, run
+
+from common import shell
 
 
 def filetype(filename):
@@ -32,12 +33,7 @@ def filetype(filename):
 
 def get_linked_dll(import_lib):
     'Get dll filename associated with import_lib'
-    ret = run(['strings', import_lib], stdout=PIPE)
-    if ret.returncode != 0:
-        raise RuntimeError('strings command failed on ' + import_lib)
-
-    # Parse output of strings program to keep only dll filename
-    strlist = ret.stdout.decode('utf-8').lower().split()
+    strlist = shell(['strings', import_lib], log=False)
     dll_names = set([v for v in strlist if v.endswith('.dll')])
 
     # Check we have one and only dll
