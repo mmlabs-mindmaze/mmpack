@@ -76,7 +76,9 @@ int dpkg_check_sysdeps_installed(const struct strset* sysdeps)
 	argv[1] = strdeps;
 	rv = execute_cmd(argv);
 
-	if (rv > 0)
+	if (rv < 0)
+		printf("%s\n", mm_get_lasterror_desc());
+	else if (rv > 0)
 		rv = DEPS_MISSING;
 
 	mmstr_free(strdeps);

@@ -58,7 +58,7 @@ error('error occurred while parsing dependencies')
 my $facts = parse_status("$admindir/status");
 my @unmet = test_depends($deps, $facts);
 if (@unmet) {
-	errormsg('Unmet dependencies: %s',
+	info('Unmet dependencies: %s',
 	         join(' ', map { $_->output() } @unmet));
 	exit 1;
 }
