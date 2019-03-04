@@ -1,9 +1,12 @@
 [Unit]
 Description=MMPACK repository updater
-After=systemd-user-sessions.service
+After=network.target
 
 [Service]
 ExecStartPre=/usr/bin/test -e /etc/gerrit-mmpack-build/config.yaml
 ExecStart=/usr/share/mmpack/gerrit/python/gerrit-mmpack-build.py
 User=mmpack-builder
 Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
