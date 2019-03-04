@@ -51,6 +51,11 @@ def _log_or_store(level, *args, **kwargs):
         LOGGER.log(level, line)
 
 
+def log_info(*args, **kwargs):
+    'write only to log as info'
+    _log_or_store(logging.ERROR, *args, **kwargs)
+
+
 def eprint(*args, **kwargs):
     'error print: print to stderr'
     _log_or_store(logging.ERROR, *args, **kwargs)

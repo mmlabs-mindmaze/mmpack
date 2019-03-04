@@ -8,10 +8,12 @@ import os
 from glob import glob
 import re
 import shutil
-from subprocess import STDOUT, run
+from subprocess import Popen
 from tempfile import mkdtemp
 import tarfile
+from threading import Thread
 from typing import Set
+import sys
 from workspace import Workspace, get_local_install_dir
 from binary_package import BinaryPackage
 from common import *
@@ -19,6 +21,21 @@ from file_utils import *
 from mm_version import Version
 from settings import PKGDATADIR
 from mmpack_builddep import process_dependencies, general_specs_builddeps
+
+
+class _FileConsumer(Thread):
+    ''' Read in a thread from file input and duplicate onto the file output
+        and logger.
+    '''
+    def __init__(self, file_in, file_out):
+        super().__init__()
+        self.file_in = file_in
+        self.file_out = file_out
+
+    def run(self):
+        for line in self.file_in:
+            self.file_out.write(line)
+            log_info(line.strip('\n\r'))
 
 
 def _get_install_prefix() -> str:
@@ -416,11 +433,22 @@ class SrcPackage(object):
             run_prefix = [wrk.mmpack_bin(), '--prefix='+wrk.prefix, 'run']
             build_cmd = run_prefix + build_cmd
 
-        log_file = open('build.log', 'wb')
         dprint('[shell] {0}'.format(' '.join(build_cmd)))
-        ret = run(build_cmd, env=self._build_env(skip_tests),
-                  stderr=STDOUT, stdout=log_file)
-        if ret.returncode != 0:
+
+        # Execute command and transfer output to log
+        proc = Popen(build_cmd, env=self._build_env(skip_tests),
+                     stdout=PIPE, stderr=PIPE, universal_newlines=True)
+        out = _FileConsumer(file_in=proc.stdout, file_out=sys.stdout)
+        err = _FileConsumer(file_in=proc.stderr, file_out=sys.stderr)
+        out.start()
+        err.start()
+        out.join()
+        err.join()
+
+        # Wait the command is actually finished (or failed) and inspect
+        # return code
+        proc.wait()
+        if proc.returncode != 0:
             errmsg = 'Failed to build ' + self.name + '\n'
             errmsg += 'See build.log file for what went wrong\n'
             raise RuntimeError(errmsg)
