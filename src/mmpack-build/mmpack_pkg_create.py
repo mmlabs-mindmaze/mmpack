@@ -33,7 +33,7 @@ import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from glob import glob
 
-from common import pushdir, popdir, yaml_load
+from common import pushdir, popdir, yaml_load, set_log_file
 from src_package import create_source_from_git, load_source_from_tar
 from workspace import Workspace, find_project_root_folder
 
@@ -116,6 +116,8 @@ def main():
 
     if args.build_deps:
         package.install_builddeps(prefix=args.prefix, assumeyes=args.assumeyes)
+
+    set_log_file(package.pkgbuild_path() + '/mmpack.log')
 
     package.local_install(args.skip_tests)
     package.ventilate()

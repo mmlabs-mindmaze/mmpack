@@ -12,57 +12,61 @@ from typing import Union
 from hashlib import sha256
 import platform
 import yaml
-from decorators import run_once
-from xdg import XDG_DATA_HOME
 
 CONFIG = {'debug': True, 'verbose': True}
 LOGGER = None
 
+# list of stored level-msg pairs of logged lines issued before the
+# filename-based logger becomes available. Once it becomes available this
+# list will populate the newly created log.
+TMP_LOG_STRLIST = []
 
-@run_once
-def _init_logger_if_not():
+
+def set_log_file(filename):
     '''
-    Init logger to print to *log_file*.
+    Init logger to print to *filename*.
     Usually called via (e|i|d)print helpers.
-
-    If verbose flag is set, it will log up to DEBUG level
-    otherwise, only up to INFO level.
     '''
     global LOGGER  # pylint: disable=global-statement
 
-    log_file = XDG_DATA_HOME + '/mmpack.log'
-    log_handler = logging.handlers.TimedRotatingFileHandler(log_file, when='D',
-                                                            backupCount=30)
+    log_handler = logging.FileHandler(filename, mode='w')
     LOGGER = logging.getLogger('mmpack-build')
     LOGGER.addHandler(log_handler)
 
-    if CONFIG['debug']:
-        LOGGER.setLevel(logging.DEBUG)
-    elif CONFIG['debug'] or CONFIG['verbose']:
-        LOGGER.setLevel(logging.INFO)
+    LOGGER.setLevel(logging.DEBUG)
+
+    for level, line in TMP_LOG_STRLIST:
+        LOGGER.log(level, line)
+
+
+def _log_or_store(level, *args, **kwargs):
+    ''' Log a message if the file-based logger has been created, otherwise
+        keep the message along with the level in TMP_LOG_STRLIST for
+        temporary storage until it because available
+    '''
+    line = str(*args, **kwargs)
+    if not LOGGER:
+        TMP_LOG_STRLIST.append([level, line])
     else:
-        LOGGER.setLevel(logging.WARNING)
+        LOGGER.log(level, line)
 
 
 def eprint(*args, **kwargs):
     'error print: print to stderr'
-    _init_logger_if_not()
-    LOGGER.error(*args, **kwargs)
+    _log_or_store(logging.ERROR, *args, **kwargs)
     print(*args, file=sys.stderr, **kwargs)
 
 
 def iprint(*args, **kwargs):
     'info print: print only if verbose flag is set'
-    _init_logger_if_not()
-    LOGGER.info(*args, **kwargs)
+    _log_or_store(logging.INFO, *args, **kwargs)
     if CONFIG['verbose'] or CONFIG['debug']:
         print(*args, file=sys.stderr, **kwargs)
 
 
 def dprint(*args, **kwargs):
     'debug print: standard print and log'
-    _init_logger_if_not()
-    LOGGER.debug(*args, **kwargs)
+    _log_or_store(logging.DEBUG, *args, **kwargs)
     if CONFIG['debug']:
         print(*args, file=sys.stderr, **kwargs)
 
