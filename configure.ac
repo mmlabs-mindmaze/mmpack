@@ -49,7 +49,7 @@ AM_CONDITIONAL(TAP_SUPPORT_IN_CHECK, [test "x$tap_in_check" = xyes])
 # Test for sphinx documentation with linuxdoc
 AC_ARG_ENABLE([sphinxdoc], AC_HELP_STRING([--enable-sphinxdoc],*
 	[Build sphinx documention. @<:@default=no@:>@]),
-	[], [enable_sphinxdoc=no])
+	[], [enable_sphinxdoc=detect])
 AM_PATH_PYTHON([3])
 MM_PYTHON_MODULE([sphinx])
 MM_PYTHON_MODULE([sphinx_rtd_theme])

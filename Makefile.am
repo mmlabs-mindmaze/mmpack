@@ -199,8 +199,9 @@ mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 #
 # Those should only make sense as helpers in a development context
 
+user_doc_sources =
 .PHONY: spelling
-spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) $(mmpack_build_gerrit)
+spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) $(mmpack_build_gerrit) $(user_doc_sources)
 	$(AM_V_at) codespell $^
 
 # dev debian-only helper function, not part of any target
@@ -311,6 +312,7 @@ EXTRA_DIST += $(RST_MAN_PAGES)
 nodist_man_MANS = $(RST_MAN_PAGES:.rst=.1)
 CLEANFILES += $(nodist_man_MANS)
 
+# rst2man is part of the docutils package which is a dependency of sphinx
 %.1: %.rst
 	$(AM_V_at) $(MKDIR_P) docs/man
 	$(AM_V_GEN) $(RST2MAN) $< $@
@@ -337,12 +339,12 @@ ALLSPHINXOPTS = -d $(sphinx_verbose) $(srcdir)
 index.rst: $(srcdir)/docs/gen-devdoc-mmpack.sh $(filter %.c, $(mmpack_lib_sources))
 	$(AM_V_GEN) $^ > $@
 
-conf.py: $(srcdir)/docs/conf.py
+conf.py: $(srcdir)/docs/devdoc-conf.py
 	$(AM_V_GEN) cp -uv $^ $@
 
 sphinx-build.log: conf.py index.rst
 	@$(RM) -f html-buildstamp
-	$(AM_V_GEN) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) srctree=$(srcdir) $(SPHINXBUILD) -b html -c $(srcdir)/docs/ $(builddir) $(builddir)/html &> $@
+	$(AM_V_GEN) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) srctree=$(srcdir) $(SPHINXBUILD) -b html -c $(srcdir)/docs/ $(builddir) $(builddir)/html/dev-doc &> $@
 
 # eg. "src/mmpack-build/common.py" -> "common.rst"
 mmpackbuild_doc_tmp = $(notdir $(mmpackbuild_PYTHON))
@@ -351,7 +353,6 @@ $(mmpackbuild_docfile): modules.rst
 modules.rst: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON)
 	$(AM_V_GEN) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) sphinx-apidoc -o . $(srcdir)/src/mmpack-build/
 
-html-local: html-buildstamp
 html-buildstamp: sphinx-build.log $(mmpackbuild_docfile)
 	@rm -vf $@
 	@if [ "$(shell grep -c WARNING: sphinx-build.log)" != "0" ] ; then \
@@ -362,11 +363,56 @@ html-buildstamp: sphinx-build.log $(mmpackbuild_docfile)
 	@echo "Build finished. The HTML pages are in $(builddir)/html."
 	@touch $@
 
-html-local: html-buildstamp
+dev-doc: html-buildstamp
 
-html-clean:
-	$(RM) -rf html html-buildstamp sphinx-build.log conf.py index.rst $(mmpackbuild_docfile) modules.rst
+dev-doc-clean:
+	$(RM) -rf html/dev-doc html-buildstamp sphinx-build.log conf.py index.rst $(mmpackbuild_docfile) modules.rst
 
-clean-local: html-clean
+clean-local: dev-doc-clean
+
+#
+# User-level documentation target
+#
+
+user_doc_sources += \
+	docs/bug.rst \
+	docs/configuration.rst \
+	docs/conf.py \
+	docs/creating-packages.rst \
+	docs/devguide.rst \
+	docs/faq.rst \
+	docs/getting-started.rst \
+	docs/index.rst \
+	docs/installation.rst \
+	docs/introduction.rst \
+	docs/usage.rst \
+	docs/yaml.rst \
+	\
+	docs/specs/package-specfile.rst \
+	$(eol)
+
+all_user_doc_sources = $(user_doc_sources) $(RST_MAN_PAGES)
+
+user-doc: user-doc-buildstamp
+user-doc-buildstamp: $(all_user_doc_sources)
+	@rm -vf $@
+	mkdir -p $(builddir)/html/user-doc
+	$(AM_V_GEN) $(SPHINXBUILD) -b html $(srcdir)/docs/ $(builddir)/html/user-doc
+	@touch $@
+
+user-doc-clean:
+	 $(RM) -r html/user-doc user-doc-buildstamp
+
+html-local: user-doc
+clean-local: user-doc-clean dev-doc-clean
+	$(RM) -r html
+
+install-html: html-local
+	@mkdir -p $(DESTDIR)$(docdir)/html/
+	cd $(builddir)/html && \
+		find . -type f -exec $(install_sh_DATA) '{}' $(DESTDIR)$(docdir)/html/'{}' \;
+
+uninstall-html:
+	$(RM) -r $(DESTDIR)$(docdir)/html/
 
 endif # BUILD_SPHINXDOC

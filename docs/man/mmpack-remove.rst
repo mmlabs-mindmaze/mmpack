@@ -25,7 +25,7 @@ from the current prefix.
 
 First *mmpack** adds all given packages and the packages depending upon them
 to the current transaction. If any additional package is required, it will
-it will ask for user confimation before proceeding (default answer is negative).
+it will ask for user confirmation before proceeding (default answer is negative).
 Otherwise it will proceed to the removal.
 
 

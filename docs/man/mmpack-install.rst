@@ -27,7 +27,7 @@ If **mmpack** finds missing systems dependencies, then it will abort the
 installation and request said packages.
 
 If **mmpack** finds additional packages required for the transaction
-(dependencies) it will ask for user confimation before proceeding (default
+(dependencies) it will ask for user confirmation before proceeding (default
 answer is negative). Otherwise it will proceed to the installation.
 
 OPTIONS

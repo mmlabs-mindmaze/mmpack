@@ -18,7 +18,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-show** show given package metadatas.
+**mmpack-show** show given package metadata.
 
 OPTIONS
 =======

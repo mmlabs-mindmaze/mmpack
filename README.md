@@ -66,7 +66,10 @@ Python files will go through pylint and pycodestyle. Unit tests will be run.
 
 All contributions are welcome !
 
+## Documentation
+
+A html mmpack documentation is available here: https://intranet.mindmaze.ch/docs/mmpack/index.html
+
 ## Planned work
 * Build server for cross compilation
 * Create new package from previous one
-* Add mmpack *upgrade* command

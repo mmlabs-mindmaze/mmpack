@@ -32,7 +32,7 @@ FILES
   Config file containing the repositories URL.
 
 ``/var/lib/mmpack/binindex.yaml``
-  Local cache for mmpack package metadatas.
+  Local cache for mmpack package metadata.
 
 SEE ALSO
 ========

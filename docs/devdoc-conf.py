@@ -3,12 +3,29 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
+import os
+import sys
+mmpackbuild_moduledir = [os.environ.get('SRCDIR', '.') + '/src/mmpack-build',
+                         os.environ.get('BUILDDIR', '.') + '/src/mmpack-build']
+for path in mmpackbuild_moduledir:
+    sys.path.insert(0, os.path.abspath(path))
 
 # -- General configuration ------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+import linuxdoc
+
+extensions = [
+    'sphinx.ext.todo',
+    'linuxdoc.rstFlatTable',    # Implementation of the 'flat-table' reST-directive.
+    'linuxdoc.rstKernelDoc',    # Implementation of the 'kernel-doc' reST-directive.
+    'linuxdoc.kernel_include',  # Implementation of the 'kernel-include' reST-directive.
+    'linuxdoc.manKernelDoc',    # Implementation of the	'kernel-doc-man' builder
+    'linuxdoc.cdomain',         # Replacement for the sphinx c-domain.
+    'sphinx.ext.autodoc',       # sphinx auto doc 
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -85,3 +102,24 @@ latex_documents = [
     (master_doc, 'mmpack.tex', u'mmpack Documentation',
      u'Nicolas Bourdaud', 'manual'),
 ]
+
+# One entry per manual page. List of tuples
+# (source start file, name, description, authors, manual section).
+man_pages = [
+    (master_doc, 'mmpack', u'mmpack Documentation',
+    [author], 1)
+]
+
+kernel_doc_exp_method = 'attribute'
+kernel_doc_exp_ids = 'API_EXPORTED API_EXPORTED_RELOCATABLE LOCAL_SYMBOL'
+kernel_doc_known_attrs = 'noreturn'
+
+# In nickpick mode, it will complain about lots of missing references that
+#
+# 1) are just typedefs like: bool, __u32, etc;
+# 2) It will complain for things like: enum, NULL;
+# 3) It will complain for symbols that should be on different
+#    books (but currently aren't ported to ReST)
+#
+# The list below has a list of such symbols to be ignored in nitpick mode
+#
