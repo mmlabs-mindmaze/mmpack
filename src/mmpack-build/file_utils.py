@@ -33,7 +33,7 @@ def filetype(filename):
 
 def get_linked_dll(import_lib):
     'Get dll filename associated with import_lib'
-    strlist = shell(['strings', import_lib], log=False)
+    strlist = shell(['strings', import_lib], log=False).lower().split()
     dll_names = set([v for v in strlist if v.endswith('.dll')])
 
     # Check we have one and only dll
