@@ -59,6 +59,29 @@ struct parsing_ctx {
 #define isdigit(c)      ((c) >= '0' && (c) <= '9')
 
 
+static
+void write_yaml_mmstr_multiline(FILE* fp, int num_indent, const char* str)
+{
+	const char *line, *next;
+	int linelen;
+
+	fprintf(fp, "|\n");
+
+	line = str;
+	while (line != NULL) {
+		next = strchr(line, '\n');
+		if (next) {
+			linelen = next - line;
+			next++;
+		} else {
+			linelen = strlen(line);
+		}
+		fprintf(fp, "%*s%.*s\n", num_indent, " ", linelen, line);
+		line = next;
+	}
+}
+
+
 /**
  * pkg_version_compare() - compare package version string
  * @v1: version string
@@ -244,6 +267,9 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 		fprintf(fp, "'%s'%s", elt->str.buf, elt->next ? ", " : "");
 	}
 	fprintf(fp, "]\n");
+
+	fprintf(fp, "    description: ");
+	write_yaml_mmstr_multiline(fp, 8, pkg->desc);
 }
 
 
