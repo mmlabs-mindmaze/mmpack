@@ -8,7 +8,8 @@ Build-Depends: debhelper (>= 10), dh-autoreconf, dh-python,
  python3,
  libarchive-dev, libyaml-dev, libmmlib-dev,
  libcurl4-gnutls-dev | libcurl-dev,
- libdpkg-perl
+ libdpkg-perl,
+ python3-sphinx, python3-sphinx-rtd-theme
 Standards-Version: 3.9.8
 Vcs-Git: https://intranet.mindmaze.ch/mmlabs/gerrit
 Vcs-browser:  https://intranet.mindmaze.ch/mmlabs/gerrit/gitweb?p=mmpack.git
@@ -73,3 +74,11 @@ Description: MindMaze package repository update (slave)
  .
  This package contains the tools needed to update repository upon git repo
  update (slave server)
+
+Package: mmpack-doc
+Section: doc
+Architecture: all
+Description: MindMaze package manager documentation
+ This package provides the user documentation for the mmpack project
+ .
+ This package contains the mmpack user documentation.
