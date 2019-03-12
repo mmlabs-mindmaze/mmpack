@@ -14,7 +14,6 @@ from common import *
 from file_utils import filetype, is_dynamic_library, \
     is_importlib, get_linked_dll
 from mm_version import Version
-import yaml
 from pacman import pacman_find_dependency
 from dpkg import dpkg_find_dependency
 from settings import DPKG_PREFIX, PACMAN_PREFIX
