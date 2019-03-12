@@ -200,7 +200,7 @@ mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 # Those should only make sense as helpers in a development context
 
 .PHONY: spelling
-spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES_IN) $(mmpack_build_gerrit)
+spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) $(mmpack_build_gerrit)
 	$(AM_V_at) codespell $^
 
 # dev debian-only helper function, not part of any target
@@ -287,33 +287,33 @@ dist_completion_DATA = \
 # DOC RULES
 #
 
-RST_MAN_PAGES_IN = \
-	docs/mmpack.rst.in \
-	docs/mmpack-build.rst.in \
-	docs/mmpack-build-builddep.rst.in \
-	docs/mmpack-build-clean.rst.in \
-	docs/mmpack-build-pkg-create.rst.in \
-	docs/mmpack-check-integrity.rst.in \
-	docs/mmpack-fix-broken.rst.in \
-	docs/mmpack-install.rst.in \
-	docs/mmpack-list.rst.in \
-	docs/mmpack-mkprefix.rst.in \
-	docs/mmpack-remove.rst.in \
-	docs/mmpack-run.rst.in \
-	docs/mmpack-search.rst.in \
-	docs/mmpack-show.rst.in \
-	docs/mmpack-source.rst.in \
-	docs/mmpack-update.rst.in \
-	docs/mmpack-upgrade.rst.in \
+RST_MAN_PAGES = \
+	docs/man/mmpack.rst \
+	docs/man/mmpack-build.rst \
+	docs/man/mmpack-build-builddep.rst \
+	docs/man/mmpack-build-clean.rst \
+	docs/man/mmpack-build-pkg-create.rst \
+	docs/man/mmpack-check-integrity.rst \
+	docs/man/mmpack-fix-broken.rst \
+	docs/man/mmpack-install.rst \
+	docs/man/mmpack-list.rst \
+	docs/man/mmpack-mkprefix.rst \
+	docs/man/mmpack-remove.rst \
+	docs/man/mmpack-run.rst \
+	docs/man/mmpack-search.rst \
+	docs/man/mmpack-show.rst \
+	docs/man/mmpack-source.rst \
+	docs/man/mmpack-update.rst \
+	docs/man/mmpack-upgrade.rst \
 	$(eof)
-EXTRA_DIST += $(RST_MAN_PAGES_IN)
+EXTRA_DIST += $(RST_MAN_PAGES)
 
-nodist_man_MANS = $(RST_MAN_PAGES_IN:.rst.in=.1)
+nodist_man_MANS = $(RST_MAN_PAGES:.rst=.1)
 CLEANFILES += $(nodist_man_MANS)
 
-%.1: %.rst.in
-	$(AM_V_at) $(MKDIR_P) docs
-	$(AM_V_GEN) $(SED) -e 's,<version>,$(VERSION),g' < $< | $(RST2MAN) > $@
+%.1: %.rst
+	$(AM_V_at) $(MKDIR_P) docs/man
+	$(AM_V_GEN) $(RST2MAN) $< $@
 
 #
 # optional doc rules: generate internal function documentation

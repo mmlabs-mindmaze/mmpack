@@ -8,7 +8,6 @@ list packages
 
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>
 :Date: 2018-12-21
-:Version: <version>
 :Manual section: 1
 
 SYNOPSIS

@@ -9,7 +9,6 @@ build mmpack packages
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
 :Date: 2018-10-25
-:Version: <version>
 :Manual section: 1
 
 SYNOPSIS

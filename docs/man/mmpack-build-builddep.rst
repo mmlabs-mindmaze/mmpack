@@ -9,7 +9,6 @@ builddep packages
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
 :Date: 2019-01-08
-:Version: <version>
 :Manual section: 1
 
 SYNOPSIS

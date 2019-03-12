@@ -9,7 +9,6 @@ fix broken packages
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
 :Date: 2019-02-18
-:Version: <version>
 :Manual section: 1
 
 SYNOPSIS

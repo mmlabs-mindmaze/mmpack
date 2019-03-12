@@ -9,7 +9,6 @@ upgrade command
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
 :Date: 2019-02-19
-:Version: <version>
 :Manual section: 1
 
 SYNOPSIS

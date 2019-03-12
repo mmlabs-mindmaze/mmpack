@@ -9,7 +9,6 @@ check-integrity packages
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
 :Date: 2018-11-16
-:Version: <version>
 :Manual section: 1
 
 SYNOPSIS

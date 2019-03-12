@@ -1,25 +1,24 @@
 ===============
-mmpack-source
+mmpack-show
 ===============
 
-----------------
-source packages
-----------------
+-------------
+show packages
+-------------
 
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
 :Date: 2018-10-25
-:Version: <version>
 :Manual section: 1
 
 SYNOPSIS
 ========
 
-``mmpack source`` [-h|--help] *package*
+``mmpack show`` [-h|--help] *package*
 
 DESCRIPTION
 ===========
-**mmpack-source** download given package sources into current directory.
+**mmpack-show** show given package metadatas.
 
 OPTIONS
 =======
@@ -30,5 +29,7 @@ SEE ALSO
 ========
 ``mmpack``\(1),
 ``mmpack-install``\(1),
+``mmpack-mkprefix``\(1),
 ``mmpack-remove``\(1),
-``mmpack-show``\(1),
+``mmpack-run``\(1),
+``mmpack-update``\(1),
