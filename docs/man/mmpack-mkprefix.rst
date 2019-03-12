@@ -30,14 +30,13 @@ that has been already setup.
 
 OPTIONS
 =======
--h|\-\-help
+``-h|--help``
   Show help and exit
 
-
--f|\-\-force
+``-f|--force``
   Force setting up prefix folder even if it was already setup.
 
---url= *repository*
+``--url= *repository*``
   Specify repository as the address of package repository
 
 **prefix-path**

@@ -23,7 +23,7 @@ DESCRIPTION
 
 OPTIONS
 =======
--h|--help
+``-h|--help``
   Show help and exit
 
 FILES

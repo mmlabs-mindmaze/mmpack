@@ -33,10 +33,10 @@ Note:  **mmpack remove** and **mmpack uninstall** are aliases.
 
 OPTIONS
 =======
--h|--help
+``-h|--help``
   Show help and exit
 
--y|--assume-yes
+``-y|--assume-yes``
   Assume yes as answer to all prompts and run non-interactively.
 
 SEE ALSO

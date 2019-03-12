@@ -33,20 +33,20 @@ It will fail otherwise.
 OPTIONS
 =======
 
--h|--help
+``-h|--help``
   Show help and exit
 
--p|--prefix=*path*
+``-p|--prefix=*path*``
   Use *path* as install prefix.
-  Can also be given through **MMPACK_PREFIX** environment variable
+  Can also be given through ``MMPACK_PREFIX`` environment variable
 
--y|--assume-yes
+``-y|--assume-yes``
   Assume yes as answer to all prompts and run non-interactively.
 
 ENVIRONMENT
 ===========
 
-**MMPACK_PREFIX**
+``MMPACK_PREFIX``
   If set, **mmpack-build** will parse the given prefix tree when looking for
   package dependencies. If unset, **mmpack-build** will only use the system
   tree.

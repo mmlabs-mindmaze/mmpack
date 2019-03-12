@@ -26,10 +26,10 @@ mmpack-build temporary files. It may also remove generated packages.
 OPTIONS
 =======
 
--h|--help
+``-h|--help``
   Show help and exit
 
---wipe
+``--wipe``
   wipe all files including generated packages
 
 SEE ALSO

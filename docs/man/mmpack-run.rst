@@ -28,7 +28,7 @@ OPTIONS
 **command**
   The command to run, as if to the shell prompt.
 
--h|--help
+``-h|--help``
   Show help and exit
 
 EXAMPLE

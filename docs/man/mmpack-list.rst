@@ -43,7 +43,7 @@ filtered by that pattern.
 
 OPTIONS
 =======
--h|--help
+``-h|--help``
   Show help and exit
 
 SEE ALSO

@@ -8,7 +8,7 @@ build mmpack package
 
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
-:Date: 2018-10-25
+:Date: 2019-10-25
 :Manual section: 1
 
 SYNOPSIS
@@ -25,40 +25,46 @@ DESCRIPTION
 OPTIONS
 =======
 
--h|--help
+``-h|--help``
   Show help and exit
 
---skip-build-tests
+``--skip-build-tests``
   If passed, do not run the default test target after the build.
   Ie. make check or make test depending on the build system.
 
---git-url= *url*
+``--git-url= *url*``
   Can be either:
-  * a git url of the repository to build
-  * a path to a local git repository
 
---src= *tarball*
+    * a git url of the repository to build
+    * a path to a local git repository
+
+``--src= *tarball*``
   path to a source package tarball
 
--t|--tag= *tag*
+``-t|--tag= *tag*``
   The project's tag to use.
-  If --git-url is specified, this can actually be any kind of object recognized by the git --tag option:
-  * a git tag
-  * a commit sha1
-  * a branch name
-  If --src, this can be any string which will be used to identify a
+  If ``--git-url`` is specified, this can actually be any kind of object
+  recognized by the ``git --tag`` option:
+
+    * a git tag
+    * a commit sha1
+    * a branch name
+
+  If ``--src``, this can be any string which will be used to identify a
   package build in the cache folder
 
--p|--prefix= *path*
+``-p|--prefix= *path*``
   Use *path* as install prefix if needed.
 
--y|--yes
+``-y|--yes``
   Assume yes as answer to all prompts and run non-interactively.
 
---build-deps
+``--build-deps``
+
   Check for build dependencies:
-    abort on missing system ones.
-    install mmpack missing ones.
+
+    * abort on missing system ones.
+    * install mmpack missing ones.
 
   If a prefix has been passed as options, the mmpack packages will be installed
   within. If called within a mmpack prefix and no prefix option has been

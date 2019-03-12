@@ -36,15 +36,15 @@ Each **mmpack** command has its own man page and help option.
 OPTIONS
 =======
 
---version
+``--version``
   Display **mmpack** version
 
--h|--help
+``-h|--help``
   Show help and exit
 
--p|--prefix=*path*
+``-p|--prefix=*path*``
   Use *path* as install prefix.
-  Can also be given through **MMPACK_PREFIX** environment variable
+  Can also be given through ``MMPACK_PREFIX`` environment variable
 
 mmpack-command
   Run given **mmpack** command.  Possible commands are:
@@ -56,10 +56,10 @@ This section describes the environment variables that affect how
 **mmpack** operates.
 
 
-**MMPACK_PREFIX**
+``MMPACK_PREFIX``
   Specify a prefix directory.
   If set, use as install prefix.  This can also be given using the
-  **\-p|\-\-prefix** flag.
+  ``-p|--prefix`` flag.
 
 EXAMPLE
 =======
