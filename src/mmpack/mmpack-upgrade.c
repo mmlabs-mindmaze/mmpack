@@ -30,7 +30,7 @@ static const struct mmarg_opt cmdline_optv[] = {
 
 
 static
-struct pkg_request* get_full_upgradable_reqlist(struct mmpack_ctx* ctx)
+struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 {
 	STATIC_CONST_MMSTR(any_version, "any")
 	struct pkg_request *req, *reqlist;
@@ -61,8 +61,8 @@ struct pkg_request* get_full_upgradable_reqlist(struct mmpack_ctx* ctx)
 
 
 static
-struct pkg_request* get_upgradable_reqlist(struct mmpack_ctx* ctx, int nreq,
-                                           char const ** req_args)
+struct pkg_request* get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
+                                            char const ** req_args)
 {
 	STATIC_CONST_MMSTR(any_version, "any")
 	int i;
@@ -171,9 +171,9 @@ int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 		return -1;
 
 	if (nreq == 0)
-		reqlist = get_upgradable_reqlist(ctx, nreq, req_args);
+		reqlist = get_upgradeable_reqlist(ctx, nreq, req_args);
 	else
-		reqlist = get_full_upgradable_reqlist(ctx);
+		reqlist = get_full_upgradeable_reqlist(ctx);
 
 	rv = 0;
 	if (reqlist != NULL) {

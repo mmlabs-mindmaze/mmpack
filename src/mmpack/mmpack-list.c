@@ -20,7 +20,7 @@
 enum {
 	LIST_ALL,
 	LIST_AVAILABLE,
-	LIST_UPGRADABLE,
+	LIST_UPGRADEABLE,
 	LIST_INSTALLED,
 	LIST_EXTRAS,
 };
@@ -92,7 +92,7 @@ int binindex_cb_extras(struct mmpkg* pkg, void * void_data)
 
 
 static
-int binindex_cb_upgradable(struct mmpkg* pkg, void * void_data)
+int binindex_cb_upgradeable(struct mmpkg* pkg, void * void_data)
 {
 	struct cb_data * data = (struct cb_data *) void_data;
 	struct mmpkg const * latest;
@@ -134,8 +134,8 @@ int mmpack_list_parse_options(int argc, const char* argv[], struct cb_data * dat
 			data->subcommand = LIST_EXTRAS;
 		else if (STR_EQUAL(argv[1], len, "installed"))
 			data->subcommand = LIST_INSTALLED;
-		else if (STR_EQUAL(argv[1], len, "upgradable"))
-			data->subcommand = LIST_UPGRADABLE;
+		else if (STR_EQUAL(argv[1], len, "upgradeable"))
+			data->subcommand = LIST_UPGRADEABLE;
 		else if (STR_EQUAL(argv[1], len, "--help")
 		         || STR_EQUAL(argv[1], len, "-h"))
 			return 1;
@@ -186,8 +186,8 @@ int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	case LIST_EXTRAS:
 		binindex_foreach(&ctx->binindex, binindex_cb_extras, &data);
 		break;
-	case LIST_UPGRADABLE:
-		binindex_foreach(&ctx->binindex, binindex_cb_upgradable, &data);
+	case LIST_UPGRADEABLE:
+		binindex_foreach(&ctx->binindex, binindex_cb_upgradeable, &data);
 		break;
 	case LIST_AVAILABLE:
 	case LIST_INSTALLED:

@@ -8,7 +8,7 @@
 #include "context.h"
 
 #define LIST_SYNOPSIS \
-	"list [all|available|upgradable|installed|extras] [*pattern*]"
+	"list [all|available|upgradeable|installed|extras] [*pattern*]"
 
 int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[]);
 

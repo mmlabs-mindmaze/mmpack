@@ -13,7 +13,7 @@ list packages
 SYNOPSIS
 ========
 
-``mmpack list`` [-h|--help] [all|available|upgradable|installed|extras] [*pattern*]
+``mmpack list`` [-h|--help] [all|available|upgradeable|installed|extras] [*pattern*]
 
 DESCRIPTION
 ===========
@@ -27,7 +27,7 @@ packages only.
 **mmpack list available** lists all the packages that are provided through any
 of the registered repositories.
 
-**mmpack list upgradable** lists all installed packages that could be upgraded.
+**mmpack list upgradeable** lists all installed packages that could be upgraded.
 This means that a newer version of the package is available.
 
 **mmpack list installed** lists all the packages that are installed in the

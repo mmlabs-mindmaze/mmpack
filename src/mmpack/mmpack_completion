@@ -21,7 +21,7 @@ _mmpack_remove_completion() {
 }
 
 _mmpack_list_completion() {
-	echo 'all available upgradable installed extras'
+	echo 'all available upgradeable installed extras'
 }
 
 _mmpack_subcmd_completion() {
