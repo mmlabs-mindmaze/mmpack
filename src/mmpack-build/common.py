@@ -169,7 +169,7 @@ def yaml_serialize(obj: Union[list, dict], filename: str,
 def mm_representer(dumper, data):
     '''
     enforce yaml interpretation of given complex object type as unicode
-    classes which want to benefit must add themselves as follow:
+    classes which want to benefit must add themselves as follows:
 
       yaml.add_representer(<class-name>, mm_representer)
 
