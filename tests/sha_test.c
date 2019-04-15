@@ -42,21 +42,21 @@ struct {
 	char name[64];
 	char target[64];
 	char refhash[SHA_HEXSTR_LEN+1];
+	char refhash_follow[SHA_HEXSTR_LEN+1];
+	int is_reg_target;
 } symlink_cases[] = {
-	{.name = "a_link", .target = "zero_len",
-	 .refhash = "sym12e7edfc58ec6ca9b28efd3a01175c7cdb4178921aab352ea0ec56b6cdab6"},
-	{.name = "b_link", .target = "small_file",
-	 .refhash = "sym25cb6d2a9304d3ed60ea1aa2b31a2c7804c98ddf31fb818a45a36433a2f1c"},
-	{.name = "links/adir/alink", .target = "../../a_link",
-	 .refhash = "sym7b78bd196680eb6e467c9a6511fe34de1afee733ce6e947b38916f962c3ca"},
-	{.name = "links/bdir/blink", .target = "../adir",
-	 .refhash = "sym4d47f0664d0e100b078e25fc66994ee7251f172062040dcadc4fe4cd85f20"},
-	{.name = "links/some dir/foo", .target = "to_non_existent",
-	 .refhash = "sym3f6baef51ad2c2a21443bd3178d9f8bb7bbfcdd8b49146643272d1c572709"},
-	{.name = "links/some dir/bar", .target = "../adir/to_non_existent",
-	 .refhash = "sym8df1ae2bd59950b09421be20f3c2f1e7e1c4d04ae872b9704664178b86ad6"},
-	{.name = "c_link", .target = "links/adir",
-	 .refhash = "sym07c53c8f582a56708b4cb455a997a043a56da57ea3d94d23d0fc1369fddce"},
+	{.name = "a_link", .target = "zero_len", .is_reg_target = 1,
+	 .refhash = "sym-6d712e7edfc58ec6ca9b28efd3a01175c7cdb4178921aab352ea0ec56b6cdab6"},
+	{.name = "b_link", .target = "small_file", .is_reg_target = 1,
+	 .refhash = "sym-63425cb6d2a9304d3ed60ea1aa2b31a2c7804c98ddf31fb818a45a36433a2f1c"},
+	{.name = "links/bdir/blink", .target = "../adir", .is_reg_target = 0,
+	 .refhash = "sym-4714d47f0664d0e100b078e25fc66994ee7251f172062040dcadc4fe4cd85f20"},
+	{.name = "links/some dir/foo", .target = "to_non_existent", .is_reg_target = 0,
+	 .refhash = "sym-88a3f6baef51ad2c2a21443bd3178d9f8bb7bbfcdd8b49146643272d1c572709"},
+	{.name = "links/some dir/bar", .target = "../adir/to_non_existent", .is_reg_target = 0,
+	 .refhash = "sym-c238df1ae2bd59950b09421be20f3c2f1e7e1c4d04ae872b9704664178b86ad6"},
+	{.name = "c_link", .target = "links/adir", .is_reg_target = 0,
+	 .refhash = "sym-b5f07c53c8f582a56708b4cb455a997a043a56da57ea3d94d23d0fc1369fddce"},
 };
 #define NUM_SYMLINK_CASES       MM_NELEM(symlink_cases)
 
@@ -107,10 +107,13 @@ void gen_ref_hash(char* hash, const char* filename)
 {
 	char cmd[512];
 	FILE* fp;
+	int sha256_strlen = SHA_HEXSTR_LEN - SHA_HDRLEN;
+
+	memcpy(hash, SHA_HDR_REG, SHA_HDRLEN);
 
 	sprintf(cmd, "openssl sha256 -hex %s | cut -f2 -d' '", filename);
 	fp = popen(cmd, "r");
-	if (fread(hash, SHA_HEXSTR_LEN, 1, fp)) {}
+	if (fread(hash + SHA_HDRLEN, sha256_strlen, 1, fp)) {}
 	fclose(fp);
 
 	hash[SHA_HEXSTR_LEN] = '\0';
@@ -122,6 +125,7 @@ void sha_setup(void)
 {
 	int i;
 	char filename[128];
+	char hash[SHA_HEXSTR_LEN];
 
 	// Create the test folder that will contains the files generated for the test
 	mm_mkdir(HASHFILE_DIR, 0755, MM_RECURSIVE);
@@ -142,6 +146,12 @@ void sha_setup(void)
 	for (i = 0; i < NUM_SYMLINK_CASES; i++) {
 		sprintf(filename, "%s/%s", HASHFILE_DIR, symlink_cases[i].name);
 		mm_symlink(symlink_cases[i].target, filename);
+
+		if (!symlink_cases[i].is_reg_target)
+			continue;
+
+		gen_ref_hash(hash, filename);
+		strcpy(symlink_cases[i].refhash_follow, hash+SHA_HDRLEN);
 	}
 }
 
@@ -167,8 +177,10 @@ START_TEST(hashfile_with_parent)
 	const mmstr* filename = mmstr_alloca_from_cstr(sha_cases[_i].name);
 	const mmstr* refhash = mmstr_alloca_from_cstr(sha_cases[_i].refhash);
 
-	sha_compute(hash, filename, hashfile_dir);
+	sha_compute(hash, filename, hashfile_dir, 0);
 	ck_assert_str_eq(hash, refhash);
+	sha_compute(hash, filename, hashfile_dir, 1);
+	ck_assert_str_eq(hash, refhash + SHA_HDRLEN);
 }
 END_TEST
 
@@ -182,8 +194,10 @@ START_TEST(hashfile_without_parent)
 
 	mmstr_join_path(fullpath, hashfile_dir, filename);
 
-	sha_compute(hash, fullpath, NULL);
+	sha_compute(hash, fullpath, NULL, 0);
 	ck_assert_str_eq(hash, refhash);
+	sha_compute(hash, fullpath, NULL, 1);
+	ck_assert_str_eq(hash, refhash + SHA_HDRLEN);
 }
 END_TEST
 
@@ -193,9 +207,17 @@ START_TEST(hash_symlink)
 	mmstr* hash = mmstr_alloca(SHA_HEXSTR_LEN);
 	const mmstr* filename = mmstr_alloca_from_cstr(symlink_cases[_i].name);
 	const char* refhash = symlink_cases[_i].refhash;
+	const char* refhash_follow = symlink_cases[_i].refhash_follow;
+	int expected_rv = symlink_cases[_i].is_reg_target ? 0 : -1;
+	int rv;
 
-	ck_assert(sha_compute(hash, filename, hashfile_dir) == 0);
+	ck_assert(sha_compute(hash, filename, hashfile_dir, 0) == 0);
 	ck_assert_str_eq(hash, refhash);
+
+	rv = sha_compute(hash, filename, hashfile_dir, 1);
+	ck_assert_int_eq(rv, expected_rv);
+	if (expected_rv == 0)
+		ck_assert_str_eq(hash, refhash_follow);
 }
 END_TEST
 

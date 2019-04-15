@@ -495,9 +495,16 @@ static
 int check_file_pkg(const mmstr * ref_sha, const mmstr * parent,
                    const mmstr * filename)
 {
+	int follow;
 	mmstr* sha = mmstr_alloca(SHA_HEXSTR_LEN);
 
-	if (sha_compute(sha, filename, parent))
+	// If reference hash contains type prefix (ie its length is
+	// SHA_HEXSTR_LEN), symlink must not be followed
+	follow = 0;
+	if (mmstrlen(ref_sha) != SHA_HEXSTR_LEN)
+		follow = 1;
+
+	if (sha_compute(sha, filename, parent, follow))
 		return -1;
 
 	if (!mmstrequal(sha, ref_sha)) {

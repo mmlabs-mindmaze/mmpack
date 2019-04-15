@@ -166,7 +166,7 @@ class BinaryPackage(object):
                 continue
 
             # Add file with checksum
-            cksums[filename] = sha256sum(filename)
+            cksums[filename] = sha256sum(filename, follow_symlink=True)
         yaml_serialize(cksums, self._sha256sums_file(), use_block_style=True)
 
         # Create info file

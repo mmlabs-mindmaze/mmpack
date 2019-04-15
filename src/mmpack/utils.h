@@ -41,9 +41,13 @@ mmstr* get_default_mmpack_prefix(void);
 mmstr* get_config_filename(void);
 mmstr* set_cacheindex_relpath(mmstr* str, int repo_index);
 
-#define SHA_HEXSTR_LEN (32*2) // string of SHA-256 in hexa (\0 NOT incl.)
+#define SHA_HDR_REG "reg-"
+#define SHA_HDR_SYM "sym-"
+#define SHA_HDRLEN 4
+#define SHA_HEXSTR_LEN (SHA_HDRLEN + 32*2) // string of header and SHA-256 in hexa (\0 NOT incl.)
 
-int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent);
+int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent,
+                int follow);
 
 
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path);

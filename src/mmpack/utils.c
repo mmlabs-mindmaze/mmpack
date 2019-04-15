@@ -356,15 +356,12 @@ int conv_to_hexstr(char* hexstr, const unsigned char* data, size_t len)
  * encountered.
  */
 static
-int sha_fd_compute(mmstr* hash, int fd)
+int sha_fd_compute(char* hash, int fd)
 {
 	unsigned char md[SHA256_BLOCK_SIZE], data[HASH_UPDATE_SIZE];
 	SHA256_CTX ctx;
 	ssize_t rsz;
-	int len, rv = 0;
-
-	if (mmstr_maxlen(hash) < SHA_HEXSTR_LEN)
-		return mm_raise_error(EOVERFLOW, "hash argument to short");
+	int rv = 0;
 
 	sha256_init(&ctx);
 
@@ -379,21 +376,32 @@ int sha_fd_compute(mmstr* hash, int fd)
 	} while (rsz > 0);
 
 	sha256_final(&ctx, md);
-	len = conv_to_hexstr(hash, md, sizeof(md));
-	mmstr_setlen(hash, len);
+
+	conv_to_hexstr(hash, md, sizeof(md));
 
 	return rv;
 }
 
 
 static
-int sha_regfile_compute(mmstr* hash, const mmstr* path)
+int sha_regfile_compute(mmstr* hash, const mmstr* path, int with_prefix)
 {
 	int fd;
 	int rv = 0;
+	char* hexstr;
+
+	// If with_prefix is set, SHA_HDR_REG ("reg-") is prefixed in hash
+	if (with_prefix) {
+		memcpy(hash, SHA_HDR_REG, SHA_HDRLEN);
+		hexstr = hash + SHA_HDRLEN;
+		mmstr_setlen(hash, SHA_HEXSTR_LEN);
+	} else {
+		hexstr = hash;
+		mmstr_setlen(hash, SHA_HEXSTR_LEN - SHA_HDRLEN);
+	}
 
 	if (  (fd = mm_open(path, O_RDONLY, 0)) < 0
-	   || sha_fd_compute(hash, fd)) {
+	   || sha_fd_compute(hexstr, fd)) {
 		rv = -1;
 	}
 	mm_close(fd);
@@ -419,12 +427,10 @@ int sha_symlink_compute(mmstr* hash, const mmstr* path, size_t target_size)
 	sha256_update(&ctx, buff, target_size-1);
 	sha256_final(&ctx, md);
 
-	len = conv_to_hexstr(hash, md, sizeof(md));
-	mmstr_setlen(hash, len);
-
-	hash[0] = 's';
-	hash[1] = 'y';
-	hash[2] = 'm';
+	// Convert sha into hexadecimal and with "sym-" prefixed
+	memcpy(hash, SHA_HDR_SYM, SHA_HDRLEN);
+	len = conv_to_hexstr(hash + SHA_HDRLEN, md, sizeof(md));
+	mmstr_setlen(hash, len + SHA_HDRLEN);
 
 	rv = 0;
 
@@ -441,25 +447,43 @@ exit:
  * @filename:   path of file whose hash must be computed
  * @parent:     prefix directory to prepend to @filename to get the
  *              final path of the file to hash. This may be NULL
+ * @follow:     if set to non zero and the file is a symlink, the hash is
+ *              computed on the file it refers to (ie the symlink is
+ *              followed). If set to zero the generated hash is prefixed
+ *              by file type indicator (regular file or symlink).
  *
  * This function allows to compute the SHA256 hash of a file located at
  *  * @parent/@filename if @parent is non NULL
  *  * @filename if @parent is NULL
  *
- * The computed hash is stored in hexadecimal as a NULL-terminated string
- * in @hash string buffer which must be at least SHA_HEXSTR_LEN long
- * (this include the NULL termination).
+ * The computed hash is stored in hexadecimal as a NULL terminated string
+ * in @hash which must be at least SHA_HEXSTR_LEN long (this include the
+ * NULL termination).
+ *
+ * If @follow is zero, hash string written in @hash is prefixed with the
+ * type ("reg-" or "sym-"). The constraints on the size of the buffer
+ * pointed to by @hash do not changes (SHA_HEXSTR_LEN takes into account
+ * the possible type prefix).
  *
  * Return: 0 in case of success, -1 if a problem of file reading has been
  * encountered.
  */
 LOCAL_SYMBOL
-int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent)
+int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent,
+                int follow)
 {
 	mmstr* fullpath = NULL;
 	size_t len;
 	int rv = 0;
+	int needed_len, with_prefix;
 	struct mm_stat st;
+
+	with_prefix = !follow;
+
+	needed_len = SHA_HEXSTR_LEN - SHA_HDRLEN;
+	needed_len += with_prefix ? SHA_HDRLEN : 0;
+	if (mmstr_maxlen(hash) < needed_len)
+		return mm_raise_error(EOVERFLOW, "hash argument to short");
 
 	if (parent != NULL) {
 		len = mmstrlen(filename) + mmstrlen(parent) + 1;
@@ -469,13 +493,13 @@ int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent)
 		filename = fullpath;
 	}
 
-	if (mm_stat(filename, &st, MM_NOFOLLOW)) {
+	if (mm_stat(filename, &st, follow ? 0 : MM_NOFOLLOW)) {
 		rv = -1;
 		goto exit;
 	}
 
 	if (S_ISREG(st.mode)) {
-		rv = sha_regfile_compute(hash, filename);
+		rv = sha_regfile_compute(hash, filename, with_prefix);
 	} else if (S_ISLNK(st.mode)) {
 		rv = sha_symlink_compute(hash, filename, st.size);
 	} else {

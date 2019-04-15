@@ -186,25 +186,35 @@ def _set_representer(dumper, data):
 yaml.add_representer(set, _set_representer)
 
 
-def sha256sum(filename: str) -> str:
-    ''' compute the SHA-256 hash a file
+def sha256sum(filename: str, follow_symlink: bool=True) -> str:
+    ''' compute the SHA-256 hash of a file
 
-    If file is a symlink, the hash string will be the hash of the target path
-    with "sym" replacing the 3 first characters of SHA256 string
+    This returns the SHA256 string of filename. If follow_symlink is False,
+    a symlink will not be followed. Additionnaly, a short indicator will be
+    prefixed to the string returned ("reg-" for regular file, "sym-" for
+    symlink) and the hash of a symlink will be the SHA256 of the target
+    path of the link.
 
     Args:
         filename: path of file whose hash must be computed
+        follow_symlink: symlink must not be followed and computed hash must
+                        be type specific
     Returns:
         a string containing hexadecimal value of hash
     '''
     sha = sha256()
-    if os.path.islink(filename):
+    if not follow_symlink and os.path.islink(filename):
         # Compute sha256 of symlink target and replace beginning with "sym"
         sha.update(os.readlink(filename).encode('utf-8'))
         shastr = sha.hexdigest()
-        return "sym" + shastr[3:]
+        return "sym-" + shastr
     sha.update(open(filename, 'rb').read())
-    return sha.hexdigest()
+    hexdig = sha.hexdigest()
+
+    if not follow_symlink:
+        return "reg-" + hexdig
+
+    return hexdig
 
 
 def get_host_arch() -> str:
