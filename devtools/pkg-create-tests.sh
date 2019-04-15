@@ -29,7 +29,7 @@ DIST=$(distrib)
 
 testdir=$(pwd)/local-install
 make install prefix=$testdir
-if [ $DIST == "debian" ] ; then
+if [ $DIST = "debian" ] && ! dpkg -s mmpack > /dev/null ; then
 	sudo make setcap prefix=$testdir
 	[[ $? -eq 0 ]] || exit -1
 fi

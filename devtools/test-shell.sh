@@ -21,7 +21,7 @@ MMPACK_PREFIX=$(mktemp -d)
 testdir=$(pwd)/local-install
 make install prefix=$testdir
 [[ $? -eq 0 ]] || exit -1
-if [ $DIST == "debian" ] ; then
+if [ $DIST = "debian" ] && ! dpkg -l mmpack > /dev/null ; then
 	sudo make setcap prefix=$testdir
 	[[ $? -eq 0 ]] || exit -1
 fi
