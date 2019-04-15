@@ -583,6 +583,38 @@ check_continue:
 
 
 /**
+ * action_set_pathname_into_dir() - construct path of cached package file
+ * @act:        action struct whose pathname field is to be set
+ * @dir:        folder in which the cached downloaded packages must reside
+ *
+ * This function set @act->pathname to point to a file whose basename is
+ * the name of the binary package file associed with @act->pkg and whose
+ * folder is specified by @dir. This is typically used to set the name of
+ * the downloaded file in the local folder of cached packages (specified by
+ * @dir).
+ */
+static
+void action_set_pathname_into_dir(struct action* act, const mmstr* dir)
+{
+	const struct mmpkg* pkg = act->pkg;
+	mmstr* pkgbase;
+	int len;
+
+	pkgbase = mmstr_malloca(mmstrlen(pkg->filename));
+
+	// Get base filename of downloaded package
+	mmstr_basename(pkgbase, pkg->filename);
+
+	// Store the joined cachedir and base filename in act->pathname
+	len = mmstrlen(pkgbase) + mmstrlen(dir) + 1;
+	act->pathname = mmstr_malloc(len);
+	mmstr_join_path(act->pathname, dir, pkgbase);
+
+	mmstr_freea(pkgbase);
+}
+
+
+/**
  * fetch_pkgs() - download packages that are going to be installed
  * @ctx:       initialized mmpack context
  * @act_stk:   action stack to be applied
@@ -594,21 +626,20 @@ check_continue:
 static
 int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 {
-	mmstr* pkgbase = NULL;
 	mmstr* mpkfile = NULL;
 	const struct mmpkg* pkg;
 	struct action* act;
 	const mmstr* repo_url;
 	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
-	int len, i, rv;
+	int i;
 
-	rv = -1;
 	for (i = 0; i < act_stk->index; i++) {
 		act = &act_stk->actions[i];
 		pkg = act->pkg;
 		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
 			continue;
 
+		// If repo is -1, package file is provided on command line
 		if (pkg->repo_index == -1) {
 			act->pathname = mmstrdup(pkg->filename);
 			mmlog_info("Going to install %s (%s) directly from file",
@@ -616,13 +647,9 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 			continue;
 		}
 
-		// Get filename of downloaded package and store the path in
-		// a field of action structure being analyzed
-		pkgbase = mmstr_realloc(pkgbase, mmstrlen(pkg->filename));
-		mmstr_basename(pkgbase, pkg->filename);
-		len = mmstrlen(pkgbase) + mmstrlen(cachedir) + 1;
-		mpkfile = mmstr_malloc(len);
-		act->pathname = mmstr_join_path(mpkfile, cachedir, pkgbase);
+		// Package is going to be installed from a downloaded package
+		action_set_pathname_into_dir(act, cachedir);
+		mpkfile = act->pathname;
 
 		// Skip if there is a valid package already downloaded
 		if (  mm_check_access(mpkfile, F_OK) == 0
@@ -640,22 +667,19 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		if (download_from_repo(ctx, repo_url, pkg->filename,
 		                       NULL, mpkfile)) {
 			error("Failed!\n");
-			goto exit;
+			return -1;
 		}
 
 		// verify integrity of what has been downloaded
 		if (check_file_pkg(pkg->sha256, NULL, mpkfile)) {
 			error("Integrity check failed!\n");
-			goto exit;
+			return -1;
 		}
 
 		info("OK\n");
 	}
-	rv = 0;
 
-exit:
-	mmstr_free(pkgbase);
-	return rv;
+	return 0;
 }
 
 

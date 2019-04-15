@@ -24,7 +24,7 @@ struct action {
 	int action;
 	struct mmpkg const * pkg;
 	struct mmpkg const * oldpkg;
-	const mmstr* pathname;
+	mmstr* pathname;
 };
 
 struct action_stack {
