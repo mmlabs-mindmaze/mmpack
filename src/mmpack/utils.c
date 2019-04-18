@@ -6,16 +6,14 @@
 # include <config.h>
 #endif
 
+#include <mmerrno.h>
 #include <mmlib.h>
 #include <mmlog.h>
 #include <mmsysio.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
-
-#include <mmerrno.h>
-#include <mmlib.h>
 
 #include "common.h"
 #include "mm-alloc.h"

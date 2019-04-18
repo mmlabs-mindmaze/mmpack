@@ -6,15 +6,13 @@
 # include <config.h>
 #endif
 
+#include <curl/curl.h>
+#include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
-#include <curl/curl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <mmerrno.h>
-#include <mmlib.h>
 
 #include "common.h"
 #include "context.h"
