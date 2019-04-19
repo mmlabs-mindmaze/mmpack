@@ -325,11 +325,14 @@ class BinaryPackage(object):
             Args:
                 binpkgs: the list of packages currently being generated
         '''
-        # provided in the same package
-        if soname in self.provides[fileformat]:
-            for sym in self.provides[fileformat][soname]:
-                symbol_set.discard(sym)
-            return
+        # provided in the same package or a package being generated
+        for pkg in binpkgs:
+            if soname in pkg.provides[fileformat]:
+                for sym in pkg.provides[fileformat][soname]['symbols']:
+                    symbol_set.discard(sym)
+                if pkg.name != self.name:
+                    self.add_depend(pkg.name, pkg.version, pkg.version)
+                return
 
         # provided by one of the packages being generated at the same time
         for pkg in binpkgs:
