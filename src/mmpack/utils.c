@@ -256,7 +256,7 @@ os_id get_os_id(void)
 		id = OS_ID_DEBIAN;
 
 exit:
-	fclose(stream);
+	pclose(stream);
 	free(line);
 	return id;
 }

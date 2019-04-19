@@ -114,7 +114,7 @@ void gen_ref_hash(char* hash, const char* filename)
 	sprintf(cmd, "openssl sha256 -hex %s | cut -f2 -d' '", filename);
 	fp = popen(cmd, "r");
 	if (fread(hash + SHA_HDRLEN, sha256_strlen, 1, fp)) {}
-	fclose(fp);
+	pclose(fp);
 
 	hash[SHA_HEXSTR_LEN] = '\0';
 }
