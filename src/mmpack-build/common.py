@@ -224,7 +224,8 @@ def get_host_dist() -> str:
                 return line[3:].strip()
     except FileNotFoundError:
         # if not linux, then windows
-        return 'windows'
+        pass
+    return 'windows'
 
 
 def get_host_arch_dist() -> str:
