@@ -77,6 +77,8 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	    || mm_setenv("CPATH", MOUNT_TARGET"/include", MM_ENV_PREPEND)
 	    || mm_setenv("LIBRARY_PATH", MOUNT_TARGET"/lib", MM_ENV_PREPEND)
 	    || mm_setenv("MANPATH", MOUNT_TARGET"/share/man", MM_ENV_PREPEND)
+	    || mm_setenv("MMPACK_PREFIX", ctx->prefix, MM_ENV_OVERWRITE)
+	    || mm_setenv("MMPACK_ACTIVE_PREFIX", ctx->prefix, MM_ENV_OVERWRITE)
 	    /* XXX: check PYTHONPATH value once a pure-python mmpack package has been created */
 	    || mm_setenv("PYTHONPATH", MOUNT_TARGET"/lib/python3/site-packages", MM_ENV_PREPEND) )
 		return -1;

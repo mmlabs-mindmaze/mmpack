@@ -38,6 +38,24 @@ EXAMPLE
 | mmpack run bash
 
 
+ENVIRONMENT VARIABLES
+=====================
+
+While a process is running in a prefix (ie children of the **mmpack-run**
+command process), the following variables are set :
+
+``MMPACK_PREFIX``
+  Although this variable may have been set prior to **mmpack-run**, this is
+  reset to the absolute path of the active prefix mounted by **mmpack-run**.
+  It may however be reset again in the children of this command if, while a
+  prefix is active, mmpack commands are intended to operate on a different
+  prefix.
+
+``MMPACK_ACTIVE_PREFIX``
+  Defined to the absolute path of the active prefix. This variable is to be
+  read only as an indicator of the currently mounted prefix.
+
+
 SEE ALSO
 ========
 ``mmpack``\(1),
