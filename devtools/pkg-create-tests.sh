@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # quick helper to create some pacakges
 # this is intended do be called manually
