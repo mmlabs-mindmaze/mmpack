@@ -78,6 +78,9 @@ Description: MindMaze package repository update (slave)
 Package: mmpack-doc
 Section: doc
 Architecture: all
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${sphinxdoc:Depends}
+Built-Using: ${sphinxdoc:Built-Using}
 Description: MindMaze package manager documentation
  This package provides the user documentation for the mmpack project
  .
