@@ -19,6 +19,7 @@ Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends},
  libdpkg-perl
+Recommends: mmpack-doc
 Description: MindMaze package manager
  This package provides the infrastructure for handling the build,
  installation and removal of mmpack software packages.
@@ -32,6 +33,7 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: mmpack (= ${binary:Version}),
  ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends},
  git, build-essential, automake, libtool, gnulib, meson, cmake
+Recommends: mmpack-doc
 Description: MindMaze package development tools
  This package provides the infrastructure for handling the build,
  installation and removal of mmpack software packages.
