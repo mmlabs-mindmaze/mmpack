@@ -56,6 +56,14 @@ command process), the following variables are set :
   read only as an indicator of the currently mounted prefix.
 
 
+NOTES
+=====
+
+You may modify your shell prompt to reflect whether a prefix is currently active
+and which one. A bash script (prompt.bash) provided in the installation of mmpack
+implements this and can be sourced in your bash initialization file.
+
+
 SEE ALSO
 ========
 ``mmpack``\(1),

@@ -89,3 +89,9 @@ How do I ...
    e.g. ``mmpack --help``, ``mmpack install --help`` ...
    If any such help is missing, incomplete, or unintelligible, please contact
    us.
+
+... know which mmpack prefix is active in my interactive shell
+   Inspect MMPACK_ACTIVE_PREFIX environment variable. You may modify your
+   shell prompt to reflect whether a prefix is currently active and which
+   one. A bash script (prompt.bash) provided in the installation of mmpack
+   implements this and can be sourced in your bash initialization file.

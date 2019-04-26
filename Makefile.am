@@ -144,6 +144,7 @@ mmpack_SOURCES = \
 	src/mmpack/mmpack.c \
 	$(eol)
 dist_pkgdata_DATA = \
+	src/mmpack/prompt.bash \
 	src/mmpack-build/build-autotools \
 	src/mmpack-build/build-cmake \
 	src/mmpack-build/build-makefile \
