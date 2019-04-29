@@ -1,11 +1,14 @@
-mmpack (0.0.1+next) UNRELEASED; urgency=medium
+mmpack (0.0.1+next2) UNRELEASED; urgency=medium
 
   * Preparing next version
   * Create mmpack-repo-tools package
   * Create mmpack-gerrit-builder package
   * Create mmpack-doc package
+  * mmpack-build: change hashes in packages sha256sums files
+  * mmpack-build: inspect properly lib depends in other package of same
+    project
 
- -- Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>  Mon, 18 Feb 2019 09:22:10 +0100
+ -- Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>  Mon, 29 Apr 2019 10:59:29 +0200
 
 mmpack (0.0.1) unstable; urgency=medium
 
