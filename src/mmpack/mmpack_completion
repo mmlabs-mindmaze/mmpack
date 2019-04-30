@@ -1,52 +1,55 @@
 # vi:syntax=sh
 #
 # completion script for mmpack commands (to be sourced)
-_mmpack_list_commands() {
-	mmpack --help | sed -n 's/^\s*mmpack \[options\] \([^ ]*\).*/\1/p'
-}
-_mmpack_options() {
-	local short_opts=$(mmpack --help | sed -n 's/\s*-\([a-zA-Z]\),.*/-\1/p')
-	local long_opts=$(mmpack --help | sed -n 's/.*--\([^= ]*\).*/--\1/p')
-	echo "$short_opts" "$long_opts"
-}
 
-_mmpack_install_completion() {
-	for file in $(find $MMPACK_PREFIX/var/lib/mmpack/ -name "binindex.yaml.*") ; do
-		sed -n 's/^\([a-zA-Z0-9_-]*\):$/\1/p' $file
-	done
-}
+_mmpack_complete_run() {
+    local offset i
+    local prefix_bin=$1/bin
+    local PATH="$prefix_bin:$PATH"
 
-_mmpack_remove_completion() {
-	sed -n 's/^\([a-zA-Z0-9_-]*\):$/\1/p' $MMPACK_PREFIX/var/lib/mmpack/installed.yaml
-}
+    # find actual offset, as position of the first argument after run
+    for (( i=1; i < COMP_CWORD; i++ )); do
+        if [[ "${COMP_WORDS[i]}" == "run" ]]; then
+            offset=$((i+1))
+            break
+        fi
+    done
 
-_mmpack_list_completion() {
-	echo 'all available upgradeable installed extras'
-}
+    # If we are completing the command, limit proposal to the prefix bin
+    if [[ $COMP_CWORD -eq $offset ]]; then
+	COMPREPLY=( $( compgen -W "$(ls $prefix_bin 2> /dev/null)" -- "${COMP_WORDS[COMP_CWORD]}" ) )
+	return 0
+    fi
 
-_mmpack_subcmd_completion() {
-	case "$1" in
-	"install") _mmpack_install_completion ;;
-	"list") _mmpack_list_completion ;;
-	"remove") _mmpack_remove_completion ;;
-	"source") _mmpack_install_completion ;;
-	*) ;;
-	esac
+    _command_offset $offset
 }
 
 _mmpack_completion() {
-    COMPREPLY=()
-    local mmpack_commands="$(_mmpack_list_commands)"
-    # completion for mmpack
-    if [ $COMP_CWORD -eq 1 ]; then
-        mmpack_options="$(_mmpack_options )"
-        COMPREPLY=( $( compgen -W "$mmpack_commands $mmpack_options" -- "${COMP_WORDS[1]}" ) )
-        return
+    local cur prev
+    cur=${COMP_WORDS[COMP_CWORD]}
+    prev=${COMP_WORDS[COMP_CWORD-1]}
+
+    # If completion is done on empty word AND we are not completing long option
+    # value, then we invoked the command with an explicit "" final arg
+    # Without, the completion would have been done on previous arg
+    if [[ "$cur" == "" && "$prev" != "=" ]]; then
+        COMPREPLY=($(MMLIB_CMD_COMPLETION=yes $COMP_LINE "" 2>/dev/null))
+    else
+        COMPREPLY=($(MMLIB_CMD_COMPLETION=yes $COMP_LINE 2>/dev/null))
     fi
-    # completion for mmpack <command>'s options
-    local cmd="$(echo "${COMP_WORDS[1]}" | tr -d '[:space:]')"
-    if [ "$(echo $mmpack_commands | grep -w "$cmd")" ] ; then
-        COMPREPLY=( $( compgen -W "$(_mmpack_subcmd_completion "$cmd")" -- "${COMP_WORDS[COMP_CWORD]}" ) )
+
+    # If run command, the first element in COMPREPLY is
+    # "execute_run_completion" and the second is the prefix used
+    if [[ ${#COMPREPLY[@]} -eq 2 && ${COMPREPLY[0]} == "execute_run_completion" ]]; then
+        _mmpack_complete_run ${COMPREPLY[1]}
+        return 0
+    fi
+
+    # if there is only one possibility, do not add space if string finishes
+    # by '='. In such a case, we are completing the value of a long
+    # option... Same if it finishes with '/': we are completing a path
+    if [[ ${#COMPREPLY[@]} -eq 1 && ${COMPREPLY[0]} == *[=/] ]]; then
+        compopt -o nospace
     fi
 }
 complete -F _mmpack_completion mmpack

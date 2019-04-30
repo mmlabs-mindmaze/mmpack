@@ -6,6 +6,7 @@
 # include <config.h>
 #endif
 
+#include <mmargparse.h>
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
@@ -44,6 +45,16 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		mm_getenv("SHELL", "sh"),
 		NULL,
 	};
+
+	// If completion is running, we need to offload completion of command
+	// argument to the shell. However the prefix in use must be reported.
+	// Hence we report a first string identifying the action to perform and
+	// then prefix path is reported.
+	if (mmarg_is_completing()) {
+		printf("execute_run_completion\n");
+		printf("%s\n", ctx->prefix);
+		return 0;
+	}
 
 	if (argc == 2
 	    && (STR_EQUAL(argv[1], strlen(argv[1]), "--help")

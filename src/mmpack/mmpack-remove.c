@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "cmdline.h"
 #include "context.h"
 #include "mmpack-remove.h"
 #include "mmstring.h"
@@ -68,6 +69,7 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	const char** req_args;
 
 	struct mmarg_parser parser = {
+		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
 		.doc = remove_doc,
 		.args_doc = REMOVE_SYNOPSIS,
 		.optv = cmdline_optv,
@@ -76,6 +78,9 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	};
 
 	arg_index = mmarg_parse(&parser, argc, (char**)argv);
+	if (mmarg_is_completing())
+		return complete_pkgname(ctx, argv[argc-1], ONLY_INSTALLED);
+
 	if (arg_index+1 > argc) {
 		fprintf(stderr, "missing package list argument in command line\n"
 		                "Run \"mmpack remove --help\" to see usage\n");

@@ -9,6 +9,10 @@
 
 #include "context.h"
 
+enum pkg_comp_type {
+	AVAILABLE_PKGS,
+	ONLY_INSTALLED,
+};
 
 typedef int (*subcmd_proc)(struct mmpack_ctx * ctx, int argc, const char* argv[]);
 
@@ -47,5 +51,7 @@ struct subcmd_parser {
 
 const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
                                   int* p_argc, const char*** p_argv);
+int complete_pkgname(struct mmpack_ctx * ctx, const char* arg,
+                     enum pkg_comp_type type);
 
 #endif /* CMDLINE_H */

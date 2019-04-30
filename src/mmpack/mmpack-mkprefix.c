@@ -104,6 +104,7 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	int arg_index;
 	const mmstr* prefix;
 	struct mmarg_parser parser = {
+		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
 		.doc = mkprefix_doc,
 		.args_doc = MKPREFIX_SYNOPSIS,
 		.optv = cmdline_optv,
@@ -113,6 +114,13 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	(void) ctx;  /* silence unused warning */
 
 	arg_index = mmarg_parse(&parser, argc, (char**)argv);
+	if (mmarg_is_completing()) {
+		if (arg_index+1 < argc)
+			return 0;
+
+		return mmarg_complete_path(argv[arg_index],
+		                           MM_DT_DIR, NULL, NULL);
+	}
 
 	if (arg_index+1 != argc) {
 		fprintf(stderr, "Bad usage of mkprefix command.\n"

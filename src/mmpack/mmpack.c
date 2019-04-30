@@ -76,7 +76,7 @@ static const char arguments_docs[] =
 static struct mmpack_opts cmdline_opts;
 
 static const struct mmarg_opt cmdline_optv[] = {
-	{"p|prefix", MMOPT_NEEDSTR, NULL, {.sptr = &cmdline_opts.prefix},
+	{"p|prefix", MMOPT_NEEDDIR, NULL, {.sptr = &cmdline_opts.prefix},
 	 "Use @PATH as install prefix."},
 	{"version", MMOPT_NOVAL, "set", {.sptr = &cmdline_opts.version},
 	 "Display mmpack version"},
@@ -118,7 +118,8 @@ int main(int argc, char* argv[])
 
 	/* handle non-command options */
 	if (cmdline_opts.version) {
-		printf("%s\n", PACKAGE_STRING);
+		if (!mmarg_is_completing())
+			printf("%s\n", PACKAGE_STRING);
 		return EXIT_SUCCESS;
 	}
 

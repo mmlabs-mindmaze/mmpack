@@ -12,6 +12,7 @@
 #include "mmpack-list.h"
 #include "package-utils.h"
 
+#include <mmargparse.h>
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
@@ -208,6 +209,10 @@ int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	subcmd = subcmd_parse(&parser, &argc, &argv);
 	if (!subcmd)
 		return -1;
+
+	/* If completing, nothing should be further displayed */
+	if (mmarg_is_completing())
+		return 0;
 
 	if (argc > 2) {
 		fprintf(stderr, "Too many argument."

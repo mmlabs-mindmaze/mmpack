@@ -8,6 +8,7 @@
 
 #include "mmpack-check-integrity.h"
 
+#include <mmargparse.h>
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmpredefs.h>
@@ -15,6 +16,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "cmdline.h"
 #include "context.h"
 #include "mmstring.h"
 #include "package-utils.h"
@@ -104,6 +106,14 @@ int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc, char const* argv[]
 		.found = 0,
 		.error = 0,
 	};
+
+	if (mmarg_is_completing()) {
+		// Complete only first command argument and if not empty
+		if (argc != 2 || argv[1][0] == '\0')
+			return 0;
+
+		return complete_pkgname(ctx, argv[1], ONLY_INSTALLED);
+	}
 
 	if (argc > 2
 	    || (argc == 2

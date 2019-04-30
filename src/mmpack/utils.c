@@ -6,6 +6,7 @@
 # include <config.h>
 #endif
 
+#include <mmargparse.h>
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmlog.h>
@@ -568,6 +569,11 @@ void report_user_and_log(int mmlog_level, const char* fmt, ...)
 	char msg[MSG_MAXLEN+2];
 	int lastchar_idx, msglen, has_lf;
 	va_list ap;
+
+	// If command completion is running, do not produce anthing on
+	// standard output or standard error
+	if (mmarg_is_completing())
+		return;
 
 	va_start(ap, fmt);
 	msglen = vsnprintf(msg, MSG_MAXLEN+1, fmt, ap);

@@ -8,10 +8,12 @@
 
 #include "mmpack-show.h"
 
+#include <mmargparse.h>
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
 #include <string.h>
+#include "cmdline.h"
 #include "context.h"
 #include "package-utils.h"
 
@@ -65,6 +67,13 @@ LOCAL_SYMBOL
 int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct cb_data data;
+
+	if (mmarg_is_completing()) {
+		if (argc != 2)
+			return 0;
+
+		return complete_pkgname(ctx, argv[1], AVAILABLE_PKGS);
+	}
 
 	if (argc != 2
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")

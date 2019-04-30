@@ -8,6 +8,7 @@
 
 #include "mmpack-search.h"
 
+#include <mmargparse.h>
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
@@ -51,6 +52,9 @@ LOCAL_SYMBOL
 int mmpack_search(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct cb_data data;
+
+	if (mmarg_is_completing())
+		return 0;
 
 	if (argc != 2
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")

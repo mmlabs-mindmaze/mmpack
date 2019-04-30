@@ -6,6 +6,8 @@
 # include <config.h>
 #endif
 
+#include <mmargparse.h>
+
 #include "context.h"
 #include "download.h"
 #include "mmpack-update.h"
@@ -47,6 +49,9 @@ LOCAL_SYMBOL
 int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 {
 	int i, num_repo;
+
+	if (mmarg_is_completing())
+		return 0;
 
 	if (argc == 2
 	    && (STR_EQUAL(argv[1], strlen(argv[1]), "--help")

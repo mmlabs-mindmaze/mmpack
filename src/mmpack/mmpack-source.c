@@ -8,11 +8,13 @@
 
 #include "mmpack-source.h"
 
+#include <mmargparse.h>
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
 #include <string.h>
 
+#include "cmdline.h"
 #include "context.h"
 #include "download.h"
 #include "package-utils.h"
@@ -60,6 +62,13 @@ LOCAL_SYMBOL
 int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct mmpkg const * pkg;
+
+	if (mmarg_is_completing()) {
+		if (argc != 2)
+			return 0;
+
+		return complete_pkgname(ctx, argv[1], AVAILABLE_PKGS);
+	}
 
 	if (argc != 2
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")
