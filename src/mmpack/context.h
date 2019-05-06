@@ -12,6 +12,7 @@
 #include "settings.h"
 
 #define CTX_SKIP_PKGLIST        0x01
+#define CTX_SKIP_REDIRECT_LOG   0x02
 
 struct mmpack_opts {
 	const char* prefix;

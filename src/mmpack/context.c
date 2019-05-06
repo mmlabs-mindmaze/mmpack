@@ -277,10 +277,13 @@ error:
 /**
  * mmpack_ctx_use_prefix() - load prefix settings and packages indices
  * @ctx:	initialized mmpack context
- * @flags:      0 or CTX_SKIP_PKGLIST
+ * @flags:      OR combination of 0 and CTX_SKIP_* values
  *
  * If flags is set to CTX_SKIP_PKGLIST, the function will not try to load
  * package list.
+ *
+ * If flags is set to CTX_SKIP_REDIRECT_LOG, the function will not redirect
+ * the error log.
  *
  * Return: 0 in case of success, -1 otherwise
  */
@@ -290,7 +293,8 @@ int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 	if (read_prefix_config(ctx))
 		return -1;
 
-	if (mmpack_ctx_use_prefix_log(ctx))
+	if (  !(flags & CTX_SKIP_REDIRECT_LOG)
+	   && mmpack_ctx_use_prefix_log(ctx))
 		return -1;
 
 	if (flags & CTX_SKIP_PKGLIST)
