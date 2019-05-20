@@ -103,6 +103,7 @@ class BinaryPackage:
         self.source = source
         self.arch = arch
         self.tag = tag
+        self.src_hash = None
 
         self.description = ''
         # * System dependencies are stored as opaque strings.
@@ -173,6 +174,7 @@ class BinaryPackage:
         info = {'version': self.version,
                 'source': self.source,
                 'description': self.description,
+                'srcsha256': self.src_hash,
                 'sumsha256sums': sha256sum(self._sha256sums_file())}
         info.update(self._dependencies)
         yaml_serialize({self.name: info}, 'MMPACK/info')

@@ -594,6 +594,11 @@ class SrcPackage:
         instdir = self._local_install_path(True)
         pushdir(instdir)
 
+        # Computer hash of source
+        srctar = '{}/{}_{}_src.tar.gz'.format(self.pkgbuild_path(),
+                                              self.name, self.version)
+        src_hash = sha256sum(srctar)
+
         # we need all of the provide infos before starting the dependencies
         for pkgname, binpkg in self._packages.items():
             binpkg.gen_provides()
@@ -601,6 +606,7 @@ class SrcPackage:
         wrk = Workspace()
         for pkgname, binpkg in self._packages.items():
             binpkg.gen_dependencies(self._packages.values())
+            binpkg.src_hash = src_hash
             pkgfile = binpkg.create(instdir, self.pkgbuild_path())
             shutil.copy(pkgfile, wrk.packages)
             iprint('generated package: {}'.format(pkgname))

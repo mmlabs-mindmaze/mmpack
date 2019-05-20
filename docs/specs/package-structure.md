@@ -39,6 +39,7 @@ named after the package name with the following fields:
  * description: string describing what the package does/provides
  * arch: string of the architecture/OS that this package is built for
  * sumsha256sums: SHA256 hash of list of installed files (MMPACK/sha256sums)
+ * srcsha256: SHA256 hash of source package used to build this package
 
 
 ## sha256sums file
