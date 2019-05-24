@@ -91,3 +91,4 @@ SEE ALSO
 ``mmpack-build-pkg-create``\(1),
 ``mmpack-build-clean``\(1),
 ``mmpack-build-builddep``\(1),
+``mmpack-build-guess``\(1),

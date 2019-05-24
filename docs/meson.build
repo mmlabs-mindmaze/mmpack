@@ -3,6 +3,7 @@ man_pages_sources = [
     'man/mmpack-build.rst',
     'man/mmpack-build-builddep.rst',
     'man/mmpack-build-clean.rst',
+    'man/mmpack-build-guess.rst',
     'man/mmpack-build-pkg-create.rst',
     'man/mmpack-check-integrity.rst',
     'man/mmpack-download.rst',
