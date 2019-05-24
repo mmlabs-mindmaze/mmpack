@@ -19,6 +19,7 @@ mmpack_build_sources = files(
         'hooks_loader.py',
         'mmpack_builddep.py',
         'mmpack_clean.py',
+        'mmpack_guess.py',
         'mmpack_pkg_create.py',
         'pacman.py',
         'pe_utils.py',

@@ -10,6 +10,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . import mmpack_builddep
 from . import mmpack_clean
+from . import mmpack_guess
 from . import mmpack_pkg_create
 from . import common
 
@@ -20,6 +21,7 @@ from . import common
 ALL_CMDS = {
     mmpack_builddep,
     mmpack_clean,
+    mmpack_guess,
     mmpack_pkg_create,
 }
 

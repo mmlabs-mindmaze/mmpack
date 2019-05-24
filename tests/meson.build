@@ -56,6 +56,7 @@ mmpack_build_unit_tests_sources = files(
     'test_file_utils.py',
     'test_hook_python.py',
     'test_package.py',
+    'test_readme_parsing.py',
     'test_version.py',
 )
 

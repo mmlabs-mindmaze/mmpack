@@ -60,6 +60,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/hooks_loader.py \
 	src/mmpack-build/mmpack_builddep.py \
 	src/mmpack-build/mmpack_clean.py \
+	src/mmpack-build/mmpack_guess.py \
 	src/mmpack-build/mmpack_pkg_create.py \
 	src/mmpack-build/pacman.py \
 	src/mmpack-build/pe_utils.py \
@@ -358,8 +359,9 @@ EXTRA_DIST += \
 	tests/mmpack-config.yaml \
 	tests/pydata/ \
 	tests/test_file_utils.py \
-	tests/test_version.py \
 	tests/test_hook_python.py \
+	tests/test_readme_parsing.py \
+	tests/test_version.py \
 	tests/binary-indexes \
 	$(eol)
 
@@ -399,6 +401,7 @@ RST_MAN_PAGES = \
 	docs/man/mmpack-build.rst \
 	docs/man/mmpack-build-builddep.rst \
 	docs/man/mmpack-build-clean.rst \
+	docs/man/mmpack-build-guess.rst \
 	docs/man/mmpack-build-pkg-create.rst \
 	docs/man/mmpack-check-integrity.rst \
 	docs/man/mmpack-download.rst \
