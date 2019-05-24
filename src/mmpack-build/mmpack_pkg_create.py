@@ -31,33 +31,10 @@ $ mmpack pkg-create --url ssh://git@intranet.mindmaze.ch:7999/~user/XXX.git \
 import os
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from glob import glob
 
-from common import pushdir, popdir, yaml_load, set_log_file
+from common import set_log_file
 from src_package import create_source_from_git, load_source_from_tar
 from workspace import Workspace, find_project_root_folder
-
-
-def read_from_mmpack_files(root_dir: str, key: str) -> str:
-    ''' Look for given key's value in the mmpack specfile of the project
-
-        Scan given project's mmpack folder. Try to read all the yaml files
-        as the project specfile (we might be guessing the project's name).
-
-        Expects the key to be a root key of the yaml file
-    '''
-    try:
-        pushdir(root_dir + '/mmpack')
-    except FileNotFoundError:
-        return None
-
-    for specfile in glob('*.yaml'):
-        specs = yaml_load(specfile)
-        if key in specs:
-            return specs[key]
-
-    popdir()  # root_dir
-    return None
 
 
 def parse_options(argv):
