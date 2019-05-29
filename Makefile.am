@@ -83,6 +83,8 @@ syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) devtools/gerrit/gerri
 mmpack_lib_sources = \
 	src/mmpack/action-solver.c \
 	src/mmpack/action-solver.h \
+	src/mmpack/cmdline.c \
+	src/mmpack/cmdline.h \
 	src/mmpack/common.h \
 	src/mmpack/context.c \
 	src/mmpack/context.h \
