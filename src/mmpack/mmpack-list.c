@@ -6,6 +6,7 @@
 # include <config.h>
 #endif
 
+#include "cmdline.h"
 #include "common.h"
 #include "context.h"
 #include "mmpack-list.h"
@@ -17,142 +18,168 @@
 #include <string.h>
 
 
-enum {
-	LIST_ALL,
-	LIST_AVAILABLE,
-	LIST_UPGRADEABLE,
-	LIST_INSTALLED,
-	LIST_EXTRAS,
+struct cb_data {
+	const char * pkg_name_pattern;
+	int only_available;
+	int found;
 };
 
-struct cb_data {
-	struct mmpack_ctx * ctx;
-	const char * pkg_name_pattern;
-	struct mmpkg* pkg;
-	int subcommand;
-	int found;
-	int silent;
-};
+
+/**
+ * print_pkg_if_match() - print package if name match pattern
+ * @pkg:        package whose name must be tested
+ * @pattern:    pattern to search in name (can be NULL)
+ *
+ * Tests whether @pkg has a name which contains the string @pattern if it
+ * is not NULL. If @pattern is NULL, the match is considered to be true
+ * (This allows to use NULL to disable filter on name).
+ *
+ * If there is a match, the package is printed on standard output along
+ * with its status and version.
+ *
+ * Return: 1 in case of match, 0 otherwise.
+ */
+static
+int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern)
+{
+	const char* state;
+
+	// If pattern is provided and the name does not match do nothing
+	if (pattern && (strstr(pkg->name, pattern) == NULL))
+		return 0;
+
+	if (pkg->state == MMPACK_PKG_INSTALLED)
+		state = "[installed]";
+	else
+		state = "[available]";
+
+	printf("%s %s (%s)\n", state, pkg->name, pkg->version);
+	return 1;
+}
 
 
 static
 int binindex_cb_all(struct mmpkg* pkg, void * void_data)
 {
-	char * state;
 	struct cb_data * data = (struct cb_data *) void_data;
 
-	if (strstr(pkg->name, data->pkg_name_pattern) != 0) {
-		switch (data->subcommand) {
-		case LIST_AVAILABLE:
-			if (pkg->filename == NULL)  /* XXX could do better ... */
-				return 0;
-			state = "[available]";
-			break;
-		case LIST_ALL:
-			if (pkg->state == MMPACK_PKG_INSTALLED)
-				state = "[installed]";
-			else
-				state = "[available]";
-			break;
-		case LIST_INSTALLED:
-			if (pkg->state != MMPACK_PKG_INSTALLED)
-				return 0;
-			state = "[installed]";
-			break;
-		default:
-			/* Should not happen. Keep to silence warnings. */
-			return 0;
-		}
+	// Exclude package not in repo if only available requested
+	if (data->only_available && pkg->repo_index == -1)
+		return 0;
 
-		data->found = 1;
-		if (!data->silent)
-			printf("%s %s (%s)\n", state, pkg->name, pkg->version);
-	}
-
+	data->found |= print_pkg_if_match(pkg, data->pkg_name_pattern);
 	return 0;
 }
 
 
 static
-int binindex_cb_extras(struct mmpkg* pkg, void * void_data)
+int list_all(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	struct cb_data * data = (struct cb_data *) void_data;
-
-	if (strstr(pkg->name, data->pkg_name_pattern) != 0) {
-		if (pkg->state != MMPACK_PKG_INSTALLED
-		    || pkg->filename != NULL)
-			return 0;
-
-		data->found = 1;
-		printf("%s %s (%s)\n", "[installed]", pkg->name, pkg->version);
-	}
-
-	return 0;
-}
-
-
-static
-int binindex_cb_upgradeable(struct mmpkg* pkg, void * void_data)
-{
-	struct cb_data * data = (struct cb_data *) void_data;
-	struct mmpkg const * latest;
-
-	if (strstr(pkg->name, data->pkg_name_pattern) != 0) {
-		if (pkg->state != MMPACK_PKG_INSTALLED)
-			return 0;
-
-		latest = binindex_get_latest_pkg(&data->ctx->binindex, pkg->name,
-		                                 mmstr_alloca_from_cstr("any"));
-		/* always found: at least self is present */
-		if (pkg_version_compare(pkg->version, latest->version) < 0) {
-			printf("%s %s (%s -> %s)\n", "[available]",
-			       latest->name, pkg->version, latest->version);
-			data->found = 1;
-		}
-	}
-
-	return 0;
-}
-
-
-static
-int mmpack_list_parse_options(int argc, const char* argv[], struct cb_data * data)
-{
-	*data = (struct cb_data) {
-		.subcommand = LIST_INSTALLED,
-		.pkg_name_pattern = "",
+	struct cb_data data = {
+		.only_available = 0,
+		.pkg_name_pattern = (argc > 1) ? argv[1] : NULL,
+		.found = 0,
 	};
 
-	if (argc >= 2) {
-		size_t len = strlen(argv[1]);
-
-		if (STR_EQUAL(argv[1], len, "all"))
-			data->subcommand = LIST_ALL;
-		else if (STR_EQUAL(argv[1], len, "available"))
-			data->subcommand = LIST_AVAILABLE;
-		else if (STR_EQUAL(argv[1], len, "extras"))
-			data->subcommand = LIST_EXTRAS;
-		else if (STR_EQUAL(argv[1], len, "installed"))
-			data->subcommand = LIST_INSTALLED;
-		else if (STR_EQUAL(argv[1], len, "upgradeable"))
-			data->subcommand = LIST_UPGRADEABLE;
-		else if (STR_EQUAL(argv[1], len, "--help")
-		         || STR_EQUAL(argv[1], len, "-h"))
-			return 1;
-		else {
-			fprintf(stderr, "invalid list subcommand\n");
-			return -1;
-		}
+	binindex_foreach(&ctx->binindex, binindex_cb_all, &data);
+	return data.found;
+}
 
 
-		if (argc == 3)
-			data->pkg_name_pattern = argv[2];
-		else if (argc > 3)
-			return -1;
+static
+int list_available(struct mmpack_ctx* ctx, int argc, const char* argv[])
+{
+	struct cb_data data = {
+		.only_available = 1,
+		.pkg_name_pattern = (argc > 1) ? argv[1] : NULL,
+		.found = 0,
+	};
+
+	binindex_foreach(&ctx->binindex, binindex_cb_all, &data);
+	return data.found;
+}
+
+
+static
+int list_installed(struct mmpack_ctx* ctx, int argc, const char* argv[])
+{
+	struct it_iterator iter;
+	struct it_entry* entry;
+	const char* pattern = (argc > 1) ? argv[1] : NULL;
+	const struct mmpkg* pkg;
+	int found = 0;
+
+	// Loop over the entries of the installed package list
+	entry = it_iter_first(&iter, &ctx->installed.idx);
+	for (; entry != NULL; entry = it_iter_next(&iter)) {
+		pkg = entry->value;
+		found |= print_pkg_if_match(pkg, pattern);
 	}
 
-	return 0;
+	return found;
 }
+
+
+static
+int list_extras(struct mmpack_ctx* ctx, int argc, const char* argv[])
+{
+	struct it_iterator iter;
+	struct it_entry* entry;
+	const char* pattern = (argc > 1) ? argv[1] : NULL;
+	const struct mmpkg* pkg;
+	int found = 0;
+
+	// Loop over the entries of the installed package list
+	entry = it_iter_first(&iter, &ctx->installed.idx);
+	for (; entry != NULL; entry = it_iter_next(&iter)) {
+		pkg = entry->value;
+
+		// Skip if a repo provides this package
+		if (pkg->repo_index != -1)
+			continue;
+
+		found |= print_pkg_if_match(pkg, pattern);
+	}
+
+	return found;
+}
+
+
+static
+int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
+{
+	struct it_iterator iter;
+	struct it_entry* entry;
+	const char* pattern = (argc > 1) ? argv[1] : NULL;
+	const struct mmpkg *pkg, *latest;
+	int found = 0;
+
+	// Loop over the entries of the installed package list
+	entry = it_iter_first(&iter, &ctx->installed.idx);
+	for (; entry != NULL; entry = it_iter_next(&iter)) {
+		pkg = entry->value;
+
+		// test against the version of latest package available
+		latest = binindex_get_latest_pkg(&ctx->binindex, pkg->name,
+		                                 mmstr_alloca_from_cstr("any"));
+		if (pkg_version_compare(pkg->version, latest->version) >= 0)
+			continue;
+
+		found |= print_pkg_if_match(latest, pattern);
+	}
+
+	return found;
+}
+
+
+static
+const struct subcmd list_subcmds[] = {
+	{"all", list_all},
+	{"available", list_available},
+	{"extras", list_extras},
+	{"installed", list_installed},
+	{"upgradeable", list_upgradeable},
+};
 
 
 /**
@@ -168,42 +195,34 @@ int mmpack_list_parse_options(int argc, const char* argv[], struct cb_data * dat
 LOCAL_SYMBOL
 int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	int rv;
-	struct cb_data data;
+	struct subcmd_parser parser = {
+		.execname = "mmpack",
+		.args_doc = LIST_SYNOPSIS,
+		.num_subcmd = MM_NELEM(list_subcmds),
+		.subcmds = list_subcmds,
+		.defcmd = "installed",
+	};
+	const struct subcmd* subcmd;
+	int found;
 
-	rv = mmpack_list_parse_options(argc, argv, &data);
-	if (rv != 0) {
-		fprintf(stderr, "Usage:\n\tmmpack "LIST_SYNOPSIS"\n");
-		return rv < 0 ? -1 : 0;
+	subcmd = subcmd_parse(&parser, &argc, &argv);
+	if (!subcmd)
+		return -1;
+
+	if (argc > 2) {
+		fprintf(stderr, "Too many argument."
+		                " Run \"mmpack list --help\" to see Usage\n");
+		return -1;
 	}
 
 	/* Load prefix configuration and caches */
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
-	data.ctx = ctx;
 
-	switch (data.subcommand) {
-	case LIST_EXTRAS:
-		binindex_foreach(&ctx->binindex, binindex_cb_extras, &data);
-		break;
-	case LIST_UPGRADEABLE:
-		binindex_foreach(&ctx->binindex, binindex_cb_upgradeable, &data);
-		break;
-	case LIST_AVAILABLE:
-	case LIST_INSTALLED:
-	case LIST_ALL:
-		binindex_foreach(&ctx->binindex, binindex_cb_all, &data);
-		break;
-	default:
-		/* should not happen.
-		 * Default case has been set to LIST_ALL when parsing options. */
-		mm_check(0);
-	}
-
-	if (!data.found) {
-		if (strlen(data.pkg_name_pattern))
-			printf("No package found matching pattern: \"%s\"\n",
-		           data.pkg_name_pattern);
+	found = subcmd->cb(ctx, argc, argv);
+	if (!found) {
+		if (argc > 1)
+			printf("No package found matching pattern: \"%s\"\n", argv[1]);
 		else
 			printf("No package found\n");
 	}
