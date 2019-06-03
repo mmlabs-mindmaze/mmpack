@@ -39,10 +39,11 @@ static
 int create_initial_empty_files(const mmstr* prefix, int force_create)
 {
 	int fd, oflag;
-	const mmstr *instlist_relpath, *log_relpath;
+	const mmstr *instlist_relpath, *log_relpath, *avllist_relpath;
 
 	instlist_relpath = mmstr_alloca_from_cstr(INSTALLED_INDEX_RELPATH);
 	log_relpath = mmstr_alloca_from_cstr(LOG_RELPATH);
+	avllist_relpath = mmstr_alloca_from_cstr(REPO_INDEX_RELPATH".0");
 
 	oflag = O_WRONLY|O_CREAT| (force_create ? O_TRUNC : O_EXCL);
 
@@ -54,6 +55,12 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 
 	// Create initial empty installed package list
 	fd = open_file_in_prefix(prefix, instlist_relpath, oflag);
+	mm_close(fd);
+	if (fd < 0)
+		return -1;
+
+	// Create initial empty available package list
+	fd = open_file_in_prefix(prefix, avllist_relpath, oflag);
 	mm_close(fd);
 	if (fd < 0)
 		return -1;
