@@ -552,6 +552,12 @@ class SrcPackage(object):
         self._ventilate_custom_packages()
         self._ventilate_pkg_create()
 
+        if not self.install_files_set:
+            # warn when no binary package will be created
+            # do not abort here however: this may be ok when
+            # working with virtual packages
+            iprint('No installed files found! No package will be created.')
+
         tmpset = set()
         for filename in self.install_files_set:
             if is_binary(filename) or is_exec_manpage(filename):
