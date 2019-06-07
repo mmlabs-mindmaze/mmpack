@@ -123,7 +123,7 @@ const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
  * complete_pkgname() - complete name of package
  * @ctx:        context associated with prefix
  * @arg:        incomplete argument supplied on command line
- * @type:       if ONLY_INSTALLED, completion must be peformed on the name of
+ * @type:       if ONLY_INSTALLED, completion must be performed on the name of
  *              installed packages. If AVAILABLE_PKGS, the completion must
  *              be performed on the name of available packages.
  *
@@ -148,7 +148,7 @@ int complete_pkgname(struct mmpack_ctx * ctx, const char* arg,
 	// indextable of install_state or binary index store data radically
 	// different... However both index their data by package name:
 	// installed_state index the packages that are installed in the prefix,
-	// binary index, all the different versions availabe of the same
+	// binary index, all the different versions available of the same
 	// package name.
 	if (type == ONLY_INSTALLED)
 		table = &ctx->installed.idx;
