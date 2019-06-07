@@ -219,6 +219,8 @@ class SrcPackage(object):
             self.build_system = 'makefile'
         elif os.path.exists('setup.py'):
             self.build_system = 'python'
+        elif os.path.exists('meson.build'):
+            self.build_system = 'meson'
         else:
             raise RuntimeError('could not guess project build system')
 
