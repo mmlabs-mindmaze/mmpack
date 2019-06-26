@@ -224,7 +224,7 @@ LOCAL_SYMBOL
 const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx, int repo_index)
 {
 	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH)
-	char suffix[sizeof(".####")];
+	char suffix[sizeof(".##########")];
 	int len;
 
 	// Alloc string if not done yet
