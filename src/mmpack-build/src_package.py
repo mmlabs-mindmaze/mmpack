@@ -27,6 +27,7 @@ class _FileConsumer(Thread):
     ''' Read in a thread from file input and duplicate onto the file output
         and logger.
     '''
+
     def __init__(self, file_in, file_out):
         super().__init__()
         self.file_in = file_in
@@ -41,8 +42,8 @@ class _FileConsumer(Thread):
 def _get_install_prefix() -> str:
     if os.name == 'nt':
         return '/m'
-    else:  # if not windows, then linux
-        return '/run/mmpack'
+
+    return '/run/mmpack'
 
 
 def _unpack_deps_version(item):
@@ -65,7 +66,7 @@ def _unpack_deps_version(item):
         return (name, minv, maxv)
 
 
-def create_source_from_git(url: str, tag: str=None):
+def create_source_from_git(url: str, tag: str = None):
     ''' Create a source package from git clone
 
     Returns: An initialized source package
@@ -115,7 +116,7 @@ def create_source_from_git(url: str, tag: str=None):
     return srcpkg
 
 
-def load_source_from_tar(tarpath: str, tag: str=None):
+def load_source_from_tar(tarpath: str, tag: str = None):
     ''' Load mmpack source package from a tarball.
 
     Returns: An initialized source package
@@ -158,12 +159,13 @@ def load_source_from_tar(tarpath: str, tag: str=None):
     return srcpkg
 
 
-class SrcPackage(object):
+class SrcPackage:
     # pylint: disable=too-many-instance-attributes
     '''
     Source package class.
     '''
-    def __init__(self, name: str, tag: str=None):
+
+    def __init__(self, name: str, tag: str = None):
         # pylint: disable=too-many-arguments
         self.name = name
         self.tag = tag
@@ -195,7 +197,7 @@ class SrcPackage(object):
         '''
         return self.pkgbuild_path() + '/' + self.name
 
-    def _local_install_path(self, withprefix: bool=False) -> str:
+    def _local_install_path(self, withprefix: bool = False) -> str:
         'internal helper: build and return the local install path'
         installdir = get_local_install_dir(self.pkgbuild_path())
         if withprefix:
@@ -226,7 +228,7 @@ class SrcPackage(object):
 
         popdir()
 
-    def load_specfile(self, specfile: str=None) -> None:
+    def load_specfile(self, specfile: str = None) -> None:
         ''' Load the specfile and store it as its dictionary equivalent
         '''
         if not specfile:
@@ -248,7 +250,7 @@ class SrcPackage(object):
         return matching_set
 
     def _format_description(self, binpkg: BinaryPackage, pkgname: str,
-                            pkg_type: str=None):
+                            pkg_type: str = None):
         ''' Format BinaryPackage's description.
 
         If the package is a default target, concat the global project
@@ -310,7 +312,7 @@ class SrcPackage(object):
                 self.build_system = value
 
     def _binpkg_get_create(self, binpkg_name: str,
-                           pkg_type: str=None) -> BinaryPackage:
+                           pkg_type: str = None) -> BinaryPackage:
         'Returns the newly create BinaryPackage if any'
         if binpkg_name not in self._packages:
             host_arch = get_host_arch_dist()
@@ -399,7 +401,7 @@ class SrcPackage(object):
         process_dependencies(system_builddeps, mmpack_builddeps,
                              prefix, assumeyes)
 
-    def local_install(self, skip_tests: bool=False) -> None:
+    def local_install(self, skip_tests: bool = False) -> None:
         ''' local installation of the package from the source package
 
         guesses build system if none given.
@@ -514,22 +516,22 @@ class SrcPackage(object):
 
         if bin_pkg_name in self._packages:
             return self._packages[bin_pkg_name]
-        else:
-            libpkg = None
-            for pkgname in self._packages:
-                if (pkgname.startswith('lib')
-                        and not (pkgname.endswith('-devel')
-                                 or pkgname.endswith('-doc')
-                                 or pkgname.endswith('-debug'))):
-                    if libpkg:
-                        # works if there's only one candidate
-                        return None
-                    libpkg = pkgname
-            if libpkg:
-                dprint('Return default package: ' + libpkg)
-                return self._binpkg_get_create(libpkg)
-            dprint('Return default package: ' + bin_pkg_name)
-            return self._binpkg_get_create(bin_pkg_name)
+
+        libpkg = None
+        for pkgname in self._packages:
+            if (pkgname.startswith('lib')
+                    and not (pkgname.endswith('-devel')
+                             or pkgname.endswith('-doc')
+                             or pkgname.endswith('-debug'))):
+                if libpkg:
+                    # works if there's only one candidate
+                    return None
+                libpkg = pkgname
+        if libpkg:
+            dprint('Return default package: ' + libpkg)
+            return self._binpkg_get_create(libpkg)
+        dprint('Return default package: ' + bin_pkg_name)
+        return self._binpkg_get_create(bin_pkg_name)
 
     def ventilate(self):
         ''' Ventilate files.

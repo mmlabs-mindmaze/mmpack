@@ -45,7 +45,7 @@ def _sysdep_find_dependency(soname: str, symbol_set: Set[str]) -> str:
     wrk = Workspace()
     if os.path.exists(DPKG_PREFIX):
         return dpkg_find_dependency(soname, symbol_set)
-    elif os.path.exists(wrk.cygroot() + PACMAN_PREFIX):
+    if os.path.exists(wrk.cygroot() + PACMAN_PREFIX):
         return pacman_find_dependency(soname, symbol_set)
 
     raise FileNotFoundError('Could not find system package manager')
@@ -89,11 +89,12 @@ def _mmpack_lib_deps(soname: str,
     raise FileNotFoundError('no installed mmpack package provides ' + soname)
 
 
-class BinaryPackage(object):
+class BinaryPackage:
     # pylint: disable=too-many-instance-attributes
     '''
     Binary package class
     '''
+
     def __init__(self, name: str, version: Version, source: str, arch: str,
                  tag: str):
         # pylint: disable=too-many-arguments
@@ -236,7 +237,7 @@ class BinaryPackage(object):
         return self._make_archive(stagedir, pkgbuilddir)
 
     def add_depend(self, name: str, minver: Version,
-                   maxver: Version=Version('any')):
+                   maxver: Version = Version('any')):
         '''
         Add mmpack package as a dependency with a minimal version
         '''
@@ -288,7 +289,7 @@ class BinaryPackage(object):
                     fmt_mod.symbols_list(inst_file, self.version))
                 self.provides[file_type].update(entry)
             else:
-                if file_type == 'pe' or file_type == 'python':
+                if file_type in {'pe', 'python'}:
                     dprint('[WARN] skipping file: ' + inst_file)
 
         if get_host_dist() == 'windows':

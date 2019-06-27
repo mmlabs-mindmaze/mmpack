@@ -23,7 +23,7 @@ def filetype(filename):
         # try to read file type first
         if magic[:4] == b'\x7fELF':
             return 'elf'
-        elif magic[:2] == b'MZ':
+        if magic[:2] == b'MZ':
             return 'pe'
 
     # return file extension otherwise
@@ -34,7 +34,7 @@ def filetype(filename):
 def get_linked_dll(import_lib):
     'Get dll filename associated with import_lib'
     strlist = shell(['strings', import_lib], log=False).lower().split()
-    dll_names = set([v for v in strlist if v.endswith('.dll')])
+    dll_names = {v for v in strlist if v.endswith('.dll')}
 
     # Check we have one and only dll
     if len(dll_names) != 1:
@@ -76,8 +76,7 @@ def is_manpage(filename: str) -> int:
     match = re.match(r'.*man\d?/.*(\d)', filename)
     if match:
         return int(match.groups(0)[0])
-    else:
-        return -1
+    return -1
 
 
 def is_exec_manpage(filename: str) -> bool:

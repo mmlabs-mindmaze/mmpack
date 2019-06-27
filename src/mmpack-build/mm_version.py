@@ -27,6 +27,7 @@ class Version(LooseVersion):  # pylint: disable=too-few-public-methods
     * adds "any" as version wildcard
 
     '''
+
     def __init__(self, string):
         if '_' in string:
             errmsg = '''Underscores ('_') are prohibited in version strings'''

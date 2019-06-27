@@ -22,6 +22,7 @@ def soname(filename: str) -> str:
 @singleton
 class SystemLibs(set):
     'cache of system libraries'
+
     def __init__(self):
         # pylint: disable=super-init-not-called
 

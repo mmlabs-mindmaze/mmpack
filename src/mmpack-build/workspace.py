@@ -29,8 +29,9 @@ def find_project_root_folder() -> str:
 
 
 @singleton
-class Workspace(object):
+class Workspace:
     'global mmpack workspace singleton class'
+
     def __init__(self):
         self.config = XDG_CONFIG_HOME + '/mmpack-config.yaml'
         self.sources = XDG_CACHE_HOME + '/mmpack/sources'
@@ -82,7 +83,7 @@ class Workspace(object):
         os.makedirs(builddir, exist_ok=True)
         return builddir
 
-    def srcclean(self, srcpkg: str=''):
+    def srcclean(self, srcpkg: str = ''):
         '''remove all copied sources
            if pkg is explicit, will only clean given package
         '''
@@ -91,7 +92,7 @@ class Workspace(object):
 
         shell('rm -rvf {0}/{1}*'.format(self.sources, srcpkg))
 
-    def clean(self, srcpkg: str='', tag: str=''):
+    def clean(self, srcpkg: str = '', tag: str = ''):
         '''remove all temporary build objects keep generated packages.
            if srcpkg is explicit, will only clean given package. If tag
            is further explicted, only tag specific subfolder of srcpkg is

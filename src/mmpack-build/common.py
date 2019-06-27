@@ -110,11 +110,11 @@ def shell(cmd, log=True):
         ret = run(cmd, stdout=PIPE, shell=run_shell)
         if ret.returncode == 0:
             return ret.stdout.decode('utf-8')
-        else:
-            errmsg = 'Command "{:.50s}{:s}" failed with error {:d}' \
-                     .format(logmsg, '...' if len(logmsg) > 50 else '',
-                             ret.returncode)
-            raise ShellException(errmsg)
+
+        errmsg = 'Command "{:.50s}{:s}" failed with error {:d}' \
+                 .format(logmsg, '...' if len(logmsg) > 50 else '',
+                         ret.returncode)
+        raise ShellException(errmsg)
     except FileNotFoundError:
         raise ShellException('failed to exec command')
 
@@ -152,7 +152,7 @@ def remove_duplicates(lst):
 
 
 def yaml_serialize(obj: Union[list, dict], filename: str,
-                   use_block_style: bool=False) -> None:
+                   use_block_style: bool = False) -> None:
     'Save object as yaml file of given name'
     default_flow_style = None
     if use_block_style:
@@ -186,7 +186,7 @@ def _set_representer(dumper, data):
 yaml.add_representer(set, _set_representer)
 
 
-def sha256sum(filename: str, follow_symlink: bool=True) -> str:
+def sha256sum(filename: str, follow_symlink: bool = True) -> str:
     ''' compute the SHA-256 hash of a file
 
     This returns the SHA256 string of filename. If follow_symlink is False,

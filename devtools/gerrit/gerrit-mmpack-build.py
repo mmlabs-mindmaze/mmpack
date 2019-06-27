@@ -82,7 +82,7 @@ def isdir(sftp_client, path):
         return False
 
 
-class SSH(object):
+class SSH:
     'helper class used to execute shell commands on ssh'
     # pylint: disable=too-many-arguments
     def __init__(self, name, hostname, username,
@@ -220,8 +220,8 @@ def shell(cmd):
     ret = run(cmd, stdout=PIPE, shell=True)
     if ret.returncode == 0:
         return ret.stdout.decode('utf-8')
-    else:
-        raise ShellException('failed to exec command')
+
+    raise ShellException('failed to exec command')
 
 
 def has_mmpack_specfile(srctar):
@@ -375,7 +375,7 @@ def main():
             # an error occurred, but NOT one involving package generation
             # just let slide, it may be caused by a hiccup in the
             # infrastructure.
-            logger.error('ignoring exception ' + str(err))
+            logger.error('ignoring exception {}'.format(str(err)))
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
