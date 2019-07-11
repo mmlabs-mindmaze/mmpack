@@ -104,6 +104,7 @@ class BinaryPackage:
         self.arch = arch
         self.tag = tag
         self.src_hash = None
+        self.pkg_path = None
 
         self.description = ''
         # * System dependencies are stored as opaque strings.
@@ -236,7 +237,8 @@ class BinaryPackage:
         self._gen_symbols(stagedir)
         self._gen_pyobjects(stagedir)
         self._gen_info(stagedir)
-        return self._make_archive(stagedir, pkgbuilddir)
+        self.pkg_path = self._make_archive(stagedir, pkgbuilddir)
+        return self.pkg_path
 
     def add_depend(self, name: str, minver: Version,
                    maxver: Version = Version('any')):

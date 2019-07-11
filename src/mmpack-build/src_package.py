@@ -589,6 +589,31 @@ class SrcPackage:
 
         popdir()
 
+    def _generate_manifest(self, src_file, src_hash) -> str:
+        'Generate the manifest and return its path'
+
+        # Generate the manifest data for binary packages
+        pkgs = dict()
+        for pkgname, binpkg in self._packages.items():
+            pkgs[pkgname] = {'file': os.path.basename(binpkg.pkg_path),
+                             'size': os.path.getsize(binpkg.pkg_path),
+                             'sha256': sha256sum(binpkg.pkg_path)}
+
+        # Generate the whole manifest data
+        arch = get_host_arch_dist()
+        data = {'name': self.name,
+                'version': self.version,
+                'binpkgs': {arch: pkgs},
+                'source': {'file': os.path.basename(src_file),
+                           'size': os.path.getsize(src_file),
+                           'sha256': src_hash}}
+
+        manifest_path = '{}_{}_{}.mmpack-manifest'.format(self.name,
+                                                          self.version,
+                                                          arch)
+        yaml_serialize(data, manifest_path, use_block_style=True)
+        return manifest_path
+
     def generate_binary_packages(self):
         'create all the binary packages'
         instdir = self._local_install_path(True)
@@ -614,6 +639,11 @@ class SrcPackage:
             pkgfile = binpkg.create(instdir, self.pkgbuild_path())
             shutil.copy(pkgfile, wrk.packages)
             iprint('generated package: {}'.format(pkgname))
+
+        manifest = self._generate_manifest(srctar, src_hash)
+        shutil.copy(manifest, wrk.packages)
+        iprint('generated manifest: {}'.format(os.path.basename(manifest)))
+
         popdir()  # local install path
 
     def __repr__(self):
