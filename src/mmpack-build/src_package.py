@@ -18,6 +18,7 @@ from workspace import Workspace, get_local_install_dir
 from binary_package import BinaryPackage
 from common import *
 from file_utils import *
+from python_utils import get_python3_pkgname, is_python3_pkgfile
 from mm_version import Version
 from settings import PKGDATADIR
 from mmpack_builddep import process_dependencies, general_specs_builddeps
@@ -286,6 +287,8 @@ class SrcPackage:
         # remove *.la and *.def files
         _ = self._get_matching_files(r'.*\.la$')
         _ = self._get_matching_files(r'.*\.def$')
+        _ = self._get_matching_files(r'.*/__pycache__/.*')
+        _ = self._get_matching_files(r'.*\.pyc$')
 
     def _parse_specfile_general(self) -> None:
         ''' Parses the mmpack/specs file's general section.
@@ -572,6 +575,9 @@ class SrcPackage:
                 pkg = self._binpkg_get_create(devel_pkg_name)
             elif is_debugsym(filename):
                 pkg = self._binpkg_get_create(debug_pkg_name)
+            elif is_python3_pkgfile(filename):
+                python3_pkg_name = get_python3_pkgname(filename)
+                pkg = self._binpkg_get_create(python3_pkg_name)
             else:
                 # skip this. It will be put in a default fallback
                 # package at the end of the ventilation process
