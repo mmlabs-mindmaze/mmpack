@@ -3,7 +3,6 @@
 Class to handle source packages, build them and generates binary packages.
 """
 
-import importlib
 import os
 import re
 import shutil
@@ -20,7 +19,7 @@ from workspace import Workspace, get_local_install_dir
 from binary_package import BinaryPackage
 from common import *
 from file_utils import *
-from python_utils import get_python3_pkgname, is_python3_pkgfile
+from hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from mm_version import Version
 from settings import PKGDATADIR
 from mmpack_builddep import process_dependencies, general_specs_builddeps
@@ -360,6 +359,8 @@ class SrcPackage:
         host_arch = get_host_arch_dist()
         sysdeps_key = 'sysdepends-' + get_host_dist()
 
+        init_mmpack_build_hooks(self.name, self.version, host_arch)
+
         # create skeleton for explicit packages
         for pkg in self._specs.keys():
             if pkg != 'general':
@@ -515,26 +516,12 @@ class SrcPackage:
         remaining files if one of them would trigger the creation of a new
         package.  Eg. a dynamic library will be given its own binary package
         """
-        ventilated = set()
-        arch = get_host_arch_dist()
-        libtype = get_exec_fileformat(arch)
-
-        for file in self.install_files_set:
-            if is_dynamic_library(file, arch):
-                format_module = importlib.import_module(libtype + '_utils')
-                soname = format_module.soname(file)
-                name, version = parse_soname(soname)
-                binpkgname = name + version  # libxxx.0.1.2 -> libxxx<ABI>
-                pkg = self._binpkg_get_create(binpkgname, 'library')
-                pkg.install_files.add(file)
-                ventilated.add(file)
-
-                # add the soname file to the same package
-                so_filename = os.path.dirname(file) + '/' + soname
-                pkg.install_files.add(so_filename)
-                ventilated.add(so_filename)
-
-        self.install_files_set.difference_update(ventilated)
+        for hook in MMPACK_BUILD_HOOKS:
+            pkgs = hook.get_dispatch(self.install_files_set)
+            for pkgname, files in pkgs.items():
+                pkg = self._binpkg_get_create(pkgname, 'library')
+                pkg.install_files.update(files)
+                self.install_files_set.difference_update(files)
 
     def _get_fallback_package(self, bin_pkg_name: str) -> BinaryPackage:
         """
@@ -602,9 +589,6 @@ class SrcPackage:
                 pkg = self._binpkg_get_create(devel_pkg_name)
             elif is_debugsym(filename):
                 pkg = self._binpkg_get_create(debug_pkg_name)
-            elif is_python3_pkgfile(filename):
-                python3_pkg_name = get_python3_pkgname(filename)
-                pkg = self._binpkg_get_create(python3_pkg_name)
             else:
                 # skip this. It will be put in a default fallback
                 # package at the end of the ventilation process

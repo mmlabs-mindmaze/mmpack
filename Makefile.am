@@ -45,19 +45,22 @@ EXTRA_DIST += \
 
 mmpackbuilddir = $(pkgdatadir)/python
 mmpackbuild_PYTHON =\
+	src/mmpack-build/base_hook.py \
 	src/mmpack-build/binary_package.py \
 	src/mmpack-build/common.py \
 	src/mmpack-build/dpkg.py \
 	src/mmpack-build/decorators.py \
 	src/mmpack-build/elf_utils.py \
 	src/mmpack-build/file_utils.py \
+	src/mmpack-build/hook_python.py \
+	src/mmpack-build/hook_sharedlib.py \
+	src/mmpack-build/hooks_loader.py \
 	src/mmpack-build/mmpack_builddep.py \
 	src/mmpack-build/mmpack_clean.py \
 	src/mmpack-build/mmpack_pkg_create.py \
 	src/mmpack-build/pacman.py \
 	src/mmpack-build/pe_utils.py \
 	src/mmpack-build/provide.py \
-	src/mmpack-build/python_utils.py \
 	src/mmpack-build/src_package.py \
 	src/mmpack-build/mm_version.py \
 	src/mmpack-build/workspace.py \
