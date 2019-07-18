@@ -49,22 +49,62 @@ def get_linked_dll(import_lib):
     return dll_names.pop()
 
 
-def is_dynamic_library(filename: str) -> str:
+def get_exec_fileformat(host_archdist: str) -> str:
     """
-    Return filetype if format conforms to a library
+    Get executable file format compatible with host ('pe' on windows,
+    elf' on linux...)
+
+    Args:
+        host_archdist: full host specification (like 'amd64-debian')
+
+    Returns:
+        the executable file format string ('pe' or 'elf')
+    """
+    if host_archdist.endswith('-windows'):
+        return 'pe'
+
+    return 'elf'
+
+
+def is_dynamic_library(filename: str, host_archdist: str) -> bool:
+    """
+    Test wether a filename is actually shared lib compatible with the host
+    architecture/distribution.
 
     eg. lib/libxxx.so.1.2.3
     - expects there is no leading './' in the pathname
     - is directly in the 'lib' directory
     - name starts with 'lib'
     - contains .so within name (maybe not at the end)
+
+    Args:
+        filename: path of file to test
+        host_archdist: full host specification (like 'amd64-debian')
+
+    Returns:
+        True if filename is a dynamic library
+
+    Raises:
+        NotImplementedError: unhandled executable file format
     """
     base = basename(filename)
-    if (not islink(filename)
-            and ((filename.startswith('lib/lib') and '.so' in base)
-                 or (filename.startswith('bin/') and base.endswith('.dll')))):
-        return filetype(filename)
-    return None
+    fmt = get_exec_fileformat(host_archdist)
+
+    # Check that filename and path match the installation folder and naming
+    # scheme of a public shared library of the host executable file format
+    if fmt == 'elf':
+        if not (filename.startswith('lib/lib') and '.so' in base):
+            return False
+    elif fmt == 'pe':
+        if not (filename.startswith('bin/') and base.endswith('.dll')):
+            return False
+    else:
+        raise NotImplementedError('Unhandled exec format: {}'.format(fmt))
+
+    if islink(filename):
+        return False
+
+    return filetype(filename) == fmt
 
 
 def is_manpage(filename: str) -> int:

@@ -14,8 +14,8 @@ from typing import List, Dict, Set
 
 from common import *
 from dpkg import dpkg_find_dependency
-from file_utils import filetype, is_dynamic_library, is_importlib, \
-         get_linked_dll
+from file_utils import filetype, is_dynamic_library, \
+    is_importlib, get_linked_dll, get_exec_fileformat
 from mm_version import Version
 from pacman import pacman_find_dependency
 from settings import DPKG_PREFIX, PACMAN_PREFIX
@@ -118,7 +118,7 @@ class BinaryPackage:
         #   dependency name, min and max version (inclusive)
         #   => format is a dict {depname: [min, max], ...}
         self._dependencies = {'sysdepends': set(), 'depends': {}}
-        self.provides = {'elf': {}, 'pe': {}, 'python': {}}
+        self.provides = {'sharedlib': {}, 'python': {}}
         self.install_files = set()
 
     def _get_specs_provides(self) -> Dict[str, Dict[str, Version]]:
@@ -133,7 +133,7 @@ class BinaryPackage:
         # TODO: also work with the last package published
         provide_spec_name = '{}/{}.provides'.format(self.spec_dir, self.name)
         dprint('reading symbols from ' + provide_spec_name)
-        specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
+        specs_provides = dict()
         try:
             specs_provides.update(yaml_load(provide_spec_name))
         except FileNotFoundError:
@@ -184,13 +184,8 @@ class BinaryPackage:
 
     def _gen_symbols(self, pkgdir: str):
         pushdir(pkgdir)
-        if self.provides['pe'] and self.provides['elf']:
-            raise AssertionError(self.name + 'cannot contain symbols for two '
-                                 'different architectures at the same time')
-        if self.provides['pe']:
-            yaml_serialize(self.provides['pe'], self._symbol_file())
-        elif self.provides['elf']:
-            yaml_serialize(self.provides['elf'], self._symbol_file())
+        if self.provides['sharedlib']:
+            yaml_serialize(self.provides['sharedlib'], self._symbol_file())
         popdir()
 
     def _gen_pyobjects(self, pkgdir: str):
@@ -286,30 +281,21 @@ class BinaryPackage:
         specs_provides = self._get_specs_provides()
 
         for inst_file in self.install_files:
-            file_type = is_dynamic_library(inst_file)
-            if file_type in ('elf', 'pe'):
-                fmt_mod = importlib.import_module(file_type + '_utils')
-                soname = fmt_mod.soname(inst_file)
-                entry = {soname: {'depends': self.name,
-                                  'symbols': {}}}
-                entry[soname]['symbols'].update(
-                    fmt_mod.symbols_list(inst_file, self.version))
-                self.provides[file_type].update(entry)
-            else:
-                if file_type in {'pe', 'python'}:
-                    dprint('[WARN] skipping file: ' + inst_file)
-
-        if get_host_dist() == 'windows':
-            # if windows, then pe
-            host_symbol_list = ('pe', 'python')
-        else:
-            # if not windows, then (linux) elf
-            host_symbol_list = ('elf', 'python')
-        for symbol_type in specs_provides:
-            if symbol_type not in host_symbol_list:
+            if not is_dynamic_library(inst_file, self.arch):
                 continue
 
-            for symbol, str_version in specs_provides[symbol_type].items():
+            file_type = get_exec_fileformat(self.arch)
+            fmt_mod = importlib.import_module(file_type + '_utils')
+            soname = fmt_mod.soname(inst_file)
+            entry = {soname: {'depends': self.name,
+                              'symbols': {}}}
+            entry[soname]['symbols'].update(
+                fmt_mod.symbols_list(inst_file, self.version))
+            self.provides['sharedlib'].update(entry)
+
+        for symbol_type in self.provides:
+            specs_symbols = specs_provides.get(symbol_type, dict())
+            for symbol, str_version in specs_symbols.items():
                 # type conversion will raise an error if malformed
                 name = self._provides_symbol(symbol_type, symbol)
                 if not name:
@@ -398,8 +384,8 @@ class BinaryPackage:
         """
         Go through the install files and search for dependencies.
         """
-        deps = {'elf': set(), 'pe': set(), 'python': set()}
-        symbols = {'elf': set(), 'pe': set(), 'python': set()}
+        deps = {'sharedlib': set(), 'python': set()}
+        symbols = {'sharedlib': set(), 'python': set()}
         for inst_file in self.install_files:
             if os.path.islink(inst_file):
                 target = os.path.join(os.path.dirname(inst_file),
@@ -414,17 +400,18 @@ class BinaryPackage:
             file_type = filetype(inst_file)
             if file_type in ('elf', 'pe'):
                 fmt_mod = importlib.import_module(file_type + '_utils')
-                symbols[file_type].update(fmt_mod.undefined_symbols(inst_file))
-                deps[file_type].update(fmt_mod.soname_deps(inst_file))
+                symbols['sharedlib'].update(
+                    fmt_mod.undefined_symbols(inst_file))
+                deps['sharedlib'].update(fmt_mod.soname_deps(inst_file))
 
-        for fileformat in ('elf', 'pe', 'python'):
+        for fileformat in ('sharedlib', 'python'):
             for dep in deps[fileformat]:
                 self._gen_lib_deps(dep, fileformat,
                                    symbols[fileformat], binpkgs)
                 if not symbols[fileformat]:
                     break
 
-        for fileformat in ('elf', 'pe', 'python'):
+        for fileformat in ('sharedlib', 'python'):
             if symbols[fileformat]:
                 errmsg = 'Failed to process all {0} of {1} symbols\n' \
                          .format(fileformat, self.name)

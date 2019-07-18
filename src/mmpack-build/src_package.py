@@ -516,9 +516,11 @@ class SrcPackage:
         package.  Eg. a dynamic library will be given its own binary package
         """
         ventilated = set()
+        arch = get_host_arch_dist()
+        libtype = get_exec_fileformat(arch)
+
         for file in self.install_files_set:
-            libtype = is_dynamic_library(file)
-            if libtype in ('elf', 'pe'):
+            if is_dynamic_library(file, arch):
                 format_module = importlib.import_module(libtype + '_utils')
                 soname = format_module.soname(file)
                 name, version = parse_soname(soname)
