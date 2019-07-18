@@ -182,6 +182,7 @@ class SrcPackage:
         self.build_depends = []
 
         self._specs = None  # raw dictionary version of the specfile
+        self._spec_dir = None  # path of specfile
         # dict of (name, BinaryPackage) generated from the source package
         self._packages = {}
         self.install_files_set = set()
@@ -236,6 +237,7 @@ class SrcPackage:
             specfile = self.unpack_path() + '/mmpack/specs'
         dprint('loading specfile: ' + specfile)
         self._specs = yaml_load(specfile)
+        self._spec_dir = os.path.dirname(specfile)
 
     def _get_matching_files(self, pcre: str) -> Set[str]:
         ''' given some pcre, return the set of matching files from
@@ -319,8 +321,8 @@ class SrcPackage:
         'Returns the newly create BinaryPackage if any'
         if binpkg_name not in self._packages:
             host_arch = get_host_arch_dist()
-            binpkg = BinaryPackage(binpkg_name, self.version,
-                                   self.name, host_arch, self.tag)
+            binpkg = BinaryPackage(binpkg_name, self.version, self.name,
+                                   host_arch, self.tag, self._spec_dir)
             self._format_description(binpkg, binpkg_name, pkg_type)
             self._packages[binpkg_name] = binpkg
             dprint('created package ' + binpkg_name)
@@ -341,7 +343,7 @@ class SrcPackage:
         for pkg in self._specs.keys():
             if pkg != 'general':
                 binpkg = BinaryPackage(pkg, self.version, self.name,
-                                       host_arch, self.tag)
+                                       host_arch, self.tag, self._spec_dir)
                 self._format_description(binpkg, pkg)
 
                 if 'depends' in self._specs[pkg]:

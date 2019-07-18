@@ -96,13 +96,14 @@ class BinaryPackage:
     '''
 
     def __init__(self, name: str, version: Version, source: str, arch: str,
-                 tag: str):
+                 tag: str, spec_dir: str):
         # pylint: disable=too-many-arguments
         self.name = name
         self.version = version
         self.source = source
         self.arch = arch
         self.tag = tag
+        self.spec_dir = spec_dir
         self.src_hash = None
         self.pkg_path = None
 
@@ -117,20 +118,16 @@ class BinaryPackage:
         self.provides = {'elf': {}, 'pe': {}, 'python': {}}
         self.install_files = set()
 
-    def _get_specs_provides(self,
-                            pkgname: str) -> Dict[str, Dict[str, Version]]:
+    def _get_specs_provides(self) -> Dict[str, Dict[str, Version]]:
         ''' return a dict containing the specified interface of given package
 
-        Look for a <pkgname>.provides file within the project's mmpack folder,
-        load it and return its parsed values as a dictionary.
+        Look for a <self.name>.provides file within the project's mmpack
+        folder, load it and return its parsed values as a dictionary.
 
         return an empty interface dict if none was specified.
         '''
         # TODO: also work with the last package published
-        wrk = Workspace()
-        provide_spec_name = '{0}/{1}-{2}/mmpack/{3}.provides' \
-                            .format(wrk.sources, self.source, self.tag,
-                                    pkgname)
+        provide_spec_name = '{}/{}.provides'.format(self.spec_dir, self.name)
         dprint('reading symbols from ' + provide_spec_name)
         specs_provides = {'elf': {}, 'pe': {}, 'python': {}}
         try:
@@ -280,7 +277,7 @@ class BinaryPackage:
             ValueError: if a specified version is invalid or if a symbol in
                         the spec file is not found provided by the package
         '''
-        specs_provides = self._get_specs_provides(self.name)
+        specs_provides = self._get_specs_provides()
 
         for inst_file in self.install_files:
             file_type = is_dynamic_library(inst_file)
