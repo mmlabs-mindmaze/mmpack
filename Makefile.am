@@ -68,6 +68,10 @@ mmpack_build_gerrit = \
 	devtools/gerrit/gerrit.py \
 	$(eol)
 
+mmpack_db_service = \
+	src/repository/mmpack-db.py \
+	$(eol)
+
 nodist_mmpackbuild_PYTHON =\
 	src/mmpack-build/settings.py \
 	$(eol)
@@ -77,7 +81,8 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 
 .PHONY: syntax
-syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) devtools/gerrit/gerrit-mmpack-build.py
+syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) $(mmpack_db_service) \
+		devtools/gerrit/gerrit-mmpack-build.py
 	$(srcdir)/devtools/check-pyfile $^
 
 
@@ -206,7 +211,8 @@ mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 
 user_doc_sources =
 .PHONY: spelling
-spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) $(mmpack_build_gerrit) $(user_doc_sources)
+spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) \
+		$(mmpack_build_gerrit) $(user_doc_sources) $(mmpack_db_service)
 	$(AM_V_at) codespell $^
 
 # dev debian-only helper function, not part of any target

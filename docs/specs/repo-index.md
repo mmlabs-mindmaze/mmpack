@@ -17,3 +17,9 @@ the following fields must be present:
 ## Index of source packages
 
 TODO
+
+## file/package database
+
+This file is a database updated each time one of the packages of the repository
+changes. It consists of a single, flat, YAML file called mmpack-file-db.yaml
+whose entries are files and values the package providing them.

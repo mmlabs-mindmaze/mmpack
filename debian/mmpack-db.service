@@ -1,0 +1,11 @@
+[Unit]
+Description=MMPACK repository database updater
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/mmpack-db.py
+User=mmpack-builder
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

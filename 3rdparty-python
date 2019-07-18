@@ -16,3 +16,7 @@ pefile
 [gerrit-mmpack-merge]
 # debian: python3-paramiko
 paramiko
+
+[mmpack-db]
+# debian: python3-watchdog
+watchdog
