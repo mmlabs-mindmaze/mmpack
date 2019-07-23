@@ -56,6 +56,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/mmpack_pkg_create.py \
 	src/mmpack-build/pacman.py \
 	src/mmpack-build/pe_utils.py \
+	src/mmpack-build/provide.py \
 	src/mmpack-build/python_utils.py \
 	src/mmpack-build/src_package.py \
 	src/mmpack-build/mm_version.py \

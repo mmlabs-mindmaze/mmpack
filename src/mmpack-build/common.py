@@ -318,6 +318,19 @@ def parse_soname(soname: str) -> (str, str):
     return (name, version)
 
 
+def shlib_keyname(soname: str) -> str:
+    """
+    Generate an identifier name from a soname that can be used across
+    platform.
+
+    example:
+        libfoo-5.dll => libfoo5
+        libfoo.so.5 => libfoo5
+    """
+    name, version = parse_soname(soname)
+    return name + version  # libxxx.0.1.2 -> libxxx<ABI>
+
+
 def yaml_load(filename: str):
     """
     helper: load yaml file with BasicLoader

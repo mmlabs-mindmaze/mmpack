@@ -18,6 +18,7 @@ from file_utils import filetype, is_dynamic_library, \
     is_importlib, get_linked_dll, get_exec_fileformat
 from mm_version import Version
 from pacman import pacman_find_dependency
+from provide import Provide, ProvideList
 from settings import DPKG_PREFIX, PACMAN_PREFIX
 from workspace import Workspace, get_staging_dir
 
@@ -118,7 +119,7 @@ class BinaryPackage:
         #   dependency name, min and max version (inclusive)
         #   => format is a dict {depname: [min, max], ...}
         self._dependencies = {'sysdepends': set(), 'depends': {}}
-        self.provides = {'sharedlib': {}, 'python': {}}
+        self.provides = {}
         self.install_files = set()
 
     def _get_specs_provides(self) -> Dict[str, Dict[str, Version]]:
@@ -183,16 +184,18 @@ class BinaryPackage:
         popdir()
 
     def _gen_symbols(self, pkgdir: str):
-        pushdir(pkgdir)
-        if self.provides['sharedlib']:
-            yaml_serialize(self.provides['sharedlib'], self._symbol_file())
-        popdir()
+        provides = self.provides.get('sharedlib')
+        if provides:
+            pushdir(pkgdir)
+            provides.serialize(self._symbol_file())
+            popdir()
 
     def _gen_pyobjects(self, pkgdir: str):
-        pushdir(pkgdir)
-        if self.provides['python']:
-            yaml_serialize(self.provides['python'], self._pyobjects_file())
-        popdir()
+        provides = self.provides.get('python')
+        if provides:
+            pushdir(pkgdir)
+            provides.serialize(self._pyobjects_file())
+            popdir()
 
     def _populate(self, instdir: str, pkgdir: str):
         for instfile in self.install_files:
@@ -257,12 +260,6 @@ class BinaryPackage:
         """
         self._dependencies['sysdepends'].add(opaque_dep)
 
-    def _provides_symbol(self, symbol_type: str, symbol: str) -> str:
-        for name, entry in self.provides[symbol_type].items():
-            if symbol in entry['symbols'].keys():
-                return name
-        return None
-
     def gen_provides(self):
         """
         Go through the install files, look for what this package provides
@@ -280,37 +277,33 @@ class BinaryPackage:
         """
         specs_provides = self._get_specs_provides()
 
+        shlib_provides = ProvideList('sharedlib')
         for inst_file in self.install_files:
             if not is_dynamic_library(inst_file, self.arch):
                 continue
 
+            # load python module to use for handling the executable file
+            # format of the targeted host
             file_type = get_exec_fileformat(self.arch)
             fmt_mod = importlib.import_module(file_type + '_utils')
+
+            # Get SONAME of the library, its exported symbols and compute
+            # the package dependency to use from the SONAME
             soname = fmt_mod.soname(inst_file)
-            entry = {soname: {'depends': self.name,
-                              'symbols': {}}}
-            entry[soname]['symbols'].update(
-                dict.fromkeys(fmt_mod.symbols_set(inst_file), self.version))
-            self.provides['sharedlib'].update(entry)
+            symbols = fmt_mod.symbols_set(inst_file)
+            name = shlib_keyname(soname)
 
-        for symbol_type in self.provides:
-            specs_symbols = specs_provides.get(symbol_type, dict())
-            for symbol, str_version in specs_symbols.items():
-                # type conversion will raise an error if malformed
-                name = self._provides_symbol(symbol_type, symbol)
-                if not name:
-                    raise ValueError('Specified {0} symbol {1} not found '
-                                     'in package files'
-                                     .format(symbol_type, symbol))
+            # store information about exported soname, symbols and package
+            # to use in the provide list
+            provide = Provide(name, soname)
+            provide.pkgdepends = self.name
+            provide.add_symbols(symbols, self.version)
+            shlib_provides.add(provide)
 
-                version = Version(str_version)
-                if version <= self.version:
-                    entry = self.provides[symbol_type][name]
-                    entry['symbols'][symbol] = version
-                else:  # version > self.version:
-                    raise ValueError('Specified version of symbol {0} ({1})'
-                                     'is greater than current version ({2})'
-                                     .format(symbol, version, self.version))
+        # update symbol information from .provides file if any
+        shlib_provides.update_from_specs(specs_provides, self.name)
+
+        self.provides['sharedlib'] = shlib_provides
 
     def _gen_lib_deps(self, soname: str, fileformat: str,
                       symbol_set: Set[str], binpkgs: List['BinaryPackages']):
@@ -325,20 +318,11 @@ class BinaryPackage:
         """
         # provided in the same package or a package being generated
         for pkg in binpkgs:
-            if soname in pkg.provides[fileformat]:
-                for sym in pkg.provides[fileformat][soname]['symbols']:
-                    symbol_set.discard(sym)
+            provide = pkg.provides[fileformat].get(soname)
+            if provide:
+                symbol_set.difference_update(provide.symbols.keys())
                 if pkg.name != self.name:
                     self.add_depend(pkg.name, pkg.version, pkg.version)
-                return
-
-        # provided by one of the packages being generated at the same time
-        for pkg in binpkgs:
-            if soname in pkg.provides[fileformat]:
-                self.add_depend(pkg.name, self.version, self.version)
-
-                for sym in pkg.provides[fileformat][soname]:
-                    symbol_set.discard(sym)
                 return
 
         # provided by another mmpack package present in the prefix
