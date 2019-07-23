@@ -32,7 +32,6 @@ def _get_python3_pkgname(filename: str) -> str:
 
 
 class MMPackBuildHook(BaseHook):
-    # pylint: disable=too-few-public-methods
     """
     Hook tracking python module used and exposed
     """

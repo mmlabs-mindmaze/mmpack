@@ -7,14 +7,14 @@ import importlib
 from os.path import dirname
 from typing import Set, Dict
 
-from base_hook import BaseHook
+from base_hook import BaseHook, PackageInfo
 from common import shlib_keyname
 from file_utils import is_dynamic_library, get_exec_fileformat
 from mm_version import Version
+from provide import Provide, ProvideList
 
 
 class MMPackBuildHook(BaseHook):
-    # pylint: disable=too-few-public-methods
     """
     Hook tracking symbol exposed in installed shared library and keep track
     of the library library used in binaries.
@@ -41,3 +41,28 @@ class MMPackBuildHook(BaseHook):
                 pkgs[binpkgname] = {file, so_filename}
 
         return pkgs
+
+    def update_provides(self, pkg: PackageInfo,
+                        specs_provides: Dict[str, Dict]):
+        shlib_provides = ProvideList('sharedlib')
+        for inst_file in pkg.files:
+            if not is_dynamic_library(inst_file, self._arch):
+                continue
+
+            # Get SONAME of the library, its exported symbols and compute
+            # the package dependency to use from the SONAME
+            soname = self._module.soname(inst_file)
+            symbols = self._module.symbols_set(inst_file)
+            name = shlib_keyname(soname)
+
+            # store information about exported soname, symbols and package
+            # to use in the provide list
+            provide = Provide(name, soname)
+            provide.pkgdepends = pkg.name
+            provide.add_symbols(symbols, self._version)
+            shlib_provides.add(provide)
+
+        # update symbol information from .provides file if any
+        shlib_provides.update_from_specs(specs_provides, pkg.name)
+
+        pkg.provides['sharedlib'] = shlib_provides

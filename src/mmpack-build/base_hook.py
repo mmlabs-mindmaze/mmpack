@@ -8,8 +8,19 @@ from typing import Set, Dict
 from mm_version import Version
 
 
-class BaseHook:
+class PackageInfo:
     # pylint: disable=too-few-public-methods
+    """
+    container to share package data with hooks
+    """
+
+    def __init__(self, name: str):
+        self.name = name
+        self.files = set()
+        self.provides = dict()
+
+
+class BaseHook:
     """
     Base class of mmpack-build hook
     """
@@ -36,3 +47,12 @@ class BaseHook:
         """
         # pylint: disable=unused-argument, no-self-use
         return dict()
+
+    def update_provides(self, pkg: PackageInfo,
+                        specs_provides: Dict[str, Dict]):
+        """
+        Look in files assigned to a binary package and update the list of
+        symbols/library exported (provided) by the package in pkg.
+        """
+        # pylint: disable=unused-argument, no-self-use
+        return None

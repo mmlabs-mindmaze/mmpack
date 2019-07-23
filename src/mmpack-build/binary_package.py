@@ -12,13 +12,14 @@ from glob import glob
 from os.path import isfile, basename
 from typing import List, Dict, Set
 
+from base_hook import PackageInfo
 from common import *
 from dpkg import dpkg_find_dependency
-from file_utils import filetype, is_dynamic_library, \
-    is_importlib, get_linked_dll, get_exec_fileformat
+from file_utils import filetype, is_importlib, get_linked_dll
+from hooks_loader import MMPACK_BUILD_HOOKS
 from mm_version import Version
 from pacman import pacman_find_dependency
-from provide import Provide, ProvideList, load_mmpack_provides
+from provide import load_mmpack_provides
 from settings import DPKG_PREFIX, PACMAN_PREFIX
 from workspace import Workspace, get_staging_dir
 
@@ -229,6 +230,13 @@ class BinaryPackage:
         """
         self._dependencies['sysdepends'].add(opaque_dep)
 
+    def get_pkginfo(self) -> PackageInfo:
+        'Create PackageInfo instance out of binary package'
+        pkginfo = PackageInfo(self.name)
+        pkginfo.files = self.install_files
+        pkginfo.provides = self.provides
+        return pkginfo
+
     def gen_provides(self):
         """
         Go through the install files, look for what this package provides
@@ -245,34 +253,9 @@ class BinaryPackage:
                         the spec file is not found provided by the package
         """
         specs_provides = self._get_specs_provides()
-
-        shlib_provides = ProvideList('sharedlib')
-        for inst_file in self.install_files:
-            if not is_dynamic_library(inst_file, self.arch):
-                continue
-
-            # load python module to use for handling the executable file
-            # format of the targeted host
-            file_type = get_exec_fileformat(self.arch)
-            fmt_mod = importlib.import_module(file_type + '_utils')
-
-            # Get SONAME of the library, its exported symbols and compute
-            # the package dependency to use from the SONAME
-            soname = fmt_mod.soname(inst_file)
-            symbols = fmt_mod.symbols_set(inst_file)
-            name = shlib_keyname(soname)
-
-            # store information about exported soname, symbols and package
-            # to use in the provide list
-            provide = Provide(name, soname)
-            provide.pkgdepends = self.name
-            provide.add_symbols(symbols, self.version)
-            shlib_provides.add(provide)
-
-        # update symbol information from .provides file if any
-        shlib_provides.update_from_specs(specs_provides, self.name)
-
-        self.provides['sharedlib'] = shlib_provides
+        pkginfo = self.get_pkginfo()
+        for hook in MMPACK_BUILD_HOOKS:
+            hook.update_provides(pkginfo, specs_provides)
 
     def _gen_shlib_deps(self, sonames: Set[str],
                         symbol_set: Set[str], binpkgs: List['BinaryPackages']):
