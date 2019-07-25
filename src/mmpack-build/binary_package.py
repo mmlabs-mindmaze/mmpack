@@ -18,9 +18,12 @@ from file_utils import filetype, is_dynamic_library, \
     is_importlib, get_linked_dll, get_exec_fileformat
 from mm_version import Version
 from pacman import pacman_find_dependency
-from provide import Provide, ProvideList
+from provide import Provide, ProvideList, load_mmpack_provides
 from settings import DPKG_PREFIX, PACMAN_PREFIX
 from workspace import Workspace, get_staging_dir
+
+
+_MMPACK_SHLIB_PROVIDES = load_mmpack_provides('symbols')
 
 
 def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
@@ -53,44 +56,6 @@ def _sysdep_find_dependency(soname: str, symbol_set: Set[str]) -> str:
         return pacman_find_dependency(soname, symbol_set)
 
     raise FileNotFoundError('Could not find system package manager')
-
-
-def _mmpack_lib_minversion(metadata: Dict[str, Dict[str, Version]],
-                           symbols: Set[str]) -> Version:
-    min_version = None
-    for sym in list(symbols):  # iterate over a shallow copy of the list
-        if sym in metadata['symbols']:
-            metadata_version = Version(metadata['symbols'][sym])
-            if min_version:
-                min_version = max(min_version, metadata_version)
-            else:
-                min_version = metadata_version
-            symbols.remove(sym)  # remove symbol from the list
-
-    return min_version
-
-
-def _mmpack_lib_deps(soname: str,
-                     symbols: Set[str]) -> (str, Version, Version):
-    wrk = Workspace()
-    symbols_path = wrk.prefix + '/var/lib/mmpack/metadata/'
-
-    # Start list by symbol file based on a guess of package name that might
-    # provide soname and add all other symbol file that can be found
-    libname, soversion = parse_soname(soname)
-    symfiles = {symbols_path + libname + soversion + '.symbols'}
-    symfiles.update(set(glob(symbols_path + '**.symbols')))
-
-    for symfile in symfiles:
-        try:
-            metadata = yaml_load(symfile)
-        except FileNotFoundError:
-            continue
-        if soname in metadata:
-            version = _mmpack_lib_minversion(metadata[soname], symbols)
-            return (metadata[soname]['depends'], version, Version('any'))
-
-    raise FileNotFoundError('no installed mmpack package provides ' + soname)
 
 
 class BinaryPackage:
@@ -245,6 +210,10 @@ class BinaryPackage:
         """
         Add mmpack package as a dependency with a minimal version
         """
+        # Drop dependencies to self
+        if name == self.name:
+            return
+
         dependencies = self._dependencies['depends']
         if name not in dependencies:
             dependencies[name] = [minver, maxver]
@@ -305,45 +274,41 @@ class BinaryPackage:
 
         self.provides['sharedlib'] = shlib_provides
 
-    def _gen_lib_deps(self, soname: str, fileformat: str,
-                      symbol_set: Set[str], binpkgs: List['BinaryPackages']):
+    def _gen_shlib_deps(self, sonames: Set[str],
+                        symbol_set: Set[str], binpkgs: List['BinaryPackages']):
         """
-        Generate the library dependencies given a library used
+        Add the shared library dependencies to the binary package given a
+        library used
 
         Args:
-            soname: soname of library used
-            fileformat: executable file format of the library used
+            sonames: set of soname of libraries used
             symbol_set: set of used symbols that are still unassociated
             binpkgs: the list of packages currently being generated
+
+        Raises:
+            AssertionError: a used soname is not provided by any mmpack or
+                system package.
         """
         # provided in the same package or a package being generated
         for pkg in binpkgs:
-            provide = pkg.provides[fileformat].get(soname)
-            if provide:
-                symbol_set.difference_update(provide.symbols.keys())
-                if pkg.name != self.name:
-                    self.add_depend(pkg.name, pkg.version, pkg.version)
-                return
+            dep_list = pkg.provides['sharedlib'].gen_deps(sonames, symbol_set)
+            for pkgname, _ in dep_list:
+                self.add_depend(pkgname, pkg.version, pkg.version)
 
         # provided by another mmpack package present in the prefix
-        try:
-            mmpack_dep, minv, maxv = _mmpack_lib_deps(soname, symbol_set)
-            self.add_depend(mmpack_dep, minv, maxv)
-            return
-
-        # FileNotFoundError: invalid guessed symbol file name
-        # KeyError: file does not contain soname
-        except (FileNotFoundError, KeyError):
-            pass
+        dep_list = _MMPACK_SHLIB_PROVIDES.gen_deps(sonames, symbol_set)
+        for pkgname, version in dep_list:
+            self.add_depend(pkgname, version)
 
         # provided by the host system
-        sysdep = _sysdep_find_dependency(soname, symbol_set)
-        if not sysdep:
-            # <soname> dependency could not be met with any available means
-            errmsg = 'Could not find package providing ' + soname
-            raise AssertionError(errmsg)
+        for soname in sonames:
+            sysdep = _sysdep_find_dependency(soname, symbol_set)
+            if not sysdep:
+                # <soname> dependency could not be met with any available means
+                errmsg = 'Could not find package providing ' + soname
+                raise AssertionError(errmsg)
 
-        self.add_sysdepend(sysdep)
+            self.add_sysdepend(sysdep)
 
     def _find_link_deps(self, target: str, binpkgs: List['BinaryPackages']):
         for pkg in binpkgs:
@@ -388,14 +353,9 @@ class BinaryPackage:
                     fmt_mod.undefined_symbols(inst_file))
                 deps['sharedlib'].update(fmt_mod.soname_deps(inst_file))
 
-        for fileformat in ('sharedlib', 'python'):
-            for dep in deps[fileformat]:
-                self._gen_lib_deps(dep, fileformat,
-                                   symbols[fileformat], binpkgs)
-                if not symbols[fileformat]:
-                    break
+        self._gen_shlib_deps(deps['sharedlib'], symbols['sharedlib'], binpkgs)
 
-        for fileformat in ('sharedlib', 'python'):
+        for fileformat in deps:
             if symbols[fileformat]:
                 errmsg = 'Failed to process all {0} of {1} symbols\n' \
                          .format(fileformat, self.name)

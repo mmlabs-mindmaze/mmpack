@@ -3,10 +3,12 @@
 common classes to specify provided symbols to other packages
 """
 
-from typing import Dict, Set
+from glob import glob
+from typing import Set, Dict, Tuple, List
 
-from common import yaml_serialize
+from common import yaml_serialize, yaml_load
 from mm_version import Version
+from workspace import Workspace
 
 
 class Provide:
@@ -110,6 +112,18 @@ class ProvideList:
 
         yaml_serialize(data, filename)
 
+    def add_from_file(self, filename) -> None:
+        """
+        Load provides by reading a file and add them to current
+        """
+        metadata = yaml_load(filename)
+        for name, sodata in metadata.items():
+            provide = Provide(name)
+            provide.pkgdepends = sodata['depends']
+            provide.symbols = {sym: Version(version)
+                               for sym, version in sodata['symbols'].items()}
+            self.add(provide)
+
     def update_from_specs(self, pkg_spec_provide: Dict, pkgname: str) -> None:
         """
         Update the ProvideList symbols dictionary based on content of
@@ -154,3 +168,84 @@ class ProvideList:
 
         for provide in self._provides.values():
             provide.update_from_specs(specs.get(provide.name, dict()))
+
+    def _get_dep_minversion(self, soname: str,
+                            symbols: Set[str]) -> Tuple[str, Version]:
+        """
+        Compute the package dependency given a soname and set of symbols.
+        If the soname is provided by the ProvideList, the symbols exported
+        by will be removed from the symbols set given on argument.
+        Moreover, this will determine the minimal version to be used given
+        the associated used symbol.
+
+        Args:
+            soname: soname that must be search in ProvideList
+            symbols: set of used symbols to update if soname is found
+
+        Returns:
+            If soname is found, a tuple containing package name and the minimal
+            version to use, (None, None) otherwise.
+        """
+        provide = self._provides.get(soname)
+        if not provide:
+            return (None, None)
+
+        min_version = None
+        for sym in list(symbols):  # iterate over a shallow copy of the list
+            if sym in provide.symbols:
+                metadata_version = provide.symbols[sym]
+                if min_version:
+                    min_version = max(min_version, metadata_version)
+                else:
+                    min_version = metadata_version
+                symbols.remove(sym)  # remove symbol from the list
+
+        return (provide.pkgdepends, min_version)
+
+    def gen_deps(self, sonames: Set[str],
+                 symbols: Set[str]) -> List[Tuple[str, Version]]:
+        """
+        For each soname used try to find the dependency to use in the
+        provide list. For each found, the soname and its associated symbols
+        are discarded from the soanames and symbols set given in input
+
+        Args:
+            sonames: list of sonanme that must be searched in ProvideList
+            symbols: set of used symbols to update if any soname is found
+
+        Returns:
+            list of tuple of package and min version to be added to the
+            dependencies.
+        """
+        dep_list = []
+        for soname in list(sonames):
+            pkg, version = self._get_dep_minversion(soname, symbols)
+            if pkg:
+                dep_list.append((pkg, version))
+                sonames.remove(soname)
+
+        return dep_list
+
+
+def load_mmpack_provides(extension: str, symtype: str = None) -> ProvideList:
+    """
+    Load all the provides of one type from all installed packages in prefix
+
+    Args:
+        extension: extension of the files that contains the data regarding
+            provided symbols of the matching type for each mmpack packages
+        symtype: symbol type whose provided symbols data must be loaded
+
+    Returns:
+        ProvideList representing the database of all exported symbols by all
+        installed mmpack packages matching symtype
+    """
+    wrk = Workspace()
+    symfiles = glob('{}/var/lib/mmpack/metadata/**.{}'
+                    .format(wrk.prefix, extension))
+
+    provides = ProvideList(symtype)
+    for symfile in symfiles:
+        provides.add_from_file(symfile)
+
+    return provides
