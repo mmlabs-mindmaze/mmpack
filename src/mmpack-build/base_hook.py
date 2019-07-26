@@ -9,7 +9,6 @@ from mm_version import Version
 
 
 class PackageInfo:
-    # pylint: disable=too-few-public-methods
     """
     container to share package data with hooks
     """
@@ -18,6 +17,23 @@ class PackageInfo:
         self.name = name
         self.files = set()
         self.provides = dict()
+        self.deplist = []  # List of triplet of (dep_name, min_ver, max_ver)
+        self.sysdeps = set()
+
+    def add_to_deplist(self, pkgname: str,
+                       minver: Version = Version('any'),
+                       maxver: Version = Version('any')):
+        """
+        add a mmpack dependency optionally with a minimal and maximal
+        version
+        """
+        self.deplist.append((pkgname, minver, maxver))
+
+    def add_sysdep(self, sysdep: str):
+        """
+        add a system dependency
+        """
+        self.sysdeps.add(sysdep)
 
 
 class BaseHook:
