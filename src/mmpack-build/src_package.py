@@ -487,6 +487,8 @@ class SrcPackage:
         popdir()  # unpack directory
 
         pushdir(self._local_install_path(True))
+        for hook in MMPACK_BUILD_HOOKS:
+            hook.post_local_install()
         self.install_files_set = set(glob('**', recursive=True))
         self._strip_dirs_from_install_files()
         popdir()

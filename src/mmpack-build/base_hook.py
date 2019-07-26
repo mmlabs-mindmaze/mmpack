@@ -55,6 +55,20 @@ class BaseHook:
         self._version = version
         self._arch = host_archdist
 
+    def post_local_install(self):
+        """
+        Immediately called after a project has been compiled and installed
+        locally and before installed files are listed and dispatched in any
+        binary package.  It can be used by hook implementation for example
+        to rename/move installed files to ensure certain standard behavior
+        are applied.
+
+        When the hook method is called the current directory is the one
+        where the files have been locally installed (install prefix)
+        """
+        # pylint: disable=no-self-use
+        return
+
     def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
         """
         Called after a project has been compiled and installed locally.
