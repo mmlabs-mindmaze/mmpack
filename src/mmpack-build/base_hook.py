@@ -3,7 +3,7 @@
 template to create mmpack-build hook
 """
 
-from typing import Set, Dict
+from typing import Set, Dict, List
 
 from mm_version import Version
 
@@ -76,6 +76,18 @@ class BaseHook:
     def store_provides(self, pkg: PackageInfo, folder: str):
         """
         store provides data managed by hook
+        """
+        # pylint: disable=unused-argument, no-self-use
+        return None
+
+    def update_depends(self, pkg: PackageInfo, other_pkgs: List[PackageInfo]):
+        """
+        Look in files assigned to a binary package update the list of
+        mmpack and system dependencies of the package in the fields of pkg.
+        This hook method is called after the method update_provides() is
+        called with all binary package cobuilded by the same projects.  In
+        other words, the "provides" field in other_pkgs is complete when
+        this method is called.
         """
         # pylint: disable=unused-argument, no-self-use
         return None

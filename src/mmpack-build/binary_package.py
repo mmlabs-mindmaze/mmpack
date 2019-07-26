@@ -4,28 +4,18 @@ Class to handle binary packages, their dependencies, symbol interface, and
 packaging as mmpack file.
 """
 
-import importlib
 import os
 import tarfile
 
 from glob import glob
-from typing import List, Dict, Set
 from os.path import isfile
+from typing import List, Dict
 
 from base_hook import PackageInfo
 from common import *
-from dpkg import dpkg_find_dependency
-from file_utils import filetype, is_importlib, get_linked_dll, \
-    get_exec_fileformat
 from hooks_loader import MMPACK_BUILD_HOOKS
 from mm_version import Version
-from pacman import pacman_find_dependency
-from provide import load_mmpack_provides
-from settings import DPKG_PREFIX, PACMAN_PREFIX
-from workspace import Workspace, get_staging_dir
-
-
-_MMPACK_SHLIB_PROVIDES = load_mmpack_provides('symbols')
+from workspace import get_staging_dir
 
 
 def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
@@ -48,32 +38,6 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
         tarinfo.mode = 0o755
 
     return tarinfo
-
-
-def _sysdep_find_dependency(soname: str, symbol_set: Set[str]) -> str:
-    wrk = Workspace()
-    if os.path.exists(DPKG_PREFIX):
-        return dpkg_find_dependency(soname, symbol_set)
-    if os.path.exists(wrk.cygroot() + PACMAN_PREFIX):
-        return pacman_find_dependency(soname, symbol_set)
-
-    raise FileNotFoundError('Could not find system package manager')
-
-
-def _add_dll_dep_to_pkginfo(currpkg: PackageInfo, import_lib: str,
-                            other_pkgs: List[PackageInfo]) -> None:
-    """
-    Adds to dependencies the package that hosts the dll associated with
-    import library.
-    """
-    dll = get_linked_dll(import_lib)
-    for pkg in other_pkgs:
-        pkg_dlls = [os.path.basename(f).lower() for f in pkg.files
-                    if f.endswith(('.dll', '.DLL'))]
-        if dll in pkg_dlls:
-            if pkg.name != currpkg.name:
-                currpkg.add_to_deplist(pkg.name, pkg.version, pkg.version)
-            return
 
 
 class BinaryPackage:
@@ -263,91 +227,10 @@ class BinaryPackage:
         for hook in MMPACK_BUILD_HOOKS:
             hook.update_provides(pkginfo, specs_provides)
 
-    def _gen_shlib_deps(self, currpkg: PackageInfo,
-                        sonames: Set[str], symbol_set: Set[str],
-                        others_pkgs: List[PackageInfo]):
-        """
-        For each element in `sonames` determine the mmpack or system
-        dependency that provides it and adds it to those of `currpkg`.
-        When an soname is found, its associated symbols are discarded from
-        `symbol_set`.
-
-        Args:
-            currpkg: package whose dependencies are computed (and added)
-            sonames: set of sonames used in `currpkg`
-            symbol_set: set of symbols used in `currpkg`
-            others_pkgs: list of packages cobuilded (may include `currpkg`)
-
-        Raises:
-            AssertionError: a used soname is not provided by any mmpack or
-                system package.
-        """
-        # provided in the same package or a package being generated
-        for pkg in others_pkgs:
-            dep_list = pkg.provides['sharedlib'].gen_deps(sonames, symbol_set)
-            for pkgname, _ in dep_list:
-                currpkg.add_to_deplist(pkgname, self.version, self.version)
-
-        # provided by another mmpack package present in the prefix
-        dep_list = _MMPACK_SHLIB_PROVIDES.gen_deps(sonames, symbol_set)
-        for pkgname, version in dep_list:
-            currpkg.add_to_deplist(pkgname, version)
-
-        # provided by the host system
-        for soname in sonames:
-            sysdep = _sysdep_find_dependency(soname, symbol_set)
-            if not sysdep:
-                # <soname> dependency could not be met with any available means
-                errmsg = 'Could not find package providing ' + soname
-                raise AssertionError(errmsg)
-
-            currpkg.add_sysdep(sysdep)
-
     def _find_link_deps(self, target: str, binpkgs: List['BinaryPackages']):
         for pkg in binpkgs:
             if target in pkg.install_files and pkg.name != self.name:
                 self.add_depend(pkg.name, pkg.version, pkg.version)
-
-    def _update_shlib_deps(self, pkg: PackageInfo,
-                           other_pkgs: List[PackageInfo]):
-        """
-        Look in files assigned to a binary package update the list of
-        mmpack and system dependencies of the package in the fields of pkg.
-        """
-        # Determine the right executable file format to process
-        execfmt = get_exec_fileformat(self.arch)
-        fmt_mod = importlib.import_module(execfmt + '_utils')
-
-        deps = set()
-        symbols = set()
-
-        for inst_file in pkg.files:
-            if is_importlib(inst_file):
-                _add_dll_dep_to_pkginfo(pkg, inst_file, other_pkgs)
-                continue
-
-            # populate the set of sonames of shared libraries used by the
-            # file and the set of used symbols external to the file. This
-            # will be use to determine the dependencies
-            file_type = filetype(inst_file)
-            if file_type == execfmt:
-                symbols.update(fmt_mod.undefined_symbols(inst_file))
-                deps.update(fmt_mod.soname_deps(inst_file))
-
-        # Given the set of sonames and used symbols by all file in the
-        # package, determine the actual package dependencies, ie find which
-        # package provides the used shared libraries and symbols. The
-        # symbols set helps to determine the minimal version to use for
-        # each dependency found. Once a shared lib package dependency is
-        # found, associated symbols are discarded from symbols set.
-        self._gen_shlib_deps(pkg, deps, symbols, other_pkgs)
-
-        if symbols:
-            errmsg = 'Failed to process all sharedlib symbols of {}\n' \
-                     .format(pkg.name)
-            errmsg += 'Remaining symbols:\n\t'
-            errmsg += '\n\t'.join(symbols)
-            raise AssertionError(errmsg)
 
     def gen_dependencies(self, binpkgs: List['BinaryPackages']):
         """
@@ -360,10 +243,11 @@ class BinaryPackage:
                 self._find_link_deps(target, binpkgs)
                 continue
 
-        # Gather mmpack and system sharedlibs dependencies info in currpkg
+        # Gather mmpack and system dependencies by executing each hook
         other_pkgs = [pkg.get_pkginfo() for pkg in binpkgs]
         currpkg = self.get_pkginfo()
-        self._update_shlib_deps(currpkg, other_pkgs)
+        for hook in MMPACK_BUILD_HOOKS:
+            hook.update_depends(currpkg, other_pkgs)
 
         for dep, minver, maxver in currpkg.deplist:
             self.add_depend(dep, minver, maxver)
