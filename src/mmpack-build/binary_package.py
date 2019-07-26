@@ -109,14 +109,6 @@ class BinaryPackage:
 
         return specs_provides
 
-    def _symbol_file(self) -> str:
-        os.makedirs('var/lib/mmpack/metadata/', exist_ok=True)
-        return 'var/lib/mmpack/metadata/{}.symbols'.format(self.name)
-
-    def _pyobjects_file(self) -> str:
-        os.makedirs('var/lib/mmpack/metadata/', exist_ok=True)
-        return 'var/lib/mmpack/metadata/{}.pyobjects'.format(self.name)
-
     def _sha256sums_file(self) -> str:
         os.makedirs('var/lib/mmpack/metadata/', exist_ok=True)
         return 'var/lib/mmpack/metadata/{}.sha256sums'.format(self.name)
@@ -149,19 +141,17 @@ class BinaryPackage:
         yaml_serialize({self.name: info}, 'MMPACK/info')
         popdir()
 
-    def _gen_symbols(self, pkgdir: str):
-        provides = self.provides.get('sharedlib')
-        if provides:
-            pushdir(pkgdir)
-            provides.serialize(self._symbol_file())
-            popdir()
+    def _store_provides(self, pkgdir: str):
+        pushdir(pkgdir)
 
-    def _gen_pyobjects(self, pkgdir: str):
-        provides = self.provides.get('python')
-        if provides:
-            pushdir(pkgdir)
-            provides.serialize(self._pyobjects_file())
-            popdir()
+        metadata_folder = 'var/lib/mmpack/metadata/'
+        os.makedirs(metadata_folder, exist_ok=True)
+
+        pkginfo = self.get_pkginfo()
+        for hook in MMPACK_BUILD_HOOKS:
+            hook.store_provides(pkginfo, metadata_folder)
+
+        popdir()
 
     def _populate(self, instdir: str, pkgdir: str):
         for instfile in self.install_files:
@@ -200,8 +190,7 @@ class BinaryPackage:
 
         dprint('link {0} in {1}'.format(self.name, stagedir))
         self._populate(instdir, stagedir)
-        self._gen_symbols(stagedir)
-        self._gen_pyobjects(stagedir)
+        self._store_provides(stagedir)
         self._gen_info(stagedir)
         self.pkg_path = self._make_archive(stagedir, pkgbuilddir)
         return self.pkg_path

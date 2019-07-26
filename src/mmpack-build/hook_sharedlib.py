@@ -66,3 +66,7 @@ class MMPackBuildHook(BaseHook):
         shlib_provides.update_from_specs(specs_provides, pkg.name)
 
         pkg.provides['sharedlib'] = shlib_provides
+
+    def store_provides(self, pkg: PackageInfo, folder: str):
+        filename = '{}/{}.symbols'.format(folder, pkg.name)
+        pkg.provides['sharedlib'].serialize(filename)

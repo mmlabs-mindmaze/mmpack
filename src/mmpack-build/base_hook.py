@@ -56,3 +56,10 @@ class BaseHook:
         """
         # pylint: disable=unused-argument, no-self-use
         return None
+
+    def store_provides(self, pkg: PackageInfo, folder: str):
+        """
+        store provides data managed by hook
+        """
+        # pylint: disable=unused-argument, no-self-use
+        return None
