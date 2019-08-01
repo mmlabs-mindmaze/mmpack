@@ -92,17 +92,16 @@ def soname(filename: str) -> str:
     raise ELFError('SONAME not found in library: ' + libname)
 
 
-def symbols_list(filename, default_version):
+def symbols_set(filename):
     """
-    Parse given elf file and return its exported symbols as a dictionary.
-    dict keys are symbols name, values will be the symbols version
+    Parse given elf file and return its exported symbols as a set.
     """
     try:
         elffile = ELFFile(open(filename, 'rb'))
     except (IsADirectoryError, ELFError):
         return {}
 
-    symbols = {}
+    symbols = set()
     dyn = elffile.get_section_by_name('.dynsym')
     for sym in dyn.iter_symbols():
         if (sym['st_info']['bind'] == 'STB_GLOBAL'
@@ -110,6 +109,6 @@ def symbols_list(filename, default_version):
                 and (sym['st_other']['visibility'] == 'STV_PROTECTED'
                      or sym['st_other']['visibility'] == 'STV_DEFAULT')
                 and sym['st_shndx'] != 'SHN_UNDEF'):
-            symbols[sym.name] = default_version
+            symbols.add(sym.name)
 
     return symbols

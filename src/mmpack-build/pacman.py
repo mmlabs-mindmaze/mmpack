@@ -27,6 +27,6 @@ def pacman_find_dependency(soname: str, symbol_set: Set[str]) -> str:
     package, _version = pacman_line.split(' ')
 
     # prune symbols
-    pe_utils.prune_symbols(filename, symbol_set)
+    symbol_set.difference_update(pe_utils.symbols_set(filename))
 
     return package

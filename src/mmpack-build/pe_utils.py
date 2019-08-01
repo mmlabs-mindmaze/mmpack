@@ -5,7 +5,6 @@ helper module containing pe parsing functions
 
 import os
 from glob import glob
-from typing import Set
 
 import pefile
 
@@ -60,21 +59,20 @@ def soname_deps(filename):
     return soname_set
 
 
-def symbols_list(filename, default_version):
+def symbols_set(filename):
     """
-    Parse given pe file and return its exported symbols as a dictionary.
-    dict keys are symbols name, values will be the symbols version
+    Parse given pe file and return its exported symbols as a set.
     """
     pe_file = pefile.PE(filename)
 
-    export_dict = {}
+    export_set = set()
     try:
         for sym in pe_file.DIRECTORY_ENTRY_EXPORT.symbols:
-            export_dict.update({sym.name.decode('utf-8'): default_version})
+            export_set.add(sym.name.decode('utf-8'))
     except AttributeError:  # parsed pe file has no EXPORT section
-        return {}
+        return set()
 
-    return export_dict
+    return export_set
 
 
 def undefined_symbols(filename):
@@ -106,12 +104,3 @@ def get_dll_from_soname(library_name: str) -> str:
     # FIXME: workaround
     path = shell('which ' + library_name).strip()
     return shell('cygpath -m ' + path).strip()
-
-
-def prune_symbols(filename: str, symbol_set: Set[str]):
-    """
-    remove from <symbol_set> those provided by <soname>
-    """
-    exported = symbols_list(filename, None)
-    for sym in exported:
-        symbol_set.discard(sym)

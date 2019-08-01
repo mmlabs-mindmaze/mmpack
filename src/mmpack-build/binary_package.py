@@ -290,7 +290,7 @@ class BinaryPackage:
             entry = {soname: {'depends': self.name,
                               'symbols': {}}}
             entry[soname]['symbols'].update(
-                fmt_mod.symbols_list(inst_file, self.version))
+                dict.fromkeys(fmt_mod.symbols_set(inst_file), self.version))
             self.provides['sharedlib'].update(entry)
 
         for symbol_type in self.provides:
