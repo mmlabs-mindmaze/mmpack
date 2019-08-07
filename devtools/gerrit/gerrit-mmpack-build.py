@@ -15,19 +15,21 @@ this explains some of the broad excepts, and flags like ignore_errors
 '''
 
 # imports
-from glob import glob
 import logging
 import logging.handlers
 import os
 import shutil
-from tempfile import mkdtemp
 import stat
-from subprocess import PIPE, run
 import tarfile
 import time
-import yaml
+
+from glob import glob
+from subprocess import PIPE, run
+from tempfile import mkdtemp
 
 import paramiko
+import yaml
+
 import gerrit
 
 

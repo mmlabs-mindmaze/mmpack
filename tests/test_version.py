@@ -1,8 +1,8 @@
 # @mindmaze_header@
 import unittest
 
-from mm_version import Version
 from distutils.version import LooseVersion
+from mm_version import Version
 
 class TestVersionClass(unittest.TestCase):
 

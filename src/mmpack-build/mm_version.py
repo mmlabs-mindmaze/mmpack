@@ -14,7 +14,9 @@ Still LooseVersion expects *at least* one digit within the version string.
 '''
 
 from distutils.version import LooseVersion
+
 import yaml
+
 from common import mm_representer
 
 

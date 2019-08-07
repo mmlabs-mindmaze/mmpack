@@ -1,7 +1,6 @@
 # @mindmaze_header@
-import unittest
-
 import os
+import unittest
 
 from src_package import SrcPackage
 from mm_version import Version

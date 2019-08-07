@@ -7,11 +7,14 @@ import logging
 import logging.handlers
 import os
 import sys
+
+from hashlib import sha256
 from subprocess import PIPE, run
 from typing import Union
-from hashlib import sha256
+
 import platform
 import yaml
+
 
 CONFIG = {'debug': True, 'verbose': True}
 LOGGER = None

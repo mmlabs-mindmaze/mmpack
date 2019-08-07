@@ -3,8 +3,8 @@
 helper module containing pe parsing functions
 '''
 
-from glob import glob
 import os
+from glob import glob
 from typing import Set
 
 import pefile

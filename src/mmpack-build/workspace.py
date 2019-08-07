@@ -4,11 +4,11 @@ os helpers to manipulate the paths and environments
 '''
 
 import os
-from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
 
-from decorators import singleton
 from common import shell, dprint, ShellException, pushdir, popdir
+from decorators import singleton
 from settings import BINDIR, EXEEXT
+from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
 
 
 def find_project_root_folder() -> str:

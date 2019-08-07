@@ -16,8 +16,8 @@ https://specifications.freedesktop.org/basedir-spec/basedir-spec-0.6.html
                      XDG_CONFIG_HOME base directory.
 '''
 
-from os.path import expanduser, join as path_join
 from os import environ as env
+from os.path import expanduser, join as path_join
 
 
 # XDG default values

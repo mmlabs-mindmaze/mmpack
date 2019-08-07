@@ -6,12 +6,13 @@ helper module containing dpkg files parsing functions
 import importlib
 import os
 import re
+
 from glob import glob
 from typing import List
 
 from common import parse_soname, get_host_arch
-from settings import DPKG_METADATA_PREFIX
 from mm_version import Version
+from settings import DPKG_METADATA_PREFIX
 
 
 def dpkg_find_shlibs_file(target_soname: str):

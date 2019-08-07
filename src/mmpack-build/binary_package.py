@@ -6,16 +6,18 @@ packaging as mmpack file.
 
 import importlib
 import os
-from os.path import isfile, basename
-from glob import glob
-from typing import List, Dict, Set
 import tarfile
+
+from glob import glob
+from os.path import isfile, basename
+from typing import List, Dict, Set
+
 from common import *
-from file_utils import filetype, is_dynamic_library, \
-    is_importlib, get_linked_dll
+from dpkg import dpkg_find_dependency
+from file_utils import filetype, is_dynamic_library, is_importlib, \
+         get_linked_dll
 from mm_version import Version
 from pacman import pacman_find_dependency
-from dpkg import dpkg_find_dependency
 from settings import DPKG_PREFIX, PACMAN_PREFIX
 from workspace import Workspace, get_staging_dir
 

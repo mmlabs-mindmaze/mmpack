@@ -5,15 +5,17 @@ Class to handle source packages, build them and generates binary packages.
 
 import importlib
 import os
-from glob import glob
 import re
 import shutil
+import sys
+import tarfile
+
+from glob import glob
 from subprocess import Popen
 from tempfile import mkdtemp
-import tarfile
 from threading import Thread
 from typing import Set
-import sys
+
 from workspace import Workspace, get_local_install_dir
 from binary_package import BinaryPackage
 from common import *

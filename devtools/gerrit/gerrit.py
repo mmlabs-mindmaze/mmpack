@@ -15,13 +15,14 @@
 
 import json
 import logging
-import pprint
 import select
 import six.moves
 import threading
 import time
 
 import paramiko
+import pprint
+
 
 CONNECTED = 'connected'
 CONNECTING = 'connecting'

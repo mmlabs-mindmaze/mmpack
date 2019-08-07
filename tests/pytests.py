@@ -1,7 +1,7 @@
+import copy
 import os
 import sys
 import unittest
-import copy
 
 
 class TapTestResult(unittest.TestResult):
