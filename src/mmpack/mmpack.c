@@ -21,6 +21,7 @@
 #include "mmpack-install.h"
 #include "mmpack-list.h"
 #include "mmpack-mkprefix.h"
+#include "mmpack-provides.h"
 #include "mmpack-remove.h"
 #include "mmpack-run.h"
 #include "mmpack-search.h"
@@ -37,6 +38,7 @@ const struct subcmd mmpack_subcmds[] = {
 	{"install", mmpack_install},
 	{"list", mmpack_list},
 	{"mkprefix", mmpack_mkprefix},
+	{"provides", mmpack_provides},
 	{"remove", mmpack_remove},
 	{"run", mmpack_run},
 	{"search", mmpack_search},
