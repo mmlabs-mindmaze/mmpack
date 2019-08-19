@@ -15,6 +15,12 @@
 #include "common.h"
 
 
+/*
+ * Warning: be careful to remember that mmstring uses a flexible array member
+ * when embedding it within another structure.
+ * Doing so (even as a last member, which is valid) will trigger a
+ * flexible-array-extensions warning (enabled by gcc's pedantic)
+ */
 struct mmstring {
 	int16_t max;
 	int16_t len;
