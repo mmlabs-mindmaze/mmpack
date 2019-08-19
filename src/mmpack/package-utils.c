@@ -1140,8 +1140,10 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg, enum field_type type,
 static inline
 void mmpkg_append_dependency_rec(struct mmpkg_dep * dep, struct mmpkg_dep * d)
 {
-	if (dep->next != NULL)
-		return mmpkg_append_dependency_rec(dep->next, d);
+	if (dep->next != NULL) {
+		mmpkg_append_dependency_rec(dep->next, d);
+		return;
+	}
 
 	dep->next = d;
 }
