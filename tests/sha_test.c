@@ -124,7 +124,7 @@ static
 void sha_setup(void)
 {
 	int i;
-	char filename[128];
+	char filename[sizeof(HASHFILE_DIR) + 64];
 	char hash[SHA_HEXSTR_LEN];
 
 	// Create the test folder that will contains the files generated for the test
