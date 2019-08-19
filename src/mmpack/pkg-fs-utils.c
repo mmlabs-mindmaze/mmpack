@@ -239,7 +239,7 @@ int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
 }
 
 
-STATIC_CONST_MMSTR(metadata_dirpath, METADATA_RELPATH)
+STATIC_CONST_MMSTR(metadata_dirpath, METADATA_RELPATH);
 
 static
 int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,

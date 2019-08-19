@@ -46,7 +46,7 @@ static const struct {                                   \
 	.buf = str_literal,                             \
 };                                                      \
 static const mmstr* name =                              \
-	(const mmstr*)&(name ## _mmstring_data.buf);
+	(const mmstr*)&(name ## _mmstring_data.buf)
 
 static inline NONNULL_ARGS(1)
 int mmstrlen(const mmstr* str)

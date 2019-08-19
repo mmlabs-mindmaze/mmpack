@@ -168,7 +168,7 @@ void sha_cleanup(void)
  *                         Hash test functions                            *
  *                                                                        *
  **************************************************************************/
-STATIC_CONST_MMSTR(hashfile_dir, HASHFILE_DIR)
+STATIC_CONST_MMSTR(hashfile_dir, HASHFILE_DIR);
 
 
 START_TEST(hashfile_with_parent)

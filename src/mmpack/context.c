@@ -38,7 +38,7 @@ int read_user_config(struct mmpack_ctx* ctx)
 static
 int read_prefix_config(struct mmpack_ctx* ctx)
 {
-	STATIC_CONST_MMSTR(cfg_relpath, CFG_RELPATH)
+	STATIC_CONST_MMSTR(cfg_relpath, CFG_RELPATH);
 	mmstr* filename;
 	int rv, len;
 
@@ -130,7 +130,7 @@ int set_installed(struct mmpkg* pkg, void * data)
 LOCAL_SYMBOL
 int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 {
-	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH)
+	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH);
 	const mmstr* repo_cache;
 	mmstr* installed_index_path;
 	int i, num_repo, len;
@@ -165,7 +165,7 @@ error:
 LOCAL_SYMBOL
 int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 {
-	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH)
+	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH);
 	mmstr* installed_index_path;
 	int len;
 	FILE* fp;
@@ -195,7 +195,7 @@ int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 LOCAL_SYMBOL
 const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 {
-	STATIC_CONST_MMSTR(pkgcache_relpath, PKGS_CACHEDIR_RELPATH)
+	STATIC_CONST_MMSTR(pkgcache_relpath, PKGS_CACHEDIR_RELPATH);
 	int len;
 
 	// If already computed, return it
@@ -223,7 +223,7 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 LOCAL_SYMBOL
 const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx, int repo_index)
 {
-	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH)
+	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
 	char suffix[sizeof(".##########")];
 	int len;
 
@@ -253,7 +253,7 @@ const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx, int repo_index)
 static
 int mmpack_ctx_use_prefix_log(struct mmpack_ctx * ctx)
 {
-	STATIC_CONST_MMSTR(log_relpath, LOG_RELPATH)
+	STATIC_CONST_MMSTR(log_relpath, LOG_RELPATH);
 	int fd, oflags;
 
 	oflags = O_WRONLY|O_CREAT|O_APPEND;
