@@ -17,6 +17,7 @@
 #include "cmdline.h"
 #include "common.h"
 #include "mmpack-check-integrity.h"
+#include "mmpack-download.h"
 #include "mmpack-fix-broken.h"
 #include "mmpack-install.h"
 #include "mmpack-list.h"
@@ -33,6 +34,7 @@
 static
 const struct subcmd mmpack_subcmds[] = {
 	{"check-integrity", mmpack_check_integrity},
+	{"download", mmpack_download},
 	{"fix-broken", mmpack_fix_broken},
 	{"info", mmpack_show},
 	{"install", mmpack_install},
@@ -62,6 +64,7 @@ static const char mmpack_doc[] =
 
 static const char arguments_docs[] =
 	"[options] "CHECK_INTEGRITY_SYNOPSIS "\n"
+	"[options] "DOWNLOAD_SYNOPSIS "\n"
 	"[options] "FIX_BROKEN_SYNOPSIS "\n"
 	"[options] "INSTALL_SYNOPSIS "\n"
 	"[options] "LIST_SYNOPSIS "\n"

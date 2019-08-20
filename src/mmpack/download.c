@@ -45,8 +45,6 @@ int get_error_from_curl(CURL* curl, int last_retcode, char* errbuf)
 			sprintf(errbuf, "Server replied error %li", respcode);
 			return EREMOTEIO;
 		}
-
-		;
 	}
 
 	// Fill error message from return code if not set yet
@@ -177,10 +175,8 @@ int download_from_repo(struct mmpack_ctx * ctx,
 	res = curl_easy_perform(curl);
 	if (res != CURLE_OK) {
 		err = get_error_from_curl(curl, res, ctx->curl_errbuf);
-		mm_raise_error(err,
-		               "Failed to download %s (%s)",
-		               url,
-		               ctx->curl_errbuf);
+		mm_raise_error(err, "Failed to download %s (%s)",
+		               url, ctx->curl_errbuf);
 		goto exit;
 	}
 

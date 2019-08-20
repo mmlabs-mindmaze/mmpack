@@ -13,6 +13,8 @@ mmpack_lib_sources = files(
 	'mm-alloc.h',
 	'mmpack-check-integrity.c',
 	'mmpack-check-integrity.h',
+	'mmpack-download.c',
+	'mmpack-download.h',
 	'mmpack-fix-broken.c',
 	'mmpack-fix-broken.h',
 	'mmpack-install.c',
