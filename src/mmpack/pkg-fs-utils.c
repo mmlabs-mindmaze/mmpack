@@ -633,6 +633,49 @@ void action_set_pathname_into_dir(struct action* act, const mmstr* dir)
 
 
 /**
+ * download_package() - download package helper
+ * @ctx: initialized mmpack context
+ * @pkg: package to download
+ * @pathname: path where the package is to be written
+ *
+ * This function will:
+ * - find out the correct repository url
+ * - download the package
+ * - check the package's integrity
+ *
+ * This function does print info and error messages to the console.
+ *
+ * Return: 0 in case of success, -1 otherwise with error state set
+ * accordingly
+ */
+LOCAL_SYMBOL
+int download_package(struct mmpack_ctx * ctx, struct mmpkg const * pkg,
+                     mmstr const * pathname)
+{
+	mmstr const * repo_url = settings_get_repo_url(&ctx->settings,
+	                                               pkg->repo_index);
+
+	info("Downloading %s (%s)... ", pkg->name, pkg->version);
+
+	/* Dowload package from repo */
+	if (download_from_repo(ctx, repo_url, pkg->filename,
+	                       NULL, pathname)) {
+		error("Failed!\n");
+		return -1;
+	}
+
+	/* verify integrity of what has been downloaded */
+	if (check_file_pkg(pkg->sha256, NULL, pathname)) {
+		error("Integrity check failed!\n");
+		return -1;
+	}
+
+	info("OK\n");
+	return 0;
+}
+
+
+/**
  * fetch_pkgs() - download packages that are going to be installed
  * @ctx:       initialized mmpack context
  * @act_stk:   action stack to be applied
@@ -647,7 +690,6 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 	mmstr* mpkfile = NULL;
 	const struct mmpkg* pkg;
 	struct action* act;
-	const mmstr* repo_url;
 	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 	int i;
 
@@ -679,23 +721,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 			continue;
 		}
 
-		info("Downloading %s (%s)... ", pkg->name, pkg->version);
-
-		// Dowload package from repo and store it in prefix
-		// package cachedir
-		repo_url =
-			settings_get_repo_url(&ctx->settings, pkg->repo_index);
-		if (download_from_repo(ctx, repo_url, pkg->filename,
-		                       NULL, mpkfile)) {
-			error("Failed!\n");
+		if (download_package(ctx, pkg, mpkfile) != 0)
 			return -1;
-		}
-
-		// verify integrity of what has been downloaded
-		if (check_file_pkg(pkg->sha256, NULL, mpkfile)) {
-			error("Integrity check failed!\n");
-			return -1;
-		}
 
 		info("OK\n");
 	}
