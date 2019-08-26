@@ -1,0 +1,56 @@
+general:
+  name: mmpack
+  version: 0.0.1
+  maintainer: gabriel.ganne@mindmaze.ch
+  url: ssh://intranet.mindmaze.ch:29418/mmpack
+  build-system: meson
+  build-depends:
+    - mmlib-devel
+  description: |
+    mmpack is a cross-platform package manager.
+    It is designed to work without any need for root access, and to allow
+    multiple coexisting project versions within project prefixes.
+
+mmpack-gerrit-builder-master:
+  description: |
+    This package contains the tools needed to update repository upon git repo
+    update (master server)
+  files:
+    - .*/gerrit/
+
+mmpack-gerrit-builder-slave:
+  description: |
+    This package contains the tools needed to update repository upon git repo
+    update (slave server)
+  files:
+    - .*/mmpack-build-slave.sh
+
+mmpack-repo-tools:
+  description: |
+    This package contains the tools needed to manage repositories of mmpack
+    packages
+  files:
+    - .*/mmpack-createrepo
+
+mmpack-build:
+  description: |
+    This package contains the tools needed to build mmpack package from source
+  files:
+    - .*/mmpack-build
+    - .*/mmpack-check-sysdep
+    - .*/mmpack/python/.*
+    - .*/mmpack-build_completion
+    - .*/share/mmpack/build-.*
+    - .*/man/man1/mmpack-build.*\.1
+
+# keep mmpack custom package last to simplify regexes
+mmpack:
+  description: |
+    This package contains the tools to install, upgrade, remove packages
+  files:
+    - .*/mmpack$
+    - .*/mount-mmpack-prefix
+    - .*/check-dpkg-installed
+    - .*/prompt.bash
+    - .*/mmpack_completion
+    - .*/man/man1/mmpack-[^b].*\.1
