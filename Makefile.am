@@ -63,7 +63,8 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/xdg.py \
 	$(eol)
 
-mmpack_build_gerrit = \
+mmpack_build_gerritdir =  $(pkgdatadir)/gerrit/python
+mmpack_build_gerrit_PYTHON = \
 	devtools/gerrit/gerrit-mmpack-build.py \
 	devtools/gerrit/gerrit.py \
 	$(eol)
@@ -214,7 +215,7 @@ mmpack-build: src/mmpack-build/mmpack-build.in Makefile
 user_doc_sources =
 .PHONY: spelling
 spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) \
-		$(mmpack_build_gerrit) $(user_doc_sources) $(mmpack_db_service)
+		$(mmpack_build_gerrit_PYTHON) $(user_doc_sources) $(mmpack_db_service)
 	$(AM_V_at) codespell $^
 
 # dev debian-only helper function, not part of any target

@@ -3,6 +3,14 @@ install_data(files('mmpack-build-slave.sh'),
         install_mode: 'rwxr-xr-x'
 )
 
+mmpack_build_gerrit_files = files(
+        'gerrit/gerrit-mmpack-build.py',
+        'gerrit/gerrit.py',
+)
+install_data(mmpack_build_gerrit_files,
+    install_dir : get_option('datadir') / 'mmpack/gerrit/python',
+)
+
 
 #
 # dev targets
