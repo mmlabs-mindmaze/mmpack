@@ -1,7 +1,7 @@
 # @mindmaze_header@
-'''
+"""
 helper module containing elf parsing functions
-'''
+"""
 
 import os
 
@@ -11,7 +11,9 @@ from elftools.elf.dynamic import DynamicSection
 
 
 def soname_deps(filename):
-    'Parse given elf file and return its dependency soname list'
+    """
+    Parse given elf file and return its dependency soname list
+    """
     elffile = ELFFile(open(filename, 'rb'))
 
     libraryset = set()
@@ -25,7 +27,8 @@ def soname_deps(filename):
 
 
 def undefined_symbols(filename):
-    '''Parse given elf file and return its undefined symbols set
+    """
+    Parse given elf file and return its undefined symbols set
 
     We require 3 sections for the elf file:
         - .gnu.version_r: lists the needed libraries version
@@ -36,7 +39,7 @@ def undefined_symbols(filename):
     the the symbol name is required to be of version .gnu.version_r[index]
 
     This is the reason why we need to iterate over all symbols with enumerate()
-    '''
+    """
     elffile = ELFFile(open(filename, 'rb'))
 
     undefined_symbols_set = set()
@@ -72,11 +75,13 @@ def undefined_symbols(filename):
 
 
 def soname(filename: str) -> str:
-    ''' Return the SONAME of given library
+    """
+    Returns:
+        the SONAME of given library
 
     Raises:
         ELFError: soname not found
-    '''
+    """
     elffile = ELFFile(open(filename, 'rb'))
     for section in elffile.iter_sections():
         if isinstance(section, DynamicSection):
@@ -88,9 +93,10 @@ def soname(filename: str) -> str:
 
 
 def symbols_list(filename, default_version):
-    ''' Parse given elf file and return its exported symbols as a dictionary.
-        dict keys are symbols name, values will be the symbols version
-    '''
+    """
+    Parse given elf file and return its exported symbols as a dictionary.
+    dict keys are symbols name, values will be the symbols version
+    """
     try:
         elffile = ELFFile(open(filename, 'rb'))
     except (IsADirectoryError, ELFError):

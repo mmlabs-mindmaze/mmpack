@@ -1,7 +1,7 @@
 # @mindmaze_header@
-'''
+"""
 Class to handle source packages, build them and generates binary packages.
-'''
+"""
 
 import importlib
 import os
@@ -27,9 +27,10 @@ from mmpack_builddep import process_dependencies, general_specs_builddeps
 
 
 class _FileConsumer(Thread):
-    ''' Read in a thread from file input and duplicate onto the file output
-        and logger.
-    '''
+    """
+    Read in a thread from file input and duplicate onto the file output and
+    logger.
+    """
 
     def __init__(self, file_in, file_out):
         super().__init__()
@@ -50,7 +51,8 @@ def _get_install_prefix() -> str:
 
 
 def _unpack_deps_version(item):
-    ''' helper to allow simpler mmpack dependency syntax
+    """
+    helper to allow simpler mmpack dependency syntax
 
     expected full mmpack dependency syntax is:
         <name>: [min_version, max_version]
@@ -58,7 +60,7 @@ def _unpack_deps_version(item):
     this allows the additional with implicit 'any' as maximum:
         <name>: min_version
         <name>: any
-    '''
+    """
     try:
         name, minv, maxv = item
         return (name, Version(minv), Version(maxv))
@@ -70,10 +72,12 @@ def _unpack_deps_version(item):
 
 
 def create_source_from_git(url: str, tag: str = None):
-    ''' Create a source package from git clone
+    """
+    Create a source package from git clone
 
-    Returns: An initialized source package
-    '''
+    Returns:
+        An initialized source package
+    """
 
     wrk = Workspace()
 
@@ -120,10 +124,12 @@ def create_source_from_git(url: str, tag: str = None):
 
 
 def load_source_from_tar(tarpath: str, tag: str = None):
-    ''' Load mmpack source package from a tarball.
+    """
+    Load mmpack source package from a tarball.
 
-    Returns: An initialized source package
-    '''
+    Returns:
+        An initialized source package
+    """
 
     wrk = Workspace()
 
@@ -164,9 +170,9 @@ def load_source_from_tar(tarpath: str, tag: str = None):
 
 class SrcPackage:
     # pylint: disable=too-many-instance-attributes
-    '''
+    """
     Source package class.
-    '''
+    """
 
     def __init__(self, name: str, tag: str = None):
         # pylint: disable=too-many-arguments
@@ -191,18 +197,23 @@ class SrcPackage:
         self._metadata_files_list = []
 
     def pkgbuild_path(self) -> str:
-        'Get the package build path'
+        """
+        Get the package build path
+        """
         wrk = Workspace()
         return wrk.builddir(srcpkg=self.name, tag=self.tag)
 
     def unpack_path(self) -> str:
-        ''' Get the local build path, ie, the place
+        """
+        Get the local build path, ie, the place
         where the sources are unpacked and compiled
-        '''
+        """
         return self.pkgbuild_path() + '/' + self.name
 
     def _local_install_path(self, withprefix: bool = False) -> str:
-        'internal helper: build and return the local install path'
+        """
+        internal helper: build and return the local install path
+        """
         installdir = get_local_install_dir(self.pkgbuild_path())
         if withprefix:
             installdir += _get_install_prefix()
@@ -211,11 +222,12 @@ class SrcPackage:
         return installdir
 
     def _guess_build_system(self):
-        ''' helper: guesses the project build system
+        """
+        helper: guesses the project build system
 
         Raises:
             RuntimeError: could not guess project build system
-        '''
+        """
         pushdir(self.unpack_path())
         if os.path.exists('configure.ac'):
             self.build_system = 'autotools'
@@ -233,8 +245,9 @@ class SrcPackage:
         popdir()
 
     def load_specfile(self, specfile: str = None) -> None:
-        ''' Load the specfile and store it as its dictionary equivalent
-        '''
+        """
+        Load the specfile and store it as its dictionary equivalent
+        """
         if not specfile:
             specfile = self.unpack_path() + '/mmpack/specs'
         dprint('loading specfile: ' + specfile)
@@ -242,10 +255,11 @@ class SrcPackage:
         self._spec_dir = os.path.dirname(specfile)
 
     def _get_matching_files(self, pcre: str) -> Set[str]:
-        ''' given some pcre, return the set of matching files from
-            self.install_files_set.
-            Those files are removed from the source install file set.
-        '''
+        """
+        given some pcre, return the set of matching files from
+        self.install_files_set.  Those files are removed from the source
+        install file set.
+        """
         matching_set = set()
         for inst_file in self.install_files_set:
             if re.match(pcre, inst_file):
@@ -256,14 +270,16 @@ class SrcPackage:
 
     def _format_description(self, binpkg: BinaryPackage, pkgname: str,
                             pkg_type: str = None):
-        ''' Format BinaryPackage's description.
+        """
+        Format BinaryPackage's description.
 
         If the package is a default target, concat the global project
         description with the additional spcific one. Otherwise, only
         use the specific description.
 
-        Raises: ValueError if the description is empty for custom packages
-        '''
+        Raises:
+            ValueError: the description is empty for custom packages
+        """
         try:
             description = self._specs[pkgname]['description']
         except KeyError:
@@ -295,11 +311,12 @@ class SrcPackage:
         _ = self._get_matching_files(r'.*\.pyc$')
 
     def _parse_specfile_general(self) -> None:
-        ''' Parses the mmpack/specs file's general section.
+        """
+        Parses the mmpack/specs file's general section.
         This will:
             - fill all the main fields of the source package.
             - prune the ignore files from the install_files_list
-        '''
+        """
         for key, value in self._specs['general'].items():
             if key == 'name':
                 self.name = value
@@ -320,7 +337,9 @@ class SrcPackage:
 
     def _binpkg_get_create(self, binpkg_name: str,
                            pkg_type: str = None) -> BinaryPackage:
-        'Returns the newly create BinaryPackage if any'
+        """
+        Returns the newly create BinaryPackage if any
+        """
         if binpkg_name not in self._packages:
             host_arch = get_host_arch_dist()
             binpkg = BinaryPackage(binpkg_name, self.version, self.name,
@@ -332,10 +351,10 @@ class SrcPackage:
         return self._packages[binpkg_name]
 
     def parse_specfile(self) -> None:
-        '''
-            - create BinaryPackage skeleton entries foreach custom and default
-              entries.
-        '''
+        """
+        create BinaryPackage skeleton entries foreach custom and default
+        entries.
+        """
         self._parse_specfile_general()
 
         host_arch = get_host_arch_dist()
@@ -393,10 +412,11 @@ class SrcPackage:
         self.install_files_set = tmp
 
     def install_builddeps(self, prefix: str, assumeyes: bool):
-        ''' install mmpack build-deps within given prefix
+        """
+        install mmpack build-deps within given prefix
 
         !!! Requires a prefix already set up !!!
-        '''
+        """
         wrk = Workspace()
         cmd = '{} --prefix={} update'.format(wrk.mmpack_bin(), prefix)
         shell(cmd)
@@ -409,16 +429,15 @@ class SrcPackage:
                              prefix, assumeyes)
 
     def local_install(self, skip_tests: bool = False) -> None:
-        ''' local installation of the package from the source package
+        """
+        local installation of the package from the source package
 
         guesses build system if none given.
-        fills private var: _install_list before returning
+        fills private var: _install_files_set before returning
 
-        Returns:
-            the list of all the installed files
         Raises:
             NotImplementedError: the specified build system is not supported
-        '''
+        """
         wrk = Workspace()
 
         pushdir(self.unpack_path())
@@ -472,9 +491,10 @@ class SrcPackage:
         popdir()
 
     def _ventilate_custom_packages(self):
-        ''' Ventilates files explicit in the specfile before
-            giving them to the default target.
-        '''
+        """
+        Ventilates files explicit in the specfile before giving them to the
+        default target.
+        """
         for binpkg in self._packages:
             if 'files' in self._specs[binpkg]:
                 for regex in self._specs[binpkg]['files']:
@@ -490,11 +510,11 @@ class SrcPackage:
                 raise FileNotFoundError(errmsg)
 
     def _ventilate_pkg_create(self):
-        ''' first ventilation pass (after custom packages):
-            check amongst the remaining files if one of them would trigger
-            the creation of a new package.
-            Eg. a dynamic library will be given its own binary package
-        '''
+        """
+        first ventilation pass (after custom packages): check amongst the
+        remaining files if one of them would trigger the creation of a new
+        package.  Eg. a dynamic library will be given its own binary package
+        """
         ventilated = set()
         for file in self.install_files_set:
             libtype = is_dynamic_library(file)
@@ -515,12 +535,11 @@ class SrcPackage:
         self.install_files_set.difference_update(ventilated)
 
     def _get_fallback_package(self, bin_pkg_name: str) -> BinaryPackage:
-        '''
+        """
         if a binary package is already created, use it
         if there is no binary package yet, try to fallback with a library pkg
         finally, create and fallback a binary package
-        '''
-
+        """
         if bin_pkg_name in self._packages:
             return self._packages[bin_pkg_name]
 
@@ -541,7 +560,9 @@ class SrcPackage:
         return self._binpkg_get_create(bin_pkg_name)
 
     def ventilate(self):
-        ''' Ventilate files.
+        """
+        Ventilate files.
+
         Must be called after local-install, otherwise it will return dummy
         packages with no files.
 
@@ -551,7 +572,7 @@ class SrcPackage:
 
           There is no conflict between the source and the binary package names
           because the packages types are different.
-        '''
+        """
         pushdir(self._local_install_path(True))
 
         bin_pkg_name = self.name
@@ -600,7 +621,9 @@ class SrcPackage:
         popdir()
 
     def _generate_manifest(self, src_file, src_hash) -> str:
-        'Generate the manifest and return its path'
+        """
+        Generate the manifest and return its path
+        """
 
         # Generate the manifest data for binary packages
         pkgs = dict()
@@ -625,7 +648,9 @@ class SrcPackage:
         return manifest_path
 
     def generate_binary_packages(self):
-        'create all the binary packages'
+        """
+        create all the binary packages
+        """
         instdir = self._local_install_path(True)
         pushdir(instdir)
 

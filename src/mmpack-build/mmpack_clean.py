@@ -1,7 +1,7 @@
 # @mindmaze_header@
-'''
+"""
 Small helper used to ensure a clean state of mmpack-build work folders
-'''
+"""
 
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter

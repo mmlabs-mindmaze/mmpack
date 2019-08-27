@@ -43,9 +43,11 @@ class GerritWatcher(threading.Thread):
     def __init__(
             self, gerrit, username=None, hostname=None, port=None,
             keyfile=None, connection_attempts=-1, retry_delay=5):
-        """Create a GerritWatcher.
+        """
+        Create a GerritWatcher.
 
-        :param gerrit: A Gerrit instance to pass events to.
+        Args:
+            gerrit: A Gerrit instance to pass events to.
 
         All other parameters are optional and if not supplied are sourced from
         the gerrit instance.
@@ -84,7 +86,9 @@ class GerritWatcher(threading.Thread):
                     self._read(stdout)
 
     def _connect(self):
-        """Attempts to connect and returns the connected client."""
+        """
+        Attempts to connect and returns the connected client.
+        """
 
         def _make_client():
             client = paramiko.SSHClient()
@@ -136,7 +140,9 @@ class GerritWatcher(threading.Thread):
                     raise e
 
     def _consume(self, client):
-        """Consumes events using the given client."""
+        """
+        Consumes events using the given client.
+        """
         stdin, stdout, stderr = client.exec_command("gerrit stream-events")
 
         self.state = CONSUMING

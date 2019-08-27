@@ -1,7 +1,7 @@
 # @mindmaze_header@
-'''
+"""
 global system variables helper
-'''
+"""
 
 import os
 

@@ -7,7 +7,9 @@ from mm_version import Version
 
 class TestSrcPackageClass(unittest.TestCase):
     def test_package_simple(self):
-        'smoke test'
+        """
+        smoke test
+        """
         specfile = os.path.dirname(os.path.abspath(__file__)) + '/specfiles' + '/simple.yaml'
         test_pkg = SrcPackage('dummy.maintainer@mindmaze.ch')
         test_pkg.load_specfile(specfile)
@@ -21,7 +23,9 @@ class TestSrcPackageClass(unittest.TestCase):
                                  r'This is the simplest mmpack specfile possible.*')
 
     def test_package_full(self):
-        'the full spec parsing'
+        """
+        the full spec parsing
+        """
         specfile = os.path.dirname(os.path.abspath(__file__)) + '/specfiles' + '/full.yaml'
         test_pkg = SrcPackage('dummy.maintainer@mindmaze.ch')
         test_pkg.load_specfile(specfile)

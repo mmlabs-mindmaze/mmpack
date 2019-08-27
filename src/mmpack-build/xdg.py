@@ -1,4 +1,4 @@
-'''
+"""
 implementation of XDG basedir environment variables specs
 https://specifications.freedesktop.org/basedir-spec/basedir-spec-0.6.html
 
@@ -14,7 +14,7 @@ https://specifications.freedesktop.org/basedir-spec/basedir-spec-0.6.html
  * XDG_CONFIG_DIRS : defines the preference-ordered set of base directories to
                      search for configuration files in addition to the
                      XDG_CONFIG_HOME base directory.
-'''
+"""
 
 from os import environ as env
 from os.path import expanduser, join as path_join

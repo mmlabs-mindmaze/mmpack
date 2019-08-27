@@ -1,7 +1,7 @@
 # @mindmaze_header@
-'''
+"""
 helper module containing dpkg files parsing functions
-'''
+"""
 
 import importlib
 import os
@@ -16,14 +16,15 @@ from settings import DPKG_METADATA_PREFIX
 
 
 def dpkg_find_shlibs_file(target_soname: str):
-    '''Find shlibs file from soname.
+    """
+    Find shlibs file from soname.
 
     Returns:
       full path to the shlibs file
 
     Raises:
       FileNotFoundError: shlibs could not be found
-    '''
+    """
     name, version = parse_soname(target_soname)
     guess_pkgname = name + version
     shlib_soname_regex = re.compile(r'\b{0} {1}\b .*'.format(name, version))
@@ -50,13 +51,15 @@ def _prune_soname_symbols(library_path: str, symbols_list: List[str]):
 
 def dpkg_parse_shlibs(filename: str, target_soname: str,
                       symbols_list: List[str]) -> str:
-    ''' Parse dpkg shlibs file.
+    """
+    Parse dpkg shlibs file.
 
-    Returns: A dependency template:
+    Returns:
+        A dependency template
 
     Raises:
         AssertionError: symbols could not be found
-    '''
+    """
     dependency_template = None
     name, version = parse_soname(target_soname)
     shlib_soname = '{0} {1} '.format(name, version)
@@ -85,14 +88,15 @@ def dpkg_parse_shlibs(filename: str, target_soname: str,
 
 
 def dpkg_find_symbols_file(target_soname: str) -> str:
-    '''Find symbols file from soname.
+    """
+    Find symbols file from soname.
 
     Returns:
       full path to the symbols file
 
     Raises:
       FileNotFoundError: symbols could not be found
-    '''
+    """
     name, version = parse_soname(target_soname)
     guess_pkgname = name + version
     symbols_soname_regex = re.compile(r'\b{0}\b .*'.format(target_soname))
@@ -117,7 +121,8 @@ def dpkg_find_symbols_file(target_soname: str) -> str:
 
 def dpkg_parse_symbols(filename: str, target_soname: str,
                        symbols_list: List[str]) -> str:
-    ''' Parse dpkg symbols file.
+    """
+    Parse dpkg symbols file.
 
     www.debian.org/doc/debian-policy/ch-sharedlibs.html#s-sharedlibs-symbols
 
@@ -131,10 +136,11 @@ def dpkg_parse_symbols(filename: str, target_soname: str,
 
     }
 
-    Returns: A filled dependency template:
-             - correct alternate dependency will have been chosen
-             - #MINVER# will be filled
-    '''
+    Returns:
+        A filled dependency template:
+        - correct alternate dependency will have been chosen
+        - #MINVER# will be filled
+    """
     # TODO: find a way to split this (and thus satisty the two below ...)
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
@@ -205,7 +211,9 @@ def dpkg_parse_symbols(filename: str, target_soname: str,
 
 
 def dpkg_find_dependency(soname: str, symbol_list: List[str]) -> str:
-    'Parses the debian system files, find a dependency template for soname'
+    """
+    Parses the debian system files, find a dependency template for soname
+    """
     try:
         symbols_file = dpkg_find_symbols_file(soname)
         return dpkg_parse_symbols(symbols_file, soname, symbol_list)

@@ -1,5 +1,5 @@
 # @mindmaze_header@
-'''
+"""
 version manipulation utility based on python's distutil LooseVersion class
 
 LooseVersion is described as:
@@ -11,7 +11,7 @@ LooseVersion is described as:
 
 There are no invalid version number.
 Still LooseVersion expects *at least* one digit within the version string.
-'''
+"""
 
 from distutils.version import LooseVersion
 
@@ -21,14 +21,14 @@ from common import mm_representer
 
 
 class Version(LooseVersion):  # pylint: disable=too-few-public-methods
-    ''' Simple version class
+    """
+    Simple version class
 
     * inherited from LooseVersion:
       - recognizes digits so that: "1.2" == "1.02", and "1.2" < "1.10"
       - Use string comparison otherwise: "1x" < "1y"
     * adds "any" as version wildcard
-
-    '''
+    """
 
     def __init__(self, string):
         if '_' in string:
@@ -37,10 +37,11 @@ class Version(LooseVersion):  # pylint: disable=too-few-public-methods
         super().__init__(string)
 
     def is_any(self):
-        ''' LooseVersion asserts its string description contains at least one
-            digit. We need to explicitly request its string description to
-            prevent raising a TypeError
-        '''
+        """
+        LooseVersion asserts its string description contains at least one
+        digit. We need to explicitly request its string description to
+        prevent raising a TypeError
+        """
         return str(self) == "any"
 
     def __lt__(self, other):

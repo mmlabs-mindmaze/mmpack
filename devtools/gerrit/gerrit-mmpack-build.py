@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=invalid-name
 # pylint: disable=logging-format-interpolation
-'''
+"""
 Simple script which listens to gerrit for merge events
 to create the updated package of the project.
 Can also be triggered b y the "MMPACK-BUILD" keyword
@@ -12,7 +12,7 @@ invalid packages creations.
 
 Note: this is intended to never fail.
 this explains some of the broad excepts, and flags like ignore_errors
-'''
+"""
 
 # imports
 import logging
@@ -50,7 +50,7 @@ TIMEOUT = 3600  # 1 hour, this is a hard stop to any command run on a slave
 
 
 def init_logger():
-    '''
+    """
     Init logger to print to *log_file*.
 
     log file is read from the config file 'log-file' key, and defaults
@@ -59,7 +59,7 @@ def init_logger():
     Should be called after loading the CONFIG
 
     Files rotate every day, and are kept for a month
-    '''
+    """
     global logger  # pylint: disable=global-statement
 
     log_file = CONFIG.get('log-file', '/var/log/gerrit-mmpack-build.log')
@@ -77,7 +77,9 @@ def init_logger():
 
 
 def isdir(sftp_client, path):
-    'test whether remote path is dir or not'
+    """
+    test whether remote path is dir or not
+    """
     try:
         return stat.S_ISDIR(sftp_client.stat(path).st_mode)
     except IOError:
@@ -85,7 +87,9 @@ def isdir(sftp_client, path):
 
 
 class SSH:
-    'helper class used to execute shell commands on ssh'
+    """
+    helper class used to execute shell commands on ssh
+    """
     # pylint: disable=too-many-arguments
     def __init__(self, name, hostname, username,
                  port=22, keyfile=None, password=None):
@@ -101,13 +105,14 @@ class SSH:
                .format(self.name, self.username, self.hostname, self.port)
 
     def _make_client(self):
-        '''return a connected ssh client
-           authentication method used:
-             1 - pubkey if self.keyfile not None
-             2 - password if self.password not None
-           If self.password is not None AND self.keyfile is not None,
-           self.password is interpreted as passphrase of keyfile
-        '''
+        """
+        return a connected ssh client
+        authentication method used:
+          1 - pubkey if self.keyfile not None
+          2 - password if self.password not None
+        If self.password is not None AND self.keyfile is not None,
+        self.password is interpreted as passphrase of keyfile
+        """
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.WarningPolicy())
@@ -121,7 +126,9 @@ class SSH:
         return client
 
     def exec(self, command):
-        'connect to host, and executes given command'
+        """
+        connect to host, and executes given command
+        """
         client = None
         try:
             client = self._make_client()
@@ -162,10 +169,11 @@ class SSH:
                 sftp_client.get(remote_path, local_path)
 
     def get(self, remote_dir_path, local_dir_path):
-        '''Copy a remote file to given local path
+        """
+        Copy a remote file to given local path
 
         Expects both remote and local arguments to be directories, not files.
-        '''
+        """
         client = None
         try:
             client = self._make_client()
@@ -181,7 +189,9 @@ class SSH:
                 client.close()
 
     def put(self, local_file_path, remote_path):
-        'Copy a local file to given remote path'
+        """
+        Copy a local file to given remote path
+        """
         client = None
         try:
             client = self._make_client()
@@ -198,7 +208,9 @@ class SSH:
 
 
 def _trigger_build(event):
-    'test whether an event is a merge event, or a manual trigger'
+    """
+    test whether an event is a merge event, or a manual trigger
+    """
     try:
         do_build = (event['type'] == 'change-merged'
                     or (event['type'] == 'comment-added'
@@ -214,11 +226,15 @@ def _trigger_build(event):
 
 
 class ShellException(RuntimeError):
-    'custom exception for shell command error'
+    """
+    custom exception for shell command error
+    """
 
 
 def shell(cmd):
-    'Wrapper for subprocess.run'
+    """
+    Wrapper for subprocess.run
+    """
     ret = run(cmd, stdout=PIPE, shell=True)
     if ret.returncode == 0:
         return ret.stdout.decode('utf-8')
@@ -227,22 +243,26 @@ def shell(cmd):
 
 
 def has_mmpack_specfile(srctar):
-    'test whether a source package has mmpack config'
+    """
+    test whether a source package has mmpack config
+    """
     tar = tarfile.open(srctar, mode='r:*')
     return 'mmpack/specs' in tar.getnames()
 
 
 def build_packages(node, workdir, tmpdir):
-    '''build project on given branch
+    """
+    build project on given branch
 
     Args:
         node: the build slave to work on
-        branch: git branch (accepts tag and sha1)
-        workdir: the *remote* working directory
-                 will be flushed when leaving
-        tmpdir: *local* directory that will receive the packages
-                (tmpdir is not cleansed by this function)
-    '''
+        workdir: the *remote* working directory will be flushed when leaving
+        tmpdir: *local* directory that will receive the packages (tmpdir is
+            not cleansed by this function)
+
+    Returns:
+        0 in case of success, -1 otherwise
+    """
     try:
         # upload source package to build slave node
         node.exec('mkdir -p ' + workdir)
@@ -262,7 +282,9 @@ def build_packages(node, workdir, tmpdir):
 
 
 def process_event(event, tmpdir):
-    'filter and processes event'
+    """
+    filter and processes event
+    """
     do_build, do_upload = _trigger_build(event)
     if do_build:
         # extract event information
@@ -331,9 +353,10 @@ def process_event(event, tmpdir):
 
 
 def gerrit_notify_error(g, event):
-    '''logs an error into gerrit
+    """
+    logs an error into gerrit
     This function is silent on error
-    '''
+    """
     try:
         project = event['change']['project']
         changeid = event['patchSet']['revision']
@@ -345,7 +368,9 @@ def gerrit_notify_error(g, event):
 
 
 def load_config(filename):
-    'load configuration file and return it as a dict'
+    """
+    load configuration file and return it as a dict
+    """
     # pylint: disable=global-statement
     global CONFIG
     # pylint: disable=global-variable-not-assigned
@@ -357,7 +382,9 @@ def load_config(filename):
 
 
 def main():
-    'main function'
+    """
+    main function
+    """
     load_config(CONFIG_FILEPATH)
     init_logger()
     g = gerrit.Gerrit(hostname=CONFIG['gerrit']['hostname'],

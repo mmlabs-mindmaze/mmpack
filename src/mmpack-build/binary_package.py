@@ -1,8 +1,8 @@
 # @mindmaze_header@
-'''
+"""
 Class to handle binary packages, their dependencies, symbol interface, and
 packaging as mmpack file.
-'''
+"""
 
 import importlib
 import os
@@ -23,16 +23,17 @@ from workspace import Workspace, get_staging_dir
 
 
 def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
-    '''
+    """
     filter function for tar creation that will remove all file attributes
     (uid, gid, mtime) from the file added to tar would can make the build
     of package not reproducible.
 
     Args:
         tarinfo: entry being added to the tar
-    Return:
+
+    Returns:
         the modified tarinfo that will be actually added to tar
-    '''
+    """
     tarinfo.uid = tarinfo.gid = 0
     tarinfo.uname = tarinfo.gname = 'root'
     tarinfo.mtime = 0
@@ -93,9 +94,9 @@ def _mmpack_lib_deps(soname: str,
 
 class BinaryPackage:
     # pylint: disable=too-many-instance-attributes
-    '''
+    """
     Binary package class
-    '''
+    """
 
     def __init__(self, name: str, version: Version, source: str, arch: str,
                  tag: str, spec_dir: str):
@@ -121,13 +122,14 @@ class BinaryPackage:
         self.install_files = set()
 
     def _get_specs_provides(self) -> Dict[str, Dict[str, Version]]:
-        ''' return a dict containing the specified interface of given package
+        """
+        return a dict containing the specified interface of given package
 
         Look for a <self.name>.provides file within the project's mmpack
         folder, load it and return its parsed values as a dictionary.
 
         return an empty interface dict if none was specified.
-        '''
+        """
         # TODO: also work with the last package published
         provide_spec_name = '{}/{}.provides'.format(self.spec_dir, self.name)
         dprint('reading symbols from ' + provide_spec_name)
@@ -153,10 +155,10 @@ class BinaryPackage:
         return 'var/lib/mmpack/metadata/{}.sha256sums'.format(self.name)
 
     def _gen_info(self, pkgdir: str):
-        '''
+        """
         This generate the info file and sha256sums. It must be the last step
         before calling _make_archive().
-        '''
+        """
         pushdir(pkgdir)
 
         # Create file containing of hashes of all installed files
@@ -215,19 +217,20 @@ class BinaryPackage:
         return mpkfile
 
     def create(self, instdir: str, pkgbuilddir: str) -> str:
-        '''
+        """
         Gather all the package data, generates metadata files
         (including exposed symbols), and create the mmpack package
         file.
 
         Args:
             instdir: folder from which the package must be populated
-            pkgbuilddir: build folder of source package. The staging file for
-                         the package as well as the created binary package file
-                         will be located in this folder.
-        Return:
+            pkgbuilddir: build folder of source package. The staging file
+                for the package as well as the created binary package file
+                will be located in this folder.
+
+        Returns:
             the path of the created binary package file (in pkgbuilddir)
-        '''
+        """
         stagedir = get_staging_dir(pkgbuilddir, self.name)
         os.makedirs(stagedir + '/MMPACK', exist_ok=True)
 
@@ -241,9 +244,9 @@ class BinaryPackage:
 
     def add_depend(self, name: str, minver: Version,
                    maxver: Version = Version('any')):
-        '''
+        """
         Add mmpack package as a dependency with a minimal version
-        '''
+        """
         dependencies = self._dependencies['depends']
         if name not in dependencies:
             dependencies[name] = [minver, maxver]
@@ -254,9 +257,9 @@ class BinaryPackage:
             dependencies[name] = [minver, maxver]
 
     def add_sysdepend(self, opaque_dep: str):
-        '''
+        """
         Add a system dependencies to the binary package
-        '''
+        """
         self._dependencies['sysdepends'].add(opaque_dep)
 
     def _provides_symbol(self, symbol_type: str, symbol: str) -> str:
@@ -266,7 +269,8 @@ class BinaryPackage:
         return None
 
     def gen_provides(self):
-        ''' Go through the install files, look for what this package provides
+        """
+        Go through the install files, look for what this package provides
 
         eg. scan elf libraries for symbols
             python files for top-level classes and functions
@@ -278,7 +282,7 @@ class BinaryPackage:
         Raises:
             ValueError: if a specified version is invalid or if a symbol in
                         the spec file is not found provided by the package
-        '''
+        """
         specs_provides = self._get_specs_provides()
 
         for inst_file in self.install_files:
@@ -324,10 +328,15 @@ class BinaryPackage:
 
     def _gen_lib_deps(self, soname: str, fileformat: str,
                       symbol_set: Set[str], binpkgs: List['BinaryPackages']):
-        '''
-            Args:
-                binpkgs: the list of packages currently being generated
-        '''
+        """
+        Generate the library dependencies given a library used
+
+        Args:
+            soname: soname of library used
+            fileformat: executable file format of the library used
+            symbol_set: set of used symbols that are still unassociated
+            binpkgs: the list of packages currently being generated
+        """
         # provided in the same package or a package being generated
         for pkg in binpkgs:
             if soname in pkg.provides[fileformat]:
@@ -372,9 +381,10 @@ class BinaryPackage:
                 self.add_depend(pkg.name, pkg.version, pkg.version)
 
     def _find_dll_dep(self, import_lib: str, binpkgs: List['BinaryPackages']):
-        ''' Adds to dependencies the package that hosts the dll associated
-            with import library.
-        '''
+        """
+        Adds to dependencies the package that hosts the dll associated with
+        import library.
+        """
         dll = get_linked_dll(import_lib)
         for pkg in binpkgs:
             pkg_dlls = [basename(f).lower() for f in pkg.install_files
@@ -385,7 +395,9 @@ class BinaryPackage:
                 return
 
     def gen_dependencies(self, binpkgs: List['BinaryPackages']):
-        'Go through the install files and search for dependencies.'
+        """
+        Go through the install files and search for dependencies.
+        """
         deps = {'elf': set(), 'pe': set(), 'python': set()}
         symbols = {'elf': set(), 'pe': set(), 'python': set()}
         for inst_file in self.install_files:

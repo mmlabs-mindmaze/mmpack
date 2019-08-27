@@ -1,5 +1,5 @@
 # @mindmaze_header@
-'''
+"""
 Create a mmpack package
 
 Usage:
@@ -26,7 +26,7 @@ $ mmpack pkg-create
 # From anywhere
 $ mmpack pkg-create --url ssh://git@intranet.mindmaze.ch:7999/~user/XXX.git \
                     --tag v1.0.0-custom-tag-target
-'''
+"""
 
 import os
 import sys
@@ -38,7 +38,9 @@ from workspace import Workspace, find_project_root_folder
 
 
 def parse_options(argv):
-    'parse and check options'
+    """
+    parse and check options
+    """
     parser = ArgumentParser(description=__doc__,
                             formatter_class=RawDescriptionHelpFormatter)
     group = parser.add_mutually_exclusive_group()
@@ -83,7 +85,9 @@ def parse_options(argv):
 
 
 def main():
-    'entry point to create a mmpack package'
+    """
+    entry point to create a mmpack package
+    """
     args = parse_options(sys.argv[1:])
 
     if args.url:

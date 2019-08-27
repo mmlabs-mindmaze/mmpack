@@ -1,7 +1,7 @@
 # @mindmaze_header@
-'''
+"""
 helper module containing pacman wrappers and file parsing functions
-'''
+"""
 
 import importlib
 from typing import Set
@@ -10,10 +10,12 @@ from common import shell
 
 
 def pacman_find_dependency(soname: str, symbol_set: Set[str]) -> str:
-    '''find pacman package providing given file
+    """
+    find pacman package providing given file
 
-    Raises: ShellException if the package could not be found
-    '''
+    Raises:
+        ShellException: the package could not be found
+    """
     pe_utils = importlib.import_module('pe_utils')
     filename = pe_utils.get_dll_from_soname(soname)
 

@@ -1,12 +1,12 @@
 # @mindmaze_header@
-'''
+"""
 Install given source package build dependencies.
 Uses current repository to find mmpack specfile if none given.
 
 System packages will be checked for only; command will fail if any
 system dependency is unmet. All the available mmpack packages found
 missing will be proposed for install within the current prefix.
-'''
+"""
 
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
@@ -18,7 +18,9 @@ from workspace import find_project_root_folder, Workspace
 
 
 def parse_option(argv):
-    'parse options'
+    """
+    parse options
+    """
     parser = ArgumentParser(description=__doc__,
                             formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument('specfile', type=str, nargs='?',
@@ -37,10 +39,16 @@ def parse_option(argv):
 
 
 def general_specs_builddeps(general):
-    ''' extract the system and mmpack build dependencies from the specs
+    """
+    extract the system and mmpack build dependencies from the specs
 
-    Args: the *general* section of the specs only
-    '''
+    Args:
+        general: content of general section of the specs only
+
+    Returns:
+        tuple of list of system build depeds and list of mmpack build
+        depends
+    """
     build_sysdeps_key = 'build-depends-' + get_host_dist()
     mmpack_builddeps = []
     system_builddeps = []
@@ -60,11 +68,12 @@ def general_specs_builddeps(general):
 
 def process_dependencies(system_builddeps, mmpack_builddeps,
                          prefix: str, assumeyes: bool):
-    ''' process given dependencies
+    """
+    process given dependencies
 
     1/ check sysdeps for presence
     2/ install mmpack deps if missing
-    '''
+    """
     # check sysdeps first
     if system_builddeps:
         sysdep_cmd = [LIBEXECDIR + '/mmpack/mmpack-check-sysdep']
@@ -93,7 +102,9 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
 
 
 def main():
-    'main function'
+    """
+    main function
+    """
     options = parse_option(sys.argv[1:])
     specs = yaml_load(options.specfile)['general']
 

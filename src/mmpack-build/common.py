@@ -1,7 +1,7 @@
 # @mindmaze_header@
-'''
+"""
 A set of helpers used throughout the mmpack project
-'''
+"""
 
 import logging
 import logging.handlers
@@ -26,10 +26,10 @@ TMP_LOG_STRLIST = []
 
 
 def set_log_file(filename):
-    '''
+    """
     Init logger to print to *filename*.
     Usually called via (e|i|d)print helpers.
-    '''
+    """
     global LOGGER  # pylint: disable=global-statement
 
     log_handler = logging.FileHandler(filename, mode='w')
@@ -43,10 +43,11 @@ def set_log_file(filename):
 
 
 def _log_or_store(level, *args, **kwargs):
-    ''' Log a message if the file-based logger has been created, otherwise
-        keep the message along with the level in TMP_LOG_STRLIST for
-        temporary storage until it because available
-    '''
+    """
+    Log a message if the file-based logger has been created, otherwise keep
+    the message along with the level in TMP_LOG_STRLIST for temporary
+    storage until it because available
+    """
     line = str(*args, **kwargs)
     if not LOGGER:
         TMP_LOG_STRLIST.append([level, line])
@@ -55,36 +56,47 @@ def _log_or_store(level, *args, **kwargs):
 
 
 def log_info(*args, **kwargs):
-    'write only to log as info'
+    """
+    write only to log as info
+    """
     _log_or_store(logging.ERROR, *args, **kwargs)
 
 
 def eprint(*args, **kwargs):
-    'error print: print to stderr'
+    """
+    error print: print to stderr
+    """
     _log_or_store(logging.ERROR, *args, **kwargs)
     print(*args, file=sys.stderr, **kwargs)
 
 
 def iprint(*args, **kwargs):
-    'info print: print only if verbose flag is set'
+    """
+    info print: print only if verbose flag is set
+    """
     _log_or_store(logging.INFO, *args, **kwargs)
     if CONFIG['verbose'] or CONFIG['debug']:
         print(*args, file=sys.stderr, **kwargs)
 
 
 def dprint(*args, **kwargs):
-    'debug print: standard print and log'
+    """
+    debug print: standard print and log
+    """
     _log_or_store(logging.DEBUG, *args, **kwargs)
     if CONFIG['debug']:
         print(*args, file=sys.stderr, **kwargs)
 
 
 class ShellException(RuntimeError):
-    'custom exception for shell command error'
+    """
+    custom exception for shell command error
+    """
 
 
 def shell(cmd, log=True):
-    '''Wrapper for subprocess.run
+    """
+    Wrapper for subprocess.run
 
     Args:
         cmd: Can be either a string or a list of strings
@@ -96,7 +108,7 @@ def shell(cmd, log=True):
 
     Returns:
         the output of the command decoded to utf-8
-    '''
+    """
     if isinstance(cmd, list):
         run_shell = False
         logmsg = ' '.join(cmd)
@@ -127,7 +139,9 @@ PUSHSTACK = []
 
 
 def pushdir(dirname):
-    'Save and then change the current directory'
+    """
+    Save and then change the current directory
+    """
     PUSHSTACK.append(os.getcwd())
     dprint('cd ' + dirname)
     os.chdir(dirname)
@@ -143,12 +157,16 @@ def popdir(num=1):
 
 
 def git_root():
-    'Get the git top directory'
+    """
+    Get the git top directory
+    """
     shell('git rev-parse --show-toplevel')
 
 
 def remove_duplicates(lst):
-    'remove duplicates from list (in place)'
+    """
+    remove duplicates from list (in place)
+    """
     for elt in list(lst):
         while lst and lst.count(elt) > 1:
             lst.remove(elt)
@@ -156,7 +174,9 @@ def remove_duplicates(lst):
 
 def yaml_serialize(obj: Union[list, dict], filename: str,
                    use_block_style: bool = False) -> None:
-    'Save object as yaml file of given name'
+    """
+    Save object as yaml file of given name
+    """
     default_flow_style = None
     if use_block_style:
         default_flow_style = False
@@ -170,19 +190,21 @@ def yaml_serialize(obj: Union[list, dict], filename: str,
 
 
 def mm_representer(dumper, data):
-    '''
+    """
     enforce yaml interpretation of given complex object type as unicode
     classes which want to benefit must add themselves as follows:
 
       yaml.add_representer(<class-name>, mm_representer)
 
     (Otherwise, they will be printed with a !!python/object tag)
-    '''
+    """
     return dumper.represent_data(repr(data))
 
 
 def _set_representer(dumper, data):
-    'dump python set as list'
+    """
+    dump python set as list
+    """
     return dumper.represent_data(list(data))
 
 
@@ -190,7 +212,8 @@ yaml.add_representer(set, _set_representer)
 
 
 def sha256sum(filename: str, follow_symlink: bool = True) -> str:
-    ''' compute the SHA-256 hash of a file
+    """
+    compute the SHA-256 hash of a file
 
     This returns the SHA256 string of filename. If follow_symlink is False,
     a symlink will not be followed. Additionnaly, a short indicator will be
@@ -201,10 +224,11 @@ def sha256sum(filename: str, follow_symlink: bool = True) -> str:
     Args:
         filename: path of file whose hash must be computed
         follow_symlink: symlink must not be followed and computed hash must
-                        be type specific
+            be type specific
+
     Returns:
         a string containing hexadecimal value of hash
-    '''
+    """
     sha = sha256()
     if not follow_symlink and os.path.islink(filename):
         # Compute sha256 of symlink target and replace beginning with "sym"
@@ -221,7 +245,9 @@ def sha256sum(filename: str, follow_symlink: bool = True) -> str:
 
 
 def get_host_arch() -> str:
-    'return the host arch'
+    """
+    return the host arch
+    """
     arch = platform.machine().lower()
     if arch == 'x86_64':
         arch = 'amd64'
@@ -230,7 +256,9 @@ def get_host_arch() -> str:
 
 
 def get_host_dist() -> str:
-    'return host distribution'
+    """
+    return host distribution
+    """
     try:
         for line in open("/etc/os-release", "r"):
             if line.startswith('ID='):
@@ -242,7 +270,8 @@ def get_host_dist() -> str:
 
 
 def get_host_arch_dist() -> str:
-    ''' return the host arch
+    """
+    return the host arch
 
     Format is <cpu arch>-<os>, and the values are converted if necessary.
     possible archs: amd64, i386, aarch64, ...
@@ -252,15 +281,16 @@ def get_host_arch_dist() -> str:
         amd64-debian
         aarch64-debian
         i386-windows
-    '''
+    """
 
     return '{0}-{1}'.format(get_host_arch(), get_host_dist())
 
 
 def parse_soname(soname: str) -> (str, str):
-    ''''helper to parse soname
+    """
+    helper to parse soname
     www.debian.org/doc/debian-policy/ch-sharedlibs.html
-    '''
+    """
     # try format: <name>.so.<major-version>
     try:
         name, major = soname.split('.so.')
@@ -289,5 +319,7 @@ def parse_soname(soname: str) -> (str, str):
 
 
 def yaml_load(filename: str):
-    'helper: load yaml file with BasicLoader'
+    """
+    helper: load yaml file with BasicLoader
+    """
     return yaml.load(open(filename, 'rb').read(), Loader=yaml.BaseLoader)
