@@ -253,6 +253,20 @@ endif
 scan-build:
 	scan-build -analyze-headers $(SCAN_BUILD_OPTIONS) $(MAKE)
 
+EXTRA_DIST += devtools/uncrustify.cfg
+.PHONY: fixstyle
+fixstyle: devtools/uncrustify.cfg
+	cd $(srcdir) && uncrustify -c devtools/uncrustify.cfg -l C --replace \
+		$(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
+		$(mount_mmpack_prefix_SOURCES)
+
+# check all the source files for correct coding style
+.PHONY: checkstyle
+checkstyle: devtools/uncrustify.cfg
+	cd $(srcdir) && uncrustify -c devtools/uncrustify.cfg -l C --check \
+	   $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
+	   $(mount_mmpack_prefix_SOURCES)
+
 #
 # TESTS RULES
 #
