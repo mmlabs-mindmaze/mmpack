@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
 		fprintf(stderr, "usage %s <prefix> <command>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
+
 	prefix_path = argv[1];
 
 	// Create a new mount namespace
@@ -80,8 +81,8 @@ int main(int argc, char* argv[])
 
 	// Do mount prefix path to mmpack mount target
 	if (mount(prefix_path, MOUNT_TARGET, NULL, MS_BIND, NULL)) {
-		fprintf(stderr, "mount of %s on "MOUNT_TARGET" failed: %s\n",
-		                prefix_path, strerror(errno));
+		fprintf(stderr, "mount of %s on "MOUNT_TARGET " failed: %s\n",
+		        prefix_path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

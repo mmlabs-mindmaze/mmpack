@@ -82,9 +82,10 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return complete_pkgname(ctx, argv[argc-1], ONLY_INSTALLED);
 
 	if (arg_index+1 > argc) {
-		fprintf(stderr, "missing package list argument in command line\n"
-		                "Run \"mmpack remove --help\" to see usage\n");
-	return -1;
+		fprintf(stderr,
+		        "missing package list argument in command line\n"
+		        "Run \"mmpack remove --help\" to see usage\n");
+		return -1;
 	}
 
 	nreq = argc - arg_index;
@@ -122,6 +123,7 @@ exit:
 		mmstr_free(reqlist[i].name);
 		mmstr_free(reqlist[i].version);
 	}
+
 	mm_freea(reqlist);
 	return rv;
 }

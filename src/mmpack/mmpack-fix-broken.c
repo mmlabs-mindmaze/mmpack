@@ -41,17 +41,20 @@ int fix_broken_package(struct mmpack_ctx * ctx, mmstr const * pkg_name,
 
 	if (installed_pkg == NULL) {
 		error("Package \"%s\" not found as installed.\n"
-				"fix-broken can only work on installed packages.\n", pkg_name);
+		      "fix-broken can only work on installed packages.\n",
+		      pkg_name);
 		goto exit;
 	}
 
-	stack = mmpack_action_stack_push(stack, INSTALL_PKG, installed_pkg, NULL);
+	stack = mmpack_action_stack_push(stack, INSTALL_PKG,
+	                                 installed_pkg, NULL);
 
 	if (!unattended) {
 		rv = confirm_action_stack_if_needed(0, stack);
 		if (rv != 0)
 			goto exit;
 	}
+
 	rv = apply_action_stack(ctx, stack);
 
 exit:
@@ -65,18 +68,17 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 {
 	int rv;
 	mmstr * sha256sums;
-	struct cb_data * data = (struct cb_data *) void_data;
+	struct cb_data * data = (struct cb_data*) void_data;
 
-	if (pkg->state == MMPACK_PKG_INSTALLED)
-	{
+	if (pkg->state == MMPACK_PKG_INSTALLED) {
 		sha256sums = get_sha256sums_file(data->ctx->prefix, pkg->name);
 		rv = check_pkg(data->ctx->prefix, sha256sums);
 		mmstr_free(sha256sums);
 
 		if (rv != 0) {
 			data->found = 1;
-			info("Trying to fix broken installed package: %s (%s) ... \n",
-			     pkg->name, pkg->version);
+			info("Trying to fix broken installed package: "
+			     "%s (%s) ... \n", pkg->name, pkg->version);
 			rv = fix_broken_package(data->ctx, pkg->name, 0);
 			if (rv != 0) {
 				data->error = 1;
@@ -134,14 +136,15 @@ int mmpack_fix_broken(struct mmpack_ctx * ctx, int argc, const char ** argv)
 		if (rv != 0)
 			break;
 	}
+
 	if (nreq == 0) {
-		binindex_foreach(&ctx->binindex, binindex_cb, (void *) &data);
+		binindex_foreach(&ctx->binindex, binindex_cb, (void*) &data);
 		if (data.found) {
 			if (data.error) {
 				info("Failure! You have held broken packages.\n");
 				rv = -1;
 			} else {
-				info("Success! You have fixed all your broken packages.\n");
+				info("Success! Fixed all the broken packages.\n");
 			}
 		}
 	}

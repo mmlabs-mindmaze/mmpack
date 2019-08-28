@@ -25,13 +25,14 @@ struct cb_data {
 static
 int binindex_cb(struct mmpkg* pkg, void * void_data)
 {
-	struct cb_data * data = (struct cb_data *) void_data;
+	struct cb_data * data = (struct cb_data*) void_data;
 
 	if (strstr(pkg->name, data->pkg_name) != 0) {
 		data->found = 1;
 		printf("%s %s (%s)\n",
-		       pkg->state == MMPACK_PKG_INSTALLED ? "[installed]":"[available]",
-		       pkg->name, pkg->version);
+		       pkg->state == MMPACK_PKG_INSTALLED ? "[installed]" : "[available]",
+		       pkg->name,
+		       pkg->version);
 	}
 
 	return 0;
@@ -59,7 +60,7 @@ int mmpack_search(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (argc != 2
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "-h")) {
-		fprintf(stderr, "Usage:\n\tmmpack "SEARCH_SYNOPSIS"\n");
+		fprintf(stderr, "Usage:\n\tmmpack "SEARCH_SYNOPSIS "\n");
 		return argc != 2 ? -1 : 0;
 	}
 
@@ -72,7 +73,8 @@ int mmpack_search(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	data.found = 0;
 	binindex_foreach(&ctx->binindex, binindex_cb, &data);
 	if (!data.found)
-		printf("No package found matching pattern: \"%s\"\n", data.pkg_name);
+		printf("No package found matching pattern: \"%s\"\n",
+		       data.pkg_name);
 
 	return 0;
 }

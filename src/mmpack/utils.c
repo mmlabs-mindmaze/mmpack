@@ -22,9 +22,9 @@
 #include "sha256.h"
 #include "utils.h"
 
-#define MSG_MAXLEN              128
-#define HASH_UPDATE_SIZE        512
-#define BLK_SIZE                512
+#define MSG_MAXLEN 128
+#define HASH_UPDATE_SIZE 512
+#define BLK_SIZE 512
 
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
@@ -208,7 +208,7 @@ int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 		mmstr_dirname(dirpath, path);
 		if (mm_mkdir(dirpath, 0777, MM_RECURSIVE)) {
 			fprintf(stderr, "Create parent dir of %s failed: %s\n",
-		                path, mmstrerror(mm_get_lasterror_number()));
+			        path, mmstrerror(mm_get_lasterror_number()));
 			return -1;
 		}
 	}
@@ -217,7 +217,7 @@ int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 	fd = mm_open(path, oflag, 0666);
 	if (fd < 0)
 		fprintf(stderr, "Failed to open %s: %s\n",
-		                path, mmstrerror(mm_get_lasterror_number()));
+		        path, mmstrerror(mm_get_lasterror_number()));
 
 	return fd;
 }
@@ -229,14 +229,15 @@ int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
  *                                                                        *
  **************************************************************************/
 
-#if defined(_WIN32)
+#if defined (_WIN32)
 LOCAL_SYMBOL
 os_id get_os_id(void)
 {
 	return OS_ID_WINDOWS_10;
 }
-#elif defined( __linux)
-#define OS_ID_CMD "grep '^ID=' /etc/os-release | cut -f2- -d= | sed -e 's/\"//g'"
+#elif defined (__linux)
+#define OS_ID_CMD \
+	"grep '^ID=' /etc/os-release | cut -f2- -d= | sed -e 's/\"//g'"
 LOCAL_SYMBOL
 os_id get_os_id(void)
 {
@@ -253,7 +254,7 @@ os_id get_os_id(void)
 		goto exit;
 
 	if (strncasecmp(line, "ubuntu", len)
-			||  strncasecmp(line, "debian", len))
+	    || strncasecmp(line, "debian", len))
 		id = OS_ID_DEBIAN;
 
 exit:
@@ -267,7 +268,7 @@ os_id get_os_id(void)
 {
 	return OS_IS_UNKNOWN;
 }
-#endif
+#endif /* if defined (_WIN32) */
 
 
 /**************************************************************************
@@ -401,10 +402,11 @@ int sha_regfile_compute(mmstr* hash, const mmstr* path, int with_prefix)
 		mmstr_setlen(hash, SHA_HEXSTR_LEN - SHA_HDRLEN);
 	}
 
-	if (  (fd = mm_open(path, O_RDONLY, 0)) < 0
-	   || sha_fd_compute(hexstr, fd)) {
+	if ((fd = mm_open(path, O_RDONLY, 0)) < 0
+	    || sha_fd_compute(hexstr, fd)) {
 		rv = -1;
 	}
+
 	mm_close(fd);
 
 	return rv;
@@ -505,7 +507,7 @@ int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent,
 		rv = sha_symlink_compute(hash, filename, st.size);
 	} else {
 		rv = mm_raise_error(EINVAL, "%s is neither a regular file "
-		                            "or symlink", filename);
+		                    "or symlink", filename);
 	}
 
 exit:
@@ -540,6 +542,7 @@ int prompt_user_confirm(void)
 	printf("Do you want to proceed? [y/N] ");
 	if (fgets(line, sizeof(line), stdin) == NULL)
 		return -1;
+
 	rv = sscanf(line, "%c\n", &answer);
 	if (rv != 0 && rv != EOF && answer == 'y')
 		return 0;
@@ -868,8 +871,8 @@ int execute_cmd(char* argv[])
 	int status;
 	mm_pid_t pid;
 
-	if (  mm_spawn(&pid, argv[0], 0, NULL, 0, argv, NULL)
-	   || mm_wait_process(pid, &status))
+	if (mm_spawn(&pid, argv[0], 0, NULL, 0, argv, NULL)
+	    || mm_wait_process(pid, &status))
 		return -1;
 
 	if (MM_WSTATUS_SIGNALED & status)

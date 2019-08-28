@@ -55,7 +55,7 @@ WCHAR* copy_first_arg(WCHAR* str, WCHAR* cmdline)
 	WCHAR c;
 
 	// Loop over all character in cmdline (until null termination)
-	while ( (c = *curr) != '\0') {
+	while ((c = *curr) != '\0') {
 		switch (c) {
 		case '\\':
 			nbackslash++;

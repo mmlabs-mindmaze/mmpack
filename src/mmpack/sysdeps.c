@@ -20,7 +20,7 @@
  *                       dpkg-based sysdeps checking                      *
  *                                                                        *
  **************************************************************************/
-#define CHECK_DPKG_INSTALLED	PKGDATADIR"/check-dpkg-installed"
+#define CHECK_DPKG_INSTALLED PKGDATADIR "/check-dpkg-installed"
 
 /**
  * dpkg_concat_sysdeps() - create a combined string of all sysdeps
@@ -92,7 +92,7 @@ int dpkg_check_sysdeps_installed(const struct strset* sysdeps)
  *                                                                        *
  **************************************************************************/
 
-#define DEFAULT_MSYS2   "C:\\msys64"
+#define DEFAULT_MSYS2 "C:\\msys64"
 
 static
 const mmstr* get_msys2_root(void)
@@ -109,7 +109,7 @@ const mmstr* get_msys2_root(void)
 	buffer_init(&cmd_output);
 	if (execute_cmd_capture_output(argv, &cmd_output)) {
 		mmlog_warn("Could not execute cygpath. Assuming MSYS2 root"
-                           " is "DEFAULT_MSYS2);
+		           " is "DEFAULT_MSYS2);
 		mmstrcpy_cstr(msys2_root, DEFAULT_MSYS2);
 		goto exit;
 	}
@@ -208,8 +208,8 @@ int pacman_populate_instpkgs(struct strset* instpkgs, const mmstr* path)
 			continue;
 
 		name = mmstrcpy_cstr_realloc(name, dirent->name);
-		if (  STR_EQUAL(name, mmstrlen(name), ".")
-		   || STR_EQUAL(name, mmstrlen(name), "..") )
+		if (STR_EQUAL(name, mmstrlen(name), ".")
+		    || STR_EQUAL(name, mmstrlen(name), "..") )
 			continue;
 
 		// Form desc file path: <path>/<pkg-ver>/desc

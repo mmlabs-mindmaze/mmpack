@@ -26,12 +26,12 @@ struct cb_data {
 static
 int binindex_cb(struct mmpkg* pkg, void * void_data)
 {
-	struct cb_data * data = (struct cb_data *) void_data;
+	struct cb_data * data = (struct cb_data*) void_data;
 
 	if (strcmp(pkg->name, data->pkg_name) == 0) {
 		data->found = 1;
 		printf("%s (%s) %s\n", pkg->name, pkg->version,
-		       pkg->state == MMPACK_PKG_INSTALLED ? "[installed]":"");
+		       pkg->state == MMPACK_PKG_INSTALLED ? "[installed]" : "");
 
 		printf("Package file: %s\n", pkg->filename);
 		printf("SHA256: %s\n", pkg->sha256);
@@ -79,9 +79,10 @@ int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "-h")) {
 		fprintf(stderr, "missing package argument in command line\n"
-		                "Usage:\n\tmmpack show "SHOW_SYNOPSIS"\n");
+		        "Usage:\n\tmmpack show "SHOW_SYNOPSIS "\n");
 		return argc != 2 ? -1 : 0;
 	}
+
 	data.pkg_name = argv[1];
 
 	// Load prefix configuration and caches

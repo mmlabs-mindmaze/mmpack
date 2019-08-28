@@ -43,7 +43,7 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 
 	instlist_relpath = mmstr_alloca_from_cstr(INSTALLED_INDEX_RELPATH);
 	log_relpath = mmstr_alloca_from_cstr(LOG_RELPATH);
-	avllist_relpath = mmstr_alloca_from_cstr(REPO_INDEX_RELPATH".0");
+	avllist_relpath = mmstr_alloca_from_cstr(REPO_INDEX_RELPATH ".0");
 
 	oflag = O_WRONLY|O_CREAT| (force_create ? O_TRUNC : O_EXCL);
 
@@ -131,14 +131,14 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 	if (arg_index+1 != argc) {
 		fprintf(stderr, "Bad usage of mkprefix command.\n"
-		                "Run \"mmpack mkprefix --help\" to see usage\n");
+		        "Run \"mmpack mkprefix --help\" to see usage\n");
 		return -1;
 	}
 
 	prefix = mmstr_alloca_from_cstr(argv[arg_index]);
 
-	if (  create_initial_empty_files(prefix, force_mkprefix)
-	   || create_initial_prefix_cfg(prefix, repo_url, force_mkprefix) ) {
+	if (create_initial_empty_files(prefix, force_mkprefix)
+	    || create_initial_prefix_cfg(prefix, repo_url, force_mkprefix) ) {
 		fprintf(stderr, "Failed to create mmpack prefix: %s\n", prefix);
 		return -1;
 	}

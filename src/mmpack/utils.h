@@ -20,7 +20,7 @@ os_id get_os_id(void);
 static inline
 int is_path_separator(char c)
 {
-#if defined(_WIN32)
+#if defined (_WIN32)
 	return (c == '\\' || c == '/');
 #else
 	return (c == '/');
@@ -28,14 +28,17 @@ int is_path_separator(char c)
 }
 
 
-
 #define MMPACK_STATEDIR_RELPATH "var/lib/mmpack"
-#define INSTALLED_INDEX_RELPATH MMPACK_STATEDIR_RELPATH "/installed.yaml"
-#define REPO_INDEX_RELPATH      MMPACK_STATEDIR_RELPATH "/binindex.yaml"
-#define METADATA_RELPATH        MMPACK_STATEDIR_RELPATH "/metadata"
-#define PKGS_CACHEDIR_RELPATH   "var/cache/mmpack/pkgs"
-#define CFG_RELPATH             "etc/mmpack-config.yaml"
-#define LOG_RELPATH             "var/log/mmpack.log"
+#define CFG_RELPATH "etc/mmpack-config.yaml"
+#define LOG_RELPATH "var/log/mmpack.log"
+#define PKGS_CACHEDIR_RELPATH "var/cache/mmpack/pkgs"
+
+#define INSTALLED_INDEX_RELPATH \
+	MMPACK_STATEDIR_RELPATH "/installed.yaml"
+#define REPO_INDEX_RELPATH \
+	MMPACK_STATEDIR_RELPATH "/binindex.yaml"
+#define METADATA_RELPATH \
+	MMPACK_STATEDIR_RELPATH "/metadata"
 
 mmstr* get_default_mmpack_prefix(void);
 mmstr* get_config_filename(void);
@@ -44,7 +47,8 @@ mmstr* set_cacheindex_relpath(mmstr* str, int repo_index);
 #define SHA_HDR_REG "reg-"
 #define SHA_HDR_SYM "sym-"
 #define SHA_HDRLEN 4
-#define SHA_HEXSTR_LEN (SHA_HDRLEN + 32*2) // string of header and SHA-256 in hexa (\0 NOT incl.)
+/* string of header and SHA-256 in hexa (\0 NOT incl.) */
+#define SHA_HEXSTR_LEN (SHA_HDRLEN + 32*2)
 
 int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent,
                 int follow);

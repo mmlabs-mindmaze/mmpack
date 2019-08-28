@@ -74,15 +74,18 @@ struct pkg_request* get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 
 	reqlist = NULL;
 
-	for (i = 0 ; i < nreq ; i++) {
+	for (i = 0; i < nreq; i++) {
 		pkg_name = mmstr_malloc_from_cstr(req_args[i]);
 		pkg = install_state_get_pkg(&ctx->installed, pkg_name);
 		mmstr_free(pkg_name);
-		latest = binindex_get_latest_pkg(&ctx->binindex, pkg->name, any_version);
+		latest = binindex_get_latest_pkg(&ctx->binindex,
+		                                 pkg->name,
+		                                 any_version);
 
 		if (pkg_version_compare(pkg->version, latest->version) >= 0) {
-			printf("Package \"%s\" is already at its latest possible version (%s).\n",
-					pkg->name, pkg->version);
+			printf("Package \"%s\" is already at its"
+			       "latest possible version (%s).\n",
+			       pkg->name, pkg->version);
 			continue;
 		}
 

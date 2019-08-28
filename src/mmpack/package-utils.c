@@ -76,6 +76,7 @@ void write_yaml_mmstr_multiline(FILE* fp, int num_indent, const char* str)
 		} else {
 			linelen = strlen(line);
 		}
+
 		fprintf(fp, "%*s%.*s\n", num_indent, " ", linelen, line);
 		line = next;
 	}
@@ -227,22 +228,22 @@ void mmpkg_dump(struct mmpkg const * pkg)
 static
 int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache)
 {
-	if (  !pkg->version
-	   || !pkg->sumsha
-	   || !pkg->source)
+	if (!pkg->version
+	    || !pkg->sumsha
+	    || !pkg->source)
 		return mm_raise_error(EINVAL, "Invalid package data for %s."
-		                              " Missing fields.", pkg->name);
+		                      " Missing fields.", pkg->name);
 
 	if (!in_repo_cache)
 		return 0;
 
-	if (  !pkg->sha256
-	   || !pkg->size
-	   || !pkg->filename)
+	if (!pkg->sha256
+	    || !pkg->size
+	    || !pkg->filename)
 		return mm_raise_error(EINVAL, "Invalid package data for %s."
-		                              " Missing fields needed in"
-		                              " repository package index.",
-		                              pkg->name);
+		                      " Missing fields needed in"
+		                      " repository package index.",
+		                      pkg->name);
 
 	return 0;
 }
@@ -254,18 +255,19 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 	const struct strlist_elt* elt;
 
 	fprintf(fp, "%s:\n"
-	            "    version: %s\n"
-	            "    source: %s\n"
-	            "    sumsha256sums: %s\n",
-		    pkg->name, pkg->version, pkg->source, pkg->sumsha);
+	        "    version: %s\n"
+	        "    source: %s\n"
+	        "    sumsha256sums: %s\n",
+	        pkg->name, pkg->version, pkg->source, pkg->sumsha);
 
 	fprintf(fp, "    depends:");
-	mmpkg_dep_save_to_index(pkg->mpkdeps, fp, 2/*indentation level*/);
+	mmpkg_dep_save_to_index(pkg->mpkdeps, fp, 2 /*indentation level*/);
 
 	fprintf(fp, "    sysdepends: [");
 	for (elt = pkg->sysdeps.head; elt != NULL; elt = elt->next) {
 		fprintf(fp, "'%s'%s", elt->str.buf, elt->next ? ", " : "");
 	}
+
 	fprintf(fp, "]\n");
 
 	fprintf(fp, "    description: ");
@@ -282,7 +284,7 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
  * Return: an initialized mmpkg_dep structure
  */
 LOCAL_SYMBOL
-struct mmpkg_dep * mmpkg_dep_create(char const * name)
+struct mmpkg_dep* mmpkg_dep_create(char const * name)
 {
 	struct mmpkg_dep * dep = mm_malloc(sizeof(*dep));
 	memset(dep, 0, sizeof(*dep));
@@ -331,6 +333,7 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type)
 		else
 			printf("\t\t [%s] %s [%s -> %s]\n", type, d->name,
 			       d->min_version, d->max_version);
+
 		d = d->next;
 	}
 }
@@ -365,11 +368,12 @@ void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
  * Return: 1 if @pkg is not NULL and meet requirement of @dep, 0 otherwise
  */
 static
-int mmpkg_dep_match_version(const struct mmpkg_dep* dep, const struct mmpkg* pkg)
+int mmpkg_dep_match_version(const struct mmpkg_dep* dep,
+                            const struct mmpkg* pkg)
 {
-	return (  pkg != NULL
-	       && pkg_version_compare(pkg->version, dep->max_version) <= 0
-	       && pkg_version_compare(dep->min_version, pkg->version) <= 0);
+	return (pkg != NULL
+	        && pkg_version_compare(pkg->version, dep->max_version) <= 0
+	        && pkg_version_compare(dep->min_version, pkg->version) <= 0);
 }
 
 
@@ -382,7 +386,7 @@ int mmpkg_dep_match_version(const struct mmpkg_dep* dep, const struct mmpkg* pkg
 static
 void rdepends_init(struct rdepends* rdeps)
 {
-	*rdeps = (struct rdepends){0};
+	*rdeps = (struct rdepends) {0};
 }
 
 
@@ -408,9 +412,10 @@ void rdepends_add(struct rdepends* rdeps, int pkgname_id)
 	int i, nmax;
 
 	// Check the reverse dependency has not been added yet.
-	for (i = 0; i < rdeps->num; i++)
+	for (i = 0; i < rdeps->num; i++) {
 		if (rdeps->ids[i] == pkgname_id)
 			return;
+	}
 
 	// Resize if too small
 	if (rdeps->num+1 > rdeps->nmax) {
@@ -441,7 +446,7 @@ void rdepends_add(struct rdepends* rdeps, int pkgname_id)
 static
 void pkglist_init(struct pkglist* list, const mmstr* name, int id)
 {
-	*list = (struct pkglist){.pkg_name = mmstrdup(name), .id = id};
+	*list = (struct pkglist) {.pkg_name = mmstrdup(name), .id = id};
 	rdepends_init(&list->rdeps);
 }
 
@@ -493,7 +498,7 @@ void pkglist_deinit(struct pkglist* list)
  * Return: a pointer to new package in list
  */
 static
-struct mmpkg * pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
+struct mmpkg* pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 {
 	struct pkglist_entry* entry;
 	struct pkglist_entry** pnext;
@@ -505,8 +510,8 @@ struct mmpkg * pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 	// (ie has the same sumsha and version).
 	for (entry = list->head; entry != NULL; entry = entry->next) {
 		// Check the entry match version and sumsha
-		if (  !mmstrequal(pkg->version, entry->pkg.version)
-		   || !mmstrequal(pkg->sumsha, entry->pkg.sumsha))
+		if (!mmstrequal(pkg->version, entry->pkg.version)
+		    || !mmstrequal(pkg->sumsha, entry->pkg.sumsha))
 			continue;
 
 		// Update repo specific fields if repo index is not set
@@ -522,6 +527,7 @@ struct mmpkg * pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 			pkg->sha256 = NULL;
 			pkg->filename = NULL;
 		}
+
 		return pkg_in_list;
 	}
 
@@ -606,7 +612,7 @@ struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
 
 LOCAL_SYMBOL
 int binindex_foreach(struct binindex * binindex,
-                     int (*cb)(struct mmpkg*, void *),
+                     int (*cb)(struct mmpkg*, void*),
                      void * data)
 {
 	int rv;
@@ -618,6 +624,7 @@ int binindex_foreach(struct binindex * binindex,
 		rv = cb(pkg, data);
 		if (rv != 0)
 			return rv;
+
 		pkg = pkg_iter_next(&iter);
 	}
 
@@ -702,8 +709,9 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
  * Return: NULL on error, a pointer to the found package otherwise
  */
 LOCAL_SYMBOL
-struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr const * name,
-                                             mmstr const * max_version)
+struct mmpkg const* binindex_get_latest_pkg(struct binindex* binindex,
+                                            mmstr const * name,
+                                            mmstr const * max_version)
 {
 	struct mmpkg * pkg, * latest_pkg;
 	struct pkglist_entry* pkgentry;
@@ -720,8 +728,8 @@ struct mmpkg const * binindex_get_latest_pkg(struct binindex* binindex, mmstr co
 
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
-		if (  pkg_version_compare(latest_version, pkg->version) <= 0
-		   && pkg_version_compare(pkg->version, max_version) <= 0) {
+		if (pkg_version_compare(latest_version, pkg->version) <= 0
+		    && pkg_version_compare(pkg->version, max_version) <= 0) {
 			latest_pkg = pkg;
 			latest_version = pkg->version;
 		}
@@ -881,6 +889,7 @@ struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
 
 		compdep->pkgs[num_pkg++] = &entry->pkg;
 	}
+
 	used_size = compiled_dep_size(num_pkg);
 
 	compdep->pkgname_id = list - binindex->pkgname_table;
@@ -904,9 +913,9 @@ struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
  * by @buff.
  */
 LOCAL_SYMBOL
-struct compiled_dep * compile_package(const struct binindex* binindex,
-                                      struct mmpkg const * pkg,
-                                      struct buffer* buff)
+struct compiled_dep* compile_package(const struct binindex* binindex,
+                                     struct mmpkg const * pkg,
+                                     struct buffer* buff)
 {
 	size_t size;
 	struct compiled_dep* compdep;
@@ -917,7 +926,7 @@ struct compiled_dep * compile_package(const struct binindex* binindex,
 
 	size = compiled_dep_size(1);
 	compdep = buffer_reserve_data(buff, size);
-	compdep->pkgs[0] = (struct mmpkg *) pkg;
+	compdep->pkgs[0] = (struct mmpkg*) pkg;
 	compdep->pkgname_id = list - binindex->pkgname_table;
 	compdep->num_pkg = 1;
 	compdep->next_entry_delta = size / sizeof(*compdep);
@@ -998,7 +1007,7 @@ const int* binindex_get_potential_rdeps(const struct binindex* binindex,
 
 
 static
-struct mmpkg * binindex_add_pkg(struct binindex* binindex, struct mmpkg* pkg)
+struct mmpkg* binindex_add_pkg(struct binindex* binindex, struct mmpkg* pkg)
 {
 	struct pkglist* pkglist;
 	int pkgname_id;
@@ -1040,6 +1049,7 @@ void binindex_compute_rdepends(struct binindex* binindex)
 
 			dep = dep->next;
 		}
+
 		pkg = pkg_iter_next(&iter);
 	}
 }
@@ -1083,9 +1093,10 @@ enum field_type get_scalar_field_type(const char* key)
 {
 	int i;
 
-	for (i = 0; i < MM_NELEM(scalar_field_names); i++)
+	for (i = 0; i < MM_NELEM(scalar_field_names); i++) {
 		if (strcmp(key, scalar_field_names[i]) == 0)
 			return i;
+	}
 
 	return FIELD_UNKNOWN;
 }
@@ -1097,7 +1108,7 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg, enum field_type type,
 {
 	const mmstr** field = NULL;
 
-	switch(type) {
+	switch (type) {
 	case FIELD_VERSION:
 		field = &pkg->version;
 		break;
@@ -1169,26 +1180,32 @@ int mmpack_parse_dependency(struct parsing_ctx* ctx,
 {
 	int exitvalue;
 	yaml_token_t token;
+	char const * val;
 
 	exitvalue = -1;
 	while (1) {
 		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto exit;
 
-		switch(token.type) {
+		switch (token.type) {
 		case YAML_FLOW_SEQUENCE_END_TOKEN:
-			if (dep->min_version != NULL && dep->max_version != NULL)
+			if (dep->min_version != NULL &&
+			    dep->max_version != NULL)
 				exitvalue = 0;
+
 			goto exit;
 
 		case YAML_SCALAR_TOKEN:
+			val = (char const*) token.data.scalar.value;
 			if (dep->min_version == NULL) {
-				dep->min_version = mmstr_malloc_from_cstr((char const *) token.data.scalar.value);
+				dep->min_version = mmstr_malloc_from_cstr(val);
 			} else {
-				if (dep->max_version != NULL) 
+				if (dep->max_version != NULL)
 					goto exit;
-				dep->max_version = mmstr_malloc_from_cstr((char const *) token.data.scalar.value);
+
+				dep->max_version = mmstr_malloc_from_cstr(val);
 			}
+
 			break;
 
 		default: /* ignore */
@@ -1196,7 +1213,7 @@ int mmpack_parse_dependency(struct parsing_ctx* ctx,
 		}
 
 		yaml_token_delete(&token);
-	};
+	}
 
 exit:
 	yaml_token_delete(&token);
@@ -1232,7 +1249,7 @@ int mmpack_parse_deplist(struct parsing_ctx* ctx,
 		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto exit;
 
-		switch(token.type) {
+		switch (token.type) {
 		case YAML_STREAM_END_TOKEN:
 			goto exit;
 
@@ -1249,22 +1266,26 @@ int mmpack_parse_deplist(struct parsing_ctx* ctx,
 			break;
 
 		case YAML_FLOW_SEQUENCE_START_TOKEN:
-				if (dep == NULL)
-					goto exit;
-				exitvalue = mmpack_parse_dependency(ctx, pkg, dep);
-				if (exitvalue != 0)
-					goto exit;
-				dep = NULL;
-				type = -1;
+			if (dep == NULL)
+				goto exit;
 
-				break;
+			exitvalue = mmpack_parse_dependency(ctx, pkg, dep);
+			if (exitvalue != 0)
+				goto exit;
+
+			dep = NULL;
+			type = -1;
+
+			break;
 
 		case YAML_SCALAR_TOKEN:
 			switch (type) {
 			case YAML_KEY_TOKEN:
 				if (dep != NULL)
 					goto exit;
-				dep = mmpkg_dep_create((char const *)token.data.scalar.value);
+
+				dep = mmpkg_dep_create(
+					(char const*)token.data.scalar.value);
 				break;
 
 			default:
@@ -1273,14 +1294,15 @@ int mmpack_parse_deplist(struct parsing_ctx* ctx,
 				type = -1;
 				break;
 			}
-		break;
+
+			break;
 
 		default: /* ignore */
 			break;
 		}
 
 		yaml_token_delete(&token);
-	};
+	}
 
 	/* reach end of file prematurely */
 	exitvalue = -1;
@@ -1314,14 +1336,14 @@ int mmpack_parse_sysdeplist(struct parsing_ctx* ctx,
 		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto exit;
 
-		switch(token.type) {
+		switch (token.type) {
 		case YAML_FLOW_SEQUENCE_END_TOKEN:
 		case YAML_BLOCK_END_TOKEN:
 		case YAML_KEY_TOKEN:
 			goto exit;
 
 		case YAML_SCALAR_TOKEN:
-			expr = (char const *) token.data.scalar.value;
+			expr = (char const*) token.data.scalar.value;
 			strlist_add(&pkg->sysdeps, expr);
 			break;
 
@@ -1330,7 +1352,7 @@ int mmpack_parse_sysdeplist(struct parsing_ctx* ctx,
 		}
 
 		yaml_token_delete(&token);
-	};
+	}
 
 	/* reach end of file prematurely */
 	exitvalue = -1;
@@ -1359,10 +1381,11 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto error;
 
-		switch(token.type) {
+		switch (token.type) {
 		case YAML_BLOCK_END_TOKEN:
 			if (mmpkg_check_valid(pkg, ctx->repo_index < 0 ? 0 : 1))
 				goto error;
+
 			goto exit;
 
 		case YAML_KEY_TOKEN:
@@ -1374,28 +1397,36 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 			break;
 
 		case YAML_SCALAR_TOKEN:
-			data = (char const *) token.data.scalar.value;
+			data = (char const*) token.data.scalar.value;
 			data_len = token.data.scalar.length;
 
 			switch (type) {
 			case YAML_KEY_TOKEN:
 				if (STR_EQUAL(data, data_len, "depends")) {
-					if (mmpack_parse_deplist(ctx, pkg) < 0)
+					if (mmpack_parse_deplist(ctx, pkg))
 						goto error;
-				} else if (STR_EQUAL(data, data_len, "sysdepends")) {
-					if (mmpack_parse_sysdeplist(ctx, pkg) < 0)
+				} else if (STR_EQUAL(data, data_len,
+				                     "sysdepends")) {
+					if (mmpack_parse_sysdeplist(ctx, pkg))
 						goto error;
 				} else {
-					scalar_field = get_scalar_field_type(data);
+					scalar_field = get_scalar_field_type(
+						data);
 					type = -1;
 				}
+
 				break;
 
 			case YAML_VALUE_TOKEN:
-				if ((scalar_field != FIELD_UNKNOWN) && token.data.scalar.length) {
-					if (mmpkg_set_scalar_field(pkg, scalar_field, data, data_len))
+				if ((scalar_field != FIELD_UNKNOWN) &&
+				    token.data.scalar.length) {
+					if (mmpkg_set_scalar_field(pkg,
+					                           scalar_field,
+					                           data,
+					                           data_len))
 						goto error;
 				}
+
 			/* fallthrough */
 			default:
 				scalar_field = FIELD_UNKNOWN;
@@ -1403,6 +1434,7 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 				type = -1;
 				break;
 			}
+
 			break;
 
 		default: /* ignore */
@@ -1410,7 +1442,7 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 		}
 
 		yaml_token_delete(&token);
-	} while(token.type != YAML_STREAM_END_TOKEN);
+	} while (token.type != YAML_STREAM_END_TOKEN);
 
 error:
 	exitvalue = -1;
@@ -1450,7 +1482,7 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 		if (!yaml_parser_scan(&ctx->parser, &token))
 			goto exit;
 
-		switch(token.type) {
+		switch (token.type) {
 		case YAML_STREAM_END_TOKEN:
 			exitvalue = 0;
 			goto exit;
@@ -1463,16 +1495,20 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 			valuestr = (const char*)token.data.scalar.value;
 			valuelen = token.data.scalar.length;
 			if (type == YAML_KEY_TOKEN) {
-				name = mmstr_copy_realloc(name, valuestr, valuelen);
+				name = mmstr_copy_realloc(name,
+				                          valuestr,
+				                          valuelen);
 				mmpkg_init(&pkg, name);
 				pkg.repo_index = ctx->repo_index;
-				exitvalue = mmpack_parse_index_package(ctx, &pkg);
+				exitvalue =
+					mmpack_parse_index_package(ctx, &pkg);
 				if (exitvalue != 0)
 					goto exit;
 
 				binindex_add_pkg(binindex, &pkg);
 				mmpkg_deinit(&pkg);
 			}
+
 			type = -1;
 			break;
 
@@ -1481,7 +1517,9 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 		}
 
 		yaml_token_delete(&token);
-	};
+	}
+
+	;
 	exitvalue = 0;
 
 exit:
@@ -1494,7 +1532,7 @@ exit:
 
 
 static
-mmstr const * parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
+mmstr const* parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
 {
 	int rv;
 	char const * delim;
@@ -1506,7 +1544,7 @@ mmstr const * parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
 		return NULL;
 	}
 
-	yaml_parser_set_input_string(&ctx.parser, (unsigned char const *) base,
+	yaml_parser_set_input_string(&ctx.parser, (unsigned char const*) base,
 	                             buffer->size);
 	rv = mmpack_parse_index_package(&ctx, pkg);
 
@@ -1533,8 +1571,8 @@ mmstr const * parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
  * cleanup.
  */
 LOCAL_SYMBOL
-struct mmpkg * add_pkgfile_to_binindex(struct binindex* binindex,
-                                       char const * filename)
+struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
+                                      char const * filename)
 {
 	int rv;
 	struct buffer buffer;
@@ -1551,6 +1589,7 @@ struct mmpkg * add_pkgfile_to_binindex(struct binindex* binindex,
 	rv = pkg_get_mmpack_info(filename, &buffer);
 	if (rv != 0)
 		goto exit;
+
 	name = parse_package_info(&tmppkg, &buffer);
 	if (name != NULL)
 		pkg = binindex_add_pkg(binindex, &tmppkg);
@@ -1587,7 +1626,8 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 
 	index_fh = fopen(index_filename, "r");
 	if (index_fh == NULL) {
-		mm_raise_error(EINVAL, "failed to open given binary index file");
+		mm_raise_error(EINVAL,
+		               "failed to open given binary index file");
 		goto exit;
 	}
 
@@ -1704,9 +1744,9 @@ void install_state_save_to_index(struct install_state* state, FILE* fp)
  *              name to id resolution)
  * @installed:  lookup table of length binindex->num_pkgname
  *
- * This function will fill a lookup table @installed whose each element correspond
- * to the package installed for a package name id if one is installed, NULL
- * if not.
+ * This function will fill a lookup table @installed whose each element
+ * correspond to the package installed for a package name id if one is
+ * installed, NULL if not.
  */
 LOCAL_SYMBOL
 void install_state_fill_lookup_table(const struct install_state* state,

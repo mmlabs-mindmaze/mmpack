@@ -93,8 +93,8 @@ const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
 	argcmd = (arg_index+1 > argc) ? parser->defcmd : argv[arg_index];
 	if (!argcmd) {
 		fprintf(stderr, "Invalid number of argument."
-		                " Run \"%s --help\" to see Usage\n",
-		                parser->execname);
+		        " Run \"%s --help\" to see Usage\n",
+		        parser->execname);
 		return NULL;
 	}
 
@@ -107,8 +107,8 @@ const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
 
 	if (subcmd == NULL) {
 		fprintf(stderr, "Invalid command: %s."
-		                " Run \"%s --help\" to see Usage\n",
-		                argcmd, parser->execname);
+		        " Run \"%s --help\" to see Usage\n",
+		        argcmd, parser->execname);
 		return NULL;
 	}
 

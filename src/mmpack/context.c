@@ -77,7 +77,8 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 
 	prefix = opts->prefix;
 	if (!prefix)
-		prefix = mm_getenv("MMPACK_PREFIX", ctx->settings.default_prefix);
+		prefix = mm_getenv("MMPACK_PREFIX",
+		                   ctx->settings.default_prefix);
 
 	ctx->prefix = mmstr_malloc_from_cstr(prefix);
 
@@ -101,6 +102,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 		ctx->curl = NULL;
 		curl_global_cleanup();
 	}
+
 	binindex_deinit(&ctx->binindex);
 	install_state_deinit(&ctx->installed);
 
@@ -143,6 +145,7 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	// populate the installed package list
 	if (binindex_populate(&ctx->binindex, installed_index_path, -1))
 		goto error;
+
 	binindex_foreach(&ctx->binindex, set_installed, ctx);
 
 	// populate the repository cached package list
@@ -229,7 +232,8 @@ const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx, int repo_index)
 
 	// Alloc string if not done yet
 	if (!ctx->cacheindex) {
-		len = mmstrlen(ctx->prefix) + mmstrlen(repo_relpath) + sizeof(suffix);
+		len = mmstrlen(ctx->prefix) + mmstrlen(repo_relpath) +
+		      sizeof(suffix);
 		ctx->cacheindex = mmstr_malloc(len);
 	}
 
@@ -293,8 +297,8 @@ int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 	if (read_prefix_config(ctx))
 		return -1;
 
-	if (  !(flags & CTX_SKIP_REDIRECT_LOG)
-	   && mmpack_ctx_use_prefix_log(ctx))
+	if (!(flags & CTX_SKIP_REDIRECT_LOG)
+	    && mmpack_ctx_use_prefix_log(ctx))
 		return -1;
 
 	if (flags & CTX_SKIP_PKGLIST)

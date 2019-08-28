@@ -36,7 +36,8 @@ int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 	sprintf(source_pkg_name, "%s_%s_src.tar.gz", pkg->source, pkg->version);
 	mmstr_setlen(source_pkg_name, source_pkg_name_len);
 	url = settings_get_repo_url(&ctx->settings, pkg->repo_index);
-	rv = download_from_repo(ctx, url, source_pkg_name, NULL, source_pkg_name);
+	rv = download_from_repo(ctx, url, source_pkg_name,
+	                        NULL, source_pkg_name);
 
 	if (rv == 0)
 		info("Downloaded: %s\n", source_pkg_name);
@@ -74,7 +75,7 @@ int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "-h")) {
 		fprintf(stderr, "missing package argument in command line\n"
-		                "Usage:\n\tmmpack source "SOURCE_SYNOPSIS"\n");
+		        "Usage:\n\tmmpack source "SOURCE_SYNOPSIS "\n");
 		return argc != 2 ? -1 : 0;
 	}
 

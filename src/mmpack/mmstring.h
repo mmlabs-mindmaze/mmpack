@@ -26,9 +26,9 @@ struct mmstring {
 	int16_t len;
 	char buf[];
 };
-#define MMSTR_NEEDED_SIZE(len)   (sizeof(struct mmstring)+1+(len))
+#define MMSTR_NEEDED_SIZE(len) (sizeof(struct mmstring)+1+(len))
 #define MMSTR_SIZE_TO_MAXLEN(sz) ((sz)-sizeof(struct mmstring)-1)
-#define MMSTR_HDR(str)           ((struct mmstring*)((str)-offsetof(struct mmstring, buf)))
+#define MMSTR_HDR(s) ((struct mmstring*)((s)-offsetof(struct mmstring, buf)))
 
 
 typedef char mmstr;
@@ -41,18 +41,18 @@ typedef char mmstr;
  * This macro declare a variable static const mmstr* named @name and
  * its value will be statically initialized with @str_literal.
  */
-#define STATIC_CONST_MMSTR(name, str_literal)           \
-static const struct {                                   \
-	int16_t max;                                    \
-	int16_t len;                                    \
-	char buf[sizeof(str_literal)];                  \
-} name ## _mmstring_data = {                            \
-	.max = sizeof(str_literal) - 1,                 \
-	.len = sizeof(str_literal) - 1,                 \
-	.buf = str_literal,                             \
-};                                                      \
-static const mmstr* name =                              \
-	(const mmstr*)&(name ## _mmstring_data.buf)
+#define STATIC_CONST_MMSTR(name, str_literal) \
+	static const struct { \
+		int16_t max; \
+		int16_t len; \
+		char buf[sizeof(str_literal)]; \
+	} name ## _mmstring_data = { \
+		.max = sizeof(str_literal) - 1, \
+		.len = sizeof(str_literal) - 1, \
+		.buf = str_literal, \
+	}; \
+	static const mmstr* name = \
+		(const mmstr*)&(name ## _mmstring_data.buf)
 
 static inline NONNULL_ARGS(1)
 int mmstrlen(const mmstr* str)
@@ -146,17 +146,21 @@ void mmstr_freea(const mmstr* str)
 }
 
 
-#define mmstr_malloc(maxlen)    mmstr_init(mm_malloc(MMSTR_NEEDED_SIZE(maxlen)), maxlen)
-#define mmstr_malloca(maxlen)   mmstr_init(mm_malloca(MMSTR_NEEDED_SIZE(maxlen)), maxlen)
-#define mmstr_alloca(maxlen)    mmstr_init(alloca(MMSTR_NEEDED_SIZE(maxlen)), maxlen)
-#define mmstr_map_on_array(array)       mmstr_init(array, MMSTR_SIZE_TO_MAXLEN(sizeof(array)))
+#define mmstr_malloc(len) mmstr_init(mm_malloc(MMSTR_NEEDED_SIZE(len)), len)
+#define mmstr_malloca(len) mmstr_init(mm_malloca(MMSTR_NEEDED_SIZE(len)), len)
+#define mmstr_alloca(len) mmstr_init(alloca(MMSTR_NEEDED_SIZE(len)), len)
+#define mmstr_map_on_array(array) \
+	mmstr_init(array, MMSTR_SIZE_TO_MAXLEN(sizeof( array)))
 
-#define mmstr_malloc_copy(data, len)    mmstr_copy(mmstr_malloc(len), (data), (len))
-#define mmstr_malloc_from_cstr(cstr)    mmstr_malloc_copy(cstr, strlen(cstr))
-#define mmstr_malloca_copy(data, len)   mmstr_copy(mmstr_malloca(len), (data), (len))
-#define mmstr_malloca_from_cstr(cstr)   mmstr_malloca_copy(cstr, strlen(cstr))
-#define mmstr_alloca_copy(data, len)    mmstr_copy(mmstr_alloca(len), (data), (len))
-#define mmstr_alloca_from_cstr(cstr)    mmstr_alloca_copy(cstr, strlen(cstr))
+#define mmstr_malloc_copy(data, len) \
+	mmstr_copy(mmstr_malloc(len), (data), (len))
+#define mmstr_malloc_from_cstr(cstr) mmstr_malloc_copy(cstr, strlen(cstr))
+#define mmstr_malloca_copy(data, len) \
+	mmstr_copy(mmstr_malloca(len), (data), (len))
+#define mmstr_malloca_from_cstr(cstr) mmstr_malloca_copy(cstr, strlen(cstr))
+#define mmstr_alloca_copy(data, len) \
+	mmstr_copy(mmstr_alloca(len), (data), (len))
+#define mmstr_alloca_from_cstr(cstr) mmstr_alloca_copy(cstr, strlen(cstr))
 
 
 static inline
@@ -176,7 +180,7 @@ mmstr* mmstr_realloc(mmstr* str, int new_maxlen)
 }
 
 
-static inline NONNULL_ARGS(1,2)
+static inline NONNULL_ARGS(1, 2)
 int mmstrcmp(const mmstr* str1, const mmstr* str2)
 {
 	const struct mmstring* s1 = MMSTR_HDR(str1);
@@ -194,18 +198,18 @@ int mmstrcmp(const mmstr* str1, const mmstr* str2)
 }
 
 
-static inline NONNULL_ARGS(1,2)
+static inline NONNULL_ARGS(1, 2)
 int mmstrequal(const mmstr* str1, const mmstr* str2)
 {
 	const struct mmstring* s1 = MMSTR_HDR(str1);
 	const struct mmstring* s2 = MMSTR_HDR(str2);
 
-	return (   (s1->len == s2->len)
+	return (s1->len == s2->len
 	        && (memcmp(s1->buf, s2->buf, s1->len) == 0));
 }
 
 
-static inline NONNULL_ARGS(1,2)
+static inline NONNULL_ARGS(1, 2)
 mmstr* mmstrcat(mmstr* restrict dst, const mmstr* restrict src)
 {
 	struct mmstring* d = MMSTR_HDR(dst);
@@ -218,7 +222,7 @@ mmstr* mmstrcat(mmstr* restrict dst, const mmstr* restrict src)
 }
 
 
-static inline NONNULL_ARGS(1,2)
+static inline NONNULL_ARGS(1, 2)
 mmstr* mmstrcpy(mmstr* restrict dst, const mmstr* restrict src)
 {
 	struct mmstring* d = MMSTR_HDR(dst);
@@ -231,7 +235,7 @@ mmstr* mmstrcpy(mmstr* restrict dst, const mmstr* restrict src)
 }
 
 
-static inline NONNULL_ARGS(1,2)
+static inline NONNULL_ARGS(1, 2)
 mmstr* mmstrcat_cstr(mmstr* restrict dst, const char* restrict cstr)
 {
 	struct mmstring* d = MMSTR_HDR(dst);
@@ -244,7 +248,7 @@ mmstr* mmstrcat_cstr(mmstr* restrict dst, const char* restrict cstr)
 }
 
 
-static inline NONNULL_ARGS(1,2)
+static inline NONNULL_ARGS(1, 2)
 mmstr* mmstrcpy_cstr(mmstr* restrict dst, const char* restrict cstr)
 {
 	struct mmstring* d = MMSTR_HDR(dst);
@@ -322,4 +326,4 @@ mmstr* mmstrcpy_cstr_realloc(mmstr* restrict dst, const mmstr* restrict csrc)
 }
 
 
-#endif
+#endif /* ifndef MMSTRING_H */

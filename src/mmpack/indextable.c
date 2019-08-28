@@ -44,28 +44,32 @@
  * This is useful for deriving constant at compile time. Do not use it for
  * runtime since there are much more performant alternative in this case.
  */
-#define POW2_CEIL(v) (1 + \
-(((((((((v) - 1) | (((v) - 1) >> 0x10) | \
-      (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) | \
-     ((((v) - 1) | (((v) - 1) >> 0x10) | \
-      (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) >> 0x04))) | \
-   ((((((v) - 1) | (((v) - 1) >> 0x10) | \
-      (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) | \
-     ((((v) - 1) | (((v) - 1) >> 0x10) | \
-      (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) >> 0x04))) >> 0x02))) | \
- ((((((((v) - 1) | (((v) - 1) >> 0x10) | \
-      (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) | \
-     ((((v) - 1) | (((v) - 1) >> 0x10) | \
-      (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) >> 0x04))) | \
-   ((((((v) - 1) | (((v) - 1) >> 0x10) | \
-      (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) | \
-     ((((v) - 1) | (((v) - 1) >> 0x10) | \
-      (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) >> 0x04))) >> 0x02))) >> 0x01))))
+#define POW2_CEIL(v) \
+	(1 + \
+	 (((((((((v) - 1) | (((v) - 1) >> 0x10) | \
+	        (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) | \
+	       ((((v) - 1) | (((v) - 1) >> 0x10) | \
+	         (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) >> 0x04))) | \
+	     ((((((v) - 1) | (((v) - 1) >> 0x10) | \
+	         (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) | \
+	        ((((v) - 1) | (((v) - 1) >> 0x10) | \
+	          (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) >> 0x04))) >> \
+	      0x02))) | \
+	   ((((((((v) - 1) | (((v) - 1) >> 0x10) | \
+	         (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) | \
+	        ((((v) - 1) | (((v) - 1) >> 0x10) | \
+	          (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) >> 0x04))) | \
+	      ((((((v) - 1) | (((v) - 1) >> 0x10) | \
+	          (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) | \
+	         ((((v) - 1) | (((v) - 1) >> 0x10) | \
+	           (((v) - 1) | (((v) - 1) >> 0x10) >> 0x08)) >> 0x04))) >> \
+	       0x02))) >> 0x01))))
 
-#define DEFAULT_CAPACITY        500
-#define BUCKET_SIZE             64 // size of cache line
-#define MAX_PER_BUCKET          ((BUCKET_SIZE-sizeof(uint32_t))/(sizeof(uint32_t)+sizeof(struct it_entry)))
-#define NUM_ENTRIES_NUMBITS     POW2_CEIL(MAX_PER_BUCKET)
+#define DEFAULT_CAPACITY 500
+#define BUCKET_SIZE 64             // size of cache line
+#define MAX_PER_BUCKET ((BUCKET_SIZE-sizeof(uint32_t))/ \
+	                (sizeof(uint32_t)+sizeof(struct it_entry)))
+#define NUM_ENTRIES_NUMBITS POW2_CEIL(MAX_PER_BUCKET)
 
 /**
  * struct it_bucket: node of a bucket list
@@ -86,8 +90,8 @@
  */
 struct it_bucket {
 	uint32_t hash[MAX_PER_BUCKET];
-	uint32_t num_entries:NUM_ENTRIES_NUMBITS;
-	int32_t next_offset:32-NUM_ENTRIES_NUMBITS;
+	uint32_t num_entries : NUM_ENTRIES_NUMBITS;
+	int32_t next_offset : 32-NUM_ENTRIES_NUMBITS;
 	struct it_entry entries[MAX_PER_BUCKET];
 };
 
@@ -128,7 +132,8 @@ uint32_t compute_hash(const void* data, int len)
 
 
 static
-struct it_bucket* indextable_get_buckethead(const struct indextable* table, uint32_t hash)
+struct it_bucket* indextable_get_buckethead(const struct indextable* table,
+                                            uint32_t hash)
 {
 	// num_bucket is power of 2, so hash % num == hash & (num - 1)
 	return &table->buckets[hash & (table->num_buckets - 1)];
@@ -144,8 +149,8 @@ int bucket_lookup(struct it_bucket* bucket, uint32_t hash, const mmstr* key)
 	// Search in the entries of the node for a matching key
 	for (i = 0; i < bucket->num_entries; i++) {
 		entry = &bucket->entries[i];
-		if (  (bucket->hash[i] == hash)
-		   && mmstrequal(entry->key, key))
+		if (bucket->hash[i] == hash
+		    && mmstrequal(entry->key, key))
 			return i;
 	}
 
@@ -344,7 +349,8 @@ int indextable_double_size(struct indextable* table)
 			// copy each entry of the node into the new indextable
 			for (j = 0; j < bucket->num_entries; j++) {
 				hash = bucket->hash[j];
-				entry = indextable_create_entry(&new_table, hash);
+				entry = indextable_create_entry(&new_table,
+				                                hash);
 				*entry = bucket->entries[j];
 			}
 
@@ -450,7 +456,7 @@ void indextable_deinit(struct indextable* table)
 {
 	mm_aligned_free(table->buckets);
 
-	*table = (struct indextable){.buckets = NULL};
+	*table = (struct indextable) {.buckets = NULL};
 }
 
 
@@ -546,7 +552,7 @@ struct it_entry* indextable_lookup_create(struct indextable* table,
  */
 LOCAL_SYMBOL
 struct it_entry* indextable_insert(struct indextable* table,
-                                          const mmstr* key)
+                                   const mmstr* key)
 {
 	struct it_entry* entry;
 	uint32_t hash;
@@ -636,7 +642,8 @@ int indextable_remove(struct indextable* table, const mmstr* key)
  * indextable_remove().
  */
 LOCAL_SYMBOL
-struct it_entry* indextable_lookup(const struct indextable* table, const mmstr* key)
+struct it_entry* indextable_lookup(const struct indextable* table,
+                                   const mmstr* key)
 {
 	struct it_bucket* bucket;
 	uint32_t hash;
@@ -657,7 +664,8 @@ struct it_entry* indextable_lookup(const struct indextable* table, const mmstr* 
  * otherwise.
  */
 LOCAL_SYMBOL
-struct it_entry* it_iter_first(struct it_iterator* iter, struct indextable const * table)
+struct it_entry* it_iter_first(struct it_iterator* iter,
+                               struct indextable const * table)
 {
 	*iter = (struct it_iterator) {.table = table, .e = -1, .b = -1};
 	return it_iter_next(iter);
@@ -694,6 +702,7 @@ struct it_entry* it_iter_next(struct it_iterator* iter)
 		} else {
 			curr += curr->next_offset;
 		}
+
 		iter->curr = curr;
 		iter->e = curr->num_entries-1;
 	}

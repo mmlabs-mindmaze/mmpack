@@ -133,12 +133,13 @@ struct solver {
  * Return: an initialized action_stack object.
  */
 LOCAL_SYMBOL
-struct action_stack * mmpack_action_stack_create(void)
+struct action_stack* mmpack_action_stack_create(void)
 {
 	size_t stack_size;
 	struct action_stack * stack;
 
-	stack_size = sizeof(*stack) + DEFAULT_STACK_SZ * sizeof(*stack->actions);
+	stack_size = sizeof(*stack) + DEFAULT_STACK_SZ *
+	             sizeof(*stack->actions);
 	stack = mm_malloc(stack_size);
 	memset(stack, 0, stack_size);
 	stack->size = DEFAULT_STACK_SZ;
@@ -176,14 +177,16 @@ void mmpack_action_stack_destroy(struct action_stack * stack)
  * Return the updated stack pointer
  */
 LOCAL_SYMBOL
-struct action_stack * mmpack_action_stack_push(struct action_stack * stack,
-                                                      int action,
-                                                      struct mmpkg const * pkg,
-                                                      struct mmpkg const * oldpkg)
+struct action_stack* mmpack_action_stack_push(struct action_stack * stack,
+                                              int action,
+                                              struct mmpkg const * pkg,
+                                              struct mmpkg const * oldpkg)
 {
 	/* increase by DEFAULT_STACK_SZ if full */
 	if ((stack->index + 1) == stack->size) {
-		size_t stack_size = sizeof(*stack) + (stack->size + DEFAULT_STACK_SZ) * sizeof(*stack->actions);
+		size_t stack_size = sizeof(*stack) +
+		                    (stack->size + DEFAULT_STACK_SZ) *
+		                    sizeof(*stack->actions);
 		stack = mm_realloc(stack, stack_size);
 	}
 
@@ -444,7 +447,8 @@ int solver_backtrack_on_decision(struct solver* solver,
 	if (solver->last_decstate_sz == 0)
 		return -1;
 
-	state = buffer_dec_size(&solver->decstate_store, solver->last_decstate_sz);
+	state = buffer_dec_size(&solver->decstate_store,
+	                        solver->last_decstate_sz);
 
 	solver->last_decstate_sz = state->last_decstate_sz;
 	solver_revert_planned_ops(solver, state->ops_stack_size);
@@ -504,8 +508,8 @@ int solver_advance_processing(struct solver* solver,
 		}
 
 		if (frame->state == INSTALL_DEPS) {
-			// Mark as installed the package whose dependency list has
-			// just been processed
+			// Mark as installed the package whose dependency list
+			// has just been processed
 			solver_commit_pkg_install(solver,
 			                          frame->dep->pkgname_id);
 			frame->state = NEXT;
@@ -705,14 +709,15 @@ int solver_step_upgrade_rdeps(struct solver* solver, struct proc_frame* frame)
 
 	buffer_init(&buff);
 	newpkg = frame->dep->pkgs[frame->ipkg];
-	rdep_ids = binindex_get_potential_rdeps(binindex, newpkg->name_id, &num);
+	rdep_ids = binindex_get_potential_rdeps(binindex, newpkg->name_id,
+	                                        &num);
 
 	// Check all reverse dependencies of old package for compatibility with
 	// the new package
 	last_upgrade_dep = NULL;
 	for (i = 0; i < num; i++) {
 		if (solver_check_upgrade_rdep(solver, rdep_ids[i], newpkg,
-		                          &buff, &last_upgrade_dep)) {
+		                              &buff, &last_upgrade_dep)) {
 			frame->state = BACKTRACK;
 			goto exit;
 		}
@@ -789,25 +794,27 @@ int solver_solve_deps(struct solver* solver, struct compiled_dep* initial_deps,
 	mm_check(initial_deps != NULL);
 
 	while (solver_advance_processing(solver, &frame) != DONE) {
-		if (frame.state == BACKTRACK)
-			if (solver_backtrack_on_decision(solver, &frame))
-				return -1;
+		if (frame.state == BACKTRACK
+		    && solver_backtrack_on_decision(solver, &frame))
+			return -1;
 
-		if (frame.state == VALIDATION)
-			if (solver_step_validation(solver, &frame))
-				continue;
+		if (frame.state == VALIDATION
+		    && solver_step_validation(solver, &frame))
+			continue;
 
-		if (frame.state == SELECTION)
-			if (solver_step_select_pkg(solver, &frame))
-				continue;
+		if (frame.state == SELECTION
+		    && solver_step_select_pkg(solver, &frame))
+			continue;
 
-		if (frame.state == UPGRADE_RDEPS)
-			if (solver_step_upgrade_rdeps(solver, &frame))
-				continue;
+		if (frame.state == UPGRADE_RDEPS
+		    && solver_step_upgrade_rdeps(solver, &frame))
+			continue;
 
 		if (frame.state == INSTALL_DEPS)
 			solver_step_install_deps(solver, &frame);
-	};
+	}
+
+	;
 
 	return 0;
 }
@@ -836,7 +843,10 @@ void solver_remove_pkgname(struct solver* solver, int pkgname_id)
 	solver->inst_lut[pkgname_id] = NULL;
 
 	// First remove recursively the reverse dependencies
-	rdep_pkg = rdeps_iter_first(&iter, pkg, solver->binindex, solver->inst_lut);
+	rdep_pkg = rdeps_iter_first(&iter,
+	                            pkg,
+	                            solver->binindex,
+	                            solver->inst_lut);
 	while (rdep_pkg) {
 		solver_remove_pkgname(solver, rdep_pkg->name_id);
 		rdep_pkg = rdeps_iter_next(&iter);
@@ -871,25 +881,28 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
 	num_ops = solver->ops_stack.size / sizeof(*ops);
 
 	for (i = 0; i < num_ops; i++) {
-		switch(ops[i].action) {
+		switch (ops[i].action) {
 		case STAGE:
 			// ignore
 			break;
 
 		case INSTALL:
 			pkg = ops[i].pkg;
-			stk = mmpack_action_stack_push(stk, INSTALL_PKG, pkg, NULL);
+			stk = mmpack_action_stack_push(stk, INSTALL_PKG,
+			                               pkg, NULL);
 			break;
 
 		case REMOVE:
 			pkg = ops[i].pkg;
-			stk = mmpack_action_stack_push(stk, REMOVE_PKG, pkg, NULL);
+			stk = mmpack_action_stack_push(stk, REMOVE_PKG,
+			                               pkg, NULL);
 			break;
 
 		case UPGRADE:
 			pkg = solver->inst_lut[ops[i].id];
 			oldpkg = pkg - ops[i].pkg_diff;
-			stk = mmpack_action_stack_push(stk, UPGRADE_PKG, pkg, oldpkg);
+			stk = mmpack_action_stack_push(stk, UPGRADE_PKG,
+			                               pkg, oldpkg);
 			break;
 
 		default:
@@ -918,8 +931,8 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
  */
 static
 struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
-                                            const struct binindex* binindex,
-                                            struct buffer* buff)
+                                           const struct binindex* binindex,
+                                           struct buffer* buff)
 {
 	STATIC_CONST_MMSTR(any_version, "any");
 	struct mmpkg_dep dep = {0};
@@ -944,6 +957,7 @@ struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
 			error("Cannot find package: %s\n", req->name);
 			return NULL;
 		}
+
 		if (compdep->num_pkg == 0) {
 			error("Cannot find version %s of package %s\n",
 			      req->version, req->name);
@@ -958,14 +972,14 @@ struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
 
 
 /**
- * mmpkg_get_install_list() -  parse package dependencies and return install order
- * @ctx:     the mmpack context
- * @reqlist:     requested package list to be installed
+ * mmpkg_get_install_list() - parse package deps and return install order
+ * @ctx: the mmpack context
+ * @reqlist: requested package list to be installed
  *
  * This function will initialize a dependency ordered list from the requested
  * packages. Then pass those to the core function solver_solve_deps() which
- * will return an ordered stack of action that are required to make the requested
- * changes happen.
+ * will return an ordered stack of action that are required to make the
+ * requested changes happen.
  *
  * The action stack is ordered so that when a package is installed, all its
  * required dependencies are already met and installed.
@@ -1035,6 +1049,7 @@ struct compiled_dep* upgrades_from_reqlist(const struct pkg_request* reqlist,
 			return NULL;
 		}
 	}
+
 	// mark last element as termination
 	compdep->next_entry_delta = 0;
 
@@ -1127,7 +1142,7 @@ void mmpack_action_stack_dump(struct action_stack * stack)
 {
 	int i;
 
-	for (i =  0 ; i < stack->index ; i++) {
+	for (i = 0; i < stack->index; i++) {
 		if (stack->actions[i].action == INSTALL_PKG)
 			printf("INSTALL: ");
 		else if (stack->actions[i].action == REMOVE_PKG)
@@ -1154,7 +1169,7 @@ int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack)
 
 	printf("Transaction summary:\n");
 
-	for (i =  0 ; i < stack->index ; i++) {
+	for (i = 0; i < stack->index; i++) {
 		if (stack->actions[i].action == UPGRADE_PKG) {
 			new_version = stack->actions[i].pkg->version;
 			old_version = stack->actions[i].oldpkg->version;
@@ -1177,7 +1192,7 @@ int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack)
 		if (stack->actions[i].oldpkg) {
 		} else {
 			printf("%s (%s)\n", stack->actions[i].pkg->name,
-			                  stack->actions[i].pkg->version);
+			       stack->actions[i].pkg->version);
 		}
 	}
 

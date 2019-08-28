@@ -15,8 +15,8 @@
 #include "utils.h"
 
 // On systems (Win32 that do not define EREMOTEIO, alias it to EIO
-#if !defined(EREMOTEIO)
-# define EREMOTEIO      EIO
+#if !defined (EREMOTEIO)
+# define EREMOTEIO EIO
 #endif
 
 /**
@@ -44,7 +44,9 @@ int get_error_from_curl(CURL* curl, int last_retcode, char* errbuf)
 		} else {
 			sprintf(errbuf, "Server replied error %li", respcode);
 			return EREMOTEIO;
-		};
+		}
+
+		;
 	}
 
 	// Fill error message from return code if not set yet
@@ -73,6 +75,7 @@ int get_error_from_curl(CURL* curl, int last_retcode, char* errbuf)
 		curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &os_errno);
 		if (os_errno == 0)
 			os_errno = EREMOTEIO;
+
 		return (int)os_errno;
 	}
 }
@@ -114,8 +117,12 @@ CURL* get_curl_handle(struct mmpack_ctx * ctx)
 		// Common config
 		curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
 		curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 1L);
-		curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, write_download_data);
-		curl_easy_setopt(ctx->curl, CURLOPT_ERRORBUFFER, ctx->curl_errbuf);
+		curl_easy_setopt(ctx->curl,
+		                 CURLOPT_WRITEFUNCTION,
+		                 write_download_data);
+		curl_easy_setopt(ctx->curl,
+		                 CURLOPT_ERRORBUFFER,
+		                 ctx->curl_errbuf);
 	}
 
 	return ctx->curl;
@@ -170,9 +177,13 @@ int download_from_repo(struct mmpack_ctx * ctx,
 	res = curl_easy_perform(curl);
 	if (res != CURLE_OK) {
 		err = get_error_from_curl(curl, res, ctx->curl_errbuf);
-		mm_raise_error(err, "Failed to download %s (%s)", url, ctx->curl_errbuf);
+		mm_raise_error(err,
+		               "Failed to download %s (%s)",
+		               url,
+		               ctx->curl_errbuf);
 		goto exit;
 	}
+
 	rv = 0;
 
 exit:

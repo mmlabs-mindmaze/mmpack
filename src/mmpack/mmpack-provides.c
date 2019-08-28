@@ -39,8 +39,10 @@ int download_file_db(struct mmpack_ctx * ctx, int repo_index)
 	STATIC_CONST_MMSTR(file_db_name, "mmpack-file-db.yaml");
 	mmstr const * url = settings_get_repo_url(&ctx->settings, repo_index);
 
-	if (download_from_repo(ctx, url, file_db_name, ctx->prefix, file_db_tmp)) {
-		error("Failed to download mmpack file/package DB from %s\n", url);
+	if (download_from_repo(ctx, url, file_db_name, ctx->prefix,
+	                       file_db_tmp)) {
+		error("Failed to download mmpack file/package DB from %s\n",
+		      url);
 		return -1;
 	}
 
@@ -50,7 +52,8 @@ int download_file_db(struct mmpack_ctx * ctx, int repo_index)
 
 
 static
-int file_db_index_save(struct mmpack_ctx * ctx, struct indextable const * indextable)
+int file_db_index_save(struct mmpack_ctx * ctx,
+                       struct indextable const * indextable)
 {
 	struct it_iterator iter;
 	struct it_entry* entry;
@@ -67,9 +70,10 @@ int file_db_index_save(struct mmpack_ctx * ctx, struct indextable const * indext
 	if (entry == NULL)
 		goto exit;
 
-	fprintf(file, "%s:%s\n", entry->key, (char const *) entry->value);
+	fprintf(file, "%s:%s\n", entry->key, (char const*) entry->value);
 	while ((entry = it_iter_next(&iter)) != NULL)
-		fprintf(file, "%s:%s\n", entry->key, (char const *) entry->value);
+		fprintf(file, "%s:%s\n", entry->key,
+		        (char const*) entry->value);
 
 exit:
 	mmstr_freea(path);
@@ -101,6 +105,7 @@ int file_db_update(struct mmpack_ctx * ctx, struct indextable * indextable,
 		len = strlen(line);
 		if (line[len - 1] == '\n') /* remove trailing \n */
 			len = strlen(line) - 1;
+
 		delim = strchr(line, ':');
 		if (delim == NULL)
 			continue; /* should not happen */
@@ -117,10 +122,14 @@ int file_db_update(struct mmpack_ctx * ctx, struct indextable * indextable,
 				mmstr_free(key);
 				goto exit;
 			}
+
 			entry->key = key;
-			entry->value = mmstr_malloc_copy(delim + 1, len - (delim - line) - 2);
+			entry->value =
+				mmstr_malloc_copy(delim + 1,
+				                  len - (delim - line) - 2);
 		}
 	}
+
 	rv = 0;
 
 exit:
@@ -142,11 +151,13 @@ void search_providing_pkg(struct indextable const * indextable,
 		return;
 
 	if (strstr(entry->key, pattern) != NULL)
-		printf("%s: %s\n", (char const *) entry->value, entry->key);
+		printf("%s: %s\n", (char const*) entry->value, entry->key);
 
 	while ((entry = it_iter_next(&iter)) != NULL) {
 		if (strstr(entry->key, pattern) != NULL)
-			printf("%s: %s\n", (char const *) entry->value, entry->key);
+			printf("%s: %s\n",
+			       (char const*) entry->value,
+			       entry->key);
 	}
 }
 
@@ -167,6 +178,7 @@ void file_db_destroy(struct indextable * indextable)
 		mmstr_free(entry->key);
 		mmstr_free(entry->value);
 	}
+
 	indextable_deinit(indextable);
 }
 
@@ -207,18 +219,21 @@ int mmpack_provides(struct mmpack_ctx * ctx, int argc, char const ** argv)
 
 	if (nreq > 1 || (!update_db && nreq != 1)) {
 		fprintf(stderr, "only one pattern ca be requested at a time\n"
-		                "Run \"mmpack provides --help\" to see usage\n");
+		        "Run \"mmpack provides --help\" to see usage\n");
 		return -1;
 	}
+
 	if (!update_db && (arg_index + 1) > argc) {
-		fprintf(stderr, "missing package list argument in command line\n"
-		                "Run \"mmpack provides --help\" to see usage\n");
+		fprintf(stderr,
+		        "missing package list argument in command line\n"
+		        "Run \"mmpack provides --help\" to see usage\n");
 		return -1;
 	}
 
 	/* Load prefix configuration and caches */
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
+
 	num_repo = settings_num_repo(&ctx->settings);
 	if (num_repo == 0) {
 		error("Repository URL unspecified\n");
@@ -236,7 +251,7 @@ int mmpack_provides(struct mmpack_ctx * ctx, int argc, char const ** argv)
 			if (download_file_db(ctx, i))
 				goto exit;
 
-			/* update file-db from intermediary file -> indextable */
+			// update file-db from intermediary file -> indextable
 			file_db_update(ctx, &file_db_index, file_db_tmp);
 			mm_unlink(file_db_tmp);
 		}

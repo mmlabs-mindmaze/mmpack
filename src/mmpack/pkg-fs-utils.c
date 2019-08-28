@@ -26,9 +26,9 @@
  *                      Packages files unpacking                          *
  *                                                                        *
  **************************************************************************/
-#define READ_ARCHIVE_BLOCK      10240
-#define READ_ARCHIVE_EOF        1
-#define SKIP_UNPACK             1
+#define READ_ARCHIVE_BLOCK 10240
+#define READ_ARCHIVE_EOF 1
+#define SKIP_UNPACK 1
 
 /**
  * fullwrite() - write fully data buffer to a file
@@ -220,8 +220,8 @@ int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
 		return 0;
 
 	// MMPACK/info is not installed and MMPACK/ must not be created
-	if (  mmstrequal(path, mmstr_alloca_from_cstr("MMPACK/info"))
-	   || mmstrequal(path, mmstr_alloca_from_cstr("MMPACK/")))
+	if (mmstrequal(path, mmstr_alloca_from_cstr("MMPACK/info"))
+	    || mmstrequal(path, mmstr_alloca_from_cstr("MMPACK/")))
 		return SKIP_UNPACK;
 
 	basename = mmstr_malloca(mmstrlen(path));
@@ -281,8 +281,10 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 		}
 
 		if (r != ARCHIVE_OK) {
-			mm_raise_error(archive_errno(a), "reading mpk %s failed: %s",
-			               mpk_filename, archive_error_string(a));
+			mm_raise_error(archive_errno(a),
+			               "reading mpk %s failed: %s",
+			               mpk_filename,
+			               archive_error_string(a));
 			rv = -1;
 			break;
 		}
@@ -300,6 +302,7 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 		if (files)
 			strlist_remove(files, path);
 	}
+
 	mmstr_free(path);
 
 	// Cleanup
@@ -363,10 +366,11 @@ int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
 
 	rv = -1;
 	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-		if (strcmp(archive_entry_pathname(entry), "./MMPACK/info") == 0) {
+		if (!strcmp(archive_entry_pathname(entry), "./MMPACK/info")) {
 			rv = unpack_entry_into_buffer(a, entry, buffer);
 			break;
 		}
+
 		archive_read_data_skip(a);
 	}
 
@@ -382,7 +386,7 @@ int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
  *                                                                        *
  **************************************************************************/
 
-#define UNPACK_MAXPATH  512
+#define UNPACK_MAXPATH 512
 
 /**
  * pkg_list_rm_files() - list files of a package to be removed
@@ -419,7 +423,8 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 	// Add immediately the path of sha256sums
 	strlist_add(files, path);
 
-	while (fscanf(fp, "%"MM_STRINGIFY(UNPACK_MAXPATH)"[^:]: %*s ", path) == 1) {
+	while (fscanf(fp, "%"MM_STRINGIFY (UNPACK_MAXPATH)"[^:]: %*s ",
+	              path) == 1) {
 		mmstr_update_len_from_buffer(path);
 
 		// Check the path has not been truncated
@@ -554,21 +559,26 @@ int check_pkg(mmstr const * parent, mmstr const * sumsha)
 
 	line = map;
 	filename = ref_sha = NULL;
-	while((eol = strchr(line, '\n')) != NULL) {
+	while ((eol = strchr(line, '\n')) != NULL) {
 		line_len = eol - line;
 
 		if (line_len < SHA_HEXSTR_LEN) {
-			mm_raise_error(EBADMSG, "Error while parsing SHA-256 file");
+			mm_raise_error(EBADMSG,
+			               "Error while parsing SHA-256 file");
 			break;
 		}
-		ref_sha = mmstr_copy_realloc(ref_sha, &line[line_len - SHA_HEXSTR_LEN],
-		                            SHA_HEXSTR_LEN);
+
+		ref_sha = mmstr_copy_realloc(ref_sha,
+		                             &line[line_len - SHA_HEXSTR_LEN],
+		                             SHA_HEXSTR_LEN);
 
 		/* 2 is for len(': ') */
 		if (line_len <= SHA_HEXSTR_LEN + 2) {
-			mm_raise_error(EBADMSG, "Error while parsing SHA-256 file");
+			mm_raise_error(EBADMSG,
+			               "Error while parsing SHA-256 file");
 			break;;
 		}
+
 		filename_len = line_len - SHA_HEXSTR_LEN - 2;
 		filename = mmstr_copy_realloc(filename, line, filename_len);
 		if (is_mmpack_metadata(filename))
@@ -580,6 +590,7 @@ int check_pkg(mmstr const * parent, mmstr const * sumsha)
 check_continue:
 		line = eol + 1;
 	}
+
 	mmstr_free(filename);
 	mmstr_free(ref_sha);
 	mm_unmap(map);
@@ -649,8 +660,10 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		// If repo is -1, package file is provided on command line
 		if (pkg->repo_index == -1) {
 			act->pathname = mmstrdup(pkg->filename);
-			mmlog_info("Going to install %s (%s) directly from file",
-			           pkg->name, pkg->version);
+			mmlog_info(
+				"Going to install %s (%s) directly from file",
+				pkg->name,
+				pkg->version);
 			continue;
 		}
 
@@ -659,8 +672,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		mpkfile = act->pathname;
 
 		// Skip if there is a valid package already downloaded
-		if (  mm_check_access(mpkfile, F_OK) == 0
-		   && check_file_pkg(pkg->sha256, NULL, mpkfile) == 0) {
+		if (mm_check_access(mpkfile, F_OK) == 0
+		    && check_file_pkg(pkg->sha256, NULL, mpkfile) == 0) {
 			mmlog_info("Going to install %s (%s) from cache",
 			           pkg->name, pkg->version);
 			continue;
@@ -670,7 +683,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 
 		// Dowload package from repo and store it in prefix
 		// package cachedir
-		repo_url = settings_get_repo_url(&ctx->settings, pkg->repo_index);
+		repo_url =
+			settings_get_repo_url(&ctx->settings, pkg->repo_index);
 		if (download_from_repo(ctx, repo_url, pkg->filename,
 		                       NULL, mpkfile)) {
 			error("Failed!\n");
@@ -750,8 +764,8 @@ int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 
 	strlist_init(&files);
 
-	if (  pkg_list_rm_files(pkg, &files)
-	   || rm_files_from_list(&files)) {
+	if (pkg_list_rm_files(pkg, &files)
+	    || rm_files_from_list(&files)) {
 		rv = -1;
 		goto exit;
 	}
@@ -802,9 +816,9 @@ int upgrade_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg,
 
 	strlist_init(&files);
 
-	if (  pkg_list_rm_files(oldpkg, &files)
-	   || pkg_unpack_files(pkg, mpkfile, &files)
-	   || rm_files_from_list(&files)) {
+	if (pkg_list_rm_files(oldpkg, &files)
+	    || pkg_unpack_files(pkg, mpkfile, &files)
+	    || rm_files_from_list(&files)) {
 		rv = -1;
 	}
 
@@ -828,7 +842,7 @@ int apply_action(struct mmpack_ctx* ctx, struct action* act)
 
 	type = act->action;
 
-	switch(type) {
+	switch (type) {
 	case INSTALL_PKG:
 		rv = install_package(ctx, act->pkg, act->pathname);
 		break;
@@ -897,8 +911,8 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 	// Change current directory to prefix... All the prefix relpath can
 	// now be used directly.
 	mm_getcwd(old_currdir, sizeof(old_currdir));
-	if (  mm_chdir(ctx->prefix)
-	   || mm_mkdir(METADATA_RELPATH, 0777, MM_RECURSIVE))
+	if (mm_chdir(ctx->prefix)
+	    || mm_mkdir(METADATA_RELPATH, 0777, MM_RECURSIVE))
 		return -1;
 
 	// Fetch missing packages
@@ -908,8 +922,9 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 
 	/* Apply individual action changes
 	 * Stop processing actions on error: the actions are ordered so that a
-	 * package will not be installed if its dependencies fail to be installed
-	 * and not be removed if a back-dependency failed to be removed.
+	 * package will not be installed if its dependencies fail to be
+	 * installed and not be removed if a back-dependency failed to be
+	 * removed.
 	 */
 	for (i = 0; i < stack->index; i++) {
 		rv = apply_action(ctx, &stack->actions[i]);

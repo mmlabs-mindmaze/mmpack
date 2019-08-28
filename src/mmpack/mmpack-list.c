@@ -62,7 +62,7 @@ int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern)
 static
 int binindex_cb_all(struct mmpkg* pkg, void * void_data)
 {
-	struct cb_data * data = (struct cb_data *) void_data;
+	struct cb_data * data = (struct cb_data*) void_data;
 
 	// Exclude package not in repo if only available requested
 	if (data->only_available && pkg->repo_index == -1)
@@ -216,7 +216,7 @@ int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 	if (argc > 2) {
 		fprintf(stderr, "Too many argument."
-		                " Run \"mmpack list --help\" to see Usage\n");
+		        " Run \"mmpack list --help\" to see Usage\n");
 		return -1;
 	}
 
@@ -227,7 +227,8 @@ int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	found = subcmd->cb(ctx, argc, argv);
 	if (!found) {
 		if (argc > 1)
-			printf("No package found matching pattern: \"%s\"\n", argv[1]);
+			printf("No package found matching pattern: "
+			       "\"%s\"\n", argv[1]);
 		else
 			printf("No package found\n");
 	}

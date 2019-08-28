@@ -56,7 +56,7 @@ int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	if (argc == 2
 	    && (STR_EQUAL(argv[1], strlen(argv[1]), "--help")
 	        || STR_EQUAL(argv[1], strlen(argv[1]), "-h"))) {
-		fprintf(stderr, "Usage:\n\tmmpack "UPDATE_SYNOPSIS"\n");
+		fprintf(stderr, "Usage:\n\tmmpack "UPDATE_SYNOPSIS "\n");
 		return 0;
 	}
 
@@ -70,9 +70,10 @@ int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 		return -1;
 	}
 
-	for (i = 0; i < num_repo; i++)
+	for (i = 0; i < num_repo; i++) {
 		if (download_repo_index(ctx, i))
 			return -1;
+	}
 
 	return 0;
 }

@@ -61,18 +61,18 @@ static const char mmpack_doc[] =
 ;
 
 static const char arguments_docs[] =
-	"[options] "CHECK_INTEGRITY_SYNOPSIS"\n"
-	"[options] "FIX_BROKEN_SYNOPSIS"\n"
-	"[options] "INSTALL_SYNOPSIS"\n"
-	"[options] "LIST_SYNOPSIS"\n"
-	"[options] "MKPREFIX_SYNOPSIS"\n"
-	"[options] "REMOVE_SYNOPSIS"\n"
-	"[options] "RUN_SYNOPSIS"\n"
-	"[options] "SEARCH_SYNOPSIS"\n"
-	"[options] "SHOW_SYNOPSIS"\n"
-	"[options] "SOURCE_SYNOPSIS"\n"
-	"[options] "UPDATE_SYNOPSIS"\n"
-	"[options] "UPGRADE_SYNOPSIS"\n"
+	"[options] "CHECK_INTEGRITY_SYNOPSIS "\n"
+	"[options] "FIX_BROKEN_SYNOPSIS "\n"
+	"[options] "INSTALL_SYNOPSIS "\n"
+	"[options] "LIST_SYNOPSIS "\n"
+	"[options] "MKPREFIX_SYNOPSIS "\n"
+	"[options] "REMOVE_SYNOPSIS "\n"
+	"[options] "RUN_SYNOPSIS "\n"
+	"[options] "SEARCH_SYNOPSIS "\n"
+	"[options] "SHOW_SYNOPSIS "\n"
+	"[options] "SOURCE_SYNOPSIS "\n"
+	"[options] "UPDATE_SYNOPSIS "\n"
+	"[options] "UPGRADE_SYNOPSIS "\n"
 ;
 
 static struct mmpack_opts cmdline_opts;
@@ -88,7 +88,7 @@ static const struct mmarg_opt cmdline_optv[] = {
 static
 void init_stdout(void)
 {
-#if defined(_WIN32)
+#if defined (_WIN32)
 	// Make stream unbuffered
 	setbuf(stdout, NULL);
 #endif
@@ -122,6 +122,7 @@ int main(int argc, char* argv[])
 	if (cmdline_opts.version) {
 		if (!mmarg_is_completing())
 			printf("%s\n", PACKAGE_STRING);
+
 		return EXIT_SUCCESS;
 	}
 

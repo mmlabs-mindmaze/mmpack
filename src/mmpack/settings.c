@@ -42,9 +42,11 @@ static
 int set_settings_field(struct settings* s, int field_type,
                        const char* data, int len)
 {
-	switch(field_type) {
+	switch (field_type) {
 	case DEFAULT_PREFIX:
-		s->default_prefix = mmstr_copy_realloc(s->default_prefix, data, len);
+		s->default_prefix = mmstr_copy_realloc(s->default_prefix,
+		                                       data,
+		                                       len);
 		break;
 
 	default:
@@ -68,7 +70,7 @@ void fill_repositories(yaml_parser_t* parser, struct settings* settings)
 		if (!yaml_parser_scan(parser, &token))
 			goto exit;
 
-		switch(token.type) {
+		switch (token.type) {
 		case YAML_FLOW_SEQUENCE_END_TOKEN:
 		case YAML_BLOCK_END_TOKEN:
 		case YAML_KEY_TOKEN:
@@ -83,6 +85,7 @@ void fill_repositories(yaml_parser_t* parser, struct settings* settings)
 			// silently ignore error
 			break;
 		}
+
 		yaml_token_delete(&token);
 	}
 
@@ -112,39 +115,43 @@ int parse_config(yaml_parser_t* parser, struct settings* settings)
 			goto exit;
 		}
 
-		switch(token.type) {
-			case YAML_STREAM_END_TOKEN:
-				rv = 0;
-				goto exit;
-			case YAML_KEY_TOKEN:
-				type = YAML_KEY_TOKEN;
-				break;
-			case YAML_VALUE_TOKEN:
-				type = YAML_VALUE_TOKEN;
-				break;
-			case YAML_FLOW_SEQUENCE_START_TOKEN:
-			case YAML_BLOCK_SEQUENCE_START_TOKEN:
-				if (  type == YAML_VALUE_TOKEN
-				   && field_type == REPOSITORIES) {
-					fill_repositories(parser, settings);
-				}
-				break;
-			case YAML_SCALAR_TOKEN:
-				data = (const char*)token.data.scalar.value;
-				datalen = token.data.scalar.length;
-				if (type == YAML_KEY_TOKEN) {
-					field_type = get_field_type(data, datalen);
-				} else if (type == YAML_VALUE_TOKEN) {
-					if (set_settings_field(settings, field_type, data, datalen))
-						goto exit;
-				}
-				break;
-			default: // ignore
-				break;
+		switch (token.type) {
+		case YAML_STREAM_END_TOKEN:
+			rv = 0;
+			goto exit;
+		case YAML_KEY_TOKEN:
+			type = YAML_KEY_TOKEN;
+			break;
+		case YAML_VALUE_TOKEN:
+			type = YAML_VALUE_TOKEN;
+			break;
+		case YAML_FLOW_SEQUENCE_START_TOKEN:
+		case YAML_BLOCK_SEQUENCE_START_TOKEN:
+			if (type == YAML_VALUE_TOKEN
+			    && field_type == REPOSITORIES) {
+				fill_repositories(parser, settings);
+			}
+
+			break;
+		case YAML_SCALAR_TOKEN:
+			data = (const char*)token.data.scalar.value;
+			datalen = token.data.scalar.length;
+			if (type == YAML_KEY_TOKEN) {
+				field_type = get_field_type(data, datalen);
+			} else if (type == YAML_VALUE_TOKEN) {
+				if (set_settings_field(settings, field_type,
+				                       data, datalen))
+					goto exit;
+			}
+
+			break;
+		default:         // ignore
+			break;
 		}
 
 		yaml_token_delete(&token);
 	}
+
 exit:
 	yaml_token_delete(&token);
 	return rv;
@@ -223,7 +230,7 @@ void settings_deinit(struct settings* settings)
 	strlist_deinit(&settings->repo_list);
 	mmstr_free(settings->default_prefix);
 
-	*settings = (struct settings){0};
+	*settings = (struct settings) {0};
 }
 
 

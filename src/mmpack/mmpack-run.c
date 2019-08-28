@@ -15,13 +15,13 @@
 #include "common.h"
 #include "context.h"
 #include "mmstring.h"
-#if defined(_WIN32)
+#if defined (_WIN32)
 #include "path-win32.h"
 #endif
 
 #include "mmpack-run.h"
 
-#define MOUNT_PREFIX_BIN        LIBEXECDIR"/mount-mmpack-prefix"EXEEXT
+#define MOUNT_PREFIX_BIN LIBEXECDIR "/mount-mmpack-prefix"EXEEXT
 
 /**
  * mmpack_run() - main function for the command to run commands
@@ -59,7 +59,7 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (argc == 2
 	    && (STR_EQUAL(argv[1], strlen(argv[1]), "--help")
 	        || STR_EQUAL(argv[1], strlen(argv[1]), "-h"))) {
-		fprintf(stderr, "Usage:\n\tmmpack "RUN_SYNOPSIS"\n");
+		fprintf(stderr, "Usage:\n\tmmpack "RUN_SYNOPSIS "\n");
 		return 0;
 	}
 
@@ -84,17 +84,20 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	memcpy(new_argv+2, args, (nargs+1) * sizeof(*args));
 
 	// Add prefix path to environment variables
-	if (   mm_setenv("PATH", MOUNT_TARGET"/bin", MM_ENV_PREPEND)
-	    || mm_setenv("CPATH", MOUNT_TARGET"/include", MM_ENV_PREPEND)
-	    || mm_setenv("LIBRARY_PATH", MOUNT_TARGET"/lib", MM_ENV_PREPEND)
-	    || mm_setenv("MANPATH", MOUNT_TARGET"/share/man", MM_ENV_PREPEND)
+	if (mm_setenv("PATH", MOUNT_TARGET "/bin", MM_ENV_PREPEND)
+	    || mm_setenv("CPATH", MOUNT_TARGET "/include", MM_ENV_PREPEND)
+	    || mm_setenv("LIBRARY_PATH", MOUNT_TARGET "/lib", MM_ENV_PREPEND)
+	    || mm_setenv("MANPATH", MOUNT_TARGET "/share/man", MM_ENV_PREPEND)
 	    || mm_setenv("MMPACK_PREFIX", ctx->prefix, MM_ENV_OVERWRITE)
 	    || mm_setenv("MMPACK_ACTIVE_PREFIX", ctx->prefix, MM_ENV_OVERWRITE)
-	    /* XXX: check PYTHONPATH value once a pure-python mmpack package has been created */
-	    || mm_setenv("PYTHONPATH", MOUNT_TARGET"/lib/python3/site-packages", MM_ENV_PREPEND) )
+	    /* XXX: check PYTHONPATH value once a pure-python mmpack package has
+	     * been created */
+	    || mm_setenv("PYTHONPATH",
+	                 MOUNT_TARGET "/lib/python3/site-packages",
+	                 MM_ENV_PREPEND) )
 		return -1;
 
-#if defined(_WIN32)
+#if defined (_WIN32)
 	// Convert environment path list that has been set/enriched here and
 	// which are meant to be used in POSIX development environment (in
 	// MSYS2 or Cygwin)

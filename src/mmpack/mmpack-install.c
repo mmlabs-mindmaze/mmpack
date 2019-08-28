@@ -47,7 +47,7 @@ int is_file(char const * path)
 
 static
 int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request *req,
-                             const char* arg)
+                            const char* arg)
 {
 	const char * v;
 	struct mmpkg * pkg;
@@ -112,8 +112,9 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return complete_pkgname(ctx, argv[argc-1], AVAILABLE_PKGS);
 
 	if (arg_index+1 > argc) {
-		fprintf(stderr, "missing package list argument in command line\n"
-		                "Run \"mmpack install --help\" to see usage\n");
+		fprintf(stderr,
+		        "missing package list argument in command line\n"
+		        "Run \"mmpack install --help\" to see usage\n");
 		return -1;
 	}
 
@@ -130,6 +131,7 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	for (i = 0; i < nreq; i++) {
 		if (fill_pkgreq_from_cmdarg(ctx, &reqlist[i], req_args[i]) < 0)
 			goto exit;
+
 		reqlist[i].next = (i == nreq-1) ? NULL : &reqlist[i+1];
 	}
 
@@ -153,6 +155,7 @@ exit:
 		mmstr_free(reqlist[i].version);
 		/* do not free reqlist package */
 	}
+
 	mm_freea(reqlist);
 	return rv;
 }

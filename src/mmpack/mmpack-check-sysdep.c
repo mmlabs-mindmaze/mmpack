@@ -19,7 +19,7 @@ int main(int argc, char const ** argv)
 
 	/* convert argument to strset struct */
 	strset_init(&sysdeps, STRSET_FOREIGN_STRINGS);
-	for (i = 1 ; i < argc ; i++)
+	for (i = 1; i < argc; i++)
 		strset_add(&sysdeps, argv[i]);
 
 	rv = check_sysdeps_installed(&sysdeps);

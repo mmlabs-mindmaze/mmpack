@@ -11,8 +11,8 @@
 #include "package-utils.h"
 #include "settings.h"
 
-#define CTX_SKIP_PKGLIST        0x01
-#define CTX_SKIP_REDIRECT_LOG   0x02
+#define CTX_SKIP_PKGLIST 0x01
+#define CTX_SKIP_REDIRECT_LOG 0x02
 
 struct mmpack_opts {
 	const char* prefix;
@@ -47,7 +47,8 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx);
 int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags);
 int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx);
 const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx);
-const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx, int repo_index);
+const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx,
+                                        int repo_index);
 
 static inline
 int mmpack_ctx_is_init(struct mmpack_ctx const * ctx)
