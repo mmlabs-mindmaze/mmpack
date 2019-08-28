@@ -1,4 +1,3 @@
-# @mindmaze_header@
 """
 global system variables helper
 """
@@ -18,7 +17,7 @@ DPKG_METADATA_PREFIX = DPKG_PREFIX + '/info'
 PACMAN_PREFIX = '\\var\\lib\\pacman'
 
 # variables taken from autotools
-PKGDATADIR = r'<pkgdatadir>'
-LIBEXECDIR = r'<libexecdir>'
-BINDIR = r'<bindir>'
-EXEEXT = r'<exeext>'
+PKGDATADIR = r'@pkgdatadir@'
+LIBEXECDIR = r'@libexecdir@'
+BINDIR = r'@bindir@'
+EXEEXT = r'@exeext@'

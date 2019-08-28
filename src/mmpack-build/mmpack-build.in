@@ -1,11 +1,9 @@
 #!/bin/bash
-#
-# @mindmaze_header@
 
 PYTHON=${PYTHON:-python3}
 
 cmd=${1:-pkg-create}
-mmpack_moduledir=<mmpackbuilddir>
+mmpack_moduledir=@mmpackbuilddir@
 if [ -n "$VIRTUAL_ENV" ] ; then
 	mmpack_moduledir="share/mmpack/python"
 	mmpack_moduledir="$VIRTUAL_ENV/$mmpack_moduledir"

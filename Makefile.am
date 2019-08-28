@@ -196,15 +196,15 @@ mmpack_check_sysdep_LDADD = \
 
 
 mmpack-build: src/mmpack-build/mmpack-build.in Makefile
-	$(AM_V_GEN)$(SED) -e 's,<mmpackbuilddir>,$(mmpackbuilddir),g' < $< > $@
+	$(AM_V_GEN)$(SED) -e 's,@mmpackbuilddir@,$(mmpackbuilddir),g' < $< > $@
 	$(AM_V_at)chmod a+x $@
 
 %.py : %.py.in Makefile
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
-	$(AM_V_GEN)$(SED) -e 's,<pkgdatadir>,$(pkgdatadir),g' \
-		-e 's,<libexecdir>,$(libexecdir),g' \
-		-e 's,<bindir>,$(bindir),g' \
-		-e 's,<exeext>,$(EXEEXT),g' < $< > $@
+	$(AM_V_GEN)$(SED) -e 's,@pkgdatadir@,$(pkgdatadir),g' \
+		-e 's,@libexecdir@,$(libexecdir),g' \
+		-e 's,@bindir@,$(bindir),g' \
+		-e 's,@exeext@,$(EXEEXT),g' < $< > $@
 
 #
 # DEVEL TARGETS
