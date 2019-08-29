@@ -6,6 +6,10 @@ config = configuration_data()
 subdir('config/api-exports')
 subdir('config/autotools-compat')
 
+if host_machine.system() == 'windows'
+    add_project_arguments('-DWIN32_LEAN_AND_MEAN', language : 'c')
+endif
+
 # write config file
 build_cfg = 'config.h'  # named as such to match autotools build system
 configure_file(output : build_cfg, configuration : config)

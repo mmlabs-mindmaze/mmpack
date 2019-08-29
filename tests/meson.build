@@ -23,7 +23,12 @@ mmpack_unit_tests = executable('mmpack-unit-test',
     link_with : libmmpack,
     dependencies : [libcheck],
 )
-test('mmpack unit tests', mmpack_unit_tests)
+
+# double default timeout (30s) because windows platforms are slower
+test('mmpack unit tests',
+        mmpack_unit_tests,
+        timeout : 60,
+)
 
 mmpack_build_unit_tests_sources = files(
     'binary-indexes/circular.yaml',
