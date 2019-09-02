@@ -68,7 +68,7 @@ def get_exec_fileformat(host_archdist: str) -> str:
 
 def is_dynamic_library(filename: str, host_archdist: str) -> bool:
     """
-    Test wether a filename is actually shared lib compatible with the host
+    Test whether a filename is actually shared lib compatible with the host
     architecture/distribution.
 
     eg. lib/libxxx.so.1.2.3
