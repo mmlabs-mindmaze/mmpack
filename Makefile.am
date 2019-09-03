@@ -1,6 +1,6 @@
 eol=
 ACLOCAL_AMFLAGS = -I m4 --install
-EXTRA_DIST = autogen.sh TODO.md
+EXTRA_DIST = autogen.sh TODO.md LICENSE
 
 AM_CPPFLAGS = \
 	-I$(srcdir)/src/mmpack \
