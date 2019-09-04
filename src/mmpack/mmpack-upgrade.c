@@ -175,9 +175,9 @@ int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 		return -1;
 
 	if (nreq == 0)
-		reqlist = get_upgradeable_reqlist(ctx, nreq, req_args);
-	else
 		reqlist = get_full_upgradeable_reqlist(ctx);
+	else
+		reqlist = get_upgradeable_reqlist(ctx, nreq, req_args);
 
 	rv = 0;
 	if (reqlist != NULL) {
