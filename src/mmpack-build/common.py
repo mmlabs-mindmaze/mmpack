@@ -70,6 +70,14 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
+def wprint(*args, **kwargs):
+    """
+    warning print: print to stderr
+    """
+    _log_or_store(logging.WARNING, *args, **kwargs)
+    print(*args, file=sys.stderr, **kwargs)
+
+
 def iprint(*args, **kwargs):
     """
     info print: print only if verbose flag is set
