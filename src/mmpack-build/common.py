@@ -33,6 +33,11 @@ def set_log_file(filename):
     global LOGGER  # pylint: disable=global-statement
 
     log_handler = logging.FileHandler(filename, mode='w')
+
+    formatter = logging.Formatter("%(asctime)s: %(levelname)s: %(message)s",
+                                  "%Y-%m-%d %H:%M:%S")
+    log_handler.setFormatter(formatter)
+
     LOGGER = logging.getLogger('mmpack-build')
     LOGGER.addHandler(log_handler)
 
