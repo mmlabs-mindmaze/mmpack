@@ -6,7 +6,7 @@ Helpers to find out what files are
 import re
 from os.path import islink, basename, splitext
 
-from common import shell
+from common import shell, wprint
 
 
 def filetype(filename):
@@ -34,15 +34,33 @@ def filetype(filename):
 
 def get_linked_dll(import_lib):
     """
-    Get dll filename associated with import_lib
+    Get dll name associated with import_lib
+
+    Args:
+        import_lib: path to import library file
+
+    Return:
+        The linked DLL name if one is found, None if the import library imports
+        actually no library.
+
+    Raises:
+        RuntimeError: more than one dll name could be found in the import lib
     """
     strlist = shell(['strings', import_lib], log=False).lower().split()
     dll_names = {v for v in strlist if v.endswith('.dll')}
 
-    # Check we have one and only dll
-    if len(dll_names) != 1:
+    # Check the import lib is not dangling (no matching dll). The case of
+    # dangling import library, although rare, may happen in the case of bad
+    # build system (example of automake/libtool generating dll.a for module).
+    # Hence only log a warning in this case
+    if not dll_names:
+        wprint('No imported DLL could be found in {}'.format(import_lib))
+        return None
+
+    # Check we have no more than one dll
+    if len(dll_names) > 1:
         raise RuntimeError('Only one imported dll should be'
-                           'found in {}. dll(s) found: {}'
+                           'found in {}. dlls found: {}'
                            .format(import_lib, dll_names))
 
     # Get the only element of dll_names set
