@@ -30,7 +30,8 @@ def _sysdep_find_dependency(soname: str, symbol_set: Set[str]) -> str:
 
 
 def _add_dll_dep_to_pkginfo(currpkg: PackageInfo, import_lib: str,
-                            other_pkgs: List[PackageInfo]) -> None:
+                            other_pkgs: List[PackageInfo],
+                            curr_version: Version) -> None:
     """
     Adds to dependencies the package that hosts the dll associated with
     import library.
@@ -41,7 +42,7 @@ def _add_dll_dep_to_pkginfo(currpkg: PackageInfo, import_lib: str,
                     if f.endswith(('.dll', '.DLL'))]
         if dll in pkg_dlls:
             if pkg.name != currpkg.name:
-                currpkg.add_to_deplist(pkg.name, pkg.version, pkg.version)
+                currpkg.add_to_deplist(pkg.name, curr_version, curr_version)
             return
 
 
@@ -158,7 +159,8 @@ class MMPackBuildHook(BaseHook):
         symbols = set()
         for inst_file in pkg.files:
             if is_importlib(inst_file):
-                _add_dll_dep_to_pkginfo(pkg, inst_file, other_pkgs)
+                _add_dll_dep_to_pkginfo(pkg, inst_file,
+                                        other_pkgs, self._version)
                 continue
 
             # populate the set of sonames of shared libraries used by the
