@@ -65,11 +65,11 @@ int fullwrite(int fd, const char* data, size_t size)
  * Return: 0 in case of success, -1 otherwise
  */
 static
-int pkg_unpack_regfile(struct archive_entry *entry, const char* path,
-                       struct archive *a)
+int pkg_unpack_regfile(struct archive_entry * entry, const char* path,
+                       struct archive * a)
 {
 	int r, rv, fd, mode;
-	const void *buff;
+	const void * buff;
 	size_t size;
 	int64_t offset;
 
@@ -122,7 +122,7 @@ int pkg_unpack_regfile(struct archive_entry *entry, const char* path,
  * Return: 0 in case of success, -1 otherwise
  */
 static
-int pkg_unpack_symlink(struct archive_entry *entry, const char* path)
+int pkg_unpack_symlink(struct archive_entry * entry, const char* path)
 {
 	const char* target;
 	int rv;
@@ -151,7 +151,7 @@ int pkg_unpack_symlink(struct archive_entry *entry, const char* path)
  * Return: 0 on success, a negative value otherwise.
  */
 static
-int pkg_unpack_entry(struct archive *a, struct archive_entry* entry,
+int pkg_unpack_entry(struct archive * a, struct archive_entry* entry,
                      const mmstr* path)
 {
 	int type, rv;
@@ -247,8 +247,8 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 {
 	mmstr* metadata_prefix;
 	const char* entry_path;
-	struct archive_entry *entry;
-	struct archive *a;
+	struct archive_entry * entry;
+	struct archive * a;
 	int len, r, rv;
 	mmstr* path = NULL;
 
@@ -458,7 +458,7 @@ exit:
 static
 int rm_files_from_list(struct strlist* files)
 {
-	struct strlist_elt *elt;
+	struct strlist_elt * elt;
 	const mmstr* path;
 
 	elt = files->head;

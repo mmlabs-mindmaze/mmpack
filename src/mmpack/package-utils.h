@@ -95,7 +95,7 @@ struct binindex {
 	int num_pkgname;
 };
 int binindex_foreach(struct binindex * binindex,
-                     int (*cb)(struct mmpkg*, void*),
+                     int (* cb)(struct mmpkg*, void*),
                      void * data);
 
 struct install_state {

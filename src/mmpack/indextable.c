@@ -208,7 +208,7 @@ static
 struct it_bucket* indextable_bucket_append_node(struct indextable* table,
                                                 struct it_bucket* bucket)
 {
-	struct it_bucket *new_bucket;
+	struct it_bucket * new_bucket;
 
 	if (table->first_unused_bucket == table->buckets_len_max)
 		return NULL;
@@ -262,7 +262,7 @@ static
 struct it_entry* indextable_create_entry(struct indextable* table,
                                          uint32_t hash)
 {
-	struct it_bucket *bucket;
+	struct it_bucket * bucket;
 	int ind;
 
 	bucket = indextable_get_buckethead(table, hash);
@@ -481,7 +481,7 @@ struct it_entry* indextable_lookup_create_default(struct indextable* table,
                                                   const mmstr* key,
                                                   struct it_entry defval)
 {
-	struct it_bucket *bucket;
+	struct it_bucket * bucket;
 	struct it_entry* entry;
 	uint32_t hash;
 
@@ -585,7 +585,7 @@ struct it_entry* indextable_insert(struct indextable* table,
 LOCAL_SYMBOL
 int indextable_remove(struct indextable* table, const mmstr* key)
 {
-	struct it_bucket *bucket, *last, *prev_last;
+	struct it_bucket * bucket, * last, * prev_last;
 	uint32_t hash;
 	int index, lastelt_index;
 

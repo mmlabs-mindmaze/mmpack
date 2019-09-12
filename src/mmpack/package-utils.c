@@ -62,7 +62,7 @@ struct parsing_ctx {
 static
 void write_yaml_mmstr_multiline(FILE* fp, int num_indent, const char* str)
 {
-	const char *line, *next;
+	const char * line, * next;
 	int linelen;
 
 	fprintf(fp, "|\n");
@@ -460,7 +460,7 @@ void pkglist_init(struct pkglist* list, const mmstr* name, int id)
 static
 void pkglist_deinit(struct pkglist* list)
 {
-	struct pkglist_entry *entry, *next;
+	struct pkglist_entry * entry, * next;
 
 	entry = list->head;
 	while (entry) {
@@ -612,7 +612,7 @@ struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
 
 LOCAL_SYMBOL
 int binindex_foreach(struct binindex * binindex,
-                     int (*cb)(struct mmpkg*, void*),
+                     int (* cb)(struct mmpkg*, void*),
                      void * data)
 {
 	int rv;

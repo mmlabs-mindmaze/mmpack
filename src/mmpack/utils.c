@@ -52,7 +52,7 @@ const char* get_last_nonsep_ptr(const mmstr* path)
 static
 const char* get_basename_ptr(const mmstr* path)
 {
-	const char *c, *lastptr;
+	const char * c, * lastptr;
 
 	lastptr = get_last_nonsep_ptr(path);
 
@@ -194,7 +194,7 @@ LOCAL_SYMBOL
 int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 {
 	int fd = -1;
-	mmstr *tmp, *dirpath;
+	mmstr * tmp, * dirpath;
 
 	if (prefix) {
 		// Form path of file in prefix
@@ -632,7 +632,7 @@ void strlist_init(struct strlist* list)
 LOCAL_SYMBOL
 void strlist_deinit(struct strlist* list)
 {
-	struct strlist_elt *elt, *next;
+	struct strlist_elt * elt, * next;
 
 	elt = list->head;
 
@@ -687,7 +687,7 @@ int strlist_add(struct strlist* list, const char* str)
 LOCAL_SYMBOL
 void strlist_remove(struct strlist* list, const mmstr* str)
 {
-	struct strlist_elt *elt, *prev;
+	struct strlist_elt * elt, * prev;
 
 	prev = NULL;
 	elt = list->head;

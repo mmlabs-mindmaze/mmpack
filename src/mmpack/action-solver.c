@@ -598,7 +598,7 @@ int solver_step_validation(struct solver* solver, struct proc_frame* frame)
 static
 int solver_step_select_pkg(struct solver* solver, struct proc_frame* frame)
 {
-	struct mmpkg *pkg, *oldpkg;
+	struct mmpkg * pkg, * oldpkg;
 	int id = frame->dep->pkgname_id;
 
 	// Check that we are not about reinstall the same package. Since
@@ -642,8 +642,8 @@ int solver_check_upgrade_rdep(struct solver* solver, int rdep_id,
                               const struct mmpkg* pkg, struct buffer* buff,
                               struct compiled_dep** last_upgrade_dep)
 {
-	struct mmpkg *rdep;
-	struct compiled_dep *dep, *upgrade_dep;
+	struct mmpkg * rdep;
+	struct compiled_dep * dep, * upgrade_dep;
 	struct binindex* binindex = solver->binindex;
 	int is_rdep_staged;
 
@@ -704,7 +704,7 @@ int solver_step_upgrade_rdeps(struct solver* solver, struct proc_frame* frame)
 	int i, num;
 	const int* rdep_ids;
 	struct mmpkg* newpkg;
-	struct compiled_dep *upgrade_deps, *last_upgrade_dep;
+	struct compiled_dep * upgrade_deps, * last_upgrade_dep;
 	struct buffer buff;
 
 	buffer_init(&buff);
@@ -872,7 +872,7 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
 {
 	struct action_stack* stk;
 	struct planned_op* ops;
-	struct mmpkg *pkg, *oldpkg;
+	struct mmpkg * pkg, * oldpkg;
 	int i, num_ops;
 
 	stk = mmpack_action_stack_create();
@@ -993,7 +993,7 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
                                             const struct pkg_request* reqlist)
 {
 	int rv;
-	struct compiled_dep *deplist;
+	struct compiled_dep * deplist;
 	struct solver solver;
 	struct action_stack* stack = NULL;
 	struct buffer deps_buffer;
@@ -1160,7 +1160,7 @@ int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack)
 {
 	int i, rv;
 	const char* operation;
-	const mmstr *old_version, *new_version;
+	const mmstr * old_version, * new_version;
 
 	if (stack->index == 0) {
 		printf("Nothing to do.\n");

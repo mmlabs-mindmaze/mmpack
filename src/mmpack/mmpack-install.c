@@ -46,7 +46,7 @@ int is_file(char const * path)
 
 
 static
-int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request *req,
+int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
                             const char* arg)
 {
 	const char * v;

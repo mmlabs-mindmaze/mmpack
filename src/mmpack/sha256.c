@@ -50,7 +50,7 @@ static const uint32_t k[64] = {
 /*********************** FUNCTION DEFINITIONS ***********************/
 
 static
-void sha256_transform(SHA256_CTX *ctx, const unsigned char* data)
+void sha256_transform(SHA256_CTX * ctx, const unsigned char* data)
 {
 	uint32_t a, b, c, d, e, f, g, h, t1, t2, m[64];
 	int i, j;
@@ -96,7 +96,7 @@ void sha256_transform(SHA256_CTX *ctx, const unsigned char* data)
 
 
 LOCAL_SYMBOL
-void sha256_init(SHA256_CTX *ctx)
+void sha256_init(SHA256_CTX * ctx)
 {
 	ctx->datalen = 0;
 	ctx->bitlen = 0;
@@ -112,7 +112,7 @@ void sha256_init(SHA256_CTX *ctx)
 
 
 LOCAL_SYMBOL
-void sha256_update(SHA256_CTX *ctx, const void* buffer, size_t len)
+void sha256_update(SHA256_CTX * ctx, const void* buffer, size_t len)
 {
 	size_t i;
 	const unsigned char* restrict data = buffer;
@@ -130,7 +130,7 @@ void sha256_update(SHA256_CTX *ctx, const void* buffer, size_t len)
 
 
 LOCAL_SYMBOL
-void sha256_final(SHA256_CTX *ctx, unsigned char* hash)
+void sha256_final(SHA256_CTX * ctx, unsigned char* hash)
 {
 	int i;
 

@@ -152,7 +152,7 @@ int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 	struct it_iterator iter;
 	struct it_entry* entry;
 	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct mmpkg *pkg, *latest;
+	const struct mmpkg * pkg, * latest;
 	int found = 0;
 
 	// Loop over the entries of the installed package list

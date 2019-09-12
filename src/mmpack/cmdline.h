@@ -14,8 +14,8 @@ enum pkg_comp_type {
 	ONLY_INSTALLED,
 };
 
-typedef int (*subcmd_proc)(struct mmpack_ctx * ctx, int argc,
-                           const char* argv[]);
+typedef int (* subcmd_proc)(struct mmpack_ctx * ctx, int argc,
+                            const char* argv[]);
 
 struct subcmd {
 	const char* name;

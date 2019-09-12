@@ -34,9 +34,9 @@ static
 struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 {
 	STATIC_CONST_MMSTR(any_version, "any");
-	struct pkg_request *req, *reqlist;
+	struct pkg_request * req, * reqlist;
 	struct it_iterator iter;
-	struct it_entry *entry;
+	struct it_entry * entry;
 	const struct mmpkg* pkg;
 	const struct mmpkg* latest;
 
@@ -67,7 +67,7 @@ struct pkg_request* get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 {
 	STATIC_CONST_MMSTR(any_version, "any");
 	int i;
-	struct pkg_request *req, *reqlist;
+	struct pkg_request * req, * reqlist;
 	mmstr * pkg_name;
 	const struct mmpkg* pkg;
 	const struct mmpkg* latest;

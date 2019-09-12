@@ -25,8 +25,8 @@ typedef struct {
 } SHA256_CTX;
 
 /*********************** FUNCTION DECLARATIONS **********************/
-void sha256_init(SHA256_CTX *ctx);
-void sha256_update(SHA256_CTX *ctx, const void* buffer, size_t len);
-void sha256_final(SHA256_CTX *ctx, unsigned char* hash);
+void sha256_init(SHA256_CTX * ctx);
+void sha256_update(SHA256_CTX * ctx, const void* buffer, size_t len);
+void sha256_final(SHA256_CTX * ctx, unsigned char* hash);
 
 #endif   // SHA256_H

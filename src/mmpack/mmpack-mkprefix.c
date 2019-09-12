@@ -39,7 +39,7 @@ static
 int create_initial_empty_files(const mmstr* prefix, int force_create)
 {
 	int fd, oflag;
-	const mmstr *instlist_relpath, *log_relpath, *avllist_relpath;
+	const mmstr * instlist_relpath, * log_relpath, * avllist_relpath;
 
 	instlist_relpath = mmstr_alloca_from_cstr(INSTALLED_INDEX_RELPATH);
 	log_relpath = mmstr_alloca_from_cstr(LOG_RELPATH);
