@@ -1,4 +1,4 @@
-mmpack (0.0.1+next3) UNRELEASED; urgency=medium
+mmpack (0.0.1+next4) UNRELEASED; urgency=medium
 
   * Preparing next version
   * Create mmpack-repo-tools package
@@ -8,6 +8,8 @@ mmpack (0.0.1+next3) UNRELEASED; urgency=medium
   * mmpack-build: inspect properly lib depends in other package of same
     project
   * Make it buildable on Debian Buster
+  * mmpack-build: create manifest
+  * mmpack-build: initial python support
 
  -- Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>  Mon, 01 Jul 2019 15:37:35 +0200
 
