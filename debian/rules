@@ -12,7 +12,7 @@ endif
 export DEB_LDFLAGS_MAINT_APPEND=-Wl,-Bsymbolic-functions
 
 %:
-	dh  $@ --with autoreconf,python3,sphinxdoc
+	dh  $@ --with autoreconf,python3,sphinxdoc --builddirectory=build
 
 override_dh_autoreconf:
 	dh_autoreconf ./autogen.sh
@@ -21,7 +21,7 @@ override_dh_auto_configure:
 	dh_auto_configure -- $(CONFFLAGS)
 
 override_dh_auto_build:
-	make all html
+	make -C build all html
 
 override_dh_install:
 	dh_install -X.la --fail-missing
