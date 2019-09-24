@@ -5,10 +5,12 @@
 /usr/share/bash-completion/completions/mmpack_completion
 /usr/share/man/man1/mmpack.1
 /usr/share/man/man1/mmpack-check-integrity.1
+/usr/share/man/man1/mmpack-download.1
 /usr/share/man/man1/mmpack-fix-broken.1
 /usr/share/man/man1/mmpack-install.1
 /usr/share/man/man1/mmpack-list.1
 /usr/share/man/man1/mmpack-mkprefix.1
+/usr/share/man/man1/mmpack-provides.1
 /usr/share/man/man1/mmpack-remove.1
 /usr/share/man/man1/mmpack-run.1
 /usr/share/man/man1/mmpack-search.1
