@@ -2,7 +2,7 @@
 
 set -e
 
-meson --prefix=$PREFIX --libdir=$PREFIX/lib $BUILDDIR $SRCDIR
+meson --prefix=$PREFIX --libdir=lib $BUILDDIR $SRCDIR
 
 cd $BUILDDIR
 ninja
