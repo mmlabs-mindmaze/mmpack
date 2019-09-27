@@ -349,3 +349,12 @@ def yaml_load(filename: str):
     helper: load yaml file with BasicLoader
     """
     return yaml.load(open(filename, 'rb').read(), Loader=yaml.BaseLoader)
+
+
+class Assert(AssertionError):
+    """
+    Wrapper over AssertionError which also logs the message as an error.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _log_or_store(logging.ERROR, *args, **kwargs)

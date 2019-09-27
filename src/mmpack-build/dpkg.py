@@ -10,7 +10,7 @@ import re
 from glob import glob
 from typing import List
 
-from common import parse_soname, get_host_arch
+from common import parse_soname, get_host_arch, Assert
 from mm_version import Version
 from settings import DPKG_METADATA_PREFIX
 
@@ -58,7 +58,7 @@ def dpkg_parse_shlibs(filename: str, target_soname: str,
         A dependency template
 
     Raises:
-        AssertionError: symbols could not be found
+        Assert: symbols could not be found
     """
     dependency_template = None
     name, version = parse_soname(target_soname)
@@ -69,7 +69,7 @@ def dpkg_parse_shlibs(filename: str, target_soname: str,
             dependency_template = line[len(shlib_soname):]
             break
     if not dependency_template:
-        raise AssertionError(target_soname + 'not found in ' + filename)
+        raise Assert(target_soname + 'not found in ' + filename)
 
     # read library file to prune symbols
     # assert the existence of <pkgname>*.list

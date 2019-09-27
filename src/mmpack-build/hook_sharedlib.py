@@ -8,7 +8,7 @@ import os
 from typing import Set, Dict, List
 
 from base_hook import BaseHook, PackageInfo
-from common import shlib_keyname
+from common import shlib_keyname, Assert
 from dpkg import dpkg_find_dependency
 from file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
@@ -87,7 +87,7 @@ class MMPackBuildHook(BaseHook):
             others_pkgs: list of packages cobuilded (may include currpkg)
 
         Raises:
-            AssertionError: a used soname is not provided by any mmpack or
+            Assert: a used soname is not provided by any mmpack or
                 system package.
         """
         # provided in the same package or a package being generated
@@ -107,7 +107,7 @@ class MMPackBuildHook(BaseHook):
             if not sysdep:
                 # <soname> dependency could not be met with any available means
                 errmsg = 'Could not find package providing ' + soname
-                raise AssertionError(errmsg)
+                raise Assert(errmsg)
 
             currpkg.add_sysdep(sysdep)
 
@@ -184,4 +184,4 @@ class MMPackBuildHook(BaseHook):
                      .format(pkg.name)
             errmsg += 'Remaining symbols:\n\t'
             errmsg += '\n\t'.join(symbols)
-            raise AssertionError(errmsg)
+            raise Assert(errmsg)
