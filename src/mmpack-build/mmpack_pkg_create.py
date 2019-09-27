@@ -79,7 +79,7 @@ def parse_options(argv):
         except KeyError:
             pass
     if args.prefix:
-        Workspace().prefix = args.prefix
+        Workspace().prefix = os.path.abspath(args.prefix)
 
     return args
 
