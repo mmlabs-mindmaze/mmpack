@@ -388,6 +388,8 @@ class SrcPackage:
         build_env['PREFIX'] = _get_install_prefix()
         build_env['LD_RUN_PATH'] = os.path.join(_get_install_prefix(), 'lib')
         build_env['SKIP_TESTS'] = str(skip_tests)
+        build_env['PKG_CONFIG_PATH'] = os.path.join(_get_install_prefix(),
+                                                    'lib/pkgconfig')
         if self.build_options:
             build_env['OPTS'] = self.build_options
 
