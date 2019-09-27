@@ -657,7 +657,7 @@ int download_package(struct mmpack_ctx * ctx, struct mmpkg const * pkg,
 
 	info("Downloading %s (%s)... ", pkg->name, pkg->version);
 
-	/* Dowload package from repo */
+	/* Download package from repo */
 	if (download_from_repo(ctx, repo_url, pkg->filename,
 	                       NULL, pathname)) {
 		error("Failed!\n");

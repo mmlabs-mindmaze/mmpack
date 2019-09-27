@@ -139,7 +139,7 @@ class SSH:
             channel = stdout.channel  # shared channel for stdout/stderr/stdin
             while not channel.exit_status_ready():
                 # flush stdout and stderr while the remote program has not
-                # returned. Read by blocs of max 16KB.
+                # returned. Read by blocks of max 16KB.
                 if channel.recv_ready():
                     stdout.channel.recv(1 << 14)
                 if channel.recv_stderr_ready():

@@ -573,7 +573,7 @@ void report_user_and_log(int mmlog_level, const char* fmt, ...)
 	int lastchar_idx, msglen, has_lf;
 	va_list ap;
 
-	// If command completion is running, do not produce anthing on
+	// If command completion is running, do not produce anything on
 	// standard output or standard error
 	if (mmarg_is_completing())
 		return;
