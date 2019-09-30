@@ -43,3 +43,36 @@ foreach rstfile : man_pages_sources
         install_dir : get_option('mandir') / 'man1',
     )
 endforeach
+
+sphinxbuild = find_program('sphinx-build', required : true)
+mmpack_doc_sources = files(
+    'bug.rst',
+    'configuration.rst',
+    'conf.py',
+    'creating-packages.rst',
+    'devguide.rst',
+    'faq.rst',
+    'getting-started.rst',
+    'index.rst',
+    'installation.rst',
+    'introduction.rst',
+    'usage.rst',
+    'yaml.rst',
+)
+# add the user part of the specifications
+mmpack_doc_sources += files('specs/package-specfile.rst')
+
+custom_target('html',
+        output : 'html',
+        command : [
+            sphinxbuild,
+            '-b', 'html',
+            '-d', 'docs/.doctrees',
+            '-j', 'auto',
+            meson.source_root() / 'docs',
+            'docs/html',
+        ],
+        build_by_default : true,
+        install : true,
+        install_dir : get_option('datadir') / 'doc/mmpack',
+)
