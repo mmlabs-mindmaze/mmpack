@@ -111,6 +111,19 @@ mount_mmpack_prefix = executable('mount-mmpack-prefix',
         install_dir : get_option('libexecdir') / 'mmpack',
 )
 
+# dev linux-only helper function, not part of any target
+# requires root permissions to run
+setcap = find_program('/sbin/setcap', required : false)
+if setcap.found()
+    run_target('setcap',
+            command : [
+                setcap,
+                'cap_dac_override,cap_sys_admin+ep',
+                get_option('libexecdir') / 'mmpack' / 'mount-mmpack-prefix'
+            ],
+    )
+endif # setcap
+
 install_data(files('prompt.bash'),
         install_dir : get_option('datadir') / 'mmpack',
 )
