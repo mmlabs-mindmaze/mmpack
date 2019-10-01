@@ -723,8 +723,6 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 
 		if (download_package(ctx, pkg, mpkfile) != 0)
 			return -1;
-
-		info("OK\n");
 	}
 
 	return 0;
