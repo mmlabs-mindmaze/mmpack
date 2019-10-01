@@ -49,8 +49,9 @@ class TapTestResult(unittest.TestResult):
         self._print_tap_result("not ok", test)
 
 
-class TapTestRunner(object):
+class TapTestRunner(unittest.TextTestRunner):
     def __init__(self, output = sys.stdout):
+        super().__init__(self)
         self.stream = output
 
     def run(self, test):
@@ -66,6 +67,8 @@ class TapTestRunner(object):
         unittest.registerResult(result)
         test(result)
         unittest.removeResult(result)
+        return result
+
 
 
 if __name__ == '__main__':
@@ -84,4 +87,7 @@ if __name__ == '__main__':
     sys.path = path_backup
 
     runner = TapTestRunner()
-    runner.run(tests)
+    rv = runner.run(tests)
+    if (len(rv.errors) + len(rv.failures) + len(rv.unexpectedSuccesses)) != 0:
+        exit(-1)
+    exit(0)
