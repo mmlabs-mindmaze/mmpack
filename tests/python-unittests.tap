@@ -3,6 +3,10 @@
 set -e
 set -x
 
-export PYTHONPATH="src/mmpack-build:$srcdir/src/mmpack-build:$PYTHONPATH"
+if [ -n "$(which cygpath)" ] ; then
+	srcdir=$(cygpath -u $srcdir)
+	builddir=$(cygpath -u $builddir)
+fi
+export PYTHONPATH="$srcdir/src/mmpack-build:$builddir/src/mmpack-build"
 
 python3 $srcdir/tests/pytests.py

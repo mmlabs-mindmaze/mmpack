@@ -281,6 +281,7 @@ check_PROGRAMS = \
 	unittests.tap \
 	$(eol)
 
+TESTS_ENVIRONMENT = srcdir=$(srcdir) builddir=$(builddir)
 TEST_EXTENSIONS = .test .tap
 TAP_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 	$(srcdir)/build-aux/tap-driver.sh

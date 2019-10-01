@@ -56,7 +56,7 @@ custom_target('mmpack-build-unit-tests',
 )
 
 test('mmpack-build unit tests',
-        files('pytests.py'),
-        env : ['PYTHONPATH=' + meson.source_root() + '/src/mmpack-build'
-                             + ':' +  meson.build_root() + '/src/mmpack-build'],
+        files('python-unittests.tap'),
+        env : ['srcdir=' + meson.source_root(),
+               'builddir=' + meson.build_root()],
 )
