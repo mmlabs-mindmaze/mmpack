@@ -28,6 +28,7 @@ mmpack_unit_tests = executable('mmpack-unit-test',
 test('mmpack unit tests',
         mmpack_unit_tests,
         timeout : 60,
+        suite : 'mmpack',
 )
 
 mmpack_build_unit_tests_sources = files(
@@ -45,18 +46,10 @@ mmpack_build_unit_tests_sources = files(
     'test_package.py',
     'test_version.py',
 )
-custom_target('mmpack-build-unit-tests',
-        command : [ 'PYTHONPATH=' + meson.source_root() + '/src/mmpack-build'
-                                  + ':' +  meson.build_root(),
-                    files('pytests.py')],
-        output : '.pytests.out',
-        build_always_stale : true,
-        console : true,
-        depend_files : mmpack_build_unit_tests_sources,
-)
 
 test('mmpack-build unit tests',
         files('python-unittests.tap'),
         env : ['srcdir=' + meson.source_root(),
                'builddir=' + meson.build_root()],
+        suite : 'mmpack-build',
 )
