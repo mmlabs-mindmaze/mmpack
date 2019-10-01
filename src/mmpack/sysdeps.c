@@ -8,6 +8,7 @@
 #include <mmsysio.h>
 #include <mmerrno.h>
 #include <stdio.h>
+#include <mmlib.h>
 
 #include "indextable.h"
 #include "mmstring.h"
@@ -62,7 +63,18 @@ static
 int dpkg_check_sysdeps_installed(const struct strset* sysdeps)
 {
 	mmstr* strdeps;
-	char* argv[] = {CHECK_DPKG_INSTALLED, NULL, NULL};
+
+	/* variables to handle the tests */
+	const mmstr * env = mmstr_alloca_from_cstr(
+		mm_getenv("_MMPACK_TEST_PREFIX", ""));
+	STATIC_CONST_MMSTR(dpk, CHECK_DPKG_INSTALLED);
+	mmstr * path = mmstr_alloca(mmstrlen(env) +
+	                            mmstrlen(dpk));
+
+	mmstrcpy(path, env);
+	mmstrcat(path, dpk);
+
+	char* argv[] = {path, NULL, NULL};
 	int rv;
 
 	strdeps = dpkg_concat_sysdeps(sysdeps);

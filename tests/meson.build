@@ -73,12 +73,40 @@ run_target('deployment-test-clean',
     command : [ 'rm', '-rvf', deployment_dir ],
 )
 
+env = environment()
+env.set('DEPLOYMENT_DIR', deployment_dir)
+env.set('PYTHON_INSTALL_DIR', python.get_install_dir())
+env.set('SRCDIR', meson.source_root())
+env.set('BUILDDIR', meson.build_root())
+env.set('PREFIX', get_option('prefix'))
+
 test('mmpack-build unit tests',
         files('python-unittests.tap'),
-        env : [ 'DEPLOYMENT_DIR=' + deployment_dir,
-                'PYTHON_INSTALL_DIR=' + python.get_install_dir(),
-                'SRCDIR=' + meson.source_root(),
-        ],
         suite : 'mmpack-build',
+        env : env,
         depends : do_deployment_test,
 )
+
+# The variable _MMPACK_TEST_PREFIX is needed by mmpack-build and mmpack to find
+# everything in the right place during the tests (that require a local
+# installation of mmpack-build and mmpack).
+test('mmpack-build',
+        files ('smoke-tests/test_mmpack-build.sh'),
+        timeout : 60,
+        env : env,
+        suite : 'mmpack-build-smoke',
+)
+
+mmpack_smoke_test = [
+        ['install', files('smoke-tests/test_mmpack_install.sh')],
+        ['remove', files('smoke-tests/test_mmpack_remove.sh')],
+        ['check-integrity', files('smoke-tests/test_mmpack_check-integrity.sh')],
+]
+
+foreach test : mmpack_smoke_test
+        test('mmpack-smoke-' + test[0],
+                test[1],
+                env : env,
+                suite : 'mmpack-smoke',
+        )
+endforeach

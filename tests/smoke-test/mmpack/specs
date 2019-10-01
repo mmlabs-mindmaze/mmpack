@@ -1,0 +1,7 @@
+general:
+    name: hello
+    version: 1.0.0
+    maintainer: test
+    url: testurl
+    description: |
+      mmpack hello

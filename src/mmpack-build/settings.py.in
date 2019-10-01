@@ -3,6 +3,7 @@ global system variables helper
 """
 
 import os
+from . common import concatenate_unix
 
 try:
     CFG_HOME = os.environ['XDG_CONFIG_HOME']
@@ -17,7 +18,9 @@ DPKG_METADATA_PREFIX = DPKG_PREFIX + '/info'
 PACMAN_PREFIX = '\\var\\lib\\pacman'
 
 # variables taken from autotools
-PKGDATADIR = r'@pkgdatadir@'
-LIBEXECDIR = r'@libexecdir@'
-BINDIR = r'@bindir@'
+_MMPACK_TEST_PREFIX = os.environ.get('_MMPACK_TEST_PREFIX', '')
 EXEEXT = r'@exeext@'
+
+PKGDATADIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@pkgdatadir@')
+LIBEXECDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@libexecdir@')
+BINDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@bindir@')

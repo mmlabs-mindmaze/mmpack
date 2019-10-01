@@ -11,5 +11,5 @@ if [ -n "$(which cygpath)" ] ; then
 fi
 
 # Finally, run the tests
-export PYTHONPATH=${DEPLOYMENT_DIR}/${PYTHON_INSTALL_DIR}
+export PYTHONPATH=${DEPLOYMENT_DIR}${PYTHON_INSTALL_DIR}
 python3 $SRCDIR/tests/pytests.py

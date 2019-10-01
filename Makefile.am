@@ -295,14 +295,16 @@ deployment-test-clean:
 noinst_PYTHON = tests/pytests.py
 
 check_DATA = deployment-test
-TESTS = unittests.tap tests/python-unittests.tap
+
+TESTS = unittests.tap tests/python-unittests.tap tests/smoke-tests/test_mmpack-build.sh tests/smoke-tests/test_mmpack_install.sh tests/smoke-tests/test_mmpack_remove.sh tests/smoke-tests/test_mmpack_check-integrity.sh
+
 dist_check_SCRIPTS = tests/python-unittests.tap
 check_PROGRAMS = \
 	unittests.tap \
 	$(eol)
 
-TESTS_ENVIRONMENT = DEPLOYMENT_DIR=deployment-test PYTHON_INSTALL_DIR=$(pythondir) SRCDIR=$(srcdir)
-TEST_EXTENSIONS = .test .tap
+TESTS_ENVIRONMENT = DEPLOYMENT_DIR=$(abs_builddir)/deployment-test PYTHON_INSTALL_DIR=$(pythondir) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) PREFIX=$(prefix)
+TEST_EXTENSIONS = .test .tap .sh
 TAP_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 	$(srcdir)/build-aux/tap-driver.sh
 
