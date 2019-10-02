@@ -2,7 +2,8 @@
 import unittest
 
 from distutils.version import LooseVersion
-from mm_version import Version
+
+from mmpack_build.mm_version import Version
 
 class TestVersionClass(unittest.TestCase):
 

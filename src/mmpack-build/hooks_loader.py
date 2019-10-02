@@ -10,8 +10,8 @@ MMPackBuildHook that derived from BaseHook of base_hook.py.
 import importlib
 import pkgutil
 
-from common import iprint
-from mm_version import Version
+from . common import iprint
+from . mm_version import Version
 
 
 MMPACK_BUILD_HOOKS = []

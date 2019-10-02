@@ -6,9 +6,9 @@ common classes to specify provided symbols to other packages
 from glob import glob
 from typing import Set, Dict, Tuple, List
 
-from common import yaml_serialize, yaml_load
-from mm_version import Version
-from workspace import Workspace
+from . common import yaml_serialize, yaml_load
+from . mm_version import Version
+from . workspace import Workspace
 
 
 class Provide:

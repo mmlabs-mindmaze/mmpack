@@ -10,7 +10,7 @@ import shutil
 from glob import glob
 from typing import Set, Dict
 
-from base_hook import BaseHook
+from . base_hook import BaseHook
 
 
 # example of matches:

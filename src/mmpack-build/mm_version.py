@@ -17,7 +17,7 @@ from distutils.version import LooseVersion
 
 import yaml
 
-from common import mm_representer
+from . common import mm_representer
 
 
 class Version(LooseVersion):  # pylint: disable=too-few-public-methods

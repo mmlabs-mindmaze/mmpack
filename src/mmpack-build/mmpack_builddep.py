@@ -8,13 +8,15 @@ system dependency is unmet. All the available mmpack packages found
 missing will be proposed for install within the current prefix.
 """
 
-import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from subprocess import run
 
-from common import get_host_dist, yaml_load, dprint
-from settings import LIBEXECDIR
-from workspace import find_project_root_folder, Workspace
+from . common import get_host_dist, yaml_load, dprint
+from . settings import LIBEXECDIR
+from . workspace import find_project_root_folder, Workspace
+
+
+CMD = 'builddep'
 
 
 def parse_option(argv):
@@ -101,18 +103,14 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
     return ret.returncode
 
 
-def main():
+def main(argv):
     """
     main function
     """
-    options = parse_option(sys.argv[1:])
+    options = parse_option(argv[1:])
     specs = yaml_load(options.specfile)['general']
 
     system_builddeps, mmpack_builddeps = general_specs_builddeps(specs)
 
     return process_dependencies(system_builddeps, mmpack_builddeps,
                                 options.prefix, options.assumeyes)
-
-
-if __name__ == '__main__':
-    main()

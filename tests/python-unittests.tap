@@ -3,10 +3,13 @@
 set -e
 set -x
 
+# window path conversion
 if [ -n "$(which cygpath)" ] ; then
-	srcdir=$(cygpath -u $srcdir)
-	builddir=$(cygpath -u $builddir)
+	DEPLOYMENT_DIR=$(cygpath -u $DEPLOYMENT_DIR)
+	PYTHON_INSTALL_DIR=$(cygpath -u $PYTHON_INSTALL_DIR)
+	SRCDIR=$(cygpath -u $SRCDIR)
 fi
-export PYTHONPATH="$srcdir/src/mmpack-build:$builddir/src/mmpack-build"
 
-python3 $srcdir/tests/pytests.py
+# Finally, run the tests
+export PYTHONPATH=${DEPLOYMENT_DIR}/${PYTHON_INSTALL_DIR}
+python3 $SRCDIR/tests/pytests.py

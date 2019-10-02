@@ -15,14 +15,14 @@ from tempfile import mkdtemp
 from threading import Thread
 from typing import Set
 
-from workspace import Workspace, get_local_install_dir
-from binary_package import BinaryPackage
-from common import *
-from file_utils import *
-from hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
-from mm_version import Version
-from settings import PKGDATADIR
-from mmpack_builddep import process_dependencies, general_specs_builddeps
+from . workspace import Workspace, get_local_install_dir
+from . binary_package import BinaryPackage
+from . common import *
+from . file_utils import *
+from . hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
+from . mm_version import Version
+from . settings import PKGDATADIR
+from . mmpack_builddep import process_dependencies, general_specs_builddeps
 
 
 class _FileConsumer(Thread):

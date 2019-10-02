@@ -30,7 +30,7 @@ am__v_RM_1 = -@rm -vf
 
 bin_PROGRAMS = mmpack
 pkglibexec_PROGRAMS = mount-mmpack-prefix mmpack-check-sysdep
-bin_SCRIPTS = mmpack-build
+bin_SCRIPTS = src/mmpack-build/mmpack-build
 dist_bin_SCRIPTS = \
 	src/repository/mmpack-createrepo \
 	devtools/mmpack-build-slave.sh \
@@ -39,12 +39,13 @@ dist_pkgdata_SCRIPTS = src/mmpack/check-dpkg-installed
 
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST += \
-	src/mmpack-build/mmpack-build.in \
 	src/mmpack-build/settings.py.in \
 	$(eol)
 
-mmpackbuilddir = $(pkgdatadir)/python
+mmpackbuilddir = $(pythondir)/mmpack_build
 mmpackbuild_PYTHON =\
+	src/mmpack-build/__init__.py \
+	src/mmpack-build/__main__.py \
 	src/mmpack-build/base_hook.py \
 	src/mmpack-build/binary_package.py \
 	src/mmpack-build/common.py \
@@ -86,20 +87,17 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 
 .PHONY: pycodestyle
-pycodestyle: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) $(mmpack_db_service) \
-		devtools/gerrit/gerrit-mmpack-build.py
-	pycodestyle --show-source $^
+pycodestyle: deployment-test
+	pycodestyle --show-source deployment-test$(pythondir)/mmpack_build
 
 .PHONY: pylint
-pylint: devtools/pylint-config $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) $(mmpack_db_service) \
-		devtools/gerrit/gerrit-mmpack-build.py
-	pylint3 --jobs=0 --disable=locally-disabled --rcfile=$^
+pylint: devtools/pylint-config deployment-test
+	pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build
 
 .PHONY: syntax
 syntax: pycodestyle pylint
 	@echo "$@ target is obsolete, and will be removed soon."
 	@echo "Use \"pycodestyle\" and \"pylint\" instead."
-
 
 mmpack_lib_sources = \
 	src/mmpack/action-solver.c \
@@ -212,10 +210,6 @@ mmpack_check_sysdep_LDADD = \
 	$(eol)
 
 
-mmpack-build: src/mmpack-build/mmpack-build.in Makefile
-	$(AM_V_GEN)$(SED) -e 's,@mmpackbuilddir[@],$(mmpackbuilddir),g' < $< > $@
-	$(AM_V_at)chmod a+x $@
-
 # write the 2nd @ between [] in order to prevent autotools replacing it
 # BEFORE the sed call
 %.py : %.py.in Makefile
@@ -283,15 +277,25 @@ checkstyle: devtools/uncrustify.cfg pycodestyle
 # TESTS RULES
 #
 
+deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
+		$(mount_mmpack_prefix_SOURCES) $(mmpackbuild_PYTHON) \
+		$(nodist_mmpackbuild_PYTHON)
+	DESTDIR=$(shell readlink -f $@) $(MAKE) install
+	@touch $@
+
+deployment-test-clean:
+	@$(RM) -rvf deployment-test
+
 noinst_PYTHON = tests/pytests.py
 
+check_DATA = deployment-test
 TESTS = unittests.tap tests/python-unittests.tap
 dist_check_SCRIPTS = tests/python-unittests.tap
 check_PROGRAMS = \
 	unittests.tap \
 	$(eol)
 
-TESTS_ENVIRONMENT = srcdir=$(srcdir) builddir=$(builddir)
+TESTS_ENVIRONMENT = DEPLOYMENT_DIR=deployment-test PYTHON_INSTALL_DIR=$(pythondir) SRCDIR=$(srcdir)
 TEST_EXTENSIONS = .test .tap
 TAP_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 	$(srcdir)/build-aux/tap-driver.sh

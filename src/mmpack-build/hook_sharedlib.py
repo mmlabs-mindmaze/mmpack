@@ -7,16 +7,16 @@ import importlib
 import os
 from typing import Set, Dict, List
 
-from base_hook import BaseHook, PackageInfo
-from common import shlib_keyname, Assert
-from dpkg import dpkg_find_dependency
-from file_utils import is_dynamic_library, get_exec_fileformat, \
+from . base_hook import BaseHook, PackageInfo
+from . common import shlib_keyname, Assert
+from . dpkg import dpkg_find_dependency
+from . file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
-from mm_version import Version
-from pacman import pacman_find_dependency
-from provide import Provide, ProvideList, load_mmpack_provides
-from settings import DPKG_PREFIX, PACMAN_PREFIX
-from workspace import Workspace
+from . mm_version import Version
+from . pacman import pacman_find_dependency
+from . provide import Provide, ProvideList, load_mmpack_provides
+from . settings import DPKG_PREFIX, PACMAN_PREFIX
+from . workspace import Workspace
 
 
 def _sysdep_find_dependency(soname: str, symbol_set: Set[str]) -> str:

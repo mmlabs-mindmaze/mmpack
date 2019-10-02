@@ -5,7 +5,7 @@ template to create mmpack-build hook
 
 from typing import Set, Dict, List
 
-from mm_version import Version
+from . mm_version import Version
 
 
 class PackageInfo:

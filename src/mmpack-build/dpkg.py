@@ -10,9 +10,9 @@ import re
 from glob import glob
 from typing import List
 
-from common import parse_soname, get_host_arch, Assert
-from mm_version import Version
-from settings import DPKG_METADATA_PREFIX
+from . common import parse_soname, get_host_arch, Assert
+from . mm_version import Version
+from . settings import DPKG_METADATA_PREFIX
 
 
 def dpkg_find_shlibs_file(target_soname: str):

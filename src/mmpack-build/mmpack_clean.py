@@ -3,13 +3,18 @@
 Small helper used to ensure a clean state of mmpack-build work folders
 """
 
-import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from workspace import Workspace
+from . workspace import Workspace
 
 
-if __name__ == '__main__':
+CMD = 'clean'
+
+
+def main(argv):
+    """
+    helper to clean the mmpack generated files
+    """
     # pylint: disable=invalid-name
     parser = ArgumentParser(description=__doc__,
                             formatter_class=RawDescriptionHelpFormatter)
@@ -17,7 +22,7 @@ if __name__ == '__main__':
                         action='store_true',
                         help='wipe all files including generated packages')
 
-    options = parser.parse_args(sys.argv[1:])
+    options = parser.parse_args(argv[1:])
 
     if options.wipe:
         Workspace().wipe()

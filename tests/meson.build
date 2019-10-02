@@ -47,9 +47,38 @@ mmpack_build_unit_tests_sources = files(
     'test_version.py',
 )
 
+install_manifest = custom_target('install-manifest',
+        output : 'install-manifest',
+        capture : true,
+        command : [ 'meson', 'introspect', '--install' ],
+        build_by_default : true,
+)
+
+deployment_dir = meson.build_root() + '/deployment-test'
+do_deployment_test = custom_target('deployment-test',
+        output : 'deployment-test.txt',
+        capture : true,
+        command : [ 'python3',
+                    files('do-deployment-test.py'),
+                    deployment_dir,
+                    install_manifest,
+        ],
+        depends : [install_manifest,mmpack, mount_mmpack_prefix,
+                   mmpack_check_sysdep ],
+        depend_files : [ mmpack_build_sources ],
+        build_by_default : true,
+)
+
+run_target('deployment-test-clean',
+    command : [ 'rm', '-rvf', deployment_dir ],
+)
+
 test('mmpack-build unit tests',
         files('python-unittests.tap'),
-        env : ['srcdir=' + meson.source_root(),
-               'builddir=' + meson.build_root()],
+        env : [ 'DEPLOYMENT_DIR=' + deployment_dir,
+                'PYTHON_INSTALL_DIR=' + python.get_install_dir(),
+                'SRCDIR=' + meson.source_root(),
+        ],
         suite : 'mmpack-build',
+        depends : do_deployment_test,
 )

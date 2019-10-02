@@ -8,9 +8,9 @@ from glob import glob
 
 import pefile
 
-from common import shell
-from decorators import singleton
-from workspace import Workspace
+from . common import shell
+from . decorators import singleton
+from . workspace import Workspace
 
 
 def soname(filename: str) -> str:

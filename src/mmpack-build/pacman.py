@@ -6,7 +6,7 @@ helper module containing pacman wrappers and file parsing functions
 import importlib
 from typing import Set
 
-from common import shell
+from . common import shell
 
 
 def pacman_find_dependency(soname: str, symbol_set: Set[str]) -> str:

@@ -1,4 +1,6 @@
 mmpack_build_sources = files(
+        '__init__.py',
+        '__main__.py',
         'base_hook.py',
         'binary_package.py',
         'common.py',
@@ -34,25 +36,14 @@ settings_py = configure_file(
         output : 'settings.py',
         input : files('settings.py.in'),
         configuration : config_data,
-        install : true,
-        install_dir : get_option('datadir') / 'mmpack' / 'python',
 )
 mmpack_build_sources += settings_py
 
-configure_file(
-        output : 'mmpack-build',
-        input : files('mmpack-build.in'),
-        configuration : config_data,
-        install : true,
-        install_dir :  get_option('bindir'),
-        install_mode : 'rwxr-xr-x',
+python.install_sources(mmpack_build_sources, subdir : 'mmpack_build')
+
+install_data(files('mmpack-build'),
+    install_dir : get_option('bindir'),
 )
-
-
-install_data(mmpack_build_sources,
-    install_dir : get_option('datadir') / 'mmpack' / 'python',
-)
-
 
 mmpack_build_plugins = files(
 	'build-autotools',

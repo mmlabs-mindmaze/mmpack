@@ -6,7 +6,7 @@ Helpers to find out what files are
 import re
 from os.path import islink, basename, splitext
 
-from common import shell, wprint
+from . common import shell, wprint
 
 
 def filetype(filename):

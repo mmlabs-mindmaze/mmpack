@@ -29,12 +29,14 @@ $ mmpack pkg-create --url ssh://git@intranet.mindmaze.ch:7999/~user/XXX.git \
 """
 
 import os
-import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from common import set_log_file
-from src_package import create_source_from_git, load_source_from_tar
-from workspace import Workspace, find_project_root_folder
+from . common import set_log_file
+from . src_package import create_source_from_git, load_source_from_tar
+from . workspace import Workspace, find_project_root_folder
+
+
+CMD = 'pkg-create'
 
 
 def parse_options(argv):
@@ -84,11 +86,11 @@ def parse_options(argv):
     return args
 
 
-def main():
+def main(argv):
     """
     entry point to create a mmpack package
     """
-    args = parse_options(sys.argv[1:])
+    args = parse_options(argv[1:])
 
     if args.url:
         package = create_source_from_git(url=args.url, tag=args.tag)
@@ -103,7 +105,3 @@ def main():
     package.local_install(args.skip_tests)
     package.ventilate()
     package.generate_binary_packages()
-
-
-if __name__ == '__main__':
-    main()

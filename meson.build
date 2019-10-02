@@ -10,6 +10,9 @@ if host_machine.system() == 'windows'
     add_project_arguments('-DWIN32_LEAN_AND_MEAN', language : 'c')
 endif
 
+# meson modules
+python = import('python').find_installation('python3', required : true)
+
 # write config file
 build_cfg = 'config.h'  # named as such to match autotools build system
 configure_file(output : build_cfg, configuration : config)

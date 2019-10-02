@@ -11,11 +11,11 @@ from glob import glob
 from os.path import isfile
 from typing import List, Dict
 
-from base_hook import PackageInfo
-from common import *
-from hooks_loader import MMPACK_BUILD_HOOKS
-from mm_version import Version
-from workspace import get_staging_dir
+from . base_hook import PackageInfo
+from . common import *
+from . hooks_loader import MMPACK_BUILD_HOOKS
+from . mm_version import Version
+from . workspace import get_staging_dir
 
 
 def _reset_entry_attrs(tarinfo: tarfile.TarInfo):

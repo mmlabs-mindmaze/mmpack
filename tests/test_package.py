@@ -2,8 +2,9 @@
 import os
 import unittest
 
-from src_package import SrcPackage
-from mm_version import Version
+from mmpack_build.src_package import SrcPackage
+from mmpack_build.mm_version import Version
+
 
 class TestSrcPackageClass(unittest.TestCase):
     def test_package_simple(self):
