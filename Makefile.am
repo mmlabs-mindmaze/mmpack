@@ -85,10 +85,20 @@ BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON)
 CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 
-.PHONY: syntax
-syntax: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) $(mmpack_db_service) \
+.PHONY: pycodestyle
+pycodestyle: $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) $(mmpack_db_service) \
 		devtools/gerrit/gerrit-mmpack-build.py
-	$(srcdir)/devtools/check-pyfile $^
+	pycodestyle --show-source $^
+
+.PHONY: pylint
+pylint: devtools/pylint-config $(mmpackbuild_PYTHON) $(nodist_mmpackbuild_PYTHON) $(mmpack_db_service) \
+		devtools/gerrit/gerrit-mmpack-build.py
+	pylint3 --jobs=0 --disable=locally-disabled --rcfile=$^
+
+.PHONY: syntax
+syntax: pycodestyle pylint
+	@echo "$@ target is obsolete, and will be removed soon."
+	@echo "Use \"pycodestyle\" and \"pylint\" instead."
 
 
 mmpack_lib_sources = \
@@ -256,15 +266,15 @@ scan-build:
 	scan-build -analyze-headers $(SCAN_BUILD_OPTIONS) $(MAKE)
 
 EXTRA_DIST += devtools/uncrustify.cfg
-.PHONY: fixstyle
-fixstyle: devtools/uncrustify.cfg
-	cd $(srcdir) && uncrustify -c devtools/uncrustify.cfg -l C --replace \
+.PHONY: fix-c-style
+fix-c-style: devtools/uncrustify.cfg
+	cd $(srcdir) && uncrustify -c devtools/uncrustify.cfg -l C --replace --no-backup \
 		$(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES)
 
 # check all the source files for correct coding style
 .PHONY: checkstyle
-checkstyle: devtools/uncrustify.cfg
+checkstyle: devtools/uncrustify.cfg pycodestyle
 	cd $(srcdir) && uncrustify -c devtools/uncrustify.cfg -l C --check \
 	   $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 	   $(mount_mmpack_prefix_SOURCES)

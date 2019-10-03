@@ -30,13 +30,14 @@ config_data = configuration_data({
     'exeext' : exeext,
 })
 
-configure_file(
+settings_py = configure_file(
         output : 'settings.py',
         input : files('settings.py.in'),
         configuration : config_data,
         install : true,
         install_dir : get_option('datadir') / 'mmpack' / 'python',
 )
+mmpack_build_sources += settings_py
 
 configure_file(
         output : 'mmpack-build',

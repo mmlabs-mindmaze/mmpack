@@ -16,17 +16,18 @@ install_data(mmpack_build_gerrit_files,
 # dev targets
 #
 
-all_sources = (mmpack_sources
-        + mmpack_lib_sources
-        + mmpack_build_sources
-        + mmpack_build_plugins
-        + mmpack_check_sysdep_sources
-        + mount_mmpack_prefix_sources)
-
 all_c_sources = (mmpack_sources
         + mmpack_lib_sources
         + mmpack_check_sysdep_sources
         + mount_mmpack_prefix_sources)
+
+all_py_sources = mmpack_build_sources
+
+all_sources = (all_c_sources
+        + all_py_sources
+        + mmpack_build_plugins)
+
+
 
 if get_option('tests')
     all_sources += mmpack_unit_tests_sources
@@ -38,7 +39,7 @@ endif
 
 codespell = find_program('codespell', required : false)
 if codespell.found()
-    run_target('spelling',
+    run_target('codespell',
         command : [
             codespell,
             all_sources,
@@ -46,10 +47,38 @@ if codespell.found()
     )
 endif # codespell
 
+pylint = find_program(['pylint3', 'pylint'], required : false)
+if pylint.found()
+    run_target('pylint',
+        command : [
+            pylint,
+            '--jobs=0',
+            '--disable=locally-disabled',
+            '--rcfile', files('pylint-config'),
+            all_py_sources
+        ],
+    )
+endif # pylint
+
+pycodestyle = find_program('pycodestyle', required : false)
+if pycodestyle.found()
+     run_pycodestyle = custom_target('pycodestyle',
+        output : 'pycodestyle',
+        command : [
+            pycodestyle,
+            '--show-source',
+            all_py_sources
+        ],
+    )
+else
+    run_pycodestyle = []
+endif # pycodestyle
+
 uncrustify = find_program('uncrustify', required : false)
 if uncrustify.found()
     uncrustify_config = files('uncrustify.cfg')
-    run_target('checkstyle',
+    custom_target('checkstyle',
+        output : 'checkstyle',
         command : [
             uncrustify,
             '-l', 'c',
@@ -57,12 +86,14 @@ if uncrustify.found()
             '--check',
             all_c_sources,
         ],
+        depends : run_pycodestyle
     )
-    run_target('fixstyle',
+    run_target('fix-c-style',
         command : [
             uncrustify,
             '-l', 'c',
             '-c', uncrustify_config,
+            '--no-backup',
             '--replace',
             all_c_sources,
         ],
