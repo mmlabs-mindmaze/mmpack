@@ -10,7 +10,7 @@ import re
 from glob import glob
 from typing import List
 
-from . common import parse_soname, get_host_arch, Assert
+from . common import parse_soname, get_host_arch, Assert, shell
 from . mm_version import Version
 from . settings import DPKG_METADATA_PREFIX
 
@@ -220,3 +220,14 @@ def dpkg_find_dependency(soname: str, symbol_list: List[str]) -> str:
     except FileNotFoundError:
         shlibs_file = dpkg_find_shlibs_file(soname)
         return dpkg_parse_shlibs(shlibs_file, soname, symbol_list)
+
+
+def dpkg_find_pypkg(pypkg: str) -> str:
+    """
+    Get installed debian package providing the specified python package
+    """
+    # dpkg -S accept a glob-like pattern
+    pattern = '/usr/lib/python3/dist-packages/{}[/|.py|.*.so]*'.format(pypkg)
+    cmd_output = shell(['dpkg', '--search', pattern])
+    debpkg_list = list({l.split(':')[0] for l in cmd_output.splitlines()})
+    return debpkg_list[0] if debpkg_list else None

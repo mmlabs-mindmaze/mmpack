@@ -6,7 +6,7 @@ from os.path import dirname, abspath, join
 from typing import Set
 
 from mmpack_build.base_hook import PackageInfo
-from mmpack_build.hook_python import _gen_pysymbols
+from mmpack_build.hook_python import _gen_pysymbols, _gen_pydepends
 
 
 _testdir = dirname(abspath(__file__))
@@ -20,7 +20,14 @@ def _load_py_symbols(name: str, pkgfiles: Set[str]) -> Set[str]:
     return _gen_pysymbols(name, pkg, _sitedir)
 
 
-class TestPythonProvides(unittest.TestCase):
+def _get_py_imports(pkgfiles: Set[str]) -> Set[str]:
+    pkg = PackageInfo('test_pkg')
+    pkg.files = {join(_sitedir, f) for f in pkgfiles}
+    used_symbols = _gen_pydepends(pkg, _sitedir)
+    return {s.split('.', maxsplit=1)[0] for s in used_symbols}
+
+
+class TestPythonHook(unittest.TestCase):
 
     def test_provides_bare_module(self):
         """test provides module without package folder"""
@@ -104,3 +111,28 @@ class TestPythonProvides(unittest.TestCase):
         }
         syms = _load_py_symbols('pkg_imported', pkgfiles)
         self.assertEqual(syms, refsymbols)
+
+    def test_depends_import_simple(self):
+        """test dependent imports with simple package with no import"""
+        pkgfiles = ['simple/__init__.py']
+        refimports = set()
+        imports = _get_py_imports(pkgfiles)
+        self.assertEqual(imports, refimports)
+
+    def test_depends_import_multi(self):
+        """test dependent import with multiple modules"""
+        pkgfiles = [
+            'multi/__init__.py',
+            'multi/foo.py',
+            'multi/bar.py',
+        ]
+        refimports = set()
+        imports = _get_py_imports(pkgfiles)
+        self.assertEqual(imports, refimports)
+
+    def test_depends_import_pkg_imported(self):
+        """test dependent import with pkg importing another package"""
+        pkgfiles = ['pkg_imported/__init__.py']
+        refimports = {'simple'}
+        imports = _get_py_imports(pkgfiles)
+        self.assertEqual(imports, refimports)

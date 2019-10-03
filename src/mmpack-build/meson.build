@@ -17,6 +17,7 @@ mmpack_build_sources = files(
         'pacman.py',
         'pe_utils.py',
         'provide.py',
+        'python_depends.py',
         'python_provides.py',
         'src_package.py',
         'mm_version.py',

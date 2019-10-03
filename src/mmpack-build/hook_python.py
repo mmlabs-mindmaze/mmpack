@@ -8,11 +8,20 @@ import os
 import re
 import shutil
 from glob import glob
-from typing import Set, Dict
+from typing import Set, Dict, List
 
 from . base_hook import BaseHook, PackageInfo
-from . common import shell
-from . provide import Provide, ProvideList
+from . common import shell, Assert
+from . dpkg import dpkg_find_pypkg
+from . file_utils import is_python_script
+from . mm_version import Version
+from . pacman import pacman_find_pypkg
+from . provide import Provide, ProvideList, load_mmpack_provides
+from . settings import DPKG_PREFIX, PACMAN_PREFIX
+from . workspace import Workspace
+
+
+_SITEDIR = 'lib/python3/site-packages'
 
 
 # example of matches:
@@ -61,6 +70,25 @@ def _gen_pysymbols(pyimport_name: str, pkg: PackageInfo,
     return set(cmd_output.split())
 
 
+def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
+    script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
+    cmd = ['python3', script, '--site-path='+sitedir]
+
+    cmd_input = '\n'.join(pkg.files)
+    cmd_output = shell(cmd, input_str=cmd_input)
+    return set(cmd_output.split())
+
+
+def _sysdep_find_pydep(pypkg: str) -> str:
+    wrk = Workspace()
+    if os.path.exists(DPKG_PREFIX):
+        return dpkg_find_pypkg(pypkg)
+    if os.path.exists(wrk.cygroot() + PACMAN_PREFIX):
+        return pacman_find_pypkg(pypkg)
+
+    raise FileNotFoundError('Could not find system package manager')
+
+
 #####################################################################
 # Python hook for mmpack-build
 #####################################################################
@@ -69,6 +97,53 @@ class MMPackBuildHook(BaseHook):
     """
     Hook tracking python module used and exposed
     """
+    def __init__(self, srcname: str, version: Version, host_archdist: str):
+        super().__init__(srcname, version, host_archdist)
+        self._mmpack_py_provides = None
+
+    def _get_mmpack_provides(self) -> ProvideList:
+        """
+        Get all shared library soname and associated symbols for all mmpack
+        package installed in prefix. The parsing of all .symbols files is
+        cached, hence subsequent calls to this method is very fast.
+        """
+        if not self._mmpack_py_provides:
+            self._mmpack_py_provides = load_mmpack_provides('pyobjects')
+        return self._mmpack_py_provides
+
+    def _gen_py_deps(self, currpkg: PackageInfo, imports: Set[str],
+                     others_pkgs: List[PackageInfo]):
+        """
+        For each key (imported package name) in `imports` determine the mmpack
+        or system dependency that provides it and add it to those of
+        `currpkg`.
+
+        Args:
+            currpkg: package whose dependencies are computed (and added)
+            imports: set of imported package names used in currpkg
+            others_pkgs: list of packages cobuilded (may include currpkg)
+        """
+        # provided in the same package or a package being generated
+        for pkg in others_pkgs:
+            dep_list = pkg.provides['python'].gen_deps(imports, set())
+            for pkgname, _ in dep_list:
+                currpkg.add_to_deplist(pkgname, self._version, self._version)
+
+        # provided by another mmpack package present in the prefix
+        dep_list = self._get_mmpack_provides().gen_deps(imports, set())
+        for pkgname, version in dep_list:
+            currpkg.add_to_deplist(pkgname, version)
+
+        # provided by the host system
+        for pypkg in imports:
+            sysdep = _sysdep_find_pydep(pypkg)
+            if not sysdep:
+                # <pypkg> dependency could not be met with any available means
+                errmsg = 'Could not find package providing {} python package'\
+                         .format(pypkg)
+                raise Assert(errmsg)
+
+            currpkg.add_sysdep(sysdep)
 
     def post_local_install(self):
         """
@@ -150,3 +225,12 @@ class MMPackBuildHook(BaseHook):
     def store_provides(self, pkg: PackageInfo, folder: str):
         filename = '{}/{}.pyobjects'.format(folder, pkg.name)
         pkg.provides['python'].serialize(filename)
+
+    def update_depends(self, pkg: PackageInfo, other_pkgs: List[PackageInfo]):
+        py_scripts = [f for f in pkg.files if is_python_script(f)]
+        if not py_scripts:
+            return
+
+        used_symbols = _gen_pydepends(pkg, _SITEDIR)
+        imports = {s.split('.', maxsplit=1)[0] for s in used_symbols}
+        self._gen_py_deps(pkg, imports, other_pkgs)
