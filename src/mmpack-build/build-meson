@@ -11,4 +11,14 @@ if [ "$SKIP_TESTS" != "True" ] ; then
 	ninja test
 fi
 
+# mingw64's package for meson introduces (on purpose) a bug to ignore the
+# prefix when DESTDIR is set, only during the install step.
+# To compensate, change DESTDIR value to DESTDIR/PREFIX at the last moment
+#
+# Assume mingw if MSYSTEM set in the environment, and propose the env variable
+# MSYSTEM_OVERRIDE to allow manual override of this small hack
+if [ -n "$MSYSTEM" && -z "$MSYSTEM_OVERRIDE" ] ; then
+	DESTDIR=$DESTDIR/$(cygpath -u $PREFIX)
+fi
+
 DESTDIR=$DESTDIR ninja install
