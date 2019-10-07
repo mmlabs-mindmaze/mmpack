@@ -11,4 +11,4 @@ if [ "$SKIP_TESTS" != "True" ] ; then
 	ninja test
 fi
 
-ninja install
+DESTDIR=$DESTDIR ninja install
