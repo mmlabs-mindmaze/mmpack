@@ -4,20 +4,6 @@ simple usual decorators
 """
 
 
-def run_once(function):
-    # pylint warning is bogus
-    # pylint: disable=inconsistent-return-statements
-    """
-    Run decorated function only once.
-    """
-    def _wrapper(*args, **kwargs):
-        if not _wrapper.has_run:
-            _wrapper.has_run = True
-            return function(*args, **kwargs)
-    _wrapper.has_run = False
-    return _wrapper
-
-
 class _SingletonWrapper:  # pylint: disable=too-few-public-methods
     """
     A singleton wrapper class. Its instances would be created
