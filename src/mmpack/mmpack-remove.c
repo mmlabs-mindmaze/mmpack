@@ -34,18 +34,16 @@ static const struct mmarg_opt cmdline_optv[] = {
 };
 
 static
-void warn_uninstalled_package(const struct mmpack_ctx* ctx,
-                              const struct pkg_request* reqlist)
+int warn_uninstalled_package(const struct mmpack_ctx* ctx,
+                             const char * _name)
 {
-	const struct pkg_request* req;
-
-	for (req = reqlist; req; req = req->next) {
-		if (install_state_get_pkg(&ctx->installed, req->name) != NULL)
-			continue;
-
-		printf("%s is not installed, thus will not be removed\n",
-		       req->name);
+	mmstr * name = mmstr_alloca_from_cstr(_name);
+	if (install_state_get_pkg(&ctx->installed, name) == NULL) {
+		printf("%s is not installed, thus will not be removed\n", name);
+		return -1;
 	}
+
+	return 0;
 }
 
 
@@ -99,12 +97,16 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	reqlist = mm_malloca(nreq * sizeof(*reqlist));
 	memset(reqlist, 0, nreq * sizeof(*reqlist));
 	for (i = 0; i < nreq; i++) {
-		reqlist[i].name = mmstr_malloc_from_cstr(req_args[i]);
-		reqlist[i].next = (i == nreq-1) ? NULL : &reqlist[i+1];
+		if (warn_uninstalled_package(ctx, req_args[i]) == 0) {
+			reqlist[i].name = mmstr_malloc_from_cstr(req_args[i]);
+			reqlist[i].next = (i == nreq-1) ? NULL : &reqlist[i+1];
+		}
 	}
 
+	if (reqlist[0].name == NULL)
+		goto exit;
+
 	// Determine the stack of actions to perform
-	warn_uninstalled_package(ctx, reqlist);
 	act_stack = mmpkg_get_remove_list(ctx, reqlist);
 	if (!act_stack)
 		goto exit;
