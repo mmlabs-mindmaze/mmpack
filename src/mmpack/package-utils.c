@@ -598,7 +598,7 @@ struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
 
 	pkg_iter->curr_list = first_list - 1;
 	pkg_iter->list_ptr_bound = first_list + num_pkgname;
-	pkg_iter->pkglist_elt = NULL;;
+	pkg_iter->pkglist_elt = NULL;
 
 	return pkg_iter_next(pkg_iter);
 }
