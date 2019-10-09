@@ -9,6 +9,7 @@ MMPackBuildHook that derived from BaseHook of base_hook.py.
 
 import importlib
 import pkgutil
+from os.path import dirname
 
 from . common import iprint
 from . mm_version import Version
@@ -35,12 +36,12 @@ def init_mmpack_build_hooks(srcname: str, version: Version,
     """
     global MMPACK_BUILD_HOOKS  # pylint: disable=global-statement
 
-    for _, name, _ in pkgutil.iter_modules():
+    for _, name, _ in pkgutil.iter_modules([dirname(__file__)]):
         if not name.startswith('hook_'):
             continue
 
         try:
-            module = importlib.import_module(name)
+            module = importlib.import_module('mmpack_build.' + name)
 
             # Instantiate hook and add it to the list
             hook = module.MMPackBuildHook(srcname, version, host_archdist)
