@@ -355,6 +355,17 @@ def yaml_load(filename: str):
     return yaml.load(open(filename, 'rb').read(), Loader=yaml.BaseLoader)
 
 
+def convert_path_native(path: str) -> str:
+    """
+    helper: permits to convert a path in the way the natif system would do
+    """
+
+    if get_host_dist() == 'windows':
+        return shell(['cygpath', '-w', path], log=False).strip()
+    else:
+        return path
+
+
 class Assert(AssertionError):
     """
     Wrapper over AssertionError which also logs the message as an error.
