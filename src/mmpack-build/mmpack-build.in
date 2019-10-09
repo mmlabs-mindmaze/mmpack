@@ -1,0 +1,10 @@
+#!/bin/sh
+
+PYTHON=${PYTHON:-python3}
+DIR=$(dirname $(realpath $0))
+BINDIR=@bindir@
+PYTHON_INSTALL_DIR=@python_install_dir@
+
+PYTHON_INSTALL_DIR=$(realpath -m --relative-to=$BINDIR $PYTHON_INSTALL_DIR)
+
+PYTHONPATH=$DIR/$PYTHON_INSTALL_DIR $PYTHON -m mmpack_build $@

@@ -28,6 +28,7 @@ config_data = configuration_data({
     'libexecdir' : get_option('prefix') + '/' + get_option('libexecdir'),
     'mmpackbuilddir' : get_option('prefix') + '/' + get_option('datadir') + '/mmpack/python',
     'pkgdatadir' : get_option('prefix') + '/' + get_option('datadir') + '/mmpack',
+    'python_install_dir' : python.get_install_dir(),
 
     'exeext' : exeext,
 })
@@ -41,7 +42,12 @@ mmpack_build_sources += settings_py
 
 python.install_sources(mmpack_build_sources, subdir : 'mmpack_build')
 
-install_data(files('mmpack-build'),
+mmpack_build = configure_file(
+        output : 'mmpack-build',
+        input : 'mmpack-build.in',
+        configuration : config_data,
+)
+install_data(mmpack_build,
     install_dir : get_option('bindir'),
 )
 

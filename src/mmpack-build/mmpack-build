@@ -1,6 +1,0 @@
-#!/bin/sh
-# @mindmaze_header@
-# vi:syntax=sh
-
-PYTHON=${PYTHON:-python3}
-$PYTHON -m mmpack_build $@

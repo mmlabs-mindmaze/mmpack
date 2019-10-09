@@ -39,6 +39,7 @@ dist_pkgdata_SCRIPTS = src/mmpack/check-dpkg-installed
 
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST += \
+	src/mmpack-build/mmpack-build.in \
 	src/mmpack-build/settings.py.in \
 	$(eol)
 
@@ -218,6 +219,11 @@ mmpack_check_sysdep_LDADD = \
 		-e 's,@libexecdir[@],$(libexecdir),g' \
 		-e 's,@bindir[@],$(bindir),g' \
 		-e 's,@exeext[@],$(EXEEXT),g' < $< > $@
+
+src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
+	$(AM_V_at)$(MKDIR_P) $(dir $@)
+	$(AM_V_GEN)$(SED) -e 's,@bindir[@],$(bindir),g' \
+		-e 's,@python_install_dir[@],$(pythondir),g' < $< > $@
 
 #
 # DEVEL TARGETS
