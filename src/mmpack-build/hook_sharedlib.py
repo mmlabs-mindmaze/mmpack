@@ -59,7 +59,8 @@ class MMPackBuildHook(BaseHook):
         # load python module to use for handling the executable file
         # format of the targeted host
         self._execfmt = get_exec_fileformat(host_archdist)
-        self._module = importlib.import_module(self._execfmt + '_utils')
+        modname = 'mmpack_build.{}_utils'.format(self._execfmt)
+        self._module = importlib.import_module(modname)
 
     def _get_mmpack_provides(self) -> ProvideList:
         """
