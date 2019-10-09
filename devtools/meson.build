@@ -21,12 +21,9 @@ all_c_sources = (mmpack_sources
         + mmpack_check_sysdep_sources
         + mount_mmpack_prefix_sources)
 
-all_py_sources = mmpack_build_sources
-
 all_sources = (all_c_sources
-        + all_py_sources
+        + mmpack_build_sources
         + mmpack_build_plugins)
-
 
 
 if get_option('tests')
@@ -55,7 +52,7 @@ if pylint.found()
             '--jobs=0',
             '--disable=locally-disabled',
             '--rcfile', files('pylint-config'),
-            all_py_sources
+            deployment_dir + python.get_install_dir() + '/mmpack_build',
         ],
     )
 endif # pylint
@@ -67,7 +64,7 @@ if pycodestyle.found()
         command : [
             pycodestyle,
             '--show-source',
-            all_py_sources
+            deployment_dir,
         ],
     )
 else
