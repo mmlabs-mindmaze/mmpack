@@ -521,18 +521,6 @@ int check_file_pkg(const mmstr * ref_sha, const mmstr * parent,
 }
 
 
-static
-size_t get_map_size(int fd)
-{
-	struct mm_stat buf;
-
-	if (mm_fstat(fd, &buf) != 0)
-		return MM_PAGESZ;
-
-	return next_pow2_u64(buf.size);
-}
-
-
 /**
  * check_pkg() - check integrity of installed package from its list of sha256
  * @parent: prefix directory to prepend to @filename to get the
@@ -550,12 +538,17 @@ int check_pkg(mmstr const * parent, mmstr const * sumsha)
 	size_t line_len, filename_len;
 	int fd;
 	void * map;
+	struct mm_stat buf;
 
 	fd = mm_open(sumsha, O_RDONLY, 0);
 	if (fd == -1)
 		return -1;
 
-	map = mm_mapfile(fd, 0, get_map_size(fd), MM_MAP_READ|MM_MAP_SHARED);
+	mm_fstat(fd, &buf);
+
+	map = mm_mapfile(fd, 0, buf.size, MM_MAP_READ|MM_MAP_SHARED);
+
+	mm_check(map != NULL);
 
 	line = map;
 	filename = ref_sha = NULL;
