@@ -32,7 +32,14 @@ def adjust_runpath(filename):
     the prefix. If DT_RUNPATH field was not empty, the path is only added to
     the previous content (which will have precedence over what has been added).
     """
-    mmpack_comp = '/run/mmpack/lib'  # We are on ELF, so always /run/mmpack
+    # determine the component corresponding to the relative path from folder of
+    # filename to lib folder. This hook is executed with current directory set
+    # to local_install + prefix, hence "lib - dir(filename)" is the relative
+    # move we want
+    to_libdir = os.path.relpath('lib', os.path.dirname(filename))
+    mmpack_comp = '$ORIGIN'
+    if to_libdir != '.':
+        mmpack_comp += '/' + to_libdir
 
     # append the component needed for mmpack if not found in current list of
     # DT_RUNPATH path components
