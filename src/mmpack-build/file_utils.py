@@ -17,9 +17,12 @@ def filetype(filename):
     file  --brief --preserve-date <filename>
     """
     if not islink(filename):
-        # Open file and read magic number
-        with open(filename, 'rb', buffering=0) as file:
-            magic = file.read(4)
+        try:
+            # Open file and read magic number
+            with open(filename, 'rb', buffering=0) as file:
+                magic = file.read(4)
+        except IsADirectoryError:
+            return 'directory'
 
         # try to read file type first
         if magic[:4] == b'\x7fELF':
