@@ -32,7 +32,7 @@ Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: mmpack (= ${binary:Version}),
  ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends},
- git, build-essential, automake, libtool, gnulib, meson, cmake
+ git, build-essential, automake, libtool, gnulib, meson, cmake, patchelf
 Recommends: mmpack-doc
 Description: MindMaze package development tools
  This package provides the infrastructure for handling the build,

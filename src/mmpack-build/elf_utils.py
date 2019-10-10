@@ -4,10 +4,42 @@ helper module containing elf parsing functions
 """
 
 import os
+from typing import List
 
 from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
 from elftools.elf.dynamic import DynamicSection
+
+from . common import shell
+
+
+def _get_runpath_list(filename) -> List[str]:
+    elffile = ELFFile(open(filename, 'rb'))
+
+    for section in elffile.iter_sections():
+        if isinstance(section, DynamicSection):
+            for tag in section.iter_tags():
+                if tag.entry.d_tag == 'DT_RUNPATH':
+                    return tag.runpath.split(':')
+
+    return []
+
+
+def adjust_runpath(filename):
+    """
+    Adjust the DT_RUNPATH value of filename so that library dependencies in
+    mmpack prefix can be found and loaded at runtime, no matter the location of
+    the prefix. If DT_RUNPATH field was not empty, the path is only added to
+    the previous content (which will have precedence over what has been added).
+    """
+    mmpack_comp = '/run/mmpack/lib'  # We are on ELF, so always /run/mmpack
+
+    # append the component needed for mmpack if not found in current list of
+    # DT_RUNPATH path components
+    runpath = _get_runpath_list(filename)
+    if mmpack_comp not in runpath:
+        runpath.append(mmpack_comp)
+        shell(['patchelf', '--set-rpath', ':'.join(runpath), filename])
 
 
 def soname_deps(filename):

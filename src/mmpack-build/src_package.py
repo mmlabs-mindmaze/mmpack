@@ -386,7 +386,6 @@ class SrcPackage:
         build_env['BUILDDIR'] = self.unpack_path() + '/build'
         build_env['DESTDIR'] = self._local_install_path()
         build_env['PREFIX'] = _get_install_prefix()
-        build_env['LD_RUN_PATH'] = os.path.join(_get_install_prefix(), 'lib')
         build_env['SKIP_TESTS'] = str(skip_tests)
         build_env['PKG_CONFIG_PATH'] = os.path.join(_get_install_prefix(),
                                                     'lib/pkgconfig')

@@ -8,7 +8,8 @@ cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $OPTS
 make
 
 if [ "$SKIP_TESTS" != "True" ] ; then
-	make test
+	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+	LD_LIBRARY_PATH=$ld_lib_path make test
 fi
 
 make install DESTDIR=$DESTDIR

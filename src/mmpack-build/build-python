@@ -8,7 +8,8 @@ set -e
 tmp_instdir=$(mktemp -d)
 
 if [ "$SKIP_TESTS" != "True" ] ; then
-	python3 $SRCDIR/setup.py --no-user-cfg check
+	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+	LD_LIBRARY_PATH=$ld_lib_path python3 $SRCDIR/setup.py --no-user-cfg check
 fi
 
 # create a binary distribution into a temporary directory

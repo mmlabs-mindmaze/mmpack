@@ -8,7 +8,8 @@ cd $BUILDDIR
 ninja
 
 if [ "$SKIP_TESTS" != "True" ] ; then
-	ninja test
+	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+	LD_LIBRARY_PATH=$ld_lib_path ninja test
 fi
 
 # mingw64's package for meson introduces (on purpose) a bug to ignore the

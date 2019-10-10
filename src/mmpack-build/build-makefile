@@ -7,7 +7,8 @@ export LDFLAGS="-Wl,--as-needed $LDFLAGS"
 make $OPTS PREFIX=$PREFIX
 
 if [ "$SKIP_TESTS" != "True" ] ; then
-	make check   $OPTS PREFIX=$PREFIX
+	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+	LD_LIBRARY_PATH=$ld_lib_path make check   $OPTS PREFIX=$PREFIX
 fi
 
 make install $OPTS PREFIX=$PREFIX DESTDIR=$DESTDIR

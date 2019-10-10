@@ -5,6 +5,7 @@ plugin tracking the exported symbol and dependencies of shared libraries
 
 import importlib
 import os
+from glob import glob
 from typing import Set, Dict, List
 
 from . base_hook import BaseHook, PackageInfo
@@ -111,6 +112,19 @@ class MMPackBuildHook(BaseHook):
                 raise Assert(errmsg)
 
             currpkg.add_sysdep(sysdep)
+
+    def post_local_install(self):
+        """
+        For ELF binaries (executable and shared lib), ensure that DT_RUNPATH is
+        set at least to value suitable for mmpack, modify it if necessary.
+        """
+        # This step is only relevant for ELF
+        if self._execfmt != 'elf':
+            return
+
+        for filename in glob('**', recursive=True):
+            if filetype(filename) == 'elf':
+                self._module.adjust_runpath(filename)
 
     def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
         pkgs = dict()

@@ -19,7 +19,8 @@ $SRCDIR/configure --prefix=$PREFIX $OPTS
 make
 
 if [ "$SKIP_TESTS" != "True" ] ; then
-	make check
+	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+	LD_LIBRARY_PATH=$ld_lib_path make check
 fi
 
 make install DESTDIR=$DESTDIR
