@@ -6,7 +6,7 @@ AM_CPPFLAGS = \
 	-I$(srcdir)/src/mmpack \
 	-DSRCDIR=\"$(srcdir)\" \
 	-DBUILDDIR=\"$(builddir)\" \
-	-DLIBEXECDIR=\"$(pkglibexecdir)\" \
+	-DLIBEXECDIR=\"$(libexecdir)\" \
 	-DEXEEXT=\"$(EXEEXT)\" \
 	-DPKGDATADIR=\"$(pkgdatadir)\" \
 	$(CHECK_CPPFLAGS) \

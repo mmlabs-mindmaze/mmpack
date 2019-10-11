@@ -21,7 +21,7 @@
 
 #include "mmpack-run.h"
 
-#define MOUNT_PREFIX_BIN LIBEXECDIR "/mount-mmpack-prefix"EXEEXT
+#define MOUNT_PREFIX_BIN LIBEXECDIR "/mmpack/mount-mmpack-prefix"EXEEXT
 
 /**
  * mmpack_run() - main function for the command to run commands
