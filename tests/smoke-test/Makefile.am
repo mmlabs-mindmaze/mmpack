@@ -3,9 +3,6 @@ ACLOCAL_AMFLAGS = -I m4 --install
 EXTRA_DIST = autogen.sh
 
 AM_CPPFLAGS = \
-	-I$(srcdir)/src \
-	-DSRCDIR=\"$(srcdir)\" \
-	-DBUILDDIR=\"$(builddir)\" \
 	-DLIBEXECDIR=\"$(pkglibexecdir)\" \
 	-DEXEEXT=\"$(EXEEXT)\" \
 	$(eol)

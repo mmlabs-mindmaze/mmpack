@@ -16,6 +16,9 @@ PREFIX_TEST=$BUILDDIR/prefix
 CREATE=$BUILDDIR/tmp
 TRASH=$BUILDDIR/trash
 TEST_SRCDIR=$SRCDIR/tests/smoke-tests
+# The variable _MMPACK_TEST_PREFIX is needed by mmpack to find
+# everything in the right place during the tests (that require
+# a local installation of mmpack).
 _MMPACK_TEST_PREFIX=$DEPLOYMENT_DIR
 
 # clean the files and repositories necessary for the tests

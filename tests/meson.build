@@ -61,15 +61,16 @@ test('mmpack-build unit tests',
         depends : do_deployment_test,
 )
 
-# The variable _MMPACK_TEST_PREFIX is needed by mmpack-build and mmpack to find
-# everything in the right place during the tests (that require a local
-# installation of mmpack-build and mmpack).
-test('mmpack-build',
-        files ('smoke-tests/test_mmpack-build.sh'),
-        timeout : 60,
-        env : env,
-        suite : 'mmpack-build-smoke',
-)
+build_systems = ['autotools', 'meson']
+foreach build_sys : build_systems
+        test('mmpack-build-' + build_sys,
+                files ('smoke-tests/test_mmpack-build.sh'),
+                timeout : 60,
+                env : env,
+                args : build_sys,
+                suite : 'mmpack-build-smoke',
+        )
+endforeach
 
 mmpack_smoke_test = [
         ['install', files('smoke-tests/test_mmpack_install.sh')],

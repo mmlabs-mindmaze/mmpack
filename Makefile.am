@@ -296,7 +296,7 @@ noinst_PYTHON = tests/pytests.py
 
 check_DATA = deployment-test
 
-TESTS = unittests.tap tests/python-unittests.tap tests/smoke-tests/test_mmpack-build.sh tests/smoke-tests/test_mmpack_install.sh tests/smoke-tests/test_mmpack_remove.sh tests/smoke-tests/test_mmpack_check-integrity.sh
+TESTS = unittests.tap tests/python-unittests.tap tests/smoke-tests/launch_test_mmpack-build_autotools.sh tests/smoke-tests/test_mmpack_install.sh tests/smoke-tests/test_mmpack_remove.sh tests/smoke-tests/test_mmpack_check-integrity.sh
 
 dist_check_SCRIPTS = tests/python-unittests.tap
 check_PROGRAMS = \
