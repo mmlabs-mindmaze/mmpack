@@ -30,6 +30,31 @@ subdir('src/mmpack')
 subdir('src/mmpack-build')
 subdir('src/repository')
 
+deployment_dir = meson.build_root() + '/deployment-test'
+install_manifest = custom_target('install-manifest',
+        output : 'install-manifest',
+        capture : true,
+        command : [ 'meson', 'introspect', '--install' ],
+        build_by_default : true,
+)
+
+do_deployment_test = custom_target('deployment-test',
+        output : 'deployment-test',
+        command : [ 'python3',
+                    files('tests/do-deployment-test.py'),
+                    deployment_dir,
+                    install_manifest,
+        ],
+        depends : [install_manifest, mmpack, mount_mmpack_prefix,
+                   mmpack_check_sysdep ],
+        depend_files : [ mmpack_build_sources ],
+        build_by_default : true,
+)
+
+run_target('deployment-test-clean',
+    command : [ 'rm', '-rvf', deployment_dir ],
+)
+
 if get_option('tests')
     subdir('tests')
 endif

@@ -54,6 +54,7 @@ if pylint.found()
             '--rcfile', files('pylint-config'),
             deployment_dir + python.get_install_dir() + '/mmpack_build',
         ],
+        depends : do_deployment_test,
     )
 endif # pylint
 
@@ -66,6 +67,7 @@ if pycodestyle.found()
             '--show-source',
             deployment_dir,
         ],
+        depends : do_deployment_test,
     )
 else
     run_pycodestyle = []
