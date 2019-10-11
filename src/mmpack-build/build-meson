@@ -18,7 +18,7 @@ fi
 #
 # Assume mingw if MSYSTEM set in the environment, and propose the env variable
 # MSYSTEM_OVERRIDE to allow manual override of this small hack
-if [ -n "$MSYSTEM" && -z "$MSYSTEM_OVERRIDE" ] ; then
+if [ -n "$MSYSTEM" -a -z "$MSYSTEM_OVERRIDE" ] ; then
 	DESTDIR=$DESTDIR/$(cygpath -u $PREFIX)
 fi
 
