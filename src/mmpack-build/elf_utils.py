@@ -13,6 +13,50 @@ from elftools.elf.dynamic import DynamicSection
 from . common import shell
 
 
+def _subpath_in_prefix(prefix: str, path: str) -> str:
+    """
+    Determine the subpath in a prefix when a path is inside the prefix
+
+    Args:
+        prefix: absolute path of a prefix
+        path: path to test
+
+    Returns: subpath within `prefix` if `path` is a subfolder of `prefix`.
+    Otherwise None is returned.
+    """
+    try:
+        # Although it looks simpler to use "if path.startswith(prefix)", this
+        # would not cover many corner cases handled by the current approach
+        if os.path.commonpath([prefix, path]) == prefix:
+            subpath = path[len(prefix)+1:]
+            return subpath if subpath else '.'
+    except ValueError:
+        pass
+
+    return None
+
+
+def _path_relative_to_origin(target_dir: str, start_dir: str) -> str:
+    """
+    Determine the component corresponding to the relative path from folder of
+    filename to target_dir folder. `target_dir` and `start_dir` must be both
+    relative to the same root folder.
+
+    Args:
+        target_dir: folder target folder to which the path must be computed
+        start_dir: path of origin
+
+    Returns: relative path from `start_dir` to `target_dir`. The returned
+    string will necessarily begin with '$ORIGIN'.
+    """
+    to_target = os.path.relpath(target_dir, start_dir)
+    new_path = '$ORIGIN'
+    if to_target != '.':
+        new_path += '/' + to_target
+
+    return new_path
+
+
 def _get_runpath_list(filename) -> List[str]:
     elffile = ELFFile(open(filename, 'rb'))
 
@@ -31,19 +75,24 @@ def adjust_runpath(filename):
     mmpack prefix can be found and loaded at runtime, no matter the location of
     the prefix. If DT_RUNPATH field was not empty, the path is only added to
     the previous content (which will have precedence over what has been added).
+
+    Additionally all absolute path elements that point to /run/mmpack will be
+    transformed in paths relative to '$ORIGIN'.
     """
-    # determine the component corresponding to the relative path from folder of
-    # filename to lib folder. This hook is executed with current directory set
-    # to local_install + prefix, hence "lib - dir(filename)" is the relative
-    # move we want
-    to_libdir = os.path.relpath('lib', os.path.dirname(filename))
-    mmpack_comp = '$ORIGIN'
-    if to_libdir != '.':
-        mmpack_comp += '/' + to_libdir
+    runpath = _get_runpath_list(filename)
+    filedir = os.path.dirname(filename)
+
+    # Turn each element in runpath list that is an absolute path and points in
+    # /run/mmpack into a relative path starting from file location. This makes
+    # binary using those runpath usable even without running "mmpack run"
+    for i, comp in enumerate(runpath):
+        subcomp = _subpath_in_prefix('/run/mmpack', comp)
+        if subcomp:
+            runpath[i] = _path_relative_to_origin(subcomp, filedir)
 
     # append the component needed for mmpack if not found in current list of
     # DT_RUNPATH path components
-    runpath = _get_runpath_list(filename)
+    mmpack_comp = _path_relative_to_origin('lib', filedir)
     if mmpack_comp not in runpath:
         runpath.append(mmpack_comp)
         shell(['patchelf', '--set-rpath', ':'.join(runpath), filename])
