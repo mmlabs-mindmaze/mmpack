@@ -18,6 +18,7 @@
 
 static int force_mkprefix = 0;
 static const char* repo_url = NULL;
+static const char* repo_name = "default";
 
 static char mkprefix_doc[] =
 	"mmpack mkprefix allows you to create a new prefix in folder "
@@ -25,13 +26,17 @@ static char mkprefix_doc[] =
 	"repository whose URL is optionally set by --url. If not present, "
 	"the URL is inherited by the global user configuration of mmpack. "
 	"By default the command will prevent to create a prefix in a "
-	"folder that has been already setup.";
+	"folder that has been already setup. You can add a short NAME for the "
+	"URL. If you do not enter a NAME, your url will have \"default\" as "
+	"short name. If NAME is set but not URL an error is returned.";
 
 static const struct mmarg_opt cmdline_optv[] = {
 	{"f|force", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &force_mkprefix},
 	 "Force setting up prefix folder even if it was already setup"},
 	{"url", MMOPT_NEEDSTR, NULL, {.sptr = &repo_url},
 	 "Specify @URL as the address of package repository"},
+	{"name", MMOPT_NEEDSTR, NULL, {.sptr = &repo_name},
+	 "Specify @NAME as a nickname for the url specified"},
 };
 
 
@@ -70,8 +75,8 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 
 
 static
-int create_initial_prefix_cfg(const mmstr* prefix, const char* url,
-                              int force_create)
+int create_initial_prefix_cfg(const mmstr* prefix, const char * name,
+                              const char* url, int force_create)
 {
 	const mmstr* cfg_relpath = mmstr_alloca_from_cstr(CFG_RELPATH);
 	char line[256];
@@ -84,7 +89,7 @@ int create_initial_prefix_cfg(const mmstr* prefix, const char* url,
 
 	// Optionally write URL (if null, it will inherit from user config)
 	if (url) {
-		len = sprintf(line, "repositories: \n  - %s\n", url);
+		len = sprintf(line, "repositories: \n  - %s: %s\n", name, url);
 		mm_write(fd, line, len);
 	}
 
@@ -138,7 +143,8 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	prefix = mmstr_alloca_from_cstr(argv[arg_index]);
 
 	if (create_initial_empty_files(prefix, force_mkprefix)
-	    || create_initial_prefix_cfg(prefix, repo_url, force_mkprefix) ) {
+	    || create_initial_prefix_cfg(prefix, repo_name, repo_url,
+	                                 force_mkprefix) ) {
 		fprintf(stderr, "Failed to create mmpack prefix: %s\n", prefix);
 		return -1;
 	}

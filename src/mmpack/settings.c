@@ -26,6 +26,75 @@ enum {
 };
 
 
+/**
+ * repolist_init() - init repolist structure
+ * @list: repolist structure to initialize
+ *
+ * To be cleansed by calling repolist_deinit()
+ */
+LOCAL_SYMBOL
+void repolist_init(struct repolist* list)
+{
+	*list = (struct repolist) {0};
+}
+
+
+/**
+ * repolist_deinit() - cleanup repolist structure
+ * @list: repolist structure to cleanse
+ */
+LOCAL_SYMBOL
+void repolist_deinit(struct repolist* list)
+{
+	struct repolist_elt * elt, * next;
+
+	elt = list->head;
+
+	while (elt) {
+		next = elt->next;
+		mmstr_free(elt->url);
+		mmstr_free(elt->name);
+		free(elt);
+		elt = next;
+	}
+}
+
+
+/**
+ * repolist_add() - add a repository to the list
+ * @list: initialized repolist structure
+ * @url: the url of the repository from which packages can be retrieved
+ * @name: the short name referencing the url
+ *
+ * Return: always return 0
+ */
+LOCAL_SYMBOL
+int repolist_add(struct repolist* list, const char* url, const char* name)
+{
+	struct repolist_elt* elt;
+
+	elt = mm_malloc(sizeof(*elt));
+	elt->name = NULL;
+	elt->url = NULL;
+
+	elt->url = mmstr_malloc_from_cstr(url);
+	elt->name = mmstr_malloc_from_cstr(name);
+
+	elt->next = NULL;
+
+	// Set as new head if list is empty
+	if (list->head == NULL) {
+		list->head = elt;
+		return 0;
+	}
+
+	// Add new element at the end of list
+	elt->next = list->head;
+	list->head = elt;
+	return 0;
+}
+
+
 static
 int get_field_type(const char* name, int len)
 {
@@ -59,26 +128,63 @@ int set_settings_field(struct settings* s, int field_type,
 
 
 static
-void fill_repositories(yaml_parser_t* parser, struct settings* settings)
+int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 {
 	yaml_token_t token;
-	const char* data;
-	struct strlist repo_list;
+	struct repolist repo_list;
+	int type = -1;
+	int cpt = 1; // counter to know when the list of repositories ends
+	char* name = NULL;
+	char* url = NULL;
 
-	strlist_init(&repo_list);
+	repolist_init(&repo_list);
 	while (1) {
 		if (!yaml_parser_scan(parser, &token))
 			goto exit;
 
 		switch (token.type) {
+
 		case YAML_FLOW_SEQUENCE_END_TOKEN:
-		case YAML_BLOCK_END_TOKEN:
-		case YAML_KEY_TOKEN:
 			goto exit;
 
+		case YAML_STREAM_END_TOKEN:
+		case YAML_BLOCK_END_TOKEN:
+			cpt--;
+			if (cpt == 0)
+				goto exit;
+
+			break;
+
+		case YAML_VALUE_TOKEN:
+			type = YAML_VALUE_TOKEN;
+			break;
+
+		case YAML_KEY_TOKEN:
+			type = YAML_KEY_TOKEN;
+			cpt++;
+			break;
+
 		case YAML_SCALAR_TOKEN:
-			data = (const char*)token.data.scalar.value;
-			strlist_add(&repo_list, data);
+			if (type == YAML_KEY_TOKEN) {
+				name = mm_malloc(token.data.scalar.length + 1);
+				memcpy(name, token.data.scalar.value,
+				       token.data.scalar.length + 1);
+				type = -1;
+			} else if (type == YAML_VALUE_TOKEN) {
+				url = mm_malloc(token.data.scalar.length + 1);
+				memcpy(url, token.data.scalar.value,
+				       token.data.scalar.length + 1);
+				repolist_add(&repo_list, url, name);
+				free(name);
+				free(url);
+				type = -1;
+			} else {
+				mm_raise_error(MM_EBADFMT, "url %s must "
+				               "possess short name\n",
+				               token.data.scalar.value);
+				return -1;
+			}
+
 			break;
 
 		default:
@@ -93,8 +199,9 @@ exit:
 	yaml_token_delete(&token);
 
 	// Replace repo list in settings
-	strlist_deinit(&settings->repo_list);
+	repolist_deinit(&settings->repo_list);
 	settings->repo_list = repo_list;
+	return 0;
 }
 
 
@@ -129,7 +236,9 @@ int parse_config(yaml_parser_t* parser, struct settings* settings)
 		case YAML_BLOCK_SEQUENCE_START_TOKEN:
 			if (type == YAML_VALUE_TOKEN
 			    && field_type == REPOSITORIES) {
-				fill_repositories(parser, settings);
+				if (fill_repositories(parser, settings)) {
+					return -1;
+				}
 			}
 
 			break;
@@ -216,7 +325,7 @@ void settings_init(struct settings* settings)
 		.default_prefix = get_default_mmpack_prefix(),
 	};
 
-	strlist_init(&settings->repo_list);
+	repolist_init(&settings->repo_list);
 }
 
 
@@ -227,7 +336,7 @@ void settings_init(struct settings* settings)
 LOCAL_SYMBOL
 void settings_deinit(struct settings* settings)
 {
-	strlist_deinit(&settings->repo_list);
+	repolist_deinit(&settings->repo_list);
 	mmstr_free(settings->default_prefix);
 
 	*settings = (struct settings) {0};
@@ -243,7 +352,7 @@ void settings_deinit(struct settings* settings)
 LOCAL_SYMBOL
 int settings_num_repo(const struct settings* settings)
 {
-	struct strlist_elt* elt;
+	struct repolist_elt* elt;
 	int num;
 
 	num = 0;
@@ -265,7 +374,7 @@ int settings_num_repo(const struct settings* settings)
 LOCAL_SYMBOL
 const mmstr* settings_get_repo_url(const struct settings* settings, int index)
 {
-	struct strlist_elt* elt;
+	struct repolist_elt* elt;
 	const mmstr* url = NULL;
 	int i;
 
@@ -274,7 +383,7 @@ const mmstr* settings_get_repo_url(const struct settings* settings, int index)
 		if (!elt)
 			return NULL;
 
-		url = elt->str.buf;
+		url = elt->url;
 		elt = elt->next;
 	}
 

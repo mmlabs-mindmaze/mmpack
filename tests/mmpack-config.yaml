@@ -1,10 +1,10 @@
 # This is a test
-repositories: [ "http://this.is.awasome", "http://localhost:8888/" ]
+repositories: [ name1: "http://this.is.awasome", name2: "http://localhost:8888/" ]
 distractor: dummy
 
 default-prefix: "a/path/to/prefix"
 
 repositories:
-  - http://another.host.com/
-  - https://www.awesome.com
-  - http://mmpack.is.cool:8888/
+  - not_funny_name3: http://another.host.com/
+  - boring_name4: https://www.awesome.com
+  - final_name5: http://mmpack.is.cool:8888/

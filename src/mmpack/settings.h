@@ -4,11 +4,30 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "utils.h"
 #include "mmstring.h"
 
+/**
+ * Struct repolist_elt - structure representing a repository
+ * @next: the next element of the list
+ * @url: the url of the repository from which packages can be retrieved
+ * @name: the short name referencing the url
+ */
+struct repolist_elt {
+	struct repolist_elt* next;
+	mmstr* url;
+	mmstr* name;
+};
+
+struct repolist {
+	struct repolist_elt* head;
+};
+
+void repolist_init(struct repolist* list);
+void repolist_deinit(struct repolist* list);
+int repolist_add(struct repolist* list, const char* url, const char* name);
+
 struct settings {
-	struct strlist repo_list;
+	struct repolist repo_list;
 	mmstr* default_prefix;
 };
 
