@@ -6,7 +6,7 @@ prepare_env()
 
 	if [ -n "$(which cygpath)" ] ; then
 	    SRCDIR=$(cygpath -u $SRCDIR)
-	    DEPLOYMENT_DIR=$(cygpath -u $DEPLOYMENT_DIR)
+	    _MMPACK_TEST_PREFIX=$(cygpath -u $_MMPACK_TEST_PREFIX)
 	    BUILDDIR=$(cygpath -u $BUILDDIR)
 	    PREFIX=$(cygpath -u $PREFIX)
 	    PYTHON_INSTALL_DIR=$(cygpath -u $PYTHON_INSTALL_DIR)
@@ -16,14 +16,10 @@ prepare_env()
 	export XDG_CONFIG_HOME=$BUILDDIR/config_$build_sys
 	export XDG_CACHE_HOME=$BUILDDIR/cache_$build_sys
 	export XDG_DATA_HOME=$BUILDDIR/data_$build_sys
-	# The variable _MMPACK_TEST_PREFIX is needed by mmpack-build to find
-	# everything in the right place during the tests (that require a local
-	# installation of mmpack-build).
-	export _MMPACK_TEST_PREFIX=$DEPLOYMENT_DIR
-	export PYTHONPATH=${DEPLOYMENT_DIR}${PYTHON_INSTALL_DIR}
+	export PYTHONPATH=${_MMPACK_TEST_PREFIX}${PYTHON_INSTALL_DIR}
 	SRC_PKG=$SRCDIR/tests/smoke-test
 
-	export PATH=$DEPLOYMENT_DIR$PREFIX/bin:$PATH
+	export PATH=$_MMPACK_TEST_PREFIX$PREFIX/bin:$PATH
 }
 
 cleanup()

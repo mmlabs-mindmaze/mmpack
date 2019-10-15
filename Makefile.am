@@ -303,7 +303,10 @@ check_PROGRAMS = \
 	unittests.tap \
 	$(eol)
 
-TESTS_ENVIRONMENT = DEPLOYMENT_DIR=$(abs_builddir)/deployment-test PYTHON_INSTALL_DIR=$(pythondir) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) PREFIX=$(prefix)
+# The variable _MMPACK_TEST_PREFIX is needed by mmpack and mmpack-build to find
+# everything in the right place during the tests (that require a local
+# installation of mmpack project).
+TESTS_ENVIRONMENT = _MMPACK_TEST_PREFIX=$(abs_builddir)/deployment-test PYTHON_INSTALL_DIR=$(pythondir) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) PREFIX=$(prefix)
 TEST_EXTENSIONS = .test .tap .sh
 TAP_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 	$(srcdir)/build-aux/tap-driver.sh

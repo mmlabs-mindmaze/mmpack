@@ -7,7 +7,7 @@ if [ -n "$(which cygpath)" ] ; then
 	SRCDIR=$(cygpath -u $SRCDIR)
 	BUILDDIR=$(cygpath -u $BUILDDIR)
 	PREFIX=$(cygpath -u $PREFIX)
-	DEPLOYMENT_DIR=$(cygpath -u $DEPLOYMENT_DIR)
+	_MMPACK_TEST_PREFIX=$(cygpath -u $_MMPACK_TEST_PREFIX)
 fi
 
 # initialisation of variables
@@ -16,10 +16,6 @@ PREFIX_TEST=$BUILDDIR/prefix
 CREATE=$BUILDDIR/tmp
 TRASH=$BUILDDIR/trash
 TEST_SRCDIR=$SRCDIR/tests/smoke-tests
-# The variable _MMPACK_TEST_PREFIX is needed by mmpack to find
-# everything in the right place during the tests (that require
-# a local installation of mmpack).
-_MMPACK_TEST_PREFIX=$DEPLOYMENT_DIR
 
 # clean the files and repositories necessary for the tests
 cleanup()
@@ -37,7 +33,7 @@ CREATE+=_${name%.*}
 TRASH+=_${name%.*}
 
 # set the environment properly
-PATH=$DEPLOYMENT_DIR$PREFIX/bin:$PATH
+PATH=$_MMPACK_TEST_PREFIX$PREFIX/bin:$PATH
 export MMPACK_PREFIX=$PREFIX_TEST
 
 cleanup

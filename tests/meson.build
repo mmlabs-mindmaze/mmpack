@@ -47,8 +47,11 @@ mmpack_build_unit_tests_sources = files(
     'test_version.py',
 )
 
+# The variable _MMPACK_TEST_PREFIX is needed by mmpack and mmpack-build to find
+# everything in the right place during the tests (that require a local
+# installation of mmpack project).
 env = environment()
-env.set('DEPLOYMENT_DIR', deployment_dir)
+env.set('_MMPACK_TEST_PREFIX', deployment_dir)
 env.set('PYTHON_INSTALL_DIR', python.get_install_dir())
 env.set('SRCDIR', meson.source_root())
 env.set('BUILDDIR', meson.build_root())
