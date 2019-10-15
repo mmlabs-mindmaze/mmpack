@@ -114,6 +114,22 @@ def soname_deps(filename):
     return libraryset
 
 
+def _get_version_table(elffile):
+    version = {}
+    gnu_version = elffile.get_section_by_name('.gnu.version')
+    for nsym, sym in enumerate(gnu_version.iter_symbols()):
+        index = sym['ndx']
+        if index not in ('VER_NDX_LOCAL', 'VER_NDX_GLOBAL'):
+            index = int(index)
+            # In GNU versioning mode, the highest bit is used to
+            # store whether the symbol is hidden or not
+            if index & 0x8000:
+                index &= ~0x8000
+            version[nsym] = index
+
+    return version
+
+
 def undefined_symbols(filename):
     """
     Parse given elf file and return its undefined symbols set
@@ -132,19 +148,8 @@ def undefined_symbols(filename):
 
     undefined_symbols_set = set()
 
+    version = _get_version_table(elffile)
     gnu_version_r = elffile.get_section_by_name('.gnu.version_r')
-
-    version = {}
-    gnu_version = elffile.get_section_by_name('.gnu.version')
-    for nsym, sym in enumerate(gnu_version.iter_symbols()):
-        index = sym['ndx']
-        if index not in ('VER_NDX_LOCAL', 'VER_NDX_GLOBAL'):
-            index = int(index)
-            # In GNU versioning mode, the highest bit is used to
-            # store whether the symbol is hidden or not
-            if index & 0x8000:
-                index &= ~0x8000
-            version[nsym] = index
 
     dyn = elffile.get_section_by_name('.dynsym')
     for nsym, sym in enumerate(dyn.iter_symbols()):
@@ -183,20 +188,59 @@ def soname(filename: str) -> str:
 def symbols_set(filename):
     """
     Parse given elf file and return its exported symbols as a set.
+
+    # https://lists.debian.org/lsb-spec/1999/12/msg00017.html
+    For each public symbol:
+        1.  find its version index in the version table
+            read in the .gnu.version section
+        2.1 (only if the library's symbols are versioned)
+            the index from (1.) is a pointer into a list of
+            symbols version geven into section .gnu.version_d
+        2.2 use that second index to recover the version string
+        3.  use the veresion and the name of the symbol to create
+            the full version name
     """
     try:
         elffile = ELFFile(open(filename, 'rb'))
     except (IsADirectoryError, ELFError):
         return {}
 
+    symbols_versions = dict()
+
+    # 1. get a table of version indexes
+    version_table = _get_version_table(elffile)
+
+    # 2.1 try to get a table of the possible versions
+    ver_def = elffile.get_section_by_name('.gnu.version_d')
+    if ver_def:
+        for entry in ver_def.iter_versions():
+            version, aux_iter = entry
+            index = version['vd_ndx']
+            for aux in aux_iter:
+                name = aux.name
+                break  # ignore parent entry (if any)
+            symbols_versions[index] = name
+
     symbols = set()
     dyn = elffile.get_section_by_name('.dynsym')
-    for sym in dyn.iter_symbols():
+    for nsym, sym in enumerate(dyn.iter_symbols()):
         if (sym['st_info']['bind'] == 'STB_GLOBAL'
                 and sym['st_size'] != 0
                 and (sym['st_other']['visibility'] == 'STV_PROTECTED'
                      or sym['st_other']['visibility'] == 'STV_DEFAULT')
                 and sym['st_shndx'] != 'SHN_UNDEF'):
-            symbols.add(sym.name)
+
+            version = ''
+            # we have an exported symbol
+            # try 2.2 if possible
+            if nsym in version_table:
+                index = version_table[nsym]
+                version = symbols_versions.get(index, '')
+
+            if version:
+                # 3. create the full version string
+                symbols.add('{}@{}'.format(sym.name, version))
+            else:
+                symbols.add(sym.name)
 
     return symbols
