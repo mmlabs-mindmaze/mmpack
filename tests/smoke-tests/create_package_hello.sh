@@ -23,7 +23,7 @@ mkdir -p $CREATE/bin
 {
 echo "#!/bin/bash"
 echo "exit"
-} >> $CREATE/bin/dum.sh
+} > $CREATE/bin/dum.sh
 
 chmod a+x $CREATE/bin/dum.sh
 
@@ -31,7 +31,7 @@ chmod a+x $CREATE/bin/dum.sh
 {
 echo "#!/bin/bash"
 echo "exit"
-} >> $CREATE/bin/dummy.sh
+} > $CREATE/bin/dummy.sh
 
 # creation of the tar.gz archive of the sources
 mkdir $TRASH
@@ -43,11 +43,11 @@ mkdir -p $CREATE/var/lib/mmpack/metadata
 {
 echo "bin/dum.sh: reg-$(extract_sum_sha $CREATE/bin/dum.sh)"
 echo "bin/dummy.sh: reg-$(extract_sum_sha $CREATE/bin/dummy.sh)"
-} >> $CREATE/var/lib/mmpack/metadata/hello.sha256sums
+} > $CREATE/var/lib/mmpack/metadata/hello.sha256sums
 
 mkdir $CREATE/MMPACK
 
-cat << EOF > } >> $CREATE/MMPACK/info
+cat << EOF > $CREATE/MMPACK/info
 hello:
     depends: {}
     description: 'hello'
