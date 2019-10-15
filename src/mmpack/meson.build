@@ -119,7 +119,7 @@ if setcap.found()
             command : [
                 setcap,
                 'cap_dac_override,cap_sys_admin+ep',
-                get_option('libexecdir') / 'mmpack' / 'mount-mmpack-prefix'
+                get_option('prefix') / get_option('libexecdir') / 'mmpack' / 'mount-mmpack-prefix'
             ],
     )
 endif # setcap
