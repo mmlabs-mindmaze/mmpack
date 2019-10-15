@@ -63,6 +63,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/pacman.py \
 	src/mmpack-build/pe_utils.py \
 	src/mmpack-build/provide.py \
+	src/mmpack-build/python_provides.py \
 	src/mmpack-build/src_package.py \
 	src/mmpack-build/mm_version.py \
 	src/mmpack-build/workspace.py \
@@ -315,7 +316,9 @@ EXTRA_DIST += \
 	tests/create-mpks \
 	tests/run-test-mpkrepo \
 	tests/mmpack-config.yaml \
+	tests/pydata/ \
 	tests/test_version.py \
+	tests/test_hook_python.py \
 	tests/binary-indexes \
 	$(eol)
 
