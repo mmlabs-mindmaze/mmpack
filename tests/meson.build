@@ -68,7 +68,7 @@ build_systems = ['autotools', 'meson']
 foreach build_sys : build_systems
         test('mmpack-build-' + build_sys,
                 files ('smoke-tests/test_mmpack-build.sh'),
-                timeout : 60,
+                timeout : 120,
                 env : env,
                 args : build_sys,
                 suite : 'mmpack-build-smoke',

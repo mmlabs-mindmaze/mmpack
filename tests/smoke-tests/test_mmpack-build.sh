@@ -25,15 +25,22 @@ mmpack-build pkg-create --src $TMP_BUILD/mmpack-hello-world.tar.gz
 # check that the packages created are correct
 ls $XDG_DATA_HOME/mmpack-packages/hello*.mmpack-manifest
 ls $XDG_DATA_HOME/mmpack-packages/hello*.mpk
+ls $XDG_DATA_HOME/mmpack-packages/libhello*.mpk
+ls $XDG_DATA_HOME/mmpack-packages/hello-devel*.mpk
 ls $XDG_DATA_HOME/mmpack-packages/hello*src.tar.gz
 
-# check that teh package contains the expected files
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello*.mpk | grep MMPACK/info
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello*.mpk | grep bin/hello-world
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello*.mpk | grep bin/head-libexec-world
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello*.mpk | grep bin/shell-exec.py
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello*.mpk | grep libexec/hello/libexec-world
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello*.mpk | grep var/lib/mmpack/metadata/hello.sha256sums
+# check that the packages contains the expected files
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep MMPACK/info
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/hello-world
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/head-libexec-world
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/shell-exec.py
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep libexec/hello/libexec-world
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep var/lib/mmpack/metadata/hello.sha256sums
+
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep include/libhello.h
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep -e lib/libhello.dll.a -e lib/libhello.so
+
+tar -tvf $XDG_DATA_HOME/mmpack-packages/libhello*.mpk | grep -e lib/libhello.so.1.0.0 -e bin/libhello-1.dll
 
 # check that the package files are well formed
 pushd $TMP_BUILD

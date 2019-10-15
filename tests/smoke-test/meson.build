@@ -10,10 +10,18 @@ else
 	add_global_arguments('-DEXEEXT=', language : 'c')
 endif
 
+hello = shared_library('hello',
+        files('libhello.c', 'libhello.h'),
+        install : true,
+        version : '1.0.0',
+)
+install_headers(files('libhello.h'))
+
 executable('hello-world',
         'hello-world.c',
         install : true,
         include_directories : include_directories('.'),
+        link_with : hello,
 )
 
 executable('head-libexec-world',
