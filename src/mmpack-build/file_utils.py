@@ -232,3 +232,10 @@ def is_devel(path: str) -> bool:
             or is_devel_manpage(path)
             or is_pkgconfig(path)
             or is_cmake_pkg_desc(path))
+
+
+def is_python_script(filename: str) -> str:
+    """
+    returns whether a file is a python script
+    """
+    return filetype(filename) in ('py', 'python', 'python3')
