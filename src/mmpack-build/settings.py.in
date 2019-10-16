@@ -21,6 +21,6 @@ PACMAN_PREFIX = '\\var\\lib\\pacman'
 _MMPACK_TEST_PREFIX = os.environ.get('_MMPACK_TEST_PREFIX', '')
 EXEEXT = r'@exeext@'
 
-PKGDATADIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@pkgdatadir@')
-LIBEXECDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@libexecdir@')
-BINDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@bindir@')
+PKGDATADIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@pkgdatadir@')  # noqa
+LIBEXECDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@libexecdir@')  # noqa
+BINDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@bindir@')  # noqa
