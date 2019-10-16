@@ -65,11 +65,11 @@ class GerritWatcher(threading.Thread):
 
     def _read(self, fd):
         try:
-            l = fd.readline()
-            if not l:
+            line = fd.readline()
+            if not line:
                 # communication has been closed
-                raise IOError("Broken pipe");
-            data = json.loads(l)
+                raise IOError("Broken pipe")
+            data = json.loads(line)
             self.log.debug("Received data from Gerrit event stream: \n%s" %
                            pprint.pformat(data))
             self.gerrit.addEvent(data)
