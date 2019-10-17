@@ -9,18 +9,31 @@ from os.path import islink, basename, splitext
 from . common import shell, wprint
 
 
+# Match the interpreter of a shebang line (interpreter will be set in the first
+# group). All the path component but the last one will be discarded unless it
+# is env. The first argument will be returned then.
+# Example of matches:
+# '#!/bin/bash' -> 'bash'
+# '#!/usr/bin/python3' -> 'python3'
+# '#!/foo/bar' -> 'bar'
+# '#!/usr/bin/env python3' -> 'python3'
+# '#!/foo/bar python3' -> 'bar'
+_SHEBANG_REGEX = re.compile(r'#!\s*(?:/[^ \n/]+)*/(?:env\s+)?([^\s]+)')
+
+
 def filetype(filename):
     """
     get file type
 
-    This performs the exact same operation as:
+    This performs the similar operation as:
     file  --brief --preserve-date <filename>
+
+    If the file has a shebang, the interpreter name will be returned
     """
     if not islink(filename):
         try:
-            # Open file and read magic number
-            with open(filename, 'rb', buffering=0) as file:
-                magic = file.read(4)
+            # Open file and read magic number (binary)
+            magic = open(filename, 'rb', buffering=0).read(4)
         except IsADirectoryError:
             return 'directory'
 
@@ -29,6 +42,13 @@ def filetype(filename):
             return 'elf'
         if magic[:2] == b'MZ':
             return 'pe'
+        if magic[:2] == b'#!':
+            # the file contains a shebang. So the complete first line of file
+            # and parse the interpreter
+            shebang_line = open(filename, 'rt').readline()
+            shebang_match = _SHEBANG_REGEX.match(shebang_line)
+            if shebang_match:
+                return shebang_match.groups()[0]
 
     # return file extension otherwise
     # eg. python, c-header, ...
