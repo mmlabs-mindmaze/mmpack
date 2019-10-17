@@ -374,18 +374,33 @@ int settings_num_repo(const struct settings* settings)
 LOCAL_SYMBOL
 const mmstr* settings_get_repo_url(const struct settings* settings, int index)
 {
-	struct repolist_elt* elt;
-	const mmstr* url = NULL;
+	struct repolist_elt* repo = settings_get_repo(settings, index);
+
+	return repo->url;
+}
+
+
+/**
+ * settings_get_repo() - pick one repository from the settings
+ * @settings: an initialized settings structure
+ * @index: index of the repository to get
+ *
+ * Return: a pointer to a struct repolist_elt describing the repository on
+ * success NULL otherwise
+ */
+LOCAL_SYMBOL
+struct repolist_elt* settings_get_repo(const struct settings* settings,
+                                       int index)
+{
+	struct repolist_elt* elt = settings->repo_list.head;
 	int i;
 
-	elt = settings->repo_list.head;
-	for (i = 0; i <= index; i++) {
+	for (i = 0; i < index; i++) {
 		if (!elt)
 			return NULL;
 
-		url = elt->url;
 		elt = elt->next;
 	}
 
-	return url;
+	return elt;
 }

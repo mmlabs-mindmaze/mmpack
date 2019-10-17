@@ -15,18 +15,22 @@
 #include <string.h>
 #include "cmdline.h"
 #include "context.h"
+#include "settings.h"
 #include "package-utils.h"
 
 
 struct cb_data {
 	const char * pkg_name;
 	int found;
+	struct settings settings;
 };
 
 static
 int binindex_cb(struct mmpkg* pkg, void * void_data)
 {
 	struct cb_data * data = (struct cb_data*) void_data;
+	struct repolist_elt * repo = settings_get_repo(&(data->settings),
+	                                               pkg->repo_index);
 
 	if (strcmp(pkg->name, data->pkg_name) == 0) {
 		data->found = 1;
@@ -36,6 +40,8 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 		printf("Package file: %s\n", pkg->filename);
 		printf("SHA256: %s\n", pkg->sha256);
 		printf("SUMSHA256: %s\n", pkg->sumsha);
+
+		printf("Repository: %s\n", repo->name);
 
 		printf("Source package: %s\n", pkg->source);
 
@@ -90,6 +96,7 @@ int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return -1;
 
 	data.found = 0;
+	data.settings = ctx->settings;
 	binindex_foreach(&ctx->binindex, binindex_cb, &data);
 	if (!data.found)
 		printf("No package found matching: \"%s\"\n", data.pkg_name);

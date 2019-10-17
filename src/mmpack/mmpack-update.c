@@ -20,17 +20,23 @@ int download_repo_index(struct mmpack_ctx * ctx, int repo_index)
 {
 	STATIC_CONST_MMSTR(pkglist, "binary-index");
 	const mmstr* cacheindex;
-	const mmstr* url;
+	struct repolist_elt * repo;
 
-	url = settings_get_repo_url(&ctx->settings, repo_index);
+	repo = settings_get_repo(&ctx->settings, repo_index);
+
 	cacheindex = mmpack_ctx_get_cache_index(ctx, repo_index);
 
-	if (download_from_repo(ctx, url, pkglist, NULL, cacheindex)) {
-		error("Failed to download package list from %s\n", url);
+	if (download_from_repo(ctx, repo->url, pkglist, NULL,
+	                       cacheindex)) {
+
+		error("Failed to download package list from %s (%s)\n",
+		      repo->name, repo->url);
+
 		return -1;
 	}
 
-	info("Updated package list from repository: %s\n", url);
+	info("Updated package list from repository: %s\n", repo->name);
+
 	return 0;
 }
 
