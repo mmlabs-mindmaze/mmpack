@@ -71,8 +71,7 @@ int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	}
 
 	for (i = 0; i < num_repo; i++) {
-		if (download_repo_index(ctx, i))
-			return -1;
+		download_repo_index(ctx, i);
 	}
 
 	return 0;
