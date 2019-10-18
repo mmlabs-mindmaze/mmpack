@@ -615,15 +615,12 @@ int binindex_foreach(struct binindex * binindex,
                      int (* cb)(struct mmpkg*, void*),
                      void * data)
 {
-	int rv;
 	struct pkg_iter iter;
 	struct mmpkg* pkg;
 
 	pkg = pkg_iter_first(&iter, binindex);
 	while (pkg != NULL) {
-		rv = cb(pkg, data);
-		if (rv != 0)
-			return rv;
+		cb(pkg, data);
 
 		pkg = pkg_iter_next(&iter);
 	}
