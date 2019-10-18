@@ -8,7 +8,7 @@ static inline
 void* mm_malloc(size_t size)
 {
 	void * rv = malloc(size);
-	mm_check(rv != NULL, "out of memory");
+	mm_check(rv != NULL);
 
 	return rv;
 }
@@ -17,7 +17,7 @@ static inline
 void* mm_realloc(void * ptr, size_t size)
 {
 	void * rv = realloc(ptr, size);
-	mm_check(rv != NULL, "out of memory");
+	mm_check(rv != NULL);
 
 	return rv;
 }
