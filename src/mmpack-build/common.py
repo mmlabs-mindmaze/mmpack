@@ -107,7 +107,8 @@ class ShellException(RuntimeError):
     """
 
 
-def shell(cmd, log=True, input_str=None):
+def shell(cmd, log: bool = True, input_str: str = None,
+          log_stderr: bool = True) -> str:
     """
     Wrapper for subprocess.run
 
@@ -117,6 +118,7 @@ def shell(cmd, log=True, input_str=None):
              the cmd argument is a string
         log: log command string on debug output if True
         input_str: string to send on standard input of the created process
+        log_stderr: capture stderr and display with eprint() if True
     Raises:
         ValueError: if type of cmd is invalid
         ShellException: if the command run failed
@@ -139,7 +141,14 @@ def shell(cmd, log=True, input_str=None):
     input_utf8 = input_str.encode('utf-8') if input_str else None
 
     try:
-        ret = run(cmd, stdout=PIPE, shell=run_shell, input=input_utf8)
+        ret = run(cmd, stdout=PIPE, shell=run_shell, input=input_utf8,
+                  stderr=PIPE if log_stderr else None)
+
+        # Reproduce stderr of command with eprint() if requested
+        if log_stderr:
+            for line in ret.stderr.decode('utf-8').splitlines():
+                eprint(line)
+
         if ret.returncode == 0:
             return ret.stdout.decode('utf-8')
 
