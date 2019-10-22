@@ -59,7 +59,7 @@ if get_option('tests')
     subdir('tests')
 endif
 
-if get_option('doc')
+if get_option('docs')
     subdir('docs')
 endif
 

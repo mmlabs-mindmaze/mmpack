@@ -30,7 +30,7 @@ if get_option('tests')
     all_sources += mmpack_unit_tests_sources
 endif
 
-if get_option('doc')
+if get_option('docs')
     all_sources += man_pages_sources
 endif
 
