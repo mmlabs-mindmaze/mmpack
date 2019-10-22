@@ -73,6 +73,14 @@ int repolist_add(struct repolist* list, const char* url, const char* name)
 {
 	struct repolist_elt* elt;
 
+	/* Should not be possible. Maybe on malformed yaml files ?
+	 * Handle anyway to silence scan-build. */
+	if (name == NULL) {
+		return mm_raise_error(MM_EBADFMT,
+		                      "url %s must have a short name", url);
+	}
+
+
 	elt = mm_malloc(sizeof(*elt));
 	elt->name = NULL;
 	elt->url = NULL;
@@ -134,6 +142,7 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 	struct repolist repo_list;
 	int type = -1;
 	int cpt = 1; // counter to know when the list of repositories ends
+	int rv = -1;
 	char* name = NULL;
 	char* url = NULL;
 
@@ -175,14 +184,21 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 				memcpy(url, token.data.scalar.value,
 				       token.data.scalar.length + 1);
 				repolist_add(&repo_list, url, name);
+
 				free(name);
+				name = NULL;
 				free(url);
+				url = NULL;
 				type = -1;
 			} else {
-				mm_raise_error(MM_EBADFMT, "url %s must "
-				               "possess short name\n",
+				/* if the yaml repository list has no server
+				 * name and only contains urls, then yaml does
+				 * not present a YAML_VALUE_TOKEN and directly
+				 * jumps to the YAML_SCALAR_TOKEN */
+				mm_raise_error(MM_EBADFMT,
+				               "url %s must have a short name",
 				               token.data.scalar.value);
-				return -1;
+				goto error;
 			}
 
 			break;
@@ -196,12 +212,17 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 	}
 
 exit:
-	yaml_token_delete(&token);
-
-	// Replace repo list in settings
+	/* Replace repo list in settings */
 	repolist_deinit(&settings->repo_list);
 	settings->repo_list = repo_list;
-	return 0;
+	rv = 0;
+
+error:
+	free(name);
+	free(url);
+	yaml_token_delete(&token);
+
+	return rv;
 }
 
 
