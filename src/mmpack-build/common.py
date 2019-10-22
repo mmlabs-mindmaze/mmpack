@@ -7,6 +7,7 @@ import logging
 import logging.handlers
 import os
 import sys
+import tarfile
 
 import platform
 
@@ -402,3 +403,47 @@ class Assert(AssertionError):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         _log_or_store(logging.ERROR, *args, **kwargs)
+
+
+def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
+    """
+    filter function for tar creation that will remove all file attributes
+    (uid, gid, mtime) from the file added to tar would can make the build
+    of package not reproducible.
+
+    Args:
+        tarinfo: entry being added to the tar
+
+    Returns:
+        the modified tarinfo that will be actually added to tar
+    """
+    tarinfo.uid = tarinfo.gid = 0
+    tarinfo.uname = tarinfo.gname = 'root'
+    tarinfo.mtime = 0
+
+    if tarinfo.name.lower().endswith('.dll'):
+        tarinfo.mode = 0o755
+
+    return tarinfo
+
+
+def create_tarball(srcdir: str, dstfile: str, compression: str = '') -> None:
+    """
+    Generate a tarball from the content of a folder. The generated file should
+    be for deterministic build. Hence all user, group member ship, mode
+    (excepting for the execution but), timestamps will be set to generic
+    values.
+
+    Args:
+        srcfolder: folder whose content will be put in the tarball
+        dstfile: path of the generated tarball
+        compression: compression algorithm to used with the tarball. It must be
+            one of the following string:
+            - '': create a tarfile without compression (default)
+            - 'gz': create a tarfile with gzip compression
+            - 'bz2': create a tarfile with bzip2 compression
+            - 'xz': create a tarfile with lzma compression
+    """
+    tar = tarfile.open(dstfile, 'w:' + compression)
+    tar.add(srcdir, recursive=True, filter=_reset_entry_attrs, arcname='.')
+    tar.close()

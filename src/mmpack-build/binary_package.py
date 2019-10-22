@@ -5,7 +5,6 @@ packaging as mmpack file.
 """
 
 import os
-import tarfile
 
 from glob import glob
 from os.path import isfile
@@ -16,28 +15,6 @@ from . common import *
 from . hooks_loader import MMPACK_BUILD_HOOKS
 from . mm_version import Version
 from . workspace import get_staging_dir
-
-
-def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
-    """
-    filter function for tar creation that will remove all file attributes
-    (uid, gid, mtime) from the file added to tar would can make the build
-    of package not reproducible.
-
-    Args:
-        tarinfo: entry being added to the tar
-
-    Returns:
-        the modified tarinfo that will be actually added to tar
-    """
-    tarinfo.uid = tarinfo.gid = 0
-    tarinfo.uname = tarinfo.gname = 'root'
-    tarinfo.mtime = 0
-
-    if tarinfo.name.lower().endswith('.dll'):
-        tarinfo.mode = 0o755
-
-    return tarinfo
 
 
 class BinaryPackage:
@@ -144,10 +121,8 @@ class BinaryPackage:
     def _make_archive(self, pkgdir: str, dstdir: str) -> str:
         mpkfile = "{0}/{1}_{2}_{3}.mpk".format(dstdir, self.name,
                                                self.version, self.arch)
-        tar = tarfile.open(mpkfile, 'w:xz')
         dprint('[tar] {0} -> {1}'.format(pkgdir, mpkfile))
-        tar.add(pkgdir, recursive=True, filter=_reset_entry_attrs, arcname='.')
-        tar.close()
+        create_tarball(pkgdir, mpkfile, 'xz')
 
         return mpkfile
 
