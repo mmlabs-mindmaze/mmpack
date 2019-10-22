@@ -746,8 +746,18 @@ int install_package(struct mmpack_ctx* ctx,
                     const struct mmpkg* pkg, const mmstr* mpkfile)
 {
 	int rv;
+	struct repolist_elt* repo;
 
 	info("Installing package %s (%s)... ", pkg->name, pkg->version);
+
+	mmlog_info("\tsha256: %s", pkg->sha256);
+	mmlog_info("\tsumsha: %s", pkg->sumsha);
+
+	repo = settings_get_repo(&ctx->settings, pkg->repo_index);
+	if (repo != NULL) {
+		mmlog_info("\tdownloaded from [%s] %s", repo->name, repo->url);
+	}
+
 	rv = pkg_unpack_files(pkg, mpkfile, NULL);
 	if (rv) {
 		error("Failed!\n");
