@@ -70,6 +70,23 @@ def _unpack_deps_version(item):
         return (name, minv, maxv)
 
 
+def _git_clone(url: str, clonedir: str, tag: str = None):
+    """
+    create a shallow clone of a git repo
+
+    Args:
+        url: url of git repository
+        clonedir: folder where the repo must be cloned into
+        tag: option tag, branch, commit hash to check out
+    """
+    git_opts = '--quiet --depth=1'
+    if tag:
+        git_opts += ' --branch ' + tag
+
+    iprint('cloning ' + url)
+    shell('git clone {0} {1} {2}'.format(git_opts, url, clonedir))
+
+
 def create_source_from_git(url: str, tag: str = None):
     """
     Create a source package from git clone
@@ -80,13 +97,8 @@ def create_source_from_git(url: str, tag: str = None):
 
     wrk = Workspace()
 
-    git_opts = '--quiet --depth=1'
-    if tag:
-        git_opts += ' --branch ' + tag
-
-    iprint('cloning ' + url)
     clonedir = mkdtemp(dir=wrk.sources)
-    shell('git clone {0} {1} {2}'.format(git_opts, url, clonedir))
+    _git_clone(url, clonedir, tag)
 
     pushdir(clonedir)
 
