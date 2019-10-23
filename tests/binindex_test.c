@@ -10,6 +10,7 @@
 
 #include "package-utils.h"
 #include "testcases.h"
+#include "settings.h"
 
 #define TEST_BININDEX_DIR SRCDIR"/tests/binary-indexes"
 #define NUM_PKGS_IN_SIMPLE_YAML 6
@@ -39,12 +40,35 @@ void ctx_teardown(void)
 START_TEST(test_binindex_parsing)
 {
 	int rv;
+	struct repolist_elt repo;
 
-	rv = binindex_populate(&binary_index, binindexes[_i], 0);
+	repo.url = mmstr_malloc_from_cstr(binindexes[_i]);
+	repo.name = mmstr_malloc_from_cstr(binindexes[_i]);
+
+	rv = binindex_populate(&binary_index, binindexes[_i], &repo);
 	ck_assert(rv == 0);
 	binindex_dump(&binary_index);
+
+	mmstr_free(repo.url);
+	mmstr_free(repo.name);
 }
 END_TEST
+
+
+static
+int check_from_repo_fully_set(struct from_repo * from_repo)
+{
+	struct from_repo * elt = from_repo;
+
+	while (elt) {
+		ck_assert(elt->size != 0);
+		ck_assert(elt->sha256 != NULL);
+		ck_assert(elt->filename != NULL);
+		ck_assert(elt->repo != NULL);
+		elt = elt->next;
+	}
+	return 0;
+}
 
 
 static
@@ -53,9 +77,8 @@ int check_pkg_fully_set(struct mmpkg* pkg, void * data)
 	int* count = data;
 
 	(*count)++;
-	ck_assert(pkg->size != 0);
-	ck_assert(pkg->sha256 != NULL);
-	ck_assert(pkg->filename != NULL);
+	ck_assert(pkg->from_repo != NULL);
+	check_from_repo_fully_set(pkg->from_repo);
 	return 0;
 }
 
@@ -65,10 +88,18 @@ START_TEST(test_deduplicate)
 {
 	int rv;
 	int count;
+	struct repolist_elt repo;
 
-	rv = binindex_populate(&binary_index, TEST_BININDEX_DIR"/installed-simple.yaml", -1);
+	repo.url = mmstr_malloc_from_cstr("http://url_simple.com");
+	repo.name = mmstr_malloc_from_cstr("name_simple");
+
+	rv = binindex_populate(&binary_index,
+	                       TEST_BININDEX_DIR"/installed-simple.yaml", NULL);
 	ck_assert_msg(rv == 0, "Installed list loading failed");
-	rv = binindex_populate(&binary_index, TEST_BININDEX_DIR"/simple.yaml", 0);
+
+
+	rv = binindex_populate(&binary_index, TEST_BININDEX_DIR"/simple.yaml",
+	                       &repo);
 	ck_assert_msg(rv == 0, "repository list loading failed");
 
 	// Check eack package has its repo specific fields set and count the
@@ -77,6 +108,9 @@ START_TEST(test_deduplicate)
 	binindex_foreach(&binary_index, check_pkg_fully_set, &count);
 
 	ck_assert_int_eq(count, NUM_PKGS_IN_SIMPLE_YAML);
+
+	mmstr_free(repo.url);
+	mmstr_free(repo.name);
 }
 END_TEST
 

@@ -18,6 +18,7 @@
 #include "context.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
+#include "utils.h"
 
 
 static char download_doc[] =
@@ -60,6 +61,7 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	int arg_index, rv = -1;
 	const char * v;
 	const char * arg;
+	mmstr * basename;
 	const mmstr * pkg_name;
 	const mmstr * pkg_version;
 	struct mmpkg const * pkg;
@@ -99,9 +101,12 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	}
 
 	pkg = lookup_package(ctx, pkg_name, pkg_version);
-	if (pkg != NULL)
-		rv = download_package(ctx, pkg, pkg->filename);
-	else
+	if (pkg != NULL && pkg->from_repo != NULL) {
+		basename = mmstr_malloc(mmstrlen(pkg->from_repo->filename));
+		mmstr_basename(basename, pkg->from_repo->filename);
+		rv = download_package(ctx, pkg, basename);
+		mmstr_free(basename);
+	} else
 		error("No such package, or no such package version\n");
 
 	mmstr_free(pkg_name);

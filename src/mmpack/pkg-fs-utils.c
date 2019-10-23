@@ -596,6 +596,7 @@ check_continue:
 /**
  * action_set_pathname_into_dir() - construct path of cached package file
  * @act:        action struct whose pathname field is to be set
+ * @from_repo:  repository from which the package was downloaded
  * @dir:        folder in which the cached downloaded packages must reside
  *
  * This function set @act->pathname to point to a file whose basename is
@@ -607,14 +608,14 @@ check_continue:
 static
 void action_set_pathname_into_dir(struct action* act, const mmstr* dir)
 {
-	const struct mmpkg* pkg = act->pkg;
 	mmstr* pkgbase;
 	int len;
+	struct from_repo * from_repo = act->pkg->from_repo;
 
-	pkgbase = mmstr_malloca(mmstrlen(pkg->filename));
+	pkgbase = mmstr_malloca(mmstrlen(from_repo->filename));
 
 	// Get base filename of downloaded package
-	mmstr_basename(pkgbase, pkg->filename);
+	mmstr_basename(pkgbase, from_repo->filename);
 
 	// Store the joined cachedir and base filename in act->pathname
 	len = mmstrlen(pkgbase) + mmstrlen(dir) + 1;
@@ -645,20 +646,22 @@ LOCAL_SYMBOL
 int download_package(struct mmpack_ctx * ctx, struct mmpkg const * pkg,
                      mmstr const * pathname)
 {
-	mmstr const * repo_url = settings_get_repo_url(&ctx->settings,
-	                                               pkg->repo_index);
+	struct from_repo * from = pkg->from_repo;
 
 	info("Downloading %s (%s)... ", pkg->name, pkg->version);
 
+	if (!from || !from->repo)
+		return -1;
+
 	/* Download package from repo */
-	if (download_from_repo(ctx, repo_url, pkg->filename,
-	                       NULL, pathname)) {
+	if (download_from_repo(ctx, from->repo->url,
+	                       from->filename, NULL, pathname)) {
 		error("Failed!\n");
 		return -1;
 	}
 
 	/* verify integrity of what has been downloaded */
-	if (check_file_pkg(pkg->sha256, NULL, pathname)) {
+	if (check_file_pkg(from->sha256, NULL, pathname)) {
 		error("Integrity check failed!\n");
 		return -1;
 	}
@@ -682,6 +685,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 {
 	mmstr* mpkfile = NULL;
 	const struct mmpkg* pkg;
+	struct from_repo * from;
 	struct action* act;
 	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 	int i;
@@ -692,9 +696,12 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
 			continue;
 
-		// If repo is -1, package file is provided on command line
-		if (pkg->repo_index == -1) {
-			act->pathname = mmstrdup(pkg->filename);
+		from = act->pkg->from_repo;
+		if (!from)
+			return -1;
+
+		if (!from->repo) {
+			act->pathname = mmstrdup(from->filename);
 			mmlog_info(
 				"Going to install %s (%s) directly from file",
 				pkg->name,
@@ -708,7 +715,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 
 		// Skip if there is a valid package already downloaded
 		if (mm_check_access(mpkfile, F_OK) == 0
-		    && check_file_pkg(pkg->sha256, NULL, mpkfile) == 0) {
+		    && check_file_pkg(from->sha256, NULL, mpkfile) == 0) {
 			mmlog_info("Going to install %s (%s) from cache",
 			           pkg->name, pkg->version);
 			continue;
@@ -746,17 +753,10 @@ int install_package(struct mmpack_ctx* ctx,
                     const struct mmpkg* pkg, const mmstr* mpkfile)
 {
 	int rv;
-	struct repolist_elt* repo;
 
 	info("Installing package %s (%s)... ", pkg->name, pkg->version);
 
-	mmlog_info("\tsha256: %s", pkg->sha256);
 	mmlog_info("\tsumsha: %s", pkg->sumsha);
-
-	repo = settings_get_repo(&ctx->settings, pkg->repo_index);
-	if (repo != NULL) {
-		mmlog_info("\tdownloaded from [%s] %s", repo->name, repo->url);
-	}
 
 	rv = pkg_unpack_files(pkg, mpkfile, NULL);
 	if (rv) {

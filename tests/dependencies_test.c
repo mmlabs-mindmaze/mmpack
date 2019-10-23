@@ -199,8 +199,9 @@ START_TEST(test_valid_dependencies)
 	int rv;
 	struct action_stack * actions;
 	struct pkg_request req;
+	struct repolist_elt * repo = settings_get_repo(&ctx.settings, 0);
 
-	rv = binindex_populate(&ctx.binindex, valid_binindexes[_i], 0);
+	rv = binindex_populate(&ctx.binindex, valid_binindexes[_i], repo);
 	ck_assert(rv == 0);
 
 	req = (struct pkg_request){.name = pkg_a_name, .version = vers001};
@@ -222,8 +223,10 @@ START_TEST(test_valid_dependencies_multiple_req)
 	int rv;
 	struct action_stack * actions;
 	struct pkg_request req[2];
+	struct repolist_elt * repo = settings_get_repo(&ctx.settings, 0);
 
-	rv = binindex_populate(&ctx.binindex, TEST_BININDEX_DIR"/simple.yaml", 0);
+	rv = binindex_populate(&ctx.binindex, TEST_BININDEX_DIR"/simple.yaml",
+	                       repo);
 	ck_assert(rv == 0);
 
 	req[0] = (struct pkg_request){.name = pkg_b_name, .next = &req[1]};
@@ -245,8 +248,9 @@ START_TEST(test_invalid_dependencies)
 	int rv;
 	struct action_stack * actions;
 	struct pkg_request req;
+	struct repolist_elt * repo = settings_get_repo(&ctx.settings, 0);
 
-	rv = binindex_populate(&ctx.binindex, invalid_binindexes[_i], 0);
+	rv = binindex_populate(&ctx.binindex, invalid_binindexes[_i], repo);
 	ck_assert(rv == 0);
 
 	req = (struct pkg_request){.name = pkg_a_name, .version = vers001};

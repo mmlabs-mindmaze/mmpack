@@ -29,13 +29,16 @@ int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 	const mmstr* url;
 	size_t source_pkg_name_len;
 
+	if (!pkg->from_repo || !pkg->from_repo->repo)
+		return -1;
+
 	/* source pkg name: name_version_src.tar.gz */
 	source_pkg_name_len = strlen(pkg->source) + 1 + strlen(pkg->version)
 	                      + 1 + sizeof("_src.tar.gz");
 	source_pkg_name = mmstr_malloc(source_pkg_name_len);
 	sprintf(source_pkg_name, "%s_%s_src.tar.gz", pkg->source, pkg->version);
 	mmstr_setlen(source_pkg_name, source_pkg_name_len);
-	url = settings_get_repo_url(&ctx->settings, pkg->repo_index);
+	url = pkg->from_repo->repo->url;
 	rv = download_from_repo(ctx, url, source_pkg_name,
 	                        NULL, source_pkg_name);
 

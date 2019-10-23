@@ -33,17 +33,23 @@ typedef enum {
 
 int pkg_version_compare(char const * v1, char const * v2);
 
+struct from_repo {
+	mmstr const * filename;
+	mmstr const * sha256;
+	size_t size;
+	struct repolist_elt * repo;
+	struct from_repo * next;
+};
+
 struct mmpkg {
 	int name_id;
 	mmstr const * name;
 	mmstr const * version;
-	mmstr const * filename;
-	mmstr const * sha256;
 	mmstr const * source;
 	mmstr const * desc;
 	mmstr const * sumsha;
-	size_t size;
-	int repo_index;
+
+	struct from_repo * from_repo;
 
 	pkg_state state;
 
@@ -142,7 +148,7 @@ void binindex_deinit(struct binindex* binindex);
 struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
                                       char const * filename);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
-                      int repo_index);
+                      struct repolist_elt * repo);
 void binindex_dump(struct binindex const * binindex);
 void binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);

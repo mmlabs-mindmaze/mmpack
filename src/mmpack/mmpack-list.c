@@ -23,7 +23,6 @@ struct cb_data {
 	const char * pkg_name_pattern;
 	int only_available;
 	int found;
-	struct settings settings;
 };
 
 
@@ -43,13 +42,10 @@ struct cb_data {
  * Return: 1 in case of match, 0 otherwise.
  */
 static
-int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern,
-                       struct settings settings)
+int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern)
 {
 	const char* state;
-
-	struct repolist_elt * repo = settings_get_repo(&settings,
-	                                               pkg->repo_index);
+	struct repolist_elt * repo;
 
 	// If pattern is provided and the name does not match do nothing
 	if (pattern && (strstr(pkg->name, pattern) == NULL))
@@ -60,8 +56,9 @@ int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern,
 	else
 		state = "[available]";
 
+	repo = pkg->from_repo ? pkg->from_repo->repo : NULL;
 	printf("%s %s (%s) from repository %s\n", state, pkg->name,
-	       pkg->version, repo->name);
+	       pkg->version, repo ? repo->name : "unknown");
 
 	return 1;
 }
@@ -73,11 +70,10 @@ int binindex_cb_all(struct mmpkg* pkg, void * void_data)
 	struct cb_data * data = (struct cb_data*) void_data;
 
 	// Exclude package not in repo if only available requested
-	if (data->only_available && pkg->repo_index == -1)
+	if (data->only_available && !pkg->from_repo)
 		return 0;
 
-	data->found |= print_pkg_if_match(pkg, data->pkg_name_pattern,
-	                                  data->settings);
+	data->found |= print_pkg_if_match(pkg, data->pkg_name_pattern);
 	return 0;
 }
 
@@ -89,7 +85,6 @@ int list_all(struct mmpack_ctx* ctx, int argc, const char* argv[])
 		.only_available = 0,
 		.pkg_name_pattern = (argc > 1) ? argv[1] : NULL,
 		.found = 0,
-		.settings = ctx->settings,
 	};
 
 	binindex_foreach(&ctx->binindex, binindex_cb_all, &data);
@@ -124,7 +119,7 @@ int list_installed(struct mmpack_ctx* ctx, int argc, const char* argv[])
 	entry = it_iter_first(&iter, &ctx->installed.idx);
 	for (; entry != NULL; entry = it_iter_next(&iter)) {
 		pkg = entry->value;
-		found |= print_pkg_if_match(pkg, pattern, ctx->settings);
+		found |= print_pkg_if_match(pkg, pattern);
 	}
 
 	return found;
@@ -146,10 +141,10 @@ int list_extras(struct mmpack_ctx* ctx, int argc, const char* argv[])
 		pkg = entry->value;
 
 		// Skip if a repo provides this package
-		if (pkg->repo_index != -1)
+		if (pkg->from_repo)
 			continue;
 
-		found |= print_pkg_if_match(pkg, pattern, ctx->settings);
+		found |= print_pkg_if_match(pkg, pattern);
 	}
 
 	return found;
@@ -176,7 +171,7 @@ int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 		if (pkg_version_compare(pkg->version, latest->version) >= 0)
 			continue;
 
-		found |= print_pkg_if_match(latest, pattern, ctx->settings);
+		found |= print_pkg_if_match(latest, pattern);
 	}
 
 	return found;

@@ -154,6 +154,7 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	const mmstr* repo_cache;
 	mmstr* installed_index_path;
 	int i, num_repo, len;
+	struct repolist_elt * repo;
 
 	// Form the path of installed package from prefix
 	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;
@@ -161,7 +162,7 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	mmstr_join_path(installed_index_path, ctx->prefix, inst_relpath);
 
 	// populate the installed package list
-	if (binindex_populate(&ctx->binindex, installed_index_path, -1))
+	if (binindex_populate(&ctx->binindex, installed_index_path, NULL))
 		goto error;
 
 	binindex_foreach(&ctx->binindex, set_installed, ctx);
@@ -170,7 +171,8 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	num_repo = settings_num_repo(&ctx->settings);
 	for (i = 0; i < num_repo; i++) {
 		repo_cache = mmpack_ctx_get_cache_index(ctx, i);
-		if (binindex_populate(&ctx->binindex, repo_cache, i))
+		repo = settings_get_repo(&ctx->settings, i);
+		if (binindex_populate(&ctx->binindex, repo_cache, repo))
 			goto error;
 	}
 

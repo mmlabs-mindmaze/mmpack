@@ -22,26 +22,27 @@
 struct cb_data {
 	const char * pkg_name;
 	int found;
-	struct settings settings;
 };
 
 static
 int binindex_cb(struct mmpkg* pkg, void * void_data)
 {
 	struct cb_data * data = (struct cb_data*) void_data;
-	struct repolist_elt * repo = settings_get_repo(&(data->settings),
-	                                               pkg->repo_index);
+	struct from_repo * from = pkg->from_repo;
 
 	if (strcmp(pkg->name, data->pkg_name) == 0) {
 		data->found = 1;
 		printf("%s (%s) %s\n", pkg->name, pkg->version,
 		       pkg->state == MMPACK_PKG_INSTALLED ? "[installed]" : "");
 
-		printf("Package file: %s\n", pkg->filename);
-		printf("SHA256: %s\n", pkg->sha256);
 		printf("SUMSHA256: %s\n", pkg->sumsha);
 
-		printf("Repository: %s\n", repo->name);
+		if (from) {
+			mm_check(from->repo != NULL);
+			printf("Package file: %s\n", from->filename);
+			printf("SHA256: %s\n", from->sha256);
+			printf("Repository: %s\n", from->repo->name);
+		}
 
 		printf("Source package: %s\n", pkg->source);
 
@@ -51,7 +52,6 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 
 		printf("\nDescription:\n");
 		printf("%s\n", pkg->desc ? pkg->desc : "none");
-
 		return 1;
 	}
 
@@ -96,7 +96,6 @@ int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return -1;
 
 	data.found = 0;
-	data.settings = ctx->settings;
 	binindex_foreach(&ctx->binindex, binindex_cb, &data);
 	if (!data.found)
 		printf("No package found matching: \"%s\"\n", data.pkg_name);

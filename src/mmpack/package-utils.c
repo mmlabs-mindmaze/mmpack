@@ -50,7 +50,7 @@ struct pkg_iter {
 
 struct parsing_ctx {
 	yaml_parser_t parser;
-	int repo_index;
+	struct repolist_elt * repo;
 };
 
 /* standard isdigit() is locale dependent making it unnecessarily slow.
@@ -164,6 +164,61 @@ int pkg_version_compare(char const * v1, char const * v2)
 
 
 static
+void from_repolist_deinit(struct from_repo* list)
+{
+	struct from_repo * elt, * next;
+
+	elt = list;
+
+	while (elt) {
+		next = elt->next;
+		mmstr_free(elt->filename);
+		mmstr_free(elt->sha256);
+		free(elt);
+		elt = next;
+	}
+}
+
+
+/**
+ * mmpkg_get_or_create_from_repo() - returns or create and returns a from_repo
+ * @pkg:       a package already registered
+ * @repo:      a repository from which the package pkg is provided
+ *
+ * This function looks if the repository is already informed in the list of the
+ * repositories that provide the package. If this is the case, then the function
+ * returns the repository, otherwise it creates a from_repo pointing to the
+ * appropriate repository.
+ *
+ * A from_repo will be added to a package only if there is a filename, a sha256,
+ * or a size read in the yaml file describing the package, otherwise
+ * the package is created with a from_repo set to NULL.
+ */
+static
+struct from_repo* mmpkg_get_or_create_from_repo(struct mmpkg* pkg,
+                                                struct repolist_elt * repo)
+{
+	struct from_repo * from;
+
+	// check that the repository of the package is not already known
+	for (from = pkg->from_repo; from != NULL; from = from->next) {
+		if (from->repo == repo)
+			return from;
+	}
+
+	// add the new repository
+	from = mm_malloc(sizeof(*from));
+
+	*from = (struct from_repo) {
+		.next = pkg->from_repo,
+		.repo = repo
+	};
+	pkg->from_repo = from;
+	return pkg->from_repo;
+}
+
+
+static
 void mmpkg_init(struct mmpkg* pkg, const mmstr* name)
 {
 	*pkg = (struct mmpkg) {.name = name};
@@ -175,12 +230,12 @@ static
 void mmpkg_deinit(struct mmpkg * pkg)
 {
 	mmstr_free(pkg->version);
-	mmstr_free(pkg->filename);
-	mmstr_free(pkg->sha256);
 	mmstr_free(pkg->source);
 	mmstr_free(pkg->desc);
 	mmstr_free(pkg->sumsha);
 
+	from_repolist_deinit(pkg->from_repo);
+	pkg->from_repo = NULL;
 	mmpkg_dep_destroy(pkg->mpkdeps);
 	strlist_deinit(&pkg->sysdeps);
 	free(pkg->compdep);
@@ -226,6 +281,24 @@ void mmpkg_dump(struct mmpkg const * pkg)
 
 
 static
+int from_repo_check_valid(struct mmpkg const * pkg)
+{
+	struct from_repo * elt;
+
+	for (elt = pkg->from_repo; elt != NULL; elt = elt->next) {
+		if (!elt->sha256 || !elt->size || !elt->filename)
+			return mm_raise_error(EINVAL,
+			                      "Invalid package data for %s."
+			                      " Missing fields needed in"
+			                      " repository package index.",
+			                      pkg->name);
+	}
+
+	return 0;
+}
+
+
+static
 int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache)
 {
 	if (!pkg->version
@@ -237,15 +310,7 @@ int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache)
 	if (!in_repo_cache)
 		return 0;
 
-	if (!pkg->sha256
-	    || !pkg->size
-	    || !pkg->filename)
-		return mm_raise_error(EINVAL, "Invalid package data for %s."
-		                      " Missing fields needed in"
-		                      " repository package index.",
-		                      pkg->name);
-
-	return 0;
+	return from_repo_check_valid(pkg);
 }
 
 
@@ -478,6 +543,36 @@ void pkglist_deinit(struct pkglist* list)
 
 
 /**
+ * mmpkg_add_from_repo_list() - add the repositories from which a package comes
+ *                              from
+ * @pkg_in:       package already registered
+ * @list:         list of repositories from which the package pkg_in is provided
+ *
+ * Be careful when using this function: the function takes ownership on the
+ * fields filename and sha256 of the argument list.
+ */
+static
+void mmpkg_add_from_repo_list(struct mmpkg* pkg_in, struct from_repo* list)
+{
+	struct from_repo * src, * dst, * next;
+	for (src = list; src != NULL; src = src->next) {
+		dst = mmpkg_get_or_create_from_repo(pkg_in, src->repo);
+		mmstr_free(dst->filename);
+		mmstr_free(dst->sha256);
+
+		// copy from src while preserving the original chaining
+		next = dst->next;
+		*dst = *src;
+		dst->next = next;
+
+		// the field of src have been taken over by dst, hence we
+		// need to reset them so that src is freed properly
+		*src = (struct from_repo) {.next = src->next};
+	}
+}
+
+
+/**
  * pkglist_add_or_modify() - allocate or modifyt a package to list
  * @list:       package list to modify
  * @pkg:        package source holding the field values to update
@@ -516,18 +611,8 @@ struct mmpkg* pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 
 		// Update repo specific fields if repo index is not set
 		pkg_in_list = &entry->pkg;
-		if (pkg_in_list->repo_index == -1) {
-			pkg_in_list->repo_index = pkg->repo_index;
-			pkg_in_list->size = pkg->size;
-			pkg_in_list->sha256 = pkg->sha256;
-			pkg_in_list->filename = pkg->filename;
 
-			// Unset string field in source package since the
-			// string are taken over by the pkg in list
-			pkg->sha256 = NULL;
-			pkg->filename = NULL;
-		}
-
+		mmpkg_add_from_repo_list(pkg_in_list, pkg->from_repo);
 		return pkg_in_list;
 	}
 
@@ -1100,10 +1185,14 @@ enum field_type get_scalar_field_type(const char* key)
 
 
 static
-int mmpkg_set_scalar_field(struct mmpkg * pkg, enum field_type type,
-                           const char* value, size_t valuelen)
+int mmpkg_set_scalar_field(struct mmpkg * pkg,
+                           enum field_type type,
+                           const char* value,
+                           size_t valuelen,
+                           struct repolist_elt * repo)
 {
 	const mmstr** field = NULL;
+	struct from_repo * from_repo;
 
 	switch (type) {
 	case FIELD_VERSION:
@@ -1111,11 +1200,13 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg, enum field_type type,
 		break;
 
 	case FIELD_FILENAME:
-		field = &pkg->filename;
+		from_repo = mmpkg_get_or_create_from_repo(pkg, repo);
+		field = &from_repo->filename;
 		break;
 
 	case FIELD_SHA:
-		field = &pkg->sha256;
+		from_repo = mmpkg_get_or_create_from_repo(pkg, repo);
+		field = &from_repo->sha256;
 		break;
 
 	case FIELD_SOURCE:
@@ -1131,7 +1222,8 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg, enum field_type type,
 		break;
 
 	case FIELD_SIZE:
-		pkg->size = atoi(value);
+		from_repo = mmpkg_get_or_create_from_repo(pkg, repo);
+		from_repo->size = atoi(value);
 		return 0;
 
 	default:
@@ -1380,7 +1472,7 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 
 		switch (token.type) {
 		case YAML_BLOCK_END_TOKEN:
-			if (mmpkg_check_valid(pkg, ctx->repo_index < 0 ? 0 : 1))
+			if (mmpkg_check_valid(pkg, !ctx->repo ? 0 : 1))
 				goto error;
 
 			goto exit;
@@ -1420,7 +1512,8 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 					if (mmpkg_set_scalar_field(pkg,
 					                           scalar_field,
 					                           data,
-					                           data_len))
+					                           data_len,
+					                           ctx->repo))
 						goto error;
 				}
 
@@ -1496,7 +1589,6 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 				                          valuestr,
 				                          valuelen);
 				mmpkg_init(&pkg, name);
-				pkg.repo_index = ctx->repo_index;
 				exitvalue =
 					mmpack_parse_index_package(ctx, &pkg);
 				if (exitvalue != 0)
@@ -1534,7 +1626,7 @@ mmstr const* parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
 	int rv;
 	char const * delim;
 	char const * base = buffer->base;
-	struct parsing_ctx ctx = {.repo_index = -1};
+	struct parsing_ctx ctx = {.repo = NULL};
 
 	if (!yaml_parser_initialize(&ctx.parser)) {
 		mm_raise_error(ENOMEM, "failed to init yaml parse");
@@ -1552,7 +1644,7 @@ mmstr const* parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
 	/* additionally, load the package name from the buffer */
 	delim = strchr(base, ':');
 	pkg->name = mmstr_malloc_copy(base, delim - base);
-	pkg->repo_index = -1;
+	pkg->from_repo->repo = NULL;
 
 	return pkg->name;
 }
@@ -1575,13 +1667,15 @@ struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
 	struct buffer buffer;
 	struct mmpkg * pkg;
 	struct mmpkg tmppkg;
+	struct from_repo * from;
 	mmstr const * name;
 
 	pkg = NULL;
 	name = NULL;
 	buffer_init(&buffer);
 	mmpkg_init(&tmppkg, NULL);
-	tmppkg.filename = mmstr_malloc_from_cstr(filename);
+	from = mmpkg_get_or_create_from_repo(&tmppkg, NULL);
+	from->filename = mmstr_malloc_from_cstr(filename);
 
 	rv = pkg_get_mmpack_info(filename, &buffer);
 	if (rv != 0)
@@ -1612,11 +1706,11 @@ exit:
  */
 LOCAL_SYMBOL
 int binindex_populate(struct binindex* binindex, char const * index_filename,
-                      int repo_index)
+                      struct repolist_elt * repo)
 {
 	int rv = -1;
 	FILE * index_fh;
-	struct parsing_ctx ctx = {.repo_index = repo_index};
+	struct parsing_ctx ctx = {.repo = repo};
 
 	if (!yaml_parser_initialize(&ctx.parser))
 		return mm_raise_error(ENOMEM, "failed to init yaml parse");
