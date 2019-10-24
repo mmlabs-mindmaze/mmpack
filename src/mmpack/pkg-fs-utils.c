@@ -960,11 +960,12 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 			break;
 	}
 
+	// Restore previous current directory
+	mm_chdir(old_currdir);
+
 	// Store the updated installed package list in prefix
 	if (mmpack_ctx_save_installed_list(ctx))
 		rv = -1;
 
-	// Restore previous current directory
-	mm_chdir(old_currdir);
 	return rv;
 }
