@@ -32,8 +32,9 @@ import os
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . common import set_log_file
-from . src_package import create_source_from_git, load_source_from_tar
+from . src_package import SrcPackage
 from . workspace import Workspace, find_project_root_folder
+from . source_tarball import SourceTarball
 
 
 CMD = 'pkg-create'
@@ -93,9 +94,17 @@ def main(argv):
     args = parse_options(argv[1:])
 
     if args.url:
-        package = create_source_from_git(url=args.url, tag=args.tag)
+        method = 'git'
+        path_url = args.url
     else:
-        package = load_source_from_tar(tarpath=args.srctar, tag=args.tag)
+        method = 'tar'
+        path_url = args.srctar
+
+    srctarball = SourceTarball(method, path_url, args.tag)
+    srctarball.prepare_binpkg_build()
+
+    specfile = os.path.join(srctarball.detach_srcdir(), 'mmpack/specs')
+    package = SrcPackage(specfile, srctarball.tag, srctarball.srctar)
 
     if args.build_deps:
         package.install_builddeps(prefix=args.prefix, assumeyes=args.assumeyes)

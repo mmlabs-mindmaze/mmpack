@@ -25,5 +25,6 @@ from . import file_utils
 from . import mm_version
 from . import provide
 from . import src_package
+from . import source_tarball
 from . import workspace
 from . import xdg

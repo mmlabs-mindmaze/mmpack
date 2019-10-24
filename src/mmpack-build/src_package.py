@@ -7,11 +7,9 @@ import os
 import re
 import shutil
 import sys
-import tarfile
 
 from glob import glob
 from subprocess import Popen
-from tempfile import mkdtemp
 from threading import Thread
 from typing import Set
 
@@ -70,131 +68,20 @@ def _unpack_deps_version(item):
         return (name, minv, maxv)
 
 
-def _git_clone(url: str, clonedir: str, tag: str = None):
-    """
-    create a shallow clone of a git repo
-
-    Args:
-        url: url of git repository
-        clonedir: folder where the repo must be cloned into
-        tag: option tag, branch, commit hash to check out
-    """
-    git_opts = '--quiet --depth=1'
-    if tag:
-        git_opts += ' --branch ' + tag
-
-    if os.path.isdir(url):
-        url = 'file://' + os.path.abspath(url)
-
-    iprint('cloning ' + url)
-    shell('git clone {0} {1} {2}'.format(git_opts, url, clonedir))
-
-
-def create_source_from_git(url: str, tag: str = None):
-    """
-    Create a source package from git clone
-
-    Returns:
-        An initialized source package
-    """
-
-    wrk = Workspace()
-
-    clonedir = mkdtemp(dir=wrk.sources)
-    _git_clone(url, clonedir, tag)
-
-    pushdir(clonedir)
-
-    # Get tag name if not set yet (use current branch)
-    if not tag:
-        tag = shell('git rev-parse --abbrev-ref HEAD').strip()
-
-    # Get package name and version
-    specs = yaml_load('mmpack/specs')
-    name = specs['general']['name']
-    version = specs['general']['version']
-
-    wrk.clean(name, tag)
-
-    srcpkg = SrcPackage(name, tag)
-    builddir = srcpkg.pkgbuild_path()
-    unpackdir = srcpkg.unpack_path()
-
-    # Create source package tarball
-    src_tarball = '{0}/{1}_{2}_src.tar.gz'.format(builddir, name, version)
-    cmd = 'git archive --format=tar.gz {} > {}'.format(tag, src_tarball)
-    shell(cmd)
-    shutil.copy(src_tarball, wrk.packages)
-
-    popdir()  # clone dir
-
-    iprint('moving cloned files from {0} to {1}'.format(clonedir, builddir))
-    shutil.move(clonedir, unpackdir)
-
-    srcpkg.load_specfile()
-    srcpkg.parse_specfile()
-
-    return srcpkg
-
-
-def load_source_from_tar(tarpath: str, tag: str = None):
-    """
-    Load mmpack source package from a tarball.
-
-    Returns:
-        An initialized source package
-    """
-
-    wrk = Workspace()
-
-    if not tag:
-        tag = 'from_tar'
-
-    tmpdir = mkdtemp(dir=wrk.sources)
-
-    iprint('extracting temporarily to ' + tmpdir)
-    tar = tarfile.open(tarpath, 'r:*')
-    tar.extractall(path=tmpdir)
-
-    # Get package name and version
-    specs = yaml_load(tmpdir + '/mmpack/specs')
-    name = specs['general']['name']
-    version = specs['general']['version']
-
-    wrk.clean(name, tag)
-
-    srcpkg = SrcPackage(name, tag)
-    builddir = srcpkg.pkgbuild_path()
-    unpackdir = srcpkg.unpack_path()
-
-    # Create source package tarball (ensure that source are properly
-    # renamed)
-    src_tarball = '{0}/{1}_{2}_src.tar.gz'.format(builddir, name, version)
-    shutil.copy(tarpath, src_tarball)
-    shutil.copy(src_tarball, wrk.packages)
-
-    iprint('moving unpacked files from {0} to {1}'.format(tmpdir, builddir))
-    shutil.move(tmpdir, unpackdir)
-
-    srcpkg.load_specfile()
-    srcpkg.parse_specfile()
-
-    return srcpkg
-
-
 class SrcPackage:
     # pylint: disable=too-many-instance-attributes
     """
     Source package class.
     """
 
-    def __init__(self, name: str, tag: str = None):
+    def __init__(self, specfile: str, tag: str, srctar_path: str):
         # pylint: disable=too-many-arguments
-        self.name = name
+        self.name = None
         self.tag = tag
         self.version = None
         self.url = None
         self.maintainer = None
+        self.src_tarball = srctar_path
 
         self.description = ''
         self.pkg_tags = ['MindMaze']
@@ -203,12 +90,18 @@ class SrcPackage:
         self.build_system = None
         self.build_depends = []
 
-        self._specs = None  # raw dictionary version of the specfile
-        self._spec_dir = None  # path of specfile
         # dict of (name, BinaryPackage) generated from the source package
         self._packages = {}
         self.install_files_set = set()
         self._metadata_files_list = []
+
+        dprint('loading specfile: ' + specfile)
+        # keep raw dictionary version of the specfile
+        self._specs = yaml_load(specfile)
+        self._spec_dir = os.path.dirname(specfile)
+
+        # Init source package from unpacked dir
+        self._parse_specfile()
 
     def pkgbuild_path(self) -> str:
         """
@@ -257,16 +150,6 @@ class SrcPackage:
             raise RuntimeError('could not guess project build system')
 
         popdir()
-
-    def load_specfile(self, specfile: str = None) -> None:
-        """
-        Load the specfile and store it as its dictionary equivalent
-        """
-        if not specfile:
-            specfile = self.unpack_path() + '/mmpack/specs'
-        dprint('loading specfile: ' + specfile)
-        self._specs = yaml_load(specfile)
-        self._spec_dir = os.path.dirname(specfile)
 
     def _get_matching_files(self, pcre: str) -> Set[str]:
         """
@@ -364,7 +247,7 @@ class SrcPackage:
             return binpkg
         return self._packages[binpkg_name]
 
-    def parse_specfile(self) -> None:
+    def _parse_specfile(self) -> None:
         """
         create BinaryPackage skeleton entries foreach custom and default
         entries.

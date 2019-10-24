@@ -65,6 +65,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/provide.py \
 	src/mmpack-build/python_depends.py \
 	src/mmpack-build/python_provides.py \
+	src/mmpack-build/source_tarball.py \
 	src/mmpack-build/src_package.py \
 	src/mmpack-build/mm_version.py \
 	src/mmpack-build/workspace.py \

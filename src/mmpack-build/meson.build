@@ -19,6 +19,7 @@ mmpack_build_sources = files(
         'provide.py',
         'python_depends.py',
         'python_provides.py',
+        'source_tarball.py',
         'src_package.py',
         'mm_version.py',
         'workspace.py',

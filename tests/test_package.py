@@ -12,9 +12,7 @@ class TestSrcPackageClass(unittest.TestCase):
         smoke test
         """
         specfile = os.path.dirname(os.path.abspath(__file__)) + '/specfiles' + '/simple.yaml'
-        test_pkg = SrcPackage('dummy.maintainer@mindmaze.ch')
-        test_pkg.load_specfile(specfile)
-        test_pkg.parse_specfile()
+        test_pkg = SrcPackage(specfile, 'dummy_tag', 'none')
 
         self.assertEqual(test_pkg.name, 'simple')
         self.assertEqual(test_pkg.version, Version('1.0.0'))
@@ -28,9 +26,7 @@ class TestSrcPackageClass(unittest.TestCase):
         the full spec parsing
         """
         specfile = os.path.dirname(os.path.abspath(__file__)) + '/specfiles' + '/full.yaml'
-        test_pkg = SrcPackage('dummy.maintainer@mindmaze.ch')
-        test_pkg.load_specfile(specfile)
-        test_pkg.parse_specfile()
+        test_pkg = SrcPackage(specfile, 'dummy_tag', 'none')
 
         # test the general section values
         self.assertEqual(test_pkg.name, 'full')
