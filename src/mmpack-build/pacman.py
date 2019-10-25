@@ -3,12 +3,12 @@
 helper module containing pacman wrappers and file parsing functions
 """
 
-import importlib
 import os
 import re
 from typing import Set
 
 from . common import shell
+from . pe_utils import get_dll_from_soname, symbols_set
 from . settings import PACMAN_PREFIX
 from . workspace import Workspace
 
@@ -20,8 +20,7 @@ def pacman_find_dependency(soname: str, symbol_set: Set[str]) -> str:
     Raises:
         ShellException: the package could not be found
     """
-    pe_utils = importlib.import_module('pe_utils')
-    filename = pe_utils.get_dll_from_soname(soname)
+    filename = get_dll_from_soname(soname)
 
     pacman_line = shell('pacman -Qo ' + filename)
     pacman_line = pacman_line.split('is owned by ')[-1]
@@ -31,7 +30,7 @@ def pacman_find_dependency(soname: str, symbol_set: Set[str]) -> str:
     package, _version = pacman_line.split(' ')
 
     # prune symbols
-    symbol_set.difference_update(pe_utils.symbols_set(filename))
+    symbol_set.difference_update(symbols_set(filename))
 
     return package
 

@@ -3,7 +3,6 @@
 helper module containing dpkg files parsing functions
 """
 
-import importlib
 import os
 import re
 
@@ -43,8 +42,10 @@ def dpkg_find_shlibs_file(target_soname: str):
 
 
 def _prune_soname_symbols(library_path: str, symbols_list: List[str]):
-    elf = importlib.import_module('elf_utils')
-    for sym in elf.symbols_list(library_path, None):
+    # to the import at the last moment in order to prevent windows
+    # from failing to import elftools
+    from . elf_utils import symbols_set
+    for sym in symbols_set(library_path):
         if sym in symbols_list:
             symbols_list.remove(sym)
 
