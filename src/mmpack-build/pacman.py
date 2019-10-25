@@ -39,16 +39,24 @@ def pacman_find_pypkg(pypkg: str) -> str:
     """
     Get packages providing files matchine the specified glob pattern
     """
-    pattern = r'mingw64/lib/python\d.\d+/site-packages/{}(.py|.*/)' \
+
+    # either match:
+    # pypkg = 'numpy'
+    # mingw64/lib/python3.7/site-packages/numpy/
+    # mingw64/lib/python3.7/site-packages/numpy.py
+    pattern = r'mingw64/lib/python\d.\d+/site-packages/{}(.py|/.*)' \
               .format(pypkg)
     file_regex = re.compile(pattern)
 
-    pacman_pkgdir = os.path.join(Workspace().cygroot(), PACMAN_PREFIX, 'local')
+    pacman_pkgdir = Workspace().cygroot() + PACMAN_PREFIX + '\\local'
     for mingw_pkg in os.listdir(pacman_pkgdir):
         instfiles_filename = os.path.join(pacman_pkgdir, mingw_pkg, 'files')
+        if not os.path.isfile(instfiles_filename):
+            continue
+
         for line in open(instfiles_filename, 'rt').readlines():
             if file_regex.match(line):
                 desc_filename = os.path.join(pacman_pkgdir, mingw_pkg, 'desc')
-                return open(desc_filename, 'rt').readlines(2)
+                return open(desc_filename, 'rt').readlines()[1].strip()
 
     return None
