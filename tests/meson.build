@@ -91,6 +91,7 @@ endforeach
 mmpack_smoke_test = [
         ['check-integrity', files('smoke-tests/test_mmpack_check-integrity.sh')],
         ['install', files('smoke-tests/test_mmpack_install.sh')],
+        ['list', files('smoke-tests/test_mmpack_list.sh')],
         ['remove', files('smoke-tests/test_mmpack_remove.sh')],
         ['show', files('smoke-tests/test_mmpack_show.sh')],
 ]
