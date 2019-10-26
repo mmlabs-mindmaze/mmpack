@@ -87,10 +87,12 @@ foreach build_sys : build_systems
         )
 endforeach
 
+# please keep alphabetically ordered
 mmpack_smoke_test = [
+        ['check-integrity', files('smoke-tests/test_mmpack_check-integrity.sh')],
         ['install', files('smoke-tests/test_mmpack_install.sh')],
         ['remove', files('smoke-tests/test_mmpack_remove.sh')],
-        ['check-integrity', files('smoke-tests/test_mmpack_check-integrity.sh')],
+        ['show', files('smoke-tests/test_mmpack_show.sh')],
 ]
 
 foreach test : mmpack_smoke_test
