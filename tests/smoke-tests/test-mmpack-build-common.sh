@@ -17,7 +17,7 @@ prepare_env()
 	export XDG_CACHE_HOME=$BUILDDIR/cache_$build_sys
 	export XDG_DATA_HOME=$BUILDDIR/data_$build_sys
 	export PYTHONPATH=${_MMPACK_TEST_PREFIX}${PYTHON_INSTALL_DIR}
-	SRC_PKG=$SRCDIR/tests/smoke-test
+	SRC_PKG=$SRCDIR/tests/test-packages/smoke/
 
 	export PATH=$_MMPACK_TEST_PREFIX$PREFIX/bin:$PATH
 }
