@@ -25,7 +25,7 @@ struct repolist {
 void repolist_init(struct repolist* list);
 void repolist_deinit(struct repolist* list);
 void repolist_reset(struct repolist* list);
-int repolist_add(struct repolist* list, const char* url, const char* name);
+void repolist_add(struct repolist* list, const char* url, const char* name);
 
 struct settings {
 	struct repolist repo_list;

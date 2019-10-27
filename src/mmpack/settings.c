@@ -96,20 +96,18 @@ int repolist_num_repo(const struct repolist* list)
  * repolist_add() - add a repository to the list
  * @list: initialized repolist structure
  * @url: the url of the repository from which packages can be retrieved
- * @name: the short name referencing the url
- *
- * Return: always return 0
+ * @name: the short name referencing the url, if NULL a default name is used
  */
 LOCAL_SYMBOL
-int repolist_add(struct repolist* list, const char* url, const char* name)
+void repolist_add(struct repolist* list, const char* url, const char* name)
 {
 	struct repolist_elt* elt;
+	char default_name[16];
 
-	/* Should not be possible. Maybe on malformed yaml files ?
-	 * Handle anyway to silence scan-build. */
+	// set index-based default name if name unset
 	if (name == NULL) {
-		return mm_raise_error(MM_EBADFMT,
-		                      "url %s must have a short name", url);
+		sprintf(default_name, "repo-%i", repolist_num_repo(list));
+		name = default_name;
 	}
 
 	// Insert the element at the head of the list
@@ -120,8 +118,6 @@ int repolist_add(struct repolist* list, const char* url, const char* name)
 		.next = list->head,
 	};
 	list->head = elt;
-
-	return 0;
 }
 
 
