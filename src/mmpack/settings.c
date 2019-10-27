@@ -61,6 +61,18 @@ void repolist_deinit(struct repolist* list)
 
 
 /**
+ * repolist_reset() - empty and reinit repolist structure
+ * @list: repolist structure to reset
+ */
+LOCAL_SYMBOL
+void repolist_reset(struct repolist* list)
+{
+	repolist_deinit(list);
+	repolist_init(list);
+}
+
+
+/**
  * repolist_add() - add a repository to the list
  * @list: initialized repolist structure
  * @url: the url of the repository from which packages can be retrieved
@@ -129,14 +141,14 @@ static
 int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 {
 	yaml_token_t token;
-	struct repolist repo_list;
+	struct repolist* repo_list = &settings->repo_list;
 	int type = -1;
 	int cpt = 1; // counter to know when the list of repositories ends
 	int rv = -1;
 	char* name = NULL;
 	char* url = NULL;
 
-	repolist_init(&repo_list);
+	repolist_reset(repo_list);
 	while (1) {
 		if (!yaml_parser_scan(parser, &token))
 			goto exit;
@@ -173,7 +185,7 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 				url = mm_malloc(token.data.scalar.length + 1);
 				memcpy(url, token.data.scalar.value,
 				       token.data.scalar.length + 1);
-				repolist_add(&repo_list, url, name);
+				repolist_add(repo_list, url, name);
 
 				free(name);
 				name = NULL;
@@ -202,9 +214,6 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 	}
 
 exit:
-	/* Replace repo list in settings */
-	repolist_deinit(&settings->repo_list);
-	settings->repo_list = repo_list;
 	rv = 0;
 
 error:
