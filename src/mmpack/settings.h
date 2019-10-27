@@ -33,6 +33,7 @@ struct settings {
 
 void settings_init(struct settings* settings);
 void settings_deinit(struct settings* settings);
+void settings_reset(struct settings* settings);
 int settings_load(struct settings* settings, const char* filename);
 int settings_num_repo(const struct settings* settings);
 const mmstr* settings_get_repo_url(const struct settings* settings, int index);

@@ -365,6 +365,18 @@ void settings_deinit(struct settings* settings)
 
 
 /**
+ * settings_reset() - reset settings structure
+ * @settings: the settings structure to clean
+ */
+LOCAL_SYMBOL
+void settings_reset(struct settings* settings)
+{
+	settings_deinit(settings);
+	settings_init(settings);
+}
+
+
+/**
  * settings_num_repo() - count the number of repositories in the configuration
  * @settings: an initialized settings structure
  *

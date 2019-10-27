@@ -22,10 +22,13 @@
 #include "settings.h"
 
 static
-int read_user_config(struct mmpack_ctx* ctx)
+int load_user_config(struct mmpack_ctx* ctx)
 {
 	mmstr* filename;
 	int rv;
+
+	// Reset any previously loaded configuration
+	settings_reset(&ctx->settings);
 
 	filename = get_config_filename();
 	rv = settings_load(&ctx->settings, filename);
@@ -36,11 +39,14 @@ int read_user_config(struct mmpack_ctx* ctx)
 
 
 static
-int read_prefix_config(struct mmpack_ctx* ctx)
+int load_prefix_config(struct mmpack_ctx* ctx)
 {
 	STATIC_CONST_MMSTR(cfg_relpath, CFG_RELPATH);
 	mmstr* filename;
 	int rv, len;
+
+	// Reset any previously loaded configuration
+	settings_reset(&ctx->settings);
 
 	len = mmstrlen(ctx->prefix) + mmstrlen(cfg_relpath) + 1;
 	filename = mmstr_malloca(len);
@@ -69,7 +75,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 
 	memset(ctx, 0, sizeof(*ctx));
 	settings_init(&ctx->settings);
-	if (read_user_config(ctx))
+	if (load_user_config(ctx))
 		return -1;
 
 	binindex_init(&ctx->binindex);
@@ -294,7 +300,7 @@ error:
 LOCAL_SYMBOL
 int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 {
-	if (read_prefix_config(ctx))
+	if (load_prefix_config(ctx))
 		return -1;
 
 	if (!(flags & CTX_SKIP_REDIRECT_LOG)
