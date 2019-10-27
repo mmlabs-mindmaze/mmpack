@@ -73,6 +73,26 @@ void repolist_reset(struct repolist* list)
 
 
 /**
+ * repolist_num_repo() - count the number of repositories in the repo list
+ * @list: initialized repolist structure
+ *
+ * Returns: the number of repositories
+ */
+static
+int repolist_num_repo(const struct repolist* list)
+{
+	struct repolist_elt* elt;
+	int num;
+
+	num = 0;
+	for (elt = list->head; elt; elt = elt->next)
+		num++;
+
+	return num;
+}
+
+
+/**
  * repolist_add() - add a repository to the list
  * @list: initialized repolist structure
  * @url: the url of the repository from which packages can be retrieved
@@ -384,14 +404,7 @@ void settings_reset(struct settings* settings)
 LOCAL_SYMBOL
 int settings_num_repo(const struct settings* settings)
 {
-	struct repolist_elt* elt;
-	int num;
-
-	num = 0;
-	for (elt = settings->repo_list.head; elt; elt = elt->next)
-		num++;
-
-	return num;
+	return repolist_num_repo(&settings->repo_list);
 }
 
 
