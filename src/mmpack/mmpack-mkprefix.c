@@ -8,6 +8,7 @@
 
 #include <mmargparse.h>
 #include <mmerrno.h>
+#include <mmlib.h>
 #include <mmsysio.h>
 
 #include "context.h"
@@ -74,24 +75,58 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 }
 
 
+/**
+ * dump_repo_elt_and_children() - write all subsequent repo elements
+ * @elt:        current repo element (can be NULL)
+ * @fd:         file descriptor of the configuration file to write
+ *
+ * Write the current repo list element @elt and all subsequent element in
+ * reverse order. This reverse order is necessary to preserve the order as
+ * appearing in user global configuration since repo element are always
+ * inserted to head when populating the list.
+ */
 static
-int create_initial_prefix_cfg(const mmstr* prefix, const char * name,
-                              const char* url, int force_create)
+void dump_repo_elt_and_children(struct repolist_elt* elt, int fd)
+{
+	char* line;
+	char linefmt[] = "  - %s: %s\n";
+	int len;
+
+	if (elt == NULL)
+		return;
+
+	// Write children element before current
+	dump_repo_elt_and_children(elt->next, fd);
+
+	// Allocate buffer large enough
+	len = sizeof(linefmt) + mmstrlen(elt->url) + mmstrlen(elt->name);
+	line = mm_malloca(len);
+	mm_check(line != NULL);
+
+	len = sprintf(line, linefmt, elt->name, elt->url);
+	mm_write(fd, line, len);
+
+	mm_freea(line);
+}
+
+
+static
+int create_initial_prefix_cfg(const mmstr* prefix,
+                              const struct repolist* repo_list,
+                              int force_create)
 {
 	const mmstr* cfg_relpath = mmstr_alloca_from_cstr(CFG_RELPATH);
-	char line[256];
-	int fd, len, oflag;
+	char repo_hdr_line[] = "repositories:\n";
+	int fd, oflag;
 
 	oflag = O_WRONLY|O_CREAT|(force_create ? O_TRUNC : O_EXCL);
 	fd = open_file_in_prefix(prefix, cfg_relpath, oflag);
 	if (fd < 0)
 		return -1;
 
-	// Optionally write URL (if null, it will inherit from user config)
-	if (url) {
-		len = sprintf(line, "repositories: \n  - %s: %s\n", name, url);
-		mm_write(fd, line, len);
-	}
+	// Write list of repositories to configuration file
+	mm_write(fd, repo_hdr_line, sizeof(repo_hdr_line)-1);
+	dump_repo_elt_and_children(repo_list->head, fd);
 
 	mm_close(fd);
 	return 0;
@@ -123,7 +158,7 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		.num_opt = MM_NELEM(cmdline_optv),
 		.execname = "mmpack",
 	};
-	(void) ctx;  /* silence unused warning */
+	struct repolist* repo_list = &ctx->settings.repo_list;
 
 	arg_index = mmarg_parse(&parser, argc, (char**)argv);
 	if (mmarg_is_completing()) {
@@ -142,9 +177,16 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 	prefix = mmstr_alloca_from_cstr(argv[arg_index]);
 
+	// If url is set, replace the repo list with one whose the url and name
+	// are supplied in arguments. If unset, the repo list will be kept
+	// untouched, hence will be the one read from user global configuration
+	if (repo_url) {
+		repolist_reset(repo_list);
+		repolist_add(repo_list, repo_url, repo_name);
+	}
+
 	if (create_initial_empty_files(prefix, force_mkprefix)
-	    || create_initial_prefix_cfg(prefix, repo_name, repo_url,
-	                                 force_mkprefix) ) {
+	    || create_initial_prefix_cfg(prefix, repo_list, force_mkprefix)) {
 		fprintf(stderr, "Failed to create mmpack prefix: %s\n", prefix);
 		return -1;
 	}
