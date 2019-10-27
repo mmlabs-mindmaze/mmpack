@@ -6,10 +6,10 @@
 #endif
 
 #include <check.h>
+#include <mmlib.h>
 #include <stdlib.h>
 
 #include "testcases.h"
-
 
 static
 Suite* api_suite(void)
@@ -33,6 +33,11 @@ int main(void)
 	int exitcode = EXIT_SUCCESS;
 	Suite* suite;
 	SRunner* runner;
+
+	// Ensure that global user config shall not be loaded: any bad
+	// formatting in the sense of the version currently being built could
+	// lead to failure will being completely unrelated what is tested.
+	mm_setenv("XDG_CONFIG_HOME", "/non-existing-dir", MM_ENV_OVERWRITE);
 
 	suite = api_suite();
 	runner = srunner_create(suite);

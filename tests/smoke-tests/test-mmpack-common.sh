@@ -26,6 +26,9 @@ prepare_env()
 	# set the environment properly
 	PATH=$_MMPACK_TEST_PREFIX$PREFIX/bin:$PATH
 	export MMPACK_PREFIX=$PREFIX_TEST
+
+	# prevent loading user global configuration
+	export XDG_CONFIG_HOME=/non-existing-dir
 }
 
 # clean the files and repositories necessary for the tests
