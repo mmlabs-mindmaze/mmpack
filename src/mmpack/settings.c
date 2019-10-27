@@ -80,25 +80,15 @@ int repolist_add(struct repolist* list, const char* url, const char* name)
 		                      "url %s must have a short name", url);
 	}
 
-
+	// Insert the element at the head of the list
 	elt = mm_malloc(sizeof(*elt));
-	elt->name = NULL;
-	elt->url = NULL;
-
-	elt->url = mmstr_malloc_from_cstr(url);
-	elt->name = mmstr_malloc_from_cstr(name);
-
-	elt->next = NULL;
-
-	// Set as new head if list is empty
-	if (list->head == NULL) {
-		list->head = elt;
-		return 0;
-	}
-
-	// Add new element at the end of list
-	elt->next = list->head;
+	*elt = (struct repolist_elt) {
+		.url = mmstr_malloc_from_cstr(url),
+		.name = mmstr_malloc_from_cstr(name),
+		.next = list->head,
+	};
 	list->head = elt;
+
 	return 0;
 }
 
