@@ -310,8 +310,14 @@ check_PROGRAMS = \
 # installation of mmpack project).
 TESTS_ENVIRONMENT = _MMPACK_TEST_PREFIX=$(abs_builddir)/deployment-test PYTHON_INSTALL_DIR=$(pythondir) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) PREFIX=$(prefix)
 TEST_EXTENSIONS = .test .tap .sh
+
+if TAP_SUPPORT_IN_CHECK
+AM_CPPFLAGS += -DCHECK_SUPPORT_TAP
 TAP_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 	$(srcdir)/build-aux/tap-driver.sh
+else
+TAP_LOG_DRIVER = $(LOG_DRIVER)
+endif
 
 EXTRA_DIST += \
 	tests/create-mpks \

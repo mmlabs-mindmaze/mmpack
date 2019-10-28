@@ -41,9 +41,16 @@ int main(void)
 
 	suite = api_suite();
 	runner = srunner_create(suite);
+#if defined(CHECK_SUPPORT_TAP)
 	srunner_set_tap(runner, "-");
+#endif
 
 	srunner_run_all(runner, CK_ENV);
+
+#if !defined(CHECK_SUPPORT_TAP)
+    if (srunner_ntests_failed(runner) != 0)
+        exitcode = EXIT_FAILURE;
+#endif
 
 	srunner_free(runner);
 
