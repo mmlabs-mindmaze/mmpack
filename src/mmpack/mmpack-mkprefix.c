@@ -19,7 +19,7 @@
 
 static int force_mkprefix = 0;
 static const char* repo_url = NULL;
-static const char* repo_name = "default";
+static const char* repo_name = NULL;
 
 static char mkprefix_doc[] =
 	"mmpack mkprefix allows you to create a new prefix in folder "
