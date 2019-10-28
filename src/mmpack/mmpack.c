@@ -24,6 +24,7 @@
 #include "mmpack-mkprefix.h"
 #include "mmpack-provides.h"
 #include "mmpack-remove.h"
+#include "mmpack-repo.h"
 #include "mmpack-run.h"
 #include "mmpack-search.h"
 #include "mmpack-show.h"
@@ -42,6 +43,7 @@ const struct subcmd mmpack_subcmds[] = {
 	{"mkprefix", mmpack_mkprefix},
 	{"provides", mmpack_provides},
 	{"remove", mmpack_remove},
+	{"repo", mmpack_repo},
 	{"run", mmpack_run},
 	{"search", mmpack_search},
 	{"show", mmpack_show},
@@ -70,6 +72,7 @@ static const char arguments_docs[] =
 	"[options] "LIST_SYNOPSIS "\n"
 	"[options] "MKPREFIX_SYNOPSIS "\n"
 	"[options] "REMOVE_SYNOPSIS "\n"
+	"[options] "REPO_SYNOPSIS "\n"
 	"[options] "RUN_SYNOPSIS "\n"
 	"[options] "SEARCH_SYNOPSIS "\n"
 	"[options] "SHOW_SYNOPSIS "\n"

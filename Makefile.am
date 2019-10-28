@@ -131,6 +131,8 @@ mmpack_lib_sources = \
 	src/mmpack/mmpack-provides.h \
 	src/mmpack/mmpack-remove.c \
 	src/mmpack/mmpack-remove.h \
+	src/mmpack/mmpack-repo.c \
+	src/mmpack/mmpack-repo.h \
 	src/mmpack/mmpack-run.c \
 	src/mmpack/mmpack-run.h \
 	src/mmpack/mmpack-search.c \
@@ -375,6 +377,7 @@ RST_MAN_PAGES = \
 	docs/man/mmpack-mkprefix.rst \
 	docs/man/mmpack-provides.rst \
 	docs/man/mmpack-remove.rst \
+	docs/man/mmpack-repo.rst \
 	docs/man/mmpack-run.rst \
 	docs/man/mmpack-search.rst \
 	docs/man/mmpack-show.rst \

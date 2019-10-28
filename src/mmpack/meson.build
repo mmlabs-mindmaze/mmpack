@@ -27,6 +27,8 @@ mmpack_lib_sources = files(
 	'mmpack-provides.h',
 	'mmpack-remove.c',
 	'mmpack-remove.h',
+	'mmpack-repo.c',
+	'mmpack-repo.h',
 	'mmpack-run.c',
 	'mmpack-run.h',
 	'mmpack-search.c',
