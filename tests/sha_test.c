@@ -125,7 +125,7 @@ void sha_setup(void)
 {
 	int i;
 	char filename[sizeof(HASHFILE_DIR) + 64];
-	char hash[SHA_HEXSTR_LEN];
+	char hash[SHA_HEXSTR_LEN+1];
 
 	// Create the test folder that will contains the files generated for the test
 	mm_mkdir(HASHFILE_DIR, 0755, MM_RECURSIVE);
