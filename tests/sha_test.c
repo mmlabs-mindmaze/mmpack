@@ -231,6 +231,12 @@ TCase* create_sha_tcase(void)
 	TCase * tc;
 
 	tc = tcase_create("sha");
+
+	/* sha functions are increadibly costly, and time out when run with
+	 * address sanitizer or valgrind (or a bad computer)
+	 * => increase default timeout from 4s to 10s and hope for the best
+	 * if 10s turns out not to be enough, I advise disabling this test */
+	tcase_set_timeout(tc, 10);
 	tcase_add_unchecked_fixture(tc, sha_setup, sha_cleanup);
 
 	tcase_add_loop_test(tc, hashfile_without_parent, 0, NUM_HASH_CASES);

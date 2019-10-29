@@ -24,7 +24,11 @@ mmpack_unit_tests = executable('mmpack-unit-test',
     dependencies : [libcheck],
 )
 
-# double default timeout (30s) because windows platforms are slower
+# this should take about 12s
+# increase timeout to be able to run this
+# - on windows (should take about 40s)
+# - with address sanitizer enabled (should take 30s)
+# (timing are expectations and depend on the platform specs and load)
 test('mmpack unit tests',
         mmpack_unit_tests,
         timeout : 60,
