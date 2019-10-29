@@ -76,64 +76,6 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 
 
 /**
- * dump_repo_elt_and_children() - write all subsequent repo elements
- * @elt:        current repo element (can be NULL)
- * @fd:         file descriptor of the configuration file to write
- *
- * Write the current repo list element @elt and all subsequent element in
- * reverse order. This reverse order is necessary to preserve the order as
- * appearing in user global configuration since repo element are always
- * inserted to head when populating the list.
- */
-static
-void dump_repo_elt_and_children(struct repolist_elt* elt, int fd)
-{
-	char* line;
-	char linefmt[] = "  - %s: %s\n";
-	int len;
-
-	if (elt == NULL)
-		return;
-
-	// Write children element before current
-	dump_repo_elt_and_children(elt->next, fd);
-
-	// Allocate buffer large enough
-	len = sizeof(linefmt) + mmstrlen(elt->url) + mmstrlen(elt->name);
-	line = mm_malloca(len);
-	mm_check(line != NULL);
-
-	len = sprintf(line, linefmt, elt->name, elt->url);
-	mm_write(fd, line, len);
-
-	mm_freea(line);
-}
-
-
-static
-int create_initial_prefix_cfg(const mmstr* prefix,
-                              const struct repolist* repo_list,
-                              int force_create)
-{
-	const mmstr* cfg_relpath = mmstr_alloca_from_cstr(CFG_RELPATH);
-	char repo_hdr_line[] = "repositories:\n";
-	int fd, oflag;
-
-	oflag = O_WRONLY|O_CREAT|(force_create ? O_TRUNC : O_EXCL);
-	fd = open_file_in_prefix(prefix, cfg_relpath, oflag);
-	if (fd < 0)
-		return -1;
-
-	// Write list of repositories to configuration file
-	mm_write(fd, repo_hdr_line, sizeof(repo_hdr_line)-1);
-	dump_repo_elt_and_children(repo_list->head, fd);
-
-	mm_close(fd);
-	return 0;
-}
-
-
-/**
  * mmpack_mkprefix() - main function for the command to create prefixes
  * @ctx: mmpack context
  * @argc: number of arguments
@@ -186,7 +128,7 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	}
 
 	if (create_initial_empty_files(prefix, force_mkprefix)
-	    || create_initial_prefix_cfg(prefix, repo_list, force_mkprefix)) {
+	    || settings_serialize(prefix, &ctx->settings, force_mkprefix)) {
 		fprintf(stderr, "Failed to create mmpack prefix: %s\n", prefix);
 		return -1;
 	}

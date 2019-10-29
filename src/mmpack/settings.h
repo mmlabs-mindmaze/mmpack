@@ -40,6 +40,8 @@ int settings_num_repo(const struct settings* settings);
 const mmstr* settings_get_repo_url(const struct settings* settings, int index);
 struct repolist_elt* settings_get_repo(const struct settings* settings,
                                        int index);
-
+int settings_serialize(const mmstr* prefix,
+                       const struct settings * settings,
+                       int force_create);
 
 #endif /* SETTINGS_H */

@@ -445,3 +445,62 @@ struct repolist_elt* settings_get_repo(const struct settings* settings,
 
 	return elt;
 }
+
+
+/**
+ * dump_repo_elt_and_children() - write all subsequent repo elements
+ * @fd:  file descriptor of the configuration file to write
+ * @elt: current repo element (can be NULL)
+ *
+ * Write the current repo list element @elt and all subsequent element in
+ * reverse order. This reverse order is necessary to preserve the order as
+ * appearing in user global configuration since repo element are always
+ * inserted to head when populating the list.
+ */
+static
+void dump_repo_elt_and_children(int fd, struct repolist_elt* elt)
+{
+	int len;
+	char* line;
+	char linefmt[] = "  - %s: %s\n";
+
+	if (elt == NULL)
+		return;
+
+	// Write children element before current
+	dump_repo_elt_and_children(fd, elt->next);
+
+	// Allocate buffer large enough
+	len = sizeof(linefmt) + mmstrlen(elt->url) + mmstrlen(elt->name);
+	line = mm_malloca(len);
+	mm_check(line != NULL);
+
+	len = sprintf(line, linefmt, elt->name, elt->url);
+	mm_write(fd, line, len);
+
+	mm_freea(line);
+}
+
+
+LOCAL_SYMBOL
+int settings_serialize(const mmstr* prefix,
+                       const struct settings * settings,
+                       int force_create)
+{
+	const struct repolist* repo_list = &settings->repo_list;
+	const mmstr* cfg_relpath = mmstr_alloca_from_cstr(CFG_RELPATH);
+	char repo_hdr_line[] = "repositories:\n";
+	int fd, oflag;
+
+	oflag = O_WRONLY|O_CREAT|(force_create ? O_TRUNC : O_EXCL);
+	fd = open_file_in_prefix(prefix, cfg_relpath, oflag);
+	if (fd < 0)
+		return -1;
+
+	// Write list of repositories to configuration file
+	mm_write(fd, repo_hdr_line, sizeof(repo_hdr_line)-1);
+	dump_repo_elt_and_children(fd, repo_list->head);
+
+	mm_close(fd);
+	return 0;
+}
