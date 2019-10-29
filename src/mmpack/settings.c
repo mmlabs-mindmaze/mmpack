@@ -121,6 +121,42 @@ void repolist_add(struct repolist* list, const char* name, const char* url)
 }
 
 
+/**
+ * repolist_remove() - remove a repository to the list
+ * @list: pointer to an initialized repolist structure
+ * @name: the short name referencing the url
+ *
+ * Return: always return 0 on success, a negative value otherwise
+ */
+LOCAL_SYMBOL
+int repolist_remove(struct repolist * list, const char * name)
+{
+	int name_len = strlen(name);
+	struct repolist_elt * elt;
+	struct repolist_elt * prev = NULL;
+
+	for (elt = list->head; elt != NULL; elt = elt->next) {
+		if (name_len == mmstrlen(elt->name)
+		    && strncmp(elt->name, name, name_len) == 0) {
+
+			if (prev != NULL)
+				prev->next = elt->next;
+			else
+				list->head = elt->next;
+
+			mmstr_free(elt->url);
+			mmstr_free(elt->name);
+			free(elt);
+			return 0;
+		}
+
+		prev = elt;
+	}
+
+	return -1;
+}
+
+
 static
 int get_field_type(const char* name, int len)
 {
