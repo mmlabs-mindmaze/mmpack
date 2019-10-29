@@ -122,6 +122,31 @@ void repolist_add(struct repolist* list, const char* name, const char* url)
 
 
 /**
+ * repolist_lookup() - lookup a repository from the list by name
+ * @list: pointer to an initialized repolist structure
+ * @name: the short name referencing the url
+ *
+ * Return: a pointer to the repolist element on success, NULL otherwise.
+ */
+LOCAL_SYMBOL
+struct repolist_elt* repolist_lookup(struct repolist * list,
+                                     const char * name)
+{
+	int name_len = strlen(name);
+	struct repolist_elt * elt;
+
+	for (elt = list->head; elt != NULL; elt = elt->next) {
+		if (name_len == mmstrlen(elt->name)
+		    && strncmp(elt->name, name, name_len) == 0) {
+			return elt;
+		}
+	}
+
+	return NULL;
+}
+
+
+/**
  * repolist_remove() - remove a repository to the list
  * @list: pointer to an initialized repolist structure
  * @name: the short name referencing the url
