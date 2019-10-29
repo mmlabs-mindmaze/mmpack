@@ -197,7 +197,7 @@ def symbols_set(filename):
             the index from (1.) is a pointer into a list of
             symbols version geven into section .gnu.version_d
         2.2 use that second index to recover the version string
-        3.  use the veresion and the name of the symbol to create
+        3.  use the version and the name of the symbol to create
             the full version name
     """
     try:
