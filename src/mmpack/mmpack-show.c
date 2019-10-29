@@ -28,7 +28,7 @@ static
 int binindex_cb(struct mmpkg* pkg, void * void_data)
 {
 	struct cb_data * data = (struct cb_data*) void_data;
-	struct from_repo * from = pkg->from_repo;
+	struct from_repo * from;
 
 	if (strcmp(pkg->name, data->pkg_name) == 0) {
 		data->found = 1;
@@ -37,11 +37,12 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 
 		printf("SUMSHA256: %s\n", pkg->sumsha);
 
-		if (from) {
-			mm_check(from->repo != NULL);
-			printf("Package file: %s\n", from->filename);
-			printf("SHA256: %s\n", from->sha256);
-			printf("Repository: %s\n", from->repo->name);
+		for (from = pkg->from_repo; from != NULL; from = from->next) {
+			printf("Repository: %s\n", from->repo ?
+			       from->repo->name : "unknown");
+			printf("\tPackage file: %s\n", from->filename);
+			printf("\tSHA256: %s\n", from->sha256);
+
 		}
 
 		printf("Source package: %s\n", pkg->source);
