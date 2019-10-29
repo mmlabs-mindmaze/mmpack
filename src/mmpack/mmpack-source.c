@@ -23,14 +23,13 @@
 static
 int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 {
-	int rv;
+	int rv = -1;
 
 	mmstr * source_pkg_name;
 	const mmstr* url;
 	size_t source_pkg_name_len;
+	struct from_repo * from;
 
-	if (!pkg->from_repo || !pkg->from_repo->repo)
-		return -1;
 
 	/* source pkg name: name_version_src.tar.gz */
 	source_pkg_name_len = strlen(pkg->source) + 1 + strlen(pkg->version)
@@ -38,9 +37,16 @@ int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 	source_pkg_name = mmstr_malloc(source_pkg_name_len);
 	sprintf(source_pkg_name, "%s_%s_src.tar.gz", pkg->source, pkg->version);
 	mmstr_setlen(source_pkg_name, source_pkg_name_len);
-	url = pkg->from_repo->repo->url;
-	rv = download_from_repo(ctx, url, source_pkg_name,
-	                        NULL, source_pkg_name);
+
+	for (from = pkg->from_repo; from != NULL; from = from->next) {
+		mm_check(from->repo != NULL);
+
+		url = from->repo->url;
+		rv = download_from_repo(ctx, url, source_pkg_name,
+		                        NULL, source_pkg_name);
+		if (rv == 0)
+			break;
+	}
 
 	if (rv == 0)
 		info("Downloaded: %s\n", source_pkg_name);
@@ -78,7 +84,7 @@ int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "-h")) {
 		fprintf(stderr, "missing package argument in command line\n"
-		        "Usage:\n\tmmpack source "SOURCE_SYNOPSIS "\n");
+		        "Usage:\n\tmmpack "SOURCE_SYNOPSIS "\n");
 		return argc != 2 ? -1 : 0;
 	}
 
