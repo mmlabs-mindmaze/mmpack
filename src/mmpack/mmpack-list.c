@@ -45,7 +45,7 @@ static
 int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern)
 {
 	const char* state;
-	struct repolist_elt * repo;
+	struct from_repo * from;
 
 	// If pattern is provided and the name does not match do nothing
 	if (pattern && (strstr(pkg->name, pattern) == NULL))
@@ -56,9 +56,19 @@ int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern)
 	else
 		state = "[available]";
 
-	repo = pkg->from_repo ? pkg->from_repo->repo : NULL;
-	printf("%s %s (%s) from repository %s\n", state, pkg->name,
-	       pkg->version, repo ? repo->name : "unknown");
+	printf("%s %s (%s) ", state, pkg->name, pkg->version);
+
+	if (pkg->from_repo) {
+		printf("from repositories:");
+		for (from = pkg->from_repo; from != NULL; from = from->next) {
+			mm_check(from->repo != NULL);
+			printf(" %s%c",
+			       from->repo->name,
+			       from->next ? ',' : '\n');
+		}
+	} else {
+		printf("from repositories: unknown\n");
+	}
 
 	return 1;
 }
