@@ -124,7 +124,7 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// untouched, hence will be the one read from user global configuration
 	if (repo_url) {
 		repolist_reset(repo_list);
-		repolist_add(repo_list, repo_url, repo_name);
+		repolist_add(repo_list, repo_name, repo_url);
 	}
 
 	if (create_initial_empty_files(prefix, force_mkprefix)

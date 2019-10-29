@@ -95,11 +95,11 @@ int repolist_num_repo(const struct repolist* list)
 /**
  * repolist_add() - add a repository to the list
  * @list: initialized repolist structure
+ * @name: the short name referencing the url
  * @url: the url of the repository from which packages can be retrieved
- * @name: the short name referencing the url, if NULL a default name is used
  */
 LOCAL_SYMBOL
-void repolist_add(struct repolist* list, const char* url, const char* name)
+void repolist_add(struct repolist* list, const char* name, const char* url)
 {
 	struct repolist_elt* elt;
 	char default_name[16];
@@ -201,7 +201,7 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 				url = mm_malloc(token.data.scalar.length + 1);
 				memcpy(url, token.data.scalar.value,
 				       token.data.scalar.length + 1);
-				repolist_add(repo_list, url, name);
+				repolist_add(repo_list, name, url);
 
 				free(name);
 				name = NULL;
