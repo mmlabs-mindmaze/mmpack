@@ -931,14 +931,12 @@ int check_new_sysdeps(struct action_stack* stack)
 int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 {
 	int i, rv;
-	char old_currdir[512];
 
 	if (check_new_sysdeps(stack) != DEPS_OK)
 		return -1;
 
 	// Change current directory to prefix... All the prefix relpath can
 	// now be used directly.
-	mm_getcwd(old_currdir, sizeof(old_currdir));
 	if (mm_chdir(ctx->prefix)
 	    || mm_mkdir(METADATA_RELPATH, 0777, MM_RECURSIVE))
 		return -1;
@@ -961,7 +959,7 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 	}
 
 	// Restore previous current directory
-	mm_chdir(old_currdir);
+	mm_chdir(ctx->cwd);
 
 	// Store the updated installed package list in prefix
 	if (mmpack_ctx_save_installed_list(ctx))
