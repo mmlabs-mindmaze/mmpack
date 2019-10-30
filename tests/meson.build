@@ -1,3 +1,5 @@
+long_test = get_option('long-tests') or disabler()
+
 cc.check_header('check.h')
 libcheck = dependency('check', required : true)
 unittest_args = [
@@ -76,16 +78,21 @@ test('mmpack-build unit tests',
         depends : do_deployment_test,
 )
 
-build_systems = ['autotools', 'meson']
-foreach build_sys : build_systems
-        test('mmpack-build-' + build_sys,
-                files ('smoke-tests/test_mmpack-build.sh'),
-                timeout : 120,
-                env : env,
-                args : build_sys,
-                suite : 'mmpack-build-smoke',
-        )
-endforeach
+test('mmpack-build-meson',
+        files ('smoke-tests/test_mmpack-build.sh'),
+        env : env,
+        args : 'meson',
+        suite : 'mmpack-build-smoke',
+)
+
+test('mmpack-build-autotools',
+        files ('smoke-tests/test_mmpack-build.sh'),
+        timeout : 120,
+        env : env,
+        args : 'autotools',
+        suite : 'mmpack-build-smoke',
+        deps : long_test,
+)
 
 # please keep alphabetically ordered
 mmpack_smoke_test = [

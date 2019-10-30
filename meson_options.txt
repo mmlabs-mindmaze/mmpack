@@ -1,4 +1,6 @@
 option('tests', type: 'boolean', value: true,
         description: 'build unit tests')
+option('long-tests', type: 'boolean', value: false,
+        description: 'also build tests that take a long time to run')
 option('docs', type: 'boolean', value: true,
         description: 'build documentation')
