@@ -57,7 +57,7 @@ int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
 	if (is_file(arg)) {
 		tmp = mmstr_alloca_from_cstr(arg);
 		len = mmstrlen(ctx->cwd) + 1 + mmstrlen(tmp);
-		arg_full = mmstr_malloc(len);
+		arg_full = mmstr_alloca(len);
 		mmstr_join_path(arg_full, ctx->cwd, tmp);
 
 		pkg = add_pkgfile_to_binindex(&ctx->binindex, arg_full);
