@@ -32,8 +32,8 @@ struct {
 	{.len =  257, .name = "small_file2"},
 	{.len =  512, .name = "afile"},
 	{.len =  515, .name = "afile2"},
-	{.len =  1024*1024*64, .name = "large_file"},
-	{.len =  1024*1024*64 + 63, .name = "large_file2"},
+	{.len =  16 << 10, .name = "large_file"},
+	{.len =  (16 << 10) + 63, .name = "large_file2"},
 };
 #define NUM_HASH_CASES	MM_NELEM(sha_cases)
 
@@ -231,12 +231,6 @@ TCase* create_sha_tcase(void)
 	TCase * tc;
 
 	tc = tcase_create("sha");
-
-	/* sha functions are increadibly costly, and time out when run with
-	 * address sanitizer or valgrind (or a bad computer)
-	 * => increase default timeout from 4s to 10s and hope for the best
-	 * if 10s turns out not to be enough, I advise disabling this test */
-	tcase_set_timeout(tc, 10);
 	tcase_add_unchecked_fixture(tc, sha_setup, sha_cleanup);
 
 	tcase_add_loop_test(tc, hashfile_without_parent, 0, NUM_HASH_CASES);
