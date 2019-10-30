@@ -130,6 +130,26 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 }
 
 
+static
+int is_absolute_path(const mmstr * p)
+{
+#if defined (_WIN32)
+	if (is_path_separator(p[0]))
+		return 1;
+
+	/* test for paths beginning with drive letters
+	 * - first letter is a char
+	 * - test for paths in windows format (X:\\)
+	 * - test for paths in mixed format (X:/)
+	 */
+	return (isalpha(*p)
+	        && (STR_EQUAL(p + 1, 3, ":\\\\")
+	            || STR_EQUAL(p + 1, 2, ":/")));
+#else
+	return is_path_separator(p[0]);
+#endif
+}
+
 /**
  * mmstr_join_path() - Join 2 path components intelligently
  * @dst:        mmstr receiving the result (its maxlen must be large enough)
@@ -149,19 +169,13 @@ LOCAL_SYMBOL
 mmstr* mmstr_join_path(mmstr* restrict dst,
                        const mmstr* restrict p1, const mmstr* restrict p2)
 {
-	int sep_end_p1, sep_start_p2;
+	if (is_absolute_path(p2))
+		return mmstrcpy(dst, p2);
 
 	mmstrcpy(dst, p1);
 
-	sep_end_p1 = is_path_separator(p1[mmstrlen(p1)-1]);
-	sep_start_p2 = is_path_separator(p2[0]);
-
-	// Remove one '/' if both path part provide a '/' at the junction
-	if (sep_end_p1 && sep_start_p2)
-		mmstr_setlen(dst, mmstrlen(dst)-1);
-
-	// Add one '/' if neither p1 and p2 provide a '/' at the junction
-	if (!sep_end_p1 && !sep_start_p2)
+	/* if p1 does not end with a '/', add it */
+	if (!is_path_separator(p1[mmstrlen(p1)-1]))
 		mmstrcat_cstr(dst, "/");
 
 	return mmstrcat(dst, p2);
