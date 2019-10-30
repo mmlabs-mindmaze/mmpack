@@ -26,6 +26,7 @@ struct mmpack_opts {
  * @binindex:   binary index of all package available (in repo or installed)
  * @installed:  list of installed package (store in an index table)
  * @prefix:     path to the root of folder to use for prefix
+ * @cwd:        path to where mmpack was invoked
  * @pkgcachedir: path to dowloaded package cache folder
  * @cacheindex: temporary string that hold the latest result of
  *              mmpack_ctx_get_cache_index()
@@ -37,6 +38,7 @@ struct mmpack_ctx {
 	struct install_state installed;
 	struct settings settings;
 	mmstr* prefix;
+	mmstr* cwd;
 	mmstr* pkgcachedir;
 	mmstr* cacheindex;
 };

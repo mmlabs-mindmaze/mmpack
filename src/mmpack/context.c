@@ -72,6 +72,8 @@ LOCAL_SYMBOL
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 {
 	const char* prefix;
+	mmstr * cwd;
+	int len = 512;
 
 	memset(ctx, 0, sizeof(*ctx));
 	settings_init(&ctx->settings);
@@ -87,6 +89,15 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 		                   ctx->settings.default_prefix);
 
 	ctx->prefix = mmstr_malloc_from_cstr(prefix);
+	cwd = mmstr_malloc(len);
+	while (!mm_getcwd(cwd, len)) {
+		len = len * 2;
+		mm_check(len > 0);
+		cwd = mmstr_realloc(cwd, len);
+	}
+
+	ctx->cwd = cwd;
+	mmstr_setlen(ctx->cwd, strlen(ctx->cwd));
 
 	return 0;
 }
@@ -100,6 +111,7 @@ LOCAL_SYMBOL
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 {
 	mmstr_free(ctx->prefix);
+	mmstr_free(ctx->cwd);
 	mmstr_free(ctx->pkgcachedir);
 	mmstr_free(ctx->cacheindex);
 
