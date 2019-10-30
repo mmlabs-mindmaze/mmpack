@@ -646,28 +646,32 @@ LOCAL_SYMBOL
 int download_package(struct mmpack_ctx * ctx, struct mmpkg const * pkg,
                      mmstr const * pathname)
 {
-	struct from_repo * from = pkg->from_repo;
+	struct from_repo * from;
 
 	info("Downloading %s (%s)... ", pkg->name, pkg->version);
 
-	if (!from || !from->repo)
-		return -1;
+	for (from = pkg->from_repo; from != NULL; from = from->next) {
+		if (!from->repo)
+			return -1;
 
-	/* Download package from repo */
-	if (download_from_repo(ctx, from->repo->url,
-	                       from->filename, NULL, pathname)) {
-		error("Failed!\n");
-		return -1;
+		/* Download package from repo */
+		if (download_from_repo(ctx, from->repo->url,
+		                       from->filename, NULL, pathname)) {
+			continue;
+		}
+
+		/* verify integrity of what has been downloaded */
+		if (check_file_pkg(from->sha256, NULL, pathname)) {
+			error("Integrity check failed!\n");
+			return -1;
+		}
+
+		info("OK\n");
+		return 0;
 	}
 
-	/* verify integrity of what has been downloaded */
-	if (check_file_pkg(from->sha256, NULL, pathname)) {
-		error("Integrity check failed!\n");
-		return -1;
-	}
-
-	info("OK\n");
-	return 0;
+	error("Failed!\n");
+	return -1;
 }
 
 
