@@ -49,11 +49,18 @@ static
 int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
                             const char* arg)
 {
+	int len;
 	const char * v;
 	struct mmpkg * pkg;
+	mmstr * tmp, * arg_full;
 
 	if (is_file(arg)) {
-		pkg = add_pkgfile_to_binindex(&ctx->binindex, arg);
+		tmp = mmstr_alloca_from_cstr(arg);
+		len = mmstrlen(ctx->cwd) + 1 + mmstrlen(tmp);
+		arg_full = mmstr_malloc(len);
+		mmstr_join_path(arg_full, ctx->cwd, tmp);
+
+		pkg = add_pkgfile_to_binindex(&ctx->binindex, arg_full);
 		if (pkg == NULL)
 			return -1;
 
