@@ -13,7 +13,7 @@ import platform
 
 from hashlib import sha256
 from subprocess import PIPE, run
-from typing import Union
+from typing import Union, Tuple
 
 import yaml
 
@@ -447,3 +447,11 @@ def create_tarball(srcdir: str, dstfile: str, compression: str = '') -> None:
     tar = tarfile.open(dstfile, 'w:' + compression)
     tar.add(srcdir, recursive=True, filter=_reset_entry_attrs, arcname='.')
     tar.close()
+
+
+def get_name_version_from_srcdir(srcdir: str) -> Tuple[str, str]:
+    """
+    Read unpacked source dir and get name and version of a source package
+    """
+    specs = yaml_load(srcdir + '/mmpack/specs')
+    return (specs['general']['name'], specs['general']['version'])
