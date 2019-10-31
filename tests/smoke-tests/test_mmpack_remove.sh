@@ -9,8 +9,6 @@ trap cleanup EXIT
 cleanup
 
 create-test-pkg
-env
-
 
 mmpack mkprefix $PREFIX_TEST
 mmpack install $PACKAGE/hello*.mpk
