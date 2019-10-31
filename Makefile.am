@@ -313,6 +313,7 @@ TESTS = \
 	tests/smoke-tests/test_mmpack_check-integrity.sh \
 	tests/smoke-tests/test_mmpack_download.sh \
 	tests/smoke-tests/test_mmpack_install.sh \
+	tests/smoke-tests/test_mmpack_mkprefix.sh \
 	tests/smoke-tests/test_mmpack_remove.sh \
 	tests/smoke-tests/test_mmpack_search.sh \
 	tests/smoke-tests/test_mmpack_source.sh \
