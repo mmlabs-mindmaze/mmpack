@@ -70,6 +70,7 @@ env.set('PYTHON_INSTALL_DIR', python.get_install_dir())
 env.set('SRCDIR', meson.source_root())
 env.set('BUILDDIR', meson.build_root())
 env.set('PREFIX', get_option('prefix'))
+env.set('REPO', repo_dir)
 
 test('mmpack-build unit tests',
         files('python-unittests.tap'),

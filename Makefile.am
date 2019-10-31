@@ -300,9 +300,12 @@ deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 deployment-test-clean:
 	@$(RM) -rvf deployment-test
 
+test-repo: tests/create-test-repo.sh deployment-test
+	$^ $@
+
 noinst_PYTHON = tests/pytests.py
 
-check_DATA = deployment-test
+check_DATA = deployment-test test-repo
 
 TESTS = unittests.tap tests/python-unittests.tap tests/smoke-tests/launch_test_mmpack-build_autotools.sh tests/smoke-tests/test_mmpack_install.sh tests/smoke-tests/test_mmpack_remove.sh tests/smoke-tests/test_mmpack_check-integrity.sh
 
@@ -314,7 +317,8 @@ check_PROGRAMS = \
 # The variable _MMPACK_TEST_PREFIX is needed by mmpack and mmpack-build to find
 # everything in the right place during the tests (that require a local
 # installation of mmpack project).
-TESTS_ENVIRONMENT = _MMPACK_TEST_PREFIX=$(abs_builddir)/deployment-test PYTHON_INSTALL_DIR=$(pythondir) SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) PREFIX=$(prefix)
+TESTS_ENVIRONMENT = _MMPACK_TEST_PREFIX=$(abs_builddir)/deployment-test PYTHON_INSTALL_DIR=$(pythondir) \
+					SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) PREFIX=$(prefix) REPO=$(abs_builddir)/test-repo
 TEST_EXTENSIONS = .test .tap .sh
 
 if TAP_SUPPORT_IN_CHECK

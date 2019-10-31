@@ -10,18 +10,12 @@ prepare_env()
 	fi
 
 	# initialisation of variables
-	PACKAGE=$BUILDDIR/packages
 	PREFIX_TEST=$BUILDDIR/prefix
-	CREATE=$BUILDDIR/tmp
-	TRASH=$BUILDDIR/trash
 	TEST_SRCDIR=$SRCDIR/tests/smoke-tests
 
 	# set the environment variables for this test
 	name="$(basename $0)"
 	PREFIX_TEST+=_${name%.*}
-	export PACKAGE+=_${name%.*}
-	export CREATE+=_${name%.*}
-	export TRASH+=_${name%.*}
 
 	# set the environment properly
 	PATH=$_MMPACK_TEST_PREFIX$PREFIX/bin:$PATH
@@ -34,13 +28,5 @@ prepare_env()
 # clean the files and repositories necessary for the tests
 cleanup()
 {
-	rm -rf $PACKAGE
 	rm -rf $PREFIX_TEST
-}
-
-create-test-pkg()
-{
-	# creation of a package hello.mpk
-	mkdir $PACKAGE
-	$TEST_SRCDIR/create_package_hello.sh
 }

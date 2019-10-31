@@ -55,6 +55,17 @@ run_target('deployment-test-clean',
     command : [ 'rm', '-rvf', deployment_dir ],
 )
 
+repo_dir = meson.build_root() + '/test-repo'
+do_test_repo = custom_target('test-repo',
+        output: 'test-repo',
+        command : ['bash',
+                   files('tests/create-test-repo.sh'),
+                   deployment_dir,
+                   repo_dir,
+        ],
+        build_by_default : true,
+        depends : do_deployment_test,
+)
 if get_option('tests')
     subdir('tests')
 endif

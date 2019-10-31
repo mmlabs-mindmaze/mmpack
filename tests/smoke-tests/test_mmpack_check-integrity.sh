@@ -8,9 +8,7 @@ prepare_env
 trap cleanup EXIT
 cleanup
 
-create-test-pkg
-
 mmpack mkprefix $PREFIX_TEST
-mmpack install $PACKAGE/hello*.mpk
+mmpack install $REPO/hello-data_1.0.0*.mpk
 
 mmpack check-integrity

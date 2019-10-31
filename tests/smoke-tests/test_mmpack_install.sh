@@ -8,11 +8,7 @@ prepare_env
 trap cleanup EXIT
 cleanup
 
-create-test-pkg
-
 mmpack mkprefix $PREFIX_TEST
-mmpack install $PACKAGE/hello*.mpk
+mmpack install -y $REPO/hello_1.0.0.mpk $REPO/hello-data_1.0.0.mpk
 
-# test the executables installed
-$PREFIX_TEST/bin/dum.sh
-$PREFIX_TEST/bin/dummy.sh || echo "failed as expected"
+$PREFIX_TEST/bin/hello-world
