@@ -1298,6 +1298,9 @@ int mmpack_parse_dependency(struct parsing_ctx* ctx,
 			goto exit;
 
 		switch (token.type) {
+		case YAML_NO_TOKEN:
+			goto exit;
+
 		case YAML_FLOW_SEQUENCE_END_TOKEN:
 			if (dep->min_version != NULL &&
 			    dep->max_version != NULL)
@@ -1360,6 +1363,9 @@ int mmpack_parse_deplist(struct parsing_ctx* ctx,
 			goto exit;
 
 		switch (token.type) {
+		case YAML_NO_TOKEN:
+			goto error;
+
 		case YAML_STREAM_END_TOKEN:
 			goto exit;
 
@@ -1414,7 +1420,7 @@ int mmpack_parse_deplist(struct parsing_ctx* ctx,
 		yaml_token_delete(&token);
 	}
 
-	/* reach end of file prematurely */
+error:  /* reach end of file prematurely */
 	exitvalue = -1;
 
 exit:
@@ -1447,6 +1453,8 @@ int mmpack_parse_sysdeplist(struct parsing_ctx* ctx,
 			goto exit;
 
 		switch (token.type) {
+		case YAML_NO_TOKEN:
+			goto error;
 		case YAML_FLOW_SEQUENCE_END_TOKEN:
 		case YAML_BLOCK_END_TOKEN:
 		case YAML_KEY_TOKEN:
@@ -1464,7 +1472,7 @@ int mmpack_parse_sysdeplist(struct parsing_ctx* ctx,
 		yaml_token_delete(&token);
 	}
 
-	/* reach end of file prematurely */
+error:  /* reach end of file prematurely */
 	exitvalue = -1;
 
 exit:
@@ -1492,6 +1500,9 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 			goto error;
 
 		switch (token.type) {
+		case YAML_NO_TOKEN:
+			goto error;
+
 		case YAML_BLOCK_END_TOKEN:
 			if (mmpkg_check_valid(pkg, !ctx->repo ? 0 : 1))
 				goto error;
@@ -1594,6 +1605,9 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 			goto exit;
 
 		switch (token.type) {
+		case YAML_NO_TOKEN:
+			goto exit;
+
 		case YAML_STREAM_END_TOKEN:
 			exitvalue = 0;
 			goto exit;
@@ -1629,7 +1643,6 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 		yaml_token_delete(&token);
 	}
 
-	;
 	exitvalue = 0;
 
 exit:

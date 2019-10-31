@@ -238,7 +238,8 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 			goto exit;
 
 		switch (token.type) {
-
+		case YAML_NO_TOKEN:
+			goto error;
 		case YAML_FLOW_SEQUENCE_END_TOKEN:
 			goto exit;
 
@@ -328,6 +329,9 @@ int parse_config(yaml_parser_t* parser, struct settings* settings)
 		}
 
 		switch (token.type) {
+		case YAML_NO_TOKEN:
+			goto exit;
+
 		case YAML_STREAM_END_TOKEN:
 			rv = 0;
 			goto exit;
