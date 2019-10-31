@@ -83,6 +83,9 @@ def _git_clone(url: str, clonedir: str, tag: str = None):
     if tag:
         git_opts += ' --branch ' + tag
 
+    if os.path.isdir(url):
+        url = 'file://' + os.path.abspath(url)
+
     iprint('cloning ' + url)
     shell('git clone {0} {1} {2}'.format(git_opts, url, clonedir))
 
