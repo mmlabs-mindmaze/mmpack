@@ -1112,13 +1112,15 @@ struct mmpkg* binindex_add_pkg(struct binindex* binindex, struct mmpkg* pkg)
  * version of B.
  */
 LOCAL_SYMBOL
-void binindex_compute_rdepends(struct binindex* binindex)
+int binindex_compute_rdepends(struct binindex* binindex)
 {
+	int rv;
 	struct pkg_iter iter;
 	struct mmpkg* pkg;
 	struct pkglist* pkglist;
 	struct mmpkg_dep * dep;
 
+	rv = 0;
 	pkg = pkg_iter_first(&iter, binindex);
 	while (pkg != NULL) {
 		// For each dependency of package, add the package name in
@@ -1126,14 +1128,25 @@ void binindex_compute_rdepends(struct binindex* binindex)
 		dep = pkg->mpkdeps;
 		while (dep) {
 			pkglist = binindex_get_pkglist(binindex, dep->name);
-			assert(pkglist != NULL);
-			rdepends_add(&pkglist->rdeps, pkg->name_id);
+
+			/* pkglist can be null if a package file is supplied
+			 * through the command line and has unmet external
+			 * dependencies. Those should also be passed in the
+			 * same install command line */
+			if (pkglist == NULL) {
+				printf("Unmet dependency: %s\n", dep->name);
+				rv = -1;
+			} else {
+				rdepends_add(&pkglist->rdeps, pkg->name_id);
+			}
 
 			dep = dep->next;
 		}
 
 		pkg = pkg_iter_next(&iter);
 	}
+
+	return rv;
 }
 
 

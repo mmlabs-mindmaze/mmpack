@@ -150,7 +150,7 @@ struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
 int binindex_populate(struct binindex* binindex, char const * index_filename,
                       struct repolist_elt * repo);
 void binindex_dump(struct binindex const * binindex);
-void binindex_compute_rdepends(struct binindex* binindex);
+int binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
 struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
                                               struct mmpkg* pkg,
