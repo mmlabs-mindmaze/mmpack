@@ -10,7 +10,8 @@ from . common import *
 from . workspace import Workspace
 
 
-def _git_clone(url: str, clonedir: str, tag: str = None):
+def _git_clone(url: str, clonedir: str, tag: str = None,
+               git_ssh_cmd: str = None):
     """
     create a shallow clone of a git repo
 
@@ -18,6 +19,7 @@ def _git_clone(url: str, clonedir: str, tag: str = None):
         url: url of git repository
         clonedir: folder where the repo must be cloned into
         tag: option tag, branch, commit hash to check out
+        git_ssh_cmd: optional, ssh cmd to use when cloning git repo through ssh
     """
     git_opts = '--quiet --depth=1'
     if tag:
@@ -26,11 +28,18 @@ def _git_clone(url: str, clonedir: str, tag: str = None):
     if os.path.isdir(url):
         url = 'file://' + os.path.abspath(url)
 
+    cmd_env = ''
+    if git_ssh_cmd:
+        cmd_env += 'GIT_SSH_COMMAND="{}"'.format(git_ssh_cmd)
+
     iprint('cloning ' + url)
-    shell('git clone {0} {1} {2}'.format(git_opts, url, clonedir))
+    git_clone_sh_cmd = '{0} git clone {1} {2} {3}'\
+                       .format(cmd_env, git_opts, url, clonedir)
+    shell(git_clone_sh_cmd)
 
 
-def _create_srcdir_from_git(builddir: str, url: str, tag: str) -> str:
+def _create_srcdir_from_git(builddir: str, url: str,
+                            tag: str, **kwargs) -> str:
     """
     Create a source package folder from git clone
 
@@ -38,11 +47,13 @@ def _create_srcdir_from_git(builddir: str, url: str, tag: str) -> str:
         builddir: folder where sources must be cloned
         url: url of the git repository
         tag: the name of the commit/tag/branch to checkout (may be None)
+        **kwargs: supported keyword arguments are following
+            git_ssh_cmd: ssh cmd to use when cloning git repo through ssh
 
     Returns:
         tag that have been checked out.
     """
-    _git_clone(url, builddir, tag)
+    _git_clone(url, builddir, tag, kwargs.get('git_ssh_cmd'))
     git_dir = builddir + '/.git'
 
     # Get tag name if not set yet (use current branch)
@@ -55,7 +66,8 @@ def _create_srcdir_from_git(builddir: str, url: str, tag: str) -> str:
     return tag
 
 
-def _create_srcdir_from_tar(builddir: str, filename: str, tag: str) -> str:
+def _create_srcdir_from_tar(builddir: str, filename: str,
+                            tag: str, **kwargs) -> str:
     """
     Create a source package folder from tarball, not necessarily named
     following mmpack src tarball convention.
@@ -64,6 +76,7 @@ def _create_srcdir_from_tar(builddir: str, filename: str, tag: str) -> str:
         builddir: folder where sources must be extracted
         filename: filename of the tarball
         tag: the name of the tag (only transmitted in later stage), can be None
+        **kwargs: keyword arguments (ignored, used on other method)
 
     Returns:
         `tag` if not None, 'from_par' otherwise
@@ -74,7 +87,8 @@ def _create_srcdir_from_tar(builddir: str, filename: str, tag: str) -> str:
     return tag if tag else 'from_tar'
 
 
-def _create_srcdir(method: str, builddir: str, path_url: str, tag: str) -> str:
+def _create_srcdir(method: str, builddir: str,
+                   path_url: str, tag: str, **kwargs) -> str:
     """
     Fetch source using specified method and extract it to src dir
 
@@ -83,6 +97,7 @@ def _create_srcdir(method: str, builddir: str, path_url: str, tag: str) -> str:
         builddir: folder where sources must be extracted
         path_url: path or url to the mmpack sources
         tag: the name of the commit/tag/branch to checkout (may be None)
+        **kwargs: supported keyword arguments passed to specific method
     """
     method_mapping = {
         'git': _create_srcdir_from_git,
@@ -94,7 +109,7 @@ def _create_srcdir(method: str, builddir: str, path_url: str, tag: str) -> str:
     if not create_srcdir_fn:
         raise ValueError("Invalid method " + method)
 
-    return create_srcdir_fn(builddir, path_url, tag)
+    return create_srcdir_fn(builddir, path_url, tag, **kwargs)
 
 
 class SourceTarball:
@@ -102,7 +117,7 @@ class SourceTarball:
     Class managing source tarball creation
     """
 
-    def __init__(self, method: str, path_url: str, tag: str = None):
+    def __init__(self, method: str, path_url: str, tag: str = None, **kwargs):
         """
         Create a source package from various methods
 
@@ -110,6 +125,8 @@ class SourceTarball:
             method: 'tar', 'srcpkg' or 'git'
             path_url: path or url to the mmpack sources
             tag: the name of the commit/tag/branch to checkout (may be None)
+            **kwargs: supported keyword arguments are following
+                git_ssh_cmd: ssh cmd to use when cloning git repo through ssh
         """
         # declare class instance attributes
         self._srcdir = None
@@ -124,7 +141,8 @@ class SourceTarball:
         # Fetch sources following the specified method and move them to the
         # temporary source build folder
         iprint('extracting temporarily to sources ' + self._srcdir)
-        self.tag = _create_srcdir(method, self._srcdir, path_url, tag)
+        self.tag = _create_srcdir(method, self._srcdir,
+                                  path_url, tag, **kwargs)
 
         # extract minimal metadata from package
         try:
