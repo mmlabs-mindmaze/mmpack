@@ -79,7 +79,7 @@ def _create_srcdir(method: str, builddir: str, path_url: str, tag: str) -> str:
     Fetch source using specified method and extract it to src dir
 
     Args:
-        method: 'tar' or 'git'
+        method: 'tar', 'git' or srcpkg
         builddir: folder where sources must be extracted
         path_url: path or url to the mmpack sources
         tag: the name of the commit/tag/branch to checkout (may be None)
@@ -87,6 +87,7 @@ def _create_srcdir(method: str, builddir: str, path_url: str, tag: str) -> str:
     method_mapping = {
         'git': _create_srcdir_from_git,
         'tar': _create_srcdir_from_tar,
+        'srcpkg': _create_srcdir_from_tar,
     }
 
     create_srcdir_fn = method_mapping.get(method)
@@ -106,7 +107,7 @@ class SourceTarball:
         Create a source package from various methods
 
         Args:
-            method: 'tar' or 'git'
+            method: 'tar', 'srcpkg' or 'git'
             path_url: path or url to the mmpack sources
             tag: the name of the commit/tag/branch to checkout (may be None)
         """
@@ -130,6 +131,11 @@ class SourceTarball:
             name, version = get_name_version_from_srcdir(self._srcdir)
             self.name = name
         except FileNotFoundError:  # raised if srcdir lack mmpack specs
+            return
+
+        # If the input was a mmpack source package, there is nothing else to do
+        if method == 'srcpkg':
+            self.srctar = path_url
             return
 
         # Create source package tarball
