@@ -12,6 +12,7 @@
 #define UPGRADE_PKG 0
 #define REMOVE_PKG -1
 
+#define SOLVER_ERROR (1 << 0)
 
 /**
  * struct action - action to take on prefix hierarchy

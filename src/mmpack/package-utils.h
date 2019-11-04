@@ -162,7 +162,8 @@ struct compiled_dep* compile_package(const struct binindex* binindex,
                                      struct mmpkg const * pkg,
                                      struct buffer* buff);
 struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
-                                              struct mmpkg* pkg);
+                                              struct mmpkg* pkg,
+                                              int * flag);
 const int* binindex_get_potential_rdeps(const struct binindex* binindex,
                                         int pkgname_id, int* num_rdeps);
 

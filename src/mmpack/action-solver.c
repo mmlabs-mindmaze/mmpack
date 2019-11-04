@@ -105,6 +105,7 @@ struct planned_op {
  * @upgrades_stack:   stack of stored upgrade list
  * @ops_stack:  stack of planned operations
  * @num_proc_frame:   current depth of processing stack
+ * @state:            flags about the solver state, used to raise errors
  */
 struct solver {
 	struct binindex* binindex;
@@ -116,6 +117,7 @@ struct solver {
 	struct buffer ops_stack;
 	struct buffer upgrades_stack;
 	int num_proc_frame;
+	int state;
 };
 
 
@@ -501,6 +503,9 @@ int solver_advance_processing(struct solver* solver,
 {
 	struct buffer* proc_stack = &solver->processing_stack;
 
+	if (solver->state & SOLVER_ERROR)
+		return DONE;
+
 	do {
 		if (frame->state == UPGRADE_RDEPS) {
 			frame->state = INSTALL_DEPS;
@@ -659,7 +664,7 @@ int solver_check_upgrade_rdep(struct solver* solver, int rdep_id,
 		return 0;
 
 	// Get compiled_dep of rdep package involving oldpkg
-	dep = binindex_compile_pkgdeps(binindex, rdep);
+	dep = binindex_compile_pkgdeps(binindex, rdep, &solver->state);
 	dep = get_compdep_with_id(dep, pkg->name_id);
 	if (!dep || compiled_dep_pkg_match(dep, pkg))
 		return 0;
@@ -762,7 +767,7 @@ void solver_step_install_deps(struct solver* solver, struct proc_frame* frame)
 
 	pkg = frame->dep->pkgs[frame->ipkg];
 
-	deps = binindex_compile_pkgdeps(solver->binindex, pkg);
+	deps = binindex_compile_pkgdeps(solver->binindex, pkg, &solver->state);
 	solver_add_deps_to_process(solver, frame, deps);
 }
 
@@ -814,9 +819,7 @@ int solver_solve_deps(struct solver* solver, struct compiled_dep* initial_deps,
 			solver_step_install_deps(solver, &frame);
 	}
 
-	;
-
-	return 0;
+	return (solver->state & SOLVER_ERROR) ? -1 : 0;
 }
 
 

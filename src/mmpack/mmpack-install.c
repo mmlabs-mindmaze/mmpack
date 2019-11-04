@@ -144,8 +144,10 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 	// Determine the stack of actions to perform
 	act_stack = mmpkg_get_install_list(ctx, reqlist);
-	if (!act_stack)
+	if (act_stack == NULL) {
+		printf("Abort: failed to compute action course\n");
 		goto exit;
+	}
 
 	if (!is_yes_assumed) {
 		rv = confirm_action_stack_if_needed(nreq, act_stack);

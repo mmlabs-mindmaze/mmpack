@@ -1045,7 +1045,8 @@ struct compiled_dep* compile_package(const struct binindex* binindex,
  */
 LOCAL_SYMBOL
 struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
-                                              struct mmpkg* pkg)
+                                              struct mmpkg* pkg,
+                                              int * flag)
 {
 	struct mmpkg_dep* dep;
 	struct buffer buff;
@@ -1064,11 +1065,18 @@ struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
 	buffer_init(&buff);
 
 	// Compile all the dependencies, stacked in a single buffer
-	for (dep = pkg->mpkdeps; dep != NULL; dep = dep->next)
+	for (dep = pkg->mpkdeps; dep != NULL; dep = dep->next) {
 		compdep = binindex_compile_dep(binindex, dep, &buff);
+		if (compdep == NULL) {
+			printf("Unmet dependency: %s\n", dep->name);
+			*flag |= SOLVER_ERROR;
+			return NULL;
+		}
+	}
 
 	// Set last element as termination of the list
-	compdep->next_entry_delta = 0;
+	if (compdep != NULL)
+		compdep->next_entry_delta = 0;
 
 	pkg->compdep = buffer_take_data_ownership(&buff);
 
@@ -1942,7 +1950,7 @@ const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
 {
 	struct mmpkg* rdep_pkg;
 	struct compiled_dep* dep;
-	int rdep_id;
+	int flag, rdep_id;
 
 	while (--iter->rdeps_index >= 0) {
 		rdep_id = iter->rdeps_ids[iter->rdeps_index];
@@ -1952,7 +1960,8 @@ const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
 
 		// Loop over dependencies of candidate package to see if it
 		// really depends on target package name
-		dep = binindex_compile_pkgdeps(iter->binindex, rdep_pkg);
+		flag = 0;
+		dep = binindex_compile_pkgdeps(iter->binindex, rdep_pkg, &flag);
 		while (dep) {
 			if (dep->pkgname_id == iter->pkgname_id)
 				return rdep_pkg;
