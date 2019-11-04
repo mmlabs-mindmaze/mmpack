@@ -4,7 +4,8 @@ Create a mmpack package
 
 Usage:
 
-mmpack pkg-create [--git-url <path or url of a git repo> | --src <tarball>]
+mmpack pkg-create [--git-url <path or url of a git repo> | --src <tarball> |
+                   --mmpack-src <mmpack_source_tarball>]
                   [--tag <tag>] [--prefix <prefix>] [--skip-build-tests]
 
 If neither git url or source tarball was given, look through the tree for a
@@ -53,6 +54,9 @@ def parse_options(argv):
     group.add_argument('--src',
                        action='store', dest='srctar', type=str,
                        help='source package tarball')
+    group.add_argument('--mmpack-src',
+                       action='store', dest='mmpack_srctar', type=str,
+                       help='mmpack source package tarball')
     parser.add_argument('-t', '--tag',
                         action='store', dest='tag', type=str,
                         help='project tag')
@@ -70,7 +74,7 @@ def parse_options(argv):
                         help='always assume yes to any prompted question')
     args = parser.parse_args(argv)
 
-    if not args.url and not args.srctar:
+    if not args.url and not args.srctar and not args.mmpack_srctar:
         args.url = find_project_root_folder()
         if not args.url:
             raise ValueError('did not find project to package')
@@ -96,9 +100,12 @@ def main(argv):
     if args.url:
         method = 'git'
         path_url = args.url
-    else:
+    elif args.srctar:
         method = 'tar'
         path_url = args.srctar
+    elif args.mmpack_srctar:
+        method = 'srcpkg'
+        path_url = args.mmpack_srctar
 
     srctarball = SourceTarball(method, path_url, args.tag)
     srctarball.prepare_binpkg_build()

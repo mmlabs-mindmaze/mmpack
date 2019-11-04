@@ -8,7 +8,7 @@ build mmpack package
 
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
-:Date: 2019-10-25
+:Date: 2019-11-05
 :Manual section: 1
 
 SYNOPSIS
@@ -16,7 +16,7 @@ SYNOPSIS
 
 ``mmpack-build pkg-create`` -h|--help
 
-``mmpack-build pkg-create`` [--skip-build-tests] [--git-url= *url* | --src= *tarball*] [-t|--tag *tag*] [-y|--yes] [--build-deps]
+``mmpack-build pkg-create`` [--skip-build-tests] [--git-url= *url* | --src= *tarball* | --mmpack-src= *tarball*] [-t|--tag *tag*] [-y|--yes] [--build-deps]
 
 DESCRIPTION
 ===========
@@ -39,7 +39,13 @@ OPTIONS
     * a path to a local git repository
 
 ``--src= *tarball*``
-  path to a source package tarball
+  path to a source package tarball that **mmpack-build** will extract, process
+  and repackage to produce a mmpack source package before calling the binary
+  packages build stages.
+
+``--mmpack-src= *tarball*``
+  path to a mmpack source package tarball. **mmpack-build** will preserve this
+  tarball as it is and pass it directly to binary packages build stages.
 
 ``-t|--tag= *tag*``
   The project's tag to use.
