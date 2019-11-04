@@ -20,7 +20,6 @@ import logging.handlers
 import os
 import shutil
 import stat
-import tarfile
 import time
 
 from glob import glob
@@ -29,6 +28,8 @@ from tempfile import mkdtemp
 
 import paramiko
 import yaml
+
+from mmpack_build.source_tarball import SourceTarball
 
 import gerrit
 
@@ -242,15 +243,7 @@ def shell(cmd):
     raise ShellException('failed to exec command')
 
 
-def has_mmpack_specfile(srctar):
-    """
-    test whether a source package has mmpack config
-    """
-    tar = tarfile.open(srctar, mode='r:*')
-    return 'mmpack/specs' in tar.getnames()
-
-
-def build_packages(node, workdir, tmpdir):
+def build_packages(node, workdir, tmpdir, srctar):
     """
     build project on given branch
 
@@ -259,15 +252,17 @@ def build_packages(node, workdir, tmpdir):
         workdir: the *remote* working directory will be flushed when leaving
         tmpdir: *local* directory that will receive the packages (tmpdir is
             not cleansed by this function)
+        srctar: source tarball to compile
 
     Returns:
         0 in case of success, -1 otherwise
     """
+    remote_srctar = os.path.join(workdir, os.path.basename(srctar))
     try:
         # upload source package to build slave node
         node.exec('mkdir -p ' + workdir)
         node.put(tmpdir + '/sources.tar.gz', workdir + '/sources.tar.gz')
-        cmd = 'mmpack-build-slave.sh {}'.format(workdir)
+        cmd = 'mmpack-build-slave.sh {} {}'.format(workdir, remote_srctar)
         node.exec(cmd)
 
         node.get(workdir + '/mmpack-packages', tmpdir)  # retrieve packages
@@ -302,7 +297,6 @@ def process_event(event, tmpdir):
         logger.info('building {} branch {}'.format(project, branch))
 
         workdir = os.path.join('/tmp/mmpack', project, branch)
-        srctar = tmpdir + '/sources.tar.gz'
 
         # create source archive
         project_git_url = 'ssh://{}@{}:{:d}/{}' \
@@ -310,21 +304,22 @@ def process_event(event, tmpdir):
                                   CONFIG['gerrit']['hostname'],
                                   int(CONFIG['gerrit']['port']),
                                   project)
-        cmd = 'GIT_SSH_COMMAND="ssh -i {}" ' \
-              .format(CONFIG['gerrit']['keyfile'])
-        cmd += 'git archive --format=tar.gz --remote={0} {1} > {2}' \
-               .format(project_git_url, branch, srctar)
-        shell(cmd)
+        srctarball = SourceTarball()
+        srctarball.create(method='git',
+                          path_url=project_git_url,
+                          tag=branch,
+                          outdir=tmpdir,
+                          git_ssh_cmd='ssh -i ' + CONFIG['gerrit']['keyfile'])
 
         # If project is not packaged with mmpack, just skip
-        if not has_mmpack_specfile(srctar):
+        if not srctarball.srctar:
             logger.info('No mmpack packaging, build cancelled')
             return 0
 
         for node in BUILDER_LIST:
             logger.info('building {} on {} using remote folder {}'
                         .format(project, node, workdir))
-            if build_packages(node, workdir, tmpdir):
+            if build_packages(node, workdir, tmpdir, srctarball.srctar):
                 return -1
             logger.info('building {} done on {}'.format(project, node))
     # At this point, all builders have succeeded

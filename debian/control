@@ -68,7 +68,8 @@ Section: devel
 Architecture: all
 Pre-Depends: ${misc:Pre-Depends}, adduser
 Depends: mmpack-repo-tools (= ${binary:Version}),
- ${misc:Depends}, ${python3:Depends}, git
+ python3-mmpack-build (>= ${source:Version}),
+ ${misc:Depends}, ${python3:Depends}
 Description: MindMaze package repository update tools (master)
  This package provides the infrastructure for handling the build,
  installation and removal of mmpack software packages.

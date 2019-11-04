@@ -93,10 +93,12 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 .PHONY: pycodestyle
 pycodestyle: deployment-test
 	pycodestyle --show-source deployment-test$(pythondir)/mmpack_build
+	pycodestyle --show-source deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
 
 .PHONY: pylint
 pylint: devtools/pylint-config deployment-test
 	pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build
+	PYTHONPATH=deployment-test$(pythondir) pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
 
 .PHONY: syntax
 syntax: pycodestyle pylint
@@ -290,7 +292,8 @@ checkstyle: devtools/uncrustify.cfg pycodestyle
 
 deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES) $(mmpackbuild_PYTHON) \
-		$(nodist_mmpackbuild_PYTHON)
+		$(nodist_mmpackbuild_PYTHON) \
+		$(mmpack_build_gerrit_PYTHON)
 	DESTDIR=$(shell readlink -f $@) $(MAKE) install
 	@touch $@
 
