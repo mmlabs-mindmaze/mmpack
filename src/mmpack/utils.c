@@ -617,6 +617,7 @@ void report_user_and_log(int mmlog_level, const char* fmt, ...)
 
 	// Write message to standard output
 	fwrite(msg, 1, msglen, stdout);
+	fflush(stdout);
 }
 
 
