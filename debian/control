@@ -26,13 +26,25 @@ Description: MindMaze package manager
  .
  This package contains the tools to install, upgrade, remove packages
 
-Package: mmpack-build
+Package: python3-mmpack-build
 Section: devel
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: mmpack (= ${binary:Version}),
  ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends},
  git, build-essential, automake, libtool, gnulib, meson, cmake, patchelf
+Description: MindMaze package development tools (python3 package)
+ This package provides the infrastructure for handling the build,
+ installation and removal of mmpack software packages.
+ .
+ This package contains the python3 package providing the necessary
+ infrastructure to implement mmpack-build
+
+Package: mmpack-build
+Section: devel
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: python3-mmpack-build (= ${binary:Version}), ${misc:Depends}
 Recommends: mmpack-doc
 Description: MindMaze package development tools
  This package provides the infrastructure for handling the build,

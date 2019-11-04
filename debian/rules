@@ -27,5 +27,5 @@ override_dh_install:
 	dh_install -X.la --fail-missing
 
 override_dh_python3:
-	dh_python3 -pmmpack-build --requires=3rdparty-python --depends-section=mmpack-build /usr/share/mmpack/python
+	dh_python3 -ppython3-mmpack-build --requires=3rdparty-python --depends-section=mmpack-build
 	dh_python3 -pmmpack-gerrit-builder-master --requires=3rdparty-python --depends-section=gerrit-mmpack-merge usr/share/mmpack/gerrit/python
