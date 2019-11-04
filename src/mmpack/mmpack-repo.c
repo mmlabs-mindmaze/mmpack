@@ -24,12 +24,12 @@ static
 int repo_add(struct mmpack_ctx* ctx, int argc, char const ** argv)
 {
 	if (argc != 2) {
-		fprintf(stderr, "usage: mmpack repo add <name> <url>\n");
+		printf("usage: mmpack repo add <name> <url>\n");
 		return -1;
 	}
 
 	if (repolist_lookup(&ctx->settings.repo_list, argv[0])) {
-		fprintf(stderr, "repository \"%s\" already exists\n", argv[1]);
+		printf("repository \"%s\" already exists\n", argv[0]);
 		return -1;
 	}
 
@@ -46,7 +46,7 @@ int repo_list(struct mmpack_ctx* ctx, int argc, char const ** argv)
 
 	(void) argv; /* silence unused warnings */
 	if (argc > 0) {
-		fprintf(stderr, "usage: mmpack repo list\n");
+		printf("usage: mmpack repo list\n");
 		return -1;
 	}
 
@@ -63,12 +63,12 @@ static
 int repo_remove(struct mmpack_ctx* ctx, int argc, char const ** argv)
 {
 	if (argc != 1) {
-		fprintf(stderr, "usage: mmpack repo remove <name>\n");
+		printf("usage: mmpack repo remove <name>\n");
 		return -1;
 	}
 
 	if (repolist_remove(&ctx->settings.repo_list, argv[0]) != 0) {
-		fprintf(stderr, "No such repository: \"%s\"\n", argv[0]);
+		printf("No such repository: \"%s\"\n", argv[0]);
 		return -1;
 	}
 
@@ -80,7 +80,7 @@ static
 int repo_rename(struct mmpack_ctx* ctx, int argc, char const ** argv)
 {
 	if (argc != 2) {
-		fprintf(stderr, "usage: mmpack repo remove <old> <new>\n");
+		printf("usage: mmpack repo rename <old> <new>\n");
 		return -1;
 	}
 
@@ -101,7 +101,7 @@ int repo_rename(struct mmpack_ctx* ctx, int argc, char const ** argv)
 		elt = elt->next;
 	}
 
-	fprintf(stderr, "No such repository: \"%s\"\n", name);
+	printf("No such repository: \"%s\"\n", name);
 	return -1;
 }
 
