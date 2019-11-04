@@ -117,7 +117,8 @@ class SourceTarball:
     Class managing source tarball creation
     """
 
-    def __init__(self, method: str, path_url: str, tag: str = None, **kwargs):
+    def __init__(self, method: str, path_url: str, tag: str = None,
+                 outdir: str = None, **kwargs):
         """
         Create a source package from various methods
 
@@ -125,6 +126,8 @@ class SourceTarball:
             method: 'tar', 'srcpkg' or 'git'
             path_url: path or url to the mmpack sources
             tag: the name of the commit/tag/branch to checkout (may be None)
+            outdir: folder where to put the generated source package. If None,
+                it will be located in Workspace().packages
             **kwargs: supported keyword arguments are following
                 git_ssh_cmd: ssh cmd to use when cloning git repo through ssh
         """
@@ -136,7 +139,8 @@ class SourceTarball:
 
         wrk = Workspace()
         self._srcdir = mkdtemp(dir=wrk.sources)
-        outdir = wrk.packages
+        if not outdir:
+            outdir = wrk.packages
 
         # Fetch sources following the specified method and move them to the
         # temporary source build folder
