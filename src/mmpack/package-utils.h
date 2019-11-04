@@ -131,6 +131,24 @@ struct inst_rdeps_iter {
 };
 
 
+/**
+ * struct rdeps_iter - data to iterate over all the potential reverse
+ *                               dependencies of a package
+ * @pkg:         package whose reverse dependencies are listed
+ * @binindex:    binary index in context from which the reverse deps are scanned
+ * @rdeps_ids:   array of potential reverse dependencies of @pkgname_id
+ * @rdeps_index: index of the reverse dependency currently processed
+ * @curr:        index of the versions currently processed
+ */
+struct rdeps_iter {
+	const struct mmpkg* pkg;
+	const struct binindex* binindex;
+	const int* rdeps_ids;
+	int rdeps_index;
+	struct pkglist_entry* curr;
+};
+
+
 void mmpkg_dump(struct mmpkg const * pkg);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
 void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);
@@ -189,6 +207,11 @@ const struct mmpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
                                           const struct binindex* binindex,
                                           struct mmpkg** inst_lut);
 const struct mmpkg* inst_rdeps_iter_next(struct inst_rdeps_iter* iter);
+
+struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
+                               const struct mmpkg* pkg,
+                               const struct binindex* binindex);
+struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter);
 
 const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
                                        const mmstr* pkgname,

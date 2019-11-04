@@ -133,6 +133,8 @@ mmpack_lib_sources = \
 	src/mmpack/mmpack-mkprefix.h \
 	src/mmpack/mmpack-provides.c \
 	src/mmpack/mmpack-provides.h \
+	src/mmpack/mmpack-rdepends.c \
+	src/mmpack/mmpack-rdepends.h \
 	src/mmpack/mmpack-remove.c \
 	src/mmpack/mmpack-remove.h \
 	src/mmpack/mmpack-repo.c \
@@ -403,6 +405,7 @@ RST_MAN_PAGES = \
 	docs/man/mmpack-list.rst \
 	docs/man/mmpack-mkprefix.rst \
 	docs/man/mmpack-provides.rst \
+	docs/man/mmpack-rdepends.rst \
 	docs/man/mmpack-remove.rst \
 	docs/man/mmpack-repo.rst \
 	docs/man/mmpack-run.rst \

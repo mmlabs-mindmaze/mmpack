@@ -23,6 +23,7 @@
 #include "mmpack-list.h"
 #include "mmpack-mkprefix.h"
 #include "mmpack-provides.h"
+#include "mmpack-rdepends.h"
 #include "mmpack-remove.h"
 #include "mmpack-repo.h"
 #include "mmpack-run.h"
@@ -42,6 +43,7 @@ const struct subcmd mmpack_subcmds[] = {
 	{"list", mmpack_list},
 	{"mkprefix", mmpack_mkprefix},
 	{"provides", mmpack_provides},
+	{"rdepends", mmpack_rdepends},
 	{"remove", mmpack_remove},
 	{"repo", mmpack_repo},
 	{"run", mmpack_run},
@@ -71,6 +73,7 @@ static const char arguments_docs[] =
 	"[options] "INSTALL_SYNOPSIS "\n"
 	"[options] "LIST_SYNOPSIS "\n"
 	"[options] "MKPREFIX_SYNOPSIS "\n"
+	"[options] "RDEPENDS_SYNOPSIS "\n"
 	"[options] "REMOVE_SYNOPSIS "\n"
 	"[options] "REPO_SYNOPSIS "\n"
 	"[options] "RUN_SYNOPSIS "\n"

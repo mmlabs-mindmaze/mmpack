@@ -60,6 +60,18 @@ struct parsing_ctx {
 #define isdigit(c)      ((c) >= '0' && (c) <= '9')
 
 
+/**
+ * get_name_pkgname_by_id() - returns the name of the packages located in
+ *                      the i-th case of the pkgname_table table.
+ * @binindex:   the initialized binindex
+ * @id:         the id of the package name
+ */
+LOCAL_SYMBOL
+const mmstr* get_name_pkgname_by_id(struct binindex binindex, int i)
+{
+	return binindex.pkgname_table[i].pkg_name;
+}
+
 static
 void write_yaml_mmstr_multiline(FILE* fp, int num_indent, const char* str)
 {
@@ -1942,7 +1954,7 @@ void install_state_fill_lookup_table(const struct install_state* state,
  * @binindex:   binary package index
  * @inst_lut:   lookup table of installed package, used combined with
  *              @binindex, to test which installed package is depending
- *              on @pkg
+ *              on @pkg.
  *
  * Return: the pointer to first package in the set of reverse dependencies
  * of @pkg if not empty, NULL otherwise.
@@ -2016,6 +2028,96 @@ const struct mmpkg* inst_rdeps_iter_next(struct inst_rdeps_iter* iter)
 	return NULL;
 }
 
+
+/**
+ * is_dependency() - determine if a package is a dependency of another package
+ * @pkg:            package whose dependencies are analyzed to see whether
+ *                  @dependency is a dependency of @pkg or not
+ * @supposed_dep:   package to test whether it is a dependency of @pkg or not
+ *
+ * Return: 1 if @supposed_dep is a dependency of @pkg, otherwise returns 0.
+ */
+static
+int is_dependency(struct mmpkg const * pkg, struct mmpkg const * supposed_dep)
+{
+	struct mmpkg_dep * deps;
+
+	for (deps = pkg->mpkdeps; deps != NULL; deps = deps->next) {
+		if (mmstrequal(deps->name, supposed_dep->name) &&
+		    mmpkg_dep_match_version(deps, supposed_dep)) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+
+/**
+ * rdeps_iter_first() - initialize iterator of a set of potential
+ *                                reverse dependencies
+ * @iter:       pointer to an iterator structure
+ * @pkg:        package whose reverse dependencies are requested
+ * @binindex:   binary package index
+ *
+ * Return: the pointer to first package in the set of reverse dependencies
+ * of @pkg if not empty, NULL otherwise.
+ */
+LOCAL_SYMBOL
+struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
+                               const struct mmpkg* pkg,
+                               const struct binindex* binindex)
+{
+	const struct pkglist* list;
+
+	assert(pkg->name_id < binindex->num_pkgname);
+
+	list = &binindex->pkgname_table[pkg->name_id];
+
+	*iter = (struct rdeps_iter) {
+		.pkg = pkg,
+		.binindex = binindex,
+		.rdeps_ids = list->rdeps.ids,
+		.rdeps_index = list->rdeps.num,
+	};
+
+	return rdeps_iter_next(iter);
+}
+
+
+/**
+ * rdeps_iter_next() - get next element in a set of reverse dependencies
+ * @iter:       pointer to an initialized iterator structure
+ *
+ * This function returns the next reverse dependency in the iterator @iter
+ * initialized by rdeps_iter_first().
+ *
+ * Return: the pointer to next package in the set of reverse dependencies if
+ * it is not the last item, NULL otherwise.
+ */
+LOCAL_SYMBOL
+struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
+{
+	struct mmpkg * ret;
+	int id_dep;
+
+	while (iter->curr || (iter->rdeps_ids && iter->rdeps_index > 0)) {
+		if (!iter->curr) {
+			id_dep = iter->rdeps_ids[--iter->rdeps_index];
+			iter->curr = iter->binindex->pkgname_table[id_dep].head;
+		}
+
+		while (iter->curr) {
+			ret = &iter->curr->pkg;
+			iter->curr = iter->curr->next;
+			if (is_dependency(ret, iter->pkg)) {
+				return ret;
+			}
+		}
+	}
+
+	return NULL;
+}
 
 /**************************************************************************
  *                                                                        *
