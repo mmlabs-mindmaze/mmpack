@@ -28,12 +28,8 @@ int repo_add(struct mmpack_ctx* ctx, int argc, char const ** argv)
 		return -1;
 	}
 
-	if (repolist_lookup(&ctx->settings.repo_list, argv[0])) {
-		printf("repository \"%s\" already exists\n", argv[0]);
+	if (repolist_add(&ctx->settings.repo_list, argv[0], argv[1]) != 0)
 		return -1;
-	}
-
-	repolist_add(&ctx->settings.repo_list, argv[0], argv[1]);
 
 	return settings_serialize(ctx->prefix, &ctx->settings, 1);
 }

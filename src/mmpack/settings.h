@@ -25,7 +25,7 @@ struct repolist {
 void repolist_init(struct repolist* list);
 void repolist_deinit(struct repolist* list);
 void repolist_reset(struct repolist* list);
-void repolist_add(struct repolist* list, const char* name, const char* url);
+int repolist_add(struct repolist* list, const char* name, const char* url);
 int repolist_remove(struct repolist * list, const char * name);
 struct repolist_elt* repolist_lookup(struct repolist * list,
                                      const char * name);

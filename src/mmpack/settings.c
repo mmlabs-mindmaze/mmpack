@@ -99,7 +99,7 @@ int repolist_num_repo(const struct repolist* list)
  * @url: the url of the repository from which packages can be retrieved
  */
 LOCAL_SYMBOL
-void repolist_add(struct repolist* list, const char* name, const char* url)
+int repolist_add(struct repolist* list, const char* name, const char* url)
 {
 	struct repolist_elt* elt;
 	char default_name[16];
@@ -110,6 +110,12 @@ void repolist_add(struct repolist* list, const char* name, const char* url)
 		name = default_name;
 	}
 
+	// check that no repository possesses already this name
+	if (repolist_lookup(list, name)) {
+		error("repository \"%s\" already exists\n", name);
+		return -1;
+	}
+
 	// Insert the element at the head of the list
 	elt = mm_malloc(sizeof(*elt));
 	*elt = (struct repolist_elt) {
@@ -118,6 +124,7 @@ void repolist_add(struct repolist* list, const char* name, const char* url)
 		.next = list->head,
 	};
 	list->head = elt;
+	return 0;
 }
 
 
@@ -262,7 +269,8 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 				url = mm_malloc(token.data.scalar.length + 1);
 				memcpy(url, token.data.scalar.value,
 				       token.data.scalar.length + 1);
-				repolist_add(repo_list, name, url);
+				if (repolist_add(repo_list, name, url) == -1)
+					goto error;
 
 				free(name);
 				name = NULL;
