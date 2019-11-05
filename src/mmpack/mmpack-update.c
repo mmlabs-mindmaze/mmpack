@@ -12,6 +12,7 @@
 #include "download.h"
 #include "mmpack-update.h"
 #include "mmstring.h"
+#include "settings.h"
 #include "utils.h"
 
 
@@ -24,7 +25,7 @@ int download_repo_index(struct mmpack_ctx * ctx, int repo_index)
 
 	repo = settings_get_repo(&ctx->settings, repo_index);
 
-	cacheindex = mmpack_ctx_get_cache_index(ctx, repo_index);
+	cacheindex = mmpack_ctx_get_cache_index(ctx, repo->name);
 
 	if (download_from_repo(ctx, repo->url, pkglist, NULL,
 	                       cacheindex)) {

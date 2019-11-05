@@ -8,6 +8,7 @@
 
 #include "indextable.h"
 #include "mmstring.h"
+#include "settings.h"
 #include "utils.h"
 
 

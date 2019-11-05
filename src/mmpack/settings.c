@@ -577,3 +577,58 @@ int settings_serialize(const mmstr* prefix,
 	mm_close(fd);
 	return 0;
 }
+
+
+/**
+ * create_empty_binindex_file() - create the binindex file corresponding to
+ *                                repository name passed in argument
+ * @prefix:   prefix
+ * @name: name of the repository
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int create_empty_binindex_file(const mmstr* prefix, char const * name)
+{
+	int fd, oflag, len;
+	mmstr * avllist_relpath;
+
+	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
+	len = mmstrlen(repo_relpath) + strlen(name) + 1;
+	avllist_relpath = mmstr_malloc(len);
+	sprintf(avllist_relpath, "%s.%s", repo_relpath, name);
+	mmstr_setlen(avllist_relpath, len);
+
+	oflag = O_WRONLY|O_CREAT|O_TRUNC;
+
+	// Create initial empty available package list
+	fd = open_file_in_prefix(prefix, avllist_relpath, oflag);
+	mm_close(fd);
+	mmstr_free(avllist_relpath);
+	if (fd < 0)
+		return -1;
+
+	return 0;
+}
+
+
+/**
+ * create_initial_binindex_files() - create the binindex files corresponding to
+ *                                   repository names passed in the list
+ * @prefix:   prefix
+ * @name: list of repositories
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int create_initial_binindex_files(const mmstr* prefix, struct repolist* repos)
+{
+	struct repolist_elt * r;
+
+	for (r = repos->head; r != NULL; r = r->next) {
+		if (create_empty_binindex_file(prefix, r->name))
+			return -1;
+	}
+
+	return 0;
+}

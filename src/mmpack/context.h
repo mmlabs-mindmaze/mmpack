@@ -50,7 +50,7 @@ int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags);
 int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx);
 const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx);
 const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx,
-                                        int repo_index);
+                                        char * repo_name);
 
 static inline
 int mmpack_ctx_is_init(struct mmpack_ctx const * ctx)

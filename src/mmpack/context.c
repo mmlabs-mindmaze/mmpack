@@ -170,8 +170,8 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	// populate the repository cached package list
 	num_repo = settings_num_repo(&ctx->settings);
 	for (i = 0; i < num_repo; i++) {
-		repo_cache = mmpack_ctx_get_cache_index(ctx, i);
 		repo = settings_get_repo(&ctx->settings, i);
+		repo_cache = mmpack_ctx_get_cache_index(ctx, repo->name);
 		if (binindex_populate(&ctx->binindex, repo_cache, repo))
 			printf("Cache file of repository %s is missing, "
 			       "updating may fix the issue\n", repo->name);
@@ -237,7 +237,7 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 /**
  * mmpack_ctx_get_cache_index() - get path in prefix of repo cache pkglist
  * @ctx:        initialized mmpack context
- * @repo_index: index of the repository
+ * @repo_name: name of the repository
  *
  * Return: a mmstr pointer to the file in prefix where the repository
  * cached package info is stored. The content of the returned pointer is
@@ -245,25 +245,23 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
  * pointer.
  */
 LOCAL_SYMBOL
-const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx, int repo_index)
+const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx,
+                                        char * repo_name)
 {
 	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
-	char suffix[sizeof(".##########")];
 	int len;
 
 	// Alloc string if not done yet
-	if (!ctx->cacheindex) {
-		len = mmstrlen(ctx->prefix) + mmstrlen(repo_relpath) +
-		      sizeof(suffix);
-		ctx->cacheindex = mmstr_malloc(len);
-	}
+	len = mmstrlen(ctx->prefix) + mmstrlen(repo_relpath) +
+	      strlen(repo_name) + 2;
+	ctx->cacheindex = mmstr_realloc(ctx->cacheindex, len);
 
 	// Form destination cache index basen in prefix
 	mmstr_join_path(ctx->cacheindex, ctx->prefix, repo_relpath);
 
-	// Append the number on name
-	sprintf(suffix, ".%i", repo_index);
-	mmstrcat_cstr(ctx->cacheindex, suffix);
+	// Append the name of the repo
+	mmstrcat_cstr(ctx->cacheindex, ".");
+	mmstrcat_cstr(ctx->cacheindex, repo_name);
 
 	return ctx->cacheindex;
 }

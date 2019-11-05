@@ -21,6 +21,7 @@
 #include "mm-alloc.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
+#include "settings.h"
 #include "utils.h"
 
 struct rdepends {
