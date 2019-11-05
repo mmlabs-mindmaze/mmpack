@@ -5,6 +5,7 @@ Fetch/gather sources of a mmpack package and create source tarball
 
 import shutil
 from tempfile import mkdtemp
+from typing import Dict
 
 from . common import *
 from . workspace import Workspace
@@ -38,6 +39,11 @@ def _git_clone(url: str, clonedir: str, tag: str = None,
     shell(git_clone_sh_cmd)
 
 
+###########################################################################
+#
+#             Create mmpack source dir package
+#
+###########################################################################
 def _create_srcdir_from_git(builddir: str, url: str,
                             tag: str, **kwargs) -> str:
     """
@@ -112,6 +118,56 @@ def _create_srcdir(method: str, builddir: str,
     return create_srcdir_fn(builddir, path_url, tag, **kwargs)
 
 
+###########################################################################
+#
+#              Fetch upstream sources
+#
+###########################################################################
+def _fetch_upstream_from_git(srcdir: str, specs: Dict[str, str]) -> str:
+    """
+    Fetch upstream sources from git clone
+
+    Args:
+        srcdir: folder where sources must be cloned
+        specs: dict of settings put in source-strap file
+    """
+    _git_clone(specs['url'], srcdir, specs.get('branch'))
+    shutil.rmtree(srcdir + '/.git')
+
+
+def _fetch_upstream(srcdir: str, specs: Dict[str, str]) -> str:
+    """
+    Fetch upstream sources using specified method and extract it to src dir
+
+    Args:
+        srcdir: folder where sources must be extracted
+        specs: dict of settings put in source-strap file
+    """
+    method_mapping = {
+        'git': _fetch_upstream_from_git,
+    }
+
+    # check that mandatory keys are present in sources-strap file
+    missings_keys = {'method', 'url'}.difference(specs)
+    if missings_keys:
+        raise Assert('missing mandatory keys in source-strap: {}'
+                     .format(', '.join(missings_keys)))
+
+    # Select proper _fetch_upstream_* function according to method entry
+    method = specs['method']
+    fetch_upstream_fn = method_mapping.get(method)
+    if not fetch_upstream_fn:
+        raise Assert("Invalid method " + method)
+
+    # execute selected method
+    return fetch_upstream_fn(srcdir, specs)
+
+
+###########################################################################
+#
+#              Source Tarball class
+#
+###########################################################################
 class SourceTarball:
     """
     Class managing source tarball creation
@@ -160,6 +216,8 @@ class SourceTarball:
             self.srctar = path_url
             return
 
+        self._process_source_strap()
+
         # Create source package tarball
         self.srctar = '{0}/{1}_{2}_src.tar.gz'.format(outdir, name, version)
         dprint('Building source tarball ' + self.srctar)
@@ -171,6 +229,24 @@ class SourceTarball:
         if self._srcdir:
             dprint('Destroying temporary source build dir ' + self._srcdir)
             shutil.rmtree(self._srcdir)
+
+    def _process_source_strap(self):
+        source_strap = os.path.join(self._srcdir, 'mmpack/sources-strap')
+        try:
+            specs = yaml_load(source_strap)
+        except FileNotFoundError:
+            return  # There is no source strap, nothing to be done
+
+        upstream_srcdir = os.path.join(self._srcdir, 'mmpack/upstream')
+        _fetch_upstream(upstream_srcdir, specs)
+
+        # Move extracted upstream sources except mmpack packaging
+        for elt in os.listdir(upstream_srcdir):
+            if elt != 'mmpack':
+                shutil.move(os.path.join(upstream_srcdir, elt), self._srcdir)
+
+        # Clean leftover of temporary extracted
+        shutil.rmtree(upstream_srcdir)
 
     def detach_srcdir(self) -> str:
         """
