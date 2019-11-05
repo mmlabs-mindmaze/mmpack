@@ -173,7 +173,8 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 		repo_cache = mmpack_ctx_get_cache_index(ctx, i);
 		repo = settings_get_repo(&ctx->settings, i);
 		if (binindex_populate(&ctx->binindex, repo_cache, repo))
-			goto error;
+			printf("Cache file of repository %s is missing, "
+			       "updating may fix the issue\n", repo->name);
 	}
 
 	binindex_compute_rdepends(&ctx->binindex);
