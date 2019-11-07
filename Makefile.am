@@ -307,7 +307,15 @@ noinst_PYTHON = tests/pytests.py
 
 check_DATA = deployment-test test-repo
 
-TESTS = unittests.tap tests/python-unittests.tap tests/smoke-tests/launch_test_mmpack-build_autotools.sh tests/smoke-tests/test_mmpack_install.sh tests/smoke-tests/test_mmpack_remove.sh tests/smoke-tests/test_mmpack_check-integrity.sh
+TESTS = \
+	tests/python-unittests.tap \
+	tests/smoke-tests/launch_test_mmpack-build_autotools.sh \
+	tests/smoke-tests/test_mmpack_check-integrity.sh \
+	tests/smoke-tests/test_mmpack_install.sh \
+	tests/smoke-tests/test_mmpack_remove.sh \
+	tests/smoke-tests/test_mmpack_upgrade.sh \
+	unittests.tap \
+	$(eol)
 
 dist_check_SCRIPTS = tests/python-unittests.tap
 check_PROGRAMS = \

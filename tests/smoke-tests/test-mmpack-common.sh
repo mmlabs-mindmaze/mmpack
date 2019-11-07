@@ -7,6 +7,13 @@ prepare_env()
 		BUILDDIR=$(cygpath -u $BUILDDIR)
 		PREFIX=$(cygpath -u $PREFIX)
 		_MMPACK_TEST_PREFIX=$(cygpath -u $_MMPACK_TEST_PREFIX)
+
+		# get the windows-format of the full path to $REPO
+		# it will be used with curl with the file protocol
+		# and needs to be in absolute native format
+		REPO_URL="file://$(cygpath -w $REPO)"
+	else
+		REPO_URL="file://$REPO"
 	fi
 
 	# initialisation of variables

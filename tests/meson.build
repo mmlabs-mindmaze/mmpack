@@ -102,6 +102,7 @@ mmpack_smoke_test = [
         ['list', files('smoke-tests/test_mmpack_list.sh')],
         ['remove', files('smoke-tests/test_mmpack_remove.sh')],
         ['show', files('smoke-tests/test_mmpack_show.sh')],
+        ['upgrade', files('smoke-tests/test_mmpack_upgrade.sh')],
 ]
 
 foreach test : mmpack_smoke_test
