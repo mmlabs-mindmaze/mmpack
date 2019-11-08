@@ -54,7 +54,7 @@ int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 		error("Failed to download: %s\n", source_pkg_name);
 
 	mmstr_free(source_pkg_name);
-	return rv < 0 ? rv : 1;
+	return rv < 0 ? rv : 0;
 }
 
 
