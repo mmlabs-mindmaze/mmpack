@@ -311,6 +311,7 @@ TESTS = \
 	tests/python-unittests.tap \
 	tests/smoke-tests/launch_test_mmpack-build_autotools.sh \
 	tests/smoke-tests/test_mmpack_check-integrity.sh \
+	tests/smoke-tests/test_mmpack_download.sh \
 	tests/smoke-tests/test_mmpack_install.sh \
 	tests/smoke-tests/test_mmpack_remove.sh \
 	tests/smoke-tests/test_mmpack_upgrade.sh \
