@@ -8,6 +8,11 @@ REPO_DIR=$2
 if [ -n "$(which cygpath)" ] ; then
 	DEPLOYMENT_DIR=$(cygpath -u $DEPLOYMENT_DIR)
 	REPO_DIR=$(cygpath -u $REPO_DIR)
+
+	# minimal system dependency that we expect to always be here
+	sysdep="mingw-w64-x86_64-gcc-libs"
+else
+	sysdep="libc6 (>= 2.15)"
 fi
 
 tmp=$REPO_DIR/tmp
@@ -75,7 +80,7 @@ cat << EOF >> $tmp/MMPACK/info
     source: $pkgname
     srcsha256: $(sha256 $REPO_DIR/${pkgname}_${version}_src.tar.gz)
     sumsha256sums: $(sha256 $tmp/var/lib/mmpack/metadata/$pkgname.sha256sums)
-    sysdepends: []
+    sysdepends: [$sysdep]
     version: '$version'
 EOF
 }
