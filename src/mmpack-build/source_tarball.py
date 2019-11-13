@@ -7,6 +7,8 @@ import shutil
 from tempfile import mkdtemp
 from typing import Dict
 
+import urllib3
+
 from . common import *
 from . workspace import Workspace
 
@@ -135,6 +137,36 @@ def _fetch_upstream_from_git(srcdir: str, specs: Dict[str, str]) -> str:
     shutil.rmtree(srcdir + '/.git')
 
 
+def _fetch_upstream_from_tar(srcdir: str, specs: Dict[str, str]) -> str:
+    """
+    Fetch upstream sources from remote tar
+
+    Args:
+        srcdir: folder where sources must be extracted
+        specs: dict of settings put in source-strap file
+    """
+    url = specs['url']
+    filename = os.path.basename(url)
+    downloaded_file = os.path.normpath(os.path.join(srcdir, '..', filename))
+
+    # Download remote tar
+    iprint('Downloading {}...'.format(url))
+    request = urllib3.PoolManager().request('GET', url)
+    with open(downloaded_file, 'wb') as outfile:
+        outfile.write(request.data)
+    iprint('Done')
+
+    # Verify sha256 is correct if supplied in specs
+    if 'sha256' in specs and specs['sha256'] != sha256sum(downloaded_file):
+        raise Assert("Downloaded file does not match expected sha256")
+
+    # Extract downloaded_file in srcdir
+    with tarfile.open(downloaded_file, 'r:*') as tar:
+        tar.extractall(path=srcdir)
+
+    os.remove(downloaded_file)
+
+
 def _fetch_upstream(srcdir: str, specs: Dict[str, str]) -> str:
     """
     Fetch upstream sources using specified method and extract it to src dir
@@ -145,6 +177,7 @@ def _fetch_upstream(srcdir: str, specs: Dict[str, str]) -> str:
     """
     method_mapping = {
         'git': _fetch_upstream_from_git,
+        'tar': _fetch_upstream_from_tar,
     }
 
     # check that mandatory keys are present in sources-strap file

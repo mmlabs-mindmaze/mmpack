@@ -13,6 +13,10 @@ pyelftools
 # debian: python3-pefile
 pefile
 
+# debian: python3-urllib3
+# pacman: mingw-w64-x86_64-python3-urllib3
+urllib3
+
 # debian: python3-astroid
 # pacman: mingw-w64-x86_64-python3-astroid
 astroid
