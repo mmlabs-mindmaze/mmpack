@@ -113,7 +113,6 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 	mmstr_free(ctx->prefix);
 	mmstr_free(ctx->cwd);
 	mmstr_free(ctx->pkgcachedir);
-	mmstr_free(ctx->cacheindex);
 
 	if (ctx->curl != NULL) {
 		curl_easy_cleanup(ctx->curl);
@@ -151,7 +150,7 @@ LOCAL_SYMBOL
 int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 {
 	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH);
-	const mmstr* repo_cache;
+	mmstr* repo_cache;
 	mmstr* installed_index_path;
 	int i, num_repo, len;
 	struct repolist_elt * repo;
@@ -171,10 +170,12 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	num_repo = settings_num_repo(&ctx->settings);
 	for (i = 0; i < num_repo; i++) {
 		repo = settings_get_repo(&ctx->settings, i);
-		repo_cache = mmpack_ctx_get_cache_index(ctx, repo->name);
+		repo_cache = mmpack_get_repocache_path(ctx, repo->name);
 		if (binindex_populate(&ctx->binindex, repo_cache, repo))
 			printf("Cache file of repository %s is missing, "
 			       "updating may fix the issue\n", repo->name);
+
+		mmstr_free(repo_cache);
 	}
 
 	binindex_compute_rdepends(&ctx->binindex);
@@ -235,35 +236,34 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 
 
 /**
- * mmpack_ctx_get_cache_index() - get path in prefix of repo cache pkglist
+ * mmpack_get_repocache_path() - get path in prefix of repo cache pkglist
  * @ctx:        initialized mmpack context
  * @repo_name: name of the repository
  *
- * Return: a mmstr pointer to the file in prefix where the repository
- * cached package info is stored. The content of the returned pointer is
- * valid until next call to mmpack_ctx_get_cache_index() with the same @ctx
- * pointer.
+ * Return: An allocated mmstr pointer to the file in prefix where the repository
+ * cached package info is stored. It must be freed with mmstr_free() when it is
+ * no longer needed.
  */
 LOCAL_SYMBOL
-const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx,
-                                        char * repo_name)
+mmstr* mmpack_get_repocache_path(struct mmpack_ctx * ctx, char * repo_name)
 {
 	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
 	int len;
+	mmstr * path;
 
 	// Alloc string if not done yet
 	len = mmstrlen(ctx->prefix) + mmstrlen(repo_relpath) +
 	      strlen(repo_name) + 2;
-	ctx->cacheindex = mmstr_realloc(ctx->cacheindex, len);
+	path = mmstr_malloc(len);
 
 	// Form destination cache index basen in prefix
-	mmstr_join_path(ctx->cacheindex, ctx->prefix, repo_relpath);
+	mmstr_join_path(path, ctx->prefix, repo_relpath);
 
 	// Append the name of the repo
-	mmstrcat_cstr(ctx->cacheindex, ".");
-	mmstrcat_cstr(ctx->cacheindex, repo_name);
+	mmstrcat_cstr(path, ".");
+	mmstrcat_cstr(path, repo_name);
 
-	return ctx->cacheindex;
+	return path;
 }
 
 

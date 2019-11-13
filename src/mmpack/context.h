@@ -28,8 +28,6 @@ struct mmpack_opts {
  * @prefix:     path to the root of folder to use for prefix
  * @cwd:        path to where mmpack was invoked
  * @pkgcachedir: path to dowloaded package cache folder
- * @cacheindex: temporary string that hold the latest result of
- *              mmpack_ctx_get_cache_index()
  */
 struct mmpack_ctx {
 	CURL * curl;
@@ -40,7 +38,6 @@ struct mmpack_ctx {
 	mmstr* prefix;
 	mmstr* cwd;
 	mmstr* pkgcachedir;
-	mmstr* cacheindex;
 };
 
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts);
@@ -49,8 +46,7 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx);
 int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags);
 int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx);
 const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx);
-const mmstr* mmpack_ctx_get_cache_index(struct mmpack_ctx * ctx,
-                                        char * repo_name);
+mmstr* mmpack_get_repocache_path(struct mmpack_ctx * ctx, char * repo_name);
 
 static inline
 int mmpack_ctx_is_init(struct mmpack_ctx const * ctx)

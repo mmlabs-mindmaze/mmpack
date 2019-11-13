@@ -42,7 +42,6 @@ int is_path_separator(char c)
 
 mmstr* get_default_mmpack_prefix(void);
 mmstr* get_config_filename(void);
-mmstr* set_cacheindex_relpath(mmstr* str, int repo_index);
 
 #define SHA_HDR_REG "reg-"
 #define SHA_HDR_SYM "sym-"
