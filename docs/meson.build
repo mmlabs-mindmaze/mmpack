@@ -61,7 +61,10 @@ mmpack_doc_sources = files(
     'yaml.rst',
 )
 # add the user part of the specifications
-mmpack_doc_sources += files('specs/package-specfile.rst')
+mmpack_doc_sources += files(
+  'specs/package-sources-strap.rst',
+  'specs/package-specfile.rst',
+)
 
 custom_target('html',
         output : 'html',

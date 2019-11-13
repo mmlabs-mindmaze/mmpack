@@ -490,6 +490,7 @@ user_doc_sources += \
 	docs/yaml.rst \
 	\
 	docs/specs/package-specfile.rst \
+	docs/specs/package-sources-strap.rst \
 	$(eol)
 
 all_user_doc_sources = $(user_doc_sources) $(RST_MAN_PAGES)
