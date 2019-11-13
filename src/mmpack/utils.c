@@ -544,7 +544,7 @@ exit:
  *
  * Interpret invalid or empty answer as denial.
  *
- * Return: 0 on acceptance, 0 otherwise
+ * Return: 0 on acceptance, -1 otherwise
  */
 LOCAL_SYMBOL
 int prompt_user_confirm(void)
@@ -552,6 +552,13 @@ int prompt_user_confirm(void)
 	int rv;
 	char line[64];
 	char answer;
+
+	// check the user can enter its answer
+	if (mm_isatty(0) != 1) {
+		printf("Current command requires confirmation\n"
+		       "Run again with --assume-yes flag set to proceed\n");
+		return -1;
+	}
 
 	printf("Do you want to proceed? [y/N] ");
 	if (fgets(line, sizeof(line), stdin) == NULL)
