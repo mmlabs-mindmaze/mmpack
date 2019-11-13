@@ -102,6 +102,7 @@ mmpack_smoke_test = [
         ['install', files('smoke-tests/test_mmpack_install.sh')],
         ['list', files('smoke-tests/test_mmpack_list.sh')],
         ['mkprefix', files('smoke-tests/test_mmpack_mkprefix.sh')],
+        ['rdepends', files('smoke-tests/test_mmpack_rdepends.sh')],
         ['remove', files('smoke-tests/test_mmpack_remove.sh')],
         ['repo', files('smoke-tests/test_mmpack_repo.sh')],
         ['show', files('smoke-tests/test_mmpack_show.sh')],
