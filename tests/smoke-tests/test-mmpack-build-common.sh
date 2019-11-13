@@ -4,6 +4,10 @@ prepare_env()
 {
 	local build_sys=$1
 
+	# make sure we don't use any mmpack prefix from the user
+	# environment. We should not need any.
+	unset MMPACK_PREFIX
+
 	if [ -n "$(which cygpath)" ] ; then
 	    SRCDIR=$(cygpath -u $SRCDIR)
 	    _MMPACK_TEST_PREFIX=$(cygpath -u $_MMPACK_TEST_PREFIX)
