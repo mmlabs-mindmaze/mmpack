@@ -6,7 +6,7 @@ common classes to specify provided symbols to other packages
 from glob import glob
 from typing import Set, Dict, Tuple, List
 
-from . common import yaml_serialize, yaml_load
+from . common import wprint, yaml_serialize, yaml_load
 from . mm_version import Version
 from . workspace import Workspace
 
@@ -73,6 +73,14 @@ class Provide:
                 raise ValueError('Specified version of symbol {0} ({1})'
                                  'is greater than current version ({2})'
                                  .format(name, version, curr_version))
+
+        # if a specs file is provided, but is incomplete, display a warning
+        diff = set(self.symbols.keys()) - set(specs_symbols.keys())
+        if diff:
+            wprint('The following symbols were found but not specified:\n\t'
+                   + '\n\t'.join(diff))
+            wprint('They will all be considered as introduced in the current'
+                   'project version.')
 
 
 class ProvideList:
