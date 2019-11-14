@@ -12,6 +12,10 @@ from . common import shell
 from . decorators import singleton
 from . workspace import Workspace
 
+# pylint: disable=unused-import
+# PE module does not need to change anything from the bale Provide class
+from . provide import Provide as ShlibProvide
+
 
 def soname(filename: str) -> str:
     """

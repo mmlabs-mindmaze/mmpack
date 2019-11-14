@@ -11,6 +11,7 @@ from elftools.elf.elffile import ELFFile
 from elftools.elf.dynamic import DynamicSection
 
 from . common import shell
+from . provide import Provide
 
 
 def _subpath_in_prefix(prefix: str, path: str) -> str:
@@ -244,3 +245,40 @@ def symbols_set(filename):
                 symbols.add(sym.name)
 
     return symbols
+
+
+def sym_basename(name: str) -> str:
+    """
+    return the base name of a symbol
+
+    A symbol name may be composed of a name and a version glued together by
+    the '@' character. This strips the version from the name.
+
+    eg.
+        xxx -> xxx
+        xxx@yyy -> xxx
+        xxx@yyy@zzz -> 'xxx@yyy
+    """
+    i = name.rfind('@')
+    if i > 0:
+        return name[:i]
+
+    return name
+
+
+class ShlibProvide(Provide):
+    """
+    Specialized Provide class which strips the version part of the symbol name.
+    """
+    def _get_symbol(self, name: str):
+        if name in self.symbols:
+            return self.symbols[name]
+
+        for fullname, version in self.symbols.items():
+            if sym_basename(fullname) == name:
+                return version
+
+        return None
+
+    def _get_symbols_keys(self):
+        return {sym_basename(x) for x in self.symbols.keys()}

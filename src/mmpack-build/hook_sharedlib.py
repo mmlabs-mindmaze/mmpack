@@ -15,7 +15,7 @@ from . file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
 from . mm_version import Version
 from . pacman import pacman_find_dependency
-from . provide import Provide, ProvideList, load_mmpack_provides
+from . provide import ProvideList, load_mmpack_provides
 from . settings import DPKG_PREFIX, PACMAN_PREFIX
 from . workspace import Workspace
 
@@ -155,7 +155,7 @@ class MMPackBuildHook(BaseHook):
 
             # store information about exported soname, symbols and package
             # to use in the provide list
-            provide = Provide(name, soname)
+            provide = self._module.ShlibProvide(name, soname)
             provide.pkgdepends = pkg.name
             provide.add_symbols(symbols, self._version)
             shlib_provides.add(provide)

@@ -23,12 +23,18 @@ class Provide:
         self.pkgdepends = None
         self.symbols = dict()
 
+    def _get_symbol(self, name: str):
+        return self.symbols.get(name)
+
     def add_symbols(self, symbols: Set[str],
                     version: Version = Version('any')) -> None:
         """
         add a set of symbol along with a minimal version.
         """
         self.symbols.update(dict.fromkeys(symbols, version))
+
+    def _get_symbols_keys(self):
+        return set(self.symbols.keys())
 
     def update_from_specs(self, pkg_specs: dict) -> None:
         """
@@ -61,7 +67,7 @@ class Provide:
         specs_symbols = pkg_specs.get('symbols', dict())
         for name, str_version in specs_symbols.items():
             # type conversion will raise an error if malformed
-            curr_version = self.symbols.get(name)
+            curr_version = self._get_symbol(name)
             if not curr_version:
                 raise ValueError('Specified symbol {0} not found '
                                  'in package files'.format(name))
@@ -75,7 +81,7 @@ class Provide:
                                  .format(name, version, curr_version))
 
         # if a specs file is provided, but is incomplete, display a warning
-        diff = set(self.symbols.keys()) - set(specs_symbols.keys())
+        diff = self._get_symbols_keys() - set(specs_symbols.keys())
         if diff:
             wprint('The following symbols were found but not specified:\n\t'
                    + '\n\t'.join(diff))
