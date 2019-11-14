@@ -304,12 +304,12 @@ def process_event(event, tmpdir):
                                   CONFIG['gerrit']['hostname'],
                                   int(CONFIG['gerrit']['port']),
                                   project)
-        srctarball = SourceTarball()
-        srctarball.create(method='git',
-                          path_url=project_git_url,
-                          tag=branch,
-                          outdir=tmpdir,
-                          git_ssh_cmd='ssh -i ' + CONFIG['gerrit']['keyfile'])
+        gitclone_ssh_cmd = 'ssh -i ' + CONFIG['gerrit']['keyfile']
+        srctarball = SourceTarball(method='git',
+                                   path_url=project_git_url,
+                                   tag=branch,
+                                   outdir=tmpdir,
+                                   git_ssh_cmd=gitclone_ssh_cmd)
 
         # If project is not packaged with mmpack, just skip
         if not srctarball.srctar:
