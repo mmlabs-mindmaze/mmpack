@@ -24,7 +24,7 @@ class BinaryPackage:
     """
 
     def __init__(self, name: str, version: Version, source: str, arch: str,
-                 tag: str, spec_dir: str):
+                 tag: str, spec_dir: str, src_hash: str):
         # pylint: disable=too-many-arguments
         self.name = name
         self.version = version
@@ -32,7 +32,7 @@ class BinaryPackage:
         self.arch = arch
         self.tag = tag
         self.spec_dir = spec_dir
-        self.src_hash = None
+        self.src_hash = src_hash
         self.pkg_path = None
 
         self.description = ''

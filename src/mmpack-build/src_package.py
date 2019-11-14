@@ -82,6 +82,7 @@ class SrcPackage:
         self.url = None
         self.maintainer = None
         self.src_tarball = srctar_path
+        self.src_hash = sha256sum(srctar_path)
 
         self.description = ''
         self.pkg_tags = ['MindMaze']
@@ -240,7 +241,8 @@ class SrcPackage:
         if binpkg_name not in self._packages:
             host_arch = get_host_arch_dist()
             binpkg = BinaryPackage(binpkg_name, self.version, self.name,
-                                   host_arch, self.tag, self._spec_dir)
+                                   host_arch, self.tag, self._spec_dir,
+                                   self.src_hash)
             self._format_description(binpkg, binpkg_name, pkg_type)
             self._packages[binpkg_name] = binpkg
             dprint('created package ' + binpkg_name)
@@ -263,7 +265,8 @@ class SrcPackage:
         for pkg in self._specs.keys():
             if pkg != 'general':
                 binpkg = BinaryPackage(pkg, self.version, self.name,
-                                       host_arch, self.tag, self._spec_dir)
+                                       host_arch, self.tag, self._spec_dir,
+                                       self.src_hash)
                 self._format_description(binpkg, pkg)
 
                 if 'depends' in self._specs[pkg]:
@@ -508,7 +511,7 @@ class SrcPackage:
 
         popdir()
 
-    def _generate_manifest(self, src_file, src_hash) -> str:
+    def _generate_manifest(self) -> str:
         """
         Generate the manifest and return its path
         """
@@ -525,9 +528,9 @@ class SrcPackage:
         data = {'name': self.name,
                 'version': self.version,
                 'binpkgs': {arch: pkgs},
-                'source': {'file': os.path.basename(src_file),
-                           'size': os.path.getsize(src_file),
-                           'sha256': src_hash}}
+                'source': {'file': os.path.basename(self.src_tarball),
+                           'size': os.path.getsize(self.src_tarball),
+                           'sha256': self.src_hash}}
 
         manifest_path = '{}_{}_{}.mmpack-manifest'.format(self.name,
                                                           self.version,
@@ -544,13 +547,10 @@ class SrcPackage:
 
         wrk = Workspace()
 
-        # Computer hash of source
-        srctar = '{}/{}_{}_src.tar.gz'.format(self.pkgbuild_path(),
-                                              self.name, self.version)
-        src_hash = sha256sum(srctar)
-        shutil.copy(srctar, wrk.packages)
-        iprint('source {} copied in {}'.format(os.path.basename(srctar),
-                                               wrk.packages))
+        # Copy source package
+        shutil.copy(self.src_tarball, wrk.packages)
+        iprint('source {} copied in {}'
+               .format(os.path.basename(self.src_tarball), wrk.packages))
 
         # we need all of the provide infos before starting the dependencies
         for pkgname, binpkg in self._packages.items():
@@ -558,12 +558,11 @@ class SrcPackage:
 
         for pkgname, binpkg in self._packages.items():
             binpkg.gen_dependencies(self._packages.values())
-            binpkg.src_hash = src_hash
             pkgfile = binpkg.create(instdir, self.pkgbuild_path())
             shutil.copy(pkgfile, wrk.packages)
             iprint('generated package: {}'.format(pkgname))
 
-        manifest = self._generate_manifest(srctar, src_hash)
+        manifest = self._generate_manifest()
         shutil.copy(manifest, wrk.packages)
         iprint('generated manifest: {}'.format(os.path.basename(manifest)))
 
