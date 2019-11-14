@@ -27,7 +27,7 @@ ls $XDG_DATA_HOME/mmpack-packages/hello*.mmpack-manifest
 ls $XDG_DATA_HOME/mmpack-packages/hello*.mpk
 ls $XDG_DATA_HOME/mmpack-packages/libhello*.mpk
 ls $XDG_DATA_HOME/mmpack-packages/hello-devel*.mpk
-ls $XDG_DATA_HOME/mmpack-packages/hello*src.tar.gz
+ls $XDG_DATA_HOME/mmpack-packages/hello*src.tar.*
 
 # check that the packages contains the expected files
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep MMPACK/info
@@ -44,7 +44,7 @@ tar -tvf $XDG_DATA_HOME/mmpack-packages/libhello*.mpk | grep -e lib/libhello.so.
 
 # check that the package files are well formed
 pushd $TMP_BUILD
-tar -xvf $XDG_DATA_HOME/mmpack-packages/hello*src.tar.gz
+tar -xvf $XDG_DATA_HOME/mmpack-packages/hello*src.tar.*
 cmp hello-world.c $SRC_PKG/hello-world.c
 cmp head-libexec-world.c $SRC_PKG/head-libexec-world.c
 cmp shell-exec.py $SRC_PKG/shell-exec.py

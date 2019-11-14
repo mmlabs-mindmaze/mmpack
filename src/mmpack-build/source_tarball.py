@@ -252,9 +252,9 @@ class SourceTarball:
         self._process_source_strap()
 
         # Create source package tarball
-        self.srctar = '{0}/{1}_{2}_src.tar.gz'.format(outdir, name, version)
+        self.srctar = '{0}/{1}_{2}_src.tar.xz'.format(outdir, name, version)
         dprint('Building source tarball ' + self.srctar)
-        create_tarball(self._srcdir, self.srctar, 'gz')
+        create_tarball(self._srcdir, self.srctar, 'xz')
 
     def __del__(self):
         # If source build dir has been created and not detach, remove it at
