@@ -8,12 +8,6 @@ prepare_env
 trap cleanup EXIT
 cleanup
 
-if [ -n "$(which cygpath)" ] ; then
-	dos2unix=dos2unix
-else
-	dos2unix=cat
-fi
-
 mmpack mkprefix --url=$REPO_URL $PREFIX_TEST
 mmpack update
 

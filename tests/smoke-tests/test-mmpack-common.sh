@@ -12,8 +12,10 @@ prepare_env()
 		# it will be used with curl with the file protocol
 		# and needs to be in absolute native format
 		REPO_URL="file://$(cygpath -w $REPO)"
+		dos2unix=dos2unix
 	else
 		REPO_URL="file://$REPO"
+		dos2unix=cat
 	fi
 
 	# initialisation of variables
