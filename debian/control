@@ -1,9 +1,9 @@
 Source: mmpack
 Section: utils
-Priority: extra
+Priority: optional
 Maintainer: Gabriel Ganne <gabriel.ganne@mindmaze.ch>
 Uploaders: Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
-Build-Depends: debhelper (>= 10), dh-autoreconf, dh-python,
+Build-Depends: debhelper (>= 10), dh-python,
  check,
  python3,
  libarchive-dev, libyaml-dev, libmmlib-dev,
