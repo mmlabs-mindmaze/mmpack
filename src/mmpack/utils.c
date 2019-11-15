@@ -208,22 +208,23 @@ LOCAL_SYMBOL
 int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 {
 	int fd = -1;
-	mmstr * tmp, * dirpath;
+	mmstr * tmp = NULL;
+	mmstr * dirpath = NULL;
 
 	if (prefix) {
 		// Form path of file in prefix
-		tmp = mmstr_alloca(mmstrlen(prefix) + mmstrlen(path) + 1);
+		tmp = mmstr_malloca(mmstrlen(prefix) + mmstrlen(path) + 1);
 		path = mmstr_join_path(tmp, prefix, path);
 	}
 
 	// If file may have to be created, try create parent dir if needed
 	if (oflag & O_CREAT) {
-		dirpath = mmstr_alloca(mmstrlen(path));
+		dirpath = mmstr_malloca(mmstrlen(path));
 		mmstr_dirname(dirpath, path);
 		if (mm_mkdir(dirpath, 0777, MM_RECURSIVE)) {
 			fprintf(stderr, "Create parent dir of %s failed: %s\n",
 			        path, mmstrerror(mm_get_lasterror_number()));
-			return -1;
+			goto exit;
 		}
 	}
 
@@ -232,6 +233,11 @@ int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 	if (fd < 0)
 		fprintf(stderr, "Failed to open %s: %s\n",
 		        path, mmstrerror(mm_get_lasterror_number()));
+
+exit:
+
+	mmstr_freea(dirpath);
+	mmstr_freea(tmp);
 
 	return fd;
 }

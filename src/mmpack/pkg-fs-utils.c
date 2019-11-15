@@ -252,12 +252,6 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 	int len, r, rv;
 	mmstr* path = NULL;
 
-	// Set the metadata prefix (var/lib/mmpack/metadata/<pkgname>.)
-	len = mmstrlen(pkg->name) + mmstrlen(metadata_dirpath) + 2;
-	metadata_prefix = mmstr_alloca(len);
-	mmstr_join_path(metadata_prefix, metadata_dirpath, pkg->name);
-	mmstrcat_cstr(metadata_prefix, ".");
-
 	// Initialize an archive stream
 	a = archive_read_new();
 	archive_read_support_filter_all(a);
@@ -270,6 +264,12 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 		archive_read_free(a);
 		return -1;
 	}
+
+	// Set the metadata prefix (var/lib/mmpack/metadata/<pkgname>.)
+	len = mmstrlen(pkg->name) + mmstrlen(metadata_dirpath) + 2;
+	metadata_prefix = mmstr_malloca(len);
+	mmstr_join_path(metadata_prefix, metadata_dirpath, pkg->name);
+	mmstrcat_cstr(metadata_prefix, ".");
 
 	// Loop over each entry in the archive and process them
 	rv = 0;
@@ -303,6 +303,7 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 			strlist_remove(files, path);
 	}
 
+	mmstr_freea(metadata_prefix);
 	mmstr_free(path);
 
 	// Cleanup
@@ -407,7 +408,7 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 
 	// Set the metadata prefix (var/lib/mmpack/metadata/<pkgname>.)
 	len = mmstrlen(metadata_dirpath) + mmstrlen(pkg->name) + 2;
-	metadata_prefix = mmstr_alloca(len);
+	metadata_prefix = mmstr_malloca(len);
 	mmstr_join_path(metadata_prefix, metadata_dirpath, pkg->name);
 	mmstrcat_cstr(metadata_prefix, ".");
 
@@ -451,6 +452,7 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 
 exit:
 	mmstr_free(path);
+	mmstr_freea(metadata_prefix);
 	return rv;
 }
 

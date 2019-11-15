@@ -154,15 +154,16 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	mmstr* installed_index_path;
 	int i, num_repo, len;
 	struct repolist_elt * repo;
+	int rv = -1;
 
 	// Form the path of installed package from prefix
 	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;
-	installed_index_path = mmstr_alloca(len);
+	installed_index_path = mmstr_malloca(len);
 	mmstr_join_path(installed_index_path, ctx->prefix, inst_relpath);
 
 	// populate the installed package list
 	if (binindex_populate(&ctx->binindex, installed_index_path, NULL))
-		goto error;
+		goto exit;
 
 	binindex_foreach(&ctx->binindex, set_installed, ctx);
 
@@ -179,11 +180,15 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	}
 
 	binindex_compute_rdepends(&ctx->binindex);
-	return 0;
+	rv = 0;
 
-error:
-	error("Failed to load package lists\n");
-	return -1;
+exit:
+	mmstr_freea(installed_index_path);
+
+	if (rv != 0)
+		error("Failed to load package lists\n");
+
+	return rv;
 }
 
 
@@ -197,10 +202,12 @@ int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 
 	// Form the path of installed package from prefix
 	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;
-	installed_index_path = mmstr_alloca(len);
+	installed_index_path = mmstr_malloca(len);
 	mmstr_join_path(installed_index_path, ctx->prefix, inst_relpath);
 
 	fp = fopen(installed_index_path, "wb");
+	mmstr_freea(installed_index_path);
+
 	if (!fp)
 		return -1;
 

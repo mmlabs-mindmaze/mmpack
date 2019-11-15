@@ -68,13 +68,7 @@ int dpkg_check_sysdeps_installed(const struct strset* sysdeps)
 	const mmstr * env = mmstr_alloca_from_cstr(
 		mm_getenv("_MMPACK_TEST_PREFIX", ""));
 	STATIC_CONST_MMSTR(dpk, CHECK_DPKG_INSTALLED);
-	mmstr * path = mmstr_alloca(mmstrlen(env) +
-	                            mmstrlen(dpk));
-
-	mmstrcpy(path, env);
-	mmstrcat(path, dpk);
-
-	char* argv[] = {path, NULL, NULL};
+	mmstr * path;
 	int rv;
 
 	strdeps = dpkg_concat_sysdeps(sysdeps);
@@ -85,7 +79,11 @@ int dpkg_check_sysdeps_installed(const struct strset* sysdeps)
 
 	// Execute check-dpkg-installed script with sysdeps in arg and
 	// check return value indeed 0 (success)
-	argv[1] = strdeps;
+
+	path = mmstr_malloca(mmstrlen(env) + mmstrlen(dpk));
+	mmstrcpy(path, env);
+	mmstrcat(path, dpk);
+	char* argv[] = {path, strdeps, NULL};
 	rv = execute_cmd(argv);
 
 	if (rv < 0)
@@ -93,6 +91,7 @@ int dpkg_check_sysdeps_installed(const struct strset* sysdeps)
 	else if (rv > 0)
 		rv = DEPS_MISSING;
 
+	mmstr_freea(path);
 	mmstr_free(strdeps);
 	return rv;
 }
