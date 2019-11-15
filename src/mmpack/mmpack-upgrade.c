@@ -50,7 +50,7 @@ struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 		if (pkg_version_compare(pkg->version, latest->version) >= 0)
 			continue;
 
-		req = mm_malloc(sizeof(*req));
+		req = xx_malloc(sizeof(*req));
 		req->name = pkg->name;
 		req->version = NULL;
 		req->next = reqlist;
@@ -89,7 +89,7 @@ struct pkg_request* get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 			continue;
 		}
 
-		req = mm_malloc(sizeof(*req));
+		req = xx_malloc(sizeof(*req));
 		req->name = pkg->name;
 		req->version = NULL;
 		req->next = reqlist;

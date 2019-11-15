@@ -18,11 +18,11 @@
 
 #include "common.h"
 #include "indextable.h"
-#include "mm-alloc.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
 #include "settings.h"
 #include "utils.h"
+#include "xx-alloc.h"
 
 struct rdepends {
 	int num;
@@ -208,7 +208,7 @@ struct from_repo* mmpkg_get_or_create_from_repo(struct mmpkg* pkg,
 	}
 
 	// add the new repository
-	from = mm_malloc(sizeof(*from));
+	from = xx_malloc(sizeof(*from));
 
 	*from = (struct from_repo) {
 		.next = pkg->from_repo,
@@ -352,7 +352,7 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 LOCAL_SYMBOL
 struct mmpkg_dep* mmpkg_dep_create(char const * name)
 {
-	struct mmpkg_dep * dep = mm_malloc(sizeof(*dep));
+	struct mmpkg_dep * dep = xx_malloc(sizeof(*dep));
 	memset(dep, 0, sizeof(*dep));
 	dep->name = mmstr_malloc_from_cstr(name);
 	return dep;
@@ -486,7 +486,7 @@ void rdepends_add(struct rdepends* rdeps, int pkgname_id)
 	// Resize if too small
 	if (rdeps->num+1 > rdeps->nmax) {
 		nmax = rdeps->nmax ? rdeps->nmax * 2 : 8;
-		rdeps->ids = mm_realloc(rdeps->ids,
+		rdeps->ids = xx_realloc(rdeps->ids,
 		                        nmax * sizeof(*rdeps->ids));
 		rdeps->nmax = nmax;
 	}
@@ -626,7 +626,7 @@ struct mmpkg* pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 	}
 
 	// Add new entry to the list
-	entry = mm_malloc(sizeof(*entry));
+	entry = xx_malloc(sizeof(*entry));
 	entry->next = *pnext;
 	*pnext = entry;
 
@@ -854,7 +854,7 @@ int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name)
 	if (pkgname_id == -1) {
 		// Rezize pkgname table
 		tab_sz = (binindex->num_pkgname + 1) * sizeof(*new_tab);
-		new_tab = mm_realloc(binindex->pkgname_table, tab_sz);
+		new_tab = xx_realloc(binindex->pkgname_table, tab_sz);
 		binindex->pkgname_table = new_tab;
 
 		// Assign an new pkgname id

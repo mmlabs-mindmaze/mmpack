@@ -142,7 +142,7 @@ struct action_stack* mmpack_action_stack_create(void)
 
 	stack_size = sizeof(*stack) + DEFAULT_STACK_SZ *
 	             sizeof(*stack->actions);
-	stack = mm_malloc(stack_size);
+	stack = xx_malloc(stack_size);
 	memset(stack, 0, stack_size);
 	stack->size = DEFAULT_STACK_SZ;
 
@@ -189,7 +189,7 @@ struct action_stack* mmpack_action_stack_push(struct action_stack * stack,
 		size_t stack_size = sizeof(*stack) +
 		                    (stack->size + DEFAULT_STACK_SZ) *
 		                    sizeof(*stack->actions);
-		stack = mm_realloc(stack, stack_size);
+		stack = xx_realloc(stack, stack_size);
 	}
 
 	stack->actions[stack->index] = (struct action) {
@@ -262,8 +262,8 @@ void solver_init(struct solver* solver, struct mmpack_ctx* ctx)
 	*solver = (struct solver) {.binindex = &ctx->binindex};
 
 	size = ctx->binindex.num_pkgname * sizeof(*solver->inst_lut);
-	solver->inst_lut = mm_malloc(size);
-	solver->stage_lut = mm_malloc(size);
+	solver->inst_lut = xx_malloc(size);
+	solver->stage_lut = xx_malloc(size);
 
 	install_state_fill_lookup_table(&ctx->installed, &ctx->binindex,
 	                                solver->inst_lut);

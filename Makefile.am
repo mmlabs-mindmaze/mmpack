@@ -119,7 +119,6 @@ mmpack_lib_sources = \
 	src/mmpack/download.h \
 	src/mmpack/indextable.c \
 	src/mmpack/indextable.h \
-	src/mmpack/mm-alloc.h \
 	src/mmpack/mmpack-check-integrity.c \
 	src/mmpack/mmpack-check-integrity.h \
 	src/mmpack/mmpack-download.c \
@@ -163,6 +162,7 @@ mmpack_lib_sources = \
 	src/mmpack/sysdeps.h \
 	src/mmpack/utils.c \
 	src/mmpack/utils.h \
+	src/mmpack/xx-alloc.h \
 	$(eol)
 
 if OS_TYPE_WIN32

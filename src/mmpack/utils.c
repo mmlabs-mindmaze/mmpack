@@ -17,7 +17,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "mm-alloc.h"
+#include "xx-alloc.h"
 #include "mmstring.h"
 #include "sha256.h"
 #include "utils.h"
@@ -681,7 +681,7 @@ int strlist_add(struct strlist* list, const char* str)
 
 	// Create the new element
 	len = strlen(str);
-	elt = mm_malloc(sizeof(*elt) + len + 1);
+	elt = xx_malloc(sizeof(*elt) + len + 1);
 	elt->str.max = len;
 	elt->str.len = len;
 	memcpy(elt->str.buf, str, len + 1);
@@ -783,7 +783,7 @@ void* buffer_reserve_data(struct buffer* buff, size_t need_size)
 {
 	if (buff->size + need_size > buff->max_size) {
 		buff->max_size = next_pow2_u64(buff->size + need_size);
-		buff->base = mm_realloc(buff->base, buff->max_size);
+		buff->base = xx_realloc(buff->base, buff->max_size);
 	}
 
 	return (char*)buff->base + buff->size;

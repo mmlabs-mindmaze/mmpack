@@ -10,7 +10,6 @@ mmpack_lib_sources = files(
 	'download.h',
 	'indextable.c',
 	'indextable.h',
-	'mm-alloc.h',
 	'mmpack-check-integrity.c',
 	'mmpack-check-integrity.h',
 	'mmpack-download.c',
@@ -54,6 +53,7 @@ mmpack_lib_sources = files(
 	'sysdeps.h',
 	'utils.c',
 	'utils.h',
+	'xx-alloc.h',
 )
 if host_machine.system() == 'windows'
     mmpack_lib_sources += files(

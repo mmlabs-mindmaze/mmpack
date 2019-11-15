@@ -117,7 +117,7 @@ int repolist_add(struct repolist* list, const char* name, const char* url)
 	}
 
 	// Insert the element at the head of the list
-	elt = mm_malloc(sizeof(*elt));
+	elt = xx_malloc(sizeof(*elt));
 	*elt = (struct repolist_elt) {
 		.url = mmstr_malloc_from_cstr(url),
 		.name = mmstr_malloc_from_cstr(name),
@@ -262,12 +262,12 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 
 		case YAML_SCALAR_TOKEN:
 			if (type == YAML_KEY_TOKEN) {
-				name = mm_malloc(token.data.scalar.length + 1);
+				name = xx_malloc(token.data.scalar.length + 1);
 				memcpy(name, token.data.scalar.value,
 				       token.data.scalar.length + 1);
 				type = -1;
 			} else if (type == YAML_VALUE_TOKEN) {
-				url = mm_malloc(token.data.scalar.length + 1);
+				url = xx_malloc(token.data.scalar.length + 1);
 				memcpy(url, token.data.scalar.value,
 				       token.data.scalar.length + 1);
 				if (repolist_add(repo_list, name, url) == -1)
