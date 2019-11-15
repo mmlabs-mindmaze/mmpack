@@ -53,6 +53,7 @@ if pylint.found()
             '--disable=locally-disabled',
             '--rcfile', files('pylint-config'),
             deployment_dir + python.get_install_dir() + '/mmpack_build',
+            files('gerrit/gerrit-mmpack-build.py'),
         ],
         depends : do_deployment_test,
     )
