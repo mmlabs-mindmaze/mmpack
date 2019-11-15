@@ -1,6 +1,6 @@
 general:
   name: mmpack
-  version: 0.0.1+next5
+  version: 0.1.0
   maintainer: gabriel.ganne@mindmaze.ch
   url: ssh://intranet.mindmaze.ch:29418/mmpack
   build-system: meson
