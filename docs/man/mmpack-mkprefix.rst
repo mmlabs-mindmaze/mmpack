@@ -16,13 +16,14 @@ SYNOPSIS
 
 ``mmpack mkprefix`` -h|--help
 
-``mmpack mkprefix`` [-f|--force] --url= *repository* *prefix-path*
+``mmpack mkprefix`` [-f|--force] --url= *repository* --name= *name* *prefix-path*
 
 DESCRIPTION
 ===========
 **mmpack-prefix** allows you to create a new prefix in folder specified by
 *prefix-path* which will pull packages from the repository whose URL is
-optionally set by ``--url``.
+optionally set by ``--url`` and whose short name is given optionally by
+``--name``.
 
 If not present, the URL is inherited by the global user configuration of
 mmpack. By default the command will prevent to create a prefix in a folder
@@ -38,6 +39,9 @@ OPTIONS
 
 ``--url= *repository*``
   Specify repository as the address of package repository
+
+``--name= *name*``
+  Specify name as the short name of the repository
 
 **prefix-path**
   Folder within which to create the prefix
