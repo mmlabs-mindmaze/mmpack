@@ -783,6 +783,33 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
 
 
 /**
+ * binindex_lookup() - get a package according to its name and version
+ * @binindex:    binary package index
+ * @name:        package name
+ * @version:     package version
+ *
+ * Return: NULL on error, a pointer to the found package otherwise
+ */
+LOCAL_SYMBOL
+struct mmpkg const* binindex_lookup(struct binindex* binindex,
+                                    mmstr const * name, mmstr const * version)
+{
+	struct mmpkg const * pkg;
+	STATIC_CONST_MMSTR(any_version, "any");
+	if (version == NULL)
+		version = any_version;
+
+	pkg = binindex_get_latest_pkg(binindex, name, version);
+	if (pkg == NULL
+	    || pkg_version_compare(pkg->version, version) < 0) {
+		return NULL;
+	}
+
+	return pkg;
+}
+
+
+/**
  * binindex_get_latest_pkg() - get the latest possible version of given package
  *                             inferior to given maximum
  * @binindex:    binary package index

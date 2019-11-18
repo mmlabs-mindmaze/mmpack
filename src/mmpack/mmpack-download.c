@@ -26,25 +26,6 @@ static char download_doc[] =
 	"the current prefix cache folder.";
 
 
-static
-struct mmpkg const* lookup_package(struct mmpack_ctx * ctx,
-                                   mmstr const * name, mmstr const * version)
-{
-	struct mmpkg const * pkg;
-	STATIC_CONST_MMSTR(any_version, "any");
-	if (version == NULL)
-		version = any_version;
-
-	pkg = binindex_get_latest_pkg(&ctx->binindex, name, version);
-	if (pkg == NULL
-	    || pkg_version_compare(pkg->version, version) < 0) {
-		return NULL;
-	}
-
-	return pkg;
-}
-
-
 /**
  * mmpack_download() - main function for the download command
  * @ctx: mmpack context
@@ -100,7 +81,7 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		pkg_version = NULL;
 	}
 
-	pkg = lookup_package(ctx, pkg_name, pkg_version);
+	pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version);
 	if (pkg != NULL && pkg->from_repo != NULL) {
 		basename = mmstr_malloc(mmstrlen(pkg->from_repo->filename));
 		mmstr_basename(basename, pkg->from_repo->filename);
