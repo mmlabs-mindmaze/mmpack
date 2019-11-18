@@ -141,11 +141,10 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, mmstr const * version);
+                                    mmstr const * name, char const * version);
 struct mmpkg const* binindex_get_latest_pkg(struct binindex* binindex,
                                             mmstr const * name,
-                                            mmstr const * max_version);
-
+                                            char const * max_version);
 void binindex_init(struct binindex* binindex);
 void binindex_deinit(struct binindex* binindex);
 struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,

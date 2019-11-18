@@ -792,7 +792,7 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
  */
 LOCAL_SYMBOL
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, mmstr const * version)
+                                    mmstr const * name, char const * version)
 {
 	struct mmpkg const * pkg;
 	STATIC_CONST_MMSTR(any_version, "any");
@@ -821,7 +821,7 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 LOCAL_SYMBOL
 struct mmpkg const* binindex_get_latest_pkg(struct binindex* binindex,
                                             mmstr const * name,
-                                            mmstr const * max_version)
+                                            char const * max_version)
 {
 	struct mmpkg * pkg, * latest_pkg;
 	struct pkglist_entry* pkgentry;
