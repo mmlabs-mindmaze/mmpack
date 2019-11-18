@@ -16,6 +16,7 @@
 #include "mmstring.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
+#include "xx-alloc.h"
 
 
 static int is_yes_assumed = 0;
@@ -94,7 +95,7 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		goto exit;
 
 	// Fill package requested to be removed from cmd arguments
-	reqlist = mm_malloca(nreq * sizeof(*reqlist));
+	reqlist = xx_malloca(nreq * sizeof(*reqlist));
 	memset(reqlist, 0, nreq * sizeof(*reqlist));
 	for (i = 0; i < nreq; i++) {
 		if (warn_uninstalled_package(ctx, req_args[i]) == 0) {

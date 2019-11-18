@@ -17,10 +17,10 @@
 #include <string.h>
 
 #include "common.h"
-#include "xx-alloc.h"
 #include "mmstring.h"
 #include "sha256.h"
 #include "utils.h"
+#include "xx-alloc.h"
 
 #define MSG_MAXLEN 128
 #define HASH_UPDATE_SIZE 512
@@ -442,7 +442,7 @@ int sha_symlink_compute(mmstr* hash, const mmstr* path, size_t target_size)
 	int len;
 	int rv = -1;
 
-	buff = mm_malloca(target_size);
+	buff = xx_malloca(target_size);
 	if (mm_readlink(path, buff, target_size))
 		goto exit;
 

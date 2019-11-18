@@ -147,7 +147,7 @@ void mmstr_freea(const mmstr* str)
 
 
 #define mmstr_malloc(len) mmstr_init(xx_malloc(MMSTR_NEEDED_SIZE(len)), len)
-#define mmstr_malloca(len) mmstr_init(mm_malloca(MMSTR_NEEDED_SIZE(len)), len)
+#define mmstr_malloca(len) mmstr_init(xx_malloca(MMSTR_NEEDED_SIZE(len)), len)
 #define mmstr_alloca(len) mmstr_init(alloca(MMSTR_NEEDED_SIZE(len)), len)
 #define mmstr_map_on_array(array) \
 	mmstr_init(array, MMSTR_SIZE_TO_MAXLEN(sizeof( array)))

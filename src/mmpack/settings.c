@@ -545,8 +545,7 @@ void dump_repo_elt_and_children(int fd, struct repolist_elt* elt)
 
 	// Allocate buffer large enough
 	len = sizeof(linefmt) + mmstrlen(elt->url) + mmstrlen(elt->name);
-	line = mm_malloca(len);
-	mm_check(line != NULL);
+	line = xx_malloca(len);
 
 	len = sprintf(line, linefmt, elt->name, elt->url);
 	mm_write(fd, line, len);
