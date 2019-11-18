@@ -73,8 +73,10 @@ mmpackbuild_PYTHON =\
 	$(eol)
 
 mmpack_build_gerritdir =  $(pkgdatadir)/gerrit/python
-mmpack_build_gerrit_PYTHON = \
+mmpack_build_gerrit_SCRIPTS = \
 	devtools/gerrit/gerrit-mmpack-build.py \
+	$(eol)
+mmpack_build_gerrit_PYTHON = \
 	devtools/gerrit/gerrit.py \
 	$(eol)
 
@@ -240,7 +242,8 @@ src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
 user_doc_sources =
 .PHONY: spelling
 spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) \
-		$(mmpack_build_gerrit_PYTHON) $(user_doc_sources) $(mmpack_db_service)
+		$(mmpack_build_gerrit_SCRIPTS) $(mmpack_build_gerrit_PYTHON) \
+		$(user_doc_sources) $(mmpack_db_service)
 	$(AM_V_at) codespell $^
 
 # dev debian-only helper function, not part of any target
@@ -293,6 +296,7 @@ checkstyle: devtools/uncrustify.cfg pycodestyle
 deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES) $(mmpackbuild_PYTHON) \
 		$(nodist_mmpackbuild_PYTHON) \
+		$(mmpack_build_gerrit_SCRIPTS) \
 		$(mmpack_build_gerrit_PYTHON)
 	DESTDIR=$(shell readlink -f $@) $(MAKE) install
 	@touch $@
