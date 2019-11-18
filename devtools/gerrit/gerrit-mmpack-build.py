@@ -261,7 +261,7 @@ def build_packages(node, workdir, tmpdir, srctar):
     try:
         # upload source package to build slave node
         node.exec('mkdir -p ' + workdir)
-        node.put(tmpdir + '/sources.tar.gz', workdir + '/sources.tar.gz')
+        node.put(srctar, remote_srctar)
         cmd = 'mmpack-build-slave.sh {} {}'.format(workdir, remote_srctar)
         node.exec(cmd)
 
