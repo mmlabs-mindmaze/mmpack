@@ -9,9 +9,10 @@ import re
 from glob import glob
 from typing import List
 
-from . common import parse_soname, get_host_arch, Assert, shell
+from . common import *
 from . mm_version import Version
 from . settings import DPKG_METADATA_PREFIX
+from . workspace import Workspace
 
 
 def dpkg_find_shlibs_file(target_soname: str):
@@ -238,3 +239,45 @@ def dpkg_find_pypkg(pypkg: str) -> str:
     cmd_output = shell(['dpkg', '--search', pattern])
     debpkg_list = list({l.split(':')[0] for l in cmd_output.splitlines()})
     return debpkg_list[0] if debpkg_list else None
+
+
+def dpkg_which_provides(deblist: List[str], filename) -> str:
+    """
+    Find which package in given list provides some file.
+
+    Return:
+        the package *name* as understood by debian, NOT the package file name.
+    """
+    for pkg in deblist:
+        pkg_content = shell('dpkg-deb --contents {}'.format(pkg))
+        for line in pkg_content.split('\n'):
+            if filename in line:
+                return shell('dpkg-deb --field {} Package'.format(pkg))
+
+    errmsg = '{} is not provided by any given package:\n\t{}' \
+             .format(filename, '\n\t'.join(deblist))
+    raise AssertionError(errmsg)
+
+
+def dpkg_fetch_deb_packages(specfile, tag):
+    """
+    Download the debian packages according to the mmpack specs.
+
+    Args:
+        specfile: path to the mmpack/specs file
+        tag: project tag (expects "from-deb")
+    """
+    wrk = Workspace()
+
+    dprint('loading specfile: ' + specfile)
+    specs = yaml_load(specfile)
+    name = specs['general']['name']
+    packages = specs['general']['shell-deb']
+
+    builddir = wrk.builddir(name, tag)
+    unpackdir = os.path.join(builddir, name)
+
+    os.makedirs(unpackdir, exist_ok=True)
+    pushdir(unpackdir)
+    shell('apt-get download ' + packages)
+    popdir()

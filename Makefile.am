@@ -185,6 +185,7 @@ dist_pkgdata_DATA = \
 	src/mmpack/prompt.bash \
 	src/mmpack-build/build-autotools \
 	src/mmpack-build/build-cmake \
+	src/mmpack-build/build-ghost-deb \
 	src/mmpack-build/build-makefile \
 	src/mmpack-build/build-meson \
 	src/mmpack-build/build-python \

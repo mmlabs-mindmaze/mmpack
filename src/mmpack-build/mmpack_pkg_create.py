@@ -30,10 +30,13 @@ $ mmpack pkg-create --url ssh://git@intranet.mindmaze.ch:7999/~user/XXX.git \
 """
 
 import os
+import sys
+
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . common import set_log_file
 from . src_package import SrcPackage
+from . dpkg import dpkg_fetch_deb_packages
 from . workspace import Workspace, find_project_root_folder
 from . source_tarball import SourceTarball
 
@@ -57,6 +60,10 @@ def parse_options(argv):
     group.add_argument('--mmpack-src',
                        action='store', dest='mmpack_srctar', type=str,
                        help='mmpack source package tarball')
+    group.add_argument('--ghost',
+                       action='store', dest='ghost',
+                       choices=['deb'],
+                       help='will try to ghost packages')
     parser.add_argument('-t', '--tag',
                         action='store', dest='tag', type=str,
                         help='project tag')
@@ -88,6 +95,18 @@ def parse_options(argv):
     if args.prefix:
         Workspace().prefix = os.path.abspath(args.prefix)
 
+    if args.ghost:
+        if args.build_deps:
+            print('Cannot build dependencies when mirroring a system package')
+            print('Aborting.')
+            sys.exit(1)
+
+        # always skip test if building a ghost package
+        args.skip_tests = True
+
+        # prefix the option to ease its manipulation internally
+        args.ghost = 'ghost-{}'.format(args.ghost)
+
     return args
 
 
@@ -111,12 +130,16 @@ def main(argv):
     srctarball.prepare_binpkg_build()
 
     specfile = os.path.join(srctarball.detach_srcdir(), 'mmpack/specs')
-    package = SrcPackage(specfile, srctarball.tag, srctarball.srctar)
+    package = SrcPackage(specfile, srctarball.tag, srctarball.srctar,
+                         ghost=args.ghost)
 
     if args.build_deps:
         package.install_builddeps(prefix=args.prefix, assumeyes=args.assumeyes)
 
     set_log_file(package.pkgbuild_path() + '/mmpack.log')
+
+    if args.ghost:
+        dpkg_fetch_deb_packages(specfile, package.tag)
 
     package.local_install(args.skip_tests)
     package.ventilate()
