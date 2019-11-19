@@ -34,6 +34,7 @@ class BinaryPackage:
         self.spec_dir = spec_dir
         self.src_hash = src_hash
         self.pkg_path = None
+        self.ghost = False
 
         self.description = ''
         # * System dependencies are stored as opaque strings.
@@ -184,6 +185,7 @@ class BinaryPackage:
         pkginfo = PackageInfo(self.name)
         pkginfo.files = self.install_files
         pkginfo.provides = self.provides
+        pkginfo.ghost = self.ghost
         return pkginfo
 
     def gen_provides(self):
@@ -225,6 +227,7 @@ class BinaryPackage:
         # Gather mmpack and system dependencies by executing each hook
         other_pkgs = [pkg.get_pkginfo() for pkg in binpkgs]
         currpkg = self.get_pkginfo()
+
         for hook in MMPACK_BUILD_HOOKS:
             hook.update_depends(currpkg, other_pkgs)
 
