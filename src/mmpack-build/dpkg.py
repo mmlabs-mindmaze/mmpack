@@ -5,11 +5,12 @@ helper module containing dpkg files parsing functions
 
 import os
 import re
+import gzip
 
 from glob import glob
-from typing import List
+from typing import List, Dict
 
-from . common import parse_soname, get_host_arch, Assert, shell
+from . common import *
 from . mm_version import Version
 from . settings import DPKG_METADATA_PREFIX
 
@@ -238,3 +239,72 @@ def dpkg_find_pypkg(pypkg: str) -> str:
     cmd_output = shell(['dpkg', '--search', pattern])
     debpkg_list = list({l.split(':')[0] for l in cmd_output.splitlines()})
     return debpkg_list[0] if debpkg_list else None
+
+
+def _download_packages_index(repo_url: str, builddir: str) -> str:
+    arch = get_host_arch()
+    outpath_gzipped = os.path.join(builddir, 'Packages.gz')
+    outpath = os.path.join(builddir, 'Packages')
+    packages_url = '{}/dists/stable/main/binary-{}/Packages.gz'.format(repo_url, arch)
+
+    # download compressed index
+    download(packages_url, outpath_gzipped)
+
+    # uncompress index
+    with open(outpath, 'wb') as outfile:
+        with gzip.open(outpath_gzipped, 'rb') as outfile_gzipped:
+            outfile.write(outfile_gzipped.read())
+
+    return outpath
+
+
+def _parse_packages(pkg_index_path: str, srcpkg: str) -> List[Dict[str, str]]:
+    pkg_list = []
+    pkg = dict()
+
+    with open(pkg_index_path, 'rt') as index_file:
+        for line in index_file:
+            try:
+                key, data = line.split(':', 1)
+                if key in ('Package', 'Source', 'Filename', 'Version'):
+                    pkg[key] = data.strip()
+            except ValueError:
+                # Check end of paragraph
+                if not line.strip():
+                    if pkg.get('Source') == srcpkg:
+                        pkg_list.append(pkg)
+                    pkg = dict()
+
+    return pkg_list
+
+
+def dpkg_fetch_unpack(srcpkg: str, builddir: str,
+                      unpackdir: str) -> (str, Dict[str, str]):
+    """
+    Find which package in given list provides some file.
+
+    Return:
+        Couple of system package version as downloaded and the mapping of file
+        to package name that provides them
+    """
+    base_repo_url = 'http://debian.proxad.net/debian'
+    pkgindex_path = _download_packages_index(base_repo_url, builddir)
+    pkg_list = _parse_packages(pkgindex_path, srcpkg)
+
+    if not pkg_list:
+        raise Assert('No system package matching project {} found'.format(srcpkg))
+
+    files_sysdep = dict()
+    for pkg in pkg_list:
+        # download package
+        pkg_url = '{}/{}'.format(base_repo_url, pkg['Filename'])
+        pkg_file = os.path.join(builddir, os.path.basename(pkg['Filename']))
+        download(pkg_url, pkg_file)
+
+        # Unpack it and add extracted files to package mapping for this syspkg
+        files = shell(['dpkg-deb', '--vextract', pkg_file, unpackdir]).split()
+        sysdep = '{} (>= {})'.format(pkg['Package'], pkg['Version'])
+        files_sysdep.update(dict.fromkeys(files, sysdep))
+
+    version = pkg_list[0]['Version']
+    return (version, files_sysdep)

@@ -30,6 +30,7 @@ $ mmpack pkg-create --url ssh://git@intranet.mindmaze.ch:7999/~user/XXX.git \
 """
 
 import os
+
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . common import set_log_file

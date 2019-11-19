@@ -14,6 +14,10 @@ general:
     specfile. This is a multiline comment.
     This describes what sample is all about
 
+  # ghost options
+  build-system: ghost-deb
+  shell-deb: libyaml-doc libyaml-0.2/buster libyaml-dev=0.2.1-1
+
   # build options
   build-options: -D_WITH_DUMMY_DEFINE=1
   build-depends:

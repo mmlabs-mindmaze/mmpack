@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+mkdir -p $DESTDIR/$PREFIX
+
+for deb in $(ls *.deb) ; do
+    dpkg-deb --vextract $deb $DESTDIR/$PREFIX
+done
+
+{
+	find $DESTDIR/$PREFIX -name changelog.Debian.gz
+	find $DESTDIR/$PREFIX -name copyright
+} | xargs rm -v

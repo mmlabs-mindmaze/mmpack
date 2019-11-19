@@ -58,6 +58,22 @@ Mandatory fields
  :description:
    Any text describing the project.
 
+ :shell-deb:
+   (debian-only)
+   A string that is interpreted by the package manager downloader.
+   It follows those specifications:
+     <pkgname> [{=<version> | /<target-release>}]
+
+   Eg: download the package libyaml-dev:
+     # get it from anywhere at whichever version
+     libyaml-dev
+
+     # get any libyaml-dev version for buster
+     libyaml-dev/buster
+
+     # get version 0.2.1-1 version of libyaml
+     libyaml-dev=0.2.1-1
+
 Optional fields
 '''''''''''''''
 

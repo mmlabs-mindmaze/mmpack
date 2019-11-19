@@ -17,10 +17,12 @@ from typing import Set
 from . workspace import Workspace, get_local_install_dir
 from . binary_package import BinaryPackage
 from . common import *
+from . dpkg import dpkg_fetch_unpack
 from . file_utils import *
 from . hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from . mm_version import Version
-from . settings import PKGDATADIR
+from . pacman import pacman_fetch_unpack
+from . settings import PKGDATADIR, DPKG_PREFIX, PACMAN_PREFIX
 from . mmpack_builddep import process_dependencies, general_specs_builddeps
 
 
@@ -83,6 +85,8 @@ class SrcPackage:
         self.version = None
         self.url = None
         self.maintainer = None
+        self.ghost = False
+        self.files_sysdep = None # Useful only for ghost packages
         self.src_tarball = srctar_path
         self.src_hash = sha256sum(srctar_path)
 
@@ -125,7 +129,7 @@ class SrcPackage:
         internal helper: build and return the local install path
         """
         installdir = get_local_install_dir(self.pkgbuild_path())
-        if withprefix:
+        if withprefix and not self.ghost:
             installdir += _get_install_prefix()
 
         os.makedirs(installdir, exist_ok=True)
@@ -139,7 +143,9 @@ class SrcPackage:
             RuntimeError: could not guess project build system
         """
         pushdir(self.unpack_path())
-        if path.exists('configure.ac'):
+        if self.ghost:
+            self.build_system = self.ghost
+        elif path.exists('configure.ac'):
             self.build_system = 'autotools'
         elif path.exists('CMakeLists.txt'):
             self.build_system = 'cmake'
@@ -234,6 +240,8 @@ class SrcPackage:
                 self.build_depends = value
             elif key == 'build-system':
                 self.build_system = value
+            elif key == 'ghost-syspkg':
+                self.ghost = value
 
     def _binpkg_get_create(self, binpkg_name: str,
                            pkg_type: str = None) -> BinaryPackage:
@@ -280,6 +288,34 @@ class SrcPackage:
                     for dep in self._specs[pkg][sysdeps_key]:
                         binpkg.add_sysdepend(dep)
                 self._packages[pkg] = binpkg
+
+    def _fetch_install_syspkg_locally(self):
+        """
+        Download system packages matching name and unpack them in local install
+        path.
+        """
+        unpackdir = self._local_install_path()
+        builddir = self.unpack_path() + '/build'
+        os.makedirs(builddir)
+
+        # Download and unpack system packages depending on target platform
+        if os.path.exists(DPKG_PREFIX):
+            version, sysdeps = dpkg_fetch_unpack(self.name,
+                                                 builddir, unpackdir)
+        elif os.path.exists(Workspace().cygroot() + PACMAN_PREFIX):
+            version, sysdeps = pacman_fetch_unpack(self.name,
+                                                   builddir, unpackdir)
+        else:
+            raise FileNotFoundError('Could not find system package manager')
+
+        self.version = version
+        self.files_sysdep = sysdeps
+
+        # Populate list of installed (unpacked) files from syspkg
+        pushdir(unpackdir)
+        self.install_files_set = set(glob('**', recursive=True))
+        self._strip_dirs_from_install_files()
+        popdir()
 
     def _build_env(self, skip_tests: bool):
         wrk = Workspace()
@@ -343,6 +379,10 @@ class SrcPackage:
         Raises:
             NotImplementedError: the specified build system is not supported
         """
+        if self.ghost:
+            self._fetch_install_syspkg_locally()
+            return
+
         wrk = Workspace()
 
         pushdir(self.unpack_path())
@@ -560,6 +600,17 @@ class SrcPackage:
 
         for pkgname, binpkg in self._packages.items():
             binpkg.gen_dependencies(self._packages.values())
+
+        # for ghost packages, the files are provided by the system package
+        # manager instead of the mmpack packages. They are only needed for
+        # generating dependencies and seeing what is provided.
+        if self.ghost:
+            for binpkg in self._packages.values():
+                # TODO: do mapping file -> sysdep
+                dprint('Remove all files associated to package ' + binpkg.name)
+                binpkg.install_files = set()
+
+        for pkgname, binpkg in self._packages.items():
             pkgfile = binpkg.create(instdir, self.pkgbuild_path())
             shutil.copy(pkgfile, wrk.packages)
             iprint('generated package: {} : {}'
