@@ -83,6 +83,10 @@ Optional fields
     - build-depends-debian-system
         list of *debian* packages that are needed to build
 
+ :ghost-syspkg:
+   True if the packaging specs refers to a ghost of system packages.
+   If not present, False is assumed.
+
  :ignore:
    list of files to be ignored by any packages.
    Any entry follows the `PCRE`_
