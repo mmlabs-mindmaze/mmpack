@@ -5,7 +5,7 @@ helper module containing pacman wrappers and file parsing functions
 
 import os
 import re
-from typing import Set
+from typing import Set, Dict
 
 from . common import shell
 from . pe_utils import get_dll_from_soname, symbols_set
@@ -60,3 +60,8 @@ def pacman_find_pypkg(pypkg: str) -> str:
                 return open(desc_filename, 'rt').readlines()[1].strip()
 
     return None
+
+
+def pacman_fetch_unpack(srcpkg: str, builddir: str,
+                        unpackdir: str) -> Dict[str, str]:
+    return ('unknow', dict())
