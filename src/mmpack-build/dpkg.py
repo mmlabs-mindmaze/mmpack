@@ -5,11 +5,14 @@ helper module containing dpkg files parsing functions
 
 import os
 import re
+import gzip
 
+from copy import copy
 from glob import glob
-from typing import List
+from io import TextIOBase
+from typing import List, Dict
 
-from . common import parse_soname, get_host_arch, Assert, shell
+from . common import *
 from . mm_version import Version
 from . settings import DPKG_METADATA_PREFIX
 
@@ -238,3 +241,92 @@ def dpkg_find_pypkg(pypkg: str) -> str:
     cmd_output = shell(['dpkg', '--search', pattern])
     debpkg_list = list({l.split(':')[0] for l in cmd_output.splitlines()})
     return debpkg_list[0] if debpkg_list else None
+
+
+class DebPkg:
+    """
+    representation of a package in a Debian-based distribution repository
+    """
+    def __init__(self):
+        self.name = None
+        self.version = None
+        self.source = None
+        self.filename = None
+        self.url = None
+
+    def parse_metadata_from_file(self, fileobj: TextIOBase):
+        for line in fileobj:
+            try:
+                key, data = line.split(':', 1)
+                if key in ('Package', 'Source', 'Filename', 'Version'):
+                    self.__setattr__(key.lower(), data.strip())
+            except ValueError:
+                # Check end of paragraph
+                if not line.strip():
+                    return 1
+
+        return 0
+
+    def fetch_and_extract(self, builddir: str, unpackdir: str) -> List[str]:
+        # download package
+        pkg_file = os.path.join(builddir, os.path.basename(self.filename))
+        download(self.url, pkg_file)
+
+        # Unpack it and add extracted files to package mapping for this syspkg
+        files = shell(['dpkg-deb', '--vextract', pkg_file, unpackdir]).split()
+
+        # Strip './' prefix and discard folder
+        files = [f.lstrip('./') for f in files]
+
+        return files
+
+
+def _parse_pkgindex(repo_url: str, builddir: str, source: str) -> List[DebPkg]:
+    pkg_list = []
+
+    arch = get_host_arch()
+    gzipped_index = os.path.join(builddir, 'Packages.gz')
+    pkgindex_url = '{}/dists/stable/main/binary-{}/Packages.gz'\
+                   .format(repo_url, arch)
+
+    # download compressed index
+    download(pkgindex_url, gzipped_index)
+
+    # Parse compressed package index
+    pkg = DebPkg()
+    with gzip.open(gzipped_index, 'rt') as index_file:
+        while pkg.parse_metadata_from_file(index_file):
+            if pkg.source == source:
+                pkg.url = repo_url + '/' + pkg.filename
+                pkg_list.append(copy(pkg))
+
+    return pkg_list
+
+
+def dpkg_fetch_unpack(srcpkg: str, builddir: str,
+                      unpackdir: str) -> (str, Dict[str, str]):
+    """
+    Find which package in given list provides some file.
+
+    Return:
+        Couple of system package version as downloaded and the mapping of file
+        to package name that provides them
+    """
+    repo_url = 'http://debian.proxad.net/debian'
+    pkg_list = _parse_pkgindex(repo_url, builddir, srcpkg)
+
+    if not pkg_list:
+        raise Assert('No system package matching project {} found'
+                     .format(srcpkg))
+
+    files_sysdep = dict()
+    for pkg in pkg_list:
+        files = pkg.fetch_and_extract(builddir, unpackdir)
+        sysdep = '{} (>= {})'.format(pkg.package, pkg.version)
+        files_sysdep.update(dict.fromkeys(files, sysdep))
+
+    # remove epoch part if any ("epoch:version" and "version" return "version")
+    debversion = pkg_list[0].version
+    version = debversion.split(':', 1)[-1]
+
+    return (version, files_sysdep)
