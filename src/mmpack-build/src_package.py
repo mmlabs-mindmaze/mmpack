@@ -17,6 +17,7 @@ from typing import Set
 from . workspace import Workspace, get_local_install_dir
 from . binary_package import BinaryPackage
 from . common import *
+from . dpkg import dpkg_which_provides
 from . file_utils import *
 from . hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from . mm_version import Version
@@ -76,13 +77,15 @@ class SrcPackage:
     Source package class.
     """
 
-    def __init__(self, specfile: str, tag: str, srctar_path: str):
+    def __init__(self, specfile: str, tag: str, srctar_path: str,
+                 ghost: str = None):
         # pylint: disable=too-many-arguments
         self.name = None
         self.tag = tag
         self.version = None
         self.url = None
         self.maintainer = None
+        self.ghost = ghost
         self.src_tarball = srctar_path
         self.src_hash = sha256sum(srctar_path)
 
@@ -139,7 +142,9 @@ class SrcPackage:
             RuntimeError: could not guess project build system
         """
         pushdir(self.unpack_path())
-        if path.exists('configure.ac'):
+        if self.ghost:
+            self.build_system = self.ghost
+        elif path.exists('configure.ac'):
             self.build_system = 'autotools'
         elif path.exists('CMakeLists.txt'):
             self.build_system = 'cmake'
@@ -560,6 +565,21 @@ class SrcPackage:
 
         for pkgname, binpkg in self._packages.items():
             binpkg.gen_dependencies(self._packages.values())
+
+        # for ghost packages, the files are provided by the system package
+        # manager instead of the mmpack packages. They are only needed for
+        # generating dependencies and seeing what is provided.
+        if self.ghost:
+            deblist = glob(self.unpack_path() + '/*.deb')
+            for binpkg in self._packages.values():
+                for mmpack_file in binpkg.install_files:
+                    deb_pkgname = dpkg_which_provides(deblist, mmpack_file)
+                    binpkg.add_sysdepend(deb_pkgname)
+
+                dprint('Remove all files associated to package ' + binpkg.name)
+                binpkg.install_files = set()
+
+        for pkgname, binpkg in self._packages.items():
             pkgfile = binpkg.create(instdir, self.pkgbuild_path())
             shutil.copy(pkgfile, wrk.packages)
             iprint('generated package: {} : {}'

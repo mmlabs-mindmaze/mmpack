@@ -63,6 +63,7 @@ install_data(mmpack_build,
 mmpack_build_plugins = files(
 	'build-autotools',
 	'build-cmake',
+    'build-ghost-deb',
 	'build-makefile',
 	'build-meson',
 	'build-python',
