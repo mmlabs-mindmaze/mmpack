@@ -831,7 +831,7 @@ int solver_solve_deps(struct solver* solver, struct compiled_dep* initial_deps,
 static
 void solver_remove_pkgname(struct solver* solver, int pkgname_id)
 {
-	struct rdeps_iter iter;
+	struct inst_rdeps_iter iter;
 	const struct mmpkg* rdep_pkg;
 	struct mmpkg* pkg;
 	struct planned_op op = {.action = REMOVE, .id = pkgname_id};
@@ -846,13 +846,13 @@ void solver_remove_pkgname(struct solver* solver, int pkgname_id)
 	solver->inst_lut[pkgname_id] = NULL;
 
 	// First remove recursively the reverse dependencies
-	rdep_pkg = rdeps_iter_first(&iter,
-	                            pkg,
-	                            solver->binindex,
-	                            solver->inst_lut);
+	rdep_pkg = inst_rdeps_iter_first(&iter,
+	                                 pkg,
+	                                 solver->binindex,
+	                                 solver->inst_lut);
 	while (rdep_pkg) {
 		solver_remove_pkgname(solver, rdep_pkg->name_id);
-		rdep_pkg = rdeps_iter_next(&iter);
+		rdep_pkg = inst_rdeps_iter_next(&iter);
 	}
 
 	// Add package removal to planned operation stack

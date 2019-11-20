@@ -1935,7 +1935,8 @@ void install_state_fill_lookup_table(const struct install_state* state,
  **************************************************************************/
 
 /**
- * rdeps_iter_first() - initialize iterator of a set of reverse dependencies
+ * inst_rdeps_iter_first() - initialize iterator of a set of reverse
+ * dependencies
  * @iter:       pointer to an iterator structure
  * @pkg:        package whose reverse dependencies are requested
  * @binindex:   binary package index
@@ -1947,10 +1948,10 @@ void install_state_fill_lookup_table(const struct install_state* state,
  * of @pkg if not empty, NULL otherwise.
  */
 LOCAL_SYMBOL
-const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
-                                     const struct mmpkg* pkg,
-                                     const struct binindex* binindex,
-                                     struct mmpkg** inst_lut)
+const struct mmpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
+                                          const struct mmpkg* pkg,
+                                          const struct binindex* binindex,
+                                          struct mmpkg** inst_lut)
 {
 	const struct pkglist* list;
 
@@ -1958,7 +1959,7 @@ const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
 
 	list = &binindex->pkgname_table[pkg->name_id];
 
-	*iter = (struct rdeps_iter) {
+	*iter = (struct inst_rdeps_iter) {
 		.binindex = binindex,
 		.install_lut = inst_lut,
 		.rdeps_ids = list->rdeps.ids,
@@ -1966,28 +1967,29 @@ const struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
 		.pkgname_id = list->id,
 	};
 
-	return rdeps_iter_next(iter);
+	return inst_rdeps_iter_next(iter);
 }
 
 
 /**
- * rdeps_iter_next() - get next element in a set of reverse dependencies
+ * inst_rdeps_iter_next() - get next element in a set of reverse dependencies
  * @iter:       pointer to an initialized iterator structure
  *
  * This function return the next reverse dependency in the iterator @iter
- * initialized by rdeps_iter_first().
+ * initialized by inst_rdeps_iter_first().
  *
  * NOTE: It is guaranteed than no elements in the reverse dependency set can
  * be missed even if the install_state element passed in argument to
- * rdeps_iter_first() is modified between two calls to rdeps_iter_next() or
- * after rdeps_iter_first() using same @iter pointer, PROVIDED that the
- * modification done in install state is only package removals.
+ * inst_rdeps_iter_first() is modified between two calls to
+ * inst_rdeps_iter_next() or after inst_rdeps_iter_first() using same @iter
+ * pointer, PROVIDED that the modification done in install state is only package
+ * removals.
  *
  * Return: the pointer to next package in the set of reverse dependencies if
  * it is not the last item, NULL otherwise.
  */
 LOCAL_SYMBOL
-const struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
+const struct mmpkg* inst_rdeps_iter_next(struct inst_rdeps_iter* iter)
 {
 	struct mmpkg* rdep_pkg;
 	struct compiled_dep* dep;
