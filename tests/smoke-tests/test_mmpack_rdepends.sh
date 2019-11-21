@@ -44,3 +44,17 @@ output="$(mmpack rdepends --recursive hello-data=1.0.0 | $dos2unix)"
 expected="call-hello (1.0.0)
 hello (1.0.0)"
 [ "$output" == "$expected" ]
+
+output="$(mmpack rdepends --sumsha 9f68904c9c1761388382afdb7d7b7618101e353b5b93b872b10cc71f0a7c8a34 | $dos2unix)"
+expected="hello (1.0.0)"
+[ "$output" == "$expected" ]
+
+output="$(mmpack rdepends --sumsha --recursive 8dc8f06e9277b4404661045a43d31dbc0f85bebd5f26e29a801a0efb12d064b6 | $dos2unix)"
+expected="call-hello (1.0.0)
+hello (1.0.0)"
+[ "$output" == "$expected" ]
+
+output="$(mmpack rdepends --sumsha --recursive 0000 | $dos2unix)"
+expected="No package with sumsha: 0000"
+[ "$output" == "$expected" ]
+

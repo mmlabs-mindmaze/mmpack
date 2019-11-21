@@ -24,6 +24,7 @@
 
 
 static int recursive = 0;
+static int sumsha = 0;
 static const char* repo_name = NULL;
 
 static const struct mmarg_opt cmdline_optv[] = {
@@ -31,6 +32,9 @@ static const struct mmarg_opt cmdline_optv[] = {
 	 "Specify @REPO_NAME as the address of package repository"},
 	{"r|recursive", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &recursive},
 	 "Print recursively the reverse dependencies"},
+	{"sumsha", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &sumsha},
+	 "Search the reverse dependencies of the package referenced thanks to "
+	 "its sumsha"},
 };
 
 
@@ -182,8 +186,14 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	if ((pkg = parse_pkg(ctx, argv[arg_index])) == NULL)
-		return -1;
+	if (!sumsha) {
+		if ((pkg = parse_pkg(ctx, argv[arg_index])) == NULL)
+			return -1;
+	} else {
+		if (!(pkg = find_package_by_sumsha(ctx, argv[arg_index])))
+			return -1;
+	}
+
 
 	if (find_reverse_dependencies(ctx->binindex, pkg, repo_name,
 	                              &rdep_list)) {

@@ -160,6 +160,53 @@ struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req)
 }
 
 
+struct cb_data {
+	mmstr const * sumsha;
+	struct mmpkg * pkg;
+};
+
+
+static
+int cb_binindex(struct mmpkg * pkg, void * void_data)
+{
+	struct cb_data * data = (struct cb_data*) void_data;
+
+	if (mmstrcmp(pkg->sumsha, data->sumsha) == 0) {
+		data->pkg = pkg;
+		return 0;
+	}
+
+	return -1;
+}
+
+
+/**
+ * find_package_by_sumsha() -  find the package associated with the sumsha given
+ *                             in argument.
+ *
+ * @binindex:      the binary package index
+ * @sumsha_req:    the sumsha searched
+ *
+ * Return: the package having the sumsha @sumsha_req, NULL if not found.
+ */
+LOCAL_SYMBOL
+struct mmpkg const* find_package_by_sumsha(struct mmpack_ctx * ctx,
+                                           const char* sumsha_req)
+{
+	struct cb_data data;
+
+	data.sumsha = mmstr_malloc_from_cstr(sumsha_req);
+	data.pkg = NULL;
+	binindex_foreach(&ctx->binindex, cb_binindex, &data);
+	mmstr_free(data.sumsha);
+
+	if (data.pkg == NULL)
+		info("No package with sumsha: %s\n", sumsha_req);
+
+	return data.pkg;
+}
+
+
 /**
  * complete_pkgname() - complete name of package
  * @ctx:        context associated with prefix
