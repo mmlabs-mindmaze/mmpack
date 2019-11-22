@@ -40,11 +40,7 @@ LOCAL_SYMBOL
 int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	int arg_index, rv = -1;
-	const char * v;
-	const char * arg;
 	mmstr * basename;
-	const mmstr * pkg_name;
-	const mmstr * pkg_version;
 	struct mmpkg const * pkg;
 	struct mmarg_parser parser = {
 		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
@@ -68,29 +64,17 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	arg = *(argv + arg_index);
+	if ((pkg = parse_pkg(ctx, argv[arg_index])) == NULL)
+		return -1;
 
-	/* Find the first occurrence of '=' */
-	v = strchr(arg, '=');
-	if (v != NULL) {
-		/* The package name is before the '=' character */
-		pkg_name = mmstr_malloc_copy(arg, v - arg);
-		pkg_version = mmstr_malloc_from_cstr(v+1);
-	} else {
-		pkg_name = mmstr_malloc_from_cstr(arg);
-		pkg_version = NULL;
-	}
-
-	pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version);
-	if (pkg != NULL && pkg->from_repo != NULL) {
+	if (pkg->from_repo != NULL) {
 		basename = mmstr_malloc(mmstrlen(pkg->from_repo->filename));
 		mmstr_basename(basename, pkg->from_repo->filename);
 		rv = download_package(ctx, pkg, basename);
 		mmstr_free(basename);
 	} else
-		error("No such package, or no such package version\n");
+		error("package %s is not present in known repositories\n",
+		      pkg->name);
 
-	mmstr_free(pkg_name);
-	mmstr_free(pkg_version);
 	return rv;
 }

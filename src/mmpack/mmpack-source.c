@@ -72,11 +72,6 @@ LOCAL_SYMBOL
 int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct mmpkg const * pkg;
-	const char * separator;
-	const mmstr * pkg_name;
-	const mmstr * pkg_version;
-	const char * pkg_req;
-	int rv = -1;
 
 	if (mmarg_is_completing()) {
 		if (argc != 2)
@@ -97,29 +92,8 @@ int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	/* Find the first occurrence of '=' */
-	pkg_req = argv[1];
-	separator = strchr(pkg_req, '=');
-	if (separator != NULL) {
-		/* The package name is before the '=' character */
-		pkg_name = mmstr_malloc_copy(pkg_req, separator - pkg_req);
-		pkg_version = mmstr_malloc_from_cstr(separator + 1);
-	} else {
-		pkg_name = mmstr_malloc_from_cstr(pkg_req);
-		pkg_version = NULL;
-	}
+	if ((pkg = parse_pkg(ctx, argv[1])) == NULL)
+		return -1;
 
-	pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version);
-
-	if (pkg == NULL) {
-		info("Could not find source package for: \"%s (%s)\"\n",
-		     pkg_name, pkg_version);
-		goto exit;
-	}
-
-	rv = download_pkg_sources(ctx, pkg);
-exit:
-	mmstr_free(pkg_name);
-	mmstr_free(pkg_version);
-	return rv;
+	return download_pkg_sources(ctx, pkg);
 }
