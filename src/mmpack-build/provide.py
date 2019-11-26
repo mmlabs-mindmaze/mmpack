@@ -202,7 +202,7 @@ class ProvideList:
         """
         provide = self._provides.get(soname)
         if not provide:
-            return (None, None)
+            return (None, Version(None))
 
         min_version = None
         for sym in list(symbols):  # iterate over a shallow copy of the list
@@ -213,6 +213,9 @@ class ProvideList:
                 else:
                     min_version = metadata_version
                 symbols.remove(sym)  # remove symbol from the list
+
+        if not min_version:
+            min_version = Version(None)
 
         return (provide.pkgdepends, min_version)
 
