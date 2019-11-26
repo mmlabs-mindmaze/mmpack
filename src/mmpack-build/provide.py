@@ -244,7 +244,7 @@ class ProvideList:
         return dep_list
 
 
-def load_mmpack_provides(extension: str, symtype: str = None) -> ProvideList:
+def load_mmpack_provides(extension: str, symtype) -> ProvideList:
     """
     Load all the provides of one type from all installed packages in prefix
 

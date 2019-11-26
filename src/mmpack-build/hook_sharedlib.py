@@ -70,7 +70,8 @@ class MMPackBuildHook(BaseHook):
         cached, hence subsequent calls to this method is very fast.
         """
         if not self._mmpack_shlib_provides:
-            self._mmpack_shlib_provides = load_mmpack_provides('symbols')
+            self._mmpack_shlib_provides = load_mmpack_provides('symbols',
+                                                               'sharedlib')
         return self._mmpack_shlib_provides
 
     def _gen_shlib_deps(self, currpkg: PackageInfo,

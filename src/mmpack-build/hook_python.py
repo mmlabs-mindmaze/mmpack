@@ -108,7 +108,8 @@ class MMPackBuildHook(BaseHook):
         cached, hence subsequent calls to this method is very fast.
         """
         if not self._mmpack_py_provides:
-            self._mmpack_py_provides = load_mmpack_provides('pyobjects')
+            self._mmpack_py_provides = load_mmpack_provides('pyobjects',
+                                                            'python')
         return self._mmpack_py_provides
 
     def _gen_py_deps(self, currpkg: PackageInfo, imports: Set[str],
