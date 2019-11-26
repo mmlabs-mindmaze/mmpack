@@ -125,6 +125,7 @@ class MMPackBuildHook(BaseHook):
         """
         # provided in the same package or a package being generated
         for pkg in others_pkgs:
+            # TODO[nb] replace set() with the list of symbols
             dep_list = pkg.provides['python'].gen_deps(imports, set())
             for pkgname, _ in dep_list:
                 currpkg.add_to_deplist(pkgname, self._version, self._version)
