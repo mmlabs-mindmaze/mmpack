@@ -1113,7 +1113,8 @@ struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
 	for (dep = pkg->mpkdeps; dep != NULL; dep = dep->next) {
 		compdep = binindex_compile_dep(binindex, dep, &buff);
 		if (compdep == NULL) {
-			printf("Unmet dependency: %s\n", dep->name);
+			printf("Unmet dependency: %s [%s -> %s]\n",
+			       dep->name, dep->min_version, dep->max_version);
 			*flag |= SOLVER_ERROR;
 			return NULL;
 		}
