@@ -980,7 +980,8 @@ struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
  * which meet the version requirements of @dep.
  *
  * Return: the pointer to compiled dependency located on data buffer managed
- * by @buff. NULL is returned if the package named in @dep could not found.
+ * by @buff. NULL is returned if the package named in @dep could not found,
+ * or if no matching package could be found.
  */
 LOCAL_SYMBOL
 struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
@@ -1011,6 +1012,10 @@ struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
 
 		compdep->pkgs[num_pkg++] = &entry->pkg;
 	}
+
+	// Gone through all packages without finding a matching candidate
+	if (num_pkg == 0)
+		return NULL;
 
 	used_size = compiled_dep_size(num_pkg);
 
