@@ -561,11 +561,14 @@ class SrcPackage:
             binpkg.gen_dependencies(self._packages.values())
             pkgfile = binpkg.create(instdir, self.pkgbuild_path())
             shutil.copy(pkgfile, wrk.packages)
-            iprint('generated package: {}'.format(pkgname))
+            iprint('generated package: {} : {}'
+                   .format(pkgname,
+                           path.join(wrk.packages, path.basename(pkgfile))))
 
         manifest = self._generate_manifest()
         shutil.copy(manifest, wrk.packages)
-        iprint('generated manifest: {}'.format(path.basename(manifest)))
+        iprint('generated manifest: {}'
+               .format(path.join(wrk.packages, path.basename(manifest))))
 
         popdir()  # local install path
 
