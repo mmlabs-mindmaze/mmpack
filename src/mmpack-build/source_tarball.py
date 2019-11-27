@@ -69,7 +69,7 @@ def _create_srcdir_from_git(builddir: str, url: str,
         cmd = 'git --git-dir={} rev-parse --abbrev-ref HEAD'.format(git_dir)
         tag = shell(cmd).strip()
 
-    shutil.rmtree(git_dir)
+    shutil.rmtree(git_dir, ignore_errors=True)
 
     return tag
 
