@@ -4,6 +4,14 @@ set -e
 
 sitedir=$PREFIX/lib/python3/site-packages
 
+# On mingw, prevent cygpath to interfere with the variables passed as argument
+# of the following options. This is required to work with both DESTDIR and
+# PREFIX: on POSIX systems, there is no volume prefixing the path, and so it is
+# possible to have <destdir>/<prefix>, but on windows, this would end up with
+# C:<destdir>/C:<prefix> and would not work.
+# ignoring those two variables allow the concatenation to work.
+export MSYS2_ARG_CONV_EXCL="--prefix=;--install-lib="
+
 # Install python package
 #
 # python distutils options:
@@ -13,7 +21,7 @@ sitedir=$PREFIX/lib/python3/site-packages
 #       --prefix : installation prefix
 #       --no-compile: don't compile .py files
 #       --install-lib: installation directory for all module distributions
-python3 setup.py --no-user-cfg install --root $DESTDIR --prefix $PREFIX --no-compile --install-lib $sitedir
+python3 setup.py --no-user-cfg install --root=$DESTDIR --prefix=$PREFIX --no-compile --install-lib=$sitedir
 
 # Run test on installed package (in build dir)
 if [ "$SKIP_TESTS" != "True" ] ; then
