@@ -13,6 +13,11 @@ from . common import *
 from . workspace import Workspace
 
 
+def _git_subcmd(subcmd: str, gitdir: str = '.git') -> str:
+    cmd = 'git --git-dir={} {}'.format(gitdir, subcmd)
+    return shell(cmd).strip()
+
+
 def _git_clone(url: str, clonedir: str, tag: str = None,
                git_ssh_cmd: str = None):
     """
@@ -66,8 +71,7 @@ def _create_srcdir_from_git(builddir: str, url: str,
 
     # Get tag name if not set yet (use current branch)
     if not tag:
-        cmd = 'git --git-dir={} rev-parse --abbrev-ref HEAD'.format(git_dir)
-        tag = shell(cmd).strip()
+        tag = _git_subcmd('rev-parse --abbrev-ref HEAD', git_dir)
 
     shutil.rmtree(git_dir, ignore_errors=True)
 
