@@ -9,6 +9,7 @@ import shutil
 import sys
 
 from glob import glob
+from os import path
 from subprocess import Popen
 from threading import Thread
 from typing import Set
@@ -99,7 +100,7 @@ class SrcPackage:
         dprint('loading specfile: ' + specfile)
         # keep raw dictionary version of the specfile
         self._specs = yaml_load(specfile)
-        self._spec_dir = os.path.dirname(specfile)
+        self._spec_dir = path.dirname(specfile)
 
         # Init source package from unpacked dir
         self._parse_specfile()
@@ -137,15 +138,15 @@ class SrcPackage:
             RuntimeError: could not guess project build system
         """
         pushdir(self.unpack_path())
-        if os.path.exists('configure.ac'):
+        if path.exists('configure.ac'):
             self.build_system = 'autotools'
-        elif os.path.exists('CMakeLists.txt'):
+        elif path.exists('CMakeLists.txt'):
             self.build_system = 'cmake'
-        elif os.path.exists('Makefile'):
+        elif path.exists('Makefile'):
             self.build_system = 'makefile'
-        elif os.path.exists('setup.py'):
+        elif path.exists('setup.py'):
             self.build_system = 'python'
-        elif os.path.exists('meson.build'):
+        elif path.exists('meson.build'):
             self.build_system = 'meson'
         else:
             raise RuntimeError('could not guess project build system')
@@ -288,8 +289,8 @@ class SrcPackage:
         build_env['DESTDIR'] = self._local_install_path()
         build_env['PREFIX'] = _get_install_prefix()
         build_env['SKIP_TESTS'] = str(skip_tests)
-        build_env['PKG_CONFIG_PATH'] = os.path.join(_get_install_prefix(),
-                                                    'lib/pkgconfig')
+        build_env['PKG_CONFIG_PATH'] = path.join(_get_install_prefix(),
+                                                 'lib/pkgconfig')
         if self.build_options:
             build_env['OPTS'] = self.build_options
 
@@ -311,7 +312,7 @@ class SrcPackage:
         return build_env
 
     def _strip_dirs_from_install_files(self):
-        tmp = {x for x in self.install_files_set if not os.path.isdir(x)}
+        tmp = {x for x in self.install_files_set if not path.isdir(x)}
         self.install_files_set = tmp
 
     def install_builddeps(self, prefix: str, assumeyes: bool):
@@ -519,8 +520,8 @@ class SrcPackage:
         # Generate the manifest data for binary packages
         pkgs = dict()
         for pkgname, binpkg in self._packages.items():
-            pkgs[pkgname] = {'file': os.path.basename(binpkg.pkg_path),
-                             'size': os.path.getsize(binpkg.pkg_path),
+            pkgs[pkgname] = {'file': path.basename(binpkg.pkg_path),
+                             'size': path.getsize(binpkg.pkg_path),
                              'sha256': sha256sum(binpkg.pkg_path)}
 
         # Generate the whole manifest data
@@ -528,8 +529,8 @@ class SrcPackage:
         data = {'name': self.name,
                 'version': self.version,
                 'binpkgs': {arch: pkgs},
-                'source': {'file': os.path.basename(self.src_tarball),
-                           'size': os.path.getsize(self.src_tarball),
+                'source': {'file': path.basename(self.src_tarball),
+                           'size': path.getsize(self.src_tarball),
                            'sha256': self.src_hash}}
 
         manifest_path = '{}_{}_{}.mmpack-manifest'.format(self.name,
@@ -550,7 +551,7 @@ class SrcPackage:
         # Copy source package
         shutil.copy(self.src_tarball, wrk.packages)
         iprint('source {} copied in {}'
-               .format(os.path.basename(self.src_tarball), wrk.packages))
+               .format(path.basename(self.src_tarball), wrk.packages))
 
         # we need all of the provide infos before starting the dependencies
         for pkgname, binpkg in self._packages.items():
@@ -564,7 +565,7 @@ class SrcPackage:
 
         manifest = self._generate_manifest()
         shutil.copy(manifest, wrk.packages)
-        iprint('generated manifest: {}'.format(os.path.basename(manifest)))
+        iprint('generated manifest: {}'.format(path.basename(manifest)))
 
         popdir()  # local install path
 
