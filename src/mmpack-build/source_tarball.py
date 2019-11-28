@@ -71,6 +71,7 @@ class SourceTarball:
         self._path_url = path_url
         self._kwargs = kwargs
         self._srcdir = mkdtemp(dir=Workspace().sources)
+        self.trace = dict()
 
         # Fetch sources following the specified method and move them to the
         # temporary source build folder
@@ -91,6 +92,7 @@ class SourceTarball:
             return
 
         self._process_source_strap()
+        self._store_src_orig_tracing()
 
         # Create source package tarball
         self.srctar = '{0}/{1}_{2}_src.tar.xz'.format(outdir, name, version)
@@ -150,6 +152,16 @@ class SourceTarball:
         self._srcdir = unpackdir
         self.srctar = new_srctar
 
+    def _store_src_orig_tracing(self):
+        """
+        Write src_orig_tracing file from trace information
+        """
+        upstream_info = self.trace.get('upstream', {'method': 'in-src-pkg'})
+        data = {'packaging': self.trace['pkg'], 'upstream': upstream_info}
+
+        file_path = os.path.join(self._srcdir, 'mmpack/src_orig_tracing')
+        yaml_serialize(data, file_path, use_block_style=True)
+
     def _create_srcdir_from_git(self):
         """
         Create a source package folder from git clone
@@ -161,6 +173,9 @@ class SourceTarball:
         # Get tag name if not set yet (use current branch)
         if not self.tag:
             self.tag = _git_subcmd('rev-parse --abbrev-ref HEAD', git_dir)
+
+        commit_ref = _git_subcmd('rev-parse HEAD', git_dir)
+        self.trace['pkg'].update({'url': self._path_url, 'ref': commit_ref})
 
         shutil.rmtree(git_dir, ignore_errors=True)
 
@@ -175,6 +190,9 @@ class SourceTarball:
         # Get tag name if not set yet
         if not self.tag:
             self.tag = 'from_tar'
+
+        self.trace['pkg'].update({'filename': self._path_url,
+                                  'sha256': sha256sum(self._path_url)})
 
     def _create_srcdir(self, method: str):
         """
@@ -193,6 +211,7 @@ class SourceTarball:
         if not create_srcdir_callable:
             raise ValueError("Invalid method " + method)
 
+        self.trace['pkg'] = {'method': method}
         create_srcdir_callable()
 
     def _fetch_upstream_from_git(self, specs: Dict[str, str]):
@@ -203,8 +222,14 @@ class SourceTarball:
             specs: dict of settings put in source-strap file
         """
         srcdir = self._get_unpacked_upstream_dir()
-        _git_clone(specs['url'], srcdir, specs.get('branch'))
-        shutil.rmtree(srcdir + '/.git')
+        gitdir = srcdir + '/.git'
+        url = specs['url']
+        _git_clone(url, srcdir, specs.get('branch'))
+
+        gitref = _git_subcmd('rev-parse HEAD', gitdir)
+        self.trace['upstream'].update({'url': url, 'ref': gitref})
+
+        shutil.rmtree(gitdir)
 
     def _fetch_upstream_from_tar(self, specs: Dict[str, str]):
         """
@@ -225,8 +250,11 @@ class SourceTarball:
         iprint('Done')
 
         # Verify sha256 is correct if supplied in specs
-        if 'sha256' in specs and specs['sha256'] != sha256sum(downloaded_file):
+        file_hash = sha256sum(downloaded_file)
+        if 'sha256' in specs and specs['sha256'] != file_hash:
             raise Assert("Downloaded file does not match expected sha256")
+
+        self.trace['upstream'].update({'url': url, 'sha256': file_hash})
 
         # Extract downloaded_file in upstreamdir
         with tarfile.open(downloaded_file, 'r:*') as tar:
@@ -259,6 +287,7 @@ class SourceTarball:
             raise Assert("Invalid method " + method)
 
         # execute selected method
+        self.trace['upstream'] = {'method': method}
         fetch_upstream_callable(specs)
 
         # Move extracted upstream sources except mmpack packaging
