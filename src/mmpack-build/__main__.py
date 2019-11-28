@@ -23,6 +23,11 @@ ALL_CMDS = {
 }
 
 
+def _list_commands():
+    for subcmd in ALL_CMDS:
+        print('\t' + subcmd.CMD)
+
+
 def _help():
     print('''
           This is a stub for all mmpack-build commands
@@ -38,8 +43,7 @@ def _help():
 
           List of available commands:
           ''')
-    for subcmd in ALL_CMDS:
-        print('\t' + subcmd.CMD)
+    _list_commands()
 
 
 def main():
@@ -54,6 +58,14 @@ def main():
     else:
         cmd = mmpack_pkg_create.CMD
         args = [cmd]
+
+    if cmd in ('-h', '--help'):
+        _help()
+        exit(0)
+
+    if cmd == '--list-commands':
+        _list_commands()
+        exit(0)
 
     # execute requested mmpack-build subcommand
     for subcmd in ALL_CMDS:
