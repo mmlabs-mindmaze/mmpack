@@ -54,6 +54,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/decorators.py \
 	src/mmpack-build/elf_utils.py \
 	src/mmpack-build/file_utils.py \
+	src/mmpack-build/hook_locales.py \
 	src/mmpack-build/hook_python.py \
 	src/mmpack-build/hook_sharedlib.py \
 	src/mmpack-build/hooks_loader.py \

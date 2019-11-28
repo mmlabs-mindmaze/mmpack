@@ -8,6 +8,7 @@ mmpack_build_sources = files(
         'decorators.py',
         'elf_utils.py',
         'file_utils.py',
+        'hook_locales.py',
         'hook_python.py',
         'hook_sharedlib.py',
         'hooks_loader.py',
