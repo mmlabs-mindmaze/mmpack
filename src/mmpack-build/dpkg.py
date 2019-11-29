@@ -100,7 +100,13 @@ def dpkg_find_symbols_file(target_soname: str) -> str:
     """
     name, version = parse_soname(target_soname)
     guess_pkgname = name + version
-    symbols_soname_regex = re.compile(r'\b{0}\b .*'.format(target_soname))
+
+    # make sure the library characters are not interpreted as PCRE
+    # Eg: libstdc++.so.6
+    #            ^^^  ^  all those are PCRE wildcards
+    # Note: '\b' is PCRE for word boundary
+    symbols_soname_regex = re.compile(r'\b{0}\b .*'
+                                      .format(re.escape(target_soname)))
 
     glob_search_pattern = '{}/{}**:{}.symbols' \
                           .format(DPKG_METADATA_PREFIX,
