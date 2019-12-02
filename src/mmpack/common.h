@@ -36,7 +36,7 @@ uint64_t next_pow2_u64(uint64_t v)
 }
 
 #ifdef _WIN32
-#define MOUNT_TARGET "/m"
+#define MOUNT_TARGET "M:"
 #else
 #define MOUNT_TARGET "/run/mmpack"
 #endif
