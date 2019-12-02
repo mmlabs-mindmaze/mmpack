@@ -4,6 +4,7 @@ Helpers to find out what files are
 """
 
 import re
+import sysconfig
 from os.path import islink, basename, splitext
 
 from . common import shell, wprint
@@ -134,10 +135,14 @@ def is_dynamic_library(filename: str, host_archdist: str) -> bool:
     # Check that filename and path match the installation folder and naming
     # scheme of a public shared library of the host executable file format
     if fmt == 'elf':
-        if not (filename.startswith('lib/lib') and '.so' in base):
+        multiarch = sysconfig.get_config_var('MULTIARCH')
+        multiarch = multiarch if multiarch else ''
+        elffile = r'(?:usr/)?lib/(?:{}/)?lib(?:[\w-]+)\.so[.0-9]*' \
+                  .format(multiarch)
+        if not re.match(elffile, filename):
             return False
     elif fmt == 'pe':
-        if not (filename.startswith('bin/') and base.endswith('.dll')):
+        if not ('bin/' in filename and base.endswith('.dll')):
             return False
     else:
         raise NotImplementedError('Unhandled exec format: {}'.format(fmt))
