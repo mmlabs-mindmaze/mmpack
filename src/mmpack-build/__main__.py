@@ -11,6 +11,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from . import mmpack_builddep
 from . import mmpack_clean
 from . import mmpack_pkg_create
+from . import common
 
 
 # all subcommand MUST expose:
@@ -58,8 +59,14 @@ def main():
                         help='execute sub-command')
     parser.add_argument("-h", "--help", help="show this help message and exit",
                         action="store_true", default=False)
+    parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                        action="store_true", default=False)
+    parser.add_argument("-d", "--debug", help="toggle debug mode",
+                        action="store_true", default=False)
 
     args, subargs = parser.parse_known_args()
+    common.CONFIG['verbose'] = args.verbose
+    common.CONFIG['debug'] = args.debug
 
     if args.help:  # show help
         if args.command:
