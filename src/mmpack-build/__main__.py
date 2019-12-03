@@ -3,10 +3,10 @@
 mmpack-build is a stub for all the tools required to create mmpack packages.
 
 For a list of all mmpack-build commands
->>> mmpack-build --list-commands
+>>> mmpack-build list-commands
 """
 
-import sys
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . import mmpack_builddep
 from . import mmpack_clean
@@ -26,24 +26,23 @@ ALL_CMDS = {
 def _list_commands():
     for subcmd in ALL_CMDS:
         print('\t' + subcmd.CMD)
+    print('\tlist-commands')
 
 
-def _help():
-    print('''
-          This is a stub for all mmpack-build commands
-
-          Usage:
-          $ mmpack-build <command> [command-options]
-
-          List all mmpack commands:
-          $ mmpack-build --list-commands
-
-          More infos about a specific command:
-          $ mmpack-build <command> --help
-
-          List of available commands:
-          ''')
-    _list_commands()
+def launch_subcommand(command, args):
+    """
+    wrapper for calling the sub-commands which handles the special case of
+    'list-commands' subcommands.
+    """
+    ret = 1
+    args = [command] + args
+    if command == 'list-commands':
+        _list_commands()
+    else:
+        for subcmd in ALL_CMDS:
+            if command == subcmd.CMD:
+                ret = subcmd.main(args)
+    return ret
 
 
 def main():
@@ -51,31 +50,30 @@ def main():
     main entry point for all mmpack-build commands, and only a stub
     redirecting to the various mmpack-bulid commands
     """
-    # make pkg-create the default target
-    if len(sys.argv) > 1:
-        cmd = sys.argv[1]
-        args = [cmd] + sys.argv[2:]
-    else:
-        cmd = mmpack_pkg_create.CMD
-        args = [cmd]
+    ret = 0
+    cmd_choices = ['list-commands'] + [subcmd.CMD for subcmd in ALL_CMDS]
+    parser = ArgumentParser(prog='mmpack-build', add_help=False,
+                            formatter_class=RawDescriptionHelpFormatter)
+    parser.add_argument('command', nargs='?', choices=cmd_choices,
+                        help='execute sub-command')
+    parser.add_argument("-h", "--help", help="show this help message and exit",
+                        action="store_true", default=False)
 
-    if cmd in ('-h', '--help'):
-        _help()
-        exit(0)
+    args, subargs = parser.parse_known_args()
 
-    if cmd == '--list-commands':
-        _list_commands()
-        exit(0)
+    if args.help:  # show help
+        if args.command:
+            # sub-command flags in common with this script must be re-added
+            ret = launch_subcommand(args.command, ['--help'] + subargs)
+        else:
+            parser.print_help()
+    else:  # launch sub-command
+        if not args.command:
+            args.command = 'pkg-create'  # default sub-command
+        ret = launch_subcommand(args.command, subargs)
 
-    # execute requested mmpack-build subcommand
-    for subcmd in ALL_CMDS:
-        if cmd == subcmd.CMD:
-            exit(subcmd.main(args))
-
-    # unrecognized mmpack-build subcommand
-    _help()
-    exit(-1)
+    return ret
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())

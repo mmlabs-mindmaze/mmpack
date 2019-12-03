@@ -11,7 +11,7 @@ _mmpack_build_subcmd_completion() {
 
 _mmpack_build_completion() {
     COMPREPLY=()
-    local mmpack_build_commands="$(mmpack-build --list-commands)"
+    local mmpack_build_commands="$(mmpack-build list-commands)"
 
     # completion for mmpack-build
     if [ $COMP_CWORD -eq 1 ]; then

@@ -18,7 +18,7 @@ SYNOPSIS
 
 ``mmpack-build`` -h|--help
 
-``mmpack-build`` --list-commands
+``mmpack-build`` list-commands
 
 ``mmpack-build`` *command* [*command options*]
 
