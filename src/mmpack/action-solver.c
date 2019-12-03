@@ -303,6 +303,8 @@ void solver_revert_planned_ops(struct solver* solver, size_t prev_size)
 {
 	struct buffer* ops_stack = &solver->ops_stack;
 	struct planned_op op;
+	char * ptr;
+	struct mmpkg * pkg;
 
 	while (ops_stack->size > prev_size) {
 		buffer_pop(ops_stack, &op, sizeof(op));
@@ -321,7 +323,9 @@ void solver_revert_planned_ops(struct solver* solver, size_t prev_size)
 			break;
 
 		case UPGRADE:
-			solver->inst_lut[op.id] -= op.pkg_diff;
+			ptr = (char*) solver->inst_lut[op.id];
+			pkg = (struct mmpkg*) (ptr - op.pkg_diff);
+			solver->inst_lut[op.id] = pkg;
 			break;
 
 		default:
@@ -373,7 +377,7 @@ void solver_commit_pkg_install(struct solver* solver, int id)
 
 	if (oldpkg) {
 		op.action = UPGRADE;
-		op.pkg_diff = pkg - oldpkg;
+		op.pkg_diff = (char*)pkg - (char*)oldpkg;
 	}
 
 	buffer_push(&solver->ops_stack, &op, sizeof(op));
@@ -903,7 +907,8 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
 
 		case UPGRADE:
 			pkg = solver->inst_lut[ops[i].id];
-			oldpkg = pkg - ops[i].pkg_diff;
+			oldpkg =
+				(struct mmpkg*) ((char*) pkg - ops[i].pkg_diff);
 			stk = mmpack_action_stack_push(stk, UPGRADE_PKG,
 			                               pkg, oldpkg);
 			break;
