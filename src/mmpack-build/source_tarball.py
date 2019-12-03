@@ -167,7 +167,7 @@ def _fetch_upstream_from_tar(srcdir: str, specs: Dict[str, str]) -> str:
     os.remove(downloaded_file)
 
 
-def _fetch_upstream(srcdir: str, specs: Dict[str, str]) -> str:
+def _fetch_upstream(srcdir: str, specs: Dict[str, str]):
     """
     Fetch upstream sources using specified method and extract it to src dir
 
@@ -193,7 +193,7 @@ def _fetch_upstream(srcdir: str, specs: Dict[str, str]) -> str:
         raise Assert("Invalid method " + method)
 
     # execute selected method
-    return fetch_upstream_fn(srcdir, specs)
+    fetch_upstream_fn(srcdir, specs)
 
 
 ###########################################################################
