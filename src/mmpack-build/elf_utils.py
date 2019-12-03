@@ -10,7 +10,7 @@ from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
 from elftools.elf.dynamic import DynamicSection
 
-from . common import shell
+from . common import shell, wprint
 from . provide import Provide
 
 
@@ -118,6 +118,11 @@ def soname_deps(filename):
 def _get_version_table(elffile):
     version = {}
     gnu_version = elffile.get_section_by_name('.gnu.version')
+    if not gnu_version:
+        # TODO: parse unversioned symbols from .symtab/.dynsym
+        msg = 'Could not find Symbol Version Table in {}'.format(elffile)
+        wprint(msg)
+        return {}
     for nsym, sym in enumerate(gnu_version.iter_symbols()):
         index = sym['ndx']
         if index not in ('VER_NDX_LOCAL', 'VER_NDX_GLOBAL'):
@@ -151,6 +156,11 @@ def undefined_symbols(filename):
 
     version = _get_version_table(elffile)
     gnu_version_r = elffile.get_section_by_name('.gnu.version_r')
+    if not gnu_version_r:
+        # TODO: parse unversioned symbols from .symtab/.dynsym
+        msg = 'Could not find Version Requirement Table in {}'.format(elffile)
+        wprint(msg)
+        return {}
 
     dyn = elffile.get_section_by_name('.dynsym')
     for nsym, sym in enumerate(dyn.iter_symbols()):
