@@ -62,21 +62,56 @@ struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 
 
 static
-struct pkg_request* get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
-                                            char const ** req_args)
+void clean_reqlist(struct pkg_request* reqlist)
+{
+	struct pkg_request* next;
+
+	while (reqlist) {
+		next = reqlist->next;
+		free(reqlist);
+		reqlist = next;
+	}
+}
+
+
+/**
+ * get_upgradeable_reqlist() - gets the packages among the one asked that
+ *                             are effectively upgradeable (they are not already
+ *                             at their latest version possible)
+ * @ctx: mmpack context
+ * @nreq: number of packages asked to be upgraded
+ * @req_args: names of the packages asked to be upgraded
+ * @reqlist: pointer which receives the resulting pkg_request list (list of the
+ *           packages that will effectively be upgraded).
+ *
+ * Return: 0 on success, -1 otherwise.
+ */
+static
+int get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
+                            char const ** req_args,
+                            struct pkg_request ** reqlist)
 {
 	STATIC_CONST_MMSTR(any_version, "any");
 	int i;
-	struct pkg_request * req, * reqlist;
+	struct pkg_request * req;
 	mmstr * pkg_name;
 	const struct mmpkg* pkg;
 	const struct mmpkg* latest;
 
-	reqlist = NULL;
+	*reqlist = NULL;
 
 	for (i = 0; i < nreq; i++) {
 		pkg_name = mmstr_malloc_from_cstr(req_args[i]);
 		pkg = install_state_get_pkg(&ctx->installed, pkg_name);
+
+		if (!pkg) {
+			clean_reqlist(*reqlist);
+			*reqlist = NULL;
+			printf("No package \"%s\" installed\n", pkg_name);
+			printf("Abort\n");
+			return -1;
+		}
+
 		mmstr_free(pkg_name);
 		latest = binindex_get_latest_pkg(&ctx->binindex,
 		                                 pkg->name,
@@ -92,24 +127,11 @@ struct pkg_request* get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 		req = xx_malloc(sizeof(*req));
 		req->name = pkg->name;
 		req->version = NULL;
-		req->next = reqlist;
-		reqlist = req;
+		req->next = *reqlist;
+		*reqlist = req;
 	}
 
-	return reqlist;
-}
-
-
-static
-void clean_reqlist(struct pkg_request* reqlist)
-{
-	struct pkg_request* next;
-
-	while (reqlist) {
-		next = reqlist->next;
-		free(reqlist);
-		reqlist = next;
-	}
+	return 0;
 }
 
 
@@ -177,10 +199,12 @@ int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	if (nreq == 0)
+	if (nreq == 0) {
 		reqlist = get_full_upgradeable_reqlist(ctx);
-	else
-		reqlist = get_upgradeable_reqlist(ctx, nreq, req_args);
+	} else {
+		if (get_upgradeable_reqlist(ctx, nreq, req_args, &reqlist) != 0)
+			return -1;
+	}
 
 	rv = 0;
 	if (reqlist != NULL) {
