@@ -33,16 +33,30 @@ def _list_commands():
 def launch_subcommand(command, args):
     """
     wrapper for calling the sub-commands which handles the special case of
-    'list-commands' subcommands.
+    'list-commands' subcommand.
+    The wrapper also masks Exceptions, hiding the backtrace when debug mode is
+    disabled.
     """
-    ret = 1
+    # pylint: disable=broad-except
+    ret = 127  # command not found error
     args = [command] + args
     if command == 'list-commands':
         _list_commands()
     else:
         for subcmd in ALL_CMDS:
             if command == subcmd.CMD:
-                ret = subcmd.main(args)
+                if common.CONFIG['debug']:
+                    ret = subcmd.main(args)
+                else:
+                    try:
+                        ret = subcmd.main(args)
+                    except KeyboardInterrupt:
+                        ret = 130
+                    except SystemExit as sysexit:
+                        ret = sysexit.code if sysexit.code else 0
+                    except Exception as inst:
+                        print('Exception: ', inst)
+                        ret = 1
     return ret
 
 
