@@ -1,3 +1,8 @@
+# patchelf is required to create any package containing elf files
+if host_machine.system() == 'linux'
+    find_program('patchelf', required : true)
+endif
+
 mmpack_build_sources = files(
         '__init__.py',
         '__main__.py',
