@@ -16,6 +16,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
 MM_CC_WARNFLAGS
 MM_OUTPUT_DEF
+AC_SET_HOSTSYSTEM
 
 # Check for programs
 AC_CHECK_PROGS(RST2MAN, [rst2man rst2man3], [none])
@@ -54,6 +55,10 @@ AM_PATH_PYTHON([3])
 MM_PYTHON_MODULE([sphinx])
 MM_PYTHON_MODULE([sphinx_rtd_theme])
 MM_PYTHON_MODULE([linuxdoc])
+MM_PYTHON_MODULE([astroid], fatal_error)
+MM_PYTHON_MODULE([urllib3], fatal_error)
+AS_IF([test "$os_system" = win32], MM_PYTHON_MODULE([pefile], fatal_error))
+AS_IF([test "$os_system" = posix], MM_PYTHON_MODULE([elftools], fatal_error))
 
 AC_CHECK_PROG(HAVE_SPHINXBUILD, [sphinx-build], [$HAVE_PYMOD_LINUXDOC], [no])
 AS_CASE([$enable_sphinxdoc],
@@ -73,7 +78,6 @@ MM_CHECK_LIB([curl_easy_init], [curl], CURL, [], [AC_MSG_ERROR([curl library req
 PKG_CHECK_MODULES_EXT(LIBARCHIVE, [libarchive], [], [AC_MSG_ERROR([libarchive library required])])
 
 AC_DEF_API_EXPORT_ATTRS
-AC_SET_HOSTSYSTEM
 
 AH_TOP([#ifndef CONFIG_H
 #define CONFIG_H])
