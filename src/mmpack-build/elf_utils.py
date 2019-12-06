@@ -120,7 +120,8 @@ def _get_version_table(elffile):
     gnu_version = elffile.get_section_by_name('.gnu.version')
     if not gnu_version:
         # TODO: parse unversioned symbols from .symtab/.dynsym
-        msg = 'Could not find Symbol Version Table in {}'.format(elffile)
+        msg = 'Could not find Symbol Version Table in {}' \
+              .format(elffile.stream.name)
         wprint(msg)
         return {}
     for nsym, sym in enumerate(gnu_version.iter_symbols()):
