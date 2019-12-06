@@ -37,7 +37,8 @@ class _FileConsumer(Thread):
 
     def run(self):
         for line in self.file_in:
-            self.file_out.write(line)
+            if CONFIG['debug']:
+                self.file_out.write(line)
             log_info(line.strip('\n\r'))
 
 
