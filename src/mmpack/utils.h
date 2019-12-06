@@ -32,6 +32,7 @@ int is_path_separator(char c)
 #define CFG_RELPATH "etc/mmpack-config.yaml"
 #define LOG_RELPATH "var/log/mmpack.log"
 #define PKGS_CACHEDIR_RELPATH "var/cache/mmpack/pkgs"
+#define UNPACK_CACHEDIR_RELPATH "var/cache/mmpack/unpack"
 
 #define INSTALLED_INDEX_RELPATH \
 	MMPACK_STATEDIR_RELPATH "/installed.yaml"

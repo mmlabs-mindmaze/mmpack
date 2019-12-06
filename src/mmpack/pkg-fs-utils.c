@@ -147,14 +147,20 @@ int pkg_unpack_symlink(struct archive_entry * entry, const char* path)
  * @entry:      archive entry to read
  * @path:       filename of package file being unpacked (it may be
  *              different from the one advertised in entry)
+ * @cpt:        counter permitting to create the name of the file in which
+ *              regular and symlink files are extracted to
  *
- * Return: 0 on success, a negative value otherwise.
+ * Return: 0 or 1 on success, a negative value otherwise. If 1 is returned, this
+ * implies that a file has been unpacked in a temporary directory and should be
+ * renamed later.
  */
 static
 int pkg_unpack_entry(struct archive * a, struct archive_entry* entry,
-                     const mmstr* path)
+                     const mmstr* path, int cpt)
 {
 	int type, rv;
+	mmstr* file;
+	int len;
 
 	type = archive_entry_filetype(entry);
 	switch (type) {
@@ -163,11 +169,20 @@ int pkg_unpack_entry(struct archive * a, struct archive_entry* entry,
 		break;
 
 	case AE_IFREG:
-		rv = pkg_unpack_regfile(entry, path, a);
-		break;
-
 	case AE_IFLNK:
-		rv = pkg_unpack_symlink(entry, path);
+		len = sizeof(UNPACK_CACHEDIR_RELPATH) + 10;
+		file = mmstr_malloc(len);
+		sprintf(file, "%s/%d", UNPACK_CACHEDIR_RELPATH, cpt);
+
+		if (type == AE_IFREG)
+			rv = pkg_unpack_regfile(entry, file, a);
+		else
+			rv = pkg_unpack_symlink(entry, file);
+
+		if (rv == 0)
+			rv = 1;
+
+		mmstr_free(file);
 		break;
 
 	default:
@@ -241,6 +256,59 @@ int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
 
 STATIC_CONST_MMSTR(metadata_dirpath, METADATA_RELPATH);
 
+
+/**
+ * rename_all() - rename all the files
+ * @to_rename:    files to be renamed
+ *
+ * In order for the install and upgrade commands to be atomic, the extraction is
+ * done in two steps: first all the regular files and symlink are extracted in a
+ * temporary directory (in var/cache/unpack), then they are all renamed, to be
+ * placed into their final directories. Note that the directories of the package
+ * are extracted directly in the good directory during the first step.
+ *
+ * The current function permits to rename the regular and symlink files.
+ *
+ * Return: 0 on success, a negative value otherwise.
+ */
+static
+int rename_all(struct strlist* to_rename)
+{
+	mmstr * file = NULL;
+	int len = sizeof(UNPACK_CACHEDIR_RELPATH) + 10;
+	struct strlist_elt * curr = to_rename->head;
+	int cpt = 0;
+
+	file = mmstr_malloc(len);
+	while (curr) {
+		sprintf(file, "%s/%d", UNPACK_CACHEDIR_RELPATH, cpt);
+
+		if (mm_rename(file, curr->str.buf) == -1)
+			return -1;
+
+		curr = curr->next;
+		cpt++;
+	}
+
+	mmstr_free(file);
+	return 0;
+}
+
+
+/**
+ * pkg_unpack_files() - extract files of a given package
+ * @pkg:          package whose files should be extracted
+ * @mpk_filename: filename of the downloaded package file
+ * @files:        files to be removed
+ *
+ * In order the install and upgrade commands to be atomic, the extraction is
+ * done in two steps: first all the regular files and symlink are extracted in a
+ * temporary directory (in var/cache/upack), then they are all renamed, to be
+ * placed in the good directory. Note that the directories of the package are
+ * extracted directly in the good directory during the first step.
+ *
+ * Return: 0 on success, a negative value otherwise.
+ */
 static
 int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
                      struct strlist* files)
@@ -251,6 +319,10 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 	struct archive * a;
 	int len, r, rv;
 	mmstr* path = NULL;
+	struct strlist to_rename;
+	int cpt = 0;
+
+	strlist_init(&to_rename);
 
 	// Initialize an archive stream
 	a = archive_read_new();
@@ -297,7 +369,13 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 		if (redirect_metadata(&path, metadata_prefix) == SKIP_UNPACK)
 			continue;
 
-		rv = pkg_unpack_entry(a, entry, path);
+		rv = pkg_unpack_entry(a, entry, path, cpt);
+
+		if (rv == 1) {
+			strlist_add(&to_rename, path);
+			cpt++;
+			rv = 0;
+		}
 
 		if (files)
 			strlist_remove(files, path);
@@ -310,7 +388,16 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 	archive_read_close(a);
 	archive_read_free(a);
 
-	return (rv != READ_ARCHIVE_EOF) ? -1 : 0;
+	if (rv != -1) {
+		// proceed to the rename of the files that have been unpacked in
+		// another directory than the "true" one, in order to execute an
+		// atomic upgrade
+		rv = rename_all(&to_rename);
+	}
+
+	strlist_deinit(&to_rename);
+
+	return rv;
 }
 
 
@@ -944,7 +1031,8 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 	// Change current directory to prefix... All the prefix relpath can
 	// now be used directly.
 	if (mm_chdir(ctx->prefix)
-	    || mm_mkdir(METADATA_RELPATH, 0777, MM_RECURSIVE))
+	    || mm_mkdir(METADATA_RELPATH, 0777, MM_RECURSIVE)
+	    || mm_mkdir(UNPACK_CACHEDIR_RELPATH, 0777, MM_RECURSIVE))
 		return -1;
 
 	// Fetch missing packages
@@ -963,6 +1051,9 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 		if (rv != 0)
 			break;
 	}
+
+	// suppress the content of the directory in which the files are unpacked
+	mm_remove(UNPACK_CACHEDIR_RELPATH, MM_RECURSIVE);
 
 	// Restore previous current directory
 	mm_chdir(ctx->cwd);
