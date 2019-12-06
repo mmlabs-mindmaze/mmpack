@@ -11,7 +11,7 @@ import importlib
 import pkgutil
 from os.path import dirname
 
-from . common import iprint
+from . common import dprint
 from . mm_version import Version
 
 
@@ -46,7 +46,7 @@ def init_mmpack_build_hooks(srcname: str, version: Version,
             # Instantiate hook and add it to the list
             hook = module.MMPackBuildHook(srcname, version, host_archdist)
             MMPACK_BUILD_HOOKS.append(hook)
-            iprint('hooks plugin loaded: {}'.format(hook.__module__))
+            dprint('hook plugin loaded: {}'.format(hook.__module__))
 
         except AttributeError:
             raise ImportError('invalid mmpack-build hook module: {}'
