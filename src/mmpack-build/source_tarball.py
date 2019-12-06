@@ -35,7 +35,7 @@ def _git_clone(url: str, clonedir: str, tag: str = None,
     if git_ssh_cmd:
         cmd_env += 'GIT_SSH_COMMAND="{}"'.format(git_ssh_cmd)
 
-    iprint('cloning ' + url)
+    iprint('cloning {} into tmp dir {}'.format(url, clonedir))
     git_clone_sh_cmd = '{0} git clone {1} {2} {3}'\
                        .format(cmd_env, git_opts, url, clonedir)
     shell(git_clone_sh_cmd)
@@ -233,7 +233,8 @@ class SourceTarball:
 
         # Fetch sources following the specified method and move them to the
         # temporary source build folder
-        iprint('extracting temporarily to sources ' + self._srcdir)
+        dprint('extracting sources in the temporary directory: {}'
+               .format(self._srcdir))
         self.tag = _create_srcdir(method, self._srcdir,
                                   path_url, tag, **kwargs)
 
