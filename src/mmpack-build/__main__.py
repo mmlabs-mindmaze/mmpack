@@ -73,13 +73,13 @@ def main():
                         help='execute sub-command')
     parser.add_argument("-h", "--help", help="show this help message and exit",
                         action="store_true", default=False)
-    parser.add_argument("-v", "--verbose", help="increase output verbosity",
+    parser.add_argument("-q", "--quiet", help="silence output",
                         action="store_true", default=False)
     parser.add_argument("-d", "--debug", help="toggle debug mode",
                         action="store_true", default=False)
 
     args, subargs = parser.parse_known_args()
-    common.CONFIG['verbose'] = args.verbose
+    common.CONFIG['verbose'] = not args.quiet
     common.CONFIG['debug'] = args.debug
 
     if args.help:  # show help
