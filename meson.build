@@ -83,17 +83,44 @@ do_test_repo = custom_target('test-repo',
                    deployment_dir,
                    repo_dir,
         ],
-        build_by_default : true,
         depends : do_deployment_test,
 )
-if get_option('tests')
+
+tests_state = 'disabled'
+libcheck = dependency('check', required : get_option('tests'))
+if libcheck.found() and not get_option('tests').disabled()
+    tests_state = 'enabled'
     subdir('tests')
 endif
 
-if get_option('docs')
+docs_state = 'disabled'
+sphinxbuild = find_program('sphinx-build', required : get_option('docs'))
+if sphinxbuild.found() and not get_option('docs').disabled()
+    # TODO
+    # meson does not yet know how to check for a python module presence
+    # (introduced in 0.51.0)
+    # change this when possible
+    python3 = import('python').find_installation('python3', required : true)
+    check_linuxdoc = run_command(python3, '-c', '"import linuxdoc"')
+
+    if check_linuxdoc.returncode() != 0 and get_option('docs').enabled()
+        error('python3 module "linuxdoc" is required to build documentation')
+    elif check_linuxdoc.returncode() == 0
+        docs_state = 'enabled'
+    endif
+endif
+
+if docs_state == 'enabled'
     subdir('docs')
 endif
 
 # uses all the other meson files.
 # keep at the end
 subdir('devtools')
+
+# print the status of the auto-detect features
+message('Configuration summary')
+message('=====================')
+message('* Tests : @0@'.format(tests_state))
+message('  - run long tests : @0@'.format(get_option('long-tests')))
+message('* Doc building : @0@'.format(docs_state))

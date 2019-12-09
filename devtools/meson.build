@@ -26,11 +26,11 @@ all_sources = (all_c_sources
         + mmpack_build_plugins)
 
 
-if get_option('tests')
+if tests_state == 'enabled'
     all_sources += mmpack_unit_tests_sources
 endif
 
-if get_option('docs')
+if docs_state == 'enabled'
     all_sources += man_pages_sources
 endif
 

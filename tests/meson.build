@@ -1,7 +1,5 @@
 long_test = get_option('long-tests') or disabler()
 
-cc.check_header('check.h')
-libcheck = dependency('check', required : true)
 unittest_args = [
     '-DSRCDIR="' + meson.source_root() + '"',
     '-DBUILDDIR="' + meson.build_root() + '"',
