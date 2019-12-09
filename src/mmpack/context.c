@@ -171,6 +171,11 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	num_repo = settings_num_repo(&ctx->settings);
 	for (i = 0; i < num_repo; i++) {
 		repo = settings_get_repo(&ctx->settings, i);
+
+		// discard repositories that are disable
+		if (repo->enabled == 0)
+			continue;
+
 		repo_cache = mmpack_get_repocache_path(ctx, repo->name);
 		if (binindex_populate(&ctx->binindex, repo_cache, repo))
 			printf("Cache file of repository %s is missing, "

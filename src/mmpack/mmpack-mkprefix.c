@@ -95,6 +95,7 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		.execname = "mmpack",
 	};
 	struct repolist* repo_list = &ctx->settings.repo_list;
+	struct repolist_elt * repo;
 
 	arg_index = mmarg_parse(&parser, argc, (char**)argv);
 	if (mmarg_is_completing()) {
@@ -118,7 +119,11 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// untouched, hence will be the one read from user global configuration
 	if (repo_url) {
 		repolist_reset(repo_list);
-		repolist_add(repo_list, repo_name, repo_url);
+		if (!(repo = repolist_add(repo_list, repo_name)))
+			return -1;
+
+		repo->url = mmstr_malloc_from_cstr(repo_url);
+		repo->enabled = 1;
 	}
 
 	if (create_initial_empty_files(prefix, force_mkprefix)

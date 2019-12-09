@@ -11,11 +11,13 @@
  * @next: the next element of the list
  * @url: the url of the repository from which packages can be retrieved
  * @name: the short name referencing the url
+ * @enabled: indicates if the repository is enabled (1) or disabled (0).
  */
 struct repolist_elt {
 	struct repolist_elt* next;
 	mmstr* url;
 	mmstr* name;
+	int enabled;
 };
 
 struct repolist {
@@ -25,7 +27,9 @@ struct repolist {
 void repolist_init(struct repolist* list);
 void repolist_deinit(struct repolist* list);
 void repolist_reset(struct repolist* list);
-int repolist_add(struct repolist* list, const char* name, const char* url);
+int repolist_enable(struct repolist * list, const char * name);
+int repolist_disable(struct repolist * list, const char * name);
+struct repolist_elt* repolist_add(struct repolist* list, const char* name);
 int repolist_remove(struct repolist * list, const char * name);
 struct repolist_elt* repolist_lookup(struct repolist * list,
                                      const char * name);

@@ -15,8 +15,12 @@ mmpack repo add other_name other_url
 
 diff $PREFIX_TEST/etc/mmpack-config.yaml <(cat << EOF
 repositories:
-  - my_name: my_url
-  - other_name: other_url
+  - my_name:
+        url: my_url
+        enabled: 1
+  - other_name:
+        url: other_url
+        enabled: 1
 EOF
 )
 
@@ -24,8 +28,8 @@ mmpack repo add other_name dum_url && false || echo "Failed as expected"
 
 # test mmpack repo list
 diff <(mmpack repo list | $dos2unix) <(cat << EOF
-other_name	other_url
-my_name	my_url
+other_name (enabled)	other_url
+my_name (enabled)	my_url
 EOF
 )
 
@@ -34,8 +38,12 @@ mmpack repo rename other_name name
 
 diff $PREFIX_TEST/etc/mmpack-config.yaml <(cat << EOF
 repositories:
-  - my_name: my_url
-  - name: other_url
+  - my_name:
+        url: my_url
+        enabled: 1
+  - name:
+        url: other_url
+        enabled: 1
 EOF
 )
 
@@ -48,5 +56,7 @@ mmpack repo remove my_name
 
 diff $PREFIX_TEST/etc/mmpack-config.yaml <(cat << EOF
 repositories:
-  - name: other_url
+  - name:
+        url: other_url
+        enabled: 1
 EOF)

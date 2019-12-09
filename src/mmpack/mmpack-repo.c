@@ -29,13 +29,18 @@ STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
 static
 int repo_add(struct mmpack_ctx* ctx, int argc, char const ** argv)
 {
+	struct repolist_elt * repo;
+
 	if (argc != 2) {
 		printf("usage: mmpack repo add <name> <url>\n");
 		return -1;
 	}
 
-	if (repolist_add(&ctx->settings.repo_list, argv[0], argv[1]) != 0)
+	if (!(repo = repolist_add(&ctx->settings.repo_list, argv[0])))
 		return -1;
+
+	repo->url = mmstr_malloc_from_cstr(argv[1]);
+	repo->enabled = 1;
 
 	if (create_empty_binindex_file(ctx->prefix, argv[0]) == -1) {
 		info("binindex file was not created\n");
@@ -60,7 +65,8 @@ int repo_list(struct mmpack_ctx* ctx, int argc, char const ** argv)
 	for (repo = ctx->settings.repo_list.head;
 	     repo != NULL;
 	     repo = repo->next)
-		printf("%s\t%s\n", repo->name, repo->url);
+		printf("%s (%s)\t%s\n", repo->name,
+		       repo->enabled ? "enabled" : "disabled", repo->url);
 
 	return 0;
 }
@@ -179,8 +185,52 @@ int repo_rename(struct mmpack_ctx* ctx, int argc, char const ** argv)
 }
 
 
+static
+int repo_enable(struct mmpack_ctx* ctx, int argc, char const ** argv)
+{
+	struct repolist_elt * repo;
+
+	if (argc != 1) {
+		printf("usage: mmpack repo enable <name>\n");
+		return -1;
+	}
+
+	if (!(repo = repolist_lookup(&ctx->settings.repo_list, argv[0]))) {
+		printf("No such repository: \"%s\"\n", argv[0]);
+		return -1;
+	}
+
+	repo->enabled = 1;
+
+	return settings_serialize(ctx->prefix, &ctx->settings, 1);
+}
+
+
+static
+int repo_disable(struct mmpack_ctx* ctx, int argc, char const ** argv)
+{
+	struct repolist_elt * repo;
+
+	if (argc != 1) {
+		printf("usage: mmpack repo disable <name>\n");
+		return -1;
+	}
+
+	if (!(repo = repolist_lookup(&ctx->settings.repo_list, argv[0]))) {
+		printf("No such repository: \"%s\"\n", argv[0]);
+		return -1;
+	}
+
+	repo->enabled = 0;
+
+	return settings_serialize(ctx->prefix, &ctx->settings, 1);
+}
+
+
 static const struct subcmd repo_subcmds[] = {
 	{"add", repo_add},
+	{"disable", repo_disable},
+	{"enable", repo_enable},
 	{"list", repo_list},
 	{"remove", repo_remove},
 	{"rename", repo_rename},

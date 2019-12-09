@@ -96,10 +96,11 @@ int repolist_num_repo(const struct repolist* list)
  * repolist_add() - add a repository to the list
  * @list: initialized repolist structure
  * @name: the short name referencing the url
- * @url: the url of the repository from which packages can be retrieved
+ *
+ * Returns: the repolist_elt created in case of success, NULL otherwise.
  */
 LOCAL_SYMBOL
-int repolist_add(struct repolist* list, const char* name, const char* url)
+struct repolist_elt* repolist_add(struct repolist* list, const char* name)
 {
 	struct repolist_elt* elt;
 	char default_name[16];
@@ -113,18 +114,18 @@ int repolist_add(struct repolist* list, const char* name, const char* url)
 	// check that no repository possesses already this name
 	if (repolist_lookup(list, name)) {
 		error("repository \"%s\" already exists\n", name);
-		return -1;
+		return NULL;
 	}
 
 	// Insert the element at the head of the list
 	elt = xx_malloc(sizeof(*elt));
 	*elt = (struct repolist_elt) {
-		.url = mmstr_malloc_from_cstr(url),
 		.name = mmstr_malloc_from_cstr(name),
 		.next = list->head,
+		.enabled = 1,
 	};
 	list->head = elt;
-	return 0;
+	return elt;
 }
 
 
@@ -221,16 +222,128 @@ int set_settings_field(struct settings* s, int field_type,
 }
 
 
+enum field_type {
+	FIELD_UNKNOWN = -1,
+	FIELD_URL = 0,
+	FIELD_ENABLED,
+};
+
+
+static
+const char * scalar_field_names[] = {
+	[FIELD_URL] = "url",
+	[FIELD_ENABLED] = "enabled",
+};
+
+
+static
+enum field_type get_scalar_field_type(const char* key)
+{
+	int i;
+
+	for (i = 0; i < MM_NELEM(scalar_field_names); i++) {
+		if (strcmp(key, scalar_field_names[i]) == 0)
+			return i;
+	}
+
+	return FIELD_UNKNOWN;
+}
+
+
+static
+int repo_set_scalar_field(struct repolist_elt * repo, enum field_type type,
+                          const char * data)
+{
+	switch (type) {
+	case FIELD_URL:
+		repo->url = mmstr_malloc_from_cstr(data);
+		break;
+	case FIELD_ENABLED:
+		repo->enabled = atoi(data);
+		break;
+	default:
+		return -1;
+	}
+
+	return 0;
+}
+
+
+static
+int parse_one_repo(yaml_parser_t * parser, struct repolist_elt * repo)
+{
+	int rv = -1;
+	int type = -1;
+	enum field_type scalar_field = FIELD_UNKNOWN;
+	char const * data;
+	size_t data_len;
+	yaml_token_t token;
+
+	while (1) {
+		if (!yaml_parser_scan(parser, &token))
+			goto exit;
+
+		switch (token.type) {
+		case YAML_BLOCK_END_TOKEN:
+			goto exit;
+		case YAML_KEY_TOKEN:
+			type = YAML_KEY_TOKEN;
+			break;
+		case YAML_VALUE_TOKEN:
+			type = YAML_VALUE_TOKEN;
+			break;
+		case YAML_SCALAR_TOKEN:
+			data = (char const*) token.data.scalar.value;
+			data_len = token.data.scalar.length;
+
+			switch (type) {
+			case YAML_KEY_TOKEN:
+				scalar_field = get_scalar_field_type(data);
+				type = -1;
+				break;
+			case YAML_VALUE_TOKEN:
+				if (data_len) {
+					if (repo_set_scalar_field(repo,
+					                          scalar_field,
+					                          data))
+						goto error;
+				} else {
+					goto error;
+				}
+
+				break;
+			default:
+				mm_raise_error(MM_EBADFMT,
+				               "yaml file not well-formed");
+				goto error;
+			}
+
+			break;
+		default:
+			break;
+		}
+
+		yaml_token_delete(&token);
+	}
+
+exit:
+	rv = 0;
+error:
+	yaml_token_delete(&token);
+	return rv;
+}
+
+
 static
 int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 {
 	yaml_token_t token;
 	struct repolist* repo_list = &settings->repo_list;
 	int type = -1;
-	int cpt = 1; // counter to know when the list of repositories ends
+	int cpt = 0; // counter to know when the list of repositories ends
 	int rv = -1;
-	char* name = NULL;
-	char* url = NULL;
+	char * name = NULL;
+	struct repolist_elt * repo;
 
 	repolist_reset(repo_list);
 	while (1) {
@@ -244,11 +357,18 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 			goto exit;
 
 		case YAML_STREAM_END_TOKEN:
+			goto exit;
+
 		case YAML_BLOCK_END_TOKEN:
-			cpt--;
 			if (cpt == 0)
 				goto exit;
 
+			cpt--;
+
+			break;
+
+		case YAML_BLOCK_MAPPING_START_TOKEN:
+			cpt++;
 			break;
 
 		case YAML_VALUE_TOKEN:
@@ -257,7 +377,6 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 
 		case YAML_KEY_TOKEN:
 			type = YAML_KEY_TOKEN;
-			cpt++;
 			break;
 
 		case YAML_SCALAR_TOKEN:
@@ -265,31 +384,13 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 				name = xx_malloc(token.data.scalar.length + 1);
 				memcpy(name, token.data.scalar.value,
 				       token.data.scalar.length + 1);
-				type = -1;
-			} else if (type == YAML_VALUE_TOKEN) {
-				url = xx_malloc(token.data.scalar.length + 1);
-				memcpy(url, token.data.scalar.value,
-				       token.data.scalar.length + 1);
-				if (repolist_add(repo_list, name, url) == -1)
+				if (!(repo = repolist_add(repo_list, name))
+				    || parse_one_repo(parser, repo))
 					goto error;
 
 				free(name);
 				name = NULL;
-				free(url);
-				url = NULL;
-				type = -1;
-			} else {
-				/* if the yaml repository list has no server
-				 * name and only contains urls, then yaml does
-				 * not present a YAML_VALUE_TOKEN and directly
-				 * jumps to the YAML_SCALAR_TOKEN */
-				mm_raise_error(MM_EBADFMT,
-				               "url %s must have a short name",
-				               token.data.scalar.value);
-				goto error;
 			}
-
-			break;
 
 		default:
 			// silently ignore error
@@ -303,10 +404,8 @@ exit:
 	rv = 0;
 
 error:
-	free(name);
-	free(url);
 	yaml_token_delete(&token);
-
+	free(name);
 	return rv;
 }
 
@@ -535,7 +634,7 @@ void dump_repo_elt_and_children(int fd, struct repolist_elt* elt)
 {
 	int len;
 	char* line;
-	char linefmt[] = "  - %s: %s\n";
+	char linefmt[] = "  - %s:\n        url: %s\n        enabled: %d\n";
 
 	if (elt == NULL)
 		return;
@@ -544,10 +643,10 @@ void dump_repo_elt_and_children(int fd, struct repolist_elt* elt)
 	dump_repo_elt_and_children(fd, elt->next);
 
 	// Allocate buffer large enough
-	len = sizeof(linefmt) + mmstrlen(elt->url) + mmstrlen(elt->name);
+	len = sizeof(linefmt) + mmstrlen(elt->url) + mmstrlen(elt->name) + 10;
 	line = xx_malloca(len);
 
-	len = sprintf(line, linefmt, elt->name, elt->url);
+	len = sprintf(line, linefmt, elt->name, elt->url, elt->enabled);
 	mm_write(fd, line, len);
 
 	mm_freea(line);

@@ -60,7 +60,9 @@ tests_tree_and_files $PREFIX_TEST/var/lib/mmpack/binindex.yaml.repo-0
 
 diff $PREFIX_TEST/etc/mmpack-config.yaml <(cat <<EOF
 repositories:
-  - repo-0: my_url
+  - repo-0:
+        url: my_url
+        enabled: 1
 EOF
 )
 
@@ -73,6 +75,8 @@ tests_tree_and_files $PREFIX_TEST/var/lib/mmpack/binindex.yaml.my_name
 
 diff $PREFIX_TEST/etc/mmpack-config.yaml <(cat <<EOF
 repositories:
-  - my_name: my_url
+  - my_name:
+        url: my_url
+        enabled: 1
 EOF
 )

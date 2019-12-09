@@ -1,10 +1,23 @@
 # This is a test
-repositories: [ name1: "http://this.is.awasome", name2: "http://localhost:8888/" ]
+repositories:
+  - name1:
+        url: http://this.is.awasome
+        enabled: 1
+  - name2:
+        url: "http://localhost:8888/"
+        enabled: 1
+
 distractor: dummy
 
 default-prefix: "a/path/to/prefix"
 
 repositories:
-  - not_funny_name3: http://another.host.com/
-  - boring_name4: https://www.awesome.com
-  - final_name5: http://mmpack.is.cool:8888/
+  - not_funny_name3:
+        url: http://another.host.com/
+        enabled: 1
+  - boring_name4:
+        url: https://www.awesome.com
+        enabled: 1
+  - final_name5:
+        url: http://mmpack.is.cool:8888/
+        enabled: 1

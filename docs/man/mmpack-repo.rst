@@ -18,6 +18,8 @@ SYNOPSIS
 ``mmpack repo`` [list]
 ``mmpack repo`` remove <name>
 ``mmpack repo`` rename <old-name> <new-name>
+``mmpack repo`` enable <name>
+``mmpack repo`` disable <name>
 
 DESCRIPTION
 ===========
@@ -36,6 +38,13 @@ that already exists.
 
 **mmpack repo rename** changes the name given to a repository from
 **<old-name>** to **<new-name>**.
+
+**mmpack repo enable** makes the repository named **<name>** enabled, i.e., the
+packages provided by the repository **<name>** are available after the next call
+to mmpack update.
+
+**mmpack repo disable** makes the repository named **<name>** disabled, i.e.,
+the packages provided by the repository **<name>** are not available anymore.
 
 OPTIONS
 =======
