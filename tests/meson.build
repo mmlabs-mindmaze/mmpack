@@ -76,7 +76,7 @@ test('mmpack-build unit tests',
         files('python-unittests.tap'),
         suite : 'mmpack-build',
         env : env,
-        depends : do_deployment_test,
+        depends : [do_deployment_test, do_test_repo],
 )
 
 test('mmpack-build-meson',
