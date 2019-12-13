@@ -38,7 +38,7 @@ config_data = configuration_data({
     'mmpackbuilddir' : get_option('prefix') + '/' + get_option('datadir') + '/mmpack/python',
     'pkgdatadir' : get_option('prefix') + '/' + get_option('datadir') + '/mmpack',
     'python_install_dir' : python.get_install_dir(),
-
+    'package_version' : meson.project_version(),
     'exeext' : exeext,
 })
 

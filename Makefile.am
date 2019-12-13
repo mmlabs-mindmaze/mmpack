@@ -230,6 +230,7 @@ mmpack_check_sysdep_LDADD = \
 	$(AM_V_GEN)$(SED) -e 's,@pkgdatadir[@],$(pkgdatadir),g' \
 		-e 's,@libexecdir[@],$(libexecdir),g' \
 		-e 's,@bindir[@],$(bindir),g' \
+		-e 's,@package_version[@],$(PACKAGE_VERSION),g' \
 		-e 's,@exeext[@],$(EXEEXT),g' < $< > $@
 
 src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in

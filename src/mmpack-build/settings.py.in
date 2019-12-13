@@ -24,3 +24,4 @@ EXEEXT = r'@exeext@'
 PKGDATADIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@pkgdatadir@')  # noqa
 LIBEXECDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@libexecdir@')  # noqa
 BINDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@bindir@')  # noqa
+PACKAGE_VERSION = r'@package_version@'

@@ -12,6 +12,7 @@ from . import mmpack_builddep
 from . import mmpack_clean
 from . import mmpack_pkg_create
 from . import common
+from . settings import PACKAGE_VERSION
 
 
 # all subcommand MUST expose:
@@ -73,6 +74,8 @@ def main():
                         help='execute sub-command')
     parser.add_argument("-h", "--help", help="show this help message and exit",
                         action="store_true", default=False)
+    parser.add_argument("-v", "--version", help="show version and exit",
+                        action="store_true", default=False)
     parser.add_argument("-q", "--quiet", help="silence output",
                         action="store_true", default=False)
     parser.add_argument("-d", "--debug", help="toggle debug mode",
@@ -82,12 +85,14 @@ def main():
     common.CONFIG['verbose'] = not args.quiet
     common.CONFIG['debug'] = args.debug
 
-    if args.help:  # show help
+    if args.help or args.version:  # handle flags
         if args.command:
             # sub-command flags in common with this script must be re-added
             ret = launch_subcommand(args.command, ['--help'] + subargs)
-        else:
+        elif args.help:
             parser.print_help()
+        else:  # args.version
+            print('mmpack-build', PACKAGE_VERSION)
     else:  # launch sub-command
         if not args.command:
             args.command = 'pkg-create'  # default sub-command
