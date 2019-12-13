@@ -124,15 +124,21 @@ int main(int argc, char* argv[])
 	/* Parse command line options and subcmd. cmd_argv and cmd_argc are
 	 * updated so that cmd_argv[0] point to sub command */
 	subcmd = subcmd_parse(&parser, &cmd_argc, &cmd_argv);
-	if (!subcmd)
-		return EXIT_FAILURE;
 
-	/* handle non-command options */
+	/* handle non-command options first */
 	if (cmdline_opts.version) {
 		if (!mmarg_is_completing())
 			printf("%s\n", PACKAGE_STRING);
 
 		return EXIT_SUCCESS;
+	}
+
+	/* make sure we have a subcommand before proceeding */
+	if (subcmd == NULL) {
+		fprintf(stderr, "Invalid number of argument."
+		        " Run \"%s --help\" to see Usage\n",
+		        parser.execname);
+		return EXIT_FAILURE;
 	}
 
 	init_stdout();

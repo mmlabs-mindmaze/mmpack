@@ -76,7 +76,7 @@ const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
 	int argc = *p_argc;
 	const char* argcmd;
 	const char** argv = *p_argv;
-	const struct subcmd* subcmd;
+	const struct subcmd* subcmd = NULL;
 
 	/* Parse command line options */
 	arg_index = mmarg_parse(&argparser, argc, (char**)argv);
@@ -92,15 +92,10 @@ const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
 
 	/* Check command is supplied, if not use default */
 	argcmd = (arg_index+1 > argc) ? parser->defcmd : argv[arg_index];
-	if (!argcmd) {
-		fprintf(stderr, "Invalid number of argument."
-		        " Run \"%s --help\" to see Usage\n",
-		        parser->execname);
-		return NULL;
-	}
+	if (!argcmd)
+		goto exit;
 
 	/* Get command function to execute */
-	subcmd = NULL;
 	for (i = 0; i < parser->num_subcmd; i++) {
 		if (strcmp(parser->subcmds[i].name, argcmd) == 0)
 			subcmd = &parser->subcmds[i];
@@ -113,6 +108,7 @@ const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
 		return NULL;
 	}
 
+exit:
 	*p_argv = argv + arg_index;
 	*p_argc = argc - arg_index;
 
