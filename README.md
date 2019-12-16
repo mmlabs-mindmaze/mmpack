@@ -209,7 +209,7 @@ supports the most widespread build-systems: Makefile, Autotools, Meson.
 mmpack-build just needs the so-called _mmpack/spec_-file; a simple example is
 given by
 
-```
+``` yaml
 general:
     name: mmpack-hello-world
     version: 1.0.0
