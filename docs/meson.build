@@ -78,6 +78,7 @@ custom_target('html',
             'docs/html',
         ],
         build_by_default : true,
+        depend_files : files('conf.py'),
         install : true,
         install_dir : get_option('datadir') / 'doc/mmpack',
 )
