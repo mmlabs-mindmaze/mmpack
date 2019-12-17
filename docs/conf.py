@@ -67,11 +67,18 @@ import sphinx_rtd_theme
 html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path(), '.']
 
 html_use_index = True
 html_split_index = False
 html_search_language = 'en'
+
+html_favicon = 'favicon.png'
+html_logo = 'logo.png'
+
+html_theme_options = {
+    'logo_only': True,
+}
 
 
 # Output file base name for HTML help builder.
