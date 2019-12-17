@@ -124,7 +124,7 @@ exit:
  *
  * Return: the package having the name @pkg_name and the version @pkg_version.
  *         In the case where @pkg_version is NULL (the entry was "pkg_name"
- *         without the "=pkg_version"), the package returned is the lastest one.
+ *         without the "=pkg_version"), the package returned is the latest one.
  *         If no such package is found, NULL is returned.
  */
 LOCAL_SYMBOL
