@@ -508,7 +508,9 @@ user-doc: user-doc-buildstamp
 user-doc-buildstamp: $(all_user_doc_sources)
 	@rm -vf $@
 	mkdir -p $(builddir)/html/user-doc
-	$(AM_V_GEN) $(SPHINXBUILD) -b html $(srcdir)/docs/ $(builddir)/html/user-doc
+	$(AM_V_GEN) $(SPHINXBUILD) \
+		-D version=$(PACKAGE_VERSION) \
+		-b html $(srcdir)/docs/ $(builddir)/html/user-doc
 	@touch $@
 
 user-doc-clean:
