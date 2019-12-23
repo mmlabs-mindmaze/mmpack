@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "368ad637_908cb312",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 801,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2019-12-23T17:56:20Z",
+      "side": 1,
+      "message": "Please specify that latest package is provided if no version or \"any\" is set in @version",
+      "revId": "d297734428b408cc2cf8b0a819f4bc7fcdfb547a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
