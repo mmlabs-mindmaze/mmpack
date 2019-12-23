@@ -800,66 +800,35 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
  * @name:        package name
  * @version:     package version
  *
- * Return: NULL on error, a pointer to the found package otherwise
+ * Return: NULL on error, a pointer to the found package otherwise. In case
+ *         @version is NULL or set to "any", the latest version of the package
+ *         is returned by the function.
  */
 LOCAL_SYMBOL
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
                                     mmstr const * name, char const * version)
 {
-	struct mmpkg const * pkg;
-	STATIC_CONST_MMSTR(any_version, "any");
-	if (version == NULL)
-		version = any_version;
-
-	pkg = binindex_get_latest_pkg(binindex, name, version);
-	if (pkg == NULL
-	    || pkg_version_compare(pkg->version, version) < 0) {
-		return NULL;
-	}
-
-	return pkg;
-}
-
-
-/**
- * binindex_get_latest_pkg() - get the latest possible version of given package
- *                             inferior to given maximum
- * @binindex:    binary package index
- * @name:        package name
- * @max_version: inclusive maximum boundary
- *
- * Return: NULL on error, a pointer to the found package otherwise
- */
-LOCAL_SYMBOL
-struct mmpkg const* binindex_get_latest_pkg(struct binindex* binindex,
-                                            mmstr const * name,
-                                            char const * max_version)
-{
-	struct mmpkg * pkg, * latest_pkg;
-	struct pkglist_entry* pkgentry;
-	struct pkglist* list;
-	const char* latest_version;
+	struct mmpkg * pkg;
+	struct pkglist_entry * pkgentry;
+	struct pkglist * list;
+	char const * pkg_version = version ? version : "any";
 
 	list = binindex_get_pkglist(binindex, name);
 	if (list == NULL)
 		return NULL;
 
 	pkgentry = list->head;
-	latest_version = "any";
-	latest_pkg = NULL;
 
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
-		if (pkg_version_compare(latest_version, pkg->version) <= 0
-		    && pkg_version_compare(pkg->version, max_version) <= 0) {
-			latest_pkg = pkg;
-			latest_version = pkg->version;
+		if (pkg_version_compare(pkg->version, pkg_version) == 0) {
+			return pkg;
 		}
 
 		pkgentry = pkgentry->next;
 	}
 
-	return latest_pkg;
+	return NULL;
 }
 
 

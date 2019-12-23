@@ -33,7 +33,6 @@ static const struct mmarg_opt cmdline_optv[] = {
 static
 struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 {
-	STATIC_CONST_MMSTR(any_version, "any");
 	struct pkg_request * req, * reqlist;
 	struct it_iterator iter;
 	struct it_entry * entry;
@@ -45,8 +44,7 @@ struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 	entry = it_iter_first(&iter, &ctx->installed.idx);
 	for (; entry != NULL; entry = it_iter_next(&iter)) {
 		pkg = entry->value;
-		latest = binindex_get_latest_pkg(&ctx->binindex, pkg->name,
-		                                 any_version);
+		latest = binindex_lookup(&ctx->binindex, pkg->name, "any");
 		if (pkg_version_compare(pkg->version, latest->version) >= 0)
 			continue;
 
@@ -91,7 +89,6 @@ int get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
                             char const ** req_args,
                             struct pkg_request ** reqlist)
 {
-	STATIC_CONST_MMSTR(any_version, "any");
 	int i;
 	struct pkg_request * req;
 	mmstr * pkg_name;
@@ -113,9 +110,7 @@ int get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 		}
 
 		mmstr_free(pkg_name);
-		latest = binindex_get_latest_pkg(&ctx->binindex,
-		                                 pkg->name,
-		                                 any_version);
+		latest = binindex_lookup(&ctx->binindex, pkg->name, "any");
 
 		if (pkg_version_compare(pkg->version, latest->version) >= 0) {
 			printf("Package \"%s\" is already at its"
