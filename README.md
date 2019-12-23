@@ -64,14 +64,14 @@ deb-src http://opensource.mindmaze.com/debrepos unstable main
 The gpg key must also be added in the apt gpg folder:
 
 ``` bash
-$> curl https://opensource.mindmaze.com/debrepos/mindmaze-opensource.gpg | sudo tee /etc/apt/trusted.gpg.d/mindmaze-opensource.gpg > /dev/null
+curl https://opensource.mindmaze.com/debrepos/mindmaze-opensource.gpg | sudo tee /etc/apt/trusted.gpg.d/mindmaze-opensource.gpg > /dev/null
 ```
 
-Then it is a matter of:
+Then it is a matter of (as root or with sudo):
 
 ``` bash
-$> sudo apt update
-$> sudo apt install mmpack
+apt update
+apt install mmpack
 ```
 
 #### Windows systems (MSYS2)
@@ -87,8 +87,8 @@ Server = https://opensource.mindmaze.com/mingw
 Then run:
 
 ``` bash
-$> pacman -Syy
-$> pacman -S mmpack
+pacman -Syy
+pacman -S mmpack
 ```
 
 ## Usage
@@ -108,7 +108,7 @@ Each prefix can be associated with one or several upstream repositories for
 installing software right away; to create a prefix run:
 
 ``` bash
-$> mmpack mkprefix --url=<http://repository/url> $MMPACK_PREFIX
+mmpack mkprefix --url=<http://repository/url> $MMPACK_PREFIX
 ```
 
 (See the section below about installing software through repositories)
@@ -132,14 +132,14 @@ it is inside a user accessible folder).
 mmpack sports some of the most common commands among package managers:
 
 ``` bash
-$> # update package list from the repository url(s) of prefix <prefix_name>
-$> mmpack --prefix=<prefix_name> update
-$>
-$> # search for available package in the prefix <prefix_name>
-$> mmpack --prefix=<prefix_name> search <package-name>
-$>
-$> # install <package-name> in the prefix <prefix_name>
-$> mmpack --prefix=<prefix_name> install <package-name>
+# update package list from the repository url(s) of prefix <prefix_name>
+mmpack --prefix=<prefix_name> update
+
+# search for available package in the prefix <prefix_name>
+mmpack --prefix=<prefix_name> search <package-name>
+
+# install <package-name> in the prefix <prefix_name>
+mmpack --prefix=<prefix_name> install <package-name>
 ```
 
 Other useful commands include _list_ and _upgrade_.
@@ -150,16 +150,16 @@ use the environment variable $MMPACK_PREFIX; the following commands have hence
 the same effect as the above ones:
 
 ``` bash
-$> export $MMPACK_PREFIX=<prefix_name>
-$>
-$> # update package list from the repository url(s) of prefix <prefix_name>
-$> mmpack update
-$>
-$> # search for available package in the prefix <prefix_name>
-$> mmpack search <package-name>
-$>
-$> # install <package-name> in the prefix <prefix_name>
-$> mmpack install <package-name>
+export $MMPACK_PREFIX=<prefix_name>
+
+# update package list from the repository url(s) of prefix <prefix_name>
+mmpack update
+
+# search for available package in the prefix <prefix_name>
+mmpack search <package-name>
+
+# install <package-name> in the prefix <prefix_name>
+mmpack install <package-name>
 ```
 
 #### Run mmpack software
@@ -167,15 +167,15 @@ $> mmpack install <package-name>
 To run mmack software, just invoke the `<command>` with:
 
 ``` bash
-$> mmpack run <command>
+mmpack run <command>
 ```
 
 Referring to the example for software A:
 
 ``` bash
-$> A #  runs the system-wide installed version
-$> mmpack run --prefix=j A #  runs A from prefix j
-$> mmpack run --prefix=k A #  runs A from prefix k, which loads patched B
+A #  runs the system-wide installed version
+mmpack run --prefix=j A #  runs A from prefix j
+mmpack run --prefix=k A #  runs A from prefix k, which loads patched B
 ```
 
 If no command is provided, the default $SHELL is launched.  Inside this shell
@@ -186,8 +186,8 @@ to the root filesystem).
 Again, wrt the above example,
 
 ``` bash
-$> mmpack run --prefix=j #  enters prefix j environment
-$> A #  runs A from prefix j
+mmpack run --prefix=j #  enters prefix j environment
+A #  runs A from prefix j
 ```
 
 For the ease of use, the possibility to specify prefixes with an environment
@@ -195,10 +195,10 @@ variable has been introduced; so the following two invocations have the same
 effect;
 
 ``` bash
-$> mmpack run --prefix=j A #  runs A from prefix j
-$>
-$> export MMPACK_PREFIX=j
-$> mmpack run A #  runs A from prefix j
+mmpack run --prefix=j A #  runs A from prefix j
+
+export MMPACK_PREFIX=j
+mmpack run A #  runs A from prefix j
 ```
 
 #### Package creation
@@ -227,7 +227,7 @@ for in-depth details about spec files.  Provided sources and the mmpack/spec
 file, building the package is as easy as typing:
 
 ``` bash
-$> mmpack-build pkg-create
+mmpack-build pkg-create
 ```
 
 ## Contribute
