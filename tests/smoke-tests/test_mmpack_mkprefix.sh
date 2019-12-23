@@ -13,20 +13,18 @@ diff_tree()
 {
 	if [ $# -eq 1 ]
 	then
-		diff <(find $PREFIX_TEST -type f | sort) <(cat <<EOF
+		diff - <(find $PREFIX_TEST -type f | sort) <<EOF
 $PREFIX_TEST/etc/mmpack-config.yaml
 $1
 $PREFIX_TEST/var/lib/mmpack/installed.yaml
 $PREFIX_TEST/var/log/mmpack.log
 EOF
-)
 	else
-		diff <(find $PREFIX_TEST -type f | sort) <(cat <<EOF
+		diff - <(find $PREFIX_TEST -type f | sort) <<EOF
 $PREFIX_TEST/etc/mmpack-config.yaml
 $PREFIX_TEST/var/lib/mmpack/installed.yaml
 $PREFIX_TEST/var/log/mmpack.log
 EOF
-)
 	fi
 }
 
@@ -46,10 +44,9 @@ mmpack mkprefix $PREFIX_TEST
 
 tests_tree_and_files
 
-diff $PREFIX_TEST/etc/mmpack-config.yaml <(cat <<EOF
+diff - $PREFIX_TEST/etc/mmpack-config.yaml <<EOF
 repositories:
 EOF
-)
 
 cleanup
 
@@ -58,13 +55,12 @@ mmpack mkprefix --url=my_url $PREFIX_TEST
 
 tests_tree_and_files $PREFIX_TEST/var/lib/mmpack/binindex.yaml.repo-0
 
-diff $PREFIX_TEST/etc/mmpack-config.yaml <(cat <<EOF
+diff - $PREFIX_TEST/etc/mmpack-config.yaml <<EOF
 repositories:
   - repo-0:
         url: my_url
         enabled: 1
 EOF
-)
 
 cleanup
 
@@ -73,10 +69,9 @@ mmpack mkprefix --name=my_name --url=my_url $PREFIX_TEST
 
 tests_tree_and_files $PREFIX_TEST/var/lib/mmpack/binindex.yaml.my_name
 
-diff $PREFIX_TEST/etc/mmpack-config.yaml <(cat <<EOF
+diff - $PREFIX_TEST/etc/mmpack-config.yaml <<EOF
 repositories:
   - my_name:
         url: my_url
         enabled: 1
 EOF
-)
