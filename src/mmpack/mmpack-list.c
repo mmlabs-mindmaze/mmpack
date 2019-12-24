@@ -175,11 +175,10 @@ int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 	for (; entry != NULL; entry = it_iter_next(&iter)) {
 		pkg = entry->value;
 
-		// test against the version of latest package available
-		latest = binindex_lookup(&ctx->binindex, pkg->name, "any");
-		if (pkg_version_compare(pkg->version, latest->version) >= 0)
+		if (!binindex_is_pkg_upgradeable(&ctx->binindex, pkg))
 			continue;
 
+		latest = binindex_lookup(&ctx->binindex, pkg->name, "any");
 		found |= print_pkg_if_match(latest, pattern);
 	}
 
