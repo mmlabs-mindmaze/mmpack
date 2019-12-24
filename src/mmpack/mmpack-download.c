@@ -64,7 +64,7 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	if ((pkg = parse_pkg(ctx, argv[arg_index])) == NULL)
+	if ((pkg = parse_pkg(ctx, argv[arg_index], NULL)) == NULL)
 		return -1;
 
 	if (pkg->from_repo != NULL) {

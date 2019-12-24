@@ -121,6 +121,7 @@ exit:
  *
  * @binindex      the binary package index
  * @pkg_req:      an entry matching either "pkg_name=pkg_version" or "pkg_name"
+ * @repo_name: name of the repository from which we want to retrieve the package
  *
  * Return: the package having the name @pkg_name and the version @pkg_version.
  *         In the case where @pkg_version is NULL (the entry was "pkg_name"
@@ -128,7 +129,8 @@ exit:
  *         If no such package is found, NULL is returned.
  */
 LOCAL_SYMBOL
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req)
+struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req,
+                              struct repolist_elt const * repo)
 {
 	const char * separator;
 	const mmstr * pkg_name;
@@ -146,7 +148,8 @@ struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req)
 		pkg_version = NULL;
 	}
 
-	if (!(pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version)))
+	if (!(pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version,
+	                            repo)))
 		info("No package %s (%s)\n", pkg_name,
 		     pkg_version ? pkg_version : "any version");
 
