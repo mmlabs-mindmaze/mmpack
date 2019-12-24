@@ -92,7 +92,7 @@ int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	if ((pkg = parse_pkg(ctx, argv[1])) == NULL)
+	if ((pkg = parse_pkg(ctx, argv[1], NULL)) == NULL)
 		return -1;
 
 	return download_pkg_sources(ctx, pkg);

@@ -52,7 +52,8 @@ struct subcmd_parser {
 
 const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
                                   int* p_argc, const char*** p_argv);
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req);
+struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req,
+                              struct repolist_elt const * repo);
 struct mmpkg const* find_package_by_sumsha(struct mmpack_ctx * ctx,
                                            const char* pkg_req);
 int complete_pkgname(struct mmpack_ctx * ctx, const char* arg,
