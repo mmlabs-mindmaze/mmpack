@@ -117,41 +117,54 @@ exit:
 
 
 /**
+ * parse_pkgreq() -  fills the request asked by the user.
+ *
+ * @pkg_req: an entry matching "pkg_name[=pkg_version]"
+ * @req:     the request to fill
+ */
+static
+void parse_pkgreq(const char* pkg_req, struct pkg_request * req)
+{
+	const char * separator;
+
+	/* Find the first occurrence of '=' */
+	separator = strchr(pkg_req, '=');
+	if (separator == NULL)
+		req->name = mmstr_malloc_from_cstr(pkg_req);
+	else {
+		req->name = mmstr_malloc_copy(pkg_req, separator - pkg_req);
+		req->version = mmstr_malloc_from_cstr(separator + 1);
+	}
+}
+
+
+/**
  * parse_pkg() -  returns the package wanted.
  *
- * @binindex      the binary package index
- * @pkg_req:      an entry matching either "pkg_name=pkg_version" or "pkg_name"
+ * @ctx:          context associated with prefix
+ * @pkg_arg:      an entry matching "pkg_name[=pkg_version]"
  *
- * Return: the package having the name @pkg_name and the version @pkg_version.
- *         In the case where @pkg_version is NULL (the entry was "pkg_name"
+ * Return: the package having pkg_name as name and pkg_version as version.
+ *         In the case where pkg_version is NULL (the entry was "pkg_name"
  *         without the "=pkg_version"), the package returned is the latest one.
  *         If no such package is found, NULL is returned.
  */
 LOCAL_SYMBOL
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req)
+struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg)
 {
-	const char * separator;
-	const mmstr * pkg_name;
-	const mmstr * pkg_version;
+	struct pkg_request * req;
 	struct mmpkg const* pkg;
 
-	/* Find the first occurrence of '=' */
-	separator = strchr(pkg_req, '=');
-	if (separator != NULL) {
-		/* The package name is before the '=' character */
-		pkg_name = mmstr_malloc_copy(pkg_req, separator - pkg_req);
-		pkg_version = mmstr_malloc_from_cstr(separator + 1);
-	} else {
-		pkg_name = mmstr_malloc_from_cstr(pkg_req);
-		pkg_version = NULL;
-	}
+	req = malloc(sizeof(struct pkg_request));
+	pkg_request_init(req);
 
-	if (!(pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version)))
-		info("No package %s (%s)\n", pkg_name,
-		     pkg_version ? pkg_version : "any version");
+	parse_pkgreq(pkg_arg, req);
+	if (!(pkg = binindex_lookup(&ctx->binindex, req)))
+		info("No package %s (%s)\n", req->name,
+		     req->version ? req->version : "any version");
 
-	mmstr_free(pkg_version);
-	mmstr_free(pkg_name);
+	pkg_request_deinit(req);
+	free(req);
 	return pkg;
 }
 
