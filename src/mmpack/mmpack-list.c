@@ -178,7 +178,8 @@ int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 		if (!binindex_is_pkg_upgradeable(&ctx->binindex, pkg))
 			continue;
 
-		latest = binindex_lookup(&ctx->binindex, pkg->name, "any");
+		latest = binindex_lookup(&ctx->binindex, pkg->name, NULL);
+
 		found |= print_pkg_if_match(latest, pattern);
 	}
 
