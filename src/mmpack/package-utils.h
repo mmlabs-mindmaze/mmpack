@@ -163,6 +163,8 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 struct mmpkg const* binindex_get_latest_pkg(struct binindex* binindex,
                                             mmstr const * name,
                                             char const * max_version);
+int binindex_is_pkg_upgradeable(struct binindex const * binindex,
+                                struct mmpkg const * pkg);
 void binindex_init(struct binindex* binindex);
 void binindex_deinit(struct binindex* binindex);
 struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
