@@ -14,6 +14,7 @@
 #include <mmsysio.h>
 #include <string.h>
 
+#include "action-solver.h"
 #include "cmdline.h"
 #include "context.h"
 #include "package-utils.h"
@@ -42,6 +43,7 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	int arg_index, rv = -1;
 	mmstr * basename;
 	struct mmpkg const * pkg;
+
 	struct mmarg_parser parser = {
 		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
 		.doc = download_doc,

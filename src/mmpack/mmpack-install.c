@@ -52,7 +52,6 @@ int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
                             const char* arg)
 {
 	int len;
-	const char * v;
 	struct mmpkg * pkg;
 	mmstr * tmp, * arg_full;
 
@@ -74,20 +73,7 @@ int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
 		return 0;
 	}
 
-	req->pkg = NULL;
-
-	// Find the first occurrence of '='
-	v = strchr(arg, '=');
-	if (v != NULL) {
-		// The package name is before the '=' character
-		req->name = mmstr_malloc_copy(arg, v - arg);
-		req->version = mmstr_malloc_from_cstr(v+1);
-	} else {
-		req->name = mmstr_malloc_from_cstr(arg);
-		req->version = NULL;
-	}
-
-	return 0;
+	return 1;
 }
 
 
@@ -105,8 +91,9 @@ LOCAL_SYMBOL
 int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct pkg_request* reqlist = NULL;
+	struct pkg_request * tmp = NULL;
 	struct action_stack* act_stack = NULL;
-	int i, nreq, arg_index, rv = -1;
+	int i, nreq, arg_index, ret, rv = -1;
 	const char** req_args;
 	struct mmarg_parser parser = {
 		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
@@ -139,8 +126,13 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	reqlist = xx_malloca(nreq * sizeof(*reqlist));
 	memset(reqlist, 0, nreq * sizeof(*reqlist));
 	for (i = 0; i < nreq; i++) {
-		if (fill_pkgreq_from_cmdarg(ctx, &reqlist[i], req_args[i]) < 0)
+		if ((ret = fill_pkgreq_from_cmdarg(ctx, &reqlist[i], req_args[i]))
+		    < 0)
 			goto exit;
+		else if (ret == 1) {
+			tmp = parse_pkgreq(req_args[i]);
+			reqlist[i] = *tmp;
+		}
 
 		reqlist[i].next = (i == nreq-1) ? NULL : &reqlist[i+1];
 	}
@@ -162,12 +154,7 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 exit:
 	mmpack_action_stack_destroy(act_stack);
-	for (i = 0; i < nreq && reqlist; i++) {
-		mmstr_free(reqlist[i].name);
-		mmstr_free(reqlist[i].version);
-		/* do not free reqlist package */
-	}
-
+	pkg_request_deinit(&reqlist);
 	mm_freea(reqlist);
 	return rv;
 }
