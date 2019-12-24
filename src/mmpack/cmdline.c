@@ -117,42 +117,71 @@ exit:
 
 
 /**
- * parse_pkg() -  returns the package wanted.
+ * cmdline_constraints_init  -  init a structure struct cmdline_constraints
  *
- * @binindex      the binary package index
- * @pkg_req:      an entry matching either "pkg_name=pkg_version" or "pkg_name"
- *
- * Return: the package having the name @pkg_name and the version @pkg_version.
- *         In the case where @pkg_version is NULL (the entry was "pkg_name"
- *         without the "=pkg_version"), the package returned is the latest one.
- *         If no such package is found, NULL is returned.
+ * @cc: pointer to the structure to initialize
  */
 LOCAL_SYMBOL
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req)
+void cmdline_constraints_init(struct cmdline_constraints ** cc)
 {
-	const char * separator;
-	const mmstr * pkg_name;
-	const mmstr * pkg_version;
-	struct mmpkg const* pkg;
+	**cc = (struct cmdline_constraints) {0};	
+}
+
+
+/**
+ * cmdline_constraints_deinit  -  deinit a structure struct cmdline_constraints
+ *
+ * @cc: the structure to deinitialize
+ */
+LOCAL_SYMBOL
+void cmdline_constraints_deinit(struct cmdline_constraints ** cc)
+{
+	  mmstr_free((*cc)->pkg_name);
+	  mmstr_free((*cc)->pkg_version);
+	  mmstr_free((*cc)->pkg_sumsha);
+}
+
+
+/**
+ * parse_cmdline() -  returns the structure of constraints imposed by the user.
+ *
+ * @pkg_req: an entry matching either "pkg_name=sumsha:sumsha", 
+ *           "pkg_name=pkg_version" or "pkg_name"
+ *
+ * Return: the structure of constraints imposed by the user in case of success,
+ *         NULL otherwise.
+ */
+LOCAL_SYMBOL
+struct cmdline_constraints * parse_cmdline(const char* pkg_req)
+{
+	const char * first_sep;
+	const char * second_sep;
+	struct cmdline_constraints * r;
+
+       	cmdline_constraints_init(&r);
 
 	/* Find the first occurrence of '=' */
-	separator = strchr(pkg_req, '=');
-	if (separator != NULL) {
+	first_sep = strchr(pkg_req, '=');
+	second_sep = strchr(pkg_req, ':');
+	if (first_sep == NULL && second_sep == NULL)
+		r->pkg_name = mmstr_malloc_from_cstr(pkg_req);
+	else { 
 		/* The package name is before the '=' character */
-		pkg_name = mmstr_malloc_copy(pkg_req, separator - pkg_req);
-		pkg_version = mmstr_malloc_from_cstr(separator + 1);
-	} else {
-		pkg_name = mmstr_malloc_from_cstr(pkg_req);
-		pkg_version = NULL;
+		r->pkg_name = mmstr_malloc_copy(pkg_req, first_sep - pkg_req);
+		if (second_sep == NULL)
+			r->pkg_version = mmstr_malloc_from_cstr(first_sep + 1);
+		else {
+			if (!strncmp(first_sep + 1, "sumsha:", 
+			             strlen("sumsha:")))
+				r->pkg_sumsha = mmstr_malloc_from_cstr(second_sep + 1);
+			else {
+				error("Bad command line syntax");
+				return NULL;
+			}
+		}
 	}
 
-	if (!(pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version)))
-		info("No package %s (%s)\n", pkg_name,
-		     pkg_version ? pkg_version : "any version");
-
-	mmstr_free(pkg_version);
-	mmstr_free(pkg_name);
-	return pkg;
+	return r;
 }
 
 

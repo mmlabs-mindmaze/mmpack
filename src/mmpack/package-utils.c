@@ -795,23 +795,28 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
 
 
 /**
- * binindex_lookup() - get a package according to its name and version
- * @binindex:    binary package index
- * @name:        package name
- * @version:     package version. In case this parameter is NULL or set to
- *               "any", the latest version of the package is returned by the
- *               function.
+ * binindex_lookup() - get a package according to some constraints asked by the
+ *                     user.
+ * @binindex:   binary package index
+ * @cc:         constraints permitting to filter on the appropriate package
  *
  * Return: NULL on error, a pointer to the found package otherwise
  */
 LOCAL_SYMBOL
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version)
+                                    struct cmdline const * cc)
 {
 	struct mmpkg * pkg;
 	struct pkglist_entry * pkgentry;
 	struct pkglist * list;
 	char const * pkg_version = version ? version : "any";
+
+// TODO: modify the body of the function to retrieve the pkg depending on the 
+// fields set in cc.
+//if (cc->pkg_version...
+//else if (cc->pkg_sumsha...
+
+
 
 	list = binindex_get_pkglist(binindex, name);
 	if (list == NULL)
