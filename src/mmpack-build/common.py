@@ -15,6 +15,7 @@ from hashlib import sha256
 from subprocess import PIPE, run
 from typing import Union, Tuple
 
+import urllib3
 import yaml
 
 CONFIG = {'debug': True, 'verbose': True}
@@ -455,3 +456,14 @@ def get_name_version_from_srcdir(srcdir: str) -> Tuple[str, str]:
     """
     specs = yaml_load(srcdir + '/mmpack/specs')
     return (specs['general']['name'], specs['general']['version'])
+
+
+def download_file(url: str, path: str):
+    """
+    Download file from url to the specified path
+    """
+    iprint('Downloading {}...'.format(url))
+    request = urllib3.PoolManager().request('GET', url)
+    with open(path, 'wb') as outfile:
+        outfile.write(request.data)
+    iprint('Done')

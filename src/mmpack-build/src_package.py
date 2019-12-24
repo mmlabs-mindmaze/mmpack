@@ -77,15 +77,14 @@ class SrcPackage:
     Source package class.
     """
 
-    def __init__(self, specfile: str, tag: str, srctar_path: str,
-                 ghost: str = None):
+    def __init__(self, specfile: str, tag: str, srctar_path: str):
         # pylint: disable=too-many-arguments
         self.name = None
         self.tag = tag
         self.version = None
         self.url = None
         self.maintainer = None
-        self.ghost = ghost
+        self.ghost = False
         self.src_tarball = srctar_path
         self.src_hash = sha256sum(srctar_path)
 
@@ -239,6 +238,8 @@ class SrcPackage:
                 self.build_depends = value
             elif key == 'build-system':
                 self.build_system = value
+            elif key == 'ghost-syspkg':
+                self.ghost = value
 
     def _binpkg_get_create(self, binpkg_name: str,
                            pkg_type: str = None) -> BinaryPackage:
@@ -285,6 +286,9 @@ class SrcPackage:
                     for dep in self._specs[pkg][sysdeps_key]:
                         binpkg.add_sysdepend(dep)
                 self._packages[pkg] = binpkg
+
+    def _fetch_unpack_syspkg(self):
+        sdf
 
     def _build_env(self, skip_tests: bool):
         wrk = Workspace()
@@ -353,6 +357,10 @@ class SrcPackage:
         pushdir(self.unpack_path())
         os.makedirs('build')
         os.makedirs(self._local_install_path(), exist_ok=True)
+
+        if self.ghost:
+            self._fetch_unpack_syspkg()
+            return
 
         if not self.build_system:
             self._guess_build_system()
@@ -570,12 +578,7 @@ class SrcPackage:
         # manager instead of the mmpack packages. They are only needed for
         # generating dependencies and seeing what is provided.
         if self.ghost:
-            deblist = glob(self.unpack_path() + '/*.deb')
             for binpkg in self._packages.values():
-                for mmpack_file in binpkg.install_files:
-                    deb_pkgname = dpkg_which_provides(deblist, mmpack_file)
-                    binpkg.add_sysdepend(deb_pkgname)
-
                 dprint('Remove all files associated to package ' + binpkg.name)
                 binpkg.install_files = set()
 

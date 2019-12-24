@@ -5,9 +5,10 @@ helper module containing dpkg files parsing functions
 
 import os
 import re
+import gzip
 
 from glob import glob
-from typing import List
+from typing import List, Dict
 
 from . common import *
 from . mm_version import Version
@@ -241,43 +242,47 @@ def dpkg_find_pypkg(pypkg: str) -> str:
     return debpkg_list[0] if debpkg_list else None
 
 
-def dpkg_which_provides(deblist: List[str], filename) -> str:
+def _download_packages_index(repo_url: str, builddir: str) -> str:
+    arch = get_host_arch()
+    outpath_gzipped = os.path.join(builddir, 'Packages.gz')
+    outpath = os.join(builddir, 'Packages.gz')
+    packages_url = '{}/dists/stable/main/binary-{}/Packages.gz'.format(repo_url, arch)
+
+    # download compressed index
+    download_file(packages_url, out_gzipped)
+
+    # uncompress index
+    with open(outpath, 'wb') as outfile:
+        with gzip.open(outpath_gzipped, 'rb') as outfile_gzipped:
+            outfile.write(outfile_gzipped.read())
+
+    return outpath
+
+
+def _parse_packages(pkg_index_path: str, srcpkg: str) -> List[Dict[str, str]]:
+    pkg_list = []
+    pkg = dict()
+
+    with open(pkg_index_path, 'rt') as index_file:
+        for line in index_file:
+            try:
+                key, data = line.split(':', 1)
+                if key in ('Name', 'Source', 'Filename', 'Version'):
+                    pkg[key] = data.strip()
+            else:
+                if pkg.getenv('Source') == srcpkg:
+                    pkg_list.append(pkg)
+                pkg = dict()
+
+    return pkg_list
+
+
+def dpkg_fetch_unpack(srcpkg: str, builddir: str, unpackdir: str):
     """
     Find which package in given list provides some file.
 
     Return:
         the package *name* as understood by debian, NOT the package file name.
     """
-    for pkg in deblist:
-        pkg_content = shell('dpkg-deb --contents {}'.format(pkg))
-        for line in pkg_content.split('\n'):
-            if filename in line:
-                return shell('dpkg-deb --field {} Package'.format(pkg))
-
-    errmsg = '{} is not provided by any given package:\n\t{}' \
-             .format(filename, '\n\t'.join(deblist))
-    raise AssertionError(errmsg)
-
-
-def dpkg_fetch_deb_packages(specfile, tag):
-    """
-    Download the debian packages according to the mmpack specs.
-
-    Args:
-        specfile: path to the mmpack/specs file
-        tag: project tag (expects "from-deb")
-    """
-    wrk = Workspace()
-
-    dprint('loading specfile: ' + specfile)
-    specs = yaml_load(specfile)
-    name = specs['general']['name']
-    packages = specs['general']['shell-deb']
-
-    builddir = wrk.builddir(name, tag)
-    unpackdir = os.path.join(builddir, name)
-
-    os.makedirs(unpackdir, exist_ok=True)
-    pushdir(unpackdir)
-    shell('apt-get download ' + packages)
-    popdir()
+    base_repo_url = 'http://debian.proxad.net/debian'
+    pkgindex_path = _download_packages_index(base_repo_url, builddir)
