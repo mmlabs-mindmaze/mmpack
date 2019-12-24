@@ -7,8 +7,6 @@ import shutil
 from tempfile import mkdtemp
 from typing import Dict
 
-import urllib3
-
 from . common import *
 from . workspace import Workspace
 
@@ -242,12 +240,7 @@ class SourceTarball:
         filename = os.path.basename(url)
         downloaded_file = os.path.join(self._srcdir, 'mmpack', filename)
 
-        # Download remote tar
-        iprint('Downloading {}...'.format(url))
-        request = urllib3.PoolManager().request('GET', url)
-        with open(downloaded_file, 'wb') as outfile:
-            outfile.write(request.data)
-        iprint('Done')
+        download(url, downloaded_file)
 
         # Verify sha256 is correct if supplied in specs
         file_hash = sha256sum(downloaded_file)
