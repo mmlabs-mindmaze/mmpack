@@ -14,7 +14,7 @@ install packages
 SYNOPSIS
 ========
 
-``mmpack install`` [-y|--assume-yes] *pkg1* [= *version1*] [*pkg2* [= *version2*] [...]]
+``mmpack install`` [-y|--assume-yes] [--repo=name] *pkg1* [= *version1*] [*pkg2* [= *version2*] [...]]
 
 ``mmpack install`` -h|--help
 
@@ -37,6 +37,9 @@ OPTIONS
 
 ``-y|--assume-yes``
   Assume yes as answer to all prompts and run non-interactively.
+
+``--repo``
+  Filter on repository name
 
 SEE ALSO
 ========
