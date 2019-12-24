@@ -22,6 +22,7 @@
 
 
 static int is_yes_assumed = 0;
+static const char * repo_name = NULL;
 
 static char install_doc[] =
 	"\"mmpack install\" downloads and installs given packages and "
@@ -32,6 +33,8 @@ static char install_doc[] =
 static const struct mmarg_opt cmdline_optv[] = {
 	{"y|assume-yes", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &is_yes_assumed},
 	 "assume \"yes\" as answer to all prompts and run non-interactively"},
+	{"repo", MMOPT_NEEDSTR, NULL, {.sptr = &repo_name},
+	 "Specify @NAME as a nickname for the url specified"},
 };
 
 
@@ -53,7 +56,8 @@ int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
 {
 	int len;
 	const char * v;
-	struct mmpkg * pkg;
+	struct mmpkg const * pkg;
+	struct repolist_elt const * repo;
 	mmstr * tmp, * arg_full;
 
 	if (is_file(arg)) {
@@ -85,6 +89,24 @@ int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
 	} else {
 		req->name = mmstr_malloc_from_cstr(arg);
 		req->version = NULL;
+	}
+
+	// to filter on a specific repository
+	if (repo_name) {
+		if (!(repo = repolist_lookup(&ctx->settings.repo_list,
+		                             repo_name))) {
+			error("Repository %s not found\n", repo_name);
+			return -1;
+		}
+
+		pkg = binindex_lookup(&ctx->binindex, req->name, req->version,
+		                      repo);
+
+		if (!pkg) {
+			error("Package %s not found\n", req->name);
+			return -1;
+		}
+		req->pkg = pkg;
 	}
 
 	return 0;
