@@ -61,6 +61,19 @@ struct parsing_ctx {
 
 
 /**
+ * constraints_deinit  -  deinit a structure struct constraints
+ *
+ * @c: the structure to deinitialize
+ */
+LOCAL_SYMBOL
+void constraints_deinit(struct constraints * c)
+{
+	mmstr_free(c->version);
+	c->version = NULL;
+}
+
+
+/**
  * get_name_pkgname_by_id() - returns the name of the packages located in
  *                      the i-th case of the pkgname_table table.
  * @binindex:   the initialized binindex
@@ -795,23 +808,22 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
 
 
 /**
- * binindex_lookup() - get a package according to its name and version
- * @binindex:    binary package index
- * @name:        package name
- * @version:     package version. In case this parameter is NULL or set to
- *               "any", the latest version of the package is returned by the
- *               function.
+ * binindex_lookup() - get a package according to some constraints.
+ * @binindex:  binary package index
+ * @name:      package name
+ * @c:         constraints permitting to select an appropriate package
  *
  * Return: NULL on error, a pointer to the found package otherwise
  */
 LOCAL_SYMBOL
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version)
+                                    mmstr const * name,
+                                    struct constraints const * c)
 {
 	struct mmpkg * pkg;
 	struct pkglist_entry * pkgentry;
 	struct pkglist * list;
-	char const * pkg_version = version ? version : "any";
+	char const * version = (c && c->version) ? c->version : "any";
 
 	list = binindex_get_pkglist(binindex, name);
 	if (list == NULL)
@@ -821,9 +833,8 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
-		if (pkg_version_compare(pkg->version, pkg_version) == 0) {
+		if (pkg_version_compare(version, pkg->version) == 0)
 			return pkg;
-		}
 
 		pkgentry = pkgentry->next;
 	}

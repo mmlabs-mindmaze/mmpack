@@ -117,41 +117,81 @@ exit:
 
 
 /**
- * parse_pkg() -  returns the package wanted.
+ * pkg_parser_init  -  init a structure struct pkg_parser
  *
- * @binindex      the binary package index
- * @pkg_req:      an entry matching either "pkg_name=pkg_version" or "pkg_name"
- *
- * Return: the package having the name @pkg_name and the version @pkg_version.
- *         In the case where @pkg_version is NULL (the entry was "pkg_name"
- *         without the "=pkg_version"), the package returned is the latest one.
- *         If no such package is found, NULL is returned.
+ * @pp: pointer to the structure to initialize
  */
 LOCAL_SYMBOL
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req)
+void pkg_parser_init(struct pkg_parser * pp)
 {
-	const char * separator;
-	const mmstr * pkg_name;
-	const mmstr * pkg_version;
-	struct mmpkg const* pkg;
+	*pp = (struct pkg_parser) {0};
+}
+
+
+/**
+ * pkg_parser_deinit  -  deinit a structure struct pkg_parser
+ *
+ * @pp: the structure to deinitialize
+ */
+LOCAL_SYMBOL
+void pkg_parser_deinit(struct pkg_parser * pp)
+{
+	constraints_deinit(&pp->cons);
+	mmstr_free(pp->name);
+	pp->name = NULL;
+}
+
+
+/**
+ * parse_pkgreq() -  fills the request asked by the user.
+ *
+ * @pkg_req: an entry matching "pkg_name[=pkg_version]"
+ * @pp: the request to fill
+ */
+static
+void parse_pkgreq(const char* pkg_req, struct pkg_parser * pp)
+{
+	const char * equal;
 
 	/* Find the first occurrence of '=' */
-	separator = strchr(pkg_req, '=');
-	if (separator != NULL) {
-		/* The package name is before the '=' character */
-		pkg_name = mmstr_malloc_copy(pkg_req, separator - pkg_req);
-		pkg_version = mmstr_malloc_from_cstr(separator + 1);
-	} else {
-		pkg_name = mmstr_malloc_from_cstr(pkg_req);
-		pkg_version = NULL;
+	equal = strchr(pkg_req, '=');
+	if (equal == NULL)
+		pp->name = mmstr_malloc_from_cstr(pkg_req);
+	else {
+		pp->name = mmstr_malloc_copy(pkg_req, equal - pkg_req);
+		pp->cons.version = mmstr_malloc_from_cstr(equal + 1);
 	}
+}
 
-	if (!(pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version)))
-		info("No package %s (%s)\n", pkg_name,
-		     pkg_version ? pkg_version : "any version");
 
-	mmstr_free(pkg_version);
-	mmstr_free(pkg_name);
+/**
+ * parse_pkg() -  returns the package wanted.
+ *
+ * @ctx:          context associated with prefix
+ * @pkg_arg:      an entry matching "pkg_name[=pkg_version]"
+ *
+ * Return: the package having pkg_name as name and pkg_version as version. In
+ * the case where pkg_version is NULL (the entry was "pkg_name" without the
+ * "=pkg_version"), the package returned is the latest one. If no such package
+ * is found, NULL is returned.
+ */
+LOCAL_SYMBOL
+struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg)
+{
+	struct pkg_parser pp;
+	struct mmpkg const* pkg;
+	struct constraints cons;
+
+	pkg_parser_init(&pp);
+
+	parse_pkgreq(pkg_arg, &pp);
+	cons = pp.cons;
+
+	if (!(pkg = binindex_lookup(&ctx->binindex, pp.name, &cons)))
+		info("No package %s (%s)\n", pp.name,
+		     cons.version ? cons.version : "any version");
+
+	pkg_parser_deinit(&pp);
 	return pkg;
 }
 

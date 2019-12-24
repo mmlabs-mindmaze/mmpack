@@ -8,6 +8,7 @@
 #include <mmargparse.h>
 
 #include "context.h"
+#include "package-utils.h"
 
 enum pkg_comp_type {
 	AVAILABLE_PKGS,
@@ -50,9 +51,25 @@ struct subcmd_parser {
 	const char* defcmd;
 };
 
+
+/**
+ * struct pkg_parser - structure containing a package parsed on the commandline
+ *
+ * @cons: constraints asked by the user on the package he wants to
+ *        retrieve/inspect...
+ * @name: package name
+ */
+struct pkg_parser {
+	struct constraints cons;
+	mmstr const * name;
+};
+
+void pkg_parser_init(struct pkg_parser * pp);
+void pkg_parser_deinit(struct pkg_parser * pp);
+
 const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
                                   int* p_argc, const char*** p_argv);
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req);
+struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg);
 struct mmpkg const* find_package_by_sumsha(struct mmpack_ctx * ctx,
                                            const char* pkg_req);
 int complete_pkgname(struct mmpack_ctx * ctx, const char* arg,
