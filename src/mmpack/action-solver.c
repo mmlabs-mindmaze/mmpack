@@ -121,6 +121,40 @@ struct solver {
 };
 
 
+/**
+ * pkg_request_init  -  init a structure struct pkg_request
+ *
+ * @req: pointer to the structure to initialize
+ */
+LOCAL_SYMBOL
+void pkg_request_init(struct pkg_request ** req)
+{
+	**req = (struct pkg_request) {0};
+}
+
+
+/**
+ * pkg_request_deinit  -  deinit a structure struct pkg_request
+ *
+ * @req: the structure to deinitialize
+ */
+LOCAL_SYMBOL
+void pkg_request_deinit(struct pkg_request ** req)
+{
+	struct pkg_request * curr = *req;
+	struct pkg_request * next;
+
+	while (curr) {
+		next = curr->next;
+		mmstr_free((*req)->name);
+		mmstr_free((*req)->version);
+		mmstr_free((*req)->repo_name);
+		mmstr_free((*req)->sumsha);
+		curr = next;
+	}
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                             Action stack                               *

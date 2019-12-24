@@ -14,6 +14,7 @@
 #include <mmsysio.h>
 #include <string.h>
 
+#include "action-solver.h"
 #include "cmdline.h"
 #include "context.h"
 #include "download.h"
@@ -72,6 +73,8 @@ LOCAL_SYMBOL
 int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct mmpkg const * pkg;
+	struct pkg_request * req = NULL;
+	int rv = -1;
 
 	if (mmarg_is_completing()) {
 		if (argc != 2)
@@ -92,8 +95,13 @@ int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	if ((pkg = parse_pkg(ctx, argv[1])) == NULL)
-		return -1;
+	if ((req = parse_cmdline(argv[1])) == NULL
+	    || (pkg = binindex_lookup(&ctx->binindex, req)) == NULL)
+		goto exit;
 
-	return download_pkg_sources(ctx, pkg);
+	rv = download_pkg_sources(ctx, pkg);
+
+exit:
+	pkg_request_deinit(&req);
+	return rv;
 }

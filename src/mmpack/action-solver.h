@@ -34,12 +34,28 @@ struct action_stack {
 	struct action actions[];
 };
 
+
+/**
+ * strcut pkg_request - structure containing all the possible constraints
+ *                      imposed by the user in the command line.
+ * @name: package name
+ * @version: package version
+ * @repo_name: name of the repository in which the package should be searched
+ * @sumsha: package sumsha
+ * @pkg: package
+ * @next: next request
+ */
 struct pkg_request {
 	const mmstr* name;
 	const mmstr* version;
+	const mmstr * repo_name;
+	const mmstr * sumsha;
 	struct mmpkg const * pkg;
 	struct pkg_request* next;
 };
+
+void pkg_request_init(struct pkg_request ** req);
+void pkg_request_deinit(struct pkg_request ** req);
 
 struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
                                             const struct pkg_request* req);

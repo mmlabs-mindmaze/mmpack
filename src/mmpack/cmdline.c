@@ -12,7 +12,7 @@
 #include "context.h"
 #include "indextable.h"
 #include "package-utils.h"
-
+#include "action-solver.h"
 
 static
 void subcmd_complete_arg(const struct subcmd_parser* parser, const char* arg)
@@ -117,89 +117,52 @@ exit:
 
 
 /**
- * parse_pkg() -  returns the package wanted.
+ * parse_cmdline() -  returns the request asked by the user.
  *
- * @binindex      the binary package index
- * @pkg_req:      an entry matching either "pkg_name=pkg_version" or "pkg_name"
+ * @pkg_req: an entry matching either "pkg_name=sumsha:sumsha",
+ *           "pkg_name=fromrepo:repo_name", "pkg_name=pkg_version",
+ *           "pkg_name=pkg_versionfromrepo:repo_name" or "pkg_name"
  *
- * Return: the package having the name @pkg_name and the version @pkg_version.
- *         In the case where @pkg_version is NULL (the entry was "pkg_name"
- *         without the "=pkg_version"), the package returned is the latest one.
- *         If no such package is found, NULL is returned.
+ * Return: the request imposed by the user in case of success, NULL otherwise.
  */
 LOCAL_SYMBOL
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req)
+struct pkg_request* parse_cmdline(const char* pkg_req)
 {
-	const char * separator;
-	const mmstr * pkg_name;
-	const mmstr * pkg_version;
-	struct mmpkg const* pkg;
+	const char * first_sep;
+	const char * second_sep;
+	struct pkg_request * r = malloc(sizeof(struct pkg_request));
+
+	pkg_request_init(&r);
 
 	/* Find the first occurrence of '=' */
-	separator = strchr(pkg_req, '=');
-	if (separator != NULL) {
+	first_sep = strchr(pkg_req, '=');
+	second_sep = strchr(pkg_req, ':');
+	if (first_sep == NULL && second_sep == NULL)
+		r->name = mmstr_malloc_from_cstr(pkg_req);
+	else {
 		/* The package name is before the '=' character */
-		pkg_name = mmstr_malloc_copy(pkg_req, separator - pkg_req);
-		pkg_version = mmstr_malloc_from_cstr(separator + 1);
-	} else {
-		pkg_name = mmstr_malloc_from_cstr(pkg_req);
-		pkg_version = NULL;
+		r->name = mmstr_malloc_copy(pkg_req, first_sep - pkg_req);
+		if (second_sep == NULL)
+			r->version = mmstr_malloc_from_cstr(first_sep + 1);
+		else {
+			if (!strncmp(second_sep - strlen("sumsha:") + 1,
+			             "sumsha:", strlen("sumsha:")))
+				r->sumsha = mmstr_malloc_from_cstr(
+					second_sep + 1);
+			else if (!strncmp(second_sep - strlen("fromrepo:") + 1,
+			                  "fromrepo:", strlen("fromrepo:")))
+				r->repo_name = mmstr_malloc_from_cstr(
+					second_sep + 1);
+			else {
+				error("Bad command line syntax");
+				pkg_request_deinit(&r);
+				free(r);
+				return NULL;
+			}
+		}
 	}
 
-	if (!(pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version)))
-		info("No package %s (%s)\n", pkg_name,
-		     pkg_version ? pkg_version : "any version");
-
-	mmstr_free(pkg_version);
-	mmstr_free(pkg_name);
-	return pkg;
-}
-
-
-struct cb_data {
-	mmstr const * sumsha;
-	struct mmpkg * pkg;
-};
-
-
-static
-int cb_binindex(struct mmpkg * pkg, void * void_data)
-{
-	struct cb_data * data = (struct cb_data*) void_data;
-
-	if (mmstrcmp(pkg->sumsha, data->sumsha) == 0) {
-		data->pkg = pkg;
-		return 0;
-	}
-
-	return -1;
-}
-
-
-/**
- * find_package_by_sumsha() -  find the package associated with the sumsha given
- *                             in argument.
- *
- * @binindex:      the binary package index
- * @sumsha_req:    the sumsha searched
- *
- * Return: the package having the sumsha @sumsha_req, NULL if not found.
- */
-LOCAL_SYMBOL
-struct mmpkg const* find_package_by_sumsha(struct mmpack_ctx * ctx,
-                                           const char* sumsha_req)
-{
-	struct cb_data data;
-
-	data.sumsha = mmstr_malloc_from_cstr(sumsha_req);
-	data.pkg = NULL;
-	binindex_foreach(&ctx->binindex, cb_binindex, &data);
-	mmstr_free(data.sumsha);
-
-	if (data.pkg == NULL)
-		info("No package with sumsha: %s\n", sumsha_req);
-
-	return data.pkg;
+	return r;
 }
 
 

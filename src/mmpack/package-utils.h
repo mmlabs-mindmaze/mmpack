@@ -11,7 +11,6 @@
 #include "settings.h"
 #include "utils.h"
 
-
 /**
  * enum pkg_state - list of possible package state
  * @MMPACK_PKG_ERROR:     error while retrieving package state
@@ -158,8 +157,12 @@ void mmpkg_dep_destroy(struct mmpkg_dep * dep);
 void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
+struct pkg_request;
+
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version);
+                                    struct pkg_request const * req);
+struct mmpkg const* binindex_lookup_lastest_pkg(struct binindex * binindex,
+                                                mmstr const * pkg_name);
 int binindex_is_pkg_upgradeable(struct binindex const * binindex,
                                 struct mmpkg const * pkg);
 void binindex_init(struct binindex* binindex);
