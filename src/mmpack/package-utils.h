@@ -11,7 +11,6 @@
 #include "settings.h"
 #include "utils.h"
 
-
 /**
  * enum pkg_state - list of possible package state
  * @MMPACK_PKG_ERROR:     error while retrieving package state
@@ -33,6 +32,28 @@ typedef enum {
 } pkg_state;
 
 int pkg_version_compare(char const * v1, char const * v2);
+
+
+/**
+ * strcut pkg_request - structure containing all the possible constraints
+ *                      imposed by the user in the command line.
+ * @name: package name
+ * @version: package version
+ * @repo_name: name of the repository in which the package should be searched
+ * @sumsha: package sumsha
+ * @pkg: package
+ * @next: next request
+ */
+struct pkg_request {
+	const mmstr* name;
+	const mmstr* version;
+	struct mmpkg const * pkg;
+	struct pkg_request* next;
+};
+
+void pkg_request_init(struct pkg_request ** req);
+void pkg_request_deinit(struct pkg_request ** req);
+
 
 struct from_repo {
 	mmstr const * filename;
@@ -159,7 +180,9 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version);
+                                    struct pkg_request const * req);
+struct mmpkg const* binindex_lookup_lastest_pkg(struct binindex * binindex,
+                                                mmstr const * pkg_name);
 int binindex_is_pkg_upgradeable(struct binindex const * binindex,
                                 struct mmpkg const * pkg);
 void binindex_init(struct binindex* binindex);
