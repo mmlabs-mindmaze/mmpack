@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9681b17d_1112bd9e",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2019-12-24T14:30:37Z",
+      "side": 1,
+      "message": "Please make it const",
+      "range": {
+        "startLine": 844,
+        "startChar": 32,
+        "endLine": 844,
+        "endChar": 47
+      },
+      "revId": "d295b9c5f002491aae2101fb6e5aeceed2ac77f5",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
