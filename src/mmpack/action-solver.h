@@ -34,12 +34,6 @@ struct action_stack {
 	struct action actions[];
 };
 
-struct pkg_request {
-	const mmstr* name;
-	const mmstr* version;
-	struct mmpkg const * pkg;
-	struct pkg_request* next;
-};
 
 struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
                                             const struct pkg_request* req);

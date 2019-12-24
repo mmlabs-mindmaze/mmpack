@@ -12,7 +12,7 @@ mmpack mkprefix --name=repo --url=$REPO_URL $PREFIX_TEST
 mmpack update
 
 output="$(mmpack rdepends toto | $dos2unix)"
-expected="No package toto (any version)"
+expected="Package toto not found"
 [ "$output" == "$expected" ]
 
 output="$(mmpack rdepends --repo=repo hello | $dos2unix)"
@@ -57,4 +57,3 @@ hello (1.0.0)"
 output="$(mmpack rdepends --sumsha --recursive 0000 | $dos2unix)"
 expected="No package with sumsha: 0000"
 [ "$output" == "$expected" ]
-

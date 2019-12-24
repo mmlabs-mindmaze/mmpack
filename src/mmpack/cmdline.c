@@ -13,7 +13,6 @@
 #include "indextable.h"
 #include "package-utils.h"
 
-
 static
 void subcmd_complete_arg(const struct subcmd_parser* parser, const char* arg)
 {
@@ -117,9 +116,37 @@ exit:
 
 
 /**
+ * parse_pkgreq() -  returns the request asked by the user.
+ *
+ * @pkg_req: an entry matching either "pkg_name=pkg_version" or "pkg_name"
+ *
+ * Return: the request imposed by the user in case of success, NULL otherwise.
+ */
+LOCAL_SYMBOL
+struct pkg_request* parse_pkgreq(const char* pkg_req)
+{
+	const char * separator;
+	struct pkg_request * r = malloc(sizeof(struct pkg_request));
+
+	pkg_request_init(&r);
+
+	/* Find the first occurrence of '=' */
+	separator = strchr(pkg_req, '=');
+	if (separator == NULL)
+		r->name = mmstr_malloc_from_cstr(pkg_req);
+	else {
+		r->name = mmstr_malloc_copy(pkg_req, separator - pkg_req);
+		r->version = mmstr_malloc_from_cstr(separator + 1);
+	}
+
+	return r;
+}
+
+
+/**
  * parse_pkg() -  returns the package wanted.
  *
- * @binindex      the binary package index
+ * @ctx:          context associated with prefix
  * @pkg_req:      an entry matching either "pkg_name=pkg_version" or "pkg_name"
  *
  * Return: the package having the name @pkg_name and the version @pkg_version.
@@ -130,28 +157,14 @@ exit:
 LOCAL_SYMBOL
 struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req)
 {
-	const char * separator;
-	const mmstr * pkg_name;
-	const mmstr * pkg_version;
+	struct pkg_request * req;
 	struct mmpkg const* pkg;
 
-	/* Find the first occurrence of '=' */
-	separator = strchr(pkg_req, '=');
-	if (separator != NULL) {
-		/* The package name is before the '=' character */
-		pkg_name = mmstr_malloc_copy(pkg_req, separator - pkg_req);
-		pkg_version = mmstr_malloc_from_cstr(separator + 1);
-	} else {
-		pkg_name = mmstr_malloc_from_cstr(pkg_req);
-		pkg_version = NULL;
-	}
+	req = parse_pkgreq(pkg_req);
 
-	if (!(pkg = binindex_lookup(&ctx->binindex, pkg_name, pkg_version)))
-		info("No package %s (%s)\n", pkg_name,
-		     pkg_version ? pkg_version : "any version");
+	pkg = binindex_lookup(&ctx->binindex, req);
 
-	mmstr_free(pkg_version);
-	mmstr_free(pkg_name);
+	pkg_request_deinit(&req);
 	return pkg;
 }
 
