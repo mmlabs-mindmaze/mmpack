@@ -158,8 +158,12 @@ void mmpkg_dep_destroy(struct mmpkg_dep * dep);
 void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
+struct cmdline_constraints;
+
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version);
+                                    struct cmdline_constraints const * cc);
+struct mmpkg const* binindex_lookup_lastest_pkg(struct binindex * binindex,
+                                                mmstr const * pkg_name);
 int binindex_is_pkg_upgradeable(struct binindex const * binindex,
                                 struct mmpkg const * pkg);
 void binindex_init(struct binindex* binindex);

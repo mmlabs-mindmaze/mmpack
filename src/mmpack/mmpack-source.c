@@ -72,6 +72,7 @@ LOCAL_SYMBOL
 int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct mmpkg const * pkg;
+	struct cmdline_constraints * cc = NULL;
 
 	if (mmarg_is_completing()) {
 		if (argc != 2)
@@ -92,7 +93,8 @@ int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	if ((pkg = parse_pkg(ctx, argv[1])) == NULL)
+	if ((cc = parse_cmdline(argv[1])) == NULL
+	    || (pkg = binindex_lookup(&ctx->binindex, cc)) == NULL)
 		return -1;
 
 	return download_pkg_sources(ctx, pkg);
