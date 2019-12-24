@@ -17,6 +17,7 @@
 #include <mmlib.h>
 
 #include "common.h"
+#include "cmdline.h"
 #include "indextable.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
@@ -795,25 +796,23 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
 
 
 /**
- * binindex_lookup() - get a package according to its name and version
- * @binindex:    binary package index
- * @name:        package name
- * @version:     package version. In case this parameter is NULL or set to
- *               "any", the latest version of the package is returned by the
- *               function.
+ * binindex_lookup() - get a package according to some constraints asked by the
+ *                     user.
+ * @binindex:   binary package index
+ * @cc:         constraints permitting to filter on the appropriate package
  *
  * Return: NULL on error, a pointer to the found package otherwise
  */
 LOCAL_SYMBOL
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version)
+                                    struct cmdline_constraints const * cc)
 {
 	struct mmpkg * pkg;
 	struct pkglist_entry * pkgentry;
 	struct pkglist * list;
-	char const * pkg_version = version ? version : "any";
+	char const * version = cc->pkg_version ? cc->pkg_version : "any";
 
-	list = binindex_get_pkglist(binindex, name);
+	list = binindex_get_pkglist(binindex, cc->pkg_name);
 	if (list == NULL)
 		return NULL;
 
@@ -821,13 +820,45 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
-		if (pkg_version_compare(pkg->version, pkg_version) == 0) {
+		if (cc->pkg_sumsha && mmstrcmp(cc->pkg_sumsha, pkg->sumsha))
 			return pkg;
-		}
+		else if (cc->repo_name
+		         && mmstrcmp(cc->repo_name, pkg->from_repo->filename)
+		         && pkg_version_compare(version, pkg->version) == 0)
+			return pkg;
+		else if (pkg_version_compare(version, pkg->version) == 0)
+			return pkg;
 
 		pkgentry = pkgentry->next;
 	}
 
+	return NULL;
+}	
+
+
+/**
+ * binindex_lookup_lastest_pkg() - get the lastest version of a package.
+ * @binindex:   binary package index
+ * @pkg_name:   name of the package searched
+ *
+ * Return: NULL on error, a pointer to the found package otherwise
+ */
+LOCAL_SYMBOL
+struct mmpkg const * binindex_lookup_lastest_pkg(struct binindex * binindex,
+                                                 mmstr const * pkg_name)
+{
+	struct pkglist * list;
+	struct pkglist_entry * pkgentry;
+
+	list = binindex_get_pkglist(binindex, pkg_name);
+	if (list == NULL)
+		return NULL;
+
+	pkgentry = list->head;
+
+	if (pkgentry)
+		return &pkgentry->pkg;
+	
 	return NULL;
 }
 

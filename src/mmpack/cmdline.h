@@ -24,6 +24,23 @@ struct subcmd {
 
 
 /**
+ * strcut cmdline_constraints - structure containing all the possible
+ *                              constraints imposed by the user in the command
+ *                              line.
+ * @pkg_name: package name
+ * @pkg_version: package version
+ * @repo_name: name of the repository in which the package should be searched
+ * @sumsha: package sumsha
+ */
+struct cmdline_constraints {
+	mmstr const * pkg_name;
+	mmstr const * pkg_version;
+	mmstr const * repo_name;
+	mmstr const * pkg_sumsha;
+};
+
+
+/**
  * struct subcmd_parser - subcmd and option parser configuration
  * @num_opt:    number of element in @optv.
  * @optv:       array of option supported. same as in struct mmarg_parser
@@ -52,7 +69,9 @@ struct subcmd_parser {
 
 const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
                                   int* p_argc, const char*** p_argv);
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_req);
+void cmdline_constraints_init(struct cmdline_constraints ** cc);
+void cmdline_constraints_deinit(struct cmdline_constraints ** cc);
+struct cmdline_constraints * parse_cmdline(const char * pkg_req);
 struct mmpkg const* find_package_by_sumsha(struct mmpack_ctx * ctx,
                                            const char* pkg_req);
 int complete_pkgname(struct mmpack_ctx * ctx, const char* arg,
