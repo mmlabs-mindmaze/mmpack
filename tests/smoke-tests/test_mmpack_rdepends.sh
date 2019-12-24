@@ -57,4 +57,3 @@ hello (1.0.0)"
 output="$(mmpack rdepends --sumsha --recursive 0000 | $dos2unix)"
 expected="No package with sumsha: 0000"
 [ "$output" == "$expected" ]
-
