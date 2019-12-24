@@ -833,6 +833,30 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 
 
 /**
+ * is_upgradeable() - indicates if an installed package of name @name and of
+ *                    @version could be upgraded or not.
+ * @binindex:    binary package index
+ * @name:        package name
+ * @version      package version
+ *
+ * Return: 1 if the package is upgradeable, 0 otherwise.
+ */
+LOCAL_SYMBOL
+int is_upgradeable(struct binindex * binindex, mmstr const * name,
+                   char const * version)
+{
+	struct pkglist * list;
+
+	list = binindex_get_pkglist(binindex, name);
+	// when using is_upgradeable, the name of an installed package is given,
+	// hence the list of packages named @name cannot be NULL
+	mm_check(list != NULL);
+
+	return (pkg_version_compare(list->head->pkg.version, version) > 0);
+}
+
+
+/**
  * binindex_get_pkgname_id() - obtain a id of a package name
  * @binindex:    binary index to query
  * @name:        package name whose is queried

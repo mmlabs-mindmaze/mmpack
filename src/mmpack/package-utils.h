@@ -150,6 +150,8 @@ struct rdeps_iter {
 
 
 void mmpkg_dump(struct mmpkg const * pkg);
+int is_upgradeable(struct binindex * binindex, mmstr const * name,
+                   char const * version);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
 void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);
 
