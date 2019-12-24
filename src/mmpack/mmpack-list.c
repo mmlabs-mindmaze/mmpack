@@ -166,6 +166,7 @@ int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
 	struct it_iterator iter;
 	struct it_entry* entry;
+	struct pkg_parser  * pp;
 	const char* pattern = (argc > 1) ? argv[1] : NULL;
 	const struct mmpkg * pkg, * latest;
 	int found = 0;
@@ -178,7 +179,16 @@ int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 		if (!binindex_is_pkg_upgradeable(&ctx->binindex, pkg))
 			continue;
 
-		latest = binindex_lookup(&ctx->binindex, pkg->name, "any");
+		pp = malloc(sizeof(struct pkg_parser));
+		pkg_parser_init(pp);
+		pp->name = mmstr_malloc_from_cstr(pkg->name);
+
+		latest = binindex_lookup(&ctx->binindex, pp->name, NULL);
+
+		mmstr_free(pp->name);
+		pkg_parser_deinit(pp);
+		free(pp);
+
 		found |= print_pkg_if_match(latest, pattern);
 	}
 
