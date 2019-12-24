@@ -34,6 +34,20 @@ typedef enum {
 
 int pkg_version_compare(char const * v1, char const * v2);
 
+
+/**
+ * strcut constraints - structure containing all the possible constraints
+ *                      imposed by the user in the command line.
+ * @version: package version
+ */
+struct constraints {
+	const mmstr * version;
+};
+
+void constraints_init(struct constraints * c);
+void constraints_deinit(struct constraints * c);
+
+
 struct from_repo {
 	mmstr const * filename;
 	mmstr const * sha256;
@@ -159,7 +173,8 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version);
+                                    mmstr const * name,
+                                    struct constraints const * c);
 int binindex_is_pkg_upgradeable(struct binindex const * binindex,
                                 struct mmpkg const * pkg);
 void binindex_init(struct binindex* binindex);
