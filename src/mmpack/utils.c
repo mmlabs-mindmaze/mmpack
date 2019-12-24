@@ -538,6 +538,28 @@ exit:
 	return rv;
 }
 
+/**
+ * strchr_or_end() - gives a pointer to the first occurrence of a character on
+ *                   a string.
+ * s: the string inspected
+ * c: the character searched for in the string s
+ *
+ * Return: a pointer to the first occurrence of a character on a string. If the
+ * character c is not found in s, then the pointer returned corresponds to the
+ * end of the string s.
+ */
+LOCAL_SYMBOL
+char* strchr_or_end(const char * s, int c)
+{
+	char * curr = (char*) s;
+
+	while (*curr != c && *curr != '\0')
+		curr++;
+
+	return curr;
+}
+
+
 
 /**************************************************************************
  *                                                                        *

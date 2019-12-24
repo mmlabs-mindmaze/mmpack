@@ -68,6 +68,7 @@ void report_user_and_log(int mmlog_level, const char* fmt, ...);
 
 int prompt_user_confirm(void);
 
+char* strchr_or_end(const char * s, int c);
 
 /**************************************************************************
  *                                                                        *
