@@ -61,6 +61,40 @@ struct parsing_ctx {
 
 
 /**
+ * pkg_request_init  -  init a structure struct pkg_request
+ *
+ * @req: pointer to the structure to initialize
+ */
+LOCAL_SYMBOL
+void pkg_request_init(struct pkg_request * req)
+{
+	*req = (struct pkg_request) {0};
+}
+
+
+/**
+ * pkg_request_deinit  -  deinit a structure struct pkg_request
+ *
+ * @req: the structure to deinitialize
+ */
+LOCAL_SYMBOL
+void pkg_request_deinit(struct pkg_request * req)
+{
+	struct pkg_request * curr = req;
+	struct pkg_request * next;
+
+	while (curr) {
+		next = curr->next;
+		mmstr_free(req->name);
+		req->name = NULL;
+		mmstr_free(req->version);
+		req->version = NULL;
+		curr = next;
+	}
+}
+
+
+/**
  * get_name_pkgname_by_id() - returns the name of the packages located in
  *                      the i-th case of the pkgname_table table.
  * @binindex:   the initialized binindex
@@ -795,25 +829,23 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
 
 
 /**
- * binindex_lookup() - get a package according to its name and version
- * @binindex:    binary package index
- * @name:        package name
- * @version:     package version. In case this parameter is NULL or set to
- *               "any", the latest version of the package is returned by the
- *               function.
+ * binindex_lookup() - get a package according to some constraints asked by the
+ *                     user.
+ * @binindex:   binary package index
+ * @req:         constraints permitting to filter on the appropriate package
  *
  * Return: NULL on error, a pointer to the found package otherwise
  */
 LOCAL_SYMBOL
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version)
+                                    struct pkg_request const * req)
 {
 	struct mmpkg * pkg;
 	struct pkglist_entry * pkgentry;
 	struct pkglist * list;
-	char const * pkg_version = version ? version : "any";
+	char const * version = req->version ? req->version : "any";
 
-	list = binindex_get_pkglist(binindex, name);
+	list = binindex_get_pkglist(binindex, req->name);
 	if (list == NULL)
 		return NULL;
 
@@ -821,9 +853,8 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
-		if (pkg_version_compare(pkg->version, pkg_version) == 0) {
+		if (pkg_version_compare(version, pkg->version) == 0)
 			return pkg;
-		}
 
 		pkgentry = pkgentry->next;
 	}
