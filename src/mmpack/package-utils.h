@@ -159,7 +159,8 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version);
+                                    mmstr const * name, char const * version,
+                                    struct repolist_elt const * repo);
 struct mmpkg const* binindex_get_latest_pkg(struct binindex* binindex,
                                             mmstr const * name,
                                             char const * max_version);

@@ -795,10 +795,35 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
 
 
 /**
+ * is_package_provided_by_repo() - indicates if a repository provide a package
+ * @pkg: pointer to the package
+ * @repo: pointer to the repository
+ *
+ * Returns: 1 if the package @pkg is provided by the repository @repo,
+ *          0 otherwise.
+ */
+static
+int is_package_provided_by_repo(struct mmpkg * pkg,
+                                struct repolist_elt const * repo)
+{
+	struct from_repo * from;
+
+	for (from = pkg->from_repo; from != NULL; from = from->next) {
+		if (repo == from->repo)
+			return 1;
+	}
+
+	return 0;
+}
+
+
+/**
  * binindex_lookup() - get a package according to its name and version
  * @binindex:    binary package index
  * @name:        package name
  * @version:     package version
+ * @repo:        pointer to the repository from which we want to filter. If we
+ *               do not want to filter, this field is set to NULL.
  *
  * Return: NULL on error, a pointer to the found package otherwise. In case
  *         @version is NULL or set to "any", the latest version of the package
@@ -806,7 +831,8 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
  */
 LOCAL_SYMBOL
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name, char const * version)
+                                    mmstr const * name, char const * version,
+                                    struct repolist_elt const * repo)
 {
 	struct mmpkg * pkg;
 	struct pkglist_entry * pkgentry;
@@ -821,7 +847,8 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
-		if (pkg_version_compare(pkg->version, pkg_version) == 0) {
+		if (pkg_version_compare(pkg->version, pkg_version) == 0
+                    && (!repo || is_package_provided_by_repo(pkg, repo))) {
 			return pkg;
 		}
 

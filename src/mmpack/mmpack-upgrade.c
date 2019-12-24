@@ -44,7 +44,8 @@ struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 	entry = it_iter_first(&iter, &ctx->installed.idx);
 	for (; entry != NULL; entry = it_iter_next(&iter)) {
 		pkg = entry->value;
-		latest = binindex_lookup(&ctx->binindex, pkg->name, "any");
+		latest = binindex_lookup(&ctx->binindex, pkg->name, "any",
+		                         NULL);
 		if (pkg_version_compare(pkg->version, latest->version) >= 0)
 			continue;
 
@@ -110,7 +111,8 @@ int get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 		}
 
 		mmstr_free(pkg_name);
-		latest = binindex_lookup(&ctx->binindex, pkg->name, "any");
+		latest = binindex_lookup(&ctx->binindex, pkg->name, "any",
+		                         NULL);
 
 		if (pkg_version_compare(pkg->version, latest->version) >= 0) {
 			printf("Package \"%s\" is already at its"

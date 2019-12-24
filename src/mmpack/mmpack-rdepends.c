@@ -187,7 +187,7 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return -1;
 
 	if (!sumsha) {
-		if ((pkg = parse_pkg(ctx, argv[arg_index])) == NULL)
+		if ((pkg = parse_pkg(ctx, argv[arg_index], NULL)) == NULL)
 			return -1;
 	} else {
 		if (!(pkg = find_package_by_sumsha(ctx, argv[arg_index])))

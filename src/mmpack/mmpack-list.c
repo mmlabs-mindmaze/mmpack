@@ -176,7 +176,8 @@ int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 		pkg = entry->value;
 
 		// test against the version of latest package available
-		latest = binindex_lookup(&ctx->binindex, pkg->name, "any");
+		latest = binindex_lookup(&ctx->binindex, pkg->name, "any",
+		                         NULL);
 		if (pkg_version_compare(pkg->version, latest->version) >= 0)
 			continue;
 
