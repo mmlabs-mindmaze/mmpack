@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9021bd22_e2cab543",
+        "filename": "src/mmpack/action-solver.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-06T10:42:30Z",
+      "side": 1,
+      "message": "move this declaration in package-utils.h since it is used in package-utils.c",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 20
+      },
+      "revId": "22936551f0c7876d66443ff9796584f967c15d6c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e58deaa0_678cf8ab",
+        "filename": "src/mmpack/action-solver.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-06T10:42:30Z",
+      "side": 1,
+      "message": "Add repo_name and sumsha constraints in a sepatated commit",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 22
+      },
+      "revId": "22936551f0c7876d66443ff9796584f967c15d6c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
