@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4247632_5223f89c",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-06T09:56:16Z",
+      "side": 1,
+      "message": "the name \"download\" is enough\n\nThe mmpack module ensures the namespace if needed",
+      "range": {
+        "startLine": 461,
+        "startChar": 4,
+        "endLine": 461,
+        "endChar": 17
+      },
+      "revId": "de05ccb631f452f671b72c57a8db58f56250c422",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31fca68a_9966ac9c",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-06T09:56:16Z",
+      "side": 1,
+      "message": "You might want to make the possible errors logged in some fashion here since it\u0027s all supposed to go through here",
+      "range": {
+        "startLine": 466,
+        "startChar": 4,
+        "endLine": 466,
+        "endChar": 11
+      },
+      "revId": "de05ccb631f452f671b72c57a8db58f56250c422",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
