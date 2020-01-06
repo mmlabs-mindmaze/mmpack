@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e19d98a2_eaf60b3e",
+        "filename": "docs/man/mmpack-build-guess.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-06T08:55:16Z",
+      "side": 1,
+      "message": "Please update mmpack-build.rst to list the guess command",
+      "revId": "69642d071d38a07ff136aba7f73d91f2462f5469",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
