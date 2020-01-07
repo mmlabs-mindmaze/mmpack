@@ -7,6 +7,7 @@
 #include "mmstring.h"
 #include "package-utils.h"
 #include "context.h"
+#include "cmdline.h"
 
 #define INSTALL_PKG 1
 #define UPGRADE_PKG 0
@@ -34,19 +35,12 @@ struct action_stack {
 	struct action actions[];
 };
 
-struct pkg_request {
-	const mmstr* name;
-	const mmstr* version;
-	struct mmpkg const * pkg;
-	struct pkg_request* next;
-};
-
 struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
-                                            const struct pkg_request* req);
+                                            const struct pkg_parser* req);
 struct action_stack* mmpkg_get_upgrade_list(struct mmpack_ctx * ctx,
-                                            const struct pkg_request* reqlist);
+                                            const struct pkg_parser* reqlist);
 struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
-                                           const struct pkg_request* reqlist);
+                                           const struct pkg_parser* reqlist);
 
 struct action_stack* mmpack_action_stack_create(void);
 void mmpack_action_stack_destroy(struct action_stack * stack);
