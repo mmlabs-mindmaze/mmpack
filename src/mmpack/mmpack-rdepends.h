@@ -8,7 +8,7 @@
 #include "context.h"
 
 #define RDEPENDS_SYNOPSIS \
-	"rdepends [-r|--recursive] [--repo<=repo-name>] <package>[=<version>]"
+	"rdepends [-r|--recursive] <package>[=<version>][,key:value]*"
 
 int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, char const ** argv);
 
