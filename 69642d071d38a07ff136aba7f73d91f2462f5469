@@ -16,6 +16,24 @@
       "revId": "69642d071d38a07ff136aba7f73d91f2462f5469",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b6603b7_780daf66",
+        "filename": "docs/man/mmpack-build-guess.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-07T13:49:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e19d98a2_eaf60b3e",
+      "revId": "69642d071d38a07ff136aba7f73d91f2462f5469",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
