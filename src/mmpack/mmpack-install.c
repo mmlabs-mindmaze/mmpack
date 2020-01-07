@@ -10,8 +10,6 @@
 
 #include <mmargparse.h>
 #include <mmerrno.h>
-#include <mmlib.h>
-#include <mmsysio.h>
 #include <string.h>
 
 #include "cmdline.h"
@@ -33,62 +31,6 @@ static const struct mmarg_opt cmdline_optv[] = {
 	{"y|assume-yes", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &is_yes_assumed},
 	 "assume \"yes\" as answer to all prompts and run non-interactively"},
 };
-
-
-static
-int is_file(char const * path)
-{
-	struct mm_stat st;
-
-	if (mm_stat(path, &st, 0) != 0)
-		return 0;
-
-	return S_ISREG(st.mode);
-}
-
-
-static
-int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
-                            const char* arg)
-{
-	int len;
-	const char * v;
-	struct mmpkg * pkg;
-	mmstr * tmp, * arg_full;
-
-	if (is_file(arg)) {
-		tmp = mmstr_alloca_from_cstr(arg);
-		len = mmstrlen(ctx->cwd) + 1 + mmstrlen(tmp);
-		arg_full = mmstr_malloca(len);
-		mmstr_join_path(arg_full, ctx->cwd, tmp);
-
-		pkg = add_pkgfile_to_binindex(&ctx->binindex, arg_full);
-		mmstr_freea(arg_full);
-		if (pkg == NULL)
-			return -1;
-
-		req->pkg = pkg;
-		req->name = NULL;
-		req->version = NULL;
-
-		return 0;
-	}
-
-	req->pkg = NULL;
-
-	// Find the first occurrence of '='
-	v = strchr(arg, '=');
-	if (v != NULL) {
-		// The package name is before the '=' character
-		req->name = mmstr_malloc_copy(arg, v - arg);
-		req->version = mmstr_malloc_from_cstr(v+1);
-	} else {
-		req->name = mmstr_malloc_from_cstr(arg);
-		req->version = NULL;
-	}
-
-	return 0;
-}
 
 
 /**
@@ -139,7 +81,7 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	reqlist = xx_malloca(nreq * sizeof(*reqlist));
 	memset(reqlist, 0, nreq * sizeof(*reqlist));
 	for (i = 0; i < nreq; i++) {
-		if (fill_pkgreq_from_cmdarg(ctx, &reqlist[i], req_args[i]) < 0)
+		if (parse_pkgreq(ctx, req_args[i], &reqlist[i]) < 0)
 			goto exit;
 
 		reqlist[i].next = (i == nreq-1) ? NULL : &reqlist[i+1];
