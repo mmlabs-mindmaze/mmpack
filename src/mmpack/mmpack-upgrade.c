@@ -31,9 +31,9 @@ static const struct mmarg_opt cmdline_optv[] = {
 
 
 static
-struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
+struct pkg_parser* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 {
-	struct pkg_request * req, * reqlist;
+	struct pkg_parser * req, * reqlist;
 	struct it_iterator iter;
 	struct it_entry * entry;
 	const struct mmpkg* pkg;
@@ -48,7 +48,7 @@ struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 
 		req = xx_malloc(sizeof(*req));
 		req->name = pkg->name;
-		req->version = NULL;
+		req->cons = NULL;
 		req->next = reqlist;
 		reqlist = req;
 	}
@@ -58,9 +58,9 @@ struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 
 
 static
-void clean_reqlist(struct pkg_request* reqlist)
+void clean_reqlist(struct pkg_parser* reqlist)
 {
-	struct pkg_request* next;
+	struct pkg_parser* next;
 
 	while (reqlist) {
 		next = reqlist->next;
@@ -85,10 +85,10 @@ void clean_reqlist(struct pkg_request* reqlist)
 static
 int get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
                             char const ** req_args,
-                            struct pkg_request ** reqlist)
+                            struct pkg_parser ** reqlist)
 {
 	int i;
-	struct pkg_request * req;
+	struct pkg_parser * req;
 	mmstr * pkg_name;
 	const struct mmpkg* pkg;
 
@@ -117,7 +117,7 @@ int get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 
 		req = xx_malloc(sizeof(*req));
 		req->name = pkg->name;
-		req->version = NULL;
+		req->cons = NULL;
 		req->next = *reqlist;
 		*reqlist = req;
 	}
@@ -127,7 +127,7 @@ int get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 
 
 static
-int mmpack_upgrade_reqlist(struct mmpack_ctx * ctx, struct pkg_request* reqlist)
+int mmpack_upgrade_reqlist(struct mmpack_ctx * ctx, struct pkg_parser* reqlist)
 {
 
 	struct action_stack* act_stack = NULL;
@@ -170,7 +170,7 @@ int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 {
 	int nreq, arg_index, rv;
 	const char** req_args;
-	struct pkg_request* reqlist;
+	struct pkg_parser* reqlist;
 	struct mmarg_parser parser = {
 		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
 		.doc = upgrade_doc,
