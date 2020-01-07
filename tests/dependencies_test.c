@@ -95,7 +95,7 @@ int is_stack_consistent(const struct action_stack* stack)
 
 static
 int does_stack_meet_requests(const struct action_stack* stack,
-                             const struct pkg_request* req)
+                             const struct pkg_parser* req)
 {
 	const struct mmpkg* pkg;
 	int i;
@@ -114,10 +114,12 @@ int does_stack_meet_requests(const struct action_stack* stack,
 			return 0;
 		}
 
-		if (req->version && !mmstrequal(req->version, pkg->version)) {
+		if (req->cons
+		    && req->cons->version
+		    && !mmstrequal(req->cons->version, pkg->version)) {
 			fprintf(stderr, "version of %s requirement not fulfilled\n"
 			                "pkg:%s != req:%s", req->name,
-					pkg->version, req->version);
+					pkg->version, req->cons->version);
 			return 0;
 		}
 
@@ -198,13 +200,15 @@ START_TEST(test_valid_dependencies)
 {
 	int rv;
 	struct action_stack * actions;
-	struct pkg_request req;
+	struct pkg_parser req;
 	struct repolist_elt * repo = settings_get_repo(&ctx.settings, 0);
 
 	rv = binindex_populate(&ctx.binindex, valid_binindexes[_i], repo);
 	ck_assert(rv == 0);
 
-	req = (struct pkg_request){.name = pkg_a_name, .version = vers001};
+	req = (struct pkg_parser){.name = pkg_a_name};
+	req.cons = xx_malloc(sizeof(struct constraints));
+	*(req.cons) = (struct constraints) {.version = vers001};
 	actions = mmpkg_get_install_list(&ctx, &req);
 	ck_assert(actions != NULL);
 
@@ -213,6 +217,7 @@ START_TEST(test_valid_dependencies)
 	ck_assert(is_stack_consistent(actions));
 	ck_assert(are_pkgs_expected_in_stack(actions, valid_mmpack_deps[_i]));
 
+	free(req.cons);
 	mmpack_action_stack_destroy(actions);
 }
 END_TEST
@@ -222,15 +227,17 @@ START_TEST(test_valid_dependencies_multiple_req)
 {
 	int rv;
 	struct action_stack * actions;
-	struct pkg_request req[2];
+	struct pkg_parser req[2];
 	struct repolist_elt * repo = settings_get_repo(&ctx.settings, 0);
 
 	rv = binindex_populate(&ctx.binindex, TEST_BININDEX_DIR"/simple.yaml",
 	                       repo);
 	ck_assert(rv == 0);
 
-	req[0] = (struct pkg_request){.name = pkg_b_name, .next = &req[1]};
-	req[1] = (struct pkg_request){.name = pkg_a_name, .version = vers001};
+	req[0] = (struct pkg_parser){.name = pkg_b_name, .next = &req[1]};
+	req[1] = (struct pkg_parser){.name = pkg_a_name};
+	req[1].cons = xx_malloc(sizeof(struct constraints));
+       *(req[1].cons) = (struct constraints) {.version = vers001};	
 	actions = mmpkg_get_install_list(&ctx, req);
 	ck_assert(actions != NULL);
 
@@ -239,6 +246,7 @@ START_TEST(test_valid_dependencies_multiple_req)
 	ck_assert(is_stack_consistent(actions));
 	ck_assert(are_pkgs_expected_in_stack(actions, valid_mmpack_deps[1]));
 
+	free(req[1].cons);
 	mmpack_action_stack_destroy(actions);
 }
 END_TEST
@@ -247,15 +255,18 @@ START_TEST(test_invalid_dependencies)
 {
 	int rv;
 	struct action_stack * actions;
-	struct pkg_request req;
+	struct pkg_parser req;
 	struct repolist_elt * repo = settings_get_repo(&ctx.settings, 0);
 
 	rv = binindex_populate(&ctx.binindex, invalid_binindexes[_i], repo);
 	ck_assert(rv == 0);
 
-	req = (struct pkg_request){.name = pkg_a_name, .version = vers001};
+	req = (struct pkg_parser){.name = pkg_a_name};
+	req.cons = xx_malloc(sizeof(struct constraints));
+	*(req.cons) = (struct constraints) {.version = vers001};
 	actions = mmpkg_get_install_list(&ctx, &req);
 	ck_assert(actions == NULL);
+	free(req.cons);
 }
 END_TEST
 
