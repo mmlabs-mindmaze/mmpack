@@ -133,8 +133,11 @@ int is_file(char const * path)
  * parse_pkgreq() -  fills the request asked by the user.
  *
  * @ctx:     context associated with prefix
- * @pkg_req: an entry matching "pkg_name[=pkg_version]". pkg_name is potentially
- *           a path toward the package (in this case no option is possible)
+ * @pkg_req: an entry matching
+ *           "pkg_name[=pkg_version[,key_0:value_0,...,key_n:value_n]]" or
+ *           "pkg_name[,key_0:value_0,...,key_n:value_n], where key_i can
+ *           be "fromrepo" or "sumsha". pkg_name is potentially a path toward
+ *           the package (in this case no option is possible).
  * @req:     the request to fill
  *
  * Returns: 0 in case the commandline is successfully read, -1 otherwise.
@@ -146,7 +149,7 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 	int len;
 	struct mmpkg * pkg;
 	mmstr * tmp, * arg_full;
-	const char * separator;
+	char * equal, * comma, * colon;
 
 	// case where pkg_name is actually a path toward the package
 	if (is_file(pkg_req)) {
@@ -165,12 +168,34 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 	}
 
 	/* Parsing of pkg_req */
-	separator = strchr(pkg_req, '=');
-	if (separator == NULL)
+	equal = strchr(pkg_req, '=');
+	comma = strchr(pkg_req, ',');
+	if (equal == NULL && comma == NULL)
 		req->name = mmstr_malloc_from_cstr(pkg_req);
+	else if (comma == NULL) {
+		req->name = mmstr_malloc_copy(pkg_req, equal - pkg_req);
+		req->version = mmstr_malloc_from_cstr(equal + 1);
+	} else if (equal == NULL)
+		req->name = mmstr_malloc_copy(pkg_req, comma - pkg_req);	
 	else {
-		req->name = mmstr_malloc_copy(pkg_req, separator - pkg_req);
-		req->version = mmstr_malloc_from_cstr(separator + 1);
+		req->name = mmstr_malloc_copy(pkg_req, equal - pkg_req);
+		req->version = mmstr_malloc_copy(equal + 1, comma - equal);
+	}
+
+	while (comma != NULL) {
+		colon = strchr(comma, ':');
+		// By construction if there is a key there is necessarily a
+		// value
+		mm_check(colon != NULL);
+
+		if (!strncmp(comma + 1, "sumsha:", strlen("sumsha:")))
+			req->sumsha = mmstr_malloc_from_cstr(colon + 1);
+		else if (!strncmp(comma + 1, "fromrepo:", strlen("fromrepo:")))
+			req->repo_name = mmstr_malloc_from_cstr(colon + 1);
+		else
+			return -1;
+
+		comma = strchr(comma + 1, ',');
 	}
 
 	return 0;
@@ -181,13 +206,17 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
  * parse_pkg() -  returns the package wanted.
  *
  * @ctx:          context associated with prefix
- * @pkg_arg:      an entry matching "pkg_name[=pkg_version]". pkg_name is
- *                potentially a path toward the package (in this case no option
- *                is possible)
+ * @pkg_arg:      an entry matching
+ *                "pkg_name[=pkg_version[,key_0:value_0,...,key_n:value_n]]" or
+ *                "pkg_name[,key_0:value_0,...,key_n:value_n], where key_i can
+ *                be "fromrepo" or "sumsha". pkg_name is potentially a path
+ *                toward the package (in this case no option is possible)
  *
- * Return: the package having pkg_name as name and pkg_version as version.
+ * Return: the package having pkg_name as name, pkg_version as version, and that
+ *         fits all the values of the keys (if any).
  *         In the case where pkg_version is NULL (the entry was "pkg_name"
- *         without the "=pkg_version"), the package returned is the latest one.
+ *         without the "=pkg_version"), the package returned is the latest one
+ *         that fits all the values of the keys (if any).
  *         If no such package is found, NULL is returned.
  */
 LOCAL_SYMBOL

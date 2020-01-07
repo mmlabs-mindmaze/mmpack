@@ -89,6 +89,10 @@ void pkg_request_deinit(struct pkg_request * req)
 		req->name = NULL;
 		mmstr_free(req->version);
 		req->version = NULL;
+		mmstr_free(req->repo_name);
+		req->repo_name = NULL;
+		mmstr_free(req->sumsha);
+		req->sumsha = NULL;
 		curr = next;
 	}
 }
@@ -853,7 +857,13 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
-		if (pkg_version_compare(version, pkg->version) == 0)
+		if (req->sumsha && mmstrcmp(req->sumsha, pkg->sumsha))
+			return pkg;
+		else if (req->repo_name
+		         && mmstrcmp(req->repo_name, pkg->from_repo->filename)
+		         && pkg_version_compare(version, pkg->version) == 0)
+			return pkg;
+		else if (pkg_version_compare(version, pkg->version) == 0)
 			return pkg;
 
 		pkgentry = pkgentry->next;
