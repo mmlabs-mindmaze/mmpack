@@ -938,14 +938,14 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
  * success. NULL if the package name in a request cannot be found.
  */
 static
-struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
+struct compiled_dep* compdeps_from_reqlist(const struct pkg_parser* reqlist,
                                            const struct binindex* binindex,
                                            struct buffer* buff)
 {
 	STATIC_CONST_MMSTR(any_version, "any");
 	struct mmpkg_dep dep = {0};
 	struct compiled_dep* compdep;
-	const struct pkg_request* req;
+	const struct pkg_parser* req;
 
 	mm_check(reqlist != NULL);
 
@@ -956,7 +956,8 @@ struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
 		}
 
 		dep.name = req->name;
-		dep.min_version = req->version ? req->version : any_version;
+		dep.min_version = (req->cons && req->cons->version) ?
+		                  req->cons->version : any_version;
 		dep.max_version = dep.min_version;
 
 		// Append to buff a new compiled dependency
@@ -968,7 +969,7 @@ struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
 
 		if (compdep->num_pkg == 0) {
 			error("Cannot find version %s of package %s\n",
-			      req->version, req->name);
+			      req->cons->version, req->name);
 			return NULL;
 		}
 	}
@@ -998,7 +999,7 @@ struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
  */
 LOCAL_SYMBOL
 struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
-                                            const struct pkg_request* reqlist)
+                                            const struct pkg_parser* reqlist)
 {
 	int rv;
 	struct compiled_dep * deplist;
@@ -1031,7 +1032,7 @@ exit:
  *                                                                        *
  **************************************************************************/
 static
-struct compiled_dep* upgrades_from_reqlist(const struct pkg_request* reqlist,
+struct compiled_dep* upgrades_from_reqlist(const struct pkg_parser* reqlist,
                                            const struct solver* solver,
                                            struct buffer* buff)
 {
@@ -1039,7 +1040,7 @@ struct compiled_dep* upgrades_from_reqlist(const struct pkg_request* reqlist,
 	struct binindex* binindex = solver->binindex;
 	struct compiled_dep* compdep = NULL;
 	const struct mmpkg* pkg;
-	const struct pkg_request* req;
+	const struct pkg_parser* req;
 	int name_id;
 	struct mmpkg_dep dep = {.max_version = any_version};
 
@@ -1076,7 +1077,7 @@ struct compiled_dep* upgrades_from_reqlist(const struct pkg_request* reqlist,
  */
 LOCAL_SYMBOL
 struct action_stack* mmpkg_get_upgrade_list(struct mmpack_ctx * ctx,
-                                            const struct pkg_request* reqs)
+                                            const struct pkg_parser* reqs)
 {
 	struct compiled_dep* deplist;
 	struct solver solver;
@@ -1118,10 +1119,10 @@ exit:
  */
 LOCAL_SYMBOL
 struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
-                                           const struct pkg_request* reqlist)
+                                           const struct pkg_parser* reqlist)
 {
 	struct action_stack * actions = NULL;
-	const struct pkg_request* req;
+	const struct pkg_parser* req;
 	struct solver solver;
 	int id;
 
