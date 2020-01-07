@@ -70,6 +70,18 @@ def _get_runpath_list(filename) -> List[str]:
     return []
 
 
+def _has_dynamic_section(filename) -> bool:
+    """
+    return whether the input filename is an elf file with a dynamic section
+    """
+    try:
+        elffile = ELFFile(open(filename, 'rb'))
+        dyn = elffile.get_section_by_name('.dynamic')
+        return dyn is not None
+    except (IsADirectoryError, ELFError):
+        return False
+
+
 def adjust_runpath(filename):
     """
     Adjust the DT_RUNPATH value of filename so that library dependencies in
@@ -80,6 +92,9 @@ def adjust_runpath(filename):
     Additionally all absolute path elements that point to /run/mmpack will be
     transformed in paths relative to '$ORIGIN'.
     """
+    if not _has_dynamic_section(filename):
+        return
+
     runpath = _get_runpath_list(filename)
     filedir = os.path.dirname(filename)
 
