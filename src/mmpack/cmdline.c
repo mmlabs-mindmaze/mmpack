@@ -7,6 +7,7 @@
 #endif
 
 #include <mmargparse.h>
+#include <mmsysio.h>
 
 #include "cmdline.h"
 #include "context.h"
@@ -116,6 +117,18 @@ exit:
 }
 
 
+static
+int is_file(char const * path)
+{
+	struct mm_stat st;
+
+	if (mm_stat(path, &st, 0) != 0)
+		return 0;
+
+	return S_ISREG(st.mode);
+}
+
+
 /**
  * pkg_parser_init  -  init a structure struct pkg_parser
  *
@@ -150,15 +163,39 @@ void pkg_parser_deinit(struct pkg_parser * pp)
 /**
  * parse_pkgreq() -  fills the request asked by the user.
  *
- * @pkg_req: an entry matching "pkg_name[=pkg_version]"
+ * @ctx: context associated with prefix
+ * @pkg_req: an entry matching "pkg_name[=pkg_version]". pkg_name is potentially
+ *           a path toward the package (in this case no option is possible)
  * @pp: the request to fill
+ *
+ * Returns: 0 in case the commandline is successfully read, -1 otherwise.
  */
-static
-void parse_pkgreq(const char* pkg_req, struct pkg_parser * pp)
+LOCAL_SYMBOL
+int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
+                 struct pkg_parser * pp)
 {
+	int len;
+	struct mmpkg * pkg;
+	mmstr * tmp, * arg_full;
 	const char * equal;
 
-	/* Find the first occurrence of '=' */
+	// case where pkg_name is actually a path toward the package
+	if (is_file(pkg_req)) {
+		tmp = mmstr_alloca_from_cstr(pkg_req);
+		len = mmstrlen(ctx->cwd) + 1 + mmstrlen(tmp);
+		arg_full = mmstr_malloca(len);
+		mmstr_join_path(arg_full, ctx->cwd, tmp);
+
+		pkg = add_pkgfile_to_binindex(&ctx->binindex, arg_full);
+		mmstr_freea(arg_full);
+		if (pkg == NULL)
+			return -1;
+
+		pp->pkg = pkg;
+		return 0;
+	}
+
+	/* Parsing of pkg_req */
 	equal = strchr(pkg_req, '=');
 	if (equal == NULL)
 		pp->name = mmstr_malloc_from_cstr(pkg_req);
@@ -168,6 +205,8 @@ void parse_pkgreq(const char* pkg_req, struct pkg_parser * pp)
 		constraints_init(pp->cons);
 		pp->cons->version = mmstr_malloc_from_cstr(equal + 1);
 	}
+
+	return 0;
 }
 
 
@@ -175,7 +214,9 @@ void parse_pkgreq(const char* pkg_req, struct pkg_parser * pp)
  * parse_pkg() -  returns the package wanted.
  *
  * @ctx:          context associated with prefix
- * @pkg_arg:      an entry matching "pkg_name[=pkg_version]"
+ * @pkg_arg:      an entry matching "pkg_name[=pkg_version]". pkg_name is
+ *                potentially a path toward the package (in this case no option
+ *                is possible)
  *
  * Return: the package having pkg_name as name and pkg_version as version.
  *         In the case where pkg_version is NULL (the entry was "pkg_name"
@@ -190,12 +231,18 @@ struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg)
 
 	pkg_parser_init(&pp);
 
-	parse_pkgreq(pkg_arg, &pp);
+	if (parse_pkgreq(ctx, pkg_arg, &pp)) {
+		pkg = NULL;
+		printf("Bad commandline argument or syntax\n");
+		goto exit;
+	}
+
 	if (!(pkg = binindex_lookup(&ctx->binindex, pp.name, pp.cons)))
 		info("No package %s (%s)\n", pp.name,
 		     (pp.cons &&
 		      pp.cons->version) ? pp.cons->version : "any version");
 
+exit:
 	pkg_parser_deinit(&pp);
 	return pkg;
 }
