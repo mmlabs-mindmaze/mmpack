@@ -62,7 +62,7 @@ int warn_uninstalled_package(const struct mmpack_ctx* ctx,
 LOCAL_SYMBOL
 int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	struct pkg_request* reqlist = NULL;
+	struct pkg_parser* reqlist = NULL;
 	struct action_stack* act_stack = NULL;
 	int i, nreq, arg_index, rv = -1;
 	const char** req_args;
@@ -122,11 +122,7 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 exit:
 	mmpack_action_stack_destroy(act_stack);
-	for (i = 0; i < nreq && reqlist; i++) {
-		mmstr_free(reqlist[i].name);
-		mmstr_free(reqlist[i].version);
-	}
-
+	pkg_parser_deinit(reqlist);
 	mm_freea(reqlist);
 	return rv;
 }

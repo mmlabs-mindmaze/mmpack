@@ -10,8 +10,6 @@
 
 #include <mmargparse.h>
 #include <mmerrno.h>
-#include <mmlib.h>
-#include <mmsysio.h>
 #include <string.h>
 
 #include "cmdline.h"
@@ -35,62 +33,6 @@ static const struct mmarg_opt cmdline_optv[] = {
 };
 
 
-static
-int is_file(char const * path)
-{
-	struct mm_stat st;
-
-	if (mm_stat(path, &st, 0) != 0)
-		return 0;
-
-	return S_ISREG(st.mode);
-}
-
-
-static
-int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
-                            const char* arg)
-{
-	int len;
-	const char * v;
-	struct mmpkg * pkg;
-	mmstr * tmp, * arg_full;
-
-	if (is_file(arg)) {
-		tmp = mmstr_alloca_from_cstr(arg);
-		len = mmstrlen(ctx->cwd) + 1 + mmstrlen(tmp);
-		arg_full = mmstr_malloca(len);
-		mmstr_join_path(arg_full, ctx->cwd, tmp);
-
-		pkg = add_pkgfile_to_binindex(&ctx->binindex, arg_full);
-		mmstr_freea(arg_full);
-		if (pkg == NULL)
-			return -1;
-
-		req->pkg = pkg;
-		req->name = NULL;
-		req->version = NULL;
-
-		return 0;
-	}
-
-	req->pkg = NULL;
-
-	// Find the first occurrence of '='
-	v = strchr(arg, '=');
-	if (v != NULL) {
-		// The package name is before the '=' character
-		req->name = mmstr_malloc_copy(arg, v - arg);
-		req->version = mmstr_malloc_from_cstr(v+1);
-	} else {
-		req->name = mmstr_malloc_from_cstr(arg);
-		req->version = NULL;
-	}
-
-	return 0;
-}
-
-
 /**
  * mmpack_install() - main function for the install command
  * @ctx: mmpack context
@@ -104,7 +46,7 @@ int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
 LOCAL_SYMBOL
 int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	struct pkg_request* reqlist = NULL;
+	struct pkg_parser* pp = NULL;
 	struct action_stack* act_stack = NULL;
 	int i, nreq, arg_index, rv = -1;
 	const char** req_args;
@@ -136,17 +78,17 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		goto exit;
 
 	// Fill package requested to be installed from cmd arguments
-	reqlist = xx_malloca(nreq * sizeof(*reqlist));
-	memset(reqlist, 0, nreq * sizeof(*reqlist));
+	pp = xx_malloca(nreq * sizeof(*pp));
+	memset(pp, 0, nreq * sizeof(*pp));
 	for (i = 0; i < nreq; i++) {
-		if (fill_pkgreq_from_cmdarg(ctx, &reqlist[i], req_args[i]) < 0)
+		if (parse_pkgreq(ctx, req_args[i], &pp[i]) < 0)
 			goto exit;
 
-		reqlist[i].next = (i == nreq-1) ? NULL : &reqlist[i+1];
+		pp[i].next = (i == nreq-1) ? NULL : &pp[i+1];
 	}
 
 	// Determine the stack of actions to perform
-	act_stack = mmpkg_get_install_list(ctx, reqlist);
+	act_stack = mmpkg_get_install_list(ctx, pp);
 	if (act_stack == NULL) {
 		printf("Abort: failed to compute action course\n");
 		goto exit;
@@ -162,12 +104,7 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 exit:
 	mmpack_action_stack_destroy(act_stack);
-	for (i = 0; i < nreq && reqlist; i++) {
-		mmstr_free(reqlist[i].name);
-		mmstr_free(reqlist[i].version);
-		/* do not free reqlist package */
-	}
-
-	mm_freea(reqlist);
+	pkg_parser_deinit(pp);
+	mm_freea(pp);
 	return rv;
 }

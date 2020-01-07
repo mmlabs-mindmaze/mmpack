@@ -61,6 +61,8 @@ struct subcmd_parser {
 struct pkg_parser {
 	struct constraints cons;
 	mmstr * name;
+	struct mmpkg * pkg;
+	struct pkg_parser * next;
 };
 
 void pkg_parser_init(struct pkg_parser * pp);
