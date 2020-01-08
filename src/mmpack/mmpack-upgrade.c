@@ -144,7 +144,7 @@ int mmpack_upgrade_reqlist(struct mmpack_ctx * ctx, struct pkg_request* reqlist)
 			goto exit;
 	}
 
-	rv = apply_action_stack(ctx, act_stack);
+	rv = apply_action_stack(ctx, act_stack, reqlist);
 
 exit:
 	mmpack_action_stack_destroy(act_stack);

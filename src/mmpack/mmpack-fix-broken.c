@@ -55,7 +55,7 @@ int fix_broken_package(struct mmpack_ctx * ctx, mmstr const * pkg_name,
 			goto exit;
 	}
 
-	rv = apply_action_stack(ctx, stack);
+	rv = apply_action_stack(ctx, stack, NULL);
 
 exit:
 	mmpack_action_stack_destroy(stack);

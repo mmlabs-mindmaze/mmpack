@@ -118,7 +118,7 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 			goto exit;
 	}
 
-	rv = apply_action_stack(ctx, act_stack);
+	rv = apply_action_stack(ctx, act_stack, NULL);
 
 exit:
 	mmpack_action_stack_destroy(act_stack);

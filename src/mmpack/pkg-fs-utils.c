@@ -1021,7 +1021,8 @@ int check_new_sysdeps(struct action_stack* stack)
  *
  * Return: 0 in case of success, -1 otherwise
  */
-int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
+int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack,
+                       struct pkg_request* reqlist)
 {
 	int i, rv;
 
@@ -1059,7 +1060,7 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 	mm_chdir(ctx->cwd);
 
 	// Store the updated installed package list in prefix
-	if (mmpack_ctx_save_installed_list(ctx))
+	if (mmpack_ctx_save_installed_list(ctx, reqlist))
 		rv = -1;
 
 	return rv;

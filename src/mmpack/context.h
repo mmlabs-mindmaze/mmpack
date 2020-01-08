@@ -7,6 +7,7 @@
 
 #include <curl/curl.h>
 
+#include "action-solver.h"
 #include "indextable.h"
 #include "package-utils.h"
 #include "settings.h"
@@ -44,7 +45,10 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts);
 void mmpack_ctx_deinit(struct mmpack_ctx * ctx);
 int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx);
 int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags);
-int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx);
+
+struct pkg_request;
+int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx,
+                                   struct pkg_request * reqlist);
 const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx);
 mmstr* mmpack_get_repocache_path(struct mmpack_ctx * ctx, char * repo_name);
 
