@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6e6aa23_00606fca",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 835,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-08T15:08:46Z",
+      "side": 1,
+      "message": "binindex_lookup() only returns a single package, so you\u0027re not really filtering.\n\nAlso, this looks more like a request logic than a filtering-with-constraints logic:\nYou do NOT allow the request to be NULL, but as a constraint on a request, it SHOULD be allowed to be NULL.",
+      "range": {
+        "startLine": 835,
+        "startChar": 17,
+        "endLine": 835,
+        "endChar": 28
+      },
+      "revId": "3175a23829c7882beb21aea57eeb7b1d542d5223",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "295b8310_34881a91",
+        "filename": "src/mmpack/package-utils.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-08T15:08:46Z",
+      "side": 1,
+      "message": "If I get things right, this is designed to be the new input for binindex_lookup().\nBefore:\n  we look up the table of packages by (name,version)\nAfter:\n  we look up the table of packages using a pkg_request structure that contains those\n  same name and version, but also new fields ...\n  ... like a package structure itself and a \"next\" request ?\n\n- why would I use a package structure to look up a package structure ?\n- what is the meaning of the next request field ?\n  I can only request a single package when looking up packages.",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 2
+      },
+      "revId": "3175a23829c7882beb21aea57eeb7b1d542d5223",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
