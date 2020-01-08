@@ -45,6 +45,30 @@
       "revId": "3175a23829c7882beb21aea57eeb7b1d542d5223",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aca7b270_172a3db3",
+        "filename": "src/mmpack/package-utils.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-08T15:35:50Z",
+      "side": 1,
+      "message": "\"- why would I use a package structure to look up a package structure ?\"\nThis is in the case where the package_name is actually the path toward the package.\n\n\"- what is the meaning of the next request field ?\"\nWe effectively not use this field for the lookup. However, if we use another structure than pkg_request, then the code of command mmpack install will greatly be degraded. Actually this command uses pkg_request structure and using it while parsing permits to gain time in this command.",
+      "parentUuid": "295b8310_34881a91",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 2
+      },
+      "revId": "3175a23829c7882beb21aea57eeb7b1d542d5223",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
