@@ -5,13 +5,16 @@ helper module containing pacman wrappers and file parsing functions
 
 import os
 import re
-from typing import Set, List
+import tarfile
 
-from . common import shell
+from io import TextIOWrapper
+from typing import Set, List, TextIO
+
+from . common import *
 from . pe_utils import get_dll_from_soname, symbols_set
 from . settings import PACMAN_PREFIX
-from . syspkg_manager_base import SysPkgManager
-from . workspace import Workspace
+from . syspkg_manager_base import SysPkgManager, SysPkg
+from . workspace import Workspace, cached_download
 
 
 def msys2_find_dependency(soname: str, symbol_set: Set[str]) -> str:
@@ -63,6 +66,91 @@ def msys2_find_pypkg(pypkg: str) -> str:
     return None
 
 
+class PacmanPkg(SysPkg):
+    """
+    representation of a package in a distribution repository using pacman
+    """
+    desc_field_re = re.compile(r'%([A-Z]+)%')
+    desc_field_to_attr = {
+        'NAME': 'name',
+        'VERSION': 'version',
+        'BASE': 'source',
+        'FILENAME': 'filename',
+        'SHA256SUM': 'sha256',
+    }
+
+    def __init__(self, fileobj: TextIO):
+        """
+        Parse package description
+
+        Args:
+            fileobj: stream reading downloaded repository index
+
+        Return: 1 if a package has been parsed, 0 if end of file is reached
+        """
+        super().__init__()
+        key = None
+        for line in fileobj:
+            value = line.strip()
+            match = self.desc_field_re.fullmatch(value)
+            if match:
+                key = match.group(1)
+                value = None  # new key, so reset value
+                if key not in self.desc_field_to_attr:
+                    key = None
+            elif key and value:
+                setattr(self, self.desc_field_to_attr[key], value)
+
+
+def _get_msys2_repo_comp(component, arch):
+    if component != 'mingw':
+        return component
+
+    mingw_subcomps = {'amd64': 'mingw64', 'i386': 'mingw32'}
+    val = mingw_subcomps.get(arch)
+    if not val:
+        raise Assert('unexpected architecture: {}'.format(arch))
+    return val
+
+
+def _get_repo_cpu(arch):
+    repo_cpu_map = {'amd64': 'x86_64', 'i386': 'i686'}
+    val = repo_cpu_map.get(arch)
+    if not val:
+        raise Assert('unexpected architecture: {}'.format(arch))
+    return val
+
+
+def _parse_pkgindex_comp(repo_url, component: str, builddir: str,
+                         source: str) -> List[PacmanPkg]:
+    pkg_list = []
+    arch = get_host_arch()
+
+    cpu_arch = _get_repo_cpu(arch)
+    repo = _get_msys2_repo_comp(component, arch)
+    pkgindex_url = '{}/{}/{}/{}.db'.format(repo_url, component, cpu_arch, repo)
+    pkgindex = os.path.join(builddir, os.path.basename(pkgindex_url))
+    pkg_baseurl = '{}/{}/{}/'.format(repo_url, component, cpu_arch)
+
+    # download compressed index
+    cached_download(pkgindex_url, pkgindex)
+
+    # Parse actual index
+    with tarfile.open(pkgindex, 'r') as tar:
+        for fileinfo in tar.getmembers():
+            if os.path.basename(fileinfo.name) == 'desc':
+                pkg = PacmanPkg(TextIOWrapper(tar.extractfile(fileinfo)))
+                if pkg.source == source:
+                    pkg.url = pkg_baseurl + pkg.filename
+                    pkg_list.append(pkg)
+
+    return pkg_list
+
+
+def _get_repo_baseurl() -> str:
+    return os.getenv('MMPACK_BUILD_MSYS2_REPO', 'http://repo.msys2.org')
+
+
 class PacmanMsys2(SysPkgManager):
     """
     Class to interact with msys2 package database
@@ -72,3 +160,26 @@ class PacmanMsys2(SysPkgManager):
 
     def find_pypkg_sysdep(self, pypkg: str) -> str:
         return msys2_find_pypkg(pypkg)
+
+    def _extract_syspkg(self, pkgfile: str, unpackdir: str) -> List[str]:
+        # Unpack and add extracted files to package mapping for this syspkg
+        # Python tarfile module is not used because it currently does not
+        # support z-standart compression (.tar.zst)
+        pkgfile_u = shell(['cygpath', '-u', pkgfile], log=False).strip()
+        unpackdir_u = shell(['cygpath', '-u', unpackdir], log=False).strip()
+        cmd = 'tar -xvf {} -C {} --exclude=.BUILDINFO --exclude=.MTREE '\
+              '--exclude=.PKGINFO'.format(pkgfile_u, unpackdir_u)
+        files = shell(cmd).splitlines()
+        return [f.rstrip('/') for f in files]
+
+    def _parse_pkgindex(self, builddir: str, srcname: str) -> List[SysPkg]:
+        repo_url = _get_repo_baseurl()
+
+        # Search first in mingw* repository
+        pkg_list = _parse_pkgindex_comp(repo_url, 'mingw', builddir,
+                                        'mingw-w64-' + srcname)
+        if pkg_list:
+            return pkg_list
+
+        # Fallback to msys repository
+        return _parse_pkgindex_comp(repo_url, 'msys', builddir, srcname)

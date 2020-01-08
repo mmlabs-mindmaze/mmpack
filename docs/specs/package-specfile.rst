@@ -34,7 +34,11 @@ Mandatory fields
  :name:
    The source package name.
    This name is also used as root to generate the binary package names
-   (unless they all are customized)
+   (unless they all are customized).
+   For ghost packages, this field will also be used to search for binary
+   package in the system package repository. All binary system package whose
+   source is this name will be fetched to create ghost packages. This source
+   name to search in the repo can be changed with syspkg-srcnames option.
 
  :version:
    The version of the packages to be generated.
@@ -82,6 +86,20 @@ Optional fields
         list of *mmpack* packages that are needed only when building on debian
     - build-depends-debian-system
         list of *debian* packages that are needed to build
+
+ :ghost:
+   True if the packaging specs refers to a ghost of system packages.
+   If not present, False is assumed.
+
+ :syspkg-srcnames:
+   Meaningful only if ghost-syspkg is True. Optional key-value mapping allowing
+   to determine to which source name the system binary packages must be
+   associated when searched in the repository of system package. If the key
+   matches the target distribution, the corresponding value will be used as
+   source project name instead of name field in the mmpack spec. However name
+   field will still be used to generate the name of the mmpack ghost package.
+   The key is a PCRE regular expression used to match targetted host
+   distribution of the generated package.
 
  :ignore:
    list of files to be ignored by any packages.
@@ -155,3 +173,20 @@ Minimal specfile example
        description: |
          mmpack hello world
 
+
+Ghost package specfile example
+------------------------------
+
+.. code-block:: yaml
+
+   general:
+       name: mmpack-hello-world
+       version: 1.0.0
+       maintainer: Gandalf <gandalf@the.grey>
+       url: ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world
+       description: |
+         mmpack hello world
+       ghost: true
+       syspkg-srcnames:
+           debian: mmpack-h-w # project source is known as mmpack-h-w in Debian
+           fedora: mmpack-helloworld # project source is known as mmpack-helloworld in fedora
