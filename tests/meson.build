@@ -96,6 +96,14 @@ test('mmpack-build-autotools',
         deps : [do_test_pkg, long_test],
 )
 
+test('mmpack-build-ghost',
+        files ('smoke-tests/test_mmpack-build_ghost.sh'),
+        timeout : 120,
+        env : env,
+        suite : 'mmpack-build-smoke',
+        deps : [do_test_sysrepo, long_test],
+)
+
 # please keep alphabetically ordered
 mmpack_smoke_test = [
         ['check-integrity', files('smoke-tests/test_mmpack_check-integrity.sh')],

@@ -334,17 +334,22 @@ deployment-test-clean:
 test-repo: tests/create-test-repo.sh deployment-test
 	$^ $@
 
+test-sysrepo.timestamp: tests/create-test-sysrepo.sh tests/test-packages
+	$(AM_V_GEN)$< $(builddir)/test-sysrepo true
+	@touch $@
+
 test-packages.timestamp: tests/create-test-pkg.sh tests/test-packages
 	$(AM_V_GEN)$< $(builddir)/test-packages true
 	@touch $@
 
 noinst_PYTHON = tests/pytests.py
 
-check_DATA = deployment-test test-repo test-packages.timestamp
+check_DATA = deployment-test test-repo test-packages.timestamp test-sysrepo.timestamp
 
 TESTS = \
 	tests/python-unittests.tap \
 	tests/smoke-tests/launch_test_mmpack-build_autotools.sh \
+	tests/smoke-tests/test_mmpack-build_ghost.sh \
 	tests/smoke-tests/test_mmpack_check-integrity.sh \
 	tests/smoke-tests/test_mmpack_download.sh \
 	tests/smoke-tests/test_mmpack_install.sh \
@@ -549,7 +554,7 @@ user-doc-clean:
 
 html-local: user-doc
 clean-local: user-doc-clean dev-doc-clean
-	$(RM) -r html test-packages*
+	$(RM) -r html test-sysrepo* test-packages*
 
 install-html: html-local
 	@mkdir -p $(DESTDIR)$(docdir)/html/
