@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+%:
+	dh  $@ --buildsystem=meson
+
+override_dh_autoreconf:
+
+override_dh_auto_test:
+
