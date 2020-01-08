@@ -96,6 +96,14 @@ if get_option('long-tests')
         suite : 'mmpack-build-smoke',
         depends : do_test_pkg,
   )
+
+  test('mmpack-build-ghost',
+        files ('smoke-tests/test_mmpack-build_ghost.sh'),
+        timeout : 120,
+        env : env,
+        suite : 'mmpack-build-smoke',
+        depends : do_test_sysrepo,
+  )
 endif
 
 # please keep alphabetically ordered
