@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e55da3_dcab1997",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-08T14:44:54Z",
+      "side": 1,
+      "message": "This should be a RuntimeError, not an Assert.\nTo be pedantic about it, you might even want to define a NetworkException inheriting from RuntimeError (like the shell exception we wrote) and raise it here",
+      "range": {
+        "startLine": 469,
+        "startChar": 14,
+        "endLine": 469,
+        "endChar": 20
+      },
+      "revId": "aa0756bbbd4d2cb82d51c23d10272a4f5d55ee52",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
