@@ -359,6 +359,7 @@ EXTRA_DIST += \
 	tests/run-test-mpkrepo \
 	tests/mmpack-config.yaml \
 	tests/pydata/ \
+	tests/test_common.py \
 	tests/test_file_utils.py \
 	tests/test_hook_python.py \
 	tests/test_readme_parsing.py \

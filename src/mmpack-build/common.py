@@ -13,7 +13,7 @@ import platform
 
 from hashlib import sha256
 from subprocess import PIPE, run
-from typing import Union, Tuple
+from typing import Union, Tuple, List
 
 import urllib3
 import yaml
@@ -474,3 +474,28 @@ def download(url: str, path: str):
         outfile.write(request.data)
 
     iprint('Done')
+
+
+def list_files(topdir: str, exclude_dirs: bool = False) -> List[str]:
+    """
+    List files in topdir recursively. This does not follow symbolic links.
+
+    Args:
+        topdir: folder path whose content will be listed
+        exclude_dirs: if True, directory element will not be listed
+
+    Return:
+        sorted list of files relative to topdir. The path separator of the
+        listed elements will always be forward slash '/', no matter the
+        platform (like glob does).
+    """
+    filelist = []
+
+    for root, dirs, files in os.walk(topdir):
+        reldir = os.path.relpath(root, topdir)
+        reldir = '' if reldir == '.' else reldir + '/'
+        filelist.extend([reldir + f for f in files])
+        if not exclude_dirs:
+            filelist.extend([reldir + d for d in dirs])
+
+    return sorted(filelist)

@@ -8,7 +8,6 @@ import re
 import shutil
 import sys
 
-from glob import glob
 from os import path
 from subprocess import Popen
 from threading import Thread
@@ -312,10 +311,6 @@ class SrcPackage:
                                        log=False).strip()
         return build_env
 
-    def _strip_dirs_from_install_files(self):
-        tmp = {x for x in self.install_files_set if not path.isdir(x)}
-        self.install_files_set = tmp
-
     def install_builddeps(self, prefix: str, assumeyes: bool):
         """
         install mmpack build-deps within given prefix
@@ -394,8 +389,7 @@ class SrcPackage:
         pushdir(self._local_install_path(True))
         for hook in MMPACK_BUILD_HOOKS:
             hook.post_local_install()
-        self.install_files_set = set(glob('**', recursive=True))
-        self._strip_dirs_from_install_files()
+        self.install_files_set = set(list_files('.', exclude_dirs=True))
         popdir()
 
     def _ventilate_custom_packages(self):
