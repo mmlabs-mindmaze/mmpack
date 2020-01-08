@@ -1,0 +1,28 @@
+Source: hello
+Section: libs
+Priority: extra
+Maintainer: Nicolas Bourdaud <nicolas.bourdaud@mindmaze.com>
+Build-Depends: debhelper (>= 10), meson
+Standards-Version: 3.9.8
+Homepage: https://opensource.mindmaze.com
+
+Package: hello-bin
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: hello (executables)
+
+Package: libhello1
+Section: libs
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: hello (shared lib)
+
+Package: libhello-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libhello0 (= ${binary:Version}), ${misc:Depends}
+Description: hello (development files)

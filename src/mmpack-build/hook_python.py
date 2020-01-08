@@ -216,6 +216,10 @@ class MMPackBuildHook(BaseHook):
         pkg.provides['python'].serialize(filename)
 
     def update_depends(self, pkg: PackageInfo, other_pkgs: List[PackageInfo]):
+        # Ignore dependency finding if ghost package
+        if pkg.ghost:
+            return
+
         py_scripts = [f for f in pkg.files if is_python_script(f)]
         if not py_scripts:
             return
