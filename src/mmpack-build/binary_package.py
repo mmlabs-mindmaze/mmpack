@@ -78,7 +78,7 @@ class BinaryPackage:
         """
         pushdir(pkgdir)
 
-        # Create file containing of hashes of all installed files
+        # Compute hashes of all installed files
         cksums = {}
         for filename in glob('**', recursive=True):
             # skip folder and MMPACK/info
@@ -87,7 +87,11 @@ class BinaryPackage:
 
             # Add file with checksum
             cksums[filename] = sha256sum(filename, follow_symlink=False)
-        yaml_serialize(cksums, self._sha256sums_file(), use_block_style=True)
+
+        # Write the file sha256sums file
+        with open(self._sha256sums_file(), 'wt', newline='\n') as sums_file:
+            for filename in sorted(cksums):
+                sums_file.write('{}: {}\n'.format(filename, cksums[filename]))
 
         # Create info file
         info = {'version': self.version,
