@@ -36,6 +36,7 @@ ssh://git@intranet.mindmaze.ch:7999/~user/XXX.git
 
 import os
 import tarfile
+
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from subprocess import call, DEVNULL
 

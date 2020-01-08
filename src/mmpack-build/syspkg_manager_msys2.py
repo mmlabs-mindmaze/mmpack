@@ -5,12 +5,15 @@ helper module containing pacman wrappers and file parsing functions
 
 import os
 import re
+import tarfile
+from copy import copy
+from io import TextIOBase, TextIOWrapper
 from typing import Set, List
 
-from . common import shell
+from . common import *
 from . pe_utils import get_dll_from_soname, symbols_set
 from . settings import PACMAN_PREFIX
-from . syspkg_manager_base import SysPkgManager
+from . syspkg_manager_base import SysPkgManager, SysPkg
 from . workspace import Workspace
 
 
@@ -63,6 +66,89 @@ def msys2_find_pypkg(pypkg: str) -> str:
     return None
 
 
+class PacmanPkg(SysPkg):
+    """
+    representation of a package in a distribution repository using pacman
+    """
+    desc_field_re = re.compile(r'%([A-Z]+)%')
+    desc_field_to_attr = {
+        'NAME': 'name',
+        'VERSION': 'version',
+        'BASE': 'source',
+        'FILENAME': 'filename',
+    }
+
+    def parse_metadata_from_file(self, fileobj: TextIOBase):
+        """
+        Parse package description
+
+        Args:
+            fileobj: stream reading downloaded repository index
+
+        Return: 1 if a package has been parsed, 0 if end of file is reached
+        """
+        key = None
+        for line in fileobj:
+            value = line.strip()
+            match = self.desc_field_re.fullmatch(value)
+            if match:
+                key = match.group(1)
+                value = None  # new key, so reset value
+                if key not in self.desc_field_to_attr:
+                    key = None
+            elif key and value:
+                self.__setattr__(self.desc_field_to_attr[key], value)
+
+
+def _get_msys2_repo_comp(component, arch):
+    if component != 'mingw':
+        return component
+
+    if arch == 'amd64':
+        return 'mingw64'
+    elif arch == 'i386':
+        return 'mingw32'
+    else:
+        raise Assert('unexpected architecture: {}'.format(arch))
+
+
+def _get_repo_cpu(arch):
+    if arch == 'amd64':
+        return 'x86_64'
+    elif arch == 'i386':
+        return 'i686'
+    else:
+        raise Assert('unexpected architecture: {}'.format(arch))
+
+
+def _parse_pkgindex_comp(repo_url, component: str, builddir: str,
+                         source: str) -> List[PacmanPkg]:
+    pkg_list = []
+    arch = get_host_arch()
+
+    cpu_arch = _get_repo_cpu(arch)
+    repo = _get_msys2_repo_comp(component, arch)
+    pkgindex_url = '{}/{}/{}/{}.db'.format(repo_url, component, cpu_arch, repo)
+    pkgindex = os.path.join(builddir, os.path.basename(pkgindex_url))
+    pkg_baseurl = '{}/{}/{}/'.format(repo_url, component, cpu_arch)
+
+    # download compressed index
+    download(pkgindex_url, pkgindex)
+
+    # Parse actual index
+    pkg = PacmanPkg()
+    with tarfile.open(pkgindex, 'r') as tar:
+        for fileinfo in tar.getmembers():
+            if os.path.basename(fileinfo.name) == 'desc':
+                with TextIOWrapper(tar.extractfile(fileinfo)) as desc_fileobj:
+                    pkg.parse_metadata_from_file(desc_fileobj)
+                if pkg.source == source:
+                    pkg.url = pkg_baseurl + pkg.filename
+                    pkg_list.append(copy(pkg))
+
+    return pkg_list
+
+
 class Msys2(SysPkgManager):
     """
     Class to interact with msys2 package database
@@ -72,3 +158,25 @@ class Msys2(SysPkgManager):
 
     def find_pypkg_sysdep(self, pypkg: str) -> str:
         return msys2_find_pypkg
+
+    def _extract_syspkg(self, pkgfile: str, unpackdir: str) -> List[str]:
+        # Unpack it and add extracted files to package mapping for this syspkg
+        ignored = ['.BUILDINFO', '.MTREE', '.PKGINFO']
+        with tarfile.open(pkgfile) as pkgtar:
+            members = [i for i in pkgtar.getmembers() if i.name not in ignored]
+            pkgtar.extractall(unpackdir, members)
+            files = [i.name for i in members]
+
+        return files
+
+    def _parse_pkgindex(self, builddir: str, srcname: str) -> List[SysPkg]:
+        repo_url = 'http://repo.msys2.org'
+
+        # Search first in mingw* repository
+        mingw_source = 'mingw-w64-' + srcname
+        pkg_list = _parse_pkgindex_comp(repo_url, 'mingw', builddir, mingw_source)
+        if pkg_list:
+            return pkg_list
+
+        # Fallback to msys repository
+        return _parse_pkgindex_comp(repo_url, 'msys', builddir, srcname)
