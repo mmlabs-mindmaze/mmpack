@@ -87,6 +87,16 @@ do_test_repo = custom_target('test-repo',
         depends : do_deployment_test,
 )
 
+sysrepo_dir = meson.build_root() + '/test-sysrepo'
+do_test_sysrepo = custom_target('test-sysrepo',
+        output: 'test-sysrepo',
+        command : ['bash',
+                   files('tests/create-test-sysrepo.sh'),
+                   sysrepo_dir,
+                   '@0@'.format(get_option('long-tests')),
+        ],
+)
+
 testpkg_dir = meson.build_root() + '/test-packages'
 do_test_pkg = custom_target('test-pkg',
         output: 'test-packages',
