@@ -20,6 +20,7 @@ class PackageInfo:
         self.deplist = []  # List of triplet of (dep_name, min_ver, max_ver)
         self.version = Version('any')
         self.sysdeps = set()
+        self.ghost = False
 
     def add_to_deplist(self, pkgname: str,
                        minver: Version = Version('any'),
