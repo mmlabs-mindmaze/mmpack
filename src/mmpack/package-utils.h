@@ -76,6 +76,11 @@ struct mmpkg {
 
 	struct from_repo * from_repo;
 
+	// if the following variable is set to 1 this implies that the user
+	// asked explicitly the installation of this package, otherwise this
+	// implies that mmpack asked the permission to installed this package
+	// because it was needed by another one.
+	int installed_manually;
 	pkg_state state;
 
 	struct mmpkg_dep * mpkdeps;

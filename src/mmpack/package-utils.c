@@ -374,7 +374,9 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 	        "    version: %s\n"
 	        "    source: %s\n"
 	        "    sumsha256sums: %s\n",
-	        pkg->name, pkg->version, pkg->source, pkg->sumsha);
+	        "    installation: %s\n",
+	        pkg->name, pkg->version, pkg->source, pkg->sumsha,
+	        pkg->installed_manually ? "manual" : "automatic");
 
 	fprintf(fp, "    depends:");
 	mmpkg_dep_save_to_index(pkg->mpkdeps, fp, 2 /*indentation level*/);
@@ -1246,6 +1248,7 @@ enum field_type {
 	FIELD_UNKNOWN = -1,
 	FIELD_VERSION = 0,
 	FIELD_FILENAME,
+	FIELD_INSTALLATION,
 	FIELD_SHA,
 	FIELD_SIZE,
 	FIELD_SOURCE,
@@ -1257,6 +1260,7 @@ static
 const char* scalar_field_names[] = {
 	[FIELD_VERSION] = "version",
 	[FIELD_FILENAME] = "filename",
+	[FIELD_INSTALLATION] = "installation",
 	// sha256: hash of the mpk file (useful only to check the download)
 	[FIELD_SHA] = "sha256",
 	[FIELD_SIZE] = "size",
@@ -1302,6 +1306,16 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 	case FIELD_FILENAME:
 		from_repo = mmpkg_get_or_create_from_repo(pkg, repo);
 		field = &from_repo->filename;
+		break;
+
+	case INSTALLATION:
+		if (strcmp(*field, "manual") == 0)
+			pkg->installed_manually = 1;
+		else if (strcmp(*field, "automatic") == 0)
+			pkg->installed_manually = 0;
+		else
+			return -1;
+
 		break;
 
 	case FIELD_SHA:
