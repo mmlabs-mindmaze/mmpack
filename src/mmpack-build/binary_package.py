@@ -34,6 +34,7 @@ class BinaryPackage:
         self.spec_dir = spec_dir
         self.src_hash = src_hash
         self.pkg_path = None
+        self.ghost = False
 
         self.description = ''
         # * System dependencies are stored as opaque strings.
@@ -193,6 +194,7 @@ class BinaryPackage:
         pkginfo.files = self.install_files
         pkginfo.provides = self.provides
         pkginfo.version = self.version
+        pkginfo.ghost = self.ghost
         return pkginfo
 
     def gen_provides(self):

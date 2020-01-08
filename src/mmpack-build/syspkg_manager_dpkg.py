@@ -3,16 +3,23 @@
 helper module containing dpkg files parsing functions
 """
 
+import gzip
 import os
 import re
 
+from functools import partial
 from glob import glob
+from io import TextIOBase
 from typing import List
 
-from . common import parse_soname, get_host_arch, Assert, shell
+from . common import *
 from . mm_version import Version
 from . settings import DPKG_METADATA_PREFIX
-from . syspkg_manager_base import SysPkgManager
+from . syspkg_manager_base import SysPkgManager, SysPkg
+from . workspace import cached_download
+
+
+REPO_URL = 'http://debian.proxad.net/debian'
 
 
 def dpkg_find_shlibs_file(target_soname: str):
@@ -241,6 +248,49 @@ def dpkg_find_pypkg(pypkg: str) -> str:
     return debpkg_list[0] if debpkg_list else None
 
 
+class DebPkg(SysPkg):
+    """
+    representation of a package in a Debian-based distribution repository
+    """
+    desc_field_to_attr = {
+        'Package': 'name',
+        'Version': 'version',
+        'Source': 'source',
+        'Filename': 'filename',
+        'SHA256': 'sha256',
+    }
+
+    def get_sysdep(self) -> str:
+        return '{} (>= {})'.format(self.name, self.version)
+
+    @classmethod
+    def fromindex(cls, fileobj: TextIOBase):
+        """
+        read next package from package index
+        """
+        pkg = DebPkg()
+        for line in fileobj:
+            try:
+                key, data = line.split(':', 1)
+                attrname = cls.desc_field_to_attr.get(key)
+                if attrname:
+                    pkg.__setattr__(attrname, data.strip())
+            except ValueError:
+                # Check end of paragraph
+                if not line.strip():
+                    if not pkg.source:
+                        pkg.source = pkg.name
+                    return pkg
+        return None
+
+    @classmethod
+    def list_index(cls, fileobj: TextIOBase):
+        """
+        iterator over all packages described in a package index
+        """
+        return iter(partial(cls.fromindex, fileobj), None)
+
+
 class Dpkg(SysPkgManager):
     """
     Class to interact with Debian package database
@@ -250,3 +300,32 @@ class Dpkg(SysPkgManager):
 
     def find_pypkg_sysdep(self, pypkg: str) -> str:
         return dpkg_find_pypkg(pypkg)
+
+    def _get_mmpack_version(self, sys_version: str) -> Version:
+        # remove epoch part if any, ie "epoch:version" and "version" return
+        # "version"
+        return Version(sys_version.split(':', 1)[-1])
+
+    def _extract_syspkg(self, pkgfile: str, unpackdir: str) -> List[str]:
+        files = shell(['dpkg-deb', '--vextract', pkgfile, unpackdir]).split()
+        return [f.lstrip('./') for f in files]
+
+    def _parse_pkgindex(self, builddir: str, srcname: str) -> List[SysPkg]:
+        pkg_list = []
+
+        arch = get_host_arch()
+        gzipped_index = os.path.join(builddir, 'Packages.gz')
+        pkgindex_url = '{}/dists/stable/main/binary-{}/Packages.gz'\
+                       .format(REPO_URL, arch)
+
+        # download compressed index
+        cached_download(pkgindex_url, gzipped_index)
+
+        # Parse compressed package index
+        for pkg in DebPkg.list_index(gzip.open(gzipped_index, 'rt')):
+            if pkg.source == srcname:
+                pkg.url = REPO_URL + '/' + pkg.filename
+                pkg.filename = os.path.basename(pkg.filename)
+                pkg_list.append(pkg)
+
+        return pkg_list

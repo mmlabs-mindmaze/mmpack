@@ -165,6 +165,11 @@ class MMPackBuildHook(BaseHook):
                 _add_dll_dep_to_pkginfo(pkg, inst_file, other_pkgs)
                 continue
 
+            # Ignore dependency finding if ghost package (link of importlib to
+            # dll should have been however be performed)
+            if pkg.ghost:
+                continue
+
             # populate the set of sonames of shared libraries used by the
             # file and the set of used symbols external to the file. This
             # will be use to determine the dependencies
