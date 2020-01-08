@@ -328,12 +328,10 @@ class SrcPackage:
         process_dependencies(system_builddeps, mmpack_builddeps,
                              prefix, assumeyes)
 
-    def local_install(self, skip_tests: bool = False) -> None:
+    def _build_project(self, skip_tests: bool) -> None:
         """
-        local installation of the package from the source package
-
+        Compile the unpacked sources
         guesses build system if none given.
-        fills private var: _install_files_set before returning
 
         Raises:
             NotImplementedError: the specified build system is not supported
@@ -385,6 +383,14 @@ class SrcPackage:
             raise RuntimeError(errmsg)
 
         popdir()  # unpack directory
+
+    def local_install(self, skip_tests: bool = False) -> None:
+        """
+        local installation of the package from the source package
+
+        fills private var: _install_files_set before returning
+        """
+        self._build_project(skip_tests)
 
         pushdir(self._local_install_path(True))
         for hook in MMPACK_BUILD_HOOKS:
