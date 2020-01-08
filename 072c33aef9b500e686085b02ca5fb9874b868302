@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "06ecb881_a3dba1e1",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-08T15:22:18Z",
+      "side": 1,
+      "message": "calls to info() generate both output and log.\nA simple output to the user should be enough here.",
+      "range": {
+        "startLine": 204,
+        "startChar": 2,
+        "endLine": 204,
+        "endChar": 6
+      },
+      "revId": "072c33aef9b500e686085b02ca5fb9874b868302",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
