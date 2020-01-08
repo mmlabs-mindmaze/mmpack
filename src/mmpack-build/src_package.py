@@ -106,6 +106,20 @@ class SrcPackage:
         # Init source package from unpacked dir
         self._parse_specfile()
 
+    def _update_version(self, version: Version):
+        """
+        Update the version of the package being built
+        """
+        self.version = version
+
+        # update information cached in hooks
+        for hook in MMPACK_BUILD_HOOKS:
+            hook.update_version(version)
+
+        # update version of binary packages already created
+        for binpkg in self._packages:
+            binpkg.version = version
+
     def pkgbuild_path(self) -> str:
         """
         Get the package build path
