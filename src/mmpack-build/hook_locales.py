@@ -37,7 +37,7 @@ class MMPackBuildHook(BaseHook):
         """
         pkgs = dict()
 
-        locales_re = re.compile(r'share/locale/.*')
+        locales_re = re.compile(r'(usr/)?share/locale/.*')
         locales_files = {f for f in install_files if locales_re.match(f)}
 
         if locales_files:
