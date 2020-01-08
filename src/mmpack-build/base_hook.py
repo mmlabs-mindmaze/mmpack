@@ -19,6 +19,7 @@ class PackageInfo:
         self.provides = dict()
         self.deplist = []  # List of triplet of (dep_name, min_ver, max_ver)
         self.sysdeps = set()
+        self.ghost = False
 
     def add_to_deplist(self, pkgname: str,
                        minver: Version = Version('any'),
@@ -54,6 +55,12 @@ class BaseHook:
         self._srcname = srcname
         self._version = version
         self._arch = host_archdist
+
+    def update_version(self, version: Version):
+        """
+        Reset the version used by packages being built
+        """
+        self._version = version
 
     def post_local_install(self):
         """
