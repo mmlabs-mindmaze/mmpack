@@ -55,6 +55,12 @@ class BaseHook:
         self._version = version
         self._arch = host_archdist
 
+    def update_version(self, version: Version):
+        """
+        Reset the version used by packages being built
+        """
+        self._version = version
+
     def post_local_install(self):
         """
         Immediately called after a project has been compiled and installed
