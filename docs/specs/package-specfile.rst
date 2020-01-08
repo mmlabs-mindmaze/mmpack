@@ -83,6 +83,20 @@ Optional fields
     - build-depends-debian-system
         list of *debian* packages that are needed to build
 
+ :ghost-syspkg:
+   True if the packaging specs refers to a ghost of system packages.
+   If not present, False is assumed.
+
+ :syspkg-srcnames:
+   Meaningful only if ghost-syspkg is True. Optional key-value mapping to
+   allowing to determine to which source name the system binary packages must
+   be associated when search in the repository of system package.  If the key
+   match the target distribution, the corresponding value will be be as source
+   project name instead of name field in the mmpack spec. However name field
+   will still be used to generate the name of the mmpack ghost package.
+   The key is a PCRE regular expression used to match targetted host
+   distribution of the generated package.
+
  :ignore:
    list of files to be ignored by any packages.
    Any entry follows the `PCRE`_
@@ -155,3 +169,20 @@ Minimal specfile example
        description: |
          mmpack hello world
 
+
+Ghost package specfile example
+------------------------------
+
+.. code-block:: yaml
+
+   general:
+       name: mmpack-hello-world
+       version: 1.0.0
+       maintainer: Gandalf <gandalf@the.grey>
+       url: ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world
+       description: |
+         mmpack hello world
+       ghost-syspkg: true
+       syspkg-srcnames:
+           debian: mmpack-h-w
+           fedora: mmpack-helloworld

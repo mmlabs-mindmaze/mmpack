@@ -20,6 +20,7 @@ from . file_utils import *
 from . hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from . mm_version import Version
 from . settings import PKGDATADIR
+from . syspkg_manager import get_syspkg_mgr
 from . mmpack_builddep import process_dependencies, general_specs_builddeps
 
 
@@ -82,6 +83,8 @@ class SrcPackage:
         self.version = None
         self.url = None
         self.maintainer = None
+        self.ghost = False
+        self.files_sysdep = None  # Useful only for ghost packages
         self.src_tarball = srctar_path
         self.src_hash = sha256sum(srctar_path)
         self.licenses = None
@@ -107,6 +110,20 @@ class SrcPackage:
         # Init source package from unpacked dir
         self._parse_specfile()
 
+    def _update_version(self, version: Version):
+        """
+        Update the version of the package being built
+        """
+        self.version = version
+
+        # update information cached in hooks
+        for hook in MMPACK_BUILD_HOOKS:
+            hook.update_version(version)
+
+        # update version of binary packages already created
+        for binpkg in self._packages:
+            binpkg.version = version
+
     def pkgbuild_path(self) -> str:
         """
         Get the package build path
@@ -126,7 +143,7 @@ class SrcPackage:
         internal helper: build and return the local install path
         """
         installdir = get_local_install_dir(self.pkgbuild_path())
-        if withprefix:
+        if withprefix and not self.ghost:
             installdir += _get_install_prefix()
 
         os.makedirs(installdir, exist_ok=True)
@@ -239,6 +256,8 @@ class SrcPackage:
                 self.licenses = value
             elif key == 'copyright':
                 self.copyright = value
+            elif key == 'ghost-syspkg':
+                self.ghost = value
 
     def _binpkg_get_create(self, binpkg_name: str,
                            pkg_type: str = None) -> BinaryPackage:
@@ -250,6 +269,7 @@ class SrcPackage:
             binpkg = BinaryPackage(binpkg_name, self.version, self.name,
                                    host_arch, self.tag, self._spec_dir,
                                    self.src_hash)
+            binpkg.ghost = self.ghost
             self._format_description(binpkg, binpkg_name, pkg_type)
             self._packages[binpkg_name] = binpkg
             dprint('created package ' + binpkg_name)
@@ -257,6 +277,9 @@ class SrcPackage:
         return self._packages[binpkg_name]
 
     def _default_license(self) -> None:
+        if self.ghost:
+            return
+
         license_file = find_license()
         if not self.licenses:
             errmsg = 'Missing mandatory field: "licenses"'
@@ -299,6 +322,30 @@ class SrcPackage:
                     for dep in self._specs[pkg][sysdeps_key]:
                         binpkg.add_sysdepend(dep)
                 self._packages[pkg] = binpkg
+
+    def _fetch_unpack_syspkg_locally(self):
+        """
+        Download system packages matching name and unpack them in local install
+        path.
+        """
+        unpackdir = self._local_install_path()
+        builddir = self.unpack_path() + '/build'
+        os.makedirs(builddir)
+
+        # Get syspkg source name (maybe remapped)
+        srcname_remap = self._specs['general'].get('syspkg-srcnames', {})
+        dist_srcname = self.name
+        dist = get_host_dist()
+        for regex, srcname in srcname_remap.items():
+            if re.fullmatch(regex, dist):
+                dist_srcname = srcname
+
+        # Download and unpack system packages depending on target platform
+        syspkg_mgr = get_syspkg_mgr()
+        version, sysdeps = syspkg_mgr.fetch_unpack(dist_srcname,
+                                                   builddir, unpackdir)
+        self._update_version(version)
+        self.files_sysdep = sysdeps
 
     def _build_env(self, skip_tests: bool):
         wrk = Workspace()
@@ -410,11 +457,15 @@ class SrcPackage:
 
         fills private var: _install_files_set before returning
         """
-        self._build_project(skip_tests)
+        if self.ghost:
+            self._fetch_unpack_syspkg_locally()
+        else:
+            self._build_project(skip_tests)
 
         pushdir(self._local_install_path(True))
-        for hook in MMPACK_BUILD_HOOKS:
-            hook.post_local_install()
+        if not self.ghost:
+            for hook in MMPACK_BUILD_HOOKS:
+                hook.post_local_install()
         self.install_files_set = set(list_files('.', exclude_dirs=True))
         popdir()
 
@@ -481,6 +532,9 @@ class SrcPackage:
         Attach the copyright and all the license files to given binary package
         Both are meant to be attached to all the binary packages.
         """
+        if self.ghost:
+            return
+
         licenses_path = set()
         for entry in self.licenses:
             tmp = os.path.join(PKGDATADIR, 'common-licenses', entry)
@@ -620,6 +674,24 @@ class SrcPackage:
 
         for pkgname, binpkg in self._packages.items():
             binpkg.gen_dependencies(self._packages.values())
+
+        # for ghost packages, the files are provided by the system package
+        # manager instead of the mmpack packages. They are only needed for
+        # generating dependencies and seeing what is provided.
+        if self.ghost:
+            for binpkg in self._packages.values():
+
+                # Assign actual system package dependency of ghost package
+                for filename in binpkg.install_files:
+                    binpkg.add_sysdepend(self.files_sysdep[filename])
+
+                # Remove install files from ghost package to avoid to copy them
+                # in the binary ghost package
+                dprint('Files associated to package {}: {}'
+                       .format(binpkg.name, binpkg.install_files))
+                binpkg.install_files = set()
+
+        for pkgname, binpkg in self._packages.items():
             pkgfile = binpkg.create(instdir, self.pkgbuild_path())
             shutil.copy(pkgfile, wrk.packages)
             iprint('generated package: {} : {}'
