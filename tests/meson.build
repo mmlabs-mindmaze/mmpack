@@ -53,6 +53,7 @@ mmpack_build_unit_tests_sources = files(
     'specfiles/full.yaml',
     'specfiles/simple.yaml',
     'specfiles/simple.yaml',
+    'test_common.py',
     'test_file_utils.py',
     'test_hook_python.py',
     'test_package.py',
