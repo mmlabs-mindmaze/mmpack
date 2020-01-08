@@ -478,14 +478,14 @@ class SrcPackage:
         debug_pkg_name = self.name + '-debug'
 
         self._remove_ignored_files()
-        self._ventilate_custom_packages()
-        self._ventilate_pkg_create()
-
         if not self.install_files_set:
             # warn when no binary package will be created
             # do not abort here however: this may be ok when
             # working with virtual packages
             iprint('No installed files found! No package will be created.')
+
+        self._ventilate_custom_packages()
+        self._ventilate_pkg_create()
 
         tmpset = set()
         for filename in self.install_files_set:
