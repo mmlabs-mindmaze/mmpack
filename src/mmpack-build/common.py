@@ -13,7 +13,7 @@ import platform
 
 from hashlib import sha256
 from subprocess import PIPE, run
-from typing import Union, Tuple
+from typing import Union, Tuple, List
 
 import urllib3
 import yaml
@@ -474,3 +474,18 @@ def download(url: str, path: str):
         outfile.write(request.data)
 
     iprint('Done')
+
+
+def list_dirs(topdir: str) -> List[str]:
+    """
+    List files in topdir recursively. This does not follow symbolic links and
+    directory are not listed
+    """
+    file_list = []
+
+    for root, dirs, files in os.walk(topdir):
+        reldir = os.path.relpath(root, topdir)
+        reldir = '' if reldir == '.' else reldir + '/'
+        file_list.extend([reldir + f for f in files])
+
+    return file_list
