@@ -446,8 +446,9 @@ class SrcPackage:
                              or pkgname.endswith('-doc')
                              or pkgname.endswith('-debug'))):
                 if libpkg:
-                    # works if there's only one candidate
-                    return None
+                    # only works if there's only one candidate
+                    libpkg = None
+                    break
                 libpkg = pkgname
         if libpkg:
             dprint('Return default package: ' + libpkg)
