@@ -251,7 +251,7 @@ def symbols_set(filename):
     symbols = set()
     dyn = elffile.get_section_by_name('.dynsym')
     for nsym, sym in enumerate(dyn.iter_symbols()):
-        if (sym['st_info']['bind'] == 'STB_GLOBAL'
+        if (sym['st_info']['bind'] in {'STB_GLOBAL', 'STB_WEAK'}
                 and sym['st_size'] != 0
                 and (sym['st_other']['visibility'] == 'STV_PROTECTED'
                      or sym['st_other']['visibility'] == 'STV_DEFAULT')
