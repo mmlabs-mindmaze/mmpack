@@ -86,6 +86,16 @@ do_test_repo = custom_target('test-repo',
         depends : do_deployment_test,
 )
 
+testpkg_dir = meson.build_root() + '/test-packages'
+do_test_pkg = custom_target('test-pkg',
+        output: 'test-packages',
+        command : ['bash',
+                   files('tests/create-test-pkg.sh'),
+                   testpkg_dir,
+                   '@0@'.format(get_option('long-tests')),
+        ],
+)
+
 tests_state = 'disabled'
 libcheck = dependency('check', required : get_option('tests'))
 if libcheck.found() and not get_option('tests').disabled()
