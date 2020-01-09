@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5cc4ae67_badae937",
+        "filename": "src/mmpack/cmdline.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-09T15:39:34Z",
+      "side": 1,
+      "message": "why not using directly the structure (instead of a pointer to it)?",
+      "range": {
+        "startLine": 56,
+        "startChar": 1,
+        "endLine": 56,
+        "endChar": 27
+      },
+      "revId": "46e5434c4e520f014ff66be8e660c967fd8ac5d7",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc5e2d47_5be4f6e6",
+        "filename": "src/mmpack/mmpack-list.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-09T15:39:34Z",
+      "side": 1,
+      "message": "Useless... just do:\nlatest \u003d binindex_lookup(\u0026ctx-\u003ebinindex, pkg-\u003ename, NULL);",
+      "range": {
+        "startLine": 182,
+        "startChar": 2,
+        "endLine": 188,
+        "endChar": 0
+      },
+      "revId": "46e5434c4e520f014ff66be8e660c967fd8ac5d7",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
