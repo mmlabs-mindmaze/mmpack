@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ed22487_6f8cb12c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-09T09:33:22Z",
+      "side": 1,
+      "message": "implement a list_files() function in common.py",
+      "range": {
+        "startLine": 12,
+        "startChar": 19,
+        "endLine": 13,
+        "endChar": 10
+      },
+      "revId": "96412ef197fc4f22e418dc9a9cc09161fed77fa1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3be3e8c1_6e8ef516",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-09T09:33:22Z",
+      "side": 1,
+      "message": "I understand why in the context of this commit, but this does not make for a very generic common function.",
+      "range": {
+        "startLine": 482,
+        "startChar": 4,
+        "endLine": 482,
+        "endChar": 28
+      },
+      "revId": "96412ef197fc4f22e418dc9a9cc09161fed77fa1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fcac275b_6975a41b",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-09T09:33:22Z",
+      "side": 1,
+      "message": "It might be nice to have the output sorted;\nWhat do you think ?",
+      "range": {
+        "startLine": 491,
+        "startChar": 11,
+        "endLine": 491,
+        "endChar": 19
+      },
+      "revId": "96412ef197fc4f22e418dc9a9cc09161fed77fa1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
