@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "842a7091_b69364a2",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-09T13:46:15Z",
+      "side": 1,
+      "message": "no tabs in meson files please",
+      "revId": "466bb4e767ea63f5f0b9d82c5a7a76a0ed87d519",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac75edfa_414be703",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-09T13:46:15Z",
+      "side": 1,
+      "message": "why not run autoreconf if long-tests is enabled ?\nmeson already knows about long tests",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 1
+      },
+      "revId": "466bb4e767ea63f5f0b9d82c5a7a76a0ed87d519",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
