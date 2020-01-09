@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb7f881c_e4fec2f1",
+        "filename": "src/mmpack/mmpack-list.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-09T14:35:24Z",
+      "side": 1,
+      "message": "you could have this to save an alloc:\n\nstruct pkg_parser pp;\npkg_parser_init(\u0026pp);\npp.name \u003d mmstr_malloc_from_cstr(pkg-\u003ename);\n...\npkg_parser_deinit(\u0026pp);",
+      "revId": "e6d68161b1de0b4a2b9cf8fb6a3f8ce3de6d6a30",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57230bd6_f827a939",
+        "filename": "src/mmpack/mmpack-list.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-09T14:35:24Z",
+      "side": 1,
+      "message": "this is done in deinit just after\nyou have a double-free here",
+      "range": {
+        "startLine": 188,
+        "startChar": 2,
+        "endLine": 188,
+        "endChar": 3
+      },
+      "revId": "e6d68161b1de0b4a2b9cf8fb6a3f8ce3de6d6a30",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
