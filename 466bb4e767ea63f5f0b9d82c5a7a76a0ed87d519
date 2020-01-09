@@ -107,6 +107,30 @@
       "revId": "466bb4e767ea63f5f0b9d82c5a7a76a0ed87d519",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b14a2ec4_6ca7f5c2",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-09T14:41:43Z",
+      "side": 1,
+      "message": "If we run the script conditionally this means:\n - either the script operate on the folder in srcdir (not builddir)\n - either we switch *depending* on long-tests in mmpack-build-test-common.sh where to get the package.\n\nThe first solution would mean to change the content of mmpack srcdir (as opposed to builddir) which is not nice especially with meson which has the nice behavior of not touching the source dir (unfortunately not the case for automake)\nThe second solution would mean changing code in unrelated place to handle the switch.... It don\u0027t like it much either.\n\nPlease give your opinion...",
+      "parentUuid": "49f77bdd_b205e334",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 1
+      },
+      "revId": "466bb4e767ea63f5f0b9d82c5a7a76a0ed87d519",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
