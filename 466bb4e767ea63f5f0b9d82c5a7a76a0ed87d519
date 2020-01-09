@@ -83,6 +83,30 @@
       "revId": "466bb4e767ea63f5f0b9d82c5a7a76a0ed87d519",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49f77bdd_b205e334",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-09T14:09:18Z",
+      "side": 1,
+      "message": "I did not ask the question right: the way you do is to define an unconditional target that gets as input the long-tests flag. The script you run may or may not do anything depending on the value you receive.\n\nyou could instead write that same script to always run autoreconf, and call it conditionally.\nThe end result is the same, but you have simplified the whole process.",
+      "parentUuid": "d690bb48_f59dd7e5",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 1
+      },
+      "revId": "466bb4e767ea63f5f0b9d82c5a7a76a0ed87d519",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
