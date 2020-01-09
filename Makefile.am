@@ -312,9 +312,13 @@ deployment-test-clean:
 test-repo: tests/create-test-repo.sh deployment-test
 	$^ $@
 
+test-packages.timestamp: tests/create-test-pkg.sh tests/test-packages
+	$(AM_V_GEN)$< $(builddir)/test-packages true
+	@touch $@
+
 noinst_PYTHON = tests/pytests.py
 
-check_DATA = deployment-test test-repo
+check_DATA = deployment-test test-repo test-packages.timestamp
 
 TESTS = \
 	tests/python-unittests.tap \
@@ -523,7 +527,7 @@ user-doc-clean:
 
 html-local: user-doc
 clean-local: user-doc-clean dev-doc-clean
-	$(RM) -r html
+	$(RM) -r html test-packages*
 
 install-html: html-local
 	@mkdir -p $(DESTDIR)$(docdir)/html/

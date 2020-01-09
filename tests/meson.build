@@ -84,6 +84,7 @@ test('mmpack-build-meson',
         env : env,
         args : 'meson',
         suite : 'mmpack-build-smoke',
+        depends : do_test_pkg,
 )
 
 test('mmpack-build-autotools',
@@ -92,7 +93,7 @@ test('mmpack-build-autotools',
         env : env,
         args : 'autotools',
         suite : 'mmpack-build-smoke',
-        deps : long_test,
+        deps : [do_test_pkg, long_test],
 )
 
 # please keep alphabetically ordered
