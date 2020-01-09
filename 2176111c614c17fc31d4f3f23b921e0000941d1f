@@ -16,6 +16,24 @@
       "revId": "2176111c614c17fc31d4f3f23b921e0000941d1f",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1008fad_2e7ca59c",
+        "filename": "tests/test_common.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-09T10:42:16Z",
+      "side": 1,
+      "message": "There is: test_list_files_with_dirs",
+      "parentUuid": "0a24b7c5_b53b085e",
+      "revId": "2176111c614c17fc31d4f3f23b921e0000941d1f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
