@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8c1c7af_181e3dc2",
+        "filename": "src/mmpack/mmpack-rdepends.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-09T16:03:23Z",
+      "side": 1,
+      "message": "this is the wrong (and always true)\n\nyou should have used parse_pkgreq()",
+      "range": {
+        "startLine": 186,
+        "startChar": 31,
+        "endLine": 186,
+        "endChar": 59
+      },
+      "revId": "f556ce8c8c7dee12cb67b28042963a368d792d2f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
