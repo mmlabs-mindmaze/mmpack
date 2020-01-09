@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e188c200_25ebf33d",
+        "filename": "src/mmpack/mmpack-install.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-09T15:46:31Z",
+      "side": 0,
+      "message": "Instead of removing everything, just implement fill_pkgreq_from_cmdarg() using parse_pkgreq(), and all of the rest of the commit can be removed",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 1
+      },
+      "revId": "89ef30ca4ddfe913ff85aa79e8ddbf6f2af5f2e3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
