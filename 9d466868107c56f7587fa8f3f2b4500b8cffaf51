@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2bb89c55_7e8de6bf",
+        "filename": "src/mmpack/mmpack-rdepends.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-09T08:48:57Z",
+      "side": 1,
+      "message": "\u003cpackage\u003e[\u003d\u003cversion\u003e][key:value]*  ?",
+      "range": {
+        "startLine": 11,
+        "startChar": 43,
+        "endLine": 11,
+        "endChar": 50
+      },
+      "revId": "9d466868107c56f7587fa8f3f2b4500b8cffaf51",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
