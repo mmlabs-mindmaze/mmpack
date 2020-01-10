@@ -24,7 +24,7 @@ class BinaryPackage:
     """
 
     def __init__(self, name: str, version: Version, source: str, arch: str,
-                 tag: str, spec_dir: str, src_hash: str):
+                 tag: str, spec_dir: str, src_hash: str, licenses: List[str]):
         # pylint: disable=too-many-arguments
         self.name = name
         self.version = version
@@ -34,6 +34,7 @@ class BinaryPackage:
         self.spec_dir = spec_dir
         self.src_hash = src_hash
         self.pkg_path = None
+        self.licenses = licenses
 
         self.description = ''
         # * System dependencies are stored as opaque strings.
@@ -45,6 +46,14 @@ class BinaryPackage:
         self._dependencies = {'sysdepends': set(), 'depends': {}}
         self.provides = {}
         self.install_files = set()
+
+    def licenses_dir(self):
+        """
+        return the license directory of the package
+        """
+        licenses_dir = 'share/licenses/{}'.format(self.name)
+        os.makedirs(licenses_dir, exist_ok=True)
+        return licenses_dir
 
     def _get_specs_provides(self) -> Dict[str, Dict[str, Version]]:
         """
@@ -98,7 +107,8 @@ class BinaryPackage:
                 'source': self.source,
                 'description': self.description,
                 'srcsha256': self.src_hash,
-                'sumsha256sums': sha256sum(self._sha256sums_file())}
+                'sumsha256sums': sha256sum(self._sha256sums_file()),
+                'licenses': self.licenses}
         info.update(self._dependencies)
         yaml_serialize({self.name: info}, 'MMPACK/info')
         popdir()
