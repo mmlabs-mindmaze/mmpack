@@ -6,6 +6,7 @@ A set of helpers used throughout the mmpack project
 import logging
 import logging.handlers
 import os
+import re
 import sys
 import tarfile
 
@@ -504,3 +505,21 @@ def list_files(topdir: str, exclude_dirs: bool = False) -> List[str]:
             filelist.extend([reldir + d for d in dirs])
 
     return sorted(filelist)
+
+
+def find_license(directory: str = None) -> str:
+    """
+    guess project license from a license file (case insensitive)
+    Assuming a single license file at the top of the tree
+
+    Returns:
+        The license file name on success, None otherwise
+    """
+    is_license = re.compile(r'(LICENSE|COPYING)', re.IGNORECASE)
+    try:
+        for entry in os.listdir(directory):
+            if os.path.isfile(entry) and is_license.match(entry):
+                return entry
+        return None
+    except Exception:  # pylint: disable=broad-except
+        return None
