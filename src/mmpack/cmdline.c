@@ -155,6 +155,22 @@ void pkg_parser_deinit(struct pkg_parser * pp)
 
 
 /**
+ * pkg_parser_translate_to_pkg_request() - translate a structure pkg_parser to
+ *                              a structure pkg_request
+ * @
+ * @
+ */
+void pkg_parser_translate_to_pkg_request(struct pkg_parser * pp,
+                                         struct pkg_request * req)
+{
+	req->pkg = pp->pkg ? pp->pkg : NULL;
+
+	req->name = mmstr_malloc_from_cstr(pp->name);
+	if (pp->cons.version)
+		req->version = mmstr_malloc_from_cstr(pp->cons.version);
+}
+
+/**
  * parse_pkgreq() -  fills the request asked by the user.
  * @ctx: context associated with prefix
  * @pkg_req: an entry matching "pkg_name[=pkg_version]".
