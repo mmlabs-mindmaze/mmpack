@@ -69,6 +69,14 @@ def _unpack_deps_version(item):
         return (name, minv, maxv)
 
 
+def _parse_specfile_license(value):
+    if os.path.isfile(value):
+        return value
+    elif os.path.isfile(os.path.join(PKGDATADIR, value)):
+        return os.path.join(PKGDATADIR, value)
+    raise ValueError('No such file, or unknown license: ' + value)
+
+
 class SrcPackage:
     # pylint: disable=too-many-instance-attributes
     """
@@ -84,6 +92,8 @@ class SrcPackage:
         self.maintainer = None
         self.src_tarball = srctar_path
         self.src_hash = sha256sum(srctar_path)
+        self.license = None
+        self.copyright = None
 
         self.description = ''
         self.pkg_tags = ['MindMaze']
@@ -233,6 +243,10 @@ class SrcPackage:
                 self.build_depends = value
             elif key == 'build-system':
                 self.build_system = value
+            elif key == 'license':
+                self.license = _parse_specfile_license(value)
+            elif key == 'copyright':
+                self.copyright = value
 
     def _binpkg_get_create(self, binpkg_name: str,
                            pkg_type: str = None) -> BinaryPackage:
@@ -506,7 +520,19 @@ class SrcPackage:
             pkg = self._get_fallback_package(bin_pkg_name)
             pkg.install_files.update(self.install_files_set)
 
-        popdir()
+        # dump copyright to dedicated file in install tree if needed
+        if not os.path.isfile(self.copyright):
+            copyright_file = 'copyright'
+            with open(copyright_file) as f:
+                f.write(self.copyright)
+            self.copyright = copyright_file
+
+        # add a copy of the license and the copyright to each package
+        for _, binpkg in self._packages.items():
+            binpkg.install_files.add(self.license)
+            binpkg.install_files.add(self.copyright)
+
+        popdir()  # local-install dir
 
     def _generate_manifest(self) -> str:
         """
