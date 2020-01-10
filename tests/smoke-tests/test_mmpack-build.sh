@@ -17,8 +17,13 @@ mmpack-build clean --wipe
 gen-specs $build_sys
 
 mkdir -p $TMP_BUILD
+
+# generate dummy license file
+echo "dummy license" > $TMP_BUILD/dummy
+
 tar -cvf $TMP_BUILD/mmpack-hello-world.tar --directory=$SRC_PKG .
 tar --update -v -f $TMP_BUILD/mmpack-hello-world.tar --directory=$TMP_BUILD mmpack/specs
+tar --update -v -f $TMP_BUILD/mmpack-hello-world.tar --directory=$TMP_BUILD dummy
 gzip $TMP_BUILD/mmpack-hello-world.tar
 mmpack-build pkg-create --src $TMP_BUILD/mmpack-hello-world.tar.gz
 
@@ -36,11 +41,17 @@ tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/head-libexec-worl
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/shell-exec.py
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep libexec/hello/libexec-world
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep var/lib/mmpack/metadata/hello.sha256sums
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep share/licenses/hello/dummy
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep share/licenses/hello/copyright
 
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep include/libhello.h
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep -e lib/libhello.dll.a -e lib/libhello.so
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep share/licenses/hello-devel/dummy
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep share/licenses/hello-devel/copyright
 
 tar -tvf $XDG_DATA_HOME/mmpack-packages/libhello*.mpk | grep -e lib/libhello.so.1.0.0 -e bin/libhello-1.dll
+tar -tvf $XDG_DATA_HOME/mmpack-packages/libhello*.mpk | grep -P share/licenses/libhello[0-9]*/copyright
+tar -tvf $XDG_DATA_HOME/mmpack-packages/libhello*.mpk | grep -P share/licenses/libhello[0-9]*/dummy
 
 # check that the package files are well formed
 pushd $TMP_BUILD
