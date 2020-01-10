@@ -50,5 +50,7 @@ general:
   url: url
   description: mmpack hello
   build-system : $build_sys
+  licenses: [ dummy ]
+  copyright: "dummy copyright"
 EOF
 }
