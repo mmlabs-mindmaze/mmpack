@@ -41,6 +41,12 @@ named after the package name with the following fields:
  * sumsha256sums: SHA256 hash of list of installed files (MMPACK/sha256sums)
  * srcsha256: SHA256 hash of source package used to build this package
 
+## license and copyright files
+
+Raw text files located in a shared dedicated directory (/share/licenses/)
+that describe the copyright of the project, along with a copy of the various
+licenses used.
+
 
 ## sha256sums file
 
