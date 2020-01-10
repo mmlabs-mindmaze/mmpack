@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ae556fc_84880f76",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T14:58:43Z",
+      "side": 1,
+      "message": "I guess, you meant:\n(*equal \u003d\u003d \u0027\u003d\u0027)",
+      "range": {
+        "startLine": 157,
+        "startChar": 20,
+        "endLine": 157,
+        "endChar": 41
+      },
+      "revId": "31c8504dc954df79571068f2db66c64975d862f4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5fa0c50_dfd32e5e",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T14:58:43Z",
+      "side": 1,
+      "message": "I would write it as:\n\nif (*equal \u003d\u003d \u0027\u003d\u0027)\n     pp-\u003econs.version \u003d mmstrcpy_cstr_realloc(pp-\u003econs.version, equal+1);\n\nOtherwise, if argument has no version specification, they would be a memleak.\n\nAlso, if done my proposed way, if version was already set in pp-\u003econs and no version is specified in cmdline argument, you will keep the previous value, which is IMO a better behavior (allows to specify constraints from several level)",
+      "range": {
+        "startLine": 157,
+        "startChar": 0,
+        "endLine": 159,
+        "endChar": 60
+      },
+      "revId": "31c8504dc954df79571068f2db66c64975d862f4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75166e99_af2c07bf",
+        "filename": "src/mmpack/utils.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T14:58:43Z",
+      "side": 1,
+      "message": "or simpler:\n\nwhile (*s !\u003d c \u0026\u0026 *s !\u003d \u0027\\0\u0027)\n        s++;\n\nreturn s;",
+      "range": {
+        "startLine": 554,
+        "startChar": 1,
+        "endLine": 559,
+        "endChar": 32
+      },
+      "revId": "31c8504dc954df79571068f2db66c64975d862f4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
