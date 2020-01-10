@@ -46,6 +46,14 @@ class BinaryPackage:
         self.provides = {}
         self.install_files = set()
 
+    def licenses_dir(self):
+        """
+        return the license directory of the package
+        """
+        licenses_dir = 'share/licenses/{}'.format(self.name)
+        os.makedirs(licenses_dir, exist_ok=True)
+        return licenses_dir
+
     def _get_specs_provides(self) -> Dict[str, Dict[str, Version]]:
         """
         return a dict containing the specified interface of given package

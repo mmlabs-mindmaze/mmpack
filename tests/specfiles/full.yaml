@@ -8,6 +8,9 @@ general:
   description: |
     This is the fullest mmpack specfile possible.
 
+  licenses: [GPL-3]
+  copyright: dummy copyright text
+
   build-options: -D_WITH_DUMMY_DEFINE=1
   build-depends:
   - libmyotherlib-devel

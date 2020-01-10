@@ -5,6 +5,7 @@ general:
   version: 1.0.0
   maintainer: mmpack.test@mindmaze.ch
   url: ssh://git@intranet.mindmaze.ch:7999/~mmpack.test/simple.git
+  licenses: [GPL-3]
   description: |
       This is the simplest mmpack specfile possible.
       It serves as a smoke test.
