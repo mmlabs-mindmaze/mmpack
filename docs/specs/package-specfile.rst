@@ -88,6 +88,22 @@ Optional fields
    Any entry follows the `PCRE`_
    format.
 
+ :licenses:
+   List of licences for the project. Each entry can be either a path to the
+   project's license file, or a license name as present in mmpack's
+   common-licenses folder.
+   If left unset, will fallback to either LICENSE, or COPYING file from the
+   source tree (case insensitive).
+   Note: the "licenses" field is optional, but its value is mandatory for
+   mmpack-build to work. If no license could be found, mmpack-build will
+   abort.
+
+ :copyright:
+   Can be either a string, or a path to a copyright file.
+   The copyright file has a free format without any special specifications.
+   The copyright field and value is entirely optional (unlike the "licenses"
+   field).
+
 .. _PCRE: https://www.pcre.org/current/doc/html/pcre2.html
 
 The custom sections
