@@ -23,6 +23,13 @@ general:
   ignore: # list of files to be ignored by any package
     - somefile
 
+  license:
+    - GPL3
+    - Apache-2.0
+    - path/to/custom/license/file
+
+  copyright: "Copyright Thorin son of Thráin son of Thrór"  # or path to file
+
 #
 # default target packages names
 #

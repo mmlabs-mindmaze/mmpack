@@ -46,6 +46,7 @@ libarchive = dependency('libarchive', required : true)
 libyaml = cc.find_library('libyaml', required : true)
 libmmlib = cc.find_library('mmlib', required : true)
 
+subdir('common-licenses')
 subdir('src/mmpack')
 subdir('src/mmpack-build')
 subdir('src/repository')
