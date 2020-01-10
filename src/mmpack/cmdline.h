@@ -7,6 +7,7 @@
 
 #include <mmargparse.h>
 
+#include "action-solver.h"
 #include "context.h"
 #include "package-utils.h"
 
