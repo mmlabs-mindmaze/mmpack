@@ -10,8 +10,6 @@
 
 #include <mmargparse.h>
 #include <mmerrno.h>
-#include <mmlib.h>
-#include <mmsysio.h>
 #include <string.h>
 
 #include "cmdline.h"
@@ -35,15 +33,20 @@ static const struct mmarg_opt cmdline_optv[] = {
 };
 
 
+/**
+ * pkg_parser_translate_to_pkg_request() - fill pkg_request from pkg_parser
+ * @pp: the pkg_parser structure
+ * @req: the pkg_request structure to fill
+ */
 static
-int is_file(char const * path)
+void pkg_parser_translate_to_pkg_request(struct pkg_parser * pp,
+                                         struct pkg_request * req)
 {
-	struct mm_stat st;
+	req->pkg = pp->pkg ? pp->pkg : NULL;
 
-	if (mm_stat(path, &st, 0) != 0)
-		return 0;
-
-	return S_ISREG(st.mode);
+	req->name = pp->name ? mmstr_malloc_from_cstr(pp->name): NULL;
+	if (pp->cons.version)
+		req->version = mmstr_malloc_from_cstr(pp->cons.version);
 }
 
 
@@ -51,42 +54,16 @@ static
 int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
                             const char* arg)
 {
-	int len;
-	const char * v;
-	struct mmpkg * pkg;
-	mmstr * tmp, * arg_full;
+	struct pkg_parser pp;
 
-	if (is_file(arg)) {
-		tmp = mmstr_alloca_from_cstr(arg);
-		len = mmstrlen(ctx->cwd) + 1 + mmstrlen(tmp);
-		arg_full = mmstr_malloca(len);
-		mmstr_join_path(arg_full, ctx->cwd, tmp);
+	pkg_parser_init(&pp);
 
-		pkg = add_pkgfile_to_binindex(&ctx->binindex, arg_full);
-		mmstr_freea(arg_full);
-		if (pkg == NULL)
-			return -1;
+	if (parse_pkgreq(ctx, arg, &pp))
+		return -1;
 
-		req->pkg = pkg;
-		req->name = NULL;
-		req->version = NULL;
+	pkg_parser_translate_to_pkg_request(&pp, req);
 
-		return 0;
-	}
-
-	req->pkg = NULL;
-
-	// Find the first occurrence of '='
-	v = strchr(arg, '=');
-	if (v != NULL) {
-		// The package name is before the '=' character
-		req->name = mmstr_malloc_copy(arg, v - arg);
-		req->version = mmstr_malloc_from_cstr(v+1);
-	} else {
-		req->name = mmstr_malloc_from_cstr(arg);
-		req->version = NULL;
-	}
-
+	pkg_parser_deinit(&pp);
 	return 0;
 }
 
