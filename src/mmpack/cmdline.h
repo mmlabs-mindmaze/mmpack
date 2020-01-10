@@ -7,6 +7,7 @@
 
 #include <mmargparse.h>
 
+#include "action-solver.h"
 #include "context.h"
 #include "package-utils.h"
 
@@ -66,6 +67,8 @@ struct pkg_parser {
 
 void pkg_parser_init(struct pkg_parser * pp);
 void pkg_parser_deinit(struct pkg_parser * pp);
+void pkg_parser_translate_to_pkg_request(struct pkg_parser * pp, 
+                                         struct pkg_request * req);
 
 const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
                                   int* p_argc, const char*** p_argv);
