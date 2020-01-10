@@ -58,6 +58,15 @@ Mandatory fields
  :description:
    Any text describing the project.
 
+ :license:
+   List of licences for the project. Each entry can be either a path to the
+   project's license file, or a license name as present in mmpack's
+   common-licenses folder.
+
+ :copyright:
+   Can be either a string, or a path to a copyright file.
+   The copyright file has a free format without any special specifications
+
 Optional fields
 '''''''''''''''
 
