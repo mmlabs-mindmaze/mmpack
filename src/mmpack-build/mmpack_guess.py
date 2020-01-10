@@ -13,8 +13,11 @@ stdout.
 '''
 
 import glob
+import os
 import re
+from typing import List
 import yaml
+
 
 from . common import shell, ShellException
 
@@ -113,6 +116,38 @@ def guess_description() -> str:
         return UNKNOWN
 
 
+def guess_copyright() -> str:
+    """
+    guess project copyright
+
+    Assume a "src" folder, take the first file it can find inside
+    And return the first line containing the term "copyright" from its beginning
+    """
+    is_copyright = re.compile(r'copyright', re.IGNORECASE)
+    try:
+        for src in glob.glob('src/**', recursive=True):
+            if os.path.isfile(src):
+                header = open(src).readlines()[0:10]
+                for line in header:
+                    if is_copyright.search(line):
+                        return line
+                break  # stop at the first text file
+        return UNKNOWN
+    except Exception:
+        return UNKNOWN
+
+
+def guess_licenses() -> List[str]:
+    """
+    guess project license from a license file (case insensitive)
+    Assuming a single license file at the top of the tree
+    """
+    try:
+        return glob.glob('[Ll][Ii][Cc][Ee][Nn][Sc][Ee]*')
+    except Exception:
+        return list(UNKNOWN)
+
+
 def main(argv):  # pylint: disable=unused-argument
     """
     guess mmpack specs and print to stdout
@@ -122,7 +157,10 @@ def main(argv):  # pylint: disable=unused-argument
         'version': guess_version(),
         'maintainer': guess_maintainer(),
         'url': guess_url(),
-        'description': guess_description()}}
+        'description': guess_description(),
+        'copyright': guess_copyright(),
+        'licenses': guess_licenses(),
+    }}
     specs_str = yaml.dump(specs, default_flow_style=False,
                           allow_unicode=True, indent=4)
     for line in specs_str.split('\n'):
