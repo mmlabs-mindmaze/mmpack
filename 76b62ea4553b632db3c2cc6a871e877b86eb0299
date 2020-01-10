@@ -1,0 +1,175 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed9e4ac4_ff38378c",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T08:37:56Z",
+      "side": 1,
+      "message": "remove line",
+      "revId": "76b62ea4553b632db3c2cc6a871e877b86eb0299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab553289_f4725323",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T08:37:56Z",
+      "side": 1,
+      "message": "remove line",
+      "revId": "76b62ea4553b632db3c2cc6a871e877b86eb0299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2dd82e9c_305e0616",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T08:37:56Z",
+      "side": 1,
+      "message": "remove line",
+      "revId": "76b62ea4553b632db3c2cc6a871e877b86eb0299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2dd2778_f6505074",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T08:37:56Z",
+      "side": 1,
+      "message": "better use:\npp-\u003ename \u003d mmstrcpy_cstr_realloc(pp-\u003ename, pkg_req);",
+      "range": {
+        "startLine": 159,
+        "startChar": 2,
+        "endLine": 159,
+        "endChar": 45
+      },
+      "revId": "76b62ea4553b632db3c2cc6a871e877b86eb0299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b05d87d_ecb622fe",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T08:37:56Z",
+      "side": 1,
+      "message": "better use:\npp-\u003ename \u003d mmstr_copy_realloc(pp-\u003ename, equal - pkg_req);\npp-\u003econs.version \u003d mmstr_cstr_realloc(pp-\u003econs.version, equal + 1);",
+      "range": {
+        "startLine": 161,
+        "startChar": 2,
+        "endLine": 162,
+        "endChar": 55
+      },
+      "revId": "76b62ea4553b632db3c2cc6a871e877b86eb0299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a34f0aa_28fd1cbf",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T08:37:56Z",
+      "side": 1,
+      "message": "remove line",
+      "revId": "76b62ea4553b632db3c2cc6a871e877b86eb0299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "474246d3_6a358c4a",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T08:37:56Z",
+      "side": 1,
+      "message": "const struct constraints* cons;\n\n....\n\ncons \u003d \u0026pp.cons;",
+      "range": {
+        "startLine": 183,
+        "startChar": 1,
+        "endLine": 183,
+        "endChar": 25
+      },
+      "revId": "76b62ea4553b632db3c2cc6a871e877b86eb0299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b56dcab_cb207e5a",
+        "filename": "src/mmpack/cmdline.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T08:37:56Z",
+      "side": 1,
+      "message": "remove line",
+      "revId": "76b62ea4553b632db3c2cc6a871e877b86eb0299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "183ec1d4_ce9996c6",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-10T08:37:56Z",
+      "side": 1,
+      "message": "remove line",
+      "revId": "76b62ea4553b632db3c2cc6a871e877b86eb0299",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
