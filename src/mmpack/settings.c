@@ -514,6 +514,9 @@ int settings_load(struct settings* settings, const char* filename)
 	rv = parse_config(&parser, settings);
 	yaml_parser_delete(&parser);
 
+	if (rv != 0)
+		fprintf(stderr, "Failed to parse configuration file\n");
+
 exit:
 	fclose(fh);
 	return rv;
