@@ -320,7 +320,7 @@ mmstr* mmstr_copy_realloc(mmstr* dst, const char* restrict data, int len)
  * passed as input if a reallocation was necessary.
  */
 static inline NONNULL_ARGS(2)
-mmstr* mmstrcpy_cstr_realloc(mmstr* restrict dst, const mmstr* restrict csrc)
+mmstr* mmstrcpy_cstr_realloc(mmstr* restrict dst, const char* restrict csrc)
 {
 	return mmstr_copy_realloc(dst, csrc, strlen(csrc));
 }
