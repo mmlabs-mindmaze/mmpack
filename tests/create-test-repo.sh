@@ -82,6 +82,7 @@ cat << EOF >> $tmp/MMPACK/info
     sumsha256sums: $(sha256 $tmp/var/lib/mmpack/metadata/$pkgname.sha256sums)
     sysdepends: [$sysdep]
     version: '$version'
+    licenses: [dummy]
 EOF
 }
 

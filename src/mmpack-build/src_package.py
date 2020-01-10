@@ -84,6 +84,8 @@ class SrcPackage:
         self.maintainer = None
         self.src_tarball = srctar_path
         self.src_hash = sha256sum(srctar_path)
+        self.licenses = None
+        self.copyright = None
 
         self.description = ''
         self.pkg_tags = ['MindMaze']
@@ -233,6 +235,10 @@ class SrcPackage:
                 self.build_depends = value
             elif key == 'build-system':
                 self.build_system = value
+            elif key == 'licenses':
+                self.licenses = value
+            elif key == 'copyright':
+                self.copyright = value
 
     def _binpkg_get_create(self, binpkg_name: str,
                            pkg_type: str = None) -> BinaryPackage:
@@ -243,7 +249,7 @@ class SrcPackage:
             host_arch = get_host_arch_dist()
             binpkg = BinaryPackage(binpkg_name, self.version, self.name,
                                    host_arch, self.tag, self._spec_dir,
-                                   self.src_hash)
+                                   self.src_hash, self.licenses)
             self._format_description(binpkg, binpkg_name, pkg_type)
             self._packages[binpkg_name] = binpkg
             dprint('created package ' + binpkg_name)
@@ -267,7 +273,7 @@ class SrcPackage:
             if pkg != 'general':
                 binpkg = BinaryPackage(pkg, self.version, self.name,
                                        host_arch, self.tag, self._spec_dir,
-                                       self.src_hash)
+                                       self.src_hash, self.licenses)
                 self._format_description(binpkg, pkg)
 
                 if 'depends' in self._specs[pkg]:
@@ -450,6 +456,43 @@ class SrcPackage:
         dprint('Return default package: ' + bin_pkg_name)
         return self._binpkg_get_create(bin_pkg_name)
 
+    def _attach_copyright(self, binpkg):
+        """
+        Attach the copyright and all the license files to given binary package
+        Both are meant to be attached to all the binary packages.
+
+        For known licenses, create a dangling symlink to the license instead.
+        """
+        licenses_path = set()
+        for entry in self.licenses:
+            tmp = os.path.join(PKGDATADIR, 'common-licenses', entry)
+            if os.path.isfile(tmp):
+                # for known licenses, create a dangling symlink to mmpack
+                # common-licenses instead of copying the full file
+                os.symlink(tmp, os.path.join(binpkg.licenses_dir(), entry))
+            else:
+                tmp = os.path.join(self.unpack_path(), entry)
+                if not os.path.isfile(tmp):
+                    errmsg = 'No such file, or unknown license: ' + entry
+                    raise ValueError(errmsg)
+                shutil.copy(tmp, binpkg.licenses_dir())
+
+            licenses_path.add(os.path.join(binpkg.licenses_dir(),
+                                           os.path.basename(tmp)))
+
+        # dump copyright to dedicated file in install tree if needed
+        if os.path.isfile(self.copyright):
+            shutil.copy(self.copyright, binpkg.licenses_dir())
+            copyright_file = self.copyright
+        else:
+            copyright_file = binpkg.licenses_dir() + '/copyright'
+            with open(copyright_file, 'w') as outfile:
+                outfile.write(self.copyright)
+
+        # add a copy of the license and the copyright to each package
+        binpkg.install_files.update(licenses_path)
+        binpkg.install_files.add(copyright_file)
+
     def ventilate(self):
         """
         Ventilate files.
@@ -506,7 +549,10 @@ class SrcPackage:
             pkg = self._get_fallback_package(bin_pkg_name)
             pkg.install_files.update(self.install_files_set)
 
-        popdir()
+        for binpkg in self._packages.values():
+            self._attach_copyright(binpkg)
+
+        popdir()  # local-install dir
 
     def _generate_manifest(self) -> str:
         """
