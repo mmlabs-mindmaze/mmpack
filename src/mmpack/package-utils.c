@@ -859,13 +859,19 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
 		repo = pkg->from_repo->repo;
-		if (c && c->sumsha && mmstrcmp(c->sumsha, pkg->sumsha))
-			return pkg;
-		else if (c && c->repo_name && package_in_repo(pkg, repo->name))
-			return pkg;
-		else if (pkg_version_compare(version, pkg->version) == 0)
-			return pkg;
 
+		if (c && c->sumsha && mmstrcmp(c->sumsha, pkg->sumsha))
+			goto next;
+
+		if (c && c->repo_name && !package_in_repo(pkg, repo->name))
+			goto next;
+
+		if (pkg_version_compare(version, pkg->version))
+			goto next;
+
+		return pkg;
+
+next:
 		pkgentry = pkgentry->next;
 	}
 

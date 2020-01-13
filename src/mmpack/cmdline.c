@@ -173,8 +173,10 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 {
 	int len;
 	struct mmpkg * pkg;
+	struct constraints * c = &pp->cons;
 	mmstr * tmp, * arg_full;
-	char * equal, * colon;
+	char * equal, * colon, * comma, * comma_tmp;
+	size_t size;
 
 	// case where pkg_name is actually a path toward the package
 	if (is_file(pkg_req)) {
@@ -197,25 +199,37 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 	/* Parsing of pkg_req */
 	equal = strchr_or_end(pkg_req, '=');
 	pp->name = mmstr_copy_realloc(pp->name, pkg_req, equal - pkg_req);
-	if (*equal == '=') {
-		colon = strchr_or_end(pkg_req, ':');
-		if (*colon != ':') {
-			pp->cons.version =
-				mmstrcpy_cstr_realloc(pp->cons.version,
-				                      equal + 1);
-			return 0;
+
+	if (*equal != '=') {
+		return 0;
+	}
+
+	//search for all the options
+	comma = equal;
+	do {
+		colon = strchr_or_end(comma + 1, ':');
+		comma_tmp = strchr_or_end(comma + 1, ',');
+		if (colon < comma_tmp) {
+			size = comma_tmp - colon - 1;
+			if (!strncmp(comma + 1, "sumsha:", strlen("sumsha:")))
+				c->sumsha = mmstr_copy_realloc(c->sumsha,
+				                               colon + 1, size);
+			else if (!strncmp(comma + 1, "fromrepo:",
+			                  strlen("fromrepo:")))
+				c->repo_name = mmstr_copy_realloc(c->repo_name,
+				                                  colon + 1,
+				                                  size);
+			else {
+				printf("Bad commandline syntax\n");
+				return -1;
+			}
+		} else {
+			c->version = mmstr_copy_realloc(c->version, comma + 1,
+			                                comma_tmp - comma - 1);
 		}
 
-		if (!strncmp(equal + 1, "sumsha:", strlen("sumsha:")))
-			pp->cons.sumsha = mmstrcpy_cstr_realloc(pp->cons.sumsha,
-			                                        colon + 1);
-		else if (!strncmp(equal + 1, "fromrepo:", strlen("fromrepo:")))
-			pp->cons.repo_name =
-				mmstrcpy_cstr_realloc(pp->cons.repo_name,
-				                      colon + 1);
-		else
-			return -1;
-	}
+		comma = comma_tmp;
+	} while (*comma == ',');
 
 	return 0;
 }
