@@ -37,10 +37,9 @@ mmpack command name
 the name on the commandline can represent:
     - a path to the package
     - the package name
-    - the string "package_name=version"
-    - the string "package_name=key:value", where "key:"
-    could be equal to "hash:" or to "repo:"
-
+    - the string "package_name=key_0:value_0,...,key_n:value_n", where "key_i:"
+    could be either equal to "hash:", or to "repo:", or to "". In the case
+    where "key_i:" is equal to "" the value behind corresponds to the version.
 
 
 Note on running binaries installed with mmpack

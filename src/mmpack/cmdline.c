@@ -154,6 +154,50 @@ void pkg_parser_deinit(struct pkg_parser * pp)
 }
 
 
+static
+char* fill_constraints_fields(struct mmpack_ctx * ctx, char * comma,
+                              struct constraints * c)
+{
+	int size;
+	char * colon, * comma_tmp;
+	struct repolist_elt * repo;
+	mmstr * repo_name = NULL;
+
+	colon = strchr_or_end(comma, ':');
+	comma_tmp = strchr_or_end(comma, ',');
+
+	if (colon >= comma_tmp) {
+		size = comma_tmp - comma;
+		c->version = mmstr_copy_realloc(c->version, comma, size);
+		return comma_tmp;
+	}
+
+	size = comma_tmp - colon - 1;
+	colon++;
+
+	if (!strncmp(comma, "hash:", strlen("hash:")))
+		c->sumsha = mmstr_copy_realloc(c->sumsha, colon, size);
+	else if (!strncmp(comma, "repo:", strlen("repo:"))) {
+		repo_name = mmstr_copy_realloc(repo_name, colon, size);
+
+		repo = repolist_lookup(&ctx->settings.repo_list, repo_name);
+		if (!repo) {
+			printf("No repository %s\n", repo_name);
+			comma_tmp = NULL;
+			goto exit;
+		}
+
+		c->repo = repo;
+	} else {
+		printf("Bad commandline syntax\n");
+		return NULL;
+	}
+
+exit:
+	mmstr_free(repo_name);
+	return comma_tmp;
+}
+
 /**
  * parse_pkgreq() -  fills the request asked by the user.
  * @ctx: context associated with prefix
@@ -173,8 +217,9 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 {
 	int len;
 	struct mmpkg * pkg;
+	struct constraints * c = &pp->cons;
 	mmstr * tmp, * arg_full;
-	char * equal, * colon;
+	char * equal, * comma;
 
 	// case where pkg_name is actually a path toward the package
 	if (is_file(pkg_req)) {
@@ -197,28 +242,16 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 	/* Parsing of pkg_req */
 	equal = strchr_or_end(pkg_req, '=');
 	pp->name = mmstr_copy_realloc(pp->name, pkg_req, equal - pkg_req);
-	if (*equal == '=') {
-		equal++;
-		colon = strchr_or_end(pkg_req, ':');
-		if (*colon != ':') {
-			pp->cons.version =
-				mmstrcpy_cstr_realloc(pp->cons.version, equal);
-			return 0;
-		}
 
-		colon++;
-		if (!strncmp(equal, "hash:", strlen("hash:")))
-			pp->cons.sumsha = mmstrcpy_cstr_realloc(pp->cons.sumsha,
-			                                        colon);
-		else if (!strncmp(equal, "repo:", strlen("repo:")))
-			pp->cons.repo =
-				repolist_lookup(&ctx->settings.repo_list,
-				                colon);
-		else {
-			printf("Bad commandline syntax\n");
+	if (*equal != '=')
+		return 0;
+
+	//search for all the options
+	comma = equal;
+	do {
+		if (!(comma = fill_constraints_fields(ctx, comma + 1, c)))
 			return -1;
-		}
-	}
+	} while (*comma == ',');
 
 	return 0;
 }
