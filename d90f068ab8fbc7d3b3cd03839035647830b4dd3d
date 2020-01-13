@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05482ab1_a7d828af",
+        "filename": "src/mmpack-build/source_tarball.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-13T18:05:15Z",
+      "side": 1,
+      "message": "I don\u0027t like that idea.\nWe only ever supported git.\n\nAdding other cvs support here would only make sense if we add it on the overall mmpack project.",
+      "range": {
+        "startLine": 205,
+        "startChar": 34,
+        "endLine": 205,
+        "endChar": 55
+      },
+      "revId": "d90f068ab8fbc7d3b3cd03839035647830b4dd3d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "730b2f60_6161d379",
+        "filename": "src/mmpack-build/source_tarball.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-13T18:05:15Z",
+      "side": 1,
+      "message": "Also, if you support git (see above) why would you get a tag named \"from path\" ?\n\nThe logic here should be easily derived from the fallback pkg-create option to auto-detect the folder.\n\nwith the following logic:\nmmpack-build pkg-create \u003c\u003d\u003e mmpack-build pkg-create $PWD",
+      "range": {
+        "startLine": 217,
+        "startChar": 24,
+        "endLine": 217,
+        "endChar": 33
+      },
+      "revId": "d90f068ab8fbc7d3b3cd03839035647830b4dd3d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
