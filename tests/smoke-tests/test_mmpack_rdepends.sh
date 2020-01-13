@@ -12,7 +12,7 @@ mmpack mkprefix --name=repo --url=$REPO_URL $PREFIX_TEST
 mmpack update
 
 output="$(mmpack rdepends toto | $dos2unix)"
-expected="No package toto (any version)"
+expected="No package toto"
 [ "$output" == "$expected" ]
 
 output="$(mmpack rdepends --repo=repo hello | $dos2unix)"

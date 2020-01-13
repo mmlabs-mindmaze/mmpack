@@ -39,10 +39,18 @@ static const struct mmarg_opt cmdline_optv[] = {
  * @req: the pkg_request structure to fill
  */
 static
-void pkg_parser_translate_to_pkg_request(struct pkg_parser * pp,
+void pkg_parser_translate_to_pkg_request(struct mmpack_ctx * ctx,
+                                         struct pkg_parser * pp,
                                          struct pkg_request * req)
 {
-	req->pkg = pp->pkg ? pp->pkg : NULL;
+	if (pp->pkg) {
+		req->pkg = pp->pkg;
+		return;
+	} else if (pp->cons.sumsha) {
+		req->pkg = binindex_lookup(&ctx->binindex, pp->name, &pp->cons);
+		if (req->pkg)
+			return;
+	}
 
 	req->name = pp->name ? mmstr_malloc_from_cstr(pp->name) : NULL;
 	if (pp->cons.version)
@@ -61,7 +69,7 @@ int fill_pkgreq_from_cmdarg(struct mmpack_ctx * ctx, struct pkg_request * req,
 	if (parse_pkgreq(ctx, arg, &pp))
 		return -1;
 
-	pkg_parser_translate_to_pkg_request(&pp, req);
+	pkg_parser_translate_to_pkg_request(ctx, &pp, req);
 
 	pkg_parser_deinit(&pp);
 	return 0;
