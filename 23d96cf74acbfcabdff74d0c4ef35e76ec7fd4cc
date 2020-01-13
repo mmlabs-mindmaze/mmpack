@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "06118d9b_d750fa2a",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-13T08:30:59Z",
+      "side": 1,
+      "message": "See my comment in the next commit: I suggest you make it LOCAL_SYMBOL",
+      "range": {
+        "startLine": 149,
+        "startChar": 0,
+        "endLine": 149,
+        "endChar": 6
+      },
+      "revId": "23d96cf74acbfcabdff74d0c4ef35e76ec7fd4cc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
