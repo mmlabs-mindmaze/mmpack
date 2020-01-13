@@ -137,7 +137,7 @@ def is_dynamic_library(filename: str, host_archdist: str) -> bool:
     if fmt == 'elf':
         multiarch = sysconfig.get_config_var('MULTIARCH')
         multiarch = multiarch if multiarch else ''
-        elffile = r'(?:usr/)?lib/(?:{}/)?lib(?:[\w-]+)\.so[.0-9]*' \
+        elffile = r'(?:usr/)?lib/(?:{}/)?lib(?:[.\w-]+)\.so[.0-9]*' \
                   .format(multiarch)
         if not re.match(elffile, filename):
             return False
