@@ -3,6 +3,7 @@
 Fetch/gather sources of a mmpack package and create source tarball
 """
 
+import os
 import shutil
 from tempfile import mkdtemp
 from typing import Dict
@@ -192,15 +193,41 @@ class SourceTarball:
         self.trace['pkg'].update({'filename': self._path_url,
                                   'sha256': sha256sum(self._path_url)})
 
+    def _create_srcdir_from_path(self):
+        """
+        Create a source package folder from folder.
+        """
+        # Copy each element of the source path folder. os.copytree cannot be
+        # used for the whole dir because dirs_exist_ok option has been
+        # introduced only in 3.8
+        for dentry in os.listdir(self._path_url):
+            # Do not copy versioning system data
+            if dentry in ('.git', '.svn', '.hg', '.cvs'):
+                continue
+
+            elt_path = os.path.join(self._path_url, dentry)
+            if os.path.isdir(elt_path):
+                dstdir = os.path.join(self._srcdir, dentry)
+                shutil.copytree(elt_path, dstdir, symlinks=True)
+            else:
+                shutil.copy(elt_path, self._srcdir, follow_symlinks=False)
+
+        # Get tag name if not set yet
+        if not self.tag:
+            self.tag = 'from_path'
+
+        self.trace['pkg'].update({'path': self._path_url})
+
     def _create_srcdir(self, method: str):
         """
         Fetch source using specified method and extract it to src dir
 
         Args:
-            method: 'tar', 'git' or 'srcpkg'
+            method: 'tar', 'git', 'path' or 'srcpkg'
         """
         method_mapping = {
             'git': self._create_srcdir_from_git,
+            'path': self._create_srcdir_from_path,
             'tar': self._create_srcdir_from_tar,
             'srcpkg': self._create_srcdir_from_tar,
         }
