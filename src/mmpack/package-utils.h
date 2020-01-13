@@ -166,6 +166,8 @@ struct rdeps_iter {
 };
 
 
+int package_in_repo(struct mmpkg const * pkg, mmstr const * repo_name);
+
 void mmpkg_dump(struct mmpkg const * pkg);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
 void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);

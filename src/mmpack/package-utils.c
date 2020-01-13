@@ -71,7 +71,7 @@ void constraints_deinit(struct constraints * c)
 	c->version = NULL;
 	mmstr_free(c->repo_name);
 	c->repo_name = NULL;
-	mmstr_free(sumsha);
+	mmstr_free(c->sumsha);
 	c->sumsha = NULL;
 }
 
@@ -208,6 +208,27 @@ void from_repolist_deinit(struct from_repo* list)
 	}
 }
 
+
+/**
+ * package_in_repo() - indicates whether a package is provided by a repo or not
+ * @pkg: package
+ * @repo_name: repository
+ *
+ * Return: 1 in case @pkg is provided by @repo_name, 0 otherwise.
+ **/
+LOCAL_SYMBOL
+int package_in_repo(struct mmpkg const * pkg, mmstr const * repo_name)
+{
+	struct from_repo * from;
+
+	for (from = pkg->from_repo; from != NULL; from = from->next) {
+		if (strcmp(from->repo->name, repo_name) == 0) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
 
 /**
  * mmpkg_get_or_create_from_repo() - returns or create and returns a from_repo
@@ -826,6 +847,7 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 	struct mmpkg * pkg;
 	struct pkglist_entry * pkgentry;
 	struct pkglist * list;
+	struct repolist_elt * repo;
 	char const * version = (c && c->version) ? c->version : "any";
 
 	list = binindex_get_pkglist(binindex, name);
@@ -836,7 +858,11 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
-		if ()
+		repo = pkg->from_repo->repo;
+		if (c && c->sumsha && mmstrcmp(c->sumsha, pkg->sumsha))
+			return pkg;
+		else if (c && c->repo_name && package_in_repo(pkg, repo->name))
+			return pkg;
 		else if (pkg_version_compare(version, pkg->version) == 0)
 			return pkg;
 
