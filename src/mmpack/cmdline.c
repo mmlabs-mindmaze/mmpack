@@ -8,6 +8,7 @@
 
 #include <mmargparse.h>
 #include <mmsysio.h>
+#include <mmerrno.h>
 
 #include "cmdline.h"
 #include "context.h"
@@ -154,14 +155,92 @@ void pkg_parser_deinit(struct pkg_parser * pp)
 }
 
 
+enum constraints_type {
+	UNKNOWN = -1,
+	HASH = 0,
+	REPO,
+	PKG_VERSION,
+};
+
+
+static
+const char * constraints_names[] = {
+	[HASH] = "hash",
+	[REPO] = "repo",
+	[PKG_VERSION] = "version",
+};
+
+
+static
+enum constraints_type get_constraints_type(const char * key, size_t size_key)
+{
+	int i;
+	size_t size;
+
+	for (i = 0; i < MM_NELEM(constraints_names); i++) {
+		size = strlen(constraints_names[i]);
+
+		if (size_key == size &&
+		    !strncmp(key, constraints_names[i], size))
+			return i;
+	}
+
+	return UNKNOWN;
+}
+
+
+static
+int constraints_set(struct mmpack_ctx * ctx,
+                    struct constraints * cons,
+                    const char * arg_req)
+{
+	enum constraints_type type = PKG_VERSION;
+	const char * value = arg_req;
+	const char * colon;
+
+	// Try to split the argument in key/value. If no colon, the whole
+	// argument is assumed to be version
+	colon = strchr_or_end(arg_req, ':');
+	if (*colon == ':') {
+		value = colon + 1;
+		type = get_constraints_type(arg_req, colon - arg_req);
+	}
+
+	switch (type) {
+	case HASH:
+		cons->sumsha = mmstrcpy_cstr_realloc(cons->sumsha, value);
+		break;
+	case REPO:
+		cons->repo = repolist_lookup(&ctx->settings.repo_list, value);
+		if (!cons->repo) {
+			printf("Repository %s not found\n", value);
+			return -1;
+		}
+
+		break;
+	case PKG_VERSION:
+		cons->version = mmstrcpy_cstr_realloc(cons->version, value);
+		break;
+	default:
+		printf("Unknown constraint key %.*s\n", (int) (colon - arg_req),
+		       arg_req);
+		return -1;
+	}
+
+	return 0;
+}
+
+
 /**
  * parse_pkgreq() -  fills the request asked by the user.
  * @ctx: context associated with prefix
- * @pkg_req: an entry matching "pkg_name[=pkg_version]".
+ * @pkg_req: an entry matching "pkg_name[=key:value]" or "pkg_name[=value]"
  * @pp: the request to fill
  *
  * pkg_name, on the entry, is potentially a path toward the package (in this
- * case no option is possible).
+ * case no option is possible). "key" can be either equal to "hash", to "repo"
+ * or to "version". It is also possible to omit key ("pkg_name[=value]"), in
+ * this case the value corresponds to the version of the package.
  *
  * Returns: 0 in case the commandline is successfully read, -1 otherwise.
  */
@@ -195,9 +274,10 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 	/* Parsing of pkg_req */
 	equal = strchr_or_end(pkg_req, '=');
 	pp->name = mmstr_copy_realloc(pp->name, pkg_req, equal - pkg_req);
-	if (*equal == '=')
-		pp->cons.version =
-			mmstrcpy_cstr_realloc(pp->cons.version, equal + 1);
+	if (*equal++ == '=') {
+		if (constraints_set(ctx, &pp->cons, equal))
+			return -1;
+	}
 
 	return 0;
 }
@@ -206,15 +286,16 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 /**
  * parse_pkg() -  returns the package wanted.
  * @ctx:          context associated with prefix
- * @pkg_arg:      an entry matching "pkg_name[=pkg_version]".
+ * @pkg_arg:      an entry matching "pkg_name[=key:value]" or "pkg_name[=value]"
  *
  * pkg_name, on the entry, is potentially a path toward the package (in this
- * case no option is possible).
+ * case no option is possible). "key" can be either equal to "hash", to "repo"
+ * or to "version". It is also possible to omit key ("pkg_name[=value]"), in
+ * this case the value corresponds to the version of the package.
  *
- * Return: the package having pkg_name as name and pkg_version as version. In
- * the case where pkg_version is NULL (the entry was "pkg_name" without the
- * "=pkg_version"), the package returned is the latest one. If no such package
- * is found, NULL is returned.
+ * Return: the package having pkg_name as name and meeting the constraints. In
+ * the case where pkg_version is NULL, the package returned is the latest one.
+ * If no such package is found, NULL is returned.
  */
 LOCAL_SYMBOL
 struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg)
@@ -233,8 +314,9 @@ struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg)
 	cons = &pp.cons;
 
 	if (!(pkg = binindex_lookup(&ctx->binindex, pp.name, cons)))
-		info("No package %s (%s)\n", pp.name,
-		     cons->version ? cons->version : "any version");
+		printf("No package %s%s\n", pp.name,
+		       constraints_is_empty(cons) ?
+		       "" : " respecting the constraints");
 
 exit:
 	pkg_parser_deinit(&pp);
