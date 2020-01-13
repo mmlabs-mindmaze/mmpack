@@ -263,6 +263,30 @@
       "revId": "1321c29fe6536024cba9260bc6d91db232d490f4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4878656c_9431a564",
+        "filename": "src/mmpack/mmpack-install.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-13T18:11:35Z",
+      "side": 1,
+      "message": "Unless I am mistaken, if something goes wrong, now nothing is printed anymore.",
+      "parentUuid": "aa21d3a0_4238ada2",
+      "range": {
+        "startLine": 45,
+        "startChar": 2,
+        "endLine": 45,
+        "endChar": 49
+      },
+      "revId": "1321c29fe6536024cba9260bc6d91db232d490f4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
