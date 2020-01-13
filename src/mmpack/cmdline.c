@@ -157,11 +157,13 @@ void pkg_parser_deinit(struct pkg_parser * pp)
 /**
  * parse_pkgreq() -  fills the request asked by the user.
  * @ctx: context associated with prefix
- * @pkg_req: an entry matching "pkg_name[=pkg_version]".
+ * @pkg_req: an entry matching "pkg_name[=key:value]".
  * @pp: the request to fill
  *
  * pkg_name, on the entry, is potentially a path toward the package (in this
- * case no option is possible).
+ * case no option is possible). key can be either equal to "sumsha" or to
+ * "fromrepo". In case there is no key, then value corresponds to the version
+ * of the package.
  *
  * Returns: 0 in case the commandline is successfully read, -1 otherwise.
  */
@@ -172,7 +174,7 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 	int len;
 	struct mmpkg * pkg;
 	mmstr * tmp, * arg_full;
-	char * equal;
+	char * equal, * colon;
 
 	// case where pkg_name is actually a path toward the package
 	if (is_file(pkg_req)) {
@@ -195,9 +197,25 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 	/* Parsing of pkg_req */
 	equal = strchr_or_end(pkg_req, '=');
 	pp->name = mmstr_copy_realloc(pp->name, pkg_req, equal - pkg_req);
-	if (*equal == '=')
-		pp->cons.version =
-			mmstrcpy_cstr_realloc(pp->cons.version, equal + 1);
+	if (*equal == '=') {
+		colon = strchr_or_end(pkg_req, ':');
+		if (*colon != ':') {
+			pp->cons.version =
+				mmstrcpy_cstr_realloc(pp->cons.version,
+				                      equal + 1);
+			return 0;
+		}
+
+		if (!strncmp(equal + 1, "sumsha:", strlen("sumsha:")))
+			pp->cons.sumsha = mmstrcpy_cstr_realloc(pp->cons.sumsha,
+			                                        colon + 1);
+		else if (!strncmp(equal + 1, "fromrepo:", strlen("fromrepo:")))
+			pp->cons.repo_name =
+				mmstrcpy_cstr_realloc(pp->cons.repo_name,
+				                      colon + 1);
+		else
+			return -1;
+	}
 
 	return 0;
 }
@@ -206,15 +224,16 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 /**
  * parse_pkg() -  returns the package wanted.
  * @ctx:          context associated with prefix
- * @pkg_arg:      an entry matching "pkg_name[=pkg_version]".
+ * @pkg_arg:      an entry matching "pkg_name[=key:value]".
  *
  * pkg_name, on the entry, is potentially a path toward the package (in this
- * case no option is possible).
+ * case no option is possible). key can be either equal to "sumsha" or to
+ * "fromrepo". In case there is no key, then value corresponds to the version
+ * of the package.
  *
- * Return: the package having pkg_name as name and pkg_version as version. In
- * the case where pkg_version is NULL (the entry was "pkg_name" without the
- * "=pkg_version"), the package returned is the latest one. If no such package
- * is found, NULL is returned.
+ * Return: the package having pkg_name as name and meeting the constraints. In
+ * the case where pkg_version is NULL, the package returned is the latest one.
+ * If no such package is found, NULL is returned.
  */
 LOCAL_SYMBOL
 struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg)

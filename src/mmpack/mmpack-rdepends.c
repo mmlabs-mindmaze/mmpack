@@ -96,21 +96,6 @@ void dump_reverse_dependencies(struct list_pkgs * list)
 
 
 static
-int package_in_repo(struct mmpkg const * pkg, mmstr const * repo_name)
-{
-	struct from_repo * from;
-
-	for (from = pkg->from_repo; from != NULL; from = from->next) {
-		if (strcmp(from->repo->name, repo_name) == 0) {
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
-
-static
 int find_reverse_dependencies(struct binindex binindex,
                               struct mmpkg const* pkg,
                               const char * repo_name,
