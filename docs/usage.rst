@@ -31,6 +31,17 @@ run it.
    # run the eegview you just installed
    mmpack run eegview
 
+Typically when you write a command mmpack as follow:
+mmpack command name
+
+The name on the commandline can represent:
+    - a path to the package
+    - the package name
+    - the string "package_name=version"
+    - the string "package_name=key:value", where "key:" could be equal to
+      "hash:" or to "repo:"
+
+
 
 Note on running binaries installed with mmpack
 ==============================================
