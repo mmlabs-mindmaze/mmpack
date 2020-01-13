@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e0de1112_7ecadc8e",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-13T10:27:12Z",
+      "side": 1,
+      "message": "The message is still wrong... Please check what could be the resaon why pkg would be NULL (under no circumstances this is an wrong  argument syntax)",
+      "range": {
+        "startLine": 187,
+        "startChar": 3,
+        "endLine": 187,
+        "endChar": 50
+      },
+      "revId": "5b8460f93c336d97942d1dc7b19988d56fad07eb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
