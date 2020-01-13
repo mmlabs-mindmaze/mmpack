@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "905a6fdc_3a458139",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-13T08:29:12Z",
+      "side": 1,
+      "message": "Better description:\n\nmmpack: cmd-provided file support to parse_pkgreq",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 35
+      },
+      "revId": "fb164ae02ac4dd034d769776a0f288ed765975b5",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5cfee14_13429da5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-13T08:29:12Z",
+      "side": 1,
+      "message": "Please do this either:\n- in a separated commit\n- in the commit when you need it.\n- in the commit that introduces the function\n\nDoing this in this commit is IMO pointless. I suggest you do when you introduce the commit, ie, in the parent one.",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 70
+      },
+      "revId": "fb164ae02ac4dd034d769776a0f288ed765975b5",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0cab121_39a1f40d",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-13T08:29:12Z",
+      "side": 1,
+      "message": "See commit message comment",
+      "range": {
+        "startLine": 168,
+        "startChar": 0,
+        "endLine": 168,
+        "endChar": 12
+      },
+      "revId": "fb164ae02ac4dd034d769776a0f288ed765975b5",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
