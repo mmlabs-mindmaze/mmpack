@@ -51,6 +51,10 @@ def parse_options(argv):
     group.add_argument('--git-url',
                        action='store', dest='url', type=str,
                        help='project git url/path')
+    group.add_argument('--path',
+                       action='store', dest='path', type=str,
+                       help='path to folder having containing a '
+                            'mmpack dir containing specs')
     group.add_argument('--src',
                        action='store', dest='srctar', type=str,
                        help='source package tarball')
@@ -74,7 +78,8 @@ def parse_options(argv):
                         help='always assume yes to any prompted question')
     args = parser.parse_args(argv)
 
-    if not args.url and not args.srctar and not args.mmpack_srctar:
+    if not args.url and not args.srctar and not args.mmpack_srctar \
+       and not args.path:
         args.url = find_project_root_folder()
         if not args.url:
             raise ValueError('did not find project to package')
@@ -106,6 +111,9 @@ def main(argv):
     elif args.mmpack_srctar:
         method = 'srcpkg'
         path_url = args.mmpack_srctar
+    elif args.path:
+        method = 'path'
+        path_url = args.path
 
     srctarball = SourceTarball(method, path_url, args.tag)
     srctarball.prepare_binpkg_build()
