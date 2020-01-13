@@ -45,11 +45,11 @@ mmstr* get_sha256sums_file(mmstr const * prefix, char const * pkg_name)
 	mmstr * sha256sums;
 
 	sha256sums_len = strlen(prefix) + 1 + sizeof(METADATA_RELPATH) + 1
-	                 + mmstrlen(pkg_name) + sizeof(".sha256sums");
+	                 + mmstrlen(pkg_name) + sizeof("/sha256sums");
 	sha256sums = mmstr_malloc(sha256sums_len);
 
 	sprintf(sha256sums,
-	        "%s/"METADATA_RELPATH "/%s.sha256sums",
+	        "%s/"METADATA_RELPATH "/%s/sha256sums",
 	        prefix,
 	        pkg_name);
 	mmstr_setlen(sha256sums, sha256sums_len);

@@ -79,7 +79,7 @@ cat << EOF >> $tmp/MMPACK/info
     description: '$pkgname package description'
     source: $pkgname
     srcsha256: $(sha256 $REPO_DIR/${pkgname}_${version}_src.tar.gz)
-    sumsha256sums: $(sha256 $tmp/var/lib/mmpack/metadata/$pkgname.sha256sums)
+    sumsha256sums: $(sha256 $tmp/var/lib/mmpack/metadata/$pkgname/sha256sums)
     sysdepends: [$sysdep]
     version: '$version'
 EOF
@@ -96,7 +96,8 @@ gen-mmpack-pkg()
 
 	gen-src-archive "$pkgname" "$version"
 	gen-sha256sums > $tmp2/tmp
-	mv $tmp2/tmp $tmp/var/lib/mmpack/metadata/${pkgname}.sha256sums
+	mkdir -p $tmp/var/lib/mmpack/metadata/${pkgname}/
+	mv $tmp2/tmp $tmp/var/lib/mmpack/metadata/${pkgname}/sha256sums
 	gen-mmpack-info "$pkgname" "$version" "$depends"
 
 	tar -czf $REPO_DIR/${pkgname}_${version}.mpk --directory=$tmp .

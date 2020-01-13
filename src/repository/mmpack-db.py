@@ -111,7 +111,7 @@ def parse_package(root, package):
     tar = tarfile.open(pkg_file, 'r:*')
     sha256sum_file = tar.extractfile('./var/lib/mmpack/metadata/'
                                      + package
-                                     + '.sha256sums')
+                                     + '/sha256sums')
 
     files = dict()
     for f in sha256sum_file:

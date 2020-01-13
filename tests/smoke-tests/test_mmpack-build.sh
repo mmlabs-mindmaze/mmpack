@@ -35,7 +35,7 @@ tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/hello-world
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/head-libexec-world
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/shell-exec.py
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep libexec/hello/libexec-world
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep var/lib/mmpack/metadata/hello.sha256sums
+tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep var/lib/mmpack/metadata/hello/sha256sums
 
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep include/libhello.h
 tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep -e lib/libhello.dll.a -e lib/libhello.so

@@ -497,7 +497,11 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 	len = mmstrlen(metadata_dirpath) + mmstrlen(pkg->name) + 2;
 	metadata_prefix = mmstr_malloca(len);
 	mmstr_join_path(metadata_prefix, metadata_dirpath, pkg->name);
-	mmstrcat_cstr(metadata_prefix, ".");
+	mmstrcat_cstr(metadata_prefix, "/");
+
+	// create metadata folder
+	if (mm_mkdir(metadata_prefix, 0777, MM_RECURSIVE) != 0)
+		goto exit;
 
 	// Open package's sha256sums file to get file list
 	mmstrcpy(path, metadata_prefix);

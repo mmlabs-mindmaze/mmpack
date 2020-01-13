@@ -69,7 +69,7 @@ class BinaryPackage:
 
     def _sha256sums_file(self) -> str:
         os.makedirs('var/lib/mmpack/metadata/', exist_ok=True)
-        return 'var/lib/mmpack/metadata/{}.sha256sums'.format(self.name)
+        return 'var/lib/mmpack/metadata/{}/sha256sums'.format(self.name)
 
     def _gen_info(self, pkgdir: str):
         """
@@ -89,6 +89,7 @@ class BinaryPackage:
             cksums[filename] = sha256sum(filename, follow_symlink=False)
 
         # Write the file sha256sums file
+        os.makedirs(os.path.dirname(self._sha256sums_file()), exist_ok=True)
         with open(self._sha256sums_file(), 'wt', newline='\n') as sums_file:
             for filename in sorted(cksums):
                 sums_file.write('{}: {}\n'.format(filename, cksums[filename]))
