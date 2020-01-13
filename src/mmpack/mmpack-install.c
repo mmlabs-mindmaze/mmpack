@@ -46,7 +46,8 @@ void pkg_parser_translate_to_pkg_request(struct mmpack_ctx * ctx,
 	if (pp->pkg) {
 		req->pkg = pp->pkg;
 		return;
-	} else if (pp->cons.sumsha) {
+	} else if (pp->cons.sumsha
+	           || (pp->cons.repo && pp->cons.version)) {
 		req->pkg = binindex_lookup(&ctx->binindex, pp->name, &pp->cons);
 		if (req->pkg)
 			return;
