@@ -69,6 +69,8 @@ void constraints_deinit(struct constraints * c)
 {
 	mmstr_free(c->version);
 	c->version = NULL;
+	mmstr_free(c->sumsha);
+	c->sumsha = NULL;
 }
 
 
@@ -848,6 +850,7 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 	struct mmpkg * pkg;
 	struct pkglist_entry * pkgentry;
 	struct pkglist * list;
+	struct repolist_elt * repo;
 	char const * version = (c && c->version) ? c->version : "any";
 
 	list = binindex_get_pkglist(binindex, name);
@@ -858,7 +861,12 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 
 	while (pkgentry != NULL) {
 		pkg = &pkgentry->pkg;
-		if (pkg_version_compare(version, pkg->version) == 0)
+		repo = c->repo;
+		if (c && c->sumsha && mmstrcmp(c->sumsha, pkg->sumsha))
+			return pkg;
+		else if (c && c->repo && mmpkg_is_provided_by_repo(pkg, repo))
+			return pkg;
+		else if (pkg_version_compare(version, pkg->version) == 0)
 			return pkg;
 
 		pkgentry = pkgentry->next;
