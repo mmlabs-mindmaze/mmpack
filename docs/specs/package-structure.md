@@ -44,10 +44,10 @@ named after the package name with the following fields:
 
 ## sha256sums file
 
-YAML file located in the MMPACK folder in the binary package that list all
-installed files by a binary package along with their SHA256 hash values. As
-an exception, the sha256sums (although it is installed) shall not be listed
-in itself (its hash can be retrieved by the sumsha256sums field of info file)
+YAML file located in the mmpack metadata folder in the binary package that list
+all installed files by a binary package along with their SHA256 hash values. As
+an exception, the sha256sums (although it is installed) shall not be listed in
+itself (its hash can be retrieved by the sumsha256sums field of info file)
 
 The file consists of a dictionary expressed in YAML where each installed file
 is a key whose associated value is the hash of the file.
