@@ -39,9 +39,13 @@ int pkg_version_compare(char const * v1, char const * v2);
  * strcut constraints - structure containing all the possible constraints
  *                      imposed by the user in the command line.
  * @version: package version
- */
+ * @repo_name: name of the repository in which the package should be searched
+ * @sumsha: package sumsha
+ **/
 struct constraints {
 	mmstr * version;
+	mmstr * repo_name;
+	mmstr * sumsha;
 };
 
 void constraints_deinit(struct constraints * c);
@@ -161,6 +165,8 @@ struct rdeps_iter {
 	struct pkglist_entry* curr;
 };
 
+
+int package_in_repo(struct mmpkg const * pkg, mmstr const * repo_name);
 
 void mmpkg_dump(struct mmpkg const * pkg);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
