@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98365658_b3dda6ca",
+        "filename": "src/mmpack-build/file_utils.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-13T18:06:52Z",
+      "side": 1,
+      "message": "this regex is starting to get complicated\nwould you mind putting examples in a comment above ?\n\nAlso, I have never seen sonames with dot until now. Which one was it ?",
+      "revId": "3dc9e4e5444d9d9b229db0fa6ca10cccff40d33a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
