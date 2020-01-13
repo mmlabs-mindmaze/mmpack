@@ -356,7 +356,7 @@ def shlib_keyname(soname: str) -> str:
         libfoo.so.5 => libfoo5
     """
     name, version = parse_soname(soname)
-    return name + version  # libxxx.0.1.2 -> libxxx<ABI>
+    return name.lower() + version  # libxxx.0.1.2 -> libxxx<ABI>
 
 
 def yaml_load(filename: str):
