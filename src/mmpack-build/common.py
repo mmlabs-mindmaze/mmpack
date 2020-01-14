@@ -356,6 +356,11 @@ def shlib_keyname(soname: str) -> str:
         libfoo.so.5 => libfoo5
     """
     name, version = parse_soname(soname)
+
+    # Allow to distinguish libfoo1.so.0 from libfoo.so.10
+    if name[-1].isdigit():
+        name += '-'
+
     return name.lower() + version  # libxxx.0.1.2 -> libxxx<ABI>
 
 
