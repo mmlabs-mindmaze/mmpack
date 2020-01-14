@@ -49,7 +49,7 @@ struct constraints {
 };
 
 void constraints_deinit(struct constraints * c);
-
+int is_constraints_empty(struct constraints * c);
 
 struct from_repo {
 	mmstr const * filename;
