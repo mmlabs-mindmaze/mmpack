@@ -24,7 +24,6 @@
 
 
 static int recursive = 0;
-static int sumsha = 0;
 static const char* repo_name = NULL;
 
 static const struct mmarg_opt cmdline_optv[] = {
@@ -32,9 +31,6 @@ static const struct mmarg_opt cmdline_optv[] = {
 	 "Specify @REPO_NAME as the address of package repository"},
 	{"r|recursive", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &recursive},
 	 "Print recursively the reverse dependencies"},
-	{"sumsha", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &sumsha},
-	 "Search the reverse dependencies of the package referenced thanks to "
-	 "its sumsha"},
 };
 
 
@@ -142,6 +138,8 @@ LOCAL_SYMBOL
 int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct mmpkg const* pkg;
+	struct pkg_parser pp;
+	struct constraints * cons = &pp.cons;
 	struct repolist_elt * repo = NULL;
 	int arg_index, rv = -1;
 	struct list_pkgs * rdep_list = NULL;
@@ -172,12 +170,15 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	if (!sumsha) {
-		if ((pkg = parse_pkg(ctx, argv[arg_index])) == NULL)
-			return -1;
-	} else {
-		if (!(pkg = find_package_by_sumsha(ctx, argv[arg_index])))
-			return -1;
+	pkg_parser_init(&pp);
+	if (parse_pkgreq(ctx, argv[arg_index], &pp))
+		goto exit;
+
+	if (!(pkg = binindex_lookup(&ctx->binindex, pp.name, cons))) {
+		printf("No package %s%s\n", pp.name,
+		       constraints_is_empty(cons) ?
+		       "" : " respecting the constraints");
+		goto exit;
 	}
 
 	if (repo_name) {
@@ -198,6 +199,7 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	rv = 0;
 
 exit:
+	pkg_parser_deinit(&pp);
 	destroy_all_elt(&rdep_list);
 	return rv;
 }
