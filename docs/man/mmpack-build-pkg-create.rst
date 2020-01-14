@@ -8,7 +8,7 @@ build mmpack package
 
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
          Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
-:Date: 2019-11-05
+:Date: 2020-01-14
 :Manual section: 1
 
 SYNOPSIS
@@ -16,11 +16,17 @@ SYNOPSIS
 
 ``mmpack-build pkg-create`` -h|--help
 
-``mmpack-build pkg-create`` [--skip-build-tests] [--git-url= *url* | --src= *tarball* | --mmpack-src= *tarball*] [-t|--tag *tag*] [-y|--yes] [--build-deps]
+``mmpack-build pkg-create`` [--skip-build-tests] [--git | --src | --mmpack-src | --path] [-t|--tag *tag*] [-y|--yes] [--build-deps] [path_or_url]
 
 DESCRIPTION
 ===========
-**mmpack-build-pkg-create** is the **mmpack-build** subcommand which builds the packages.
+**mmpack-build-pkg-create** is the **mmpack-build** subcommand which builds the
+packages. It builds the mmpack binary and source packages from the location
+specified in *path_or_url* argument.
+
+If no argument is provided, it looks through the current directory or one of
+its parent for a mmpack folder, and use the containing folder as root
+directory.
 
 OPTIONS
 =======
@@ -32,32 +38,32 @@ OPTIONS
   If passed, do not run the default test target after the build.
   Ie. make check or make test depending on the build system.
 
-``--git-url= *url*``
-  Can be either:
+``--git``
+  Interpret *path_or_url* argument as git url or path to a local git repository.
 
-    * a git url of the repository to build
-    * a path to a local git repository
+``--src``
+  Interpret *path_or_url* argument as source package tarball.
 
-``--src= *tarball*``
-  path to a source package tarball that **mmpack-build** will extract, process
-  and repackage to produce a mmpack source package before calling the binary
-  packages build stages.
+``--mmpack-src``
+  Interpret *path_or_url* argument as mmpack source package tarball. **mmpack-build** will
+  preserve this tarball as it is and pass it directly to binary packages build
+  stages.
 
-``--mmpack-src= *tarball*``
-  path to a mmpack source package tarball. **mmpack-build** will preserve this
-  tarball as it is and pass it directly to binary packages build stages.
+``--path``
+  Interpret *path_or_url* argument as folder containing mmpack packaging specification.
 
 ``-t|--tag= *tag*``
   The project's tag to use.
-  If ``--git-url`` is specified, this can actually be any kind of object
-  recognized by the ``git --tag`` option:
+  If a git repository (local or remote url) is being built, this will specify
+  the commit to build. This can actually be any kind of object recognized by
+  the ``git --tag`` option:
 
     * a git tag
     * a commit sha1
     * a branch name
 
-  If ``--src``, this can be any string which will be used to identify a
-  package build in the cache folder
+  For the other type of build, *tag* will be the string which will be used to
+  identify a package build in the cache folder.
 
 ``-p|--prefix= *path*``
   Use *path* as install prefix if needed.
