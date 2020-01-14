@@ -47,6 +47,30 @@
       "revId": "5b8460f93c336d97942d1dc7b19988d56fad07eb",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6f77fe07_201f75b2",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-14T07:20:06Z",
+      "side": 1,
+      "message": "This error message might have been misplaced or badly written but is required (somewhere).\nOn error, there is nothing printed anymore.",
+      "parentUuid": "e2ab4ac4_006e13c0",
+      "range": {
+        "startLine": 187,
+        "startChar": 3,
+        "endLine": 187,
+        "endChar": 50
+      },
+      "revId": "5b8460f93c336d97942d1dc7b19988d56fad07eb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
