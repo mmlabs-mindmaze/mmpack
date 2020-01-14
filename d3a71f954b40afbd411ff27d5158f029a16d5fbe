@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e54b73d9_62b7f64e",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-14T16:08:34Z",
+      "side": 1,
+      "message": "This cannot work this way... Imagine the scenario:\n 1 - I install my own version of mmpack in my home.\n 2 - with my local mmpack install, I create a mmpack package of foo.\n 3 - I distribute foo the repo \"http://the_repo\"\n 4 - bob has mmpack packaged in debian\n 5 - he installs foo from \"http://the_repo\"\n 6 - the symlink to the standard licenses that foo used points to nothing",
+      "range": {
+        "startLine": 468,
+        "startChar": 12,
+        "endLine": 472,
+        "endChar": 75
+      },
+      "revId": "d3a71f954b40afbd411ff27d5158f029a16d5fbe",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
