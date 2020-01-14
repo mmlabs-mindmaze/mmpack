@@ -79,9 +79,13 @@ def parse_options(argv):
 
     if not args.url and not args.srctar and not args.mmpack_srctar \
        and not args.path:
-        args.url = find_project_root_folder()
-        if not args.url:
+        rootpath = find_project_root_folder()
+        if not rootpath:
             raise ValueError('did not find project to package')
+        if os.path.isdir(rootpath + '/.git'):
+            args.url = rootpath  # Fallback to git method
+        else:
+            args.path = rootpath  # Fallback to path method
 
     # set workspace prefix
     if not args.prefix:
