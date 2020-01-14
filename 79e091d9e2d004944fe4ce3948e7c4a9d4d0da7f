@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "986189eb_9f27bd94",
+        "filename": "docs/man/mmpack-build-pkg-create.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-14T15:02:31Z",
+      "side": 1,
+      "message": "Not completely clear to me;\n\"It builds the mmpack sources specified through the *path_or_url* argument and it generates the mmpack binary packages.\"",
+      "range": {
+        "startLine": 24,
+        "startChar": 9,
+        "endLine": 25,
+        "endChar": 77
+      },
+      "revId": "79e091d9e2d004944fe4ce3948e7c4a9d4d0da7f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4f55157_d8082143",
+        "filename": "src/mmpack-build/mmpack_pkg_create.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-14T15:02:31Z",
+      "side": 1,
+      "message": "git directory and git remote url are identified by the same string, \u0027git\u0027?",
+      "range": {
+        "startLine": 132,
+        "startChar": 11,
+        "endLine": 132,
+        "endChar": 16
+      },
+      "revId": "79e091d9e2d004944fe4ce3948e7c4a9d4d0da7f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
