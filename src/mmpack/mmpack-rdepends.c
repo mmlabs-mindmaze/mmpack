@@ -24,17 +24,10 @@
 
 
 static int recursive = 0;
-static int sumsha = 0;
-static const char* repo_name = NULL;
 
 static const struct mmarg_opt cmdline_optv[] = {
-	{"repo", MMOPT_NEEDSTR, NULL, {.sptr = &repo_name},
-	 "Specify @REPO_NAME as the address of package repository"},
 	{"r|recursive", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &recursive},
 	 "Print recursively the reverse dependencies"},
-	{"sumsha", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &sumsha},
-	 "Search the reverse dependencies of the package referenced thanks to "
-	 "its sumsha"},
 };
 
 
@@ -104,7 +97,7 @@ int find_reverse_dependencies(struct binindex binindex,
 	struct rdeps_iter rdep_it;
 	struct mmpkg * rdep;
 
-	if (!pkg || (repo_name && !mmpkg_is_provided_by_repo(pkg, repo)))
+	if (!pkg || (repo && !mmpkg_is_provided_by_repo(pkg, repo)))
 		return -1;
 
 	// iterate over all the potential reverse dependencies of pkg
@@ -112,7 +105,7 @@ int find_reverse_dependencies(struct binindex binindex,
 	     rdep = rdeps_iter_next(&rdep_it)) {
 		// check that the reverse dependency belongs to the
 		// repository inspected
-		if (repo_name && !mmpkg_is_provided_by_repo(rdep, repo))
+		if (repo && !mmpkg_is_provided_by_repo(rdep, repo))
 			continue;
 
 		//check that the dependency is not already written
@@ -142,7 +135,8 @@ LOCAL_SYMBOL
 int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct mmpkg const* pkg;
-	struct repolist_elt * repo = NULL;
+	struct pkg_parser pp;
+	struct constraints * cons = &pp.cons;
 	int arg_index, rv = -1;
 	struct list_pkgs * rdep_list = NULL;
 
@@ -172,23 +166,19 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	if (!sumsha) {
-		if ((pkg = parse_pkg(ctx, argv[arg_index])) == NULL)
-			return -1;
-	} else {
-		if (!(pkg = find_package_by_sumsha(ctx, argv[arg_index])))
-			return -1;
+
+	pkg_parser_init(&pp);
+	if (parse_pkgreq(ctx, argv[arg_index], &pp))
+		goto exit;
+
+	if (!(pkg = binindex_lookup(&ctx->binindex, pp.name, cons))) {
+		info("No package %s (%s)\n", pp.name,
+		     cons->version ? cons->version : "any version");
+		goto exit;
 	}
 
-	if (repo_name) {
-		repo = repolist_lookup(&ctx->settings.repo_list, repo_name);
-		if (!repo) {
-			printf("No repository %s\n", repo_name);
-			goto exit;
-		}
-	}
-
-	if (find_reverse_dependencies(ctx->binindex, pkg, repo, &rdep_list)) {
+	if (find_reverse_dependencies(ctx->binindex, pkg, pp.cons.repo,
+	                              &rdep_list)) {
 		printf("No package found\n");
 		goto exit;
 	}
