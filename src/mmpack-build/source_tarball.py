@@ -55,7 +55,7 @@ class SourceTarball:
         Create a source package from various methods
 
         Args:
-            method: 'tar', 'srcpkg' or 'git'
+            method: 'tar', 'srcpkg', 'path' or 'git'
             path_url: path or url to the mmpack sources
             tag: the name of the commit/tag/branch to checkout (may be None)
             outdir: folder where to put the generated source package. If None,
