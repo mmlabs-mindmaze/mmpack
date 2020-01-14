@@ -119,6 +119,30 @@
       "revId": "d90f068ab8fbc7d3b3cd03839035647830b4dd3d",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2458475d_627c161d",
+        "filename": "src/mmpack-build/source_tarball.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-14T10:36:17Z",
+      "side": 1,
+      "message": "OK, but why in a separated commit ?",
+      "parentUuid": "02cbd8dc_4cb6e059",
+      "range": {
+        "startLine": 217,
+        "startChar": 24,
+        "endLine": 217,
+        "endChar": 33
+      },
+      "revId": "d90f068ab8fbc7d3b3cd03839035647830b4dd3d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
