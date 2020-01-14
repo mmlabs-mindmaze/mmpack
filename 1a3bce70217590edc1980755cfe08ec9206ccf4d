@@ -25,6 +25,52 @@
     },
     {
       "key": {
+        "uuid": "fee935c2_90fbf2ae",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 861,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-14T15:49:51Z",
+      "side": 1,
+      "message": "what???\n\nWhat you ultimately do is to check that a package is indeed provided by the first repo of its from_repo list... It looks like a programming \"lapalissade\"",
+      "range": {
+        "startLine": 861,
+        "startChar": 2,
+        "endLine": 861,
+        "endChar": 30
+      },
+      "revId": "1a3bce70217590edc1980755cfe08ec9206ccf4d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17c8f19a_8d9dd3e3",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-14T15:49:51Z",
+      "side": 1,
+      "message": "wrong... For a package to be selected, it must match all constraints...\n\nI suggest you replace the \u0027while loop\u0027 with \u0027for loop\u0027... ie:\nfor (pkgentry \u003d list-\u003ehead; !pkgentry; pkgentry \u003d pkgentry-\u003enext)\n\nThis way, you can use break statement:\n\nfor (pkgentry \u003d list-\u003ehead; !pkgentry; pkgentry \u003d pkgentry-\u003enext) {\n      pkg \u003d \u0026pkgentry-\u003epkg;\n      if (!c)\n              return pkg;\n\n      if (c-\u003eversion \u0026\u0026 pkg_version_compare(c-\u003eversion, pkg-\u003eversion) !\u003d 0)\n              break;\n\n      if (c-\u003erepo \u0026\u0026 !package_in_repo(pkg, c-\u003erepo))\n              break;\n\n      ...\n}\n\nYou can possible create a static function that checks that constraints are matched by a package",
+      "range": {
+        "startLine": 862,
+        "startChar": 0,
+        "endLine": 867,
+        "endChar": 14
+      },
+      "revId": "1a3bce70217590edc1980755cfe08ec9206ccf4d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3318c7e3_181186a6",
         "filename": "src/mmpack/package-utils.h",
         "patchSetId": 4
