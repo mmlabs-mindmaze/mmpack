@@ -4,14 +4,30 @@
 
 _mmpack_build_subcmd_completion() {
     local cmd=$1
-    local short_opts=$(mmpack-build $cmd --help | sed -n 's/\s*-\([a-zA-Z]\),.*/-\1/p')
-    local long_opts=$(mmpack-build $cmd --help | sed -n 's/.*--\([^= ]*\).*/--\1/p')
+    local short_opts long_opts
+
+    case $cmd in
+    pkg-create)
+        short_opts="-t -h -p -y"
+        long_opts="--help --git --path --src --mmpack-src --tag --prefix --skip-build-tests --build-deps --yes"
+        ;;
+    builddep)
+        short_opts="-h -p -y"
+        long_opts="--help --prefix --yes"
+        ;;
+    clean)
+        short_opts="-h"
+        long_opts="--help --wipe"
+        ;;
+    esac
+
     echo "$short_opts" "$long_opts"
 }
 
 _mmpack_build_completion() {
     COMPREPLY=()
     local mmpack_build_commands="$(mmpack-build list-commands)"
+    local last="${COMP_WORDS[COMP_CWORD]}"
 
     # completion for mmpack-build
     if [ $COMP_CWORD -eq 1 ]; then
@@ -24,7 +40,11 @@ _mmpack_build_completion() {
        local cmd="$(echo "${COMP_WORDS[1]}" | tr -d '[:space:]')"
 
     if [ "$(echo $mmpack_build_commands | grep -w "$cmd")" ] ; then
-        COMPREPLY=( $( compgen -W "$(_mmpack_build_subcmd_completion "$cmd")" -- "${COMP_WORDS[COMP_CWORD]}" ) )
+        if [[ ${last} == -* ]] ; then
+            COMPREPLY=( $( compgen -W "$(_mmpack_build_subcmd_completion "$cmd")" --  "${COMP_WORDS[COMP_CWORD]}" ) )
+        else
+            COMPREPLY=( $(compgen -d -- "${COMP_WORDS[COMP_CWORD]}") )
+        fi
     fi
 }
 complete -F _mmpack_build_completion mmpack-build
