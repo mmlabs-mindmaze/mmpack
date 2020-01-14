@@ -2,6 +2,46 @@
   "comments": [
     {
       "key": {
+        "uuid": "bd8f692b_a80506af",
+        "filename": "docs/usage.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-14T16:39:42Z",
+      "side": 1,
+      "message": "from a user point of view, I think I would prefer the keys \"hash\" and \"repo\"",
+      "range": {
+        "startLine": 42,
+        "startChar": 22,
+        "endLine": 42,
+        "endChar": 49
+      },
+      "revId": "1a3bce70217590edc1980755cfe08ec9206ccf4d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5f00283_b7fd6bc7",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-14T16:39:42Z",
+      "side": 1,
+      "message": "you could equal++ just after this: you always use (equal + 1) within here",
+      "revId": "1a3bce70217590edc1980755cfe08ec9206ccf4d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3d626d06_50455fd2",
         "filename": "src/mmpack/cmdline.c",
         "patchSetId": 4
