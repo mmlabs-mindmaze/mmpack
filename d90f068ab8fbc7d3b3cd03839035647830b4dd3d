@@ -143,6 +143,30 @@
       "revId": "d90f068ab8fbc7d3b3cd03839035647830b4dd3d",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ddafd5d_60b05154",
+        "filename": "src/mmpack-build/source_tarball.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-14T14:53:30Z",
+      "side": 1,
+      "message": "Because adding a feature to the default behavior of mmpack-build pkg-create is IMO orthogonal to this commit.",
+      "parentUuid": "2458475d_627c161d",
+      "range": {
+        "startLine": 217,
+        "startChar": 24,
+        "endLine": 217,
+        "endChar": 33
+      },
+      "revId": "d90f068ab8fbc7d3b3cd03839035647830b4dd3d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
