@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d626d06_50455fd2",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-14T15:14:22Z",
+      "side": 1,
+      "message": "Please add a printf statement",
+      "range": {
+        "startLine": 216,
+        "startChar": 2,
+        "endLine": 217,
+        "endChar": 13
+      },
+      "revId": "1a3bce70217590edc1980755cfe08ec9206ccf4d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3318c7e3_181186a6",
+        "filename": "src/mmpack/package-utils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-14T15:14:22Z",
+      "side": 1,
+      "message": "instead of a repo name, store the actual repolist_elt pointer, This allows to reduce the memory management, to have a faster function package_in_repo function and more importantly to validate the repo name as early as possible",
+      "range": {
+        "startLine": 47,
+        "startChar": 1,
+        "endLine": 47,
+        "endChar": 19
+      },
+      "revId": "1a3bce70217590edc1980755cfe08ec9206ccf4d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75edbdd1_5c674f12",
+        "filename": "src/mmpack/package-utils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-14T15:14:22Z",
+      "side": 1,
+      "message": "change for mmpkg_is_provided_by_repo or something like this",
+      "range": {
+        "startLine": 169,
+        "startChar": 4,
+        "endLine": 169,
+        "endChar": 19
+      },
+      "revId": "1a3bce70217590edc1980755cfe08ec9206ccf4d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
