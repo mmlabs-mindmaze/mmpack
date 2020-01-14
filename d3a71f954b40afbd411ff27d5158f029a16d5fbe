@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "79894757_eb9ab61d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-14T16:12:03Z",
+      "side": 1,
+      "message": "license",
+      "range": {
+        "startLine": 11,
+        "startChar": 18,
+        "endLine": 11,
+        "endChar": 26
+      },
+      "revId": "d3a71f954b40afbd411ff27d5158f029a16d5fbe",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70ba7a62_6a752669",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-14T16:12:03Z",
+      "side": 1,
+      "message": "known",
+      "range": {
+        "startLine": 15,
+        "startChar": 24,
+        "endLine": 15,
+        "endChar": 25
+      },
+      "revId": "d3a71f954b40afbd411ff27d5158f029a16d5fbe",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f77e731_d9ce2a5a",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 7
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-14T16:12:03Z",
+      "side": 1,
+      "message": ", or a",
+      "range": {
+        "startLine": 67,
+        "startChar": 26,
+        "endLine": 67,
+        "endChar": 27
+      },
+      "revId": "d3a71f954b40afbd411ff27d5158f029a16d5fbe",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e54b73d9_62b7f64e",
         "filename": "src/mmpack-build/src_package.py",
         "patchSetId": 7
