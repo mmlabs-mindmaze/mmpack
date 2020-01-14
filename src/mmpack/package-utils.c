@@ -75,6 +75,20 @@ void constraints_deinit(struct constraints * c)
 
 
 /**
+ * constraints_is_empty() - indicates whether a struct constraints is empty or
+ *                          not
+ * @c: the structure to test
+ *
+ * Return: 1 if @c is empty, 0 otherwise.
+ */
+LOCAL_SYMBOL
+int constraints_is_empty(struct constraints * c)
+{
+	return c->version == NULL && c->sumsha == NULL && c->repo == NULL;
+}
+
+
+/**
  * get_name_pkgname_by_id() - returns the name of the packages located in
  *                      the i-th case of the pkgname_table table.
  * @binindex:   the initialized binindex
