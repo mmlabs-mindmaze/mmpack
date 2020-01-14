@@ -13,4 +13,4 @@ tmp_prefix=$workdir/tmp-prefix
 # that execute the script. (likely set in $HOME/.config/mmpack-config.yaml)
 mmpack mkprefix --force $tmp_prefix
 mmpack-build pkg-create --prefix=$tmp_prefix --build-deps -y \
- --src=$srctar --skip-build-tests
+ --src --skip-build-tests $srctar
