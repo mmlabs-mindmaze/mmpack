@@ -96,30 +96,15 @@ void dump_reverse_dependencies(struct list_pkgs * list)
 
 
 static
-int package_in_repo(struct mmpkg const * pkg, mmstr const * repo_name)
-{
-	struct from_repo * from;
-
-	for (from = pkg->from_repo; from != NULL; from = from->next) {
-		if (strcmp(from->repo->name, repo_name) == 0) {
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
-
-static
 int find_reverse_dependencies(struct binindex binindex,
                               struct mmpkg const* pkg,
-                              const char * repo_name,
+                              const struct repolist_elt * repo,
                               struct list_pkgs** rdep_list)
 {
 	struct rdeps_iter rdep_it;
 	struct mmpkg * rdep;
 
-	if (!pkg || (repo_name && !package_in_repo(pkg, repo_name)))
+	if (!pkg || !mmpkg_is_provided_by_repo(pkg, repo))
 		return -1;
 
 	// iterate over all the potential reverse dependencies of pkg
@@ -127,7 +112,7 @@ int find_reverse_dependencies(struct binindex binindex,
 	     rdep = rdeps_iter_next(&rdep_it)) {
 		// check that the reverse dependency belongs to the
 		// repository inspected
-		if (repo_name && !package_in_repo(rdep, repo_name))
+		if (!mmpkg_is_provided_by_repo(rdep, repo))
 			continue;
 
 		//check that the dependency is not already written
@@ -135,7 +120,7 @@ int find_reverse_dependencies(struct binindex binindex,
 			add_elt_list_pkgs(rdep_list, rdep);
 
 		if (recursive)
-			find_reverse_dependencies(binindex, rdep, repo_name,
+			find_reverse_dependencies(binindex, rdep, repo,
 			                          rdep_list);
 	}
 
@@ -157,6 +142,7 @@ LOCAL_SYMBOL
 int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct mmpkg const* pkg;
+	struct repolist_elt * repo = NULL;
 	int arg_index, rv = -1;
 	struct list_pkgs * rdep_list = NULL;
 
@@ -194,9 +180,15 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 			return -1;
 	}
 
+	if (repo_name) {
+		repo = repolist_lookup(&ctx->settings.repo_list, repo_name);
+		if (!repo) {
+			printf("No repository %s\n", repo_name);
+			goto exit;
+		}
+	}
 
-	if (find_reverse_dependencies(ctx->binindex, pkg, repo_name,
-	                              &rdep_list)) {
+	if (find_reverse_dependencies(ctx->binindex, pkg, repo, &rdep_list)) {
 		printf("No package found\n");
 		goto exit;
 	}
