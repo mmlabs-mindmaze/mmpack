@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "d638c956_0a51c745",
+        "filename": "src/mmpack-build/mmpack-build_completion",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-15T12:49:17Z",
+      "side": 1,
+      "message": "This is not exactly what we want:\n\nThis will systematically complete \"mmpack-build pkg-create\" with an option.\nie: \"mmpack-build pkg-create \u003ctab\u003e\" -\u003e \"mmpack-build pkg-create -\" (with a new dash)\n\nThis is not able to complete the path.\nI would want \"mmpack-build pkg-create /ho\" -\u003e \"mmpack-build pkg-create /home/\"",
+      "revId": "e3560e3835d370a72830217d808e417f3bc3cb59",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "fd59e6e3_308e595b",
         "filename": "src/mmpack-build/mmpack_pkg_create.py",
         "patchSetId": 4
