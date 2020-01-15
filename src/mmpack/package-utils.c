@@ -258,6 +258,32 @@ void mmpkg_deinit(struct mmpkg * pkg)
 
 
 /**
+ * mmpkg_is_provided_by_repo() - indicates whether a package is provided by a
+ *                              repository or not.
+ * @pkg: package
+ * @repo: repository
+ *
+ * Return: 1 if @pkg is provided by @repo or if no repository is given in
+ * parameter, 0 otherwise.
+ */
+int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
+                              struct repolist_elt const * repo)
+{
+	struct from_repo * from;
+
+	if (!repo)
+		return 1;
+
+	for (from = pkg->from_repo; from != NULL; from = from->next) {
+		if (from->repo == repo)
+			return 1;
+	}
+
+	return 0;
+}
+
+
+/**
  * mmpkg_sysdeps_dump() - dump sysdeps
  * @sysdeps: system dependencies strlist structure
  * @type: a string which will prefix the output (eg. "SYSTEM")
