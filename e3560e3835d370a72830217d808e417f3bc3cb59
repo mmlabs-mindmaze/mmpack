@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd59e6e3_308e595b",
+        "filename": "src/mmpack-build/mmpack_pkg_create.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-15T09:49:06Z",
+      "side": 1,
+      "message": "In case of git method, it tag is specified, it will be used to build the commit referenced by it.",
+      "range": {
+        "startLine": 22,
+        "startChar": 31,
+        "endLine": 22,
+        "endChar": 43
+      },
+      "revId": "e3560e3835d370a72830217d808e417f3bc3cb59",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab4a2f6c_98b572f6",
+        "filename": "src/mmpack-build/mmpack_pkg_create.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-15T09:49:06Z",
+      "side": 1,
+      "message": "It is not specified in the documentation of sourceTarBall that the method could be \u0027path\u0027. I have the feeling that this function actually just cares about the \u0027srcpkg\u0027 method. For all the other method (also the empty method, like it will be the case when giving a mpk) the function SourceTarBall performs the same code. Ans therefore, I am wondering if in the _guess_method function we could not only guess the srcpkg method and let everything else to empty. But I have perhaps misunderstand something.",
+      "range": {
+        "startLine": 145,
+        "startChar": 17,
+        "endLine": 145,
+        "endChar": 30
+      },
+      "revId": "e3560e3835d370a72830217d808e417f3bc3cb59",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
