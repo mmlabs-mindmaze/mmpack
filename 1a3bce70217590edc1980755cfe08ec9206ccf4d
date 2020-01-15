@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba2b68c4_9970da50",
+        "filename": "docs/usage.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-15T08:24:55Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "bd8f692b_a80506af",
+      "range": {
+        "startLine": 42,
+        "startChar": 22,
+        "endLine": 42,
+        "endChar": 49
+      },
+      "revId": "1a3bce70217590edc1980755cfe08ec9206ccf4d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a5f00283_b7fd6bc7",
         "filename": "src/mmpack/cmdline.c",
         "patchSetId": 4
