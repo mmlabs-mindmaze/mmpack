@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72141213_9f6d8c3b",
+        "filename": "src/mmpack-build/mmpack_pkg_create.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-16T09:56:27Z",
+      "side": 1,
+      "message": "suppress \"containing\"",
+      "range": {
+        "startLine": 56,
+        "startChar": 51,
+        "endLine": 56,
+        "endChar": 61
+      },
+      "revId": "7532547f9a0342124f0d975c1b33e495be9b5f76",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
