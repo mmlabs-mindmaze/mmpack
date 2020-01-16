@@ -16,6 +16,46 @@
       "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5e3514f_24c346de",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 17
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T07:49:34Z",
+      "side": 1,
+      "message": "I do not understand from this how I can create a ghost package for say:\n- buster\u0027s libyaml\n- stretch\u0027s libyaml\n- debian\u0027s (any version) libyaml\u0027s version  0.2.1-1",
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f36d2f99_bd3e3d66",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 17
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T07:49:34Z",
+      "side": 1,
+      "message": "what for ?\nwhen is it a good idea to ghost a system package but change its name ?",
+      "range": {
+        "startLine": 92,
+        "startChar": 3,
+        "endLine": 92,
+        "endChar": 35
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
