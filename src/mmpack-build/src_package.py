@@ -20,6 +20,7 @@ from . file_utils import *
 from . hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from . mm_version import Version
 from . settings import PKGDATADIR
+from . syspkg_manager import init_syspkg_manager
 from . mmpack_builddep import process_dependencies, general_specs_builddeps
 
 
@@ -258,8 +259,10 @@ class SrcPackage:
         self._parse_specfile_general()
 
         host_arch = get_host_arch_dist()
-        sysdeps_key = 'sysdepends-' + get_host_dist()
+        host_dist = get_host_dist()
+        sysdeps_key = 'sysdepends-' + host_dist
 
+        init_syspkg_manager(host_dist)
         init_mmpack_build_hooks(self.name, self.version, host_arch)
 
         # create skeleton for explicit packages

@@ -10,24 +10,11 @@ from typing import Set, Dict, List
 
 from . base_hook import BaseHook, PackageInfo
 from . common import shlib_keyname, Assert
-from . dpkg import dpkg_find_dependency
 from . file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
 from . mm_version import Version
-from . pacman import pacman_find_dependency
 from . provide import ProvideList, load_mmpack_provides
-from . settings import DPKG_PREFIX, PACMAN_PREFIX
-from . workspace import Workspace
-
-
-def _sysdep_find_dependency(soname: str, symbol_set: Set[str]) -> str:
-    wrk = Workspace()
-    if os.path.exists(DPKG_PREFIX):
-        return dpkg_find_dependency(soname, symbol_set)
-    if os.path.exists(wrk.cygroot() + PACMAN_PREFIX):
-        return pacman_find_dependency(soname, symbol_set)
-
-    raise FileNotFoundError('Could not find system package manager')
+from . syspkg_manager import get_syspkg_mgr
 
 
 def _add_dll_dep_to_pkginfo(currpkg: PackageInfo, import_lib: str,
@@ -105,8 +92,9 @@ class MMPackBuildHook(BaseHook):
             currpkg.add_to_deplist(pkgname, version)
 
         # provided by the host system
+        syspkg_mgr = get_syspkg_mgr()
         for soname in sonames:
-            sysdep = _sysdep_find_dependency(soname, symbol_set)
+            sysdep = syspkg_mgr.find_sharedlib_sysdep(soname, symbol_set)
             if not sysdep:
                 # <soname> dependency could not be met with any available means
                 errmsg = 'Could not find package providing ' + soname
