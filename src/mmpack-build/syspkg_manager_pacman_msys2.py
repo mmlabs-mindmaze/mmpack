@@ -5,17 +5,18 @@ helper module containing pacman wrappers and file parsing functions
 
 import os
 import re
-from typing import Set
+from typing import Set, List
 
 from . common import shell
 from . pe_utils import get_dll_from_soname, symbols_set
 from . settings import PACMAN_PREFIX
+from . syspkg_manager_base import SysPkgManager
 from . workspace import Workspace
 
 
-def pacman_find_dependency(soname: str, symbol_set: Set[str]) -> str:
+def msys2_find_dependency(soname: str, symbol_set: Set[str]) -> str:
     """
-    find pacman package providing given file
+    find msys2 package providing given file
 
     Raises:
         ShellException: the package could not be found
@@ -35,7 +36,7 @@ def pacman_find_dependency(soname: str, symbol_set: Set[str]) -> str:
     return package
 
 
-def pacman_find_pypkg(pypkg: str) -> str:
+def msys2_find_pypkg(pypkg: str) -> str:
     """
     Get packages providing files matchine the specified glob pattern
     """
@@ -60,3 +61,14 @@ def pacman_find_pypkg(pypkg: str) -> str:
                 return open(desc_filename, 'rt').readlines()[1].strip()
 
     return None
+
+
+class PacmanMsys2(SysPkgManager):
+    """
+    Class to interact with msys2 package database
+    """
+    def find_sharedlib_sysdep(self, soname: str, symbols: List[str]) -> str:
+        return msys2_find_dependency(soname, symbols)
+
+    def find_pypkg_sysdep(self, pypkg: str) -> str:
+        return msys2_find_pypkg(pypkg)
