@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c6ddcf06_7a230f41",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:11:14Z",
+      "side": 1,
+      "message": "this is quite the minimalist description",
+      "range": {
+        "startLine": 263,
+        "startChar": 0,
+        "endLine": 264,
+        "endChar": 20
+      },
+      "revId": "bdaecf3c1617c15017370af07158a49151e0aeea",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
