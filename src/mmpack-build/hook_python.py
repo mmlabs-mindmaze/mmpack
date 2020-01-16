@@ -12,13 +12,10 @@ from typing import Set, Dict, List
 
 from . base_hook import BaseHook, PackageInfo
 from . common import shell, Assert
-from . dpkg import dpkg_find_pypkg
 from . file_utils import is_python_script
 from . mm_version import Version
-from . pacman import pacman_find_pypkg
 from . provide import Provide, ProvideList, load_mmpack_provides
-from . settings import DPKG_PREFIX, PACMAN_PREFIX
-from . workspace import Workspace
+from . syspkg_manager import SYSPKG_MGR
 
 
 _SITEDIR = 'lib/python3/site-packages'
@@ -79,16 +76,6 @@ def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
     return set(cmd_output.split())
 
 
-def _sysdep_find_pydep(pypkg: str) -> str:
-    wrk = Workspace()
-    if os.path.exists(DPKG_PREFIX):
-        return dpkg_find_pypkg(pypkg)
-    if os.path.exists(wrk.cygroot() + PACMAN_PREFIX):
-        return pacman_find_pypkg(pypkg)
-
-    raise FileNotFoundError('Could not find system package manager')
-
-
 #####################################################################
 # Python hook for mmpack-build
 #####################################################################
@@ -138,7 +125,7 @@ class MMPackBuildHook(BaseHook):
 
         # provided by the host system
         for pypkg in imports:
-            sysdep = _sysdep_find_pydep(pypkg)
+            sysdep = SYSPKG_MGR.find_pypkg_sysdep(pypkg)
             if not sysdep:
                 # <pypkg> dependency could not be met with any available means
                 errmsg = 'Could not find package providing {} python package'\
