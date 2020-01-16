@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "20754987_63d23cfc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-16T08:14:28Z",
+      "side": 1,
+      "message": "Ghost packages are virtual packages (that provide no file) that allow replacing a system package dependency with a mmpack package one, while wiring the redirections for the runtime execution.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 27
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "08790288_b526316a",
         "filename": "docs/specs/package-specfile.rst",
         "patchSetId": 17
@@ -75,6 +98,29 @@
         "startChar": 4,
         "endLine": 255,
         "endChar": 23
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c6d5028_688a7bed",
+        "filename": "src/mmpack-build/dpkg.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-16T08:14:28Z",
+      "side": 1,
+      "message": "are we using any tool to check parameter annotation consistency in the test suite?",
+      "range": {
+        "startLine": 273,
+        "startChar": 31,
+        "endLine": 273,
+        "endChar": 76
       },
       "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
@@ -156,6 +202,29 @@
       "writtenOn": "2020-01-16T08:06:17Z",
       "side": 1,
       "message": "unrelated",
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec06ca8c_e3903c5a",
+        "filename": "src/mmpack-build/pacman.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-16T08:14:28Z",
+      "side": 1,
+      "message": "This class seems deeply connected both to pacman and msys.\nFrom I understanding I could not use it on my arch linux distribution, could I?\nIn this case I suggest to rename it to emphasize its dependency on msys",
+      "range": {
+        "startLine": 68,
+        "startChar": 1,
+        "endLine": 68,
+        "endChar": 16
+      },
       "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
