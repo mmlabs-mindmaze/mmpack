@@ -17,7 +17,7 @@ def find_project_root_folder() -> str:
     folder.
     """
     pwd = os.getcwd()
-    if os.path.exists('mmpack'):
+    if os.path.isdir('mmpack') and os.path.isfile('mmpack/specs'):
         return pwd
 
     parent, current = os.path.split(pwd)
