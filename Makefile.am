@@ -50,7 +50,6 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/base_hook.py \
 	src/mmpack-build/binary_package.py \
 	src/mmpack-build/common.py \
-	src/mmpack-build/dpkg.py \
 	src/mmpack-build/decorators.py \
 	src/mmpack-build/elf_utils.py \
 	src/mmpack-build/file_utils.py \
@@ -62,13 +61,16 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/mmpack_clean.py \
 	src/mmpack-build/mmpack_guess.py \
 	src/mmpack-build/mmpack_pkg_create.py \
-	src/mmpack-build/pacman.py \
 	src/mmpack-build/pe_utils.py \
 	src/mmpack-build/provide.py \
 	src/mmpack-build/python_depends.py \
 	src/mmpack-build/python_provides.py \
 	src/mmpack-build/source_tarball.py \
 	src/mmpack-build/src_package.py \
+	src/mmpack-build/syspkg_manager.py \
+	src/mmpack-build/syspkg_manager_base.py \
+	src/mmpack-build/syspkg_manager_dpkg.py \
+	src/mmpack-build/syspkg_manager_msys2.py \
 	src/mmpack-build/mm_version.py \
 	src/mmpack-build/workspace.py \
 	src/mmpack-build/xdg.py \

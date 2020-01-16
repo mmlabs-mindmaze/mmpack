@@ -12,6 +12,7 @@ from typing import List
 from . common import parse_soname, get_host_arch, Assert, shell
 from . mm_version import Version
 from . settings import DPKG_METADATA_PREFIX
+from . syspkg_manager_base import SysPkgManager
 
 
 def dpkg_find_shlibs_file(target_soname: str):
@@ -238,3 +239,14 @@ def dpkg_find_pypkg(pypkg: str) -> str:
     cmd_output = shell(['dpkg', '--search', pattern])
     debpkg_list = list({l.split(':')[0] for l in cmd_output.splitlines()})
     return debpkg_list[0] if debpkg_list else None
+
+
+class Dpkg(SysPkgManager):
+    """
+    Class to interact with Debian package database
+    """
+    def find_sharedlib_sysdep(self, soname: str, symbols: List[str]) -> str:
+        return dpkg_find_dependency(soname, symbols)
+
+    def find_pypkg_sysdep(self, pypkg: str) -> str:
+        return dpkg_find_pypkg
