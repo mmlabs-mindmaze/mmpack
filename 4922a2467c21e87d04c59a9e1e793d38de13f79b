@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08790288_b526316a",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 17
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T07:45:49Z",
+      "side": 1,
+      "message": "The strangely named \"dist-srcname-remap\" key is present  \u003c\u003d\u003e is ghost package",
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
