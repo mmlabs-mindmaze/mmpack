@@ -128,6 +128,30 @@
     },
     {
       "key": {
+        "uuid": "13d2945a_4ba9dacf",
+        "filename": "src/mmpack-build/dpkg.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:29:47Z",
+      "side": 1,
+      "message": "Not yet.\nmypy does it, but we haven\u0027t integrated it yet.\nI\u0027ll add a bounty with some chocolate for it",
+      "parentUuid": "8c6d5028_688a7bed",
+      "range": {
+        "startLine": 273,
+        "startChar": 31,
+        "endLine": 273,
+        "endChar": 76
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c0d28ac4_af1e36f8",
         "filename": "src/mmpack-build/dpkg.py",
         "patchSetId": 17
