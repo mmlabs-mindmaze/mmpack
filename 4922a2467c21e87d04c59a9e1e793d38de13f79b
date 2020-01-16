@@ -59,6 +59,29 @@
     },
     {
       "key": {
+        "uuid": "ca0aa02f_204445da",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 17
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-16T15:45:05Z",
+      "side": 1,
+      "message": "if",
+      "range": {
+        "startLine": 91,
+        "startChar": 19,
+        "endLine": 91,
+        "endChar": 21
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f36d2f99_bd3e3d66",
         "filename": "docs/specs/package-specfile.rst",
         "patchSetId": 17
@@ -75,6 +98,75 @@
         "startChar": 3,
         "endLine": 92,
         "endChar": 35
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea8cb734_6cfe9c5a",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 17
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-16T15:45:05Z",
+      "side": 1,
+      "message": "I guess you mean \"be a source name instead of a name field\". But even with that sentence, I do not understand, to what corresponds the \"field\" you are talking about. Is it the value of the key?\nMoreover, in the previous sentence I understand that you want to suppress the source name, but in this sentence this is the reverse. \nSo perhaps the sentence is more \"be the value name instead of the source name\".",
+      "range": {
+        "startLine": 93,
+        "startChar": 62,
+        "endLine": 93,
+        "endChar": 78
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1eae9590_068612ac",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 17
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-16T15:45:05Z",
+      "side": 1,
+      "message": "Put an example like in the message commit.",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 0
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "feef71f0_09743eda",
+        "filename": "src/mmpack-build/binary_package.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-16T15:45:05Z",
+      "side": 1,
+      "message": "Not related commit.",
+      "range": {
+        "startLine": 230,
+        "startChar": 0,
+        "endLine": 230,
+        "endChar": 0
       },
       "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
