@@ -56,6 +56,235 @@
       "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ba96d31_3de948c1",
+        "filename": "src/mmpack-build/dpkg.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "this is a strange idea\nwhy not set a few ?",
+      "range": {
+        "startLine": 250,
+        "startChar": 4,
+        "endLine": 255,
+        "endChar": 23
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0d28ac4_af1e36f8",
+        "filename": "src/mmpack-build/dpkg.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "why only strip leading spaces and not trailing ones ?",
+      "range": {
+        "startLine": 291,
+        "startChar": 19,
+        "endLine": 291,
+        "endChar": 25
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e1b9041_211a4622",
+        "filename": "src/mmpack-build/dpkg.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "The builtin exception FileNotFoundError is probably a better fit",
+      "range": {
+        "startLine": 331,
+        "startChar": 14,
+        "endLine": 331,
+        "endChar": 20
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bbfdf1b4_3b954e40",
+        "filename": "src/mmpack-build/hook_sharedlib.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "continue ?\n\notherwise you can just skip the whole loop and fix the above comment",
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a14c6e30_b32da31e",
+        "filename": "src/mmpack-build/mmpack_pkg_create.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "unrelated",
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "902ad054_fd55a340",
+        "filename": "src/mmpack-build/pacman.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "if you expect value to never be defined to None when you need it, you can also \"del value\"",
+      "range": {
+        "startLine": 97,
+        "startChar": 16,
+        "endLine": 97,
+        "endChar": 55
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dcc552eb_0f600b79",
+        "filename": "src/mmpack-build/pacman.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "list \u003c- set",
+      "range": {
+        "startLine": 118,
+        "startChar": 18,
+        "endLine": 118,
+        "endChar": 54
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7af6ef78_d722de61",
+        "filename": "src/mmpack-build/pacman.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "I think this might be more readable: (same for some above, maybe some other switch/case places used for simple translations)\n\n\nd \u003d {\u0027amd64\u0027: \u0027x86_64\u0027, \u0027i386\" : \u0027i686\u0027}\nval \u003d d.get(key)\nif not val:\n    raise Assert(...)\nreturn val",
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "39bebf0f_fade439a",
+        "filename": "src/mmpack-build/pacman.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "this is a global const variable that could be put on top of the file in capitals",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 197,
+        "endChar": 2
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "325dcb44_65b7c663",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "this almost made be believed you were installing the packages.\n\"unpack\" might be a better name",
+      "range": {
+        "startLine": 309,
+        "startChar": 8,
+        "endLine": 309,
+        "endChar": 37
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92905eea_0e511a9b",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 640,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-16T08:06:17Z",
+      "side": 1,
+      "message": "did you just removed the gen_dependencies() step for normal packages ?",
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
