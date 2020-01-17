@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4b949a2_a48b42c8",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-17T10:32:44Z",
+      "side": 1,
+      "message": "constraints_is_empty() \u003d keep the same prefix",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 24
+      },
+      "revId": "0774c0cc2a8ba2385a649b7f1c120df2104f00b0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
