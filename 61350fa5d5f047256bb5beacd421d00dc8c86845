@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8b93700_71cedeb6",
+        "filename": "tests/smoke-tests/test_mmpack_rdepends.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-17T09:56:39Z",
+      "side": 1,
+      "message": "It is unfortunate that it would come with a less expressive error message",
+      "revId": "61350fa5d5f047256bb5beacd421d00dc8c86845",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
