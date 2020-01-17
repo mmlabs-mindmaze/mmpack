@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6c3ac99_ae790316",
+        "filename": "docs/usage.rst",
+        "patchSetId": 9
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-17T16:01:13Z",
+      "side": 1,
+      "message": "t \u003c- T\ncapital",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 1
+      },
+      "revId": "97a0a78f13bba09e4dc3f6c8e99e09bd69df17f9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "96173149_c882baf3",
+        "filename": "docs/usage.rst",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-17T16:01:13Z",
+      "side": 1,
+      "message": "t \u003c- T\ncapital",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 1
+      },
+      "revId": "97a0a78f13bba09e4dc3f6c8e99e09bd69df17f9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6054ee6c_5a9293e1",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-17T16:01:13Z",
+      "side": 1,
+      "message": "It would be nice if the list of known keywords was singled out and their recognition done in a dedicated function.\nThis would make adding new keywords easier.\n\n(remember how many possible keywords redhat is using !)",
+      "range": {
+        "startLine": 208,
+        "startChar": 2,
+        "endLine": 214,
+        "endChar": 27
+      },
+      "revId": "97a0a78f13bba09e4dc3f6c8e99e09bd69df17f9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0df9b919_ca32ccc2",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 879,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-17T16:01:13Z",
+      "side": 1,
+      "message": "for (pkgentry \u003d list-\u003ehead ; pkgentry !\u003d NULL ; pkgentry \u003d pkgentry-\u003enext) {\n...\nthen replace the \"goto next\" by \"continue\"\n...\n}",
+      "range": {
+        "startLine": 862,
+        "startChar": 1,
+        "endLine": 879,
+        "endChar": 2
+      },
+      "revId": "97a0a78f13bba09e4dc3f6c8e99e09bd69df17f9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ceba0b2_28352ac4",
+        "filename": "src/mmpack/package-utils.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-17T16:01:13Z",
+      "side": 1,
+      "message": "isn\u0027t there any need to clean this one up ?",
+      "revId": "97a0a78f13bba09e4dc3f6c8e99e09bd69df17f9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
