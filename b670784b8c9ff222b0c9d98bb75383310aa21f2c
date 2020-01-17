@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98d486cd_84a05a20",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-17T13:08:19Z",
+      "side": 1,
+      "message": "You must check the return repo is not null",
+      "range": {
+        "startLine": 214,
+        "startChar": 3,
+        "endLine": 216,
+        "endChar": 27
+      },
+      "revId": "b670784b8c9ff222b0c9d98bb75383310aa21f2c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c34cea9b_5168e655",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-17T13:08:19Z",
+      "side": 1,
+      "message": "Please recall the argument that is bad",
+      "range": {
+        "startLine": 218,
+        "startChar": 33,
+        "endLine": 218,
+        "endChar": 35
+      },
+      "revId": "b670784b8c9ff222b0c9d98bb75383310aa21f2c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "33b059db_f0566067",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-17T13:08:19Z",
+      "side": 1,
+      "message": "const struct repolist_elt",
+      "range": {
+        "startLine": 853,
+        "startChar": 1,
+        "endLine": 853,
+        "endChar": 20
+      },
+      "revId": "b670784b8c9ff222b0c9d98bb75383310aa21f2c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3439facb_9736c600",
+        "filename": "src/mmpack/package-utils.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-17T13:08:19Z",
+      "side": 1,
+      "message": "const struct repolist_elt",
+      "range": {
+        "startLine": 47,
+        "startChar": 1,
+        "endLine": 47,
+        "endChar": 20
+      },
+      "revId": "b670784b8c9ff222b0c9d98bb75383310aa21f2c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
