@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a627803_53ba92a8",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T15:57:57Z",
+      "side": 1,
+      "message": "Add printf() here",
+      "revId": "b9bca25f82d6ae739077924f42317cf8e6ba64f3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d196cce_63fbc856",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T15:57:57Z",
+      "side": 1,
+      "message": "Rewrite constraints_set() to integrate the key parsing:\n\nint constraints_set(struct mmpack_ctx * ctx,\n                    struct constraints * cons, const char* arg_req)\n{\n      enum constraints_type type;\n      const char* value;\n\n      colon \u003d strchr_or_end(pkg_req, \u0027:\u0027);\n      if (colon \u003d\u003d \u0027:\u0027) {\n              value \u003d colon + 1;\n              type \u003d get_constraints_type(arg_req);\n              if (type \u003d\u003d UNKNOWN)\n                      return -1;\n      } else {\n              value \u003d arg_reg;\n              type \u003d VERSION;\n      }\n\n      ... the rest remain the same\n}",
+      "range": {
+        "startLine": 190,
+        "startChar": 0,
+        "endLine": 193,
+        "endChar": 39
+      },
+      "revId": "b9bca25f82d6ae739077924f42317cf8e6ba64f3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e6e19bc_cb099b90",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T15:57:57Z",
+      "side": 1,
+      "message": "remove empty line",
+      "revId": "b9bca25f82d6ae739077924f42317cf8e6ba64f3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b77adffa_4b91a51d",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T15:57:57Z",
+      "side": 1,
+      "message": "Do printf instead of mm_raise_error()",
+      "range": {
+        "startLine": 212,
+        "startChar": 2,
+        "endLine": 212,
+        "endChar": 53
+      },
+      "revId": "b9bca25f82d6ae739077924f42317cf8e6ba64f3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0b4a0ff_d7dab18d",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T15:57:57Z",
+      "side": 1,
+      "message": "Merge this into constraints_set()",
+      "range": {
+        "startLine": 265,
+        "startChar": 2,
+        "endLine": 276,
+        "endChar": 0
+      },
+      "revId": "b9bca25f82d6ae739077924f42317cf8e6ba64f3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
