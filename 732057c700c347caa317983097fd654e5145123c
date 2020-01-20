@@ -16,6 +16,24 @@
       "revId": "732057c700c347caa317983097fd654e5145123c",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee91556f_bbbe2161",
+        "filename": "src/mmpack/mmpack-rdepends.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-20T10:45:34Z",
+      "side": 1,
+      "message": "The --repo option is here to ask for reverse dependencies that are in the repo written repo_name. It is a filter but on the reverse dependencies.\n \nIf we write in the commandline:\nmmpack rdepends package\u003drepo:repo, this does not mean that we want also the reverse dependencies to be in the repository repo. the option \"repo:\" is a filter on the package.",
+      "parentUuid": "877942c2_f5d80d09",
+      "revId": "732057c700c347caa317983097fd654e5145123c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
