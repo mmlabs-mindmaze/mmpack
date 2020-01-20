@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "877942c2_f5d80d09",
+        "filename": "src/mmpack/mmpack-rdepends.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-20T09:18:09Z",
+      "side": 1,
+      "message": "why did you choose to keep the \"repo\" option, and remove the \"sumsha\" one ?\nI thought you would remove both in favor of the new constraint syntax",
+      "revId": "732057c700c347caa317983097fd654e5145123c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
