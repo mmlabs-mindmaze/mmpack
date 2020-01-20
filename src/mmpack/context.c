@@ -59,6 +59,29 @@ int load_prefix_config(struct mmpack_ctx* ctx)
 }
 
 
+static
+int ensure_prefix_files(const char* prefix)
+{
+	int fd, oflag;
+	const mmstr * instlist_relpath, * log_relpath;
+	const mmstr * mm_prefix;
+
+	mm_prefix = mmstr_alloca_from_cstr(prefix);
+
+	instlist_relpath = mmstr_alloca_from_cstr(INSTALLED_INDEX_RELPATH);
+	log_relpath = mmstr_alloca_from_cstr(LOG_RELPATH);
+
+	oflag = O_WRONLY|O_CREAT;
+
+	fd = open_file_in_prefix(mm_prefix, log_relpath, oflag);
+	mm_close(fd);
+	fd = open_file_in_prefix(mm_prefix, instlist_relpath, oflag);
+	mm_close(fd);
+
+	return 0;
+}
+
+
 /**
  * mmpack_ctx_init() - initialize mmpack context
  * @ctx: mmpack context
@@ -72,8 +95,9 @@ LOCAL_SYMBOL
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 {
 	const char* prefix;
+	char * bundle;
 	mmstr * cwd;
-	int len = 512;
+	int len = 512, dir_strlen;
 
 	memset(ctx, 0, sizeof(*ctx));
 	settings_init(&ctx->settings);
@@ -84,9 +108,21 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	install_state_init(&ctx->installed);
 
 	prefix = opts->prefix;
-	if (!prefix)
-		prefix = mm_getenv("MMPACK_PREFIX",
-		                   ctx->settings.default_prefix);
+	if (!prefix) {
+		if (opts->bundle) {
+			dir_strlen = strlen(mm_get_basedir(MM_DATA_HOME));
+			dir_strlen += strlen("/mm_prefixes/");
+			dir_strlen += strlen(opts->bundle) + 1;
+			bundle = mm_malloca(sizeof(char)*(dir_strlen));
+			sprintf(bundle, "%s/mm_prefixes/%s",
+			        mm_get_basedir(MM_DATA_HOME),
+			        opts->bundle);
+			ensure_prefix_files(bundle);
+			prefix = bundle;
+		} else
+			prefix = mm_getenv("MMPACK_PREFIX",
+			                   ctx->settings.default_prefix);
+	}
 
 	ctx->prefix = mmstr_malloc_from_cstr(prefix);
 	cwd = mmstr_malloc(len);

@@ -16,6 +16,7 @@
 
 struct mmpack_opts {
 	const char* prefix;
+	const char* bundle;
 	const char* version;
 };
 

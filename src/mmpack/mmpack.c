@@ -89,6 +89,8 @@ static struct mmpack_opts cmdline_opts;
 static const struct mmarg_opt cmdline_optv[] = {
 	{"p|prefix", MMOPT_NEEDDIR, NULL, {.sptr = &cmdline_opts.prefix},
 	 "Use @PATH as install prefix."},
+	{"b|bundle", MMOPT_NEEDVAL, NULL, {.sptr = &cmdline_opts.bundle},
+	 "Use bundle @BUNDLE. This yields PATH=MM_RUNTIME_DIR/@BUNDLE."},
 	{"version", MMOPT_NOVAL, "set", {.sptr = &cmdline_opts.version},
 	 "Display mmpack version"},
 };
