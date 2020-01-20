@@ -34,6 +34,24 @@
       "revId": "732057c700c347caa317983097fd654e5145123c",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "905122e9_570c9c62",
+        "filename": "src/mmpack/mmpack-rdepends.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-20T15:53:07Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ee91556f_bbbe2161",
+      "revId": "732057c700c347caa317983097fd654e5145123c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
