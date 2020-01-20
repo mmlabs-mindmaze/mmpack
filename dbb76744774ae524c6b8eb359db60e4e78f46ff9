@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da13f16f_874737e4",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T18:28:00Z",
+      "side": 1,
+      "message": "There is a mistake, you would get a match for \u0027hash\u0027 with \u0027hashfoobar\u0027. You must pass keylen in argument",
+      "range": {
+        "startLine": 180,
+        "startChar": 2,
+        "endLine": 181,
+        "endChar": 49
+      },
+      "revId": "dbb76744774ae524c6b8eb359db60e4e78f46ff9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "384d606e_d7fa6a2a",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T18:28:00Z",
+      "side": 1,
+      "message": "Which one?",
+      "range": {
+        "startLine": 185,
+        "startChar": 1,
+        "endLine": 185,
+        "endChar": 50
+      },
+      "revId": "dbb76744774ae524c6b8eb359db60e4e78f46ff9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1499d82_8094487e",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T18:28:00Z",
+      "side": 1,
+      "message": "There is multiple path that set and allocation version... This is not a good idea while you can do it better and harmonize the code path.\n\nPlease consider the following implementation:\n\nint constraints_set(struct mmpack_ctx * ctx,\n                    struct constraints * cons, const char* arg_req)\n{\n      const chat* colon;\n      const char* value \u003d arg_req;\n      enum constraints_type type \u003d VERSION;\n\n      // Try to split the argument in key/value. If no colon, the whole\n      //argument is assumed to be version\n      colon \u003d strchr_or_end(pkg_req, \u0027:\u0027);\n      if (colon \u003d\u003d \u0027:\u0027) {\n              value \u003d colon + 1;\n              type \u003d get_constraints_type(arg_req, colon-arg_req);\n      }\n\n      switch (type) {\n      case HASH:\n              cons-\u003esumsha \u003d mmstrcpy_cstr_realloc(cons-\u003esumsha, value);\n              break;\n      case REPO:\n              cons-\u003erepo \u003d repolist_lookup(\u0026ctx-\u003esettings.repo_list, value);\n              if (!cons-\u003erepo) {\n                      printf(\"Repository %s not found\\n\", colon);\n                      return -1;\n              }\n              break;\n       case PKG_VERSION:\n               cons-\u003eversion \u003d mmstrcpy_cstr_realloc(cons-\u003eversion, value);\n               break;\n       default:\n               printf(\"key not known in %s\\n\", arg_req);\n               return -1;\n       }\n\n\treturn 0;\n}",
+      "range": {
+        "startLine": 198,
+        "startChar": 1,
+        "endLine": 206,
+        "endChar": 0
+      },
+      "revId": "dbb76744774ae524c6b8eb359db60e4e78f46ff9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "73b48b5f_ca9094e6",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T18:28:00Z",
+      "side": 1,
+      "message": "Duplicate with what you got in get_constraints_type(). either you do not check the return value there, either you don\u0027t include the case here.",
+      "range": {
+        "startLine": 223,
+        "startChar": 1,
+        "endLine": 226,
+        "endChar": 2
+      },
+      "revId": "dbb76744774ae524c6b8eb359db60e4e78f46ff9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
