@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "577103a9_c7f9d462",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-20T07:48:34Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "range": {
+        "startLine": 178,
+        "startChar": 40,
+        "endLine": 178,
+        "endChar": 41
+      },
+      "revId": "e1817b7e1449c764edf5a5d8bb28e7cbe4b7da05",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a309822_4912da84",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-20T07:48:34Z",
+      "side": 1,
+      "message": "here too",
+      "range": {
+        "startLine": 189,
+        "startChar": 46,
+        "endLine": 189,
+        "endChar": 47
+      },
+      "revId": "e1817b7e1449c764edf5a5d8bb28e7cbe4b7da05",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
