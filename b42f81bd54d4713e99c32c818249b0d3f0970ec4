@@ -92,6 +92,75 @@
       "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55a82f1f_180ec07e",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T18:05:34Z",
+      "side": 1,
+      "message": "Please state the type",
+      "range": {
+        "startLine": 475,
+        "startChar": 32,
+        "endLine": 475,
+        "endChar": 38
+      },
+      "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4af33ac9_df054389",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T18:05:34Z",
+      "side": 1,
+      "message": "I am really for this being implemented in a hook... Not only it would avoid to clutter Srcpackage, but also, it would allow more flexibility than doing all the guess in spec loading: If licenses are installed by the project compilation/installation, you will not see them.",
+      "range": {
+        "startLine": 480,
+        "startChar": 8,
+        "endLine": 509,
+        "endChar": 48
+      },
+      "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e7c2f54_b8f03d78",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-20T18:05:34Z",
+      "side": 1,
+      "message": "If you rename hook methods update_provides()/store_provides() by gather_metadata()/store_metadata(), you could implement license guessing and storing in a hook.\n\nAlso, it would allows not change the local_install content after post_install() hook",
+      "range": {
+        "startLine": 567,
+        "startChar": 8,
+        "endLine": 568,
+        "endChar": 42
+      },
+      "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
