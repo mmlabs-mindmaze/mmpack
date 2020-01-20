@@ -11,6 +11,7 @@
 /usr/share/man/man1/mmpack-list.1
 /usr/share/man/man1/mmpack-mkprefix.1
 /usr/share/man/man1/mmpack-provides.1
+/usr/share/man/man1/mmpack-rdepends.1
 /usr/share/man/man1/mmpack-remove.1
 /usr/share/man/man1/mmpack-repo.1
 /usr/share/man/man1/mmpack-run.1

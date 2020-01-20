@@ -1,3 +1,7 @@
+mmpack (0.1.1+next) UNRELEASED; urgency=medium
+
+ -- Luca Baldesi <luca.baldesi@mindmaze.com>  Mon, 20 Jan 2020 16:11:16 +0100
+
 mmpack (0.1.1) unstable; urgency=medium
 
   * Fix gerrit-mmpack-build.py
