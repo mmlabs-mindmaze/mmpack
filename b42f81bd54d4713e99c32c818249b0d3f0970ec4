@@ -46,6 +46,52 @@
       "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1fb47670_266b03e7",
+        "filename": "src/mmpack-build/mmpack_guess.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-20T17:49:52Z",
+      "side": 1,
+      "message": "Are you sure that you want to return a list and not only a string. Because latter in the function -default_licenses you only test a string.\nNormally if you call this function it is only possible to have one license file.",
+      "range": {
+        "startLine": 141,
+        "startChar": 24,
+        "endLine": 141,
+        "endChar": 33
+      },
+      "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2adfffaf_c6b90a7d",
+        "filename": "src/mmpack-build/mmpack_guess.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-20T17:49:52Z",
+      "side": 1,
+      "message": "don\u0027t you have to return here also list(UNKNOWN)?\nPerhaps return NULL instead of list(UNKNOWN).",
+      "range": {
+        "startLine": 151,
+        "startChar": 15,
+        "endLine": 151,
+        "endChar": 22
+      },
+      "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
