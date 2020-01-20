@@ -42,8 +42,9 @@ OPTIONS
 ``-h|--help``
   Show help and exit
 
-``-p|--prefix=*path*``
-  Use *path* as install prefix.
+``-p|--prefix=*prefix-name*``
+  if *prefix-name* is a path, use it as install prefix.
+  Otherwise, use $XDG_DATA_HOME/mmpack-prefix/*prefix-name* as install prefix.
   Can also be given through ``MMPACK_PREFIX`` environment variable
 
 mmpack-command
@@ -57,9 +58,10 @@ This section describes the environment variables that affect how
 
 
 ``MMPACK_PREFIX``
-  Specify a prefix directory.
-  If set, use as install prefix.  This can also be given using the
-  ``-p|--prefix`` flag.
+  Specify a prefix name.
+  If it is a path, use it as install prefix.
+  Otherwise, use $XDG_DATA_HOME/mmpack-prefix/$MMPACK_PREFIX as install prefix.
+  This can also be given using the ``-p|--prefix`` flag.
 
 EXAMPLE
 =======
