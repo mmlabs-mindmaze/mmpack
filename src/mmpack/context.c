@@ -21,6 +21,8 @@
 #include "package-utils.h"
 #include "settings.h"
 
+#define ALIAS_PREFIX_FOLDER "mmpack-prefix"
+
 static
 int load_user_config(struct mmpack_ctx* ctx)
 {
@@ -60,6 +62,34 @@ int load_prefix_config(struct mmpack_ctx* ctx)
 
 
 /**
+ * prefix_is_alias
+ * @prefix: prefix path or name
+ *
+ * Returns: 0 if prefix is a path and 1 otherwise
+ */
+static
+int prefix_is_alias(const char * prefix)
+{
+	int res = 1;
+	char * ch;
+
+	if (prefix) {
+#if defined (_WIN32)
+		ch = strchr(prefix, '\\');
+		if (ch)
+			res = 0;
+
+#endif
+		ch = strchr(prefix, '/');
+		if (ch)
+			res = 0;
+	}
+
+	return res;
+}
+
+
+/**
  * mmpack_ctx_init() - initialize mmpack context
  * @ctx: mmpack context
  * @opts: init options
@@ -72,8 +102,9 @@ LOCAL_SYMBOL
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 {
 	const char* prefix;
+	char * prefix_path = NULL;
 	mmstr * cwd;
-	int len = 512;
+	int len = 512, dir_strlen;
 
 	memset(ctx, 0, sizeof(*ctx));
 	settings_init(&ctx->settings);
@@ -88,7 +119,21 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 		prefix = mm_getenv("MMPACK_PREFIX",
 		                   ctx->settings.default_prefix);
 
+	if (prefix_is_alias(prefix)) {
+		dir_strlen = strlen(mm_get_basedir(MM_DATA_HOME));
+		dir_strlen += strlen(ALIAS_PREFIX_FOLDER) + 2;
+		dir_strlen += strlen(prefix) + 1;
+		prefix_path = mm_malloca(sizeof(char)*(dir_strlen));
+		sprintf(prefix_path, "%s/%s/%s",
+		        mm_get_basedir(MM_DATA_HOME), ALIAS_PREFIX_FOLDER,
+		        prefix);
+		prefix = prefix_path;
+	}
+
 	ctx->prefix = mmstr_malloc_from_cstr(prefix);
+	if (prefix_path)
+		mm_freea(prefix_path);
+
 	cwd = mmstr_malloc(len);
 	while (!mm_getcwd(cwd, len)) {
 		len = len * 2;
