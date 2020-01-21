@@ -151,6 +151,13 @@ int strset_add(struct strset* set, const mmstr* str)
 
 
 static inline
+int strset_remove(struct strset* set, const mmstr* str)
+{
+	return indextable_remove(&set->idx, str);
+}
+
+
+static inline
 int strset_contains(const struct strset* set, const mmstr* str)
 {
 	return (indextable_lookup(&set->idx, str) != NULL);
