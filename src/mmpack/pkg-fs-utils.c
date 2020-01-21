@@ -15,6 +15,7 @@
 #include "common.h"
 #include "context.h"
 #include "download.h"
+#include "manually_installed.h"
 #include "mmstring.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
@@ -970,6 +971,10 @@ int apply_action(struct mmpack_ctx* ctx, struct action* act)
 
 	case REMOVE_PKG:
 		rv = remove_package(ctx, act->pkg);
+		if (!rv)
+			remove_from_manually_installed(&ctx->manually_inst,
+			                               act->pkg->name);
+
 		break;
 
 	case UPGRADE_PKG:
@@ -1059,7 +1064,7 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 	mm_chdir(ctx->cwd);
 
 	// Store the updated installed package list in prefix
-	if (mmpack_ctx_save_installed_list(ctx))
+	if (!rv && mmpack_ctx_save_installed_list(ctx))
 		rv = -1;
 
 	return rv;

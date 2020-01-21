@@ -14,6 +14,7 @@
 
 #include "cmdline.h"
 #include "context.h"
+#include "manually_installed.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
 #include "xx-alloc.h"
