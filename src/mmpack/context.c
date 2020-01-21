@@ -17,6 +17,7 @@
 #include "common.h"
 #include "context.h"
 #include "indextable.h"
+#include "manually_installed.h"
 #include "mmstring.h"
 #include "package-utils.h"
 #include "settings.h"
@@ -83,12 +84,15 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	binindex_init(&ctx->binindex);
 	install_state_init(&ctx->installed);
 
+	strset_init(&ctx->manually_inst, STRSET_HANDLE_STRINGS_MEM);
+
 	prefix = opts->prefix;
 	if (!prefix)
 		prefix = mm_getenv("MMPACK_PREFIX",
 		                   ctx->settings.default_prefix);
 
 	ctx->prefix = mmstr_malloc_from_cstr(prefix);
+
 	cwd = mmstr_malloc(len);
 	while (!mm_getcwd(cwd, len)) {
 		len = len * 2;
@@ -122,7 +126,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 
 	binindex_deinit(&ctx->binindex);
 	install_state_deinit(&ctx->installed);
-
+	strset_deinit(&ctx->manually_inst);
 	settings_deinit(&ctx->settings);
 }
 
@@ -326,6 +330,9 @@ LOCAL_SYMBOL
 int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 {
 	if (load_prefix_config(ctx))
+		return -1;
+
+	if (load_manually_installed(ctx->prefix, &ctx->manually_inst))
 		return -1;
 
 	if (!(flags & CTX_SKIP_REDIRECT_LOG)
