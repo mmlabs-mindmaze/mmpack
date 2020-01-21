@@ -349,6 +349,7 @@ TESTS = \
 	tests/smoke-tests/test_mmpack_download.sh \
 	tests/smoke-tests/test_mmpack_install.sh \
 	tests/smoke-tests/test_mmpack_list.sh \
+	tests/smoke-tests/test_manually_installed.sh \
 	tests/smoke-tests/test_mmpack_mkprefix.sh \
 	tests/smoke-tests/test_mmpack_rdepends.sh \
 	tests/smoke-tests/test_mmpack_remove.sh \

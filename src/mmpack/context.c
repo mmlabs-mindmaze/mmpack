@@ -108,6 +108,8 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	binindex_init(&ctx->binindex);
 	install_state_init(&ctx->installed);
 
+	strset_init(&ctx->manually_inst, STRSET_HANDLE_STRINGS_MEM);
+
 	prefix = opts->prefix;
 	if (!prefix)
 		prefix = mm_getenv("MMPACK_PREFIX",
@@ -160,7 +162,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 
 	binindex_deinit(&ctx->binindex);
 	install_state_deinit(&ctx->installed);
-
+	strset_deinit(&ctx->manually_inst);
 	settings_deinit(&ctx->settings);
 }
 
@@ -242,6 +244,8 @@ int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 	mmstr* installed_index_path;
 	int len;
 	FILE* fp;
+
+	save_manually_installed(ctx->prefix, &ctx->manually_inst);
 
 	// Form the path of installed package from prefix
 	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;
@@ -374,6 +378,9 @@ int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 	if (load_prefix_config(ctx))
 		return -1;
 
+	if (load_manually_installed(ctx->prefix, &ctx->manually_inst))
+		return -1;
+
 	if (!(flags & CTX_SKIP_REDIRECT_LOG)
 	    && mmpack_ctx_use_prefix_log(ctx))
 		return -1;
@@ -382,4 +389,99 @@ int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 		return 0;
 
 	return mmpack_ctx_init_pkglist(ctx);
+}
+
+
+static
+int manually_installed_populate(struct strset * manually_inst,
+                                const char * filename)
+{
+	return 0;
+}
+
+
+/**
+ * load_manually_installed() - loads the name list of the manually installed
+ *                             packages
+ * @prefix: prefix
+ * @manually_inst: name set of manually installed packages
+ *
+ * The file from which the names are read is
+ * prefix/var/lib/mmpack/manually_installed.yaml
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int load_manually_installed(const mmstr * prefix, struct strset * manually_inst)
+{
+	STATIC_CONST_MMSTR(manually_inst_relpath, MANUALLY_INST_RELPATH);
+	mmstr * filename;
+	int rv, len;
+	FILE * file;
+	mmstr * pkg_name = mmstr_alloca(256);
+
+	len = mmstrlen(prefix) + mmstrlen(manually_inst_relpath) + 1;
+	filename = mmstr_malloca(len);
+
+	mmstr_join_path(filename, prefix, manually_inst_relpath);
+
+	file = fopen(filename, "rb");
+	if (file == NULL) {
+		mm_raise_error(EINVAL,
+		               "failed to open manually installed file");
+		return -1;
+	}
+
+	while (fscanf(file, "%256s\n", pkg_name) != -1) {
+		mmstr_update_len_from_buffer(pkg_name);
+		strset_add(manually_inst, pkg_name);
+	}
+
+	fclose(file);
+
+	rv = manually_installed_populate(manually_inst, filename);
+
+	mmstr_freea(filename);
+	return rv;
+}
+
+
+/**
+ * save_manually_installed() - dump the name list of the manually installed
+ *                             packages
+ * @prefix: prefix
+ * @manually_inst: name set of manually installed packages
+ *
+ * The file where the names are dumped is
+ * prefix/var/lib/mmpack/manually_installed.yaml
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int save_manually_installed(const mmstr * prefix, struct strset * manually_inst)
+{
+	struct strset_iterator iter;
+	mmstr * curr;
+	mmstr * filename;
+	FILE * file;
+	int len;
+
+	STATIC_CONST_MMSTR(manually_inst_relpath, MANUALLY_INST_RELPATH);
+
+	len = mmstrlen(prefix) + mmstrlen(manually_inst_relpath) + 1;
+	filename = mmstr_malloca(len);
+
+	mmstr_join_path(filename, prefix, manually_inst_relpath);
+
+	if (!(file = fopen(filename, "wb")))
+		return -1;
+
+	for (curr = strset_iter_first(&iter, manually_inst); curr;
+	     curr = strset_iter_next(&iter)) {
+		fprintf(file, "%s\n", curr);
+	}
+
+	fclose(file);
+	mmstr_freea(filename);
+	return 0;
 }
