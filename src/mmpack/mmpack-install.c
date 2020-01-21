@@ -14,6 +14,7 @@
 
 #include "cmdline.h"
 #include "context.h"
+#include "manually_installed.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
 #include "xx-alloc.h"
@@ -143,7 +144,8 @@ int mmpack_install(struct mmpack_ctx * ctx, int argc, const char* argv[])
 			goto exit;
 	}
 
-	rv = apply_action_stack(ctx, act_stack);
+	if (!(rv = apply_action_stack(ctx, act_stack)))
+		complete_manually_installed(&ctx->manually_inst, reqlist);
 
 exit:
 	mmpack_action_stack_destroy(act_stack);
