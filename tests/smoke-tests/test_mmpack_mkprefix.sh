@@ -17,12 +17,14 @@ diff_tree()
 $PREFIX_TEST/etc/mmpack-config.yaml
 $1
 $PREFIX_TEST/var/lib/mmpack/installed.yaml
+$PREFIX_TEST/var/lib/mmpack/manually_installed.yaml
 $PREFIX_TEST/var/log/mmpack.log
 EOF
 	else
 		diff - <(find $PREFIX_TEST -type f | sort) <<EOF
 $PREFIX_TEST/etc/mmpack-config.yaml
 $PREFIX_TEST/var/lib/mmpack/installed.yaml
+$PREFIX_TEST/var/lib/mmpack/manually_installed.yaml
 $PREFIX_TEST/var/log/mmpack.log
 EOF
 	fi
@@ -36,6 +38,7 @@ tests_tree_and_files()
 		file -b $1 | grep "^empty$"
 	fi
 	file -b $PREFIX_TEST/var/lib/mmpack/installed.yaml | grep "^empty$"
+	file -b $PREFIX_TEST/var/lib/mmpack/manually_installed.yaml | grep "^empty$"
 }
 
 
