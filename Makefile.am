@@ -123,6 +123,8 @@ mmpack_lib_sources = \
 	src/mmpack/download.h \
 	src/mmpack/indextable.c \
 	src/mmpack/indextable.h \
+	src/mmpack/manually_installed.c \
+	src/mmpack/manually_installed.h \
 	src/mmpack/mmpack-check-integrity.c \
 	src/mmpack/mmpack-check-integrity.h \
 	src/mmpack/mmpack-download.c \
@@ -349,6 +351,7 @@ TESTS = \
 	tests/smoke-tests/test_mmpack_download.sh \
 	tests/smoke-tests/test_mmpack_install.sh \
 	tests/smoke-tests/test_mmpack_list.sh \
+	tests/smoke-tests/test_manually_installed.sh \
 	tests/smoke-tests/test_mmpack_mkprefix.sh \
 	tests/smoke-tests/test_mmpack_rdepends.sh \
 	tests/smoke-tests/test_mmpack_remove.sh \
