@@ -83,6 +83,10 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	binindex_init(&ctx->binindex);
 	install_state_init(&ctx->installed);
 
+	strset_init(&ctx->manually_inst, STRSET_HANDLE_STRINGS_MEM);
+	if (load_manually_installed(&ctx->manually_inst))
+		return -1;
+
 	prefix = opts->prefix;
 	if (!prefix)
 		prefix = mm_getenv("MMPACK_PREFIX",
@@ -122,7 +126,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 
 	binindex_deinit(&ctx->binindex);
 	install_state_deinit(&ctx->installed);
-
+	strset_deinit(&ctx->manually_inst);
 	settings_deinit(&ctx->settings);
 }
 
