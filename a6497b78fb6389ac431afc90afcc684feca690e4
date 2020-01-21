@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "678bd132_e419437e",
+        "filename": "src/mmpack/cmdline.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-21T10:03:05Z",
+      "side": 1,
+      "message": "\"Unknown constraint key: %.*s\", ...",
+      "range": {
+        "startLine": 225,
+        "startChar": 10,
+        "endLine": 225,
+        "endChar": 53
+      },
+      "revId": "a6497b78fb6389ac431afc90afcc684feca690e4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b36990f4_867e4bef",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-21T10:03:05Z",
+      "side": 1,
+      "message": "struct constraints empty \u003d {0};\nreturn memcmp(\u0026empty, c, sizeof(emptry)) \u003d\u003d 0\n\nThis will still work if you add new fields to the constraints struct",
+      "range": {
+        "startLine": 87,
+        "startChar": 8,
+        "endLine": 87,
+        "endChar": 66
+      },
+      "revId": "a6497b78fb6389ac431afc90afcc684feca690e4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
