@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ac1d974_dd8bb4ae",
+        "filename": "src/mmpack-build/mmpack_guess.py",
+        "patchSetId": 13
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-21T12:56:07Z",
+      "side": 1,
+      "message": "I do not think this does what you wanted:\n\nlist(UNKNOWN) \u003d\u003d [\u0027u\u0027, \u0027n\u0027, \u0027k\u0027, \u0027n\u0027, \u0027o\u0027, \u0027w\u0027, \u0027n\u0027]",
+      "range": {
+        "startLine": 151,
+        "startChar": 51,
+        "endLine": 151,
+        "endChar": 64
+      },
+      "revId": "665779f7f79ed119ad70cfa3a565a218cb7936fb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
