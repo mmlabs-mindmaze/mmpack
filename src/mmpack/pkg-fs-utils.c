@@ -970,6 +970,9 @@ int apply_action(struct mmpack_ctx* ctx, struct action* act)
 
 	case REMOVE_PKG:
 		rv = remove_package(ctx, act->pkg);
+		if (!rv)
+			strset_remove(&ctx->manually_inst, act->pkg->name);
+
 		break;
 
 	case UPGRADE_PKG:

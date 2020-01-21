@@ -25,6 +25,8 @@ struct mmpack_opts {
  * @curl:       buffer where curl may write error message
  * @binindex:   binary index of all package available (in repo or installed)
  * @installed:  list of installed package (store in an index table)
+ * @manually_inst: list of packages whose installation has been asked explicitly
+ *                 by the user
  * @prefix:     path to the root of folder to use for prefix
  * @cwd:        path to where mmpack was invoked
  * @pkgcachedir: path to dowloaded package cache folder
@@ -34,6 +36,7 @@ struct mmpack_ctx {
 	char curl_errbuf[CURL_ERROR_SIZE];
 	struct binindex binindex;
 	struct install_state installed;
+	struct strset manually_inst;
 	struct settings settings;
 	mmstr* prefix;
 	mmstr* cwd;
@@ -53,5 +56,12 @@ int mmpack_ctx_is_init(struct mmpack_ctx const * ctx)
 {
 	return (ctx != NULL && ctx->prefix != NULL);
 }
+
+void remove_from_manually_installed(struct strset * manually_inst,
+                                    const mmstr * name);
+int load_manually_installed(const mmstr * prefix,
+                            struct strset * manually_inst);
+int save_manually_installed(const mmstr * prefix,
+                            struct strset * manually_inst);
 
 #endif /* CONTEXT_H */

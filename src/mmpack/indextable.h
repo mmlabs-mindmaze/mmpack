@@ -148,6 +148,26 @@ void strset_add(struct strset* set, const mmstr* str)
 
 
 static inline
+int strset_remove(struct strset* set, const mmstr* str)
+{
+	struct it_entry * to_remove;
+	mmstr * string = NULL;
+	int rv;
+
+	if (set->mem_handling == STRSET_HANDLE_STRINGS_MEM) {
+		to_remove = indextable_lookup(&set->idx, str);
+		if (to_remove)
+			string = to_remove->value;
+	}
+
+	rv = indextable_remove(&set->idx, str);
+	mmstr_free(string);
+
+	return rv;
+}
+
+
+static inline
 int strset_contains(const struct strset* set, const mmstr* str)
 {
 	return (indextable_lookup(&set->idx, str) != NULL);
@@ -178,6 +198,5 @@ mmstr* strset_iter_next(struct strset_iterator* iter)
 
 	return entry->value;
 }
-
 
 #endif /* ifndef INDEXTABLE_H */
