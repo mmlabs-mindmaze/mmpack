@@ -151,6 +151,13 @@ int strset_add(struct strset* set, const mmstr* str)
 
 
 static inline
+int strset_remove(struct strset* set, const mmstr* str)
+{
+	return indextable_remove(&set->idx, str);
+}
+
+
+static inline
 int strset_contains(const struct strset* set, const mmstr* str)
 {
 	return (indextable_lookup(&set->idx, str) != NULL);
@@ -182,5 +189,16 @@ mmstr* strset_iter_next(struct strset_iterator* iter)
 	return entry->value;
 }
 
+
+static inline
+void strset_debug(struct strset * set)
+{
+	struct strset_iterator it;
+	mmstr * elt;
+
+	for (elt = strset_iter_first(&it, set); elt;
+	     elt = strset_iter_next(&it))
+		printf("element in set: %s\n", elt);
+}
 
 #endif /* ifndef INDEXTABLE_H */
