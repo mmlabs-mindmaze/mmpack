@@ -1002,6 +1002,7 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
 {
 	int rv;
 	struct compiled_dep * deplist;
+	struct compiled_dep * curr;
 	struct solver solver;
 	struct action_stack* stack = NULL;
 	struct buffer deps_buffer;
@@ -1013,6 +1014,14 @@ struct action_stack* mmpkg_get_install_list(struct mmpack_ctx * ctx,
 	deplist = compdeps_from_reqlist(reqlist, &ctx->binindex, &deps_buffer);
 	if (!deplist)
 		goto exit;
+
+	// fill the manually installed packages set
+	for (curr = deplist; !curr->next_entry_delta; curr = curr + curr->next_entry_delta) {
+		if (strset_add(&ctx->manually_inst, curr->pkgs[0]->name)) {
+			info("Impossible to add in manually installed set\n");
+			return NULL;
+		}
+	}
 
 	rv = solver_solve_deps(&solver, deplist, 0);
 	if (rv == 0)
