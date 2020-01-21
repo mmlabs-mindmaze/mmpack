@@ -497,6 +497,30 @@
     },
     {
       "key": {
+        "uuid": "ef5898bc_afbee563",
+        "filename": "src/mmpack-build/pacman.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-21T18:10:27Z",
+      "side": 1,
+      "message": "I did in my reimplementation of syspkg manager access: https://review.gerrithub.io/c/mmlabs-mindmaze/mmpack/+/481918\n\nWith this commit, code should be easily extensible to other distribution",
+      "parentUuid": "ec06ca8c_e3903c5a",
+      "range": {
+        "startLine": 68,
+        "startChar": 1,
+        "endLine": 68,
+        "endChar": 16
+      },
+      "revId": "4922a2467c21e87d04c59a9e1e793d38de13f79b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "902ad054_fd55a340",
         "filename": "src/mmpack-build/pacman.py",
         "patchSetId": 17
