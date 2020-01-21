@@ -108,6 +108,8 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	binindex_init(&ctx->binindex);
 	install_state_init(&ctx->installed);
 
+	strset_init(&ctx->manually_inst, STRSET_HANDLE_STRINGS_MEM);
+
 	prefix = opts->prefix;
 	if (!prefix)
 		prefix = mm_getenv("MMPACK_PREFIX",
@@ -160,7 +162,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 
 	binindex_deinit(&ctx->binindex);
 	install_state_deinit(&ctx->installed);
-
+	strset_deinit(&ctx->manually_inst);
 	settings_deinit(&ctx->settings);
 }
 
@@ -235,6 +237,98 @@ exit:
 }
 
 
+/**
+ * load_manually_installed() - loads the name list of the manually installed
+ *                             packages
+ * @prefix: prefix
+ * @manually_inst: name set of manually installed packages
+ *
+ * The file from which the names are read is
+ * prefix/var/lib/mmpack/manually_installed.yaml
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+static
+int load_manually_installed(const mmstr * prefix, struct strset * manually_inst)
+{
+	STATIC_CONST_MMSTR(manually_inst_relpath, MANUALLY_INST_RELPATH);
+	mmstr * pkg_name = NULL;
+	int fd, line_len;
+	char * line, * eol;
+	struct mm_stat buf;
+	void * map = NULL;
+
+	fd = open_file_in_prefix(prefix, manually_inst_relpath, O_RDONLY);
+	if (fd == -1)
+		return -1;
+
+	mm_fstat(fd, &buf);
+
+	if (!buf.size)
+		goto exit;
+
+	map = mm_mapfile(fd, 0, buf.size, MM_MAP_READ);
+	mm_check(map != NULL);
+
+	line = map;
+	while ((eol = strchr(line, '\n')) != NULL) {
+		line_len = eol - line;
+		pkg_name = mmstr_copy_realloc(pkg_name, line, line_len);
+		strset_add(manually_inst, pkg_name);
+		line = eol + 1;
+	}
+
+exit:
+	mm_close(fd);
+	mm_unmap(map);
+	mmstr_free(pkg_name);
+	return 0;
+}
+
+
+/**
+ * save_manually_installed() - dump the name list of the manually installed
+ *                             packages
+ * @prefix: prefix
+ * @manually_inst: name set of manually installed packages
+ *
+ * The file where the names are dumped is
+ * prefix/var/lib/mmpack/manually_installed.yaml
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+static
+int save_manually_installed(const mmstr * prefix, struct strset * manually_inst)
+{
+	struct strset_iterator iter;
+	mmstr * curr;
+	int fd, oflag;
+	FILE * file;
+
+	STATIC_CONST_MMSTR(manually_inst_relpath, MANUALLY_INST_RELPATH);
+
+	oflag = O_WRONLY|O_TRUNC;
+	fd = open_file_in_prefix(prefix, manually_inst_relpath, oflag);
+	if (fd == -1)
+		return -1;
+
+	if (!(file = fdopen(fd, "wb"))) {
+		mm_raise_from_errno("Cannot obtain a FILE* from a file "
+		                    "descriptor");
+		mm_close(fd);
+		return -1;
+	}
+
+	for (curr = strset_iter_first(&iter, manually_inst); curr;
+	     curr = strset_iter_next(&iter)) {
+		fprintf(file, "%s\n", curr);
+	}
+
+	fclose(file);
+	return 0;
+}
+
+
 LOCAL_SYMBOL
 int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 {
@@ -242,6 +336,9 @@ int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 	mmstr* installed_index_path;
 	int len;
 	FILE* fp;
+
+	if (save_manually_installed(ctx->prefix, &ctx->manually_inst))
+		return -1;
 
 	// Form the path of installed package from prefix
 	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;
@@ -372,6 +469,9 @@ int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 	}
 
 	if (load_prefix_config(ctx))
+		return -1;
+
+	if (load_manually_installed(ctx->prefix, &ctx->manually_inst))
 		return -1;
 
 	if (!(flags & CTX_SKIP_REDIRECT_LOG)
