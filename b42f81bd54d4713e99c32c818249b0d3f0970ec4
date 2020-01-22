@@ -333,6 +333,30 @@
       "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de8b81c5_3518e271",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-22T09:56:48Z",
+      "side": 1,
+      "message": "I think we can let the code as it is for now. And the day where we see that the code can be re-used then we will create new hooks.",
+      "parentUuid": "2886f5b9_36983df2",
+      "range": {
+        "startLine": 567,
+        "startChar": 8,
+        "endLine": 568,
+        "endChar": 42
+      },
+      "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
