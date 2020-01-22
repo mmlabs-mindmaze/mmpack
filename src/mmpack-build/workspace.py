@@ -4,8 +4,10 @@ os helpers to manipulate the paths and environments
 """
 
 import os
+import shutil
 
-from . common import shell, dprint, ShellException, pushdir, popdir
+from . common import shell, dprint, ShellException, pushdir, popdir, \
+    download, sha256sum, iprint
 from . decorators import singleton
 from . settings import BINDIR, EXEEXT
 from . xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
@@ -31,6 +33,7 @@ def find_project_root_folder() -> str:
 
 @singleton
 class Workspace:
+    # pylint: disable=too-many-instance-attributes
     """
     global mmpack workspace singleton class
     """
@@ -40,6 +43,7 @@ class Workspace:
         self.sources = XDG_CACHE_HOME + '/mmpack/sources'
         self.build = XDG_CACHE_HOME + '/mmpack/build'
         self.packages = XDG_DATA_HOME + '/mmpack-packages'
+        self.cache = XDG_CACHE_HOME + '/mmpack/cache'
         self._cygpath_root = None
         self._mmpack_bin = None
         self.prefix = ''
@@ -49,6 +53,7 @@ class Workspace:
         os.makedirs(self.build, exist_ok=True)
         os.makedirs(self.sources, exist_ok=True)
         os.makedirs(self.packages, exist_ok=True)
+        os.makedirs(self.cache, exist_ok=True)
 
     def cygroot(self) -> str:
         """
@@ -115,7 +120,34 @@ class Workspace:
         """
         self.srcclean()
         self.clean()
-        shell('rm -vrf {0}/*'.format(self.packages))
+        shell('rm -vrf {0}/* {1}/*'.format(self.packages, self.cache))
+
+    def cache_get(self, path: str, expected_sha256: str = None) -> bool:
+        """
+        Get file from cache if a copy is present
+
+        Args:
+            path: path of the file to copy (lookup done on basename)
+            expected_sha256: if not None, expected sha256 of the file.
+
+        Return: True if the a cached version has been copied, False otherwise
+        """
+        cache_file = os.path.join(self.cache, os.path.basename(path))
+        try:
+            if not expected_sha256 or expected_sha256 == sha256sum(cache_file):
+                shutil.copyfile(cache_file, path)
+                return True
+        except FileNotFoundError:
+            pass
+
+        return False
+
+    def cache_file(self, path: str):
+        """
+        Copy file into cache
+        """
+        cache_file = os.path.join(self.cache, os.path.basename(path))
+        shutil.copyfile(path, cache_file)
 
 
 def get_local_install_dir(builddir: str):
@@ -141,3 +173,24 @@ def is_valid_prefix(prefix: str) -> bool:
     returns whether given prefix is a valid path for mmpack prefix
     """
     return os.path.exists(prefix + '/var/lib/mmpack/')
+
+
+def cached_download(url: str, path: str, expected_sha256: str = None):
+    """
+    Download file from url or copy from cache available to the specified path.
+
+    Args:
+        url: URL of the resource to download
+        path: path where to save downloaded file
+        expected_sha256: if not None, expected sha256 of the file to download.
+            The file will be redownloaded if sha256 of cached file does not
+            match.
+    """
+    wrk = Workspace()
+
+    if wrk.cache_get(path, expected_sha256):
+        iprint('Skip download {}. Using cached file'.format(url))
+        return
+
+    download(url, path)
+    wrk.cache_file(path)
