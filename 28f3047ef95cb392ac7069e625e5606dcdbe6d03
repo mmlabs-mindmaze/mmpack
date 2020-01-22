@@ -1,0 +1,124 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b91685b_6d6badb8",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T07:48:48Z",
+      "side": 1,
+      "message": "unnecessary if the getter does a lazy-init",
+      "range": {
+        "startLine": 262,
+        "startChar": 1,
+        "endLine": 265,
+        "endChar": 38
+      },
+      "revId": "28f3047ef95cb392ac7069e625e5606dcdbe6d03",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc44ca04_8b592290",
+        "filename": "src/mmpack-build/syspkg_manager.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T07:48:48Z",
+      "side": 1,
+      "message": "I think that you could implement this with a {dist: pkg-mgr} dict.",
+      "revId": "28f3047ef95cb392ac7069e625e5606dcdbe6d03",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f2ddbb3_ef9269cf",
+        "filename": "src/mmpack-build/syspkg_manager.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T07:48:48Z",
+      "side": 1,
+      "message": "you may also want to test for dpkg presence.",
+      "revId": "28f3047ef95cb392ac7069e625e5606dcdbe6d03",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c8b5b8d_8354d993",
+        "filename": "src/mmpack-build/syspkg_manager.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T07:48:48Z",
+      "side": 1,
+      "message": "why not do the init instead of complaining it\u0027s not been done ?",
+      "revId": "28f3047ef95cb392ac7069e625e5606dcdbe6d03",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "23431c21_80a5c2f9",
+        "filename": "src/mmpack-build/syspkg_manager_dpkg.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T07:48:48Z",
+      "side": 1,
+      "message": "this is returning the function itself\n\nIt\u0027s interesting that the tests would pass",
+      "range": {
+        "startLine": 252,
+        "startChar": 15,
+        "endLine": 252,
+        "endChar": 30
+      },
+      "revId": "28f3047ef95cb392ac7069e625e5606dcdbe6d03",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70291c75_3945caee",
+        "filename": "src/mmpack-build/syspkg_manager_msys2.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T07:48:48Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 74,
+        "startChar": 15,
+        "endLine": 74,
+        "endChar": 31
+      },
+      "revId": "28f3047ef95cb392ac7069e625e5606dcdbe6d03",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}

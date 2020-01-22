@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ba465f0_75ff0326",
+        "filename": "src/mmpack-build/syspkg_manager_msys2.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T07:48:48Z",
+      "side": 0,
+      "message": "you\u0027re naming the debian-based package manager \"dpkg\" based on the tool name, but \"msys2\" on windows while the tool name is pacman.\nThis is not coherent.",
+      "revId": "91c8d283e75cc206c3aa4d6bbdea2a6b5d9af98e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
