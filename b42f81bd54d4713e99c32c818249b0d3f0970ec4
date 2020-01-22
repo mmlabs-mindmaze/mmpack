@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "3fd477cd_e631b1ea",
+        "filename": "src/mmpack-build/mmpack_guess.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-22T10:47:37Z",
+      "side": 1,
+      "message": "Yeah, I think is fair enough",
+      "parentUuid": "6249f744_69af72bd",
+      "range": {
+        "startLine": 135,
+        "startChar": 9,
+        "endLine": 135,
+        "endChar": 52
+      },
+      "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1fb47670_266b03e7",
         "filename": "src/mmpack-build/mmpack_guess.py",
         "patchSetId": 10
@@ -348,6 +372,30 @@
       "side": 1,
       "message": "I think we can let the code as it is for now. And the day where we see that the code can be re-used then we will create new hooks.",
       "parentUuid": "2886f5b9_36983df2",
+      "range": {
+        "startLine": 567,
+        "startChar": 8,
+        "endLine": 568,
+        "endChar": 42
+      },
+      "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9b1175c_638e253f",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-22T10:47:37Z",
+      "side": 1,
+      "message": "I agree with Marjourie that, for the current state, the code is fair enough.\nI also agree with Nicolas that it would be more elegant using hooks but I do not like how hooks are implemented right now, I find them quite complicated (which does not mean that this complexity is not inherently part of the application).\n\nHowever, why not installing the licences with the \u0027post_local_install\u0027 method?",
+      "parentUuid": "de8b81c5_3518e271",
       "range": {
         "startLine": 567,
         "startChar": 8,
