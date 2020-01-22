@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1b43347_36edd6ac",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-22T13:08:38Z",
+      "side": 1,
+      "message": "This is useless: / on posix in forbidden in filename and dirname, / and \\ are forbidden in Windows for the same purpose.\n\nIn other word, / cannot be escaped in paths\n\nYou can simply check for the presence of dir separator in the prefix and be done with it",
+      "range": {
+        "startLine": 81,
+        "startChar": 2,
+        "endLine": 92,
+        "endChar": 3
+      },
+      "revId": "bf58ccb880db1d1c31cfb54a28fd62eb91d750c9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57c9e96a_96030dcd",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-22T13:08:38Z",
+      "side": 1,
+      "message": "mm_freea() handles NULL (it is noop). Since you initialize prefix_path to NULL, I suggest you skip the \"if (prefix_path)\" test",
+      "range": {
+        "startLine": 141,
+        "startChar": 1,
+        "endLine": 142,
+        "endChar": 24
+      },
+      "revId": "bf58ccb880db1d1c31cfb54a28fd62eb91d750c9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
