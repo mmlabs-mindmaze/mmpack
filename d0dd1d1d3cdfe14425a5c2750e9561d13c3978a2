@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "042bdc0b_88cafeb7",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-22T13:56:50Z",
+      "side": 1,
+      "message": "I am not sure that it makes sense to handle case prefix \u003d\u003d NULL\n\nAfter all, prefix_is_alias(NULL) 0 or 1 is neither good answer...",
+      "range": {
+        "startLine": 76,
+        "startChar": 1,
+        "endLine": 76,
+        "endChar": 14
+      },
+      "revId": "d0dd1d1d3cdfe14425a5c2750e9561d13c3978a2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "442e149d_6bdc5fdb",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-22T13:56:50Z",
+      "side": 1,
+      "message": "What about:\n\nfor (ch \u003d prefix; *ch !\u003d \u0027\\0\u0027; ch++)\n          if (is_path_separator(*ch))\n                  return 0;\n\nreturn 1",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 2
+      },
+      "revId": "d0dd1d1d3cdfe14425a5c2750e9561d13c3978a2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
