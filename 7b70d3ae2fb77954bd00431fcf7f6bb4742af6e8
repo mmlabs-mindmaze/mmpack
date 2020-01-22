@@ -257,6 +257,30 @@
       "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d355a25b_b466e067",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T11:41:58Z",
+      "side": 1,
+      "message": "Maybe. And maybe not.\nsee man mm_malloca: the returned pointer must be passed to mm_freea() before calling function returns to its caller.",
+      "parentUuid": "e3a3e13a_7d5f5dfb",
+      "range": {
+        "startLine": 131,
+        "startChar": 2,
+        "endLine": 131,
+        "endChar": 13
+      },
+      "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
