@@ -106,13 +106,15 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		                           MM_DT_DIR, NULL, NULL);
 	}
 
-	if (arg_index+1 != argc) {
+	prefix = ctx->prefix;
+	if (arg_index+1 == argc)
+		prefix = mmstr_alloca_from_cstr(argv[arg_index]);
+
+	if (!prefix || argc > arg_index+1) {
 		fprintf(stderr, "Bad usage of mkprefix command.\n"
 		        "Run \"mmpack mkprefix --help\" to see usage\n");
 		return -1;
 	}
-
-	prefix = mmstr_alloca_from_cstr(argv[arg_index]);
 
 	// If url is set, replace the repo list with one whose the url and name
 	// are supplied in arguments. If unset, the repo list will be kept
