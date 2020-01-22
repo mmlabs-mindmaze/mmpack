@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "01b3e984_d1cda0a7",
+        "filename": "src/mmpack/mmpack-mkprefix.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-22T16:06:22Z",
+      "side": 1,
+      "message": "You need to update MKPREFIX_SYNOPSIS in mmpack-mkprefix.h and docs/man/mmpack-mkprefix.rst",
+      "range": {
+        "startLine": 115,
+        "startChar": 1,
+        "endLine": 118,
+        "endChar": 23
+      },
+      "revId": "583056d1af16ab301995c894e4c8277dd1450ec5",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
