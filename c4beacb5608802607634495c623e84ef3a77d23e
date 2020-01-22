@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b06723e6_0bcf4cf6",
+        "filename": "src/mmpack-build/workspace.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T16:17:14Z",
+      "side": 1,
+      "message": "you\u0027re returning a boolean",
+      "range": {
+        "startLine": 125,
+        "startChar": 73,
+        "endLine": 125,
+        "endChar": 76
+      },
+      "revId": "c4beacb5608802607634495c623e84ef3a77d23e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a0de1eb_0c628a1d",
+        "filename": "src/mmpack-build/workspace.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T16:17:14Z",
+      "side": 1,
+      "message": "I have a minor preference for functions prefixed by cache_\n  cache_lookup()\n  cache_get()\n  ...",
+      "range": {
+        "startLine": 125,
+        "startChar": 8,
+        "endLine": 125,
+        "endChar": 23
+      },
+      "revId": "c4beacb5608802607634495c623e84ef3a77d23e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
