@@ -309,6 +309,30 @@
       "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2886f5b9_36983df2",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-22T08:56:35Z",
+      "side": 1,
+      "message": "I am personally fine with the code as it is today.",
+      "parentUuid": "7c138832_7b1566cf",
+      "range": {
+        "startLine": 567,
+        "startChar": 8,
+        "endLine": 568,
+        "endChar": 42
+      },
+      "revId": "b42f81bd54d4713e99c32c818249b0d3f0970ec4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
