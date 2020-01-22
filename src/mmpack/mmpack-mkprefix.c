@@ -68,6 +68,12 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 	return 0;
 }
 
+#define halt_on_condition(cond, str) \
+	if (cond) { \
+		fprintf(stderr, str); \
+		fprintf(stderr, "Run \"mmpack mkprefix --help\" to see usage\n"); \
+		return 1; \
+	}
 
 /**
  * mmpack_mkprefix() - main function for the command to create prefixes
@@ -106,13 +112,14 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		                           MM_DT_DIR, NULL, NULL);
 	}
 
-	if (arg_index+1 != argc) {
-		fprintf(stderr, "Bad usage of mkprefix command.\n"
-		        "Run \"mmpack mkprefix --help\" to see usage\n");
-		return -1;
-	}
+	prefix = ctx->prefix;
+	if (arg_index+1 == argc)
+		prefix = mmstr_alloca_from_cstr(argv[arg_index]);
 
-	prefix = mmstr_alloca_from_cstr(argv[arg_index]);
+	halt_on_condition(argc > arg_index+1,
+	                  "Bad usage of mkprefix command.\n");
+	halt_on_condition(!prefix,
+	                  "Un-specified prefix path to create.\n");
 
 	// If url is set, replace the repo list with one whose the url and name
 	// are supplied in arguments. If unset, the repo list will be kept
