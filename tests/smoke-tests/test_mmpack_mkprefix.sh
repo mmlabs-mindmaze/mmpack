@@ -75,3 +75,15 @@ repositories:
         url: my_url
         enabled: 1
 EOF
+
+cleanup
+
+# test mkprefix with conflicting --prefix
+mmpack --prefix=my_name mkprefix $PREFIX_TEST
+tests_tree_and_files
+
+cleanup
+
+# test mkprefix with invalid arguments
+! mmpack mkprefix tata tito tutu
+! mmpack --prefix=my_name mkprefix tata tito tutu
