@@ -24,6 +24,7 @@ DESCRIPTION
 *prefix-path* which will pull packages from the repository whose URL is
 optionally set by ``--url`` and whose short name is given optionally by
 ``--name``.
+If *prefix-path* is omitted, the argument --prefix of mmpack is is used.
 
 If not present, the URL is inherited by the global user configuration of
 mmpack. By default the command will prevent to create a prefix in a folder
