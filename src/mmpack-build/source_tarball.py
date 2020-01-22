@@ -9,7 +9,7 @@ from tempfile import mkdtemp
 from typing import Dict
 
 from . common import *
-from . workspace import Workspace
+from . workspace import Workspace, cached_download
 
 
 def _git_subcmd(subcmd: str, gitdir: str = '.git') -> str:
@@ -262,12 +262,13 @@ class SourceTarball:
         url = specs['url']
         filename = os.path.basename(url)
         downloaded_file = os.path.join(self._srcdir, 'mmpack', filename)
+        expected_sha256 = specs.get('sha256')
 
-        download(url, downloaded_file)
+        cached_download(url, downloaded_file, expected_sha256)
 
         # Verify sha256 is correct if supplied in specs
         file_hash = sha256sum(downloaded_file)
-        if 'sha256' in specs and specs['sha256'] != file_hash:
+        if expected_sha256 and expected_sha256 != file_hash:
             raise Assert("Downloaded file does not match expected sha256")
 
         self.trace['upstream'].update({'url': url, 'sha256': file_hash})
