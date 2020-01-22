@@ -307,11 +307,21 @@ class SourceTarball:
         self.trace['upstream'] = {'method': method}
         fetch_upstream_callable(specs)
 
-        # Move extracted upstream sources except mmpack packaging
+        # Determine in which subfolder of extracted upstream dir the source are
+        # actually located
         upstream_srcdir = self._get_unpacked_upstream_dir()
-        for elt in os.listdir(upstream_srcdir):
+        dir_content = list(os.listdir(upstream_srcdir))
+        while len(dir_content) == 1:
+            elt = os.path.join(upstream_srcdir, dir_content[0])
+            if not os.path.isdir(elt):
+                break
+            upstream_srcdir = elt
+            dir_content = os.listdir(upstream_srcdir)
+
+        # Move extracted upstream sources except mmpack packaging
+        for elt in dir_content:
             if elt != 'mmpack':
                 shutil.move(os.path.join(upstream_srcdir, elt), self._srcdir)
 
         # Clean leftover of temporary extracted
-        shutil.rmtree(upstream_srcdir)
+        shutil.rmtree(self._get_unpacked_upstream_dir())
