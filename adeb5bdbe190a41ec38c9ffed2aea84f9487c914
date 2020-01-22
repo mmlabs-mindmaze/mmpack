@@ -45,6 +45,52 @@
       "revId": "adeb5bdbe190a41ec38c9ffed2aea84f9487c914",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "021182a3_6923b923",
+        "filename": "docs/man/mmpack-mkprefix.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-22T16:30:51Z",
+      "side": 1,
+      "message": "suppress",
+      "range": {
+        "startLine": 27,
+        "startChar": 64,
+        "endLine": 27,
+        "endChar": 66
+      },
+      "revId": "adeb5bdbe190a41ec38c9ffed2aea84f9487c914",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce7d43f1_7ace31da",
+        "filename": "src/mmpack/mmpack-mkprefix.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-22T16:30:51Z",
+      "side": 1,
+      "message": "Don\u0027t we have to indicate when the user has written a bad commandline such as:\nmmpack mkprefix --prefix\u003dprefix --url\u003durl toto tata titi ...\nBefore when the user wrote \nmmpack mkprefix --url\u003durl toto tata titi ...\nhe gets such an error. Now this is not the case anymore.",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 5
+      },
+      "revId": "adeb5bdbe190a41ec38c9ffed2aea84f9487c914",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
