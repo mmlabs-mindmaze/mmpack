@@ -4,8 +4,10 @@ os helpers to manipulate the paths and environments
 """
 
 import os
+import shutil
 
-from . common import shell, dprint, ShellException, pushdir, popdir
+from . common import shell, dprint, ShellException, pushdir, popdir, \
+    download, sha256sum, iprint
 from . decorators import singleton
 from . settings import BINDIR, EXEEXT
 from . xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
@@ -31,6 +33,7 @@ def find_project_root_folder() -> str:
 
 @singleton
 class Workspace:
+    # pylint: disable=too-many-instance-attributes
     """
     global mmpack workspace singleton class
     """
@@ -40,6 +43,7 @@ class Workspace:
         self.sources = XDG_CACHE_HOME + '/mmpack/sources'
         self.build = XDG_CACHE_HOME + '/mmpack/build'
         self.packages = XDG_DATA_HOME + '/mmpack-packages'
+        self.download_cache = XDG_CACHE_HOME + '/mmpack/download_cache'
         self._cygpath_root = None
         self._mmpack_bin = None
         self.prefix = ''
@@ -116,6 +120,7 @@ class Workspace:
         self.srcclean()
         self.clean()
         shell('rm -vrf {0}/*'.format(self.packages))
+        shutil.rmtree(self.download_cache, ignore_errors=True)
 
 
 def get_local_install_dir(builddir: str):
@@ -141,3 +146,31 @@ def is_valid_prefix(prefix: str) -> bool:
     returns whether given prefix is a valid path for mmpack prefix
     """
     return os.path.exists(prefix + '/var/lib/mmpack/')
+
+
+def cached_download(url: str, path: str, expected_sha256: str = None):
+    """
+    Download file from url or copy from cache available to the specified path.
+
+    Args:
+        url: URL of the resource to download
+        path: path where to save downloaded file
+        expected_sha256: if not None, expected sha256 of the file to download.
+            The file will be redownloaded if sha256 of cached file does not
+            match.
+    """
+    cachedir = Workspace().download_cache
+    cache_filename = os.path.join(cachedir, os.path.basename(path))
+    try:
+        if not expected_sha256 or expected_sha256 == sha256sum(cache_filename):
+            shutil.copyfile(cache_filename, path)
+            iprint('Skip download {}. Using cached file'.format(url))
+            return
+    except FileNotFoundError:
+        pass
+
+    download(url, path)
+
+    # Update the cache
+    os.makedirs(cachedir, exist_ok=True)
+    shutil.copyfile(path, cache_filename)
