@@ -84,7 +84,7 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 LOCAL_SYMBOL
 int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	int arg_index;
+	int arg_index, res = 0;
 	const mmstr* prefix;
 	struct mmarg_parser parser = {
 		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
@@ -106,34 +106,45 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		                           MM_DT_DIR, NULL, NULL);
 	}
 
-	if (arg_index+1 != argc) {
-		fprintf(stderr, "Bad usage of mkprefix command.\n"
-		        "Run \"mmpack mkprefix --help\" to see usage\n");
-		return -1;
+	prefix = ctx->prefix;
+	if (arg_index+1 == argc)
+		prefix = mmstr_alloca_from_cstr(argv[arg_index]);
+
+	if (argc > arg_index+1) {
+		fprintf(stderr, "Bad usage of mkprefix command.\n");
+		res = 1;
 	}
 
-	prefix = mmstr_alloca_from_cstr(argv[arg_index]);
+	if (!prefix) {
+		fprintf(stderr, "Un-specified prefix path to create.\n");
+		res = 1;
+	}
 
 	// If url is set, replace the repo list with one whose the url and name
 	// are supplied in arguments. If unset, the repo list will be kept
 	// untouched, hence will be the one read from user global configuration
-	if (repo_url) {
+	if (!res && repo_url) {
 		repolist_reset(repo_list);
 		if (!(repo = repolist_add(repo_list, repo_name)))
-			return -1;
+			res = -1;
 
 		repo->url = mmstr_malloc_from_cstr(repo_url);
 		repo->enabled = 1;
 	}
 
-	if (create_initial_empty_files(prefix, force_mkprefix)
-	    || create_initial_binindex_files(prefix, repo_list)
-	    || settings_serialize(prefix, &ctx->settings, force_mkprefix)) {
+	if (!res && (create_initial_empty_files(prefix, force_mkprefix)
+	             || create_initial_binindex_files(prefix, repo_list)
+	             || settings_serialize(prefix, &ctx->settings,
+	                                   force_mkprefix))) {
 		fprintf(stderr, "Failed to create mmpack prefix: %s\n", prefix);
-		return -1;
+		res = -1;
 	}
 
-	printf("Created mmpack prefix: %s\n", prefix);
+	if (!res)
+		printf("Created mmpack prefix: %s\n", prefix);
+	else
+		fprintf(stderr,
+		        "Run \"mmpack mkprefix --help\" to see usage\n");
 
-	return 0;
+	return res;
 }
