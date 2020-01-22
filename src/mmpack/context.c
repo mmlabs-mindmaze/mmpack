@@ -190,8 +190,11 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 exit:
 	mmstr_freea(installed_index_path);
 
-	if (rv != 0)
-		error("Failed to load package lists\n");
+	if (rv != 0) {
+		error("Fatal: \"%s\" is not an mmpack prefix\n", ctx->prefix);
+		error("To create it, type:\n\t mmpack mkprefix %s\n",
+		      ctx->prefix);
+	}
 
 	return rv;
 }
