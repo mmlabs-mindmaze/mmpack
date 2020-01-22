@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d5b62879_fa37b597",
+        "filename": "src/mmpack-build/workspace.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T09:56:16Z",
+      "side": 1,
+      "message": "why not just make it a cache ?\nI mean *now* it\u0027s a download cache because it\u0027s a cache you want to use for downloaded files, but why be so restrictive ?\n\nIt could simply be XDG_CACHE_HOME/mmpack/",
+      "revId": "bc3acf315dcf692cef8abe4bcdb2287d74798d95",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "43f3b51a_0a4d454d",
+        "filename": "src/mmpack-build/workspace.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T09:56:16Z",
+      "side": 1,
+      "message": "There\u0027s a reason why we use the shell with rm instead.\nPlease keep doing so.",
+      "revId": "bc3acf315dcf692cef8abe4bcdb2287d74798d95",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2ada073_44d9f6e8",
+        "filename": "src/mmpack-build/workspace.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-22T09:56:16Z",
+      "side": 1,
+      "message": "this should strictly be a cache fetch, and the download function should be the one to try fetching from the cache.",
+      "revId": "bc3acf315dcf692cef8abe4bcdb2287d74798d95",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
