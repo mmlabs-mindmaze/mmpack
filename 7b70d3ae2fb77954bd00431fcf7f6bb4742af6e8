@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6839caa1_e6de68ad",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-22T11:00:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0b69f12c_36fc64b3",
+      "range": {
+        "startLine": 11,
+        "startChar": 13,
+        "endLine": 11,
+        "endChar": 24
+      },
+      "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4df12728_92120fdf",
         "filename": "src/mmpack/context.c",
         "patchSetId": 3
@@ -36,6 +60,24 @@
       "writtenOn": "2020-01-22T10:50:33Z",
       "side": 1,
       "message": "you *could* try to open as a directory.\nif it works, then you have a local prefix, otherwise try as an alias.\n\nThis might be more brutal, but is less convoluted than you approach",
+      "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8dee78ad_c46ec466",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-22T11:00:35Z",
+      "side": 1,
+      "message": "That is quite interesting (I did not think about it)\nHowever, I think that the prefix existence check pertains to other parts of the code base and it is better to just handle prefix keywords at the string level.",
+      "parentUuid": "4df12728_92120fdf",
       "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
@@ -88,6 +130,54 @@
     },
     {
       "key": {
+        "uuid": "f2f5b7e5_27fc91bf",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-22T11:00:35Z",
+      "side": 1,
+      "message": "does not it would also include the nul terminating byte?",
+      "parentUuid": "4f83666f_6d1d25c4",
+      "range": {
+        "startLine": 129,
+        "startChar": 16,
+        "endLine": 129,
+        "endChar": 22
+      },
+      "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20420627_abd29655",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-22T11:00:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82a00d31_2f33f6f1",
+      "range": {
+        "startLine": 129,
+        "startChar": 25,
+        "endLine": 129,
+        "endChar": 36
+      },
+      "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "894eeb2b_59e294e6",
         "filename": "src/mmpack/context.c",
         "patchSetId": 3
@@ -122,6 +212,48 @@
         "endLine": 131,
         "endChar": 13
       },
+      "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3a3e13a_7d5f5dfb",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-22T11:00:35Z",
+      "side": 1,
+      "message": "it is allocated in the stack",
+      "parentUuid": "1fb65924_cd7a2904",
+      "range": {
+        "startLine": 131,
+        "startChar": 2,
+        "endLine": 131,
+        "endChar": 13
+      },
+      "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05bc90e5_7a30407e",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-22T11:00:35Z",
+      "side": 1,
+      "message": "why? Does not it improve portability?",
+      "parentUuid": "894eeb2b_59e294e6",
       "revId": "7b70d3ae2fb77954bd00431fcf7f6bb4742af6e8",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
