@@ -86,7 +86,7 @@ int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "--help")
 	    || STR_EQUAL(argv[1], strlen(argv[1]), "-h")) {
 		fprintf(stderr, "missing package argument in command line\n"
-		        "Usage:\n\tmmpack show "SHOW_SYNOPSIS "\n");
+		        "Usage:\n\tmmpack "SHOW_SYNOPSIS "\n");
 		return argc != 2 ? -1 : 0;
 	}
 
