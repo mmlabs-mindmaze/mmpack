@@ -7,7 +7,7 @@
 
 #include "context.h"
 
-#define REPO_SYNOPSIS "repo [add|list|remove|rename] ..."
+#define REPO_SYNOPSIS "repo [add|list|remove|rename] <name> <url>"
 
 int mmpack_repo(struct mmpack_ctx * ctx, int argc, char const ** argv);
 
