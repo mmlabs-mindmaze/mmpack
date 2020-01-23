@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "daf615c4_eb285a26",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-23T15:07:21Z",
+      "side": 1,
+      "message": "Unless I\u0027ve missed something, prefix CANNOT be NULL when you call prefix_is_alias() (see hightlighted code)\n\nHence I am not sure to understand what this commit is trying to solve",
+      "range": {
+        "startLine": 116,
+        "startChar": 1,
+        "endLine": 119,
+        "endChar": 0
+      },
+      "revId": "2d83a6f9a4b4e2dc315e6771bd79305a4c51dc23",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
