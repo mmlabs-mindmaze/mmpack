@@ -111,17 +111,25 @@ struct compiled_dep {
  * @pkgname_idx:        index table mapping package name to package name ID.
  * @pkgname_table:      table of list of package sharing the same name. This
  *                      table is indexed by the package name ID.
- * @num_pkgname:        number of different package in struct binindex. This
- *                      corresponds to the length of @pkgname_table.
+ * @pkg_num:            number of packages in struct binindex, counting
+ *                      different versions.
+ * @num_pkgname:        number of package in struct binindex without counting
+ *                      different versions. This corresponds to the length of
+ *                      @pkgname_table.
  */
 struct binindex {
 	struct indextable pkgname_idx;
 	struct pkglist* pkgname_table;
 	int num_pkgname;
+	int pkg_num;
 };
 int binindex_foreach(struct binindex * binindex,
                      int (* cb)(struct mmpkg*, void*),
                      void * data);
+
+int binindex_sorted_foreach(struct binindex * binindex,
+                            int (* cb)(struct mmpkg*, void*),
+                            void * data);
 
 struct install_state {
 	struct indextable idx;
