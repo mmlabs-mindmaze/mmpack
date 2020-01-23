@@ -363,6 +363,12 @@ error:
 LOCAL_SYMBOL
 int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 {
+	if (mm_check_access(ctx->prefix, F_OK)) {
+		fprintf(stderr, "Fatal: \"%s\" does not exist\n", ctx->prefix);
+		fprintf(stdout, "To create it, type:\n\t mmpack mkprefix %s\n", ctx->prefix);
+		return -1;
+	}
+
 	if (load_prefix_config(ctx))
 		return -1;
 
