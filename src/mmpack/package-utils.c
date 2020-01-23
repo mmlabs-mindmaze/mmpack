@@ -770,12 +770,16 @@ int binindex_foreach(struct binindex * binindex,
 {
 	struct pkg_iter iter;
 	struct mmpkg* pkg;
+	struct pkg_ordered_list pol;
 
 	pkg = pkg_iter_first(&iter, binindex);
 	while (pkg != NULL) {
-		cb(pkg, data);
-
+		pkg_ordered_list_add(&pol, pkg);
 		pkg = pkg_iter_next(&iter);
+	}
+	pkg = NULL;
+	while (pkg = pkg_ordered_list_each(pkg)) {
+		cb(pkg, data);
 	}
 
 	return 0;
