@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc61cf69_e4b2c93d",
+        "filename": "src/mmpack/mmpack-repo.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-23T14:22:29Z",
+      "side": 1,
+      "message": "Since the printf is in repo_add, I would have let the error message as it is.",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 45
+      },
+      "revId": "18e46a3f734cebab069c99daf75f9714e5e7f1ac",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68125d99_f8c38cc5",
+        "filename": "src/mmpack/mmpack-repo.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-23T14:22:29Z",
+      "side": 1,
+      "message": "For mmpack repo list, the name and url are not mandatory. So I think you should let as it was before.",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 66
+      },
+      "revId": "18e46a3f734cebab069c99daf75f9714e5e7f1ac",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
