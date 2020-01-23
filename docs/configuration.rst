@@ -30,3 +30,4 @@ There are two configuration options:
    - other_repo_name:
          url: url_of_other_repo
          enabled: 1
+
