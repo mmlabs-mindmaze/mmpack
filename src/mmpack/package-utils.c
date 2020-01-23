@@ -774,10 +774,75 @@ int binindex_foreach(struct binindex * binindex,
 	pkg = pkg_iter_first(&iter, binindex);
 	while (pkg != NULL) {
 		cb(pkg, data);
-
 		pkg = pkg_iter_next(&iter);
 	}
 
+	return 0;
+}
+
+
+LOCAL_SYMBOL
+int mmpkg_cmp(const void * v1, const void * v2)
+{
+	const struct mmpkg * pkg1, * pkg2;
+	int res;
+
+	pkg1 = *((const struct mmpkg**) v1);
+	pkg2 = *((const struct mmpkg**) v2);
+
+	res = strcmp(pkg1->name, pkg2->name);
+
+	if (res == 0)
+		res = pkg_version_compare(pkg1->version, pkg2->version);
+
+	return res;
+}
+
+
+
+LOCAL_SYMBOL
+struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex,
+                                    int * len)
+{
+	struct pkg_iter iter;
+	struct mmpkg ** pkgs, * pkg;
+	int i = 0;
+
+	pkg = pkg_iter_first(&iter, binindex);
+	while (pkg != NULL) {
+		i++;
+		pkg = pkg_iter_next(&iter);
+	}
+
+	*len = i;
+	pkgs = malloc(sizeof(struct mmpkg) * (*len));
+
+	i = 0;
+	pkg = pkg_iter_first(&iter, binindex);
+	while (pkg != NULL && i < *len) {
+		pkgs[i++] = pkg;
+		pkg = pkg_iter_next(&iter);
+	}
+
+	qsort(pkgs, *len, sizeof(struct mmpkg*), mmpkg_cmp);
+
+	return pkgs;
+}
+
+
+LOCAL_SYMBOL
+int binindex_sorted_foreach(struct binindex * binindex,
+                            int (* cb)(struct mmpkg*, void*),
+                            void * data)
+{
+	struct mmpkg ** pkgs;
+	int i, pkg_num;
+
+	pkgs = binindex_sorted_pkgs(binindex, &pkg_num);
+	for (i = 0; i < pkg_num; i++)
+		cb(pkgs[i], data);
+
+	free(pkgs);
 	return 0;
 }
 
