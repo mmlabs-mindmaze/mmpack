@@ -97,7 +97,7 @@ int list_all(struct mmpack_ctx* ctx, int argc, const char* argv[])
 		.found = 0,
 	};
 
-	binindex_foreach(&ctx->binindex, binindex_cb_all, &data);
+	binindex_sorted_foreach(&ctx->binindex, binindex_cb_all, &data);
 	return data.found;
 }
 
@@ -111,7 +111,7 @@ int list_available(struct mmpack_ctx* ctx, int argc, const char* argv[])
 		.found = 0,
 	};
 
-	binindex_foreach(&ctx->binindex, binindex_cb_all, &data);
+	binindex_sorted_foreach(&ctx->binindex, binindex_cb_all, &data);
 	return data.found;
 }
 

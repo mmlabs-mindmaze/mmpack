@@ -774,10 +774,83 @@ int binindex_foreach(struct binindex * binindex,
 	pkg = pkg_iter_first(&iter, binindex);
 	while (pkg != NULL) {
 		cb(pkg, data);
-
 		pkg = pkg_iter_next(&iter);
 	}
 
+	return 0;
+}
+
+
+static
+int mmpkg_cmp(const void * v1, const void * v2)
+{
+	const struct mmpkg * pkg1, * pkg2;
+	int res;
+
+	pkg1 = *((const struct mmpkg**) v1);
+	pkg2 = *((const struct mmpkg**) v2);
+
+	res = strcmp(pkg1->name, pkg2->name);
+
+	if (res == 0)
+		res = pkg_version_compare(pkg1->version, pkg2->version);
+
+	return res;
+}
+
+
+/**
+ * binindex_sorted_pkgs - get a sorted array of packages
+ * @binindex:    The binindex to get the packages from.
+ *
+ * It allocates a NULL terminated array in the heap memory. It is
+ * responsibility of the caller to free it.
+ *
+ * Returns:      A NULL terminated array of packages.
+ */
+LOCAL_SYMBOL
+struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex)
+{
+	struct pkg_iter iter;
+	struct mmpkg ** pkgs, * pkg;
+	int cnt, i = 0;
+
+	pkg = pkg_iter_first(&iter, binindex);
+	while (pkg != NULL) {
+		i++;
+		pkg = pkg_iter_next(&iter);
+	}
+
+	cnt = i;
+	pkgs = xx_malloc(sizeof(struct mmpkg) * (cnt + 1));
+
+	i = 0;
+	pkg = pkg_iter_first(&iter, binindex);
+	while (pkg != NULL && i < cnt) {
+		pkgs[i++] = pkg;
+		pkg = pkg_iter_next(&iter);
+	}
+
+	qsort(pkgs, cnt, sizeof(struct mmpkg*), mmpkg_cmp);
+	pkgs[cnt] = NULL;
+
+	return pkgs;
+}
+
+
+LOCAL_SYMBOL
+int binindex_sorted_foreach(struct binindex * binindex,
+                            int (* cb)(struct mmpkg*, void*),
+                            void * data)
+{
+	struct mmpkg ** pkgs, * pkg;
+	int i = 0;
+
+	pkgs = binindex_sorted_pkgs(binindex);
+	while ((pkg = pkgs[i++]))
+		cb(pkg, data);
+
+	free(pkgs);
 	return 0;
 }
 
