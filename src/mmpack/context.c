@@ -72,12 +72,16 @@ int prefix_is_alias(const char * prefix)
 {
 	int alias = 1;
 
-	while (alias && *prefix != '\0') {
-		if (is_path_separator(*prefix))
-			alias = 0;
+	if (prefix)
+		while (alias && *prefix != '\0') {
+			if (is_path_separator(*prefix))
+				alias = 0;
 
-		prefix++;
-	}
+			prefix++;
+		}
+
+	else
+		alias = 0;
 
 	return alias;
 }
