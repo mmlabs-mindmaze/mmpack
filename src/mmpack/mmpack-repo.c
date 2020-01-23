@@ -32,7 +32,7 @@ int repo_add(struct mmpack_ctx* ctx, int argc, char const ** argv)
 	struct repolist_elt * repo;
 
 	if (argc != 2) {
-		printf("usage: mmpack repo add <name> <url>\n");
+		printf("usage: mmpack "REPO_SYNOPSIS "\n");
 		return -1;
 	}
 
