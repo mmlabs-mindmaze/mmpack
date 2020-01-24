@@ -39,7 +39,6 @@ int create_initial_binindex_files(const mmstr* prefix, struct repolist* repos);
 
 struct settings {
 	struct repolist repo_list;
-	mmstr* default_prefix;
 };
 
 void settings_init(struct settings* settings);
