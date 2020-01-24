@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6cc18654_c87551d4",
+        "filename": "src/mmpack/mmpack-mkprefix.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T11:27:04Z",
+      "side": 1,
+      "message": "I think you have misunderstood what I said about the macro hiding the execution workflow... I am fine with a return -1 here, just it is not good that it got hidden inside a macro.\n\nI strongly suggest you return -1 here instead of keeping a result code value, or use goto",
+      "range": {
+        "startLine": 115,
+        "startChar": 2,
+        "endLine": 115,
+        "endChar": 10
+      },
+      "revId": "20231420670e4c4f58d0e4d89fb3de8ebaa680b2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
