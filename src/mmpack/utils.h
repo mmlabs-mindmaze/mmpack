@@ -41,7 +41,6 @@ int is_path_separator(char c)
 #define METADATA_RELPATH \
 	MMPACK_STATEDIR_RELPATH "/metadata"
 
-mmstr* get_default_mmpack_prefix(void);
 mmstr* get_config_filename(void);
 
 #define SHA_HDR_REG "reg-"

@@ -325,13 +325,6 @@ mmstr* get_config_filename(void)
 }
 
 
-LOCAL_SYMBOL
-mmstr* get_default_mmpack_prefix(void)
-{
-	return get_default_path(MM_DATA_HOME, "mmpack");
-}
-
-
 /**************************************************************************
  *                                                                        *
  *                            SHA computation helper                      *
