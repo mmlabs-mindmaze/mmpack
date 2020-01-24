@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9e9c0d63_c35ed869",
+        "filename": "src/mmpack/settings.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T16:32:19Z",
+      "side": 0,
+      "message": "keep",
+      "range": {
+        "startLine": 25,
+        "startChar": 1,
+        "endLine": 25,
+        "endChar": 16
+      },
+      "revId": "84983b50c4e9d26f8f9ce0f34e4411f040a4c800",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "779fb310_0b2c7579",
+        "filename": "src/mmpack/settings.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T16:32:19Z",
+      "side": 0,
+      "message": "Please keep",
+      "range": {
+        "startLine": 198,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 24
+      },
+      "revId": "84983b50c4e9d26f8f9ce0f34e4411f040a4c800",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "628d33b2_85832f59",
+        "filename": "src/mmpack/settings.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T16:32:19Z",
+      "side": 0,
+      "message": "keep",
+      "range": {
+        "startLine": 210,
+        "startChar": 0,
+        "endLine": 214,
+        "endChar": 8
+      },
+      "revId": "84983b50c4e9d26f8f9ce0f34e4411f040a4c800",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9dae39d0_32726cc0",
+        "filename": "src/mmpack/settings.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 536,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T16:32:19Z",
+      "side": 0,
+      "message": ".default_prefix \u003d NULL\n\nget_default_mmpack_prefix() can be removed from utils.*",
+      "range": {
+        "startLine": 536,
+        "startChar": 0,
+        "endLine": 536,
+        "endChar": 48
+      },
+      "revId": "84983b50c4e9d26f8f9ce0f34e4411f040a4c800",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a926aca_44bfe84d",
+        "filename": "src/mmpack/settings.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T16:32:19Z",
+      "side": 0,
+      "message": "keep",
+      "range": {
+        "startLine": 551,
+        "startChar": 1,
+        "endLine": 551,
+        "endChar": 38
+      },
+      "revId": "84983b50c4e9d26f8f9ce0f34e4411f040a4c800",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc6cbd8d_eb9a16ed",
+        "filename": "src/mmpack/settings.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T16:32:19Z",
+      "side": 0,
+      "message": "Please keep",
+      "range": {
+        "startLine": 42,
+        "startChar": 1,
+        "endLine": 42,
+        "endChar": 23
+      },
+      "revId": "84983b50c4e9d26f8f9ce0f34e4411f040a4c800",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc136ae7_33df4dad",
+        "filename": "tests/config_test.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T16:32:19Z",
+      "side": 0,
+      "message": "Please keep",
+      "range": {
+        "startLine": 30,
+        "startChar": 1,
+        "endLine": 30,
+        "endChar": 63
+      },
+      "revId": "84983b50c4e9d26f8f9ce0f34e4411f040a4c800",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
