@@ -22,7 +22,6 @@
 enum {
 	UNKNOWN_FIELD = -1,
 	REPOSITORIES,
-	DEFAULT_PREFIX,
 };
 
 
@@ -195,8 +194,6 @@ int get_field_type(const char* name, int len)
 {
 	if (STR_EQUAL(name, len, "repositories"))
 		return REPOSITORIES;
-	else if (STR_EQUAL(name, len, "default-prefix"))
-		return DEFAULT_PREFIX;
 	else
 		return UNKNOWN_FIELD;
 }
@@ -207,12 +204,6 @@ int set_settings_field(struct settings* s, int field_type,
                        const char* data, int len)
 {
 	switch (field_type) {
-	case DEFAULT_PREFIX:
-		s->default_prefix = mmstr_copy_realloc(s->default_prefix,
-		                                       data,
-		                                       len);
-		break;
-
 	default:
 		// Unknown field are silently ignored
 		break;
@@ -533,7 +524,6 @@ LOCAL_SYMBOL
 void settings_init(struct settings* settings)
 {
 	*settings = (struct settings) {
-		.default_prefix = get_default_mmpack_prefix(),
 	};
 
 	repolist_init(&settings->repo_list);
@@ -548,7 +538,6 @@ LOCAL_SYMBOL
 void settings_deinit(struct settings* settings)
 {
 	repolist_deinit(&settings->repo_list);
-	mmstr_free(settings->default_prefix);
 
 	*settings = (struct settings) {0};
 }
