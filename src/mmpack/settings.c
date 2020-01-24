@@ -533,7 +533,7 @@ LOCAL_SYMBOL
 void settings_init(struct settings* settings)
 {
 	*settings = (struct settings) {
-		.default_prefix = get_default_mmpack_prefix(),
+		.default_prefix = NULL,
 	};
 
 	repolist_init(&settings->repo_list);

@@ -110,10 +110,11 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 
 	prefix = opts->prefix;
 	if (!prefix)
-		prefix = mm_getenv("MMPACK_PREFIX",
-		                   ctx->settings.default_prefix);
+		prefix =
+			mm_getenv("MMPACK_PREFIX",
+			          ctx->settings.default_prefix);
 
-	if (prefix_is_alias(prefix)) {
+	if (prefix && prefix_is_alias(prefix)) {
 		dir_strlen = strlen(mm_get_basedir(MM_DATA_HOME));
 		dir_strlen += strlen(ALIAS_PREFIX_FOLDER) + 2;
 		dir_strlen += strlen(prefix) + 1;
@@ -124,7 +125,9 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 		prefix = prefix_path;
 	}
 
-	ctx->prefix = mmstr_malloc_from_cstr(prefix);
+	if (prefix)
+		ctx->prefix = mmstr_malloc_from_cstr(prefix);
+
 	mm_freea(prefix_path);
 
 	cwd = mmstr_malloc(len);
@@ -363,6 +366,9 @@ error:
 LOCAL_SYMBOL
 int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 {
+	if (ctx->prefix == NULL)
+		return -1;
+
 	if (mm_check_access(ctx->prefix, F_OK)) {
 		fprintf(stderr, "Fatal: \"%s\" does not exist\n", ctx->prefix);
 		fprintf(stdout,
