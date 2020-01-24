@@ -46,6 +46,9 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		NULL,
 	};
 
+	if (ctx->prefix == NULL)
+		return -1;
+
 	// If completion is running, we need to offload completion of command
 	// argument to the shell. However the prefix in use must be reported.
 	// Hence we report a first string identifying the action to perform and
