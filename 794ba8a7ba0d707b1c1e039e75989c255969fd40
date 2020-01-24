@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37b438fd_a43600a0",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T18:21:32Z",
+      "side": 1,
+      "message": "This hase not its place here... You must call this in mmpack_ctx_save_installed_list()",
+      "range": {
+        "startLine": 154,
+        "startChar": 0,
+        "endLine": 154,
+        "endChar": 59
+      },
+      "revId": "794ba8a7ba0d707b1c1e039e75989c255969fd40",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ceac29a2_660f5ea5",
+        "filename": "src/mmpack/indextable.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T18:21:32Z",
+      "side": 1,
+      "message": "simpler:\n\n\nif (set-\u003emem_handling \u003d\u003d STRSET_HANDLE_STRINGS_MEM)\n\tstring \u003d indextable_lookup(\u0026set-\u003eidx, str)-\u003evalue;\n\nrv \u003d indextable_remove(\u0026set-\u003eidx, str);\nmmstr_free(string);",
+      "range": {
+        "startLine": 160,
+        "startChar": 1,
+        "endLine": 168,
+        "endChar": 21
+      },
+      "revId": "794ba8a7ba0d707b1c1e039e75989c255969fd40",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a0327d9_d11f2b2e",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T18:21:32Z",
+      "side": 1,
+      "message": "simpler: remove_from_manually_installed",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 42
+      },
+      "revId": "794ba8a7ba0d707b1c1e039e75989c255969fd40",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e13c5b5a_1beba481",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T18:21:32Z",
+      "side": 1,
+      "message": "Not really needed... just use directly strset_remove()",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 0
+      },
+      "revId": "794ba8a7ba0d707b1c1e039e75989c255969fd40",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58511a0e_67aa11fd",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T18:21:32Z",
+      "side": 1,
+      "message": "It is simpler to update directly ctx-\u003emanually_inst inside mmpkg_get_install_list()",
+      "range": {
+        "startLine": 45,
+        "startChar": 1,
+        "endLine": 61,
+        "endChar": 1
+      },
+      "revId": "794ba8a7ba0d707b1c1e039e75989c255969fd40",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "980a19c2_19bf1a2d",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T18:21:32Z",
+      "side": 1,
+      "message": "You will dramatically simplify this, if you do not use yaml, but only a simple format of package name on each line.\n\nYou DO NOT need yaml in this case",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 162,
+        "endChar": 0
+      },
+      "revId": "794ba8a7ba0d707b1c1e039e75989c255969fd40",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2753b914_af016eca",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-24T18:21:32Z",
+      "side": 1,
+      "message": "save_manually_installed is more consistent with the rest of the code base",
+      "range": {
+        "startLine": 176,
+        "startChar": 4,
+        "endLine": 176,
+        "endChar": 27
+      },
+      "revId": "794ba8a7ba0d707b1c1e039e75989c255969fd40",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
