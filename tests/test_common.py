@@ -5,7 +5,7 @@ from os import makedirs, getcwd, chdir
 from os.path import dirname, abspath
 from shutil import rmtree
 
-from mmpack_build.common import list_files, pushdir, popdir
+from mmpack_build.common import list_files
 
 
 REF_FILELIST = [
@@ -38,9 +38,13 @@ TEST_TREE_ROOT = 'test_tree/root'
 
 
 class TestFileList(unittest.TestCase):
-    def setUp(self):
+    abs_testdir = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.abs_testdir = getcwd()
         makedirs(TEST_TREE_ROOT, exist_ok=True)
-        pushdir(TEST_TREE_ROOT)
+        chdir(TEST_TREE_ROOT)
 
         for path in REF_FILELIST:
             # Create dummy file located at path
@@ -49,12 +53,14 @@ class TestFileList(unittest.TestCase):
                 makedirs(dirpath, exist_ok=True)
             open(path, 'w')
 
-        popdir()
-        pushdir('.')
+        chdir(cls.abs_testdir)
+
+    @classmethod
+    def tearDownClass(cls):
+        rmtree(TEST_TREE_ROOT)
 
     def tearDown(self):
-        popdir()
-        rmtree(TEST_TREE_ROOT)
+        chdir(self.abs_testdir)
 
     def test_list_files_with_dirs(self):
         """
