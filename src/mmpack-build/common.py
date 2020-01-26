@@ -361,7 +361,11 @@ def shlib_keyname(soname: str) -> str:
     if name[-1].isdigit() and version != '':
         name += '-'
 
-    return name.lower() + version  # libxxx.0.1.2 -> libxxx<ABI>
+    name = name.lower()
+    if not name.startswith('lib'):
+        name = 'lib' + name
+
+    return name + version  # libxxx.0.1.2 -> libxxx<ABI>
 
 
 def yaml_load(filename: str):

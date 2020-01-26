@@ -56,6 +56,8 @@ REF_SONAME_DATA = [
     SonameData('libfoo.dll', 'libfoo', '', 'libfoo'),
     SonameData('libfoo1.2.so', 'libfoo1.2', '', 'libfoo1.2'),
     SonameData('libfoo1.2.dll', 'libfoo1.2', '', 'libfoo1.2'),
+    SonameData('foo-1.dll', 'foo', '1', 'libfoo1'),
+    SonameData('foo.dll', 'foo', '', 'libfoo'),
     SonameData('liba52-0.7.4.so', 'liba52-0.7.4', '', 'liba52-0.7.4'),
 ]
 
