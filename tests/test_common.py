@@ -39,6 +39,13 @@ TEST_TREE_ROOT = 'test_tree/root'
 
 class TestFileList(unittest.TestCase):
     def setUp(self):
+        pushdir('.')
+
+    def tearDown(self):
+        popdir()
+
+    @classmethod
+    def setUpClass(cls):
         makedirs(TEST_TREE_ROOT, exist_ok=True)
         pushdir(TEST_TREE_ROOT)
 
@@ -50,10 +57,9 @@ class TestFileList(unittest.TestCase):
             open(path, 'w')
 
         popdir()
-        pushdir('.')
 
-    def tearDown(self):
-        popdir()
+    @classmethod
+    def tearDownClass(cls):
         rmtree(TEST_TREE_ROOT)
 
     def test_list_files_with_dirs(self):
