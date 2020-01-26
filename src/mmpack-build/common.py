@@ -358,7 +358,19 @@ def shlib_keyname(soname: str) -> str:
     if name[-1].isdigit() and version:
         name += '-'
 
-    return name.lower() + version  # libxxx.0.1.2 -> libxxx<ABI>
+    name = name.lower()
+
+    # Sometime on some platform, mostly on windows, shared libraries names are
+    # not prefixed with "lib". This is an issue because often, those project on
+    # other platform, like Linux, they do add the lib prefix in the shared lib
+    # name. Consequently, to keep cross-platform consistent keyname, we prefix
+    # lib if it does not exist. This lib prefix also avoid avoid name clashes
+    # between packages holding executable named after the same root as the
+    # shared library.
+    if not name.startswith('lib'):
+        name = 'lib' + name
+
+    return name + version  # libxxx.0.1.2 -> libxxx<ABI>
 
 
 def yaml_load(filename: str):

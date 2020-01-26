@@ -53,6 +53,8 @@ REF_SONAME_DATA = [
     ('libfoo.dll', 'libfoo', '', 'libfoo'),
     ('libfoo1.2.so', 'libfoo1.2', '', 'libfoo1.2'),
     ('libfoo1.2.dll', 'libfoo1.2', '', 'libfoo1.2'),
+    ('foo-1.dll', 'foo', '1', 'libfoo1'),
+    ('foo.dll', 'foo', '', 'libfoo'),
     ('liba52-0.7.4.so', 'liba52-0.7.4', '', 'liba52-0.7.4'),
 ]
 
