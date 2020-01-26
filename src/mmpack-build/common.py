@@ -322,27 +322,26 @@ def parse_soname(soname: str) -> (str, str):
     """
     # try format: <name>.so.<major-version>
     try:
-        name, major = soname.split('.so.')
+        name, major = soname.rsplit('.so.', 1)
         return (name, major)
     except ValueError:
         pass
 
-    # try format: <name>-<version>.[so|dll]
-    # return the full version (not only the major part)
     if soname.endswith('.so'):
-        soname = soname[:-len('.so')]
-    elif soname.endswith('.dll'):
+        return (soname[:-len('.so')], '')
+
+    if soname.endswith('.dll'):
         soname = soname[:-len('.dll')]
     else:
         raise ValueError('failed to parse SONAME: ' + soname)
 
-    split = soname.split('-')
+    # Assume format: <name>[-<version>].dll
+    split = soname.rsplit('-', 1)
+    name = split[0]
     if len(split) == 1:
-        version = '0'
+        version = ''
     else:
-        version = split[-1]
-    name = '-'.join(split[0:-1])
-    version = split[-1]
+        version = split[1]
 
     return (name, version)
 
@@ -359,7 +358,7 @@ def shlib_keyname(soname: str) -> str:
     name, version = parse_soname(soname)
 
     # Allow to distinguish libfoo1.so.0 from libfoo.so.10
-    if name[-1].isdigit():
+    if name[-1].isdigit() and version != '':
         name += '-'
 
     return name.lower() + version  # libxxx.0.1.2 -> libxxx<ABI>

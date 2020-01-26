@@ -48,6 +48,15 @@ REF_SONAME_DATA = [
     SonameData('libfoo-1.2.dll', 'libfoo', '1.2', 'libfoo1.2'),
     SonameData('libfoo1.2.so.3', 'libfoo1.2', '3', 'libfoo1.2-3'),
     SonameData('libfoo1.2-3.dll', 'libfoo1.2', '3', 'libfoo1.2-3'),
+    SonameData('libfoo-bar.so.1', 'libfoo-bar', '1', 'libfoo-bar1'),
+    SonameData('libfoo-bar-1.dll', 'libfoo-bar', '1', 'libfoo-bar1'),
+    SonameData('libFoo-Bar.so.1', 'libFoo-Bar', '1', 'libfoo-bar1'),
+    SonameData('libFoo-Bar-1.dll', 'libFoo-Bar', '1', 'libfoo-bar1'),
+    SonameData('libfoo.so', 'libfoo', '', 'libfoo'),
+    SonameData('libfoo.dll', 'libfoo', '', 'libfoo'),
+    SonameData('libfoo1.2.so', 'libfoo1.2', '', 'libfoo1.2'),
+    SonameData('libfoo1.2.dll', 'libfoo1.2', '', 'libfoo1.2'),
+    SonameData('liba52-0.7.4.so', 'liba52-0.7.4', '', 'liba52-0.7.4'),
 ]
 
 class TestCommon(unittest.TestCase):
