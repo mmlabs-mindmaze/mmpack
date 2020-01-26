@@ -1,11 +1,13 @@
 # @mindmaze_header@
 import unittest
 
+from collections import namedtuple
 from os import makedirs, getcwd, chdir
 from os.path import dirname, abspath
 from shutil import rmtree
 
-from mmpack_build.common import list_files, pushdir, popdir
+from mmpack_build.common import list_files, pushdir, popdir, \
+    parse_soname, shlib_keyname
 
 
 REF_FILELIST = [
@@ -37,7 +39,18 @@ REF_FILELIST_WITHDIRS = [
 TEST_TREE_ROOT = 'test_tree/root'
 
 
-class TestFileList(unittest.TestCase):
+SonameData = namedtuple('SonameData',
+                        ['soname', 'name', 'version', 'pkgname'])
+REF_SONAME_DATA = [
+    SonameData('libfoo.so.1', 'libfoo', '1', 'libfoo1'),
+    SonameData('libfoo-1.dll', 'libfoo', '1', 'libfoo1'),
+    SonameData('libfoo.so.1.2', 'libfoo', '1.2', 'libfoo1.2'),
+    SonameData('libfoo-1.2.dll', 'libfoo', '1.2', 'libfoo1.2'),
+    SonameData('libfoo1.2.so.3', 'libfoo1.2', '3', 'libfoo1.2-3'),
+    SonameData('libfoo1.2-3.dll', 'libfoo1.2', '3', 'libfoo1.2-3'),
+]
+
+class TestCommon(unittest.TestCase):
     def setUp(self):
         pushdir('.')
 
@@ -99,3 +112,19 @@ class TestFileList(unittest.TestCase):
         filelist = list_files(abspath(TEST_TREE_ROOT), exclude_dirs=True)
         self.assertEqual(filelist, REF_FILELIST)
 
+    def test_soname_parsing(self):
+        """
+        test parse_soname()
+        """
+        for refdata in REF_SONAME_DATA:
+            name, version = parse_soname(refdata.soname)
+            self.assertEqual(name, refdata.name)
+            self.assertEqual(version, refdata.version)
+
+    def test_shlib_name(self):
+        """
+        test shlib_keyname()
+        """
+        for refdata in REF_SONAME_DATA:
+            pkgname = shlib_keyname(refdata.soname)
+            self.assertEqual(pkgname, refdata.pkgname)
