@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f3a8048a_777ba4ea",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 803,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-27T15:39:08Z",
+      "side": 1,
+      "message": "indextable_sorted_pkgs",
+      "range": {
+        "startLine": 803,
+        "startChar": 3,
+        "endLine": 803,
+        "endChar": 29
+      },
+      "revId": "2bc68fce3623e2e61545eb374336cdf8d5a78619",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a1ff5d0_cf3dff01",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 840,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-27T15:39:08Z",
+      "side": 1,
+      "message": "I think I would suppress this function and use binindex_sorted_pkgs in the functions that need it.\n\nAnd therefore I would merge both the two commits.",
+      "range": {
+        "startLine": 802,
+        "startChar": 0,
+        "endLine": 840,
+        "endChar": 1
+      },
+      "revId": "2bc68fce3623e2e61545eb374336cdf8d5a78619",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
