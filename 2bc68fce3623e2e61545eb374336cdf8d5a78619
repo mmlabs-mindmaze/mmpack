@@ -45,6 +45,30 @@
       "revId": "2bc68fce3623e2e61545eb374336cdf8d5a78619",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0cbec6b5_c114ffb3",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 840,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-27T15:41:10Z",
+      "side": 1,
+      "message": "My bad, I miread the struct in parameter",
+      "parentUuid": "0a1ff5d0_cf3dff01",
+      "range": {
+        "startLine": 802,
+        "startChar": 0,
+        "endLine": 840,
+        "endChar": 1
+      },
+      "revId": "2bc68fce3623e2e61545eb374336cdf8d5a78619",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
