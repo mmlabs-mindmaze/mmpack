@@ -799,6 +799,46 @@ int mmpkg_cmp(const void * v1, const void * v2)
 }
 
 
+/**
+ * indextable_sorted_packages - get a sorted array of packages
+ * @it:   struct indextable, the table of packages to take the packages from
+ * @len:  pointer to a caller variable where to store the returned array length
+ *
+ * The array is allocated in the heap memory and the caller has the
+ * responsibility to free it.
+ *
+ * Returns: a sorted array of packages
+ */
+LOCAL_SYMBOL
+const struct mmpkg** indextable_sorted_pkgs(struct indextable * it,
+                                            int * len)
+{
+	struct it_iterator iter;
+	struct it_entry* entry;
+	const struct mmpkg ** pkgs;
+	int i = 0;
+
+	entry = it_iter_first(&iter, it);
+	while (entry != NULL) {
+		i++;
+		entry = it_iter_next(&iter);
+	}
+
+	*len = i;
+	pkgs = malloc(sizeof(struct mmpkg) * (*len));
+
+	i = 0;
+	entry = it_iter_first(&iter, it);
+	while (entry != NULL && i < *len) {
+		pkgs[i++] = entry->value;
+		entry = it_iter_next(&iter);
+	}
+
+	qsort(pkgs, *len, sizeof(struct mmpkg*), mmpkg_cmp);
+
+	return pkgs;
+}
+
 
 LOCAL_SYMBOL
 struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex,

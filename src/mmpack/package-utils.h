@@ -127,6 +127,9 @@ int binindex_sorted_foreach(struct binindex * binindex,
                             int (* cb)(struct mmpkg*, void*),
                             void * data);
 
+const struct mmpkg** indextable_sorted_pkgs(struct indextable * it,
+                                            int * len);
+
 struct install_state {
 	struct indextable idx;
 };
