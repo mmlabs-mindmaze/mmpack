@@ -46,6 +46,30 @@
       "revId": "5a515b2b392a4c9d0c493f21c22a1fd6a5e3b72e",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8992944b_bc85edf7",
+        "filename": "tests/test_common.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T09:38:40Z",
+      "side": 1,
+      "message": "No, I mean: you changed from moving before/after each test to before/after the whole class call.\nThe before and after each test case, you pushdir(\u0027.\u0027) which means that you move to where you already are.\nIf you\u0027re already there, there is no point going there again.",
+      "parentUuid": "bc6879ef_dbaa4e12",
+      "range": {
+        "startLine": 41,
+        "startChar": 1,
+        "endLine": 45,
+        "endChar": 16
+      },
+      "revId": "5a515b2b392a4c9d0c493f21c22a1fd6a5e3b72e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
