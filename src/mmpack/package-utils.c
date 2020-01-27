@@ -800,6 +800,40 @@ int mmpkg_cmp(const void * v1, const void * v2)
 
 
 /**
+ * install_state_sorted_pkgs - get a sorted array of packages
+ * @is:   struct install_state
+ *
+ * The array is allocated in the heap memory and the caller has the
+ * responsibility to free it.
+ *
+ * Returns: a NULL terminated sorted array of packages
+ */
+LOCAL_SYMBOL
+const struct mmpkg** install_state_sorted_pkgs(struct install_state * is)
+{
+	struct it_iterator iter;
+	struct it_entry* entry;
+	const struct mmpkg ** pkgs;
+	int cnt, i = 0;
+
+	cnt = is->pkg_num;
+	pkgs = xx_malloc(sizeof(*pkgs) * (cnt + 1));
+
+	i = 0;
+	entry = it_iter_first(&iter, &is->idx);
+	while (entry != NULL && i < cnt) {
+		pkgs[i++] = entry->value;
+		entry = it_iter_next(&iter);
+	}
+
+	qsort(pkgs, cnt, sizeof(struct mmpkg*), mmpkg_cmp);
+	pkgs[cnt] = NULL;
+
+	return pkgs;
+}
+
+
+/**
  * binindex_sorted_pkgs - get a sorted array of packages
  * @binindex:    The binindex to get the packages from.
  *
@@ -1946,6 +1980,7 @@ exit:
 LOCAL_SYMBOL
 int install_state_init(struct install_state* state)
 {
+	state->pkg_num = 0;
 	return indextable_init(&state->idx, -1, -1);
 }
 
@@ -2000,6 +2035,7 @@ void install_state_add_pkg(struct install_state* state,
 
 	entry = indextable_lookup_create(&state->idx, pkg->name);
 	entry->value = (void*)pkg;
+	state->pkg_num++;
 }
 
 
@@ -2012,7 +2048,8 @@ LOCAL_SYMBOL
 void install_state_rm_pkgname(struct install_state* state,
                               const mmstr* pkgname)
 {
-	indextable_remove(&state->idx, pkgname);
+	if (!indextable_remove(&state->idx, pkgname))
+		state->pkg_num--;
 }
 
 

@@ -133,6 +133,7 @@ int binindex_sorted_foreach(struct binindex * binindex,
 
 struct install_state {
 	struct indextable idx;
+	int pkg_num;
 };
 
 
@@ -230,6 +231,7 @@ void install_state_add_pkg(struct install_state* state,
 void install_state_rm_pkgname(struct install_state* state,
                               const mmstr* pkgname);
 void install_state_save_to_index(struct install_state* state, FILE* fp);
+const struct mmpkg** install_state_sorted_pkgs(struct install_state * is);
 
 const struct mmpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
                                           const struct mmpkg* pkg,
