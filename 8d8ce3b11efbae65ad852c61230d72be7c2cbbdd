@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "42524a1f_2197296b",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T08:03:28Z",
+      "side": 1,
+      "message": "if you enforce a single split maximum, then you\u0027re not **trying**.\nThis cannot fail like it used to",
+      "range": {
+        "startLine": 325,
+        "startChar": 44,
+        "endLine": 325,
+        "endChar": 45
+      },
+      "revId": "8d8ce3b11efbae65ad852c61230d72be7c2cbbdd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "204674e3_29d1fda4",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T08:03:28Z",
+      "side": 1,
+      "message": "return here, like above ?",
+      "range": {
+        "startLine": 334,
+        "startChar": 8,
+        "endLine": 334,
+        "endChar": 38
+      },
+      "revId": "8d8ce3b11efbae65ad852c61230d72be7c2cbbdd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b00195cc_9f1b9c7b",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T08:03:28Z",
+      "side": 1,
+      "message": "and version:",
+      "range": {
+        "startLine": 361,
+        "startChar": 26,
+        "endLine": 361,
+        "endChar": 43
+      },
+      "revId": "8d8ce3b11efbae65ad852c61230d72be7c2cbbdd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
