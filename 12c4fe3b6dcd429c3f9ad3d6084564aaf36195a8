@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aaaf8a9_ad0e232f",
+        "filename": "tests/test_common.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T07:50:09Z",
+      "side": 1,
+      "message": "naming is overkill.\na comment is quite enough",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 1
+      },
+      "revId": "12c4fe3b6dcd429c3f9ad3d6084564aaf36195a8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
