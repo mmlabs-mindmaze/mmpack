@@ -481,12 +481,17 @@ class SrcPackage:
         remaining files if one of them would trigger the creation of a new
         package.  Eg. a dynamic library will be given its own binary package
         """
+        pkgs = {}
         for hook in MMPACK_BUILD_HOOKS:
-            pkgs = hook.get_dispatch(self.install_files_set)
-            for pkgname, files in pkgs.items():
-                pkg = self._binpkg_get_create(pkgname, 'library')
-                pkg.install_files.update(files)
-                self.install_files_set.difference_update(files)
+            pkgs = hook.get_dispatch(self.install_files_set, pkgs)
+            # remove assigned files from install_files_set
+            for pkginfo in pkgs.values():
+                self.install_files_set.difference_update(pkginfo.files)
+
+        # Create binary packages
+        for pkginfo in pkgs.values():
+            pkg = self._binpkg_get_create(pkginfo.name, 'library')
+            pkg.install_files.update(pkginfo.files)
 
     def _get_fallback_package(self, bin_pkg_name: str) -> BinaryPackage:
         """

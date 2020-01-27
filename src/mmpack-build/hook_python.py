@@ -197,18 +197,15 @@ class MMPackBuildHook(BaseHook):
             # Remove the remainings
             shutil.rmtree(pydir)
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
-        pkgs = dict()
+    def dispatch(self, install_files: Set[str], pkgs: Dict[str, PackageInfo]):
         for file in install_files:
             try:
                 info = _parse_py3_filename(file)
                 mmpack_pkgname = _mmpack_pkg_from_pyimport_name(info.pyname)
-                pkgfiles = pkgs.setdefault(mmpack_pkgname, set())
-                pkgfiles.add(file)
+                pkg = pkgs.setdefault(mmpack_pkgname, PackageInfo(pkgname))
+                pkg.files.add(file)
             except FileNotFoundError:
                 pass
-
-        return pkgs
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
