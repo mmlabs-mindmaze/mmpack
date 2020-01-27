@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9ff32c7_860c903f",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 796,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T14:11:39Z",
+      "side": 1,
+      "message": "why not use pkg_version_compare() here instead ?",
+      "range": {
+        "startLine": 796,
+        "startChar": 8,
+        "endLine": 796,
+        "endChar": 14
+      },
+      "revId": "d13bd45e8ed7eb671b550bbca5055af38dbc7111",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
