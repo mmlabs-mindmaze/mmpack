@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "364be4df_fb279fe2",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-27T16:28:29Z",
+      "side": 1,
+      "message": "This is a detail, however, you could have kept as it was initially",
+      "range": {
+        "startLine": 113,
+        "startChar": 1,
+        "endLine": 115,
+        "endChar": 43
+      },
+      "revId": "5b2e4e1599a224368b0a1c1223f5cf84ad95b3d3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
