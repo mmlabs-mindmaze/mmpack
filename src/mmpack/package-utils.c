@@ -800,6 +800,46 @@ int mmpkg_cmp(const void * v1, const void * v2)
 
 
 /**
+ * install_state_sorted_pkgs - get a sorted array of packages
+ * @is:   struct install_state
+ *
+ * The array is allocated in the heap memory and the caller has the
+ * responsibility to free it.
+ *
+ * Returns: a NULL terminated sorted array of packages
+ */
+LOCAL_SYMBOL
+const struct mmpkg** install_state_sorted_pkgs(struct install_state * is)
+{
+	struct it_iterator iter;
+	struct it_entry* entry;
+	const struct mmpkg ** pkgs;
+	int cnt, i = 0;
+
+	entry = it_iter_first(&iter, &is->idx);
+	while (entry != NULL) {
+		i++;
+		entry = it_iter_next(&iter);
+	}
+
+	cnt = i;
+	pkgs = malloc(sizeof(struct mmpkg) * (cnt + 1));
+
+	i = 0;
+	entry = it_iter_first(&iter, &is->idx);
+	while (entry != NULL && i < cnt) {
+		pkgs[i++] = entry->value;
+		entry = it_iter_next(&iter);
+	}
+
+	qsort(pkgs, cnt, sizeof(struct mmpkg*), mmpkg_cmp);
+	pkgs[cnt] = NULL;
+
+	return pkgs;
+}
+
+
+/**
  * binindex_sorted_pkgs - get a sorted array of packages
  * @binindex:    The binindex to get the packages from.
  *
