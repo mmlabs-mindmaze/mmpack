@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "bc01707d_50af1f20",
+        "filename": "src/mmpack/mmpack-list.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-27T15:30:39Z",
+      "side": 1,
+      "message": "The sorted list will be only for list all or list available.\nI think that would be nice to sort also the other possible subcommand results of list.",
+      "range": {
+        "startLine": 194,
+        "startChar": 1,
+        "endLine": 196,
+        "endChar": 35
+      },
+      "revId": "d13bd45e8ed7eb671b550bbca5055af38dbc7111",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a9ff32c7_860c903f",
         "filename": "src/mmpack/package-utils.c",
         "patchSetId": 2
