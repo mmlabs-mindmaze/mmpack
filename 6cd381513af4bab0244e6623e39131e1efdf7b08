@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "576dd800_4644cedf",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 785,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-27T16:17:45Z",
+      "side": 1,
+      "message": "Why is it LOCAL_SYMBOL and not static?",
+      "range": {
+        "startLine": 784,
+        "startChar": 0,
+        "endLine": 785,
+        "endChar": 47
+      },
+      "revId": "6cd381513af4bab0244e6623e39131e1efdf7b08",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
