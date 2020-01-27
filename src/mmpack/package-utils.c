@@ -799,6 +799,36 @@ int mmpkg_cmp(const void * v1, const void * v2)
 }
 
 
+LOCAL_SYMBOL
+const struct mmpkg** indextable_sorted_pkgs(struct indextable * it,
+                                            int * len)
+{
+	struct it_iterator iter;
+	struct it_entry* entry;
+	const struct mmpkg ** pkgs;
+	int i = 0;
+
+	entry = it_iter_first(&iter, it);
+	while (entry != NULL) {
+		i++;
+		entry = it_iter_next(&iter);
+	}
+
+	*len = i;
+	pkgs = malloc(sizeof(struct mmpkg) * (*len));
+
+	i = 0;
+	entry = it_iter_first(&iter, it);
+	while (entry != NULL && i < *len) {
+		pkgs[i++] = entry->value;
+		entry = it_iter_next(&iter);
+	}
+
+	qsort(pkgs, *len, sizeof(struct mmpkg*), mmpkg_cmp);
+
+	return pkgs;
+}
+
 
 LOCAL_SYMBOL
 struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex,
