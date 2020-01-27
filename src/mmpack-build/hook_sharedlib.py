@@ -114,8 +114,7 @@ class MMPackBuildHook(BaseHook):
             if filetype(filename) == 'elf':
                 self._module.adjust_runpath(filename)
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
-        pkgs = dict()
+    def dispatch(self, install_files: Set[str], pkgs: Dict[str, PackageInfo]):
         for file in install_files:
             if is_dynamic_library(file, self._arch):
                 soname = self._module.soname(file)
@@ -124,9 +123,9 @@ class MMPackBuildHook(BaseHook):
                 # add the soname file to the same package
                 so_filename = os.path.dirname(file) + '/' + soname
 
-                pkgs[binpkgname] = {file, so_filename}
-
-        return pkgs
+                pkg = PackageInfo(binpkgname)
+                pkg.files.update({file, so_filename})
+                pkgs[binpkgname] = pkg
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
