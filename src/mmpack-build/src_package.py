@@ -381,15 +381,7 @@ class SrcPackage:
         package.  Eg. a dynamic library will be given its own binary package
         """
         for hook in MMPACK_BUILD_HOOKS:
-            hook_dispatch_data = hook.get_dispatch(self.install_files_set)
-            for pkgname, files in hook_dispatch_data.items():
-                pkg = pkginfo_get_create(pkgname, pkgs)
-                pkg.files.update(files)
-                self.install_files_set.difference_update(files)
-
-                pkg.description = self.description + '\n'
-                pkg.description += 'automatically generated around SONAME '
-                pkg.description += self.name
+            hook.dispatch(self.install_files_set, pkgs)
 
     def _get_fallback_pkginfo(self,
                               pkgs: Dict[str, PackageInfo]) -> PackageInfo:

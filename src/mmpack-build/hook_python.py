@@ -14,7 +14,7 @@ from typing import Set, Dict, List
 from . base_hook import BaseHook
 from . common import shell, Assert
 from . file_utils import is_python_script
-from . package_info import PackageInfo
+from . package_info import PackageInfo, pkginfo_get_create
 from . provide import Provide, ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
 
@@ -100,6 +100,12 @@ def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
 
     cmd_output = shell(cmd)
     return set(cmd_output.split())
+
+
+def _pykg_desc(src_desc: str, info: PyNameInfo):
+    desc = '{}\nThis contains the python3 package {}'.format(src_desc,
+                                                             info.pyname)
+    return desc
 
 
 #####################################################################
@@ -198,18 +204,20 @@ class MMPackBuildHook(BaseHook):
             # Remove the remainings
             shutil.rmtree(pydir)
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
-        pkgs = dict()
+    def dispatch(self, install_files: Set[str], pkgs: Dict[str, PackageInfo]):
         for file in install_files:
             try:
                 info = _parse_py3_filename(file)
                 mmpack_pkgname = _mmpack_pkg_from_pyimport_name(info.pyname)
-                pkgfiles = pkgs.setdefault(mmpack_pkgname, set())
-                pkgfiles.add(file)
+                pkg = pkginfo_get_create(mmpack_pkgname, pkgs)
+
+                if not pkg.description:
+                    pkg.description = _pypkg_desc(self._src_description, info)
+
+                pkg.files.add(file)
+                install_files.discard(file)
             except FileNotFoundError:
                 pass
-
-        return pkgs
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):

@@ -11,6 +11,7 @@ import re
 from typing import Dict, Set
 
 from . base_hook import BaseHook
+from . package_info import pkginfo_get_create
 
 
 class MMPackBuildHook(BaseHook):
@@ -18,7 +19,7 @@ class MMPackBuildHook(BaseHook):
     Hook tracking internationalization files
     """
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
+    def dispatch(self, install_files: Set[str], pkgs: Dict[str, PackageInfo]):
         """
         Unless specified otherwise in mmpack specs, all internationalization
         files are packaged together in a dedicated package.
@@ -35,12 +36,17 @@ class MMPackBuildHook(BaseHook):
               same files, which will prevent to coinstall those two packages
               (which is the guarantee for a smooth transition).
         """
-        pkgs = dict()
 
-        locales_re = re.compile(r'(usr/|mingw64/)?share/locale/.*')
-        locales_files = {f for f in install_files if locales_re.match(f)}
+        locales = extract_matching_set(r'(usr/|mingw64/)?share/locale/.*',
+                                       install_files)
+        if not locales:
+            return
 
-        if locales_files:
-            pkgs[self._srcname + '-locales'] = locales_files
+        pkgname = self._srcname + '-locales'
+        pkg = pkginfo_get_create(pkgname, pkgs)
+        pkg.files.update(locales_files)
 
-        return pkgs
+        if not pkg.description:
+            pkg.description = self._src_description + \
+                              '\nThis package the translation files.'
+            

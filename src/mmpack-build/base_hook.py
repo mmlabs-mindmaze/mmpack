@@ -41,14 +41,14 @@ class BaseHook:
         # pylint: disable=no-self-use
         return
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
+    def dispatch(self, install_files: Set[str], pkgs: Dict[str, PackageInfo]):
         """
         Called after a project has been compiled and installed locally.
         Look up in installed files and determine for each file, if handled
         by plugin, which package it must be assigned to.
         """
         # pylint: disable=unused-argument, no-self-use
-        return dict()
+        return
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
