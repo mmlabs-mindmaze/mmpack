@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "0aebea5a_9d4b9426",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 29
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "If I understand how ghost packages work, you will deduce the system source pkg name from this field unless the optional \"syspkg-srcnames\" key is defined.\nCorrect ?\nIf so, you should add a comment here.\n\nAlso, I do not believe you have explained that you worked on *\"source names* instead of *binary packages*.\nThis is not trivial: the ghost package itself is ghosting binary packages, not a source name.",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "78a430b5_fd876597",
         "filename": "docs/specs/package-specfile.rst",
         "patchSetId": 29
@@ -94,6 +111,148 @@
     },
     {
       "key": {
+        "uuid": "1924eb42_05b3a711",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 29
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "You should add comments about how you end up with the \"mmpack-hello-world\", \"mmpack-h-w\", and \"mmpack-helloworld\" values.",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb1b1f63_01b7a951",
+        "filename": "src/mmpack-build/base_hook.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "In my mind, overriding the version is an incredibly special case.\nI have yet to make sure it even is legitimate in the case of ghost packages.\nIt cannot be legitimate for other workflows, so you should not present it for anyone to hook into.",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 31
+      },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea0cc70a_031642b4",
+        "filename": "src/mmpack-build/binary_package.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "why not make this one of the parameters ?\nYou know that a binary package is a ghost or not when creating the binary package right away.",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "991245e4_286dbe76",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "I do not like this.\nSee comment above.",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1251ea99_86dc9c75",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "looking here, the specs key could be \"ghost\"",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe40effa_65b117d0",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "see comment in BinaryPackage class: include ghost within the __init__",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80a54a21_dd55aabc",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "just for the fun of it: how do you license the specfiles of a ghost package ?",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f8e6ada_b9325e07",
+        "filename": "src/mmpack-build/syspkg_manager_base.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "what good is this __init__() function ?\nit does not define anything, we cannot declare a SysPkg of anything with it.\n\nAlso (examples)\n - is self.version a string or a mmpack Version class ?\n - is self.source an url or a string ?",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a1b743b7_942421d3",
         "filename": "src/mmpack-build/syspkg_manager_base.py",
         "patchSetId": 29
@@ -111,6 +270,120 @@
         "endLine": 78,
         "endChar": 33
       },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d27c4ad8_935ed308",
+        "filename": "src/mmpack-build/syspkg_manager_dpkg.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "please keep it alphabetical\nshouldn\u0027t this trigger some kind of linter warning ?",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b611e17d_076bd8ca",
+        "filename": "src/mmpack-build/syspkg_manager_dpkg.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d32e7896_c4cc152a",
+        "filename": "src/mmpack-build/syspkg_manager_dpkg.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "if you define a __setattr__ method to DebPkg, you can probably end up with a nicer syntax",
+      "range": {
+        "startLine": 277,
+        "startChar": 19,
+        "endLine": 277,
+        "endChar": 59
+      },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e99badc9_144564a9",
+        "filename": "src/mmpack-build/syspkg_manager_dpkg.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "if you can only split into two, then the last field is also the 2nd one (index 1)\nAre you sure you\u0027re doing what you want ?",
+      "range": {
+        "startLine": 307,
+        "startChar": 15,
+        "endLine": 307,
+        "endChar": 53
+      },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2bbdd6c5_c2981622",
+        "filename": "src/mmpack-build/syspkg_manager_pacman_msys2.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "please add a blank line below",
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "233f8f15_0d2ff59d",
+        "filename": "src/mmpack-build/syspkg_manager_pacman_msys2.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-27T13:23:38Z",
+      "side": 1,
+      "message": "couldn\u0027t this be done more nicely with a os.path.join() ?",
       "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
