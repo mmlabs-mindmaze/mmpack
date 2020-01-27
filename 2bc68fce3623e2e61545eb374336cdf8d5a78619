@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "eae8dcf1_29d70d59",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 813,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-27T16:04:18Z",
+      "side": 1,
+      "message": "Better to use struct install_state* as argument since this is what you actually operate on. Hence rename function to install_state_sorted_pkgs().\n\nAlso, I would not use a int* len argument, just return a NULL terminated array.",
+      "range": {
+        "startLine": 813,
+        "startChar": 21,
+        "endLine": 813,
+        "endChar": 43
+      },
+      "revId": "2bc68fce3623e2e61545eb374336cdf8d5a78619",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0a1ff5d0_cf3dff01",
         "filename": "src/mmpack/package-utils.c",
         "patchSetId": 4
