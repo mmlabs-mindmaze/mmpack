@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b573d468_6199cf52",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-27T09:09:30Z",
+      "side": 1,
+      "message": "ctx-\u003esettings.default_prefix",
+      "range": {
+        "startLine": 113,
+        "startChar": 38,
+        "endLine": 113,
+        "endChar": 42
+      },
+      "revId": "f7160fb35c2f8404957fd1e320a6822b664d4a94",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
