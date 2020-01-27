@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f0b46d96_2074d978",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 777,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-27T15:22:35Z",
+      "side": 0,
+      "message": "unrelated change",
+      "revId": "84983b50c4e9d26f8f9ce0f34e4411f040a4c800",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
