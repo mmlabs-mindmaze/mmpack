@@ -366,21 +366,6 @@ class SrcPackage:
                 errmsg = 'Custom package {0} is empty !'.format(pkgname)
                 raise FileNotFoundError(errmsg)
 
-    def _ventilate_pkg_create(self, data: DispatchData):
-        """
-        first ventilation pass (after custom packages): check amongst the
-        remaining files if one of them would trigger the creation of a new
-        package.  Eg. a dynamic library will be given its own binary package
-        """
-        for hook in MMPACK_BUILD_HOOKS:
-            hook_dispatch_data = hook.get_dispatch(self.install_files_set)
-            for pkgname, files in hook_dispatch_data.items():
-                pkg = data.assign_to_pkg(pkgname, files)
-                if not pkg.description:
-                    pkg.description = self.description + '\n'
-                    pkg.description += 'automatically generated around SONAME '
-                    pkg.description += self.name
-
     def _get_fallback_pkgname(self, pkg_names: Set[str]) -> str:
         """
         if a binary package is already created, use it
@@ -507,7 +492,8 @@ class SrcPackage:
         # specified in specs and continuing with the result of dispatch hooks
         data = DispatchData(self.install_files_set)
         self._ventilate_custom_packages(data)
-        self._ventilate_pkg_create(data)
+        for hook in MMPACK_BUILD_HOOKS:
+            hook.dispatch(data)
 
         for filename in data.unassigned_files.copy():
             if is_binary(filename) or is_exec_manpage(filename):
