@@ -18,7 +18,7 @@ class MMPackBuildHook(BaseHook):
     Hook tracking internationalization files
     """
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
+    def dispatch(self, install_files: Set[str], pkgs: Dict[str, PackageInfo]):
         """
         Unless specified otherwise in mmpack specs, all internationalization
         files are packaged together in a dedicated package.
@@ -35,12 +35,10 @@ class MMPackBuildHook(BaseHook):
               same files, which will prevent to coinstall those two packages
               (which is the guarantee for a smooth transition).
         """
-        pkgs = dict()
-
         locales_re = re.compile(r'share/locale/.*')
         locales_files = {f for f in install_files if locales_re.match(f)}
 
         if locales_files:
-            pkgs[self._srcname + '-locales'] = locales_files
-
-        return pkgs
+            pkgname = self._srcname + '-locales'
+            pkg = pkgs.get(pkgname, PackageInfo(pkgname))
+            pkg.files.update(locales_files)

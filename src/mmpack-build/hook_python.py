@@ -183,16 +183,13 @@ class MMPackBuildHook(BaseHook):
             # Remove the remainings
             shutil.rmtree(pydir)
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
-        pkgs = dict()
+    def dispatch(self, install_files: Set[str], pkgs: Dict[str, PackageInfo]):
         for file in install_files:
             pyname = _get_py3_public_import_name(file)
             if pyname:
                 mmpack_pkgname = _mmpack_pkg_from_pyimport_name(pyname)
-                pkgfiles = pkgs.setdefault(mmpack_pkgname, set())
-                pkgfiles.add(file)
-
-        return pkgs
+                pkg = pkgs.get(pkgname, PackageInfo(pkgname))
+                pkg.files.add(file)
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
