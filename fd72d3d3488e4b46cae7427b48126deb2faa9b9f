@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78a430b5_fd876597",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 29
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-27T12:59:30Z",
+      "side": 1,
+      "message": "suppress",
+      "range": {
+        "startLine": 91,
+        "startChar": 71,
+        "endLine": 91,
+        "endChar": 73
+      },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c6c0d49c_f3bb2809",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 29
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-27T12:59:30Z",
+      "side": 1,
+      "message": "searched",
+      "range": {
+        "startLine": 93,
+        "startChar": 22,
+        "endLine": 93,
+        "endChar": 28
+      },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5fda7fad_e0fef3dc",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 29
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-27T12:59:30Z",
+      "side": 1,
+      "message": "matches",
+      "range": {
+        "startLine": 94,
+        "startChar": 3,
+        "endLine": 94,
+        "endChar": 8
+      },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2bbd202a_50996314",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 29
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-27T12:59:30Z",
+      "side": 1,
+      "message": "used",
+      "range": {
+        "startLine": 94,
+        "startChar": 66,
+        "endLine": 94,
+        "endChar": 68
+      },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1b743b7_942421d3",
+        "filename": "src/mmpack-build/syspkg_manager_base.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-27T12:59:30Z",
+      "side": 1,
+      "message": "Why do we keep these functions (there is such a function behind too) if there are not implemented yet and therefore if we do not need them for now.",
+      "range": {
+        "startLine": 45,
+        "startChar": 4,
+        "endLine": 78,
+        "endChar": 33
+      },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
