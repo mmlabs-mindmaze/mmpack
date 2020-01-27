@@ -12,7 +12,7 @@ from . base_hook import BaseHook
 from . common import shlib_keyname, Assert
 from . file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
-from . package_info import PackageInfo
+from . package_info import PackageInfo, DispatchData
 from . provide import ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
 
@@ -114,19 +114,17 @@ class MMPackBuildHook(BaseHook):
             if filetype(filename) == 'elf':
                 self._module.adjust_runpath(filename)
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
-        pkgs = dict()
-        for file in install_files:
+    def dispatch(self, data: DispatchData):
+        for file in data.unassigned_files.copy():
             if is_dynamic_library(file, self._arch):
                 soname = self._module.soname(file)
                 binpkgname = shlib_keyname(soname)
 
                 # add the soname file to the same package
                 so_filename = os.path.dirname(file) + '/' + soname
+                libfiles = {file, so_filename}
 
-                pkgs[binpkgname] = {file, so_filename}
-
-        return pkgs
+                data.assign_to_pkg(binpkgname, libfiles)
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
