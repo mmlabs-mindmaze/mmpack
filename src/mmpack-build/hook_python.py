@@ -14,7 +14,7 @@ from typing import Set, Dict, List
 from . base_hook import BaseHook
 from . common import shell, Assert
 from . file_utils import is_python_script
-from . package_info import PackageInfo
+from . package_info import PackageInfo, DispatchData
 from . provide import Provide, ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
 
@@ -198,18 +198,14 @@ class MMPackBuildHook(BaseHook):
             # Remove the remainings
             shutil.rmtree(pydir)
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
-        pkgs = dict()
-        for file in install_files:
+    def dispatch(self, data: DispatchData):
+        for file in data.unassigned_files.copy():
             try:
                 info = _parse_py3_filename(file)
                 mmpack_pkgname = _mmpack_pkg_from_pyimport_name(info.pyname)
-                pkgfiles = pkgs.setdefault(mmpack_pkgname, set())
-                pkgfiles.add(file)
+                data.assign_to_pkg(mmpack_pkgname, {file})
             except FileNotFoundError:
                 pass
-
-        return pkgs
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):

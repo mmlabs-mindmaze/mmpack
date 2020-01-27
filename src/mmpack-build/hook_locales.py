@@ -8,9 +8,9 @@ strings
 """
 
 import re
-from typing import Dict, Set
 
 from . base_hook import BaseHook
+from . package_info import DispatchData
 
 
 class MMPackBuildHook(BaseHook):
@@ -18,7 +18,7 @@ class MMPackBuildHook(BaseHook):
     Hook tracking internationalization files
     """
 
-    def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
+    def dispatch(self, data: DispatchData):
         """
         Unless specified otherwise in mmpack specs, all internationalization
         files are packaged together in a dedicated package.
@@ -35,12 +35,9 @@ class MMPackBuildHook(BaseHook):
               same files, which will prevent to coinstall those two packages
               (which is the guarantee for a smooth transition).
         """
-        pkgs = dict()
-
         locales_re = re.compile(r'(usr/|mingw64/)?share/locale/.*')
-        locales_files = {f for f in install_files if locales_re.match(f)}
+        locales = {f for f in data.unassigned_files if locales_re.match(f)}
+        if not locales:
+            return
 
-        if locales_files:
-            pkgs[self._srcname + '-locales'] = locales_files
-
-        return pkgs
+        data.assign_to_pkg(self._srcname + '-locales', locales)
