@@ -119,18 +119,15 @@ int list_available(struct mmpack_ctx* ctx, int argc, const char* argv[])
 static
 int list_installed(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	struct it_iterator iter;
-	struct it_entry* entry;
 	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct mmpkg* pkg;
-	int found = 0;
+	const struct mmpkg ** pkgs, * pkg;
+	int i = 0, found = 0;
 
-	// Loop over the entries of the installed package list
-	entry = it_iter_first(&iter, &ctx->installed.idx);
-	for (; entry != NULL; entry = it_iter_next(&iter)) {
-		pkg = entry->value;
+	pkgs = install_state_sorted_pkgs(&ctx->installed);
+	while ((pkg = pkgs[i++]))
 		found |= print_pkg_if_match(pkg, pattern);
-	}
+
+	free(pkgs);
 
 	return found;
 }
@@ -139,23 +136,17 @@ int list_installed(struct mmpack_ctx* ctx, int argc, const char* argv[])
 static
 int list_extras(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	struct it_iterator iter;
-	struct it_entry* entry;
 	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct mmpkg* pkg;
-	int found = 0;
+	const struct mmpkg ** pkgs, * pkg;
+	int i = 0, found = 0;
 
-	// Loop over the entries of the installed package list
-	entry = it_iter_first(&iter, &ctx->installed.idx);
-	for (; entry != NULL; entry = it_iter_next(&iter)) {
-		pkg = entry->value;
-
-		// Skip if a repo provides this package
-		if (pkg->from_repo)
-			continue;
-
-		found |= print_pkg_if_match(pkg, pattern);
+	pkgs = install_state_sorted_pkgs(&ctx->installed);
+	while ((pkg = pkgs[i++])) {
+		if (!pkg->from_repo)
+			found |= print_pkg_if_match(pkg, pattern);
 	}
+
+	free(pkgs);
 
 	return found;
 }
@@ -164,24 +155,19 @@ int list_extras(struct mmpack_ctx* ctx, int argc, const char* argv[])
 static
 int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	struct it_iterator iter;
-	struct it_entry* entry;
 	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct mmpkg * pkg, * latest;
-	int found = 0;
+	const struct mmpkg ** pkgs, * pkg, * latest;
+	int i = 0, found = 0;
 
-	// Loop over the entries of the installed package list
-	entry = it_iter_first(&iter, &ctx->installed.idx);
-	for (; entry != NULL; entry = it_iter_next(&iter)) {
-		pkg = entry->value;
+	pkgs = install_state_sorted_pkgs(&ctx->installed);
+	while ((pkg = pkgs[i++]))
+		if (binindex_is_pkg_upgradeable(&ctx->binindex, pkg)) {
+			latest = binindex_lookup(&ctx->binindex,
+			                         pkg->name, NULL);
+			found |= print_pkg_if_match(latest, pattern);
+		}
 
-		if (!binindex_is_pkg_upgradeable(&ctx->binindex, pkg))
-			continue;
-
-		latest = binindex_lookup(&ctx->binindex, pkg->name, NULL);
-
-		found |= print_pkg_if_match(latest, pattern);
-	}
+	free(pkgs);
 
 	return found;
 }
