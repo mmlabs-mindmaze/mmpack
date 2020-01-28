@@ -4,6 +4,17 @@
 #include <mmlog.h>
 #include <stdlib.h>
 
+
+static inline
+void* xx_mm_aligned_alloc(size_t alignment, size_t size)
+{
+	void * rv = mm_aligned_alloc(alignment, size);
+	mm_check(rv != NULL);
+
+	return rv;
+}
+
+
 static inline
 void* xx_malloc(size_t size)
 {

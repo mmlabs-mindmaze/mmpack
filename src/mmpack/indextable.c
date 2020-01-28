@@ -299,9 +299,8 @@ int indextable_alloc(struct indextable* table)
 	int i;
 
 	// Perform allocation (align on cacheline)
-	table->buckets = mm_aligned_alloc(64, nmax*sizeof(*(table->buckets)));
-	if (!table->buckets)
-		return -1;
+	table->buckets = xx_mm_aligned_alloc(64,
+	                                     nmax*sizeof(*(table->buckets)));
 
 	// Initialize the heads of bucket lists as unused elements
 	for (i = 0; i < table->num_buckets; i++) {
@@ -440,7 +439,7 @@ int indextable_copy(struct indextable* restrict table,
 	*table = *src;
 
 	size = table->buckets_len_max * sizeof(*table->buckets);
-	table->buckets = mm_aligned_alloc(64, size);
+	table->buckets = xx_mm_aligned_alloc(64, size);
 	memcpy(table->buckets, src->buckets, size);
 
 	return 0;
