@@ -192,6 +192,7 @@ class BinaryPackage:
         pkginfo = PackageInfo(self.name)
         pkginfo.files = self.install_files
         pkginfo.provides = self.provides
+        pkginfo.version = self.version
         return pkginfo
 
     def gen_provides(self):
