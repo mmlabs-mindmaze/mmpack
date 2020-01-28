@@ -1,0 +1,135 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c6abb6da_29fc852c",
+        "filename": "Makefile.am",
+        "patchSetId": 20
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T18:34:18Z",
+      "side": 1,
+      "message": "please keep the list alphabetically ordered",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0471a9e5_b7d2e719",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T18:34:18Z",
+      "side": 1,
+      "message": "you designed this function to be able to fail.\nPlease test it.",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0a61566_4b58ab16",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T18:34:18Z",
+      "side": 1,
+      "message": "You might need to be a bit more tolerant.\nEspecially when we\u0027ll have ghost packages, the names might get arbitrarily longer.\n\nAnyway.\nMost of all you need the version:\n\nx depends on y\u003e\u003d2\n\ninstall y\u003d1\ninstall x  (installs y\u003d2, assume y\u003d1 and y\u003d2 can coexist)\nremove x  (you\u0027re stuck with y\u003d2) since y is in the list",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a60a9a8_fc01974f",
+        "filename": "src/mmpack/utils.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T18:34:18Z",
+      "side": 1,
+      "message": "Is this still really a yaml file ?",
+      "range": {
+        "startLine": 40,
+        "startChar": 46,
+        "endLine": 40,
+        "endChar": 50
+      },
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2207d0bf_d5a91d94",
+        "filename": "src/mmpack/utils.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T18:34:18Z",
+      "side": 1,
+      "message": "manually-installed.yaml\n\n\u0027-\u0027 \u003e \u0027_\u0027\n(I like dashes)",
+      "range": {
+        "startLine": 40,
+        "startChar": 35,
+        "endLine": 40,
+        "endChar": 36
+      },
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d219fc2e_90b5dd0e",
+        "filename": "tests/smoke-tests/test_manually_installed.sh",
+        "patchSetId": 20
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T18:34:18Z",
+      "side": 1,
+      "message": "In terms of naming, you kind of introduced the \"test_mmpack\" prefix for all the test files regarding smoke test scripts calling mmpack.",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f1db1c7_48bdcbdc",
+        "filename": "tests/smoke-tests/test_manually_installed.sh",
+        "patchSetId": 20
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T18:34:18Z",
+      "side": 1,
+      "message": "please remove the trailing blank lines",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
