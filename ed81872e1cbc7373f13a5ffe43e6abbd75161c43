@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87b7f695_7566d139",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 825,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T15:57:21Z",
+      "side": 1,
+      "message": "Use xx_malloc() from xx-alloc.h... Then, you can assume the function will not fail",
+      "range": {
+        "startLine": 825,
+        "startChar": 8,
+        "endLine": 825,
+        "endChar": 14
+      },
+      "revId": "ed81872e1cbc7373f13a5ffe43e6abbd75161c43",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0283578a_b0fd7912",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T15:57:21Z",
+      "side": 1,
+      "message": "Since pkg cannot be NULL:\nfor (i \u003d 0; pkg[i] !\u003d NULL; i++)",
+      "range": {
+        "startLine": 850,
+        "startChar": 1,
+        "endLine": 850,
+        "endChar": 34
+      },
+      "revId": "ed81872e1cbc7373f13a5ffe43e6abbd75161c43",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
