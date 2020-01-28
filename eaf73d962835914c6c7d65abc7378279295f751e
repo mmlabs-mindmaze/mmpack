@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "026d0e26_89ffe3b1",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 826,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T23:25:35Z",
+      "side": 1,
+      "message": "I did not noticed before, but this should be struct mmpkg* instead of struct mmpkg... Alternatively you can use the idiom\npkgs \u003d xx_malloc(sizeof(*pkgs) * (cnt + 1));",
+      "range": {
+        "startLine": 826,
+        "startChar": 25,
+        "endLine": 826,
+        "endChar": 37
+      },
+      "revId": "eaf73d962835914c6c7d65abc7378279295f751e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
