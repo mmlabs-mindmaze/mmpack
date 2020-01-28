@@ -125,6 +125,8 @@ mmpack_lib_sources = \
 	src/mmpack/indextable.h \
 	src/mmpack/manually_installed.c \
 	src/mmpack/manually_installed.h \
+	src/mmpack/mmpack-autoremove.c \
+	src/mmpack/mmpack-autoremove.h \
 	src/mmpack/mmpack-check-integrity.c \
 	src/mmpack/mmpack-check-integrity.h \
 	src/mmpack/mmpack-download.c \
@@ -429,6 +431,7 @@ dist_completion_DATA = \
 
 RST_MAN_PAGES = \
 	docs/man/mmpack.rst \
+	docs/man/mmpack-autoremove.rst \
 	docs/man/mmpack-build.rst \
 	docs/man/mmpack-build-builddep.rst \
 	docs/man/mmpack-build-clean.rst \
