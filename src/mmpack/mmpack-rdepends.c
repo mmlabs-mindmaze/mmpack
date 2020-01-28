@@ -26,10 +26,10 @@
 static int recursive = 0;
 static const char* repo_name = NULL;
 
-static const struct mmarg_opt cmdline_optv[] = {
-	{"repo", MMOPT_NEEDSTR, NULL, {.sptr = &repo_name},
+static const struct mm_arg_opt cmdline_optv[] = {
+	{"repo", MM_OPT_NEEDSTR, NULL, {.sptr = &repo_name},
 	 "Specify @REPO_NAME as the address of package repository"},
-	{"r|recursive", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &recursive},
+	{"r|recursive", MM_OPT_NOVAL|MM_OPT_INT, "1", {.iptr = &recursive},
 	 "Print recursively the reverse dependencies"},
 };
 
@@ -144,16 +144,16 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	int arg_index, rv = -1;
 	struct list_pkgs * rdep_list = NULL;
 
-	struct mmarg_parser parser = {
-		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
+	struct mm_arg_parser parser = {
+		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.args_doc = RDEPENDS_SYNOPSIS,
 		.optv = cmdline_optv,
 		.num_opt = MM_NELEM(cmdline_optv),
 		.execname = "mmpack",
 	};
 
-	arg_index = mmarg_parse(&parser, argc, (char**)argv);
-	if (mmarg_is_completing()) {
+	arg_index = mm_arg_parse(&parser, argc, (char**)argv);
+	if (mm_arg_is_completing()) {
 		if (arg_index + 1 < argc)
 			return 0;
 

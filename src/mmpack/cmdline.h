@@ -27,11 +27,11 @@ struct subcmd {
 /**
  * struct subcmd_parser - subcmd and option parser configuration
  * @num_opt:    number of element in @optv.
- * @optv:       array of option supported. same as in struct mmarg_parser
+ * @optv:       array of option supported. same as in struct mm_arg_parser
  * @args_doc:   lines of synopsis of program usage (excluding program name).
  *              This can support multiple line (like for different case of
  *              invocation). Can be NULL.
- * @doc:        document of the program. same as in struct mmarg_parser
+ * @doc:        document of the program. same as in struct mm_arg_parser
  * @execname:   name of executable. You are invited to set it to argv[0]. If
  *              NULL, "PROGRAM" will be used instead for synopsis
  * @num_subcmd: number of element in @subcmds array
@@ -42,7 +42,7 @@ struct subcmd {
  */
 struct subcmd_parser {
 	int num_opt;
-	const struct mmarg_opt* optv;
+	const struct mm_arg_opt* optv;
 	const char* doc;
 	const char* args_doc;
 	const char* execname;
