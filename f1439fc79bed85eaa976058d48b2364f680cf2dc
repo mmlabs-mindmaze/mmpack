@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5adc3c10_40ab7c54",
+        "filename": "src/mmpack-build/base_hook.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T18:18:50Z",
+      "side": 1,
+      "message": "looking at the jenkins report, this is obviously not the same.\nI\u0027m guessing the idea is to have a wildcard that is lower than anything, is that it ?\n\"any\" should work.",
+      "revId": "f1439fc79bed85eaa976058d48b2364f680cf2dc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
