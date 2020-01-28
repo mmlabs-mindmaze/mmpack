@@ -29,8 +29,8 @@ static char remove_doc[] =
 	"before proceeding (default answer is negative). "
 	"Otherwise it will proceed to the removal.";
 
-static const struct mmarg_opt cmdline_optv[] = {
-	{"y|assume-yes", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &is_yes_assumed},
+static const struct mm_arg_opt cmdline_optv[] = {
+	{"y|assume-yes", MM_OPT_NOVAL|MM_OPT_INT, "1", {.iptr = &is_yes_assumed},
 	 "assume \"yes\" as answer to all prompts and run non-interactively"},
 };
 
@@ -67,8 +67,8 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	int i, nreq, arg_index, rv = -1;
 	const char** req_args;
 
-	struct mmarg_parser parser = {
-		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
+	struct mm_arg_parser parser = {
+		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.doc = remove_doc,
 		.args_doc = REMOVE_SYNOPSIS,
 		.optv = cmdline_optv,
@@ -76,8 +76,8 @@ int mmpack_remove(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		.execname = "mmpack",
 	};
 
-	arg_index = mmarg_parse(&parser, argc, (char**)argv);
-	if (mmarg_is_completing())
+	arg_index = mm_arg_parse(&parser, argc, (char**)argv);
+	if (mm_arg_is_completing())
 		return complete_pkgname(ctx, argv[argc-1], ONLY_INSTALLED);
 
 	if (arg_index+1 > argc) {

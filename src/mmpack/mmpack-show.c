@@ -75,7 +75,7 @@ int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct cb_data data;
 
-	if (mmarg_is_completing()) {
+	if (mm_arg_is_completing()) {
 		if (argc != 2)
 			return 0;
 

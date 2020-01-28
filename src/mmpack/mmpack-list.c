@@ -225,7 +225,7 @@ int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return -1;
 
 	/* If completing, nothing should be further displayed */
-	if (mmarg_is_completing())
+	if (mm_arg_is_completing())
 		return 0;
 
 	if (argc > 2) {

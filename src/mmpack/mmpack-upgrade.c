@@ -24,8 +24,8 @@ static char upgrade_doc[] =
 	"if no package is given";
 
 
-static const struct mmarg_opt cmdline_optv[] = {
-	{"y|assume-yes", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &is_yes_assumed},
+static const struct mm_arg_opt cmdline_optv[] = {
+	{"y|assume-yes", MM_OPT_NOVAL|MM_OPT_INT, "1", {.iptr = &is_yes_assumed},
 	 "assume \"yes\" as answer to all prompts and run non-interactively"},
 };
 
@@ -171,8 +171,8 @@ int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	int nreq, arg_index, rv;
 	const char** req_args;
 	struct pkg_request* reqlist;
-	struct mmarg_parser parser = {
-		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
+	struct mm_arg_parser parser = {
+		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.doc = upgrade_doc,
 		.args_doc = UPGRADE_SYNOPSIS,
 		.optv = cmdline_optv,
@@ -180,10 +180,10 @@ int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 		.execname = "mmpack",
 	};
 
-	arg_index = mmarg_parse(&parser, argc, (char**)argv);
+	arg_index = mm_arg_parse(&parser, argc, (char**)argv);
 	nreq = argc - arg_index;
 	req_args = argv + arg_index;
-	if (mmarg_is_completing())
+	if (mm_arg_is_completing())
 		return complete_pkgname(ctx, argv[argc-1], ONLY_INSTALLED);
 
 	/* Load prefix configuration and caches */
