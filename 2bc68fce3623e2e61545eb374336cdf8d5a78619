@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "295bdb92_04cfe056",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 813,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-28T10:16:22Z",
+      "side": 1,
+      "message": "To be coherent, I think that the function in the previous commit should also not return len, and only return a NULL terminated array.",
+      "parentUuid": "4f6fb4bb_4e3b6925",
+      "range": {
+        "startLine": 813,
+        "startChar": 21,
+        "endLine": 813,
+        "endChar": 43
+      },
+      "revId": "2bc68fce3623e2e61545eb374336cdf8d5a78619",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0a1ff5d0_cf3dff01",
         "filename": "src/mmpack/package-utils.c",
         "patchSetId": 4
