@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "9771e34e_470af641",
+        "filename": "src/mmpack/action-solver.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1021,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T16:25:34Z",
+      "side": 1,
+      "message": "strset_add() can fail for so many reasons that it still is a good idea to check for failure.\nMore generally, as long as strset_add() will return an integer that canbe either 0 or -1, then you absolutely MUST check for failure.\n\nAlso, adding an xx_aligned_alloc() is not necessary, and is unrelated to this commit.\n... most probably only good for the indextable\n... almost certainly overkill in all other situations anyway.",
+      "parentUuid": "b866085f_557f3b8e",
+      "range": {
+        "startLine": 1021,
+        "startChar": 2,
+        "endLine": 1021,
+        "endChar": 59
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "72475189_f187911d",
         "filename": "src/mmpack/action-solver.c",
         "patchSetId": 17
