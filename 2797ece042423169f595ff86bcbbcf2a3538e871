@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a95e1e4b_448370f9",
+        "filename": "src/mmpack-build/base_hook.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T16:40:39Z",
+      "side": 1,
+      "message": "Not that I can find an issue with this, but why did you choose to use the any wildcard here ?",
+      "range": {
+        "startLine": 21,
+        "startChar": 23,
+        "endLine": 21,
+        "endChar": 37
+      },
+      "revId": "2797ece042423169f595ff86bcbbcf2a3538e871",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
