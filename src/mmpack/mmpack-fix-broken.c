@@ -110,17 +110,17 @@ int mmpack_fix_broken(struct mmpack_ctx * ctx, int argc, const char ** argv)
 	const char** req_args;
 	mmstr * pkg_name;
 	struct cb_data data = {.ctx = ctx};
-	struct mmarg_parser parser = {
-		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
+	struct mm_arg_parser parser = {
+		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.doc = fix_broken_doc,
 		.args_doc = FIX_BROKEN_SYNOPSIS,
 		.execname = "mmpack",
 	};
 
-	arg_index = mmarg_parse(&parser, argc, (char**)argv);
+	arg_index = mm_arg_parse(&parser, argc, (char**)argv);
 	nreq = argc - arg_index;
 	req_args = argv + arg_index;
-	if (mmarg_is_completing())
+	if (mm_arg_is_completing())
 		return complete_pkgname(ctx, argv[argc-1], ONLY_INSTALLED);
 
 	/* Load prefix configuration and caches */

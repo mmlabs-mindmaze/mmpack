@@ -53,7 +53,7 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// argument to the shell. However the prefix in use must be reported.
 	// Hence we report a first string identifying the action to perform and
 	// then prefix path is reported.
-	if (mmarg_is_completing()) {
+	if (mm_arg_is_completing()) {
 		printf("execute_run_completion\n");
 		printf("%s\n", ctx->prefix);
 		return 0;

@@ -62,10 +62,10 @@ mmstr* mmstr_join_path(mmstr* restrict dst,
 
 int open_file_in_prefix(const mmstr* prefix, const mmstr* relpath, int oflag);
 
-void report_user_and_log(int mmlog_level, const char* fmt, ...);
+void report_user_and_log(int mm_log_level, const char* fmt, ...);
 
-#define info(fmt, ...) report_user_and_log(MMLOG_INFO, fmt, ## __VA_ARGS__)
-#define error(fmt, ...) report_user_and_log(MMLOG_ERROR, fmt, ## __VA_ARGS__)
+#define info(fmt, ...) report_user_and_log(MM_LOG_INFO, fmt, ## __VA_ARGS__)
+#define error(fmt, ...) report_user_and_log(MM_LOG_ERROR, fmt, ## __VA_ARGS__)
 
 int prompt_user_confirm(void);
 

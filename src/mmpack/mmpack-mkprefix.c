@@ -32,12 +32,12 @@ static char mkprefix_doc[] =
 	"URL. If you do not enter a NAME, your url will have \"default\" as "
 	"short name. If NAME is set but not URL an error is returned.";
 
-static const struct mmarg_opt cmdline_optv[] = {
-	{"f|force", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &force_mkprefix},
+static const struct mm_arg_opt cmdline_optv[] = {
+	{"f|force", MM_OPT_NOVAL|MM_OPT_INT, "1", {.iptr = &force_mkprefix},
 	 "Force setting up prefix folder even if it was already setup"},
-	{"url", MMOPT_NEEDSTR, NULL, {.sptr = &repo_url},
+	{"url", MM_OPT_NEEDSTR, NULL, {.sptr = &repo_url},
 	 "Specify @URL as the address of package repository"},
-	{"name", MMOPT_NEEDSTR, NULL, {.sptr = &repo_name},
+	{"name", MM_OPT_NEEDSTR, NULL, {.sptr = &repo_name},
 	 "Specify @NAME as a nickname for the url specified"},
 };
 
@@ -94,8 +94,8 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	int arg_index;
 	const mmstr* prefix;
-	struct mmarg_parser parser = {
-		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
+	struct mm_arg_parser parser = {
+		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.doc = mkprefix_doc,
 		.args_doc = MKPREFIX_SYNOPSIS,
 		.optv = cmdline_optv,
@@ -105,13 +105,13 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	struct repolist* repo_list = &ctx->settings.repo_list;
 	struct repolist_elt * repo;
 
-	arg_index = mmarg_parse(&parser, argc, (char**)argv);
-	if (mmarg_is_completing()) {
+	arg_index = mm_arg_parse(&parser, argc, (char**)argv);
+	if (mm_arg_is_completing()) {
 		if (arg_index+1 < argc)
 			return 0;
 
-		return mmarg_complete_path(argv[arg_index],
-		                           MM_DT_DIR, NULL, NULL);
+		return mm_arg_complete_path(argv[arg_index],
+		                            MM_DT_DIR, NULL, NULL);
 	}
 
 	prefix = ctx->prefix;

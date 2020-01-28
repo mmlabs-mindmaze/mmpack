@@ -72,7 +72,7 @@ AC_CHECK_PROG(SCAN_BUILD_6, [scan-build-6.0], [yes], [no])
 AM_CONDITIONAL(HAVE_SCAN_BUILD_6, [test "x$SCAN_BUILD_6" = xyes])
 
 # Check for libraries
-MM_CHECK_LIB([mmthr_create], [mmlib], MMLIB, [], [AC_MSG_ERROR([mmlib library required])])
+MM_CHECK_LIB([mm_thr_create], [mmlib], MMLIB, [], [AC_MSG_ERROR([mmlib library required])])
 MM_CHECK_LIB([yaml_parser_initialize], [yaml], YAML, [], [AC_MSG_ERROR([yaml library required])])
 MM_CHECK_LIB([curl_easy_init], [curl], CURL, [], [AC_MSG_ERROR([curl library required])])
 PKG_CHECK_MODULES_EXT(LIBARCHIVE, [libarchive], [], [AC_MSG_ERROR([libarchive library required])])

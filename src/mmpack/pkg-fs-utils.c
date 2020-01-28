@@ -795,7 +795,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 
 		if (!from->repo) {
 			act->pathname = mmstrdup(from->filename);
-			mmlog_info(
+			mm_log_info(
 				"Going to install %s (%s) directly from file",
 				pkg->name,
 				pkg->version);
@@ -809,8 +809,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		// Skip if there is a valid package already downloaded
 		if (mm_check_access(mpkfile, F_OK) == 0
 		    && check_file_pkg(from->sha256, NULL, mpkfile) == 0) {
-			mmlog_info("Going to install %s (%s) from cache",
-			           pkg->name, pkg->version);
+			mm_log_info("Going to install %s (%s) from cache",
+			            pkg->name, pkg->version);
 			continue;
 		}
 
@@ -849,7 +849,7 @@ int install_package(struct mmpack_ctx* ctx,
 
 	info("Installing package %s (%s)... ", pkg->name, pkg->version);
 
-	mmlog_info("\tsumsha: %s", pkg->sumsha);
+	mm_log_info("\tsumsha: %s", pkg->sumsha);
 
 	rv = pkg_unpack_files(pkg, mpkfile, NULL);
 	if (rv) {

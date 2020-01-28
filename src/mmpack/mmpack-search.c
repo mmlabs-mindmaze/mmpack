@@ -54,7 +54,7 @@ int mmpack_search(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct cb_data data;
 
-	if (mmarg_is_completing())
+	if (mm_arg_is_completing())
 		return 0;
 
 	if (argc != 2
