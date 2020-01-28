@@ -485,3 +485,22 @@ int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags)
 
 	return mmpack_ctx_init_pkglist(ctx);
 }
+
+
+LOCAL_SYMBOL
+int installed_pkgs_foreach(struct mmpack_ctx * ctx,
+                           int (* cb)(struct mmpkg*, void*),
+                           void * data)
+{
+	struct it_iterator iter;
+	struct it_entry * entry;
+	struct mmpkg * pkg;
+
+	for (entry = it_iter_first(&iter, &(ctx->installed.idx)); entry;
+	     entry = it_iter_next(&iter)) {
+		pkg = entry->value;
+		cb(pkg, data);
+	}
+
+	return 0;
+}
