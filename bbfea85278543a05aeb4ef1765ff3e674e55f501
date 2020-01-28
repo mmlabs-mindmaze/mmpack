@@ -145,6 +145,30 @@
     },
     {
       "key": {
+        "uuid": "11d83835_e361374c",
+        "filename": "src/mmpack/action-solver.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1021,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T16:59:44Z",
+      "side": 1,
+      "message": "Pas de pierre : pas de construction.\nPas de construction : pas de palais.\nPas de palais : … pas de palais.",
+      "parentUuid": "2b707b65_0abcbf17",
+      "range": {
+        "startLine": 1021,
+        "startChar": 2,
+        "endLine": 1021,
+        "endChar": 59
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "72475189_f187911d",
         "filename": "src/mmpack/action-solver.c",
         "patchSetId": 17
