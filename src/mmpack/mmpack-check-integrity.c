@@ -110,7 +110,7 @@ int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc,
 		.error = 0,
 	};
 
-	if (mmarg_is_completing()) {
+	if (mm_arg_is_completing()) {
 		// Complete only first command argument and if not empty
 		if (argc != 2 || argv[1][0] == '\0')
 			return 0;

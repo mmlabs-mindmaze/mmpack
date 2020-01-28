@@ -40,14 +40,14 @@ void subcmd_complete_arg(const struct subcmd_parser* parser, const char* arg)
  * @p_argc:     pointer to argument count (used as input and output)
  * @p_argv:     pointer to argument array (used as input and output)
  *
- * This function extents the functionality provided by mmarg_parse() from
+ * This function extents the functionality provided by mm_arg_parse() from
  * mmlib. It parses the command line option and try to match the first
  * non-option argument to one of the subcmd listed in @parser->subcmds. If
  * no sub command if found on command line, the string pointed by
  * @parser->defcmd, if not NULL, will be interpreted as the provided sub
  * command.
  *
- * If mmarg_is_completing() reports that the shell completion is requested,
+ * If mm_arg_is_completing() reports that the shell completion is requested,
  * the function will complete the options and possibly the sub command if
  * last argument in array is being parsed. In such a case, the function will
  * exit the program. If the last argument as not been parsed by the
@@ -67,8 +67,8 @@ LOCAL_SYMBOL
 const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
                                   int* p_argc, const char*** p_argv)
 {
-	struct mmarg_parser argparser = {
-		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
+	struct mm_arg_parser argparser = {
+		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.num_opt = parser->num_opt,
 		.optv = parser->optv,
 		.doc = parser->doc,
@@ -82,14 +82,14 @@ const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
 	const struct subcmd* subcmd = NULL;
 
 	/* Parse command line options */
-	arg_index = mmarg_parse(&argparser, argc, (char**)argv);
+	arg_index = mm_arg_parse(&argparser, argc, (char**)argv);
 	if (arg_index < 0)
 		return NULL;
 
 	/* Run completion if last argument and completion requested */
-	if (mmarg_is_completing() && (arg_index == argc-1)) {
+	if (mm_arg_is_completing() && (arg_index == argc-1)) {
 		subcmd_complete_arg(parser, argv[argc-1]);
-		mmarg_parse_complete(&argparser, argv[argc-1]);
+		mm_arg_parse_complete(&argparser, argv[argc-1]);
 		exit(EXIT_SUCCESS);
 	}
 

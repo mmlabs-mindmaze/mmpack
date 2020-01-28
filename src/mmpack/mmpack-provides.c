@@ -24,8 +24,8 @@ static char provides_doc[] =
 	"\"mmpack provides\" uses the repository file/package database "
 	"to help knowing which package provides given file or command.";
 
-static const struct mmarg_opt cmdline_optv[] = {
-	{"u|update", MMOPT_NOVAL|MMOPT_INT, "1", {.iptr = &update_db},
+static const struct mm_arg_opt cmdline_optv[] = {
+	{"u|update", MM_OPT_NOVAL|MM_OPT_INT, "1", {.iptr = &update_db},
 	 "update local database of file/package correspondence"},
 };
 
@@ -201,8 +201,8 @@ int mmpack_provides(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	int rv = -1;
 	const char** req_args;
 	struct indextable file_db_index;
-	struct mmarg_parser parser = {
-		.flags = mmarg_is_completing() ? MMARG_PARSER_COMPLETION : 0,
+	struct mm_arg_parser parser = {
+		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.doc = provides_doc,
 		.args_doc = PROVIDES_SYNOPSIS,
 		.optv = cmdline_optv,
@@ -210,8 +210,8 @@ int mmpack_provides(struct mmpack_ctx * ctx, int argc, char const ** argv)
 		.execname = "mmpack",
 	};
 
-	arg_index = mmarg_parse(&parser, argc, (char**)argv);
-	if (mmarg_is_completing())
+	arg_index = mm_arg_parse(&parser, argc, (char**)argv);
+	if (mm_arg_is_completing())
 		return 0;
 
 	nreq = argc - arg_index;
