@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "2b707b65_0abcbf17",
+        "filename": "src/mmpack/action-solver.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1021,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-28T16:52:42Z",
+      "side": 1,
+      "message": "Looking at the code, the only case of failure for strset_add I see is when there is an allocation error.\n\nI have the feeling that:\n- strset_add fails only if indextable_lookup_create fails.\n- indextable_lookup_create fails only if indextable_lookup_create_default fails.\n- indextable_lookup_create fails only if indextable_double_size fails.\n- indextable_double_size fails only if indextable_alloc fails.\n- indextable_alloc fails only if indextable_alloc fails.",
+      "parentUuid": "9771e34e_470af641",
+      "range": {
+        "startLine": 1021,
+        "startChar": 2,
+        "endLine": 1021,
+        "endChar": 59
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "72475189_f187911d",
         "filename": "src/mmpack/action-solver.c",
         "patchSetId": 17
