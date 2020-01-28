@@ -46,6 +46,29 @@
       "revId": "6cf50df274980c7b31105228b8f7c73fbdba2e06",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b504e74_a660daef",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 825,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T23:25:29Z",
+      "side": 1,
+      "message": "Left unnoticed until now:\nThis should be the pointer type... To avoid mistake, I usually do sizeof(*pkgs)",
+      "range": {
+        "startLine": 825,
+        "startChar": 25,
+        "endLine": 825,
+        "endChar": 37
+      },
+      "revId": "6cf50df274980c7b31105228b8f7c73fbdba2e06",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
