@@ -1,5 +1,6 @@
 man_pages_sources = [
     'man/mmpack.rst',
+    'man/mmpack-autoremove.rst',
     'man/mmpack-build.rst',
     'man/mmpack-build-builddep.rst',
     'man/mmpack-build-clean.rst',
