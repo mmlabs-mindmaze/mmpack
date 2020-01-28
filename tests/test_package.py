@@ -56,6 +56,7 @@ class TestSrcPackageClass(unittest.TestCase):
 
         # test the overloaded and custom packages
         # This does not include the implicit packages
+        test_pkg._parse_specfile_binpkgs()
         ref_pkg_list_name = ['full', 'custom-package']
         test_pkg_list_name = test_pkg._packages.keys()
         self.assertEqual(len(test_pkg._packages), 2)
