@@ -119,8 +119,8 @@ const mmstr* get_msys2_root(void)
 
 	buffer_init(&cmd_output);
 	if (execute_cmd_capture_output(argv, &cmd_output)) {
-		mmlog_warn("Could not execute cygpath. Assuming MSYS2 root"
-		           " is "DEFAULT_MSYS2);
+		mm_log_warn("Could not execute cygpath. Assuming MSYS2 root"
+		            " is "DEFAULT_MSYS2);
 		mmstrcpy_cstr(msys2_root, DEFAULT_MSYS2);
 		goto exit;
 	}
@@ -197,7 +197,7 @@ int read_pkgname(const mmstr* descpath, struct strset* instpkgs)
 static
 int pacman_populate_instpkgs(struct strset* instpkgs, const mmstr* path)
 {
-	MMDIR* dir;
+	MM_DIR* dir;
 	const struct mm_dirent* dirent;
 	mmstr* descpath = NULL;
 	mmstr* name = NULL;

@@ -223,7 +223,7 @@ int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 		mmstr_dirname(dirpath, path);
 		if (mm_mkdir(dirpath, 0777, MM_RECURSIVE)) {
 			fprintf(stderr, "Create parent dir of %s failed: %s\n",
-			        path, mmstrerror(mm_get_lasterror_number()));
+			        path, mm_strerror(mm_get_lasterror_number()));
 			goto exit;
 		}
 	}
@@ -232,7 +232,7 @@ int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 	fd = mm_open(path, oflag, 0666);
 	if (fd < 0)
 		fprintf(stderr, "Failed to open %s: %s\n",
-		        path, mmstrerror(mm_get_lasterror_number()));
+		        path, mm_strerror(mm_get_lasterror_number()));
 
 exit:
 
@@ -526,7 +526,7 @@ int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent,
 exit:
 	mmstr_freea(fullpath);
 	if (rv == -1)
-		mmlog_error("Cannot compute SHA-256 of %s", filename);
+		mm_log_error("Cannot compute SHA-256 of %s", filename);
 
 	return rv;
 }
@@ -595,7 +595,7 @@ int prompt_user_confirm(void)
 
 /**
  * report_user_and_log() - print message to user and log it
- * @mmlog_level:        mmlog level to set to the logged message
+ * @mm_log_level:        mmlog level to set to the logged message
  * @fmt:                printf-like format string
  *
  * This function format a message duplicates it both to standard output for
@@ -609,7 +609,7 @@ int prompt_user_confirm(void)
  * one-liners.
  */
 LOCAL_SYMBOL
-void report_user_and_log(int mmlog_level, const char* fmt, ...)
+void report_user_and_log(int mm_log_level, const char* fmt, ...)
 {
 	char msg[MSG_MAXLEN+2];
 	int lastchar_idx, msglen, has_lf;
@@ -617,7 +617,7 @@ void report_user_and_log(int mmlog_level, const char* fmt, ...)
 
 	// If command completion is running, do not produce anything on
 	// standard output or standard error
-	if (mmarg_is_completing())
+	if (mm_arg_is_completing())
 		return;
 
 	va_start(ap, fmt);
@@ -637,7 +637,7 @@ void report_user_and_log(int mmlog_level, const char* fmt, ...)
 		msg[lastchar_idx] = '\0';
 
 	// log message with mmlog (to STDERR)
-	mmlog_log(mmlog_level, PACKAGE_NAME, msg);
+	mm_log(mm_log_level, PACKAGE_NAME, msg);
 
 	// restore trailing linefeed if there was one
 	if (has_lf)
