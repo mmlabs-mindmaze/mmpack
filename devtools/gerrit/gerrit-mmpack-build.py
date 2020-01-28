@@ -331,6 +331,8 @@ def process_event(event, tmpdir):
         # upload packages to repository
         dstdir = os.path.join(CONFIG['repository-root-path'], node.name)
         node.exec('mkdir -p ' + dstdir)
+        # copy source package
+        shutil.copy(srctarball.srctar, dstdir)
         # Copy binary packages
         for filename in glob(tmpdir + '/*-{}.mpk'.format(node.name)):
             shutil.copy(os.path.join(tmpdir, filename), dstdir)
