@@ -34,13 +34,7 @@ static const struct mmarg_opt cmdline_optv[] = {
 };
 
 
-struct list_pkgs {
-	struct mmpkg const * pkg;
-	struct list_pkgs * next;
-};
-
-
-static
+LOCAL_SYMBOL
 void add_elt_list_pkgs(struct list_pkgs ** list, struct mmpkg const * pkg)
 {
 	struct list_pkgs * elt = malloc(sizeof(struct list_pkgs));
@@ -52,7 +46,7 @@ void add_elt_list_pkgs(struct list_pkgs ** list, struct mmpkg const * pkg)
 }
 
 
-static
+LOCAL_SYMBOL
 int search_elt_list_pkgs(struct list_pkgs * list, struct mmpkg const * pkg)
 {
 	struct list_pkgs * curr;
@@ -66,7 +60,7 @@ int search_elt_list_pkgs(struct list_pkgs * list, struct mmpkg const * pkg)
 }
 
 
-static
+LOCAL_SYMBOL
 void destroy_all_elt(struct list_pkgs ** list)
 {
 	struct list_pkgs * next;
@@ -91,11 +85,12 @@ void dump_reverse_dependencies(struct list_pkgs * list)
 }
 
 
-static
+LOCAL_SYMBOL
 int find_reverse_dependencies(struct binindex binindex,
                               struct mmpkg const* pkg,
                               const struct repolist_elt * repo,
-                              struct list_pkgs** rdep_list)
+                              struct list_pkgs** rdep_list,
+                              int rec)
 {
 	struct rdeps_iter rdep_it;
 	struct mmpkg * rdep;
@@ -115,9 +110,9 @@ int find_reverse_dependencies(struct binindex binindex,
 		if (search_elt_list_pkgs(*rdep_list, rdep))
 			add_elt_list_pkgs(rdep_list, rdep);
 
-		if (recursive)
+		if (rec)
 			find_reverse_dependencies(binindex, rdep, repo,
-			                          rdep_list);
+			                          rdep_list, rec);
 	}
 
 	return 0;
@@ -189,7 +184,8 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		}
 	}
 
-	if (find_reverse_dependencies(ctx->binindex, pkg, repo, &rdep_list)) {
+	if (find_reverse_dependencies(ctx->binindex, pkg, repo, &rdep_list, 
+	                              recursive)) {
 		printf("No package found\n");
 		goto exit;
 	}

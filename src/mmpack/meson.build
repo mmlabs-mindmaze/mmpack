@@ -12,6 +12,8 @@ mmpack_lib_sources = files(
 	'indextable.h',
 	'manually_installed.c',
 	'manually_installed.h',
+	'mmpack-autoremove.c',
+	'mmpack-autoremove.h',
 	'mmpack-check-integrity.c',
 	'mmpack-check-integrity.h',
 	'mmpack-download.c',
