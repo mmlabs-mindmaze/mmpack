@@ -12,14 +12,12 @@ from . base_hook import BaseHook, PackageInfo
 from . common import shlib_keyname, Assert
 from . file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
-from . mm_version import Version
 from . provide import ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
 
 
 def _add_dll_dep_to_pkginfo(currpkg: PackageInfo, import_lib: str,
-                            other_pkgs: List[PackageInfo],
-                            curr_version: Version) -> None:
+                            other_pkgs: List[PackageInfo]) -> None:
     """
     Adds to dependencies the package that hosts the dll associated with
     import library.
@@ -30,7 +28,7 @@ def _add_dll_dep_to_pkginfo(currpkg: PackageInfo, import_lib: str,
                     if f.endswith(('.dll', '.DLL'))]
         if dll in pkg_dlls:
             if pkg.name != currpkg.name:
-                currpkg.add_to_deplist(pkg.name, curr_version, curr_version)
+                currpkg.add_to_deplist(pkg.name, pkg.version, pkg.version)
             return
 
 
@@ -40,8 +38,8 @@ class MMPackBuildHook(BaseHook):
     of the library library used in binaries.
     """
 
-    def __init__(self, srcname: str, version: Version, host_archdist: str):
-        super().__init__(srcname, version, host_archdist)
+    def __init__(self, srcname: str, host_archdist: str):
+        super().__init__(srcname, host_archdist)
         self._mmpack_shlib_provides = None
 
         # load python module to use for handling the executable file
@@ -84,7 +82,7 @@ class MMPackBuildHook(BaseHook):
         for pkg in others_pkgs:
             dep_list = pkg.provides['sharedlib'].gen_deps(sonames, symbol_set)
             for pkgname, _ in dep_list:
-                currpkg.add_to_deplist(pkgname, self._version, self._version)
+                currpkg.add_to_deplist(pkgname, pkg.version, pkg.version)
 
         # provided by another mmpack package present in the prefix
         dep_list = self._get_mmpack_provides().gen_deps(sonames, symbol_set)
@@ -146,7 +144,7 @@ class MMPackBuildHook(BaseHook):
             # to use in the provide list
             provide = self._module.ShlibProvide(name, soname)
             provide.pkgdepends = pkg.name
-            provide.add_symbols(symbols, self._version)
+            provide.add_symbols(symbols, pkg.version)
             shlib_provides.add(provide)
 
         # update symbol information from .provides file if any
@@ -163,8 +161,7 @@ class MMPackBuildHook(BaseHook):
         symbols = set()
         for inst_file in pkg.files:
             if is_importlib(inst_file):
-                _add_dll_dep_to_pkginfo(pkg, inst_file,
-                                        other_pkgs, self._version)
+                _add_dll_dep_to_pkginfo(pkg, inst_file, other_pkgs)
                 continue
 
             # populate the set of sonames of shared libraries used by the

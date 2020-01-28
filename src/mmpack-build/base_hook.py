@@ -18,6 +18,7 @@ class PackageInfo:
         self.files = set()
         self.provides = dict()
         self.deplist = []  # List of triplet of (dep_name, min_ver, max_ver)
+        self.version = Version()
         self.sysdeps = set()
 
     def add_to_deplist(self, pkgname: str,
@@ -41,18 +42,16 @@ class BaseHook:
     Base class of mmpack-build hook
     """
 
-    def __init__(self, srcname: str, version: Version, host_archdist: str):
+    def __init__(self, srcname: str, host_archdist: str):
         """
         Initialize the hook class
 
         Args:
             srcname: name of source package being built
-            version: version of source package being built
             host_archdist: architecture/distribution of the host, ie which
                 arch/dist the package is being built for
         """
         self._srcname = srcname
-        self._version = version
         self._arch = host_archdist
 
     def post_local_install(self):
