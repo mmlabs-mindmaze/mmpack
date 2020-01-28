@@ -24,6 +24,16 @@ void* xx_malloc(size_t size)
 	return rv;
 }
 
+
+static inline
+void* xx_calloc(size_t nb_elt, size_t size)
+{
+	void * rv = calloc(nb_elt, size);
+	mm_check(rv != NULL);
+
+	return rv;
+}
+
 static inline
 void* xx_realloc(void * ptr, size_t size)
 {

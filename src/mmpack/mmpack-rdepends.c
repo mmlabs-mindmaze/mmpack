@@ -39,7 +39,6 @@ struct list_pkgs {
 	struct list_pkgs * next;
 };
 
-
 static
 void add_elt_list_pkgs(struct list_pkgs ** list, struct mmpkg const * pkg)
 {
