@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60893475_c399027c",
+        "filename": "docs/specs/package-specfile.rst",
+        "patchSetId": 30
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-28T12:11:45Z",
+      "side": 1,
+      "message": "be",
+      "range": {
+        "startLine": 38,
+        "startChar": 44,
+        "endLine": 38,
+        "endChar": 48
+      },
+      "revId": "fdb3eb68512508e8f52e5b4a5bb12a5a00b559b5",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}

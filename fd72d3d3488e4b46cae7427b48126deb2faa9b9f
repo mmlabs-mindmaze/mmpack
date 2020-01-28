@@ -495,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "d65751e9_f4345976",
+        "filename": "src/mmpack-build/syspkg_manager_base.py",
+        "patchSetId": 29
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-28T12:11:45Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4dcc9f20_c614694a",
+      "range": {
+        "startLine": 45,
+        "startChar": 4,
+        "endLine": 78,
+        "endChar": 33
+      },
+      "revId": "fd72d3d3488e4b46cae7427b48126deb2faa9b9f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d27c4ad8_935ed308",
         "filename": "src/mmpack-build/syspkg_manager_dpkg.py",
         "patchSetId": 29
