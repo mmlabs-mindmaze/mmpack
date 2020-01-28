@@ -100,6 +100,7 @@ endif
 
 # please keep alphabetically ordered
 mmpack_smoke_test = [
+        ['autoremove', files('smoke-tests/test_mmpack_autoremove.sh')],
         ['check-integrity', files('smoke-tests/test_mmpack_check-integrity.sh')],
         ['download', files('smoke-tests/test_mmpack_download.sh')],
         ['install', files('smoke-tests/test_mmpack_install.sh')],
