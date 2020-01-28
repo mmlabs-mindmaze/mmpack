@@ -69,6 +69,30 @@
       "revId": "d13bd45e8ed7eb671b550bbca5055af38dbc7111",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a49ce6a_528e96d1",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 796,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-28T16:06:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9ff32c7_860c903f",
+      "range": {
+        "startLine": 796,
+        "startChar": 8,
+        "endLine": 796,
+        "endChar": 14
+      },
+      "revId": "d13bd45e8ed7eb671b550bbca5055af38dbc7111",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
