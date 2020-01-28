@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b450230_b83d2beb",
+        "filename": "src/mmpack/indextable.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T16:27:49Z",
+      "side": 1,
+      "message": "remove the test for failure",
+      "range": {
+        "startLine": 303,
+        "startChar": 1,
+        "endLine": 304,
+        "endChar": 12
+      },
+      "revId": "7c2116755c7573c2cf92c42e809a4491b5f912e0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b4a691c_0069a9d5",
+        "filename": "src/mmpack/xx-alloc.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-28T16:27:49Z",
+      "side": 1,
+      "message": "not a good name:\nxx_malloc() is an indirection for malloc()\nxx_aligned_alloc() is NOT and indirection for aligned_alloc()",
+      "revId": "7c2116755c7573c2cf92c42e809a4491b5f912e0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
