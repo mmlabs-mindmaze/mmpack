@@ -1,0 +1,268 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3fd0bce_cfc58f33",
+        "filename": "src/mmpack/action-solver.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1020,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "for (curr \u003d deplist; !curr; curr \u003d compiled_dep_next(curr))",
+      "range": {
+        "startLine": 1019,
+        "startChar": 5,
+        "endLine": 1020,
+        "endChar": 45
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a82de9f_c196e382",
+        "filename": "src/mmpack/action-solver.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1021,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "Don\u0027t check for failure. Instead, in a previous commit add xx_aligned_alloc() in xx-alloc.h and replace mm_aligned_alloc() by xx_aligned_alloc() (normally only in indextable.c)",
+      "range": {
+        "startLine": 1021,
+        "startChar": 2,
+        "endLine": 1021,
+        "endChar": 59
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72475189_f187911d",
+        "filename": "src/mmpack/action-solver.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1031,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "To remove if you change the previous for",
+      "range": {
+        "startLine": 1027,
+        "startChar": 1,
+        "endLine": 1031,
+        "endChar": 0
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c69e1ae0_7c31f0ee",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "Those functions could be added in context.c",
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f55ba69_cb7a2ec1",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "unused",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 17
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd874051_52deedbd",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "Is it worth to have a dedicated function for that?",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 1
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a55536fc_8032214d",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "you can merge this function in load_manually_installed()",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 54
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd7ed9d8_163f8b8a",
+        "filename": "src/mmpack/manually_installed.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "!!!!Danger!!!! malloca in a loop.... This is recipe for disaster\n\nInstead I suggest to do in the top of function:\n\nmmstr* pkg_name \u003d mmstr_alloca(1000);\n\nAnd then:\n\nwhile (fscanf(file, \"%s\\n\", pkg_name) !\u003d -1) {\n      mmstr_update_len_from_buffer(pkg_name);\n      strset_add(manually_inst, pkg_name);\n}",
+      "range": {
+        "startLine": 48,
+        "startChar": 2,
+        "endLine": 48,
+        "endChar": 55
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d6ba7db_09a2090a",
+        "filename": "src/mmpack/manually_installed.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "Unused",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 26
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ef8ef53_76d8f0e9",
+        "filename": "src/mmpack/mmpack-install.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "unused",
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5a51ba2_34e598db",
+        "filename": "src/mmpack/pkg-fs-utils.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1067,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "You should not modify this. This commits the modification successfully made so far.",
+      "range": {
+        "startLine": 1067,
+        "startChar": 5,
+        "endLine": 1067,
+        "endChar": 12
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4fec6f7_e2d621ae",
+        "filename": "tests/meson.build",
+        "patchSetId": 17
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T14:48:00Z",
+      "side": 1,
+      "message": "Use spaces",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 1
+      },
+      "revId": "bbfea85278543a05aeb4ef1765ff3e674e55f501",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
