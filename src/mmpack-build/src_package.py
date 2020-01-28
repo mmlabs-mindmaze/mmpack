@@ -280,7 +280,7 @@ class SrcPackage:
         host_arch = get_host_arch_dist()
         sysdeps_key = 'sysdepends-' + get_host_dist()
 
-        init_mmpack_build_hooks(self.name, self.version, host_arch)
+        init_mmpack_build_hooks(self.name, host_arch)
 
         # create skeleton for explicit packages
         for pkg in self._specs.keys():

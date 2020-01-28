@@ -84,8 +84,8 @@ class MMPackBuildHook(BaseHook):
     """
     Hook tracking python module used and exposed
     """
-    def __init__(self, srcname: str, version: Version, host_archdist: str):
-        super().__init__(srcname, version, host_archdist)
+    def __init__(self, srcname: str, host_archdist: str):
+        super().__init__(srcname, host_archdist)
         self._mmpack_py_provides = None
 
     def _get_mmpack_provides(self) -> ProvideList:
@@ -116,7 +116,7 @@ class MMPackBuildHook(BaseHook):
             # TODO[nb] replace set() with the list of symbols
             dep_list = pkg.provides['python'].gen_deps(imports, set())
             for pkgname, _ in dep_list:
-                currpkg.add_to_deplist(pkgname, self._version, self._version)
+                currpkg.add_to_deplist(pkgname, pkg.version, pkg.version)
 
         # provided by another mmpack package present in the prefix
         dep_list = self._get_mmpack_provides().gen_deps(imports, set())
@@ -204,7 +204,7 @@ class MMPackBuildHook(BaseHook):
 
             provide = Provide(pyname)
             provide.pkgdepends = _mmpack_pkg_from_pyimport_name(pyname)
-            provide.add_symbols(symbols, self._version)
+            provide.add_symbols(symbols, pkg.version)
             py3_provides.add(provide)
 
         # update symbol information from .provides file if any

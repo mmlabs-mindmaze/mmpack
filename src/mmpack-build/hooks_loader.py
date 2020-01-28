@@ -18,8 +18,7 @@ from . mm_version import Version
 MMPACK_BUILD_HOOKS = []
 
 
-def init_mmpack_build_hooks(srcname: str, version: Version,
-                            host_archdist: str) -> None:
+def init_mmpack_build_hooks(srcname: str, host_archdist: str) -> None:
     """
     To be called in the early stages of package creation mmpack-build, it
     populates the list of build hooks plugins and initializes the hooks
@@ -27,7 +26,6 @@ def init_mmpack_build_hooks(srcname: str, version: Version,
 
     Args:
         srcname: name of source package being built
-        version: version of source package being built
         host_archdist: architecture/distribution of the host, ie which
             arch/dist the package is being built for
 
@@ -44,7 +42,7 @@ def init_mmpack_build_hooks(srcname: str, version: Version,
             module = importlib.import_module('mmpack_build.' + name)
 
             # Instantiate hook and add it to the list
-            hook = module.MMPackBuildHook(srcname, version, host_archdist)
+            hook = module.MMPackBuildHook(srcname, host_archdist)
             MMPACK_BUILD_HOOKS.append(hook)
             dprint('hook plugin loaded: {}'.format(hook.__module__))
 
