@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "464cc4c1_2bf11bd9",
+        "filename": "src/mmpack/mmpack-list.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T15:59:47Z",
+      "side": 1,
+      "message": "Just do \"for (i \u003d 0; pkgs[i] !\u003d NULL; i++)\"",
+      "range": {
+        "startLine": 127,
+        "startChar": 1,
+        "endLine": 127,
+        "endChar": 34
+      },
+      "revId": "ab1f9f0095d8e9f0c835eaebb8cd32b2271997dd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4e48e9d_6aaf4125",
+        "filename": "src/mmpack/mmpack-list.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T15:59:47Z",
+      "side": 1,
+      "message": "Just do \"for (i \u003d 0; pkgs[i] !\u003d NULL; i++)\"",
+      "range": {
+        "startLine": 144,
+        "startChar": 1,
+        "endLine": 144,
+        "endChar": 36
+      },
+      "revId": "ab1f9f0095d8e9f0c835eaebb8cd32b2271997dd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3052578c_66400dd9",
+        "filename": "src/mmpack/mmpack-list.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T15:59:47Z",
+      "side": 1,
+      "message": "Just do \"for (i \u003d 0; pkgs[i] !\u003d NULL; i++)\"",
+      "range": {
+        "startLine": 163,
+        "startChar": 1,
+        "endLine": 163,
+        "endChar": 34
+      },
+      "revId": "ab1f9f0095d8e9f0c835eaebb8cd32b2271997dd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05893beb_cc669a8c",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 826,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-28T15:59:47Z",
+      "side": 1,
+      "message": "Use xx_malloc() from xx-alloc.h",
+      "range": {
+        "startLine": 826,
+        "startChar": 8,
+        "endLine": 826,
+        "endChar": 14
+      },
+      "revId": "ab1f9f0095d8e9f0c835eaebb8cd32b2271997dd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
