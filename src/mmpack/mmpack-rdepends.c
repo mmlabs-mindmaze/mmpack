@@ -34,14 +34,8 @@ static const struct mm_arg_opt cmdline_optv[] = {
 };
 
 
-struct list_pkgs {
-	struct mmpkg const * pkg;
-	struct list_pkgs * next;
-};
-
-
 static
-void add_elt_list_pkgs(struct list_pkgs ** list, struct mmpkg const * pkg)
+void list_pkgs_add_elt(struct list_pkgs ** list, struct mmpkg const * pkg)
 {
 	struct list_pkgs * elt = malloc(sizeof(struct list_pkgs));
 
@@ -53,7 +47,7 @@ void add_elt_list_pkgs(struct list_pkgs ** list, struct mmpkg const * pkg)
 
 
 static
-int search_elt_list_pkgs(struct list_pkgs * list, struct mmpkg const * pkg)
+int list_pkgs_search_elt(struct list_pkgs * list, struct mmpkg const * pkg)
 {
 	struct list_pkgs * curr;
 
@@ -67,7 +61,7 @@ int search_elt_list_pkgs(struct list_pkgs * list, struct mmpkg const * pkg)
 
 
 static
-void destroy_all_elt(struct list_pkgs ** list)
+void list_pkgs_destroy_all_elt(struct list_pkgs ** list)
 {
 	struct list_pkgs * next;
 	struct list_pkgs * curr = *list;
@@ -112,8 +106,8 @@ int find_reverse_dependencies(struct binindex binindex,
 			continue;
 
 		//check that the dependency is not already written
-		if (search_elt_list_pkgs(*rdep_list, rdep))
-			add_elt_list_pkgs(rdep_list, rdep);
+		if (list_pkgs_search_elt(*rdep_list, rdep))
+			list_pkgs_add_elt(rdep_list, rdep);
 
 		if (recursive)
 			find_reverse_dependencies(binindex, rdep, repo,
@@ -200,6 +194,6 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 exit:
 	pkg_parser_deinit(&pp);
-	destroy_all_elt(&rdep_list);
+	list_pkgs_destroy_all_elt(&rdep_list);
 	return rv;
 }

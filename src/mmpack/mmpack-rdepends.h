@@ -10,6 +10,12 @@
 #define RDEPENDS_SYNOPSIS \
 	"rdepends [-r|--recursive] [--repo<=repo_name>] <package>[=[key:]<value>]"
 
+
+struct list_pkgs {
+	struct mmpkg const * pkg;
+	struct list_pkgs * next;
+};
+
 int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, char const ** argv);
 
 #endif /* MMPACK_RDEPENDS_H */
