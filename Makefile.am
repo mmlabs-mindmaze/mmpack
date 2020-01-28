@@ -123,6 +123,8 @@ mmpack_lib_sources = \
 	src/mmpack/download.h \
 	src/mmpack/indextable.c \
 	src/mmpack/indextable.h \
+	src/mmpack/mmpack-autoremove.c \
+	src/mmpack/mmpack-autoremove.h \
 	src/mmpack/mmpack-check-integrity.c \
 	src/mmpack/mmpack-check-integrity.h \
 	src/mmpack/mmpack-download.c \
@@ -345,6 +347,7 @@ check_DATA = deployment-test test-repo test-packages.timestamp
 TESTS = \
 	tests/python-unittests.tap \
 	tests/smoke-tests/launch_test_mmpack-build_autotools.sh \
+	tests/smoke-tests/test_mmpack_autoremove.sh \
 	tests/smoke-tests/test_mmpack_check-integrity.sh \
 	tests/smoke-tests/test_mmpack_download.sh \
 	tests/smoke-tests/test_mmpack_install.sh \
@@ -427,6 +430,7 @@ dist_completion_DATA = \
 
 RST_MAN_PAGES = \
 	docs/man/mmpack.rst \
+	docs/man/mmpack-autoremove.rst \
 	docs/man/mmpack-build.rst \
 	docs/man/mmpack-build-builddep.rst \
 	docs/man/mmpack-build-clean.rst \
