@@ -105,7 +105,12 @@ class SrcPackage:
         self._spec_dir = path.dirname(specfile)
 
         # Init source package from unpacked dir
-        self._parse_specfile()
+        self._parse_specfile_general()
+
+        if not self.licenses:
+            self._default_license()
+
+        init_mmpack_build_hooks(self.name, get_host_arch_dist())
 
     def pkgbuild_path(self) -> str:
         """
@@ -267,20 +272,13 @@ class SrcPackage:
                      .format(license_file)
             dprint(wrnmsg)
 
-    def _parse_specfile(self) -> None:
+    def _parse_specfile_binpkgs(self) -> None:
         """
         create BinaryPackage skeleton entries foreach custom and default
         entries.
         """
-        self._parse_specfile_general()
-
-        if not self.licenses:
-            self._default_license()
-
         host_arch = get_host_arch_dist()
         sysdeps_key = 'sysdepends-' + get_host_dist()
-
-        init_mmpack_build_hooks(self.name, host_arch)
 
         # create skeleton for explicit packages
         for pkg in self._specs.keys():
@@ -423,6 +421,8 @@ class SrcPackage:
         Ventilates files explicit in the specfile before giving them to the
         default target.
         """
+        self._parse_specfile_binpkgs()
+
         for binpkg in self._packages:
             if 'files' in self._specs[binpkg]:
                 for regex in self._specs[binpkg]['files']:
