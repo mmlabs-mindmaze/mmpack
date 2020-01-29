@@ -7,7 +7,7 @@ import os
 import re
 
 from glob import glob
-from typing import List
+from typing import List, Optional
 
 from . common import parse_soname, get_host_arch, Assert, shell
 from . mm_version import Version
@@ -152,7 +152,7 @@ def dpkg_parse_symbols(filename: str, target_soname: str,
     # TODO: find a way to split this (and thus satisty the two below ...)
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
-    dependency_template = None
+    dependency_template = ''
     templates = {}
     templates_cpt = 0
     minversion = None
@@ -230,7 +230,7 @@ def dpkg_find_dependency(soname: str, symbol_list: List[str]) -> str:
         return dpkg_parse_shlibs(shlibs_file, soname, symbol_list)
 
 
-def dpkg_find_pypkg(pypkg: str) -> str:
+def dpkg_find_pypkg(pypkg: str) -> Optional[str]:
     """
     Get installed debian package providing the specified python package
     """
@@ -248,5 +248,5 @@ class Dpkg(SysPkgManager):
     def find_sharedlib_sysdep(self, soname: str, symbols: List[str]) -> str:
         return dpkg_find_dependency(soname, symbols)
 
-    def find_pypkg_sysdep(self, pypkg: str) -> str:
+    def find_pypkg_sysdep(self, pypkg: str) -> Optional[str]:
         return dpkg_find_pypkg(pypkg)

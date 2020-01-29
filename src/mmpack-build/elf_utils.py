@@ -4,7 +4,7 @@ helper module containing elf parsing functions
 """
 
 import os
-from typing import List
+from typing import List, Optional
 
 from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
@@ -14,7 +14,7 @@ from . common import shell, wprint
 from . provide import Provide
 
 
-def _subpath_in_prefix(prefix: str, path: str) -> str:
+def _subpath_in_prefix(prefix: str, path: str) -> Optional[str]:
     """
     Determine the subpath in a prefix when a path is inside the prefix
 

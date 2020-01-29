@@ -5,7 +5,7 @@ helper module containing pacman wrappers and file parsing functions
 
 import os
 import re
-from typing import Set, List
+from typing import Set, List, Optional
 
 from . common import shell
 from . pe_utils import get_dll_from_soname, symbols_set
@@ -36,7 +36,7 @@ def msys2_find_dependency(soname: str, symbol_set: Set[str]) -> str:
     return package
 
 
-def msys2_find_pypkg(pypkg: str) -> str:
+def msys2_find_pypkg(pypkg: str) -> Optional[str]:
     """
     Get packages providing files matchine the specified glob pattern
     """
@@ -70,5 +70,5 @@ class PacmanMsys2(SysPkgManager):
     def find_sharedlib_sysdep(self, soname: str, symbols: List[str]) -> str:
         return msys2_find_dependency(soname, symbols)
 
-    def find_pypkg_sysdep(self, pypkg: str) -> str:
+    def find_pypkg_sysdep(self, pypkg: str) -> Optional[str]:
         return msys2_find_pypkg(pypkg)
