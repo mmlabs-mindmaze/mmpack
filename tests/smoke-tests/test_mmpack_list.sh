@@ -5,15 +5,6 @@ set -ex
 . $(dirname $0)/test-mmpack-common.sh
 prepare_env
 
-assert-str-equal()
-{
-    read rv
-    rv=${rv%%[[:space:]]} # remove trailing whitespaces
-    local ref=$1
-
-    [[ "$rv" == "$ref" ]]
-}
-
 trap cleanup EXIT
 cleanup
 
