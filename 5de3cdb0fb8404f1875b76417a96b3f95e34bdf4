@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "39bc95ed_90409da8",
+        "filename": "Makefile.am",
+        "patchSetId": 20
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-29T10:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c6abb6da_29fc852c",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0471a9e5_b7d2e719",
         "filename": "src/mmpack/context.c",
         "patchSetId": 20
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "d8015318_7015f481",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-29T10:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0471a9e5_b7d2e719",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0a61566_4b58ab16",
         "filename": "src/mmpack/context.c",
         "patchSetId": 20
@@ -47,6 +83,24 @@
       "writtenOn": "2020-01-28T18:34:18Z",
       "side": 1,
       "message": "You might need to be a bit more tolerant.\nEspecially when we\u0027ll have ghost packages, the names might get arbitrarily longer.\n\nAnyway.\nMost of all you need the version:\n\nx depends on y\u003e\u003d2\n\ninstall y\u003d1\ninstall x  (installs y\u003d2, assume y\u003d1 and y\u003d2 can coexist)\nremove x  (you\u0027re stuck with y\u003d2) since y is in the list",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd299fc8_d0fbc4ac",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-29T10:03:05Z",
+      "side": 1,
+      "message": "I am not sure to understand.\nIn the same prefix we cannot have two versions of the same package installed.\nI try to do it to be sure, but the action solver abort the execution.",
+      "parentUuid": "e0a61566_4b58ab16",
       "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
@@ -99,6 +153,54 @@
     },
     {
       "key": {
+        "uuid": "c0383bb3_9cb8403b",
+        "filename": "src/mmpack/utils.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-29T10:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2207d0bf_d5a91d94",
+      "range": {
+        "startLine": 40,
+        "startChar": 35,
+        "endLine": 40,
+        "endChar": 36
+      },
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "722dba34_53e95eb2",
+        "filename": "src/mmpack/utils.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-29T10:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a60a9a8_fc01974f",
+      "range": {
+        "startLine": 40,
+        "startChar": 46,
+        "endLine": 40,
+        "endChar": 50
+      },
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d219fc2e_90b5dd0e",
         "filename": "tests/smoke-tests/test_manually_installed.sh",
         "patchSetId": 20
@@ -116,6 +218,24 @@
     },
     {
       "key": {
+        "uuid": "d8b08d4b_8222af89",
+        "filename": "tests/smoke-tests/test_manually_installed.sh",
+        "patchSetId": 20
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-29T10:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d219fc2e_90b5dd0e",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f1db1c7_48bdcbdc",
         "filename": "tests/smoke-tests/test_manually_installed.sh",
         "patchSetId": 20
@@ -130,6 +250,24 @@
       "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c7f55b3_dbb20ccf",
+        "filename": "tests/smoke-tests/test_manually_installed.sh",
+        "patchSetId": 20
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-29T10:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f1db1c7_48bdcbdc",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
