@@ -72,6 +72,29 @@
     },
     {
       "key": {
+        "uuid": "f83c15b8_5c6bcf84",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-29T10:04:12Z",
+      "side": 1,
+      "message": "static\nand move it before it is used",
+      "range": {
+        "startLine": 406,
+        "startChar": 0,
+        "endLine": 406,
+        "endChar": 12
+      },
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e0a61566_4b58ab16",
         "filename": "src/mmpack/context.c",
         "patchSetId": 20
@@ -101,6 +124,52 @@
       "side": 1,
       "message": "I am not sure to understand.\nIn the same prefix we cannot have two versions of the same package installed.\nI try to do it to be sure, but the action solver abort the execution.",
       "parentUuid": "e0a61566_4b58ab16",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f7598c0_245d7a6c",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-29T10:04:12Z",
+      "side": 1,
+      "message": "static\nand move it before it is used",
+      "range": {
+        "startLine": 450,
+        "startChar": 0,
+        "endLine": 450,
+        "endChar": 12
+      },
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e24840f_3de33050",
+        "filename": "src/mmpack/context.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-29T10:04:12Z",
+      "side": 1,
+      "message": "This is used only in context.c, you should not declare them here",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 59
+      },
       "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
