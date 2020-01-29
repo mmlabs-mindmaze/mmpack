@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9a3d9d1_2341cee5",
+        "filename": "src/mmpack/mmpack-mkprefix.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-29T13:54:54Z",
+      "side": 1,
+      "message": "if (fd \u003c 0)\n    return -1;\nmm_close(fd);\n\n... It ends up the same, but this way seems strange",
+      "range": {
+        "startLine": 71,
+        "startChar": 1,
+        "endLine": 73,
+        "endChar": 12
+      },
+      "revId": "8c54046eaa9aefdd768ed960d7c1f3f6ee390903",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
