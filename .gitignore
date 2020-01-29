@@ -11,6 +11,7 @@ tags
 *.unc-backup.md5~
 *.uncrustify
 *.gcno
+.mypy_cache
 
 # autotools generated files
 aclocal.m4

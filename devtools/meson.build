@@ -74,6 +74,19 @@ else
     run_pycodestyle = []
 endif # pycodestyle
 
+mypy = find_program('mypy', required : false)
+if mypy.found()
+    run_target('mypy',
+        command : [
+            mypy,
+            '--config-file',
+            files('mypy-config.ini'),
+            deployment_dir + python.get_install_dir() + '/mmpack_build',
+        ],
+        depends : do_deployment_test,
+    )
+endif # mypy
+
 uncrustify = find_program('uncrustify', required : false)
 if uncrustify.found()
     uncrustify_config = files('uncrustify.cfg')
