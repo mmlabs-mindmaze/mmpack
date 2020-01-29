@@ -77,9 +77,9 @@ class SrcPackage:
 
     def __init__(self, specfile: str, tag: str, srctar_path: str):
         # pylint: disable=too-many-arguments
-        self.name = None
+        self.name = ''
         self.tag = tag
-        self.version = None
+        self.version = Version(None)
         self.url = None
         self.maintainer = None
         self.src_tarball = srctar_path
@@ -363,7 +363,7 @@ class SrcPackage:
         if not self.build_system:
             self._guess_build_system()
         if not self.build_system:
-            errmsg = 'Unknown build system: ' + self.build_system
+            errmsg = 'Unknown build system: ' + str(self.build_system)
             raise NotImplementedError(errmsg)
 
         # Use build script provided in mmpack installed data folder unless
@@ -482,6 +482,9 @@ class SrcPackage:
         Both are meant to be attached to all the binary packages.
         """
         licenses_path = set()
+        if not self.licenses:
+            raise RuntimeError('FATAL: license key is mandatory')
+
         for entry in self.licenses:
             tmp = os.path.join(PKGDATADIR, 'common-licenses', entry)
             if os.path.isfile(tmp):

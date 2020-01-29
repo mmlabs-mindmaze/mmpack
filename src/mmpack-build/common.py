@@ -14,7 +14,7 @@ import platform
 
 from hashlib import sha256
 from subprocess import PIPE, run
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Optional
 
 import urllib3
 import yaml
@@ -515,7 +515,7 @@ def list_files(topdir: str, exclude_dirs: bool = False) -> List[str]:
     return sorted(filelist)
 
 
-def find_license(directory: str = '.') -> str:
+def find_license(directory: str = '.') -> Optional[str]:
     """
     guess project license from a license file (case insensitive)
     Assuming a single license file at the top of the tree

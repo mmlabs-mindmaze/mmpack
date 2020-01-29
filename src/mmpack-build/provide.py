@@ -4,7 +4,7 @@ common classes to specify provided symbols to other packages
 """
 
 from glob import glob
-from typing import Set, Dict, Tuple, List
+from typing import Set, Dict, Tuple, List, Optional
 
 from . common import wprint, yaml_serialize, yaml_load
 from . mm_version import Version
@@ -104,7 +104,7 @@ class ProvideList:
         """
         self._provides[provide.soname] = provide
 
-    def get(self, soname) -> Provide:
+    def get(self, soname) -> Optional[Provide]:
         """
         return the provide associated to a soname (if available).
         None otherwise.
@@ -183,8 +183,8 @@ class ProvideList:
         for provide in self._provides.values():
             provide.update_from_specs(specs.get(provide.name, dict()))
 
-    def _get_dep_minversion(self, soname: str,
-                            symbols: Set[str]) -> Tuple[str, Version]:
+    def _get_dep_minversion(self, soname: str, symbols: Set[str]) \
+            -> Tuple[Optional[str], Version]:
         """
         Compute the package dependency given a soname and set of symbols.
         If the soname is provided by the ProvideList, the symbols exported

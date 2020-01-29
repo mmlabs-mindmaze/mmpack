@@ -6,7 +6,7 @@ plugin tracking the exported symbol and dependencies of shared libraries
 import importlib
 import os
 from glob import glob
-from typing import Set, Dict, List
+from typing import Set, Dict, List, Optional
 
 from . base_hook import BaseHook, PackageInfo
 from . common import shlib_keyname, Assert
@@ -40,7 +40,7 @@ class MMPackBuildHook(BaseHook):
 
     def __init__(self, srcname: str, host_archdist: str):
         super().__init__(srcname, host_archdist)
-        self._mmpack_shlib_provides = None
+        self._mmpack_shlib_provides: Optional[ProvideList] = None
 
         # load python module to use for handling the executable file
         # format of the targeted host

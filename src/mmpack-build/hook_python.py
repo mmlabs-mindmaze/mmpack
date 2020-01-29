@@ -8,7 +8,7 @@ import os
 import re
 import shutil
 from glob import glob
-from typing import Set, Dict, List
+from typing import Set, Dict, List, Optional
 
 from . base_hook import BaseHook, PackageInfo
 from . common import shell, Assert
@@ -35,7 +35,7 @@ _PKG_REGEX = re.compile(r'lib/python3(?:\.\d)?/site-packages/_?([\w_]+)')
 _MMPACK_REL_PY_SITEDIR = 'lib/python3/site-packages'
 
 
-def _get_py3_public_import_name(filename: str) -> str:
+def _get_py3_public_import_name(filename: str) -> Optional[str]:
     """
     Return the python3 package name a file should belongs to (ie the one with
     __init__.py file if folder, or the name of the single module if directly in
@@ -85,7 +85,7 @@ class MMPackBuildHook(BaseHook):
     """
     def __init__(self, srcname: str, host_archdist: str):
         super().__init__(srcname, host_archdist)
-        self._mmpack_py_provides = None
+        self._mmpack_py_provides: Optional[ProvideList] = None
 
     def _get_mmpack_provides(self) -> ProvideList:
         """

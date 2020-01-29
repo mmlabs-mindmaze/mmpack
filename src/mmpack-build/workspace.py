@@ -6,6 +6,8 @@ os helpers to manipulate the paths and environments
 import os
 import shutil
 
+from typing import Optional
+
 from . common import shell, dprint, ShellException, pushdir, popdir, \
     download, sha256sum, iprint
 from . decorators import singleton
@@ -13,7 +15,7 @@ from . settings import BINDIR, EXEEXT
 from . xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
 
 
-def find_project_root_folder() -> str:
+def find_project_root_folder() -> Optional[str]:
     """
     Look for folder named 'mmpack' in the current directory or any parent
     folder.

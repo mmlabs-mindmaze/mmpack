@@ -33,7 +33,7 @@ class BinaryPackage:
         self.tag = tag
         self.spec_dir = spec_dir
         self.src_hash = src_hash
-        self.pkg_path = None
+        self.pkg_path = ''
 
         self.description = ''
         # * System dependencies are stored as opaque strings.

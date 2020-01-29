@@ -6,7 +6,7 @@ Fetch/gather sources of a mmpack package and create source tarball
 import os
 import shutil
 from tempfile import mkdtemp
-from typing import Dict
+from typing import Dict, Optional
 
 from . common import *
 from . workspace import Workspace, cached_download
@@ -69,7 +69,7 @@ class SourceTarball:
         self.name = None
         self._path_url = path_url
         self._kwargs = kwargs
-        self._srcdir = mkdtemp(dir=Workspace().sources)
+        self._srcdir: Optional[str] = mkdtemp(dir=Workspace().sources)
         self.trace = dict()
 
         # Fetch sources following the specified method and move them to the
@@ -125,6 +125,8 @@ class SourceTarball:
         """
         Remove ownership of extracted srcdir from SourceTarball and return it
         """
+        if not self._srcdir:
+            raise Assert("Internal Error: source directory cannot be None")
         srcdir = self._srcdir
         self._srcdir = None
         return srcdir

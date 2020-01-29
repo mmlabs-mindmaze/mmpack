@@ -268,7 +268,7 @@ def is_devel(path: str) -> bool:
             or is_cmake_pkg_desc(path))
 
 
-def is_python_script(filename: str) -> str:
+def is_python_script(filename: str) -> bool:
     """
     returns whether a file is a python script
     """
