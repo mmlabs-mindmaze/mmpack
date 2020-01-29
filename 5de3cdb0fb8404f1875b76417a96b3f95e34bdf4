@@ -130,6 +130,24 @@
     },
     {
       "key": {
+        "uuid": "579d38c6_4e868252",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-29T10:27:06Z",
+      "side": 1,
+      "message": "My mistake, you\u0027re right: we cannot co-install two versions of the same package.\n\nPlease just don\u0027t hardcode 256 Bytes lines",
+      "parentUuid": "dd299fc8_d0fbc4ac",
+      "revId": "5de3cdb0fb8404f1875b76417a96b3f95e34bdf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6f7598c0_245d7a6c",
         "filename": "src/mmpack/context.c",
         "patchSetId": 20
