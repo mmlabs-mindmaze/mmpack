@@ -39,3 +39,13 @@ cleanup()
 {
 	rm -rf $PREFIX_TEST
 }
+
+assert-str-equal()
+{
+    read rv
+    rv=${rv%%[[:space:]]} # remove trailing whitespaces
+    local ref=$1
+
+    [[ "$rv" == "$ref" ]]
+}
+
