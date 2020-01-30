@@ -83,6 +83,24 @@
       "revId": "9214d354a826f3fe7218fc03c2ea9c9580b8bad3",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30ec62ed_d04ef2f8",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-30T14:53:20Z",
+      "side": 1,
+      "message": "OK.\nThen please fix the error message",
+      "parentUuid": "1cf81840_697aa6e8",
+      "revId": "9214d354a826f3fe7218fc03c2ea9c9580b8bad3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }

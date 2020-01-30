@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c94f5667_cf1cb102",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-30T14:53:20Z",
+      "side": 1,
+      "message": "use re.fullmatch()\n\notherwise the previous regex was already matching LICENSES (with an S), and all the possible extensions (.txt, but also .md, .rst, ...)",
+      "range": {
+        "startLine": 530,
+        "startChar": 55,
+        "endLine": 530,
+        "endChar": 60
+      },
+      "revId": "45872ca6b8badfcbd41b2d5955c02a2a4c449a50",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
