@@ -22,6 +22,30 @@
       "revId": "89287fb4f0c0a116fc8c9fe83c07a4f748c0df18",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34bb0e1b_ec72dd1f",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-30T19:57:53Z",
+      "side": 1,
+      "message": "are you sure? The negation is at the beginning: \u0027no suitable license...\u0027",
+      "parentUuid": "6465c282_d29e8d45",
+      "range": {
+        "startLine": 268,
+        "startChar": 35,
+        "endLine": 268,
+        "endChar": 41
+      },
+      "revId": "89287fb4f0c0a116fc8c9fe83c07a4f748c0df18",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
