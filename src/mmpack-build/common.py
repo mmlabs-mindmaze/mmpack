@@ -515,7 +515,7 @@ def list_files(topdir: str, exclude_dirs: bool = False) -> List[str]:
     return sorted(filelist)
 
 
-def find_license(directory: str = None) -> str:
+def find_license(directory: str = '.') -> str:
     """
     guess project license from a license file (case insensitive)
     Assuming a single license file at the top of the tree
@@ -526,7 +526,8 @@ def find_license(directory: str = None) -> str:
     is_license = re.compile(r'(LICENSE|COPYING)', re.IGNORECASE)
     try:
         for entry in os.listdir(directory):
-            if os.path.isfile(entry) and is_license.match(entry):
+            filename = os.path.join(directory, entry)
+            if os.path.isfile(filename) and is_license.match(entry):
                 return entry
         return None
     except Exception:  # pylint: disable=broad-except
