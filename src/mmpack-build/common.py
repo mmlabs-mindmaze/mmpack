@@ -523,11 +523,12 @@ def find_license(directory: str = None) -> str:
     Returns:
         The license file name on success, None otherwise
     """
-    is_license = re.compile(r'(LICENSE|COPYING)', re.IGNORECASE)
+    is_license = re.compile(r'(LICENSE(S)?|COPYING)(\.TXT)?', re.IGNORECASE)
     try:
         for entry in os.listdir(directory):
-            if os.path.isfile(entry) and is_license.match(entry):
-                return entry
+            filename = os.path.join(directory, entry) if directory else entry
+            if os.path.isfile(filename) and is_license.match(entry):
+                return filename
         return None
     except Exception:  # pylint: disable=broad-except
         return None
