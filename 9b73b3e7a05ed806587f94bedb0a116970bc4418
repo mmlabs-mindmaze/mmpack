@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dfd53425_7c1bcf8c",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-30T15:16:22Z",
+      "side": 1,
+      "message": "why is this a good idea ?\nwhere are we ? (which cwd)\n\nwhen should we pick a __guessed__ license NOT from the unpack directory ?",
+      "revId": "9b73b3e7a05ed806587f94bedb0a116970bc4418",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
