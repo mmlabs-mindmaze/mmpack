@@ -481,23 +481,24 @@ class SrcPackage:
         Attach the copyright and all the license files to given binary package
         Both are meant to be attached to all the binary packages.
         """
-        licenses_path = set()
         for entry in self.licenses:
-            tmp = os.path.join(PKGDATADIR, 'common-licenses', entry)
-            if os.path.isfile(tmp):
+            common_lic = os.path.join(PKGDATADIR, 'common-licenses', entry)
+            if os.path.isfile(entry):
+                licfile = entry
+            elif os.path.isfile(common_lic):
                 # TODO: for known licenses, create a dangling symlink to
                 # mmpack common-licenses instead of copying the full file
-                shutil.copy(tmp, os.path.join(binpkg.licenses_dir(), entry))
-                tmp = os.path.join(binpkg.licenses_dir(), entry)
+                licfile = common_lic
             else:
-                tmp = os.path.join(self.unpack_path(), entry)
-                if not os.path.isfile(tmp):
+                licfile = os.path.join(self.unpack_path(), entry)
+                if not os.path.isfile(licfile):
                     errmsg = 'No such file, or unknown license: ' + entry
                     raise ValueError(errmsg)
-                shutil.copy(tmp, binpkg.licenses_dir())
 
-            licenses_path.add(os.path.join(binpkg.licenses_dir(),
-                                           os.path.basename(tmp)))
+            lic_pkg_path = os.path.join(binpkg.licenses_dir(),
+                                        os.path.basename(licfile))
+            shutil.copy(licfile, lic_pkg_path)
+            binpkg.install_files.add(lic_pkg_path)
 
         # dump copyright to dedicated file in install tree if needed
         if os.path.isfile(self.copyright):
@@ -508,8 +509,7 @@ class SrcPackage:
             with open(copyright_file, 'w') as outfile:
                 outfile.write(self.copyright)
 
-        # add a copy of the license and the copyright to each package
-        binpkg.install_files.update(licenses_path)
+        # add a copy of the copyright to each package
         binpkg.install_files.add(copyright_file)
 
     def ventilate(self):
