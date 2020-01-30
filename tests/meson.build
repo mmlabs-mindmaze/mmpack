@@ -87,14 +87,16 @@ test('mmpack-build-meson',
         depends : do_test_pkg,
 )
 
-test('mmpack-build-autotools',
+if get_option('long-tests')
+  test('mmpack-build-autotools',
         files ('smoke-tests/test_mmpack-build.sh'),
         timeout : 120,
         env : env,
         args : 'autotools',
         suite : 'mmpack-build-smoke',
-        deps : [do_test_pkg, long_test],
-)
+        depends : do_test_pkg,
+  )
+endif
 
 # please keep alphabetically ordered
 mmpack_smoke_test = [
