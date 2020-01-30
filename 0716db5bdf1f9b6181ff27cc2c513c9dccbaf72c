@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "85b9c200_d068d725",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-30T11:26:33Z",
+      "side": 1,
+      "message": "remove... this is already taken care in open_file_in_prefix()",
+      "range": {
+        "startLine": 263,
+        "startChar": 1,
+        "endLine": 264,
+        "endChar": 59
+      },
+      "revId": "0716db5bdf1f9b6181ff27cc2c513c9dccbaf72c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c83bccc3_39e85eb7",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-30T11:26:33Z",
+      "side": 1,
+      "message": "This is already logged in open_file_prefix and must not be done here.",
+      "range": {
+        "startLine": 316,
+        "startChar": 2,
+        "endLine": 317,
+        "endChar": 59
+      },
+      "revId": "0716db5bdf1f9b6181ff27cc2c513c9dccbaf72c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f4a61a19_6dc3bb1f",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-30T11:26:33Z",
+      "side": 1,
+      "message": "fdopen is unlikely to fail... but if this happens, this must be logged!!! use mm_raise_from_errno()\n\nAlso, if this function fails, you leak fd... Use mm_close() here",
+      "revId": "0716db5bdf1f9b6181ff27cc2c513c9dccbaf72c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b1328ff_9d5b913f",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-30T11:26:33Z",
+      "side": 1,
+      "message": "fdopen closes the underlying the file descriptor, this leads to a double close \u003d\u003e remove mm_close(fd)",
+      "range": {
+        "startLine": 330,
+        "startChar": 1,
+        "endLine": 330,
+        "endChar": 14
+      },
+      "revId": "0716db5bdf1f9b6181ff27cc2c513c9dccbaf72c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
