@@ -483,21 +483,24 @@ class SrcPackage:
         """
         licenses_path = set()
         for entry in self.licenses:
-            tmp = os.path.join(PKGDATADIR, 'common-licenses', entry)
-            if os.path.isfile(tmp):
+            common_license_guess = os.path.join(PKGDATADIR,
+                                                'common-licenses', entry)
+            if os.path.isfile(entry):
+                licence_filename = entry
+            elif os.path.isfile(common_license_guess):
                 # TODO: for known licenses, create a dangling symlink to
                 # mmpack common-licenses instead of copying the full file
-                shutil.copy(tmp, os.path.join(binpkg.licenses_dir(), entry))
-                tmp = os.path.join(binpkg.licenses_dir(), entry)
+                license_filename = common_license_guess
             else:
-                tmp = os.path.join(self.unpack_path(), entry)
-                if not os.path.isfile(tmp):
+                license_filename = os.path.join(self.unpack_path(), entry)
+                if not os.path.isfile(license_filename):
                     errmsg = 'No such file, or unknown license: ' + entry
                     raise ValueError(errmsg)
-                shutil.copy(tmp, binpkg.licenses_dir())
 
-            licenses_path.add(os.path.join(binpkg.licenses_dir(),
-                                           os.path.basename(tmp)))
+            filename_in_pkg = os.path.join(binpkg.licenses_dir(),
+                                          os.path.basename(license_filename))
+            shutil.copy(license_filename, filename_in_pkg)
+            licenses_path.add(filename_in_pkg)
 
         # dump copyright to dedicated file in install tree if needed
         if os.path.isfile(self.copyright):
