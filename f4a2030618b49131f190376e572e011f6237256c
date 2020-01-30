@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6cfcdf8a_4c3c7752",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-30T15:19:50Z",
+      "side": 1,
+      "message": "this does not seem to be the right commit",
+      "revId": "f4a2030618b49131f190376e572e011f6237256c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
