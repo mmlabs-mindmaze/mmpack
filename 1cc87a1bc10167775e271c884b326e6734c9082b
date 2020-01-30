@@ -22,6 +22,30 @@
       "revId": "1cc87a1bc10167775e271c884b326e6734c9082b",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "635a29a4_27863ac2",
+        "filename": "devtools/meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-30T13:57:07Z",
+      "side": 1,
+      "message": "no it\u0027s not.\nit\u0027s within the devtools folder, just next to this file.\nhttps://review.gerrithub.io/c/mmlabs-mindmaze/mmpack/+/483273/1/devtools/mypy-config.ini",
+      "parentUuid": "8b4632ad_f76a0f34",
+      "range": {
+        "startLine": 83,
+        "startChar": 19,
+        "endLine": 83,
+        "endChar": 34
+      },
+      "revId": "1cc87a1bc10167775e271c884b326e6734c9082b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
