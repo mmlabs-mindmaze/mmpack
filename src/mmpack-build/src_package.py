@@ -500,11 +500,14 @@ class SrcPackage:
             shutil.copy(licfile, lic_pkg_path)
             binpkg.install_files.add(lic_pkg_path)
 
+        if not self.copyright:
+            return
+
         # dump copyright to dedicated file in install tree if needed
         if os.path.isfile(self.copyright):
             shutil.copy(self.copyright, binpkg.licenses_dir())
             copyright_file = self.copyright
-        elif self.copyright:
+        else:
             copyright_file = binpkg.licenses_dir() + '/copyright'
             with open(copyright_file, 'w') as outfile:
                 outfile.write(self.copyright)
