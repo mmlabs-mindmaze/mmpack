@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b1885f3_d26d94d9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-30T14:18:55Z",
+      "side": 1,
+      "message": "this is not a fix until you have presented a bug",
+      "range": {
+        "startLine": 7,
+        "startChar": 14,
+        "endLine": 7,
+        "endChar": 17
+      },
+      "revId": "9214d354a826f3fe7218fc03c2ea9c9580b8bad3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "007cce8e_7350bd4a",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-30T14:18:55Z",
+      "side": 1,
+      "message": "this is not true.\nthe error message says that the \"licenses\" key is missing, but you\u0027re testing against its value.\nif find_license() is called with a key that failed to get processed within the function, you will tell the user that he forgot about the \"licenses\" key, but he didn\u0027t",
+      "revId": "9214d354a826f3fe7218fc03c2ea9c9580b8bad3",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
