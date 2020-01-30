@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "febf81f8_71ab3b34",
+        "filename": "src/mmpack/mmpack-rdepends.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-30T13:04:31Z",
+      "side": 0,
+      "message": "I liked \"recursive\" better",
+      "range": {
+        "startLine": 118,
+        "startChar": 6,
+        "endLine": 118,
+        "endChar": 15
+      },
+      "revId": "e3b04784b70923ac866f46f42102bb8b57f5ae5f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
