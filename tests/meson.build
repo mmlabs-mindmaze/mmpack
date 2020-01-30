@@ -93,7 +93,7 @@ test('mmpack-build-autotools',
         env : env,
         args : 'autotools',
         suite : 'mmpack-build-smoke',
-        deps : [do_test_pkg, long_test],
+        depends : [do_test_pkg, long_test],
 )
 
 # please keep alphabetically ordered
