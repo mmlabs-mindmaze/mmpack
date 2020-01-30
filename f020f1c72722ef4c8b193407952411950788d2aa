@@ -16,6 +16,24 @@
       "revId": "f020f1c72722ef4c8b193407952411950788d2aa",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fae4390f_2fe5dcaa",
+        "filename": "src/mmpack/mmpack-rdepends.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-30T15:53:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e0be1828_02dada66",
+      "revId": "f020f1c72722ef4c8b193407952411950788d2aa",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
