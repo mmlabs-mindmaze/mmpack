@@ -262,8 +262,8 @@ class SrcPackage:
         return self._packages[binpkg_name]
 
     def _default_license(self) -> None:
-        license_file = find_license()
-        if not self.licenses:
+        license_file = find_license(self.unpack_path())
+        if not license_file:
             errmsg = 'Missing mandatory field: "licenses"'
             raise ValueError(errmsg)
         else:
