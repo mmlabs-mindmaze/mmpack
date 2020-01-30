@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "b07053cc_dfa11d89",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 25
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-30T14:46:45Z",
+      "side": 1,
+      "message": "because there is no mmlib call that provide fdopen functionality",
+      "parentUuid": "606f338a_868a2c62",
+      "range": {
+        "startLine": 315,
+        "startChar": 14,
+        "endLine": 315,
+        "endChar": 20
+      },
+      "revId": "77a10455f40be5e2a8bee7340afd5842b4ecfb6f",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e45b824b_13df00bf",
         "filename": "src/mmpack/context.c",
         "patchSetId": 25
