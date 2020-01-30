@@ -1,4 +1,4 @@
-long_test = get_option('long-tests') or disabler()
+long_tests = get_option('long-tests') or disabler()
 
 unittest_args = [
     '-DSRCDIR="' + meson.source_root() + '"',
@@ -93,7 +93,7 @@ test('mmpack-build-autotools',
         env : env,
         args : 'autotools',
         suite : 'mmpack-build-smoke',
-        deps : [do_test_pkg, long_test],
+        depends : [do_test_pkg, long_tests],
 )
 
 # please keep alphabetically ordered
