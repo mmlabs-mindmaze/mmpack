@@ -499,18 +499,21 @@ class SrcPackage:
 
             licenses_path.add(os.path.join(binpkg.licenses_dir(),
                                            os.path.basename(tmp)))
+        binpkg.install_files.update(licenses_path)
+
+        if not self.copyright:
+            return
 
         # dump copyright to dedicated file in install tree if needed
         if os.path.isfile(self.copyright):
             shutil.copy(self.copyright, binpkg.licenses_dir())
             copyright_file = self.copyright
-        elif self.copyright:
+        else:
             copyright_file = binpkg.licenses_dir() + '/copyright'
             with open(copyright_file, 'w') as outfile:
                 outfile.write(self.copyright)
 
-        # add a copy of the license and the copyright to each package
-        binpkg.install_files.update(licenses_path)
+        # add a copy of the copyright to each package
         binpkg.install_files.add(copyright_file)
 
     def ventilate(self):
