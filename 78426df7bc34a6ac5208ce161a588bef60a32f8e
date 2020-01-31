@@ -22,6 +22,30 @@
       "revId": "78426df7bc34a6ac5208ce161a588bef60a32f8e",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9d62e1e_93d07ecd",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-31T16:16:39Z",
+      "side": 1,
+      "message": "It is more customary to use in data (and later to put more data stuff). For example this is where meson put the completion files.",
+      "parentUuid": "0a0128be_96ae9151",
+      "range": {
+        "startLine": 53,
+        "startChar": 6,
+        "endLine": 53,
+        "endChar": 14
+      },
+      "revId": "78426df7bc34a6ac5208ce161a588bef60a32f8e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
