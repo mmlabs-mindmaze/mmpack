@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ae891e5_85942f38",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-31T13:38:39Z",
+      "side": 1,
+      "message": "This is extremly unefficient and requires to write a lot of code unnecessarily.... Instead of going backward to search for needed package, going forward will be way more efficient:\n\nfor pkg in installed package:\n  mark_needed(pkg)\n\nmark_needed(pkg) {\n   set needed flag for pkg\n   for deppkg in deps(pkg):\n       mark_needed(deppkg)\n}\n\nafter that each pakage that don\u0027t have the needed flag should be added to removal list",
+      "range": {
+        "startLine": 23,
+        "startChar": 1,
+        "endLine": 104,
+        "endChar": 52
+      },
+      "revId": "5c29f39a3d50e94893661822d090bca9b1af77d2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
