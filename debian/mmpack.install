@@ -2,7 +2,7 @@
 /usr/lib/*/mmpack/mount-mmpack-prefix
 /usr/share/mmpack/check-dpkg-installed
 /usr/share/mmpack/prompt.bash
-/usr/share/bash-completion/completions/mmpack_completion
+/usr/share/bash-completion/completions/mmpack
 /usr/share/man/man1/mmpack.1
 /usr/share/man/man1/mmpack-check-integrity.1
 /usr/share/man/man1/mmpack-download.1
