@@ -50,6 +50,7 @@ subdir('common-licenses')
 subdir('src/mmpack')
 subdir('src/mmpack-build')
 subdir('src/repository')
+subdir('data')
 
 deployment_dir = meson.build_root() + '/deployment-test'
 install_manifest = custom_target('install-manifest',
