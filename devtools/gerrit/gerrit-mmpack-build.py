@@ -373,7 +373,7 @@ def load_config(filename):
     # pylint: disable=global-variable-not-assigned
     global BUILDER_LIST
 
-    CONFIG = yaml.load(open(filename, 'rb').read())
+    CONFIG = yaml.load(open(filename, 'rb', Loader=yaml.BaseLoader).read())
     for name, node in CONFIG['builders'].items():
         BUILDER_LIST.append(SSH(name=name, **node))
 
