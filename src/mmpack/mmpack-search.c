@@ -27,12 +27,10 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 {
 	struct cb_data * data = (struct cb_data*) void_data;
 
+
 	if (strstr(pkg->name, data->pkg_name) != 0) {
 		data->found = 1;
-		printf("%s %s (%s)\n",
-		       pkg->state == MMPACK_PKG_INSTALLED ? "[installed]" : "[available]",
-		       pkg->name,
-		       pkg->version);
+		mmpkg_print(pkg);
 	}
 
 	return 0;

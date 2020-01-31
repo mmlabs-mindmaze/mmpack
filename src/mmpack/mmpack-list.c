@@ -44,32 +44,11 @@ struct cb_data {
 static
 int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern)
 {
-	const char* state;
-	struct from_repo * from;
-
 	// If pattern is provided and the name does not match do nothing
 	if (pattern && (strstr(pkg->name, pattern) == NULL))
 		return 0;
 
-	if (pkg->state == MMPACK_PKG_INSTALLED)
-		state = "[installed]";
-	else
-		state = "[available]";
-
-	printf("%s %s (%s) ", state, pkg->name, pkg->version);
-
-	if (pkg->from_repo) {
-		printf("from repositories:");
-		for (from = pkg->from_repo; from != NULL; from = from->next) {
-			mm_check(from->repo != NULL);
-			printf(" %s%c",
-			       from->repo->name,
-			       from->next ? ',' : '\n');
-		}
-	} else {
-		printf("from repositories: unknown\n");
-	}
-
+	mmpkg_print(pkg);
 	return 1;
 }
 
