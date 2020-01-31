@@ -348,6 +348,37 @@ void mmpkg_dump(struct mmpkg const * pkg)
 }
 
 
+/**
+ * mmpkg_print() - print mmpack package
+ * @pkg: mmpkg to print
+ */
+LOCAL_SYMBOL
+void mmpkg_print(struct mmpkg const * pkg)
+{
+	const char* state;
+	struct from_repo * from;
+
+	if (pkg->state == MMPACK_PKG_INSTALLED)
+		state = "[installed]";
+	else
+		state = "[available]";
+
+	printf("%s %s (%s) ", state, pkg->name, pkg->version);
+
+	if (pkg->from_repo) {
+		printf("from repositories:");
+		for (from = pkg->from_repo; from != NULL; from = from->next) {
+			mm_check(from->repo != NULL);
+			printf(" %s%c",
+			       from->repo->name,
+			       from->next ? ',' : '\n');
+		}
+	} else {
+		printf("from repositories: unknown\n");
+	}
+}
+
+
 static
 int from_repo_check_valid(struct mmpkg const * pkg)
 {
