@@ -101,10 +101,6 @@ mmpack_check_sysdep = executable('mmpack-check-sysdep',
         install_dir : get_option('libexecdir') / 'mmpack',
 )
 
-install_data(files('mmpack_completion'),
-        install_dir : get_option('datadir') / 'bash-completion' / 'completions',
-)
-
 if host_machine.system() == 'windows'
     mount_mmpack_prefix_sources = files('mount-prefix-nt.c')
 else
