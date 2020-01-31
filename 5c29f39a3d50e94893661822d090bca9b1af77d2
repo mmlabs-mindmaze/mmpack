@@ -22,6 +22,30 @@
       "revId": "5c29f39a3d50e94893661822d090bca9b1af77d2",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8a8e269_f1c52968",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-01-31T13:42:09Z",
+      "side": 1,
+      "message": "correction for mark_needed:\n\nmark_needed(pkg) {\n   if needed flag for pkg already set:\n      return\n\n   set needed flag for pkg\n   for deppkg in deps(pkg):\n       mark_needed(deppkg)\n}",
+      "parentUuid": "8ae891e5_85942f38",
+      "range": {
+        "startLine": 23,
+        "startChar": 1,
+        "endLine": 104,
+        "endChar": 52
+      },
+      "revId": "5c29f39a3d50e94893661822d090bca9b1af77d2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
