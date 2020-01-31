@@ -73,7 +73,3 @@ mmpack_build_plugins = files(
 install_data(mmpack_build_plugins,
     install_dir : get_option('datadir') / 'mmpack',
 )
-
-install_data(files('mmpack-build_completion'),
-        install_dir : get_option('datadir') / 'bash-completion' / 'completions',
-)

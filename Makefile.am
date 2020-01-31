@@ -417,8 +417,8 @@ unittests_tap_LDADD = \
 
 completiondir = $(datadir)/bash-completion/completions
 dist_completion_DATA = \
-	src/mmpack/mmpack_completion \
-	src/mmpack-build/mmpack-build_completion \
+	data/shell-completions/bash/mmpack \
+	data/shell-completions/bash/mmpack-build \
 	$(eol)
 
 #
