@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a0128be_96ae9151",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-01-31T16:14:17Z",
+      "side": 1,
+      "message": "are these scripts \u0027data\u0027?\nwhat about \u0027utils\u0027?",
+      "range": {
+        "startLine": 53,
+        "startChar": 6,
+        "endLine": 53,
+        "endChar": 14
+      },
+      "revId": "78426df7bc34a6ac5208ce161a588bef60a32f8e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
