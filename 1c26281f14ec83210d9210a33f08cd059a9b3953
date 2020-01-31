@@ -16,6 +16,24 @@
       "revId": "1c26281f14ec83210d9210a33f08cd059a9b3953",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "13d07c4b_f2a0b924",
+        "filename": "tests/smoke-tests/test-mmpack-common.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-01-31T13:13:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "40d45a8a_50c79b91",
+      "revId": "1c26281f14ec83210d9210a33f08cd059a9b3953",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
