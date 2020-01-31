@@ -230,7 +230,7 @@ def load_config(filename):
     """
     # pylint: disable=global-statement
     global CONFIG
-    CONFIG = yaml.load(open(filename, 'rb').read())
+    CONFIG = yaml.load(open(filename, 'rb', Loader=yaml.FullLoader).read())
 
 
 if __name__ == '__main__':
