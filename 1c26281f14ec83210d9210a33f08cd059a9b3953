@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "40d45a8a_50c79b91",
+        "filename": "tests/smoke-tests/test-mmpack-common.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-01-31T10:55:36Z",
+      "side": 1,
+      "message": "you have changed permissions for this file to make it executable\nyou should not, it should always be sourced, never executed",
+      "revId": "1c26281f14ec83210d9210a33f08cd059a9b3953",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
