@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fde0a0cb_1e65b8e7",
+        "filename": "src/mmpack-build/syspkg_manager_dpkg.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T12:56:36Z",
+      "side": 1,
+      "message": "Given how we use find_pypkg_sysdep() method, I would rather raise an exception if we don\u0027t find the package (we will raise it any way in the caller)",
+      "range": {
+        "startLine": 233,
+        "startChar": 32,
+        "endLine": 233,
+        "endChar": 48
+      },
+      "revId": "3fce06b40c5e2d952c150ef906772da9e02a9123",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a5d0d2b_a8d5e85b",
+        "filename": "src/mmpack-build/syspkg_manager_dpkg.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T12:56:36Z",
+      "side": 1,
+      "message": "See previous comment... I would keep str",
+      "range": {
+        "startLine": 251,
+        "startChar": 43,
+        "endLine": 251,
+        "endChar": 61
+      },
+      "revId": "3fce06b40c5e2d952c150ef906772da9e02a9123",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ecd0e98a_506c3e13",
+        "filename": "src/mmpack-build/syspkg_manager_pacman_msys2.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T12:56:36Z",
+      "side": 1,
+      "message": "Same as dpkg_find_pypkg() I would rather raise an exception",
+      "range": {
+        "startLine": 39,
+        "startChar": 32,
+        "endLine": 39,
+        "endChar": 49
+      },
+      "revId": "3fce06b40c5e2d952c150ef906772da9e02a9123",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efb4bc80_7ba5cced",
+        "filename": "src/mmpack-build/workspace.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T12:56:36Z",
+      "side": 1,
+      "message": "Since we raise exception directly in the caller, we can simply do it here",
+      "range": {
+        "startLine": 18,
+        "startChar": 30,
+        "endLine": 18,
+        "endChar": 47
+      },
+      "revId": "3fce06b40c5e2d952c150ef906772da9e02a9123",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
