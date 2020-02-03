@@ -79,7 +79,7 @@ class SrcPackage:
         # pylint: disable=too-many-arguments
         self.name = None
         self.tag = tag
-        self.version = None
+        self.version = Version(None)
         self.url = None
         self.maintainer = None
         self.src_tarball = srctar_path
