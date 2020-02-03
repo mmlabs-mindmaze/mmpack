@@ -78,15 +78,15 @@ class SrcPackage:
 
     def __init__(self, specfile: str, tag: str, srctar_path: str):
         # pylint: disable=too-many-arguments
-        self.name = None
+        self.name = ''
         self.tag = tag
-        self.version = None
-        self.url = None
-        self.maintainer = None
+        self.version = Version(None)
+        self.url = ''
+        self.maintainer = ''
         self.src_tarball = srctar_path
         self.src_hash = sha256sum(srctar_path)
-        self.licenses = None
-        self.copyright = None
+        self.licenses = []
+        self.copyright = ''
 
         self.description = ''
         self.pkg_tags = ['MindMaze']
