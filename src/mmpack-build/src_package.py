@@ -482,6 +482,9 @@ class SrcPackage:
         Both are meant to be attached to all the binary packages.
         """
         licenses_path = set()
+        if not self.licenses:
+            raise RuntimeError('FATAL: license key is mandatory')
+
         for entry in self.licenses:
             tmp = os.path.join(PKGDATADIR, 'common-licenses', entry)
             if os.path.isfile(tmp):
