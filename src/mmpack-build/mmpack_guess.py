@@ -37,7 +37,7 @@ def _sshell(cmd) -> str:
     try:
         return shell(cmd, log=False, log_stderr=False).strip()
     except ShellException:
-        return None
+        return UNKNOWN
 
 
 def guess_url() -> str:
