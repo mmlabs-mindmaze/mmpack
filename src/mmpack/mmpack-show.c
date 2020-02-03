@@ -46,6 +46,7 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 		}
 
 		printf("Source package: %s\n", pkg->source);
+		printf("Ghost: %s\n", mmpkg_is_ghost(pkg) ? "yes" : "no");
 
 		printf("Dependencies:\n");
 		mmpkg_dep_dump(pkg->mpkdeps, "MMPACK");
