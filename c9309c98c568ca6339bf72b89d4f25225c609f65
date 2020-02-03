@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f8c8a94_1a75cadb",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 506,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T08:48:16Z",
+      "side": 1,
+      "message": "Don\u0027t introduce this, using iterator is better: using data for callback make code difficult to read (ou are forced to do following casts: type* -\u003evoid* -\u003etype*)",
+      "range": {
+        "startLine": 490,
+        "startChar": 0,
+        "endLine": 506,
+        "endChar": 1
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "448f3c8e_3969175c",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T08:48:16Z",
+      "side": 1,
+      "message": "use install_state_get_pkg()",
+      "range": {
+        "startLine": 48,
+        "startChar": 2,
+        "endLine": 49,
+        "endChar": 25
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f5b32da_389f6298",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T08:48:16Z",
+      "side": 1,
+      "message": "If you iterated over manually_inst, this test would be useless",
+      "range": {
+        "startLine": 62,
+        "startChar": 8,
+        "endLine": 62,
+        "endChar": 61
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "88f5307e_aeccadd5",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T08:48:16Z",
+      "side": 1,
+      "message": "Merge the 2 together:\n\nmark_needed(name, needed, ctx)\n{\n     pkg \u003d install_state_get_pkg(name, ctx)\n     if (needed[pkg-\u003ename_id])\n         return\n\n     needed[pkg-\u003ename_id] \u003d 1\n     for dep in pkg_deps(pkg, ctx):\n         mark_needed(dep-\u003ename, needed)\n}",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 0
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "acb08268_34546921",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T08:48:16Z",
+      "side": 1,
+      "message": "You can advantageaously add xx_calloc() in xx_alloc.h and use it instead",
+      "range": {
+        "startLine": 136,
+        "startChar": 1,
+        "endLine": 137,
+        "endChar": 53
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b51e851_433f1413",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T08:48:16Z",
+      "side": 1,
+      "message": "Use iterators over ctx-\u003emanually_inst instead of this",
+      "range": {
+        "startLine": 140,
+        "startChar": 1,
+        "endLine": 141,
+        "endChar": 52
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad639bca_95e0b031",
+        "filename": "src/mmpack/mmpack-rdepends.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T08:48:16Z",
+      "side": 1,
+      "message": "Unused \u003d\u003e remove",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 39
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
