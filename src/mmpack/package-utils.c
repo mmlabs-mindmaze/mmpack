@@ -421,8 +421,11 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 	fprintf(fp, "%s:\n"
 	        "    version: %s\n"
 	        "    source: %s\n"
-	        "    sumsha256sums: %s\n",
-	        pkg->name, pkg->version, pkg->source, pkg->sumsha);
+	        "    sumsha256sums: %s\n"
+		"    ghost: %s\n",
+	        pkg->name, pkg->version, pkg->source, pkg->sumsha,
+		mmpkg_is_ghost(pkg) ? "true" : "false");
+
 
 	fprintf(fp, "    depends:");
 	mmpkg_dep_save_to_index(pkg->mpkdeps, fp, 2 /*indentation level*/);
@@ -1407,6 +1410,7 @@ enum field_type {
 	FIELD_SOURCE,
 	FIELD_DESC,
 	FIELD_SUMSHA,
+	FIELD_GHOST,
 };
 
 static
@@ -1423,7 +1427,40 @@ const char* scalar_field_names[] = {
 	// assess that packages from different source are actually the
 	// same, even in their installed (unpacked) form
 	[FIELD_SUMSHA] = "sumsha256sums",
+	[FIELD_GHOST] = "ghost",
 };
+
+
+static
+int get_yaml_bool_value(const char* value, size_t valuelen)
+{
+	char tmp[8] = "";
+
+	if (valuelen > sizeof(tmp) - 1)
+		goto error;
+
+	memcpy(tmp, value, valuelen);
+	if (mm_strcasecmp(tmp, "true") == 0)
+		return 1;
+	else if (mm_strcasecmp(tmp, "false") == 0)
+		return 0;
+	else if (mm_strcasecmp(tmp, "on") == 0)
+		return 1;
+	else if (mm_strcasecmp(tmp, "off") == 0)
+		return 0;
+	else if (mm_strcasecmp(tmp, "yes") == 0)
+		return 1;
+	else if (mm_strcasecmp(tmp, "no") == 0)
+		return 0;
+	else if (mm_strcasecmp(tmp, "y") == 0)
+		return 1;
+	else if (mm_strcasecmp(tmp, "n") == 0)
+		return 0;
+
+error:
+	mm_raise_error(EINVAL, "invalid bool value: %.*s", valuelen, value);
+	return -1;
+}
 
 
 static
@@ -1449,6 +1486,7 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 {
 	const mmstr** field = NULL;
 	struct from_repo * from_repo;
+	int bval;
 
 	switch (type) {
 	case FIELD_VERSION:
@@ -1476,6 +1514,13 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 	case FIELD_SUMSHA:
 		field = &pkg->sumsha;
 		break;
+
+	case FIELD_GHOST:
+		bval = get_yaml_bool_value(value, valuelen);
+		if (bval == -1)
+			return -1;
+		mmpkg_update_flags(pkg, MMPKG_FLAGS_GHOST, bval);
+		return 0;
 
 	case FIELD_SIZE:
 		from_repo = mmpkg_get_or_create_from_repo(pkg, repo);

@@ -60,6 +60,9 @@ struct from_repo {
 	struct from_repo * next;
 };
 
+
+#define MMPKG_FLAGS_GHOST       (1 << 0)
+
 struct mmpkg {
 	int name_id;
 	mmstr const * name;
@@ -71,11 +74,13 @@ struct mmpkg {
 	struct from_repo * from_repo;
 
 	pkg_state state;
+	int flags;
 
 	struct mmpkg_dep * mpkdeps;
 	struct strlist sysdeps;
 	struct compiled_dep* compdep;
 };
+
 
 struct mmpkg_dep {
 	mmstr const * name;
@@ -174,6 +179,23 @@ struct rdeps_iter {
 	int rdeps_index;
 	struct pkglist_entry* curr;
 };
+
+
+static inline
+void mmpkg_update_flags(struct mmpkg* pkg, int mask, int set)
+{
+	if (set)
+		pkg->flags |= mask;
+	else
+		pkg->flags &= ~mask;
+}
+
+
+static inline
+int mmpkg_is_ghost(struct mmpkg const * pkg)
+{
+	return pkg->flags & MMPKG_FLAGS_GHOST;
+}
 
 
 int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
