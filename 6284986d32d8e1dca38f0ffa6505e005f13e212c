@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2e8bf61d_c21d9a97",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T15:26:45Z",
+      "side": 1,
+      "message": "This is way simpler to have:\n\nstruct pkg_request* find_to_remove(struct mmpack_ctx * ctx, const int * needed)\n{\n...\n}",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 43
+      },
+      "revId": "6284986d32d8e1dca38f0ffa6505e005f13e212c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fbc9058_c63a0ebc",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T15:26:45Z",
+      "side": 1,
+      "message": "not need to allocate a copy of pkg-\u003ename... pkg life will stay for the whole program duration (hence same for pkg-\u003ename)...",
+      "range": {
+        "startLine": 75,
+        "startChar": 40,
+        "endLine": 76,
+        "endChar": 14
+      },
+      "revId": "6284986d32d8e1dca38f0ffa6505e005f13e212c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f4ada2b_46b8ef17",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T15:26:45Z",
+      "side": 1,
+      "message": "pkg_request are part of a chained list... Use this, do not allocate of array of struct pkg_request. BTW it will solve your bug of not removing all unused packages (currently only the last but one element has its .next field updated, while since you use a realloc of of the array, all existing elements should have their next field updated).",
+      "range": {
+        "startLine": 70,
+        "startChar": 2,
+        "endLine": 80,
+        "endChar": 36
+      },
+      "revId": "6284986d32d8e1dca38f0ffa6505e005f13e212c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
