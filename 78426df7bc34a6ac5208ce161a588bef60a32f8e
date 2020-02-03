@@ -71,6 +71,30 @@
       "revId": "78426df7bc34a6ac5208ce161a588bef60a32f8e",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a42ad61e_99230aa3",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T15:34:36Z",
+      "side": 1,
+      "message": "Just before final decision on this, I just want to point that if you use data, commmon-licenses could fit in here as well (and other static data as well in future)...",
+      "parentUuid": "e20cd3b4_136789b6",
+      "range": {
+        "startLine": 53,
+        "startChar": 6,
+        "endLine": 53,
+        "endChar": 14
+      },
+      "revId": "78426df7bc34a6ac5208ce161a588bef60a32f8e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
