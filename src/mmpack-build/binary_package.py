@@ -106,6 +106,7 @@ class BinaryPackage:
         info = {'version': self.version,
                 'source': self.source,
                 'description': self.description,
+                'ghost': self.ghost,
                 'srcsha256': self.src_hash,
                 'sumsha256sums': sha256sum(self._sha256sums_file())}
         info.update(self._dependencies)
