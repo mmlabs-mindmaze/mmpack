@@ -40,6 +40,7 @@ named after the package name with the following fields:
  * arch: string of the architecture/OS that this package is built for
  * sumsha256sums: SHA256 hash of list of installed files (MMPACK/sha256sums)
  * srcsha256: SHA256 hash of source package used to build this package
+ * ghost: true or false depending the package is a ghost package
 
 ## license and copyright files
 
