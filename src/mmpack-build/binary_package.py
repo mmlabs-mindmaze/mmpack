@@ -109,6 +109,8 @@ class BinaryPackage:
                 'srcsha256': self.src_hash,
                 'sumsha256sums': sha256sum(self._sha256sums_file())}
         info.update(self._dependencies)
+        if self.ghost:
+            info['ghost'] = True
         yaml_serialize({self.name: info}, 'MMPACK/info')
         popdir()
 
