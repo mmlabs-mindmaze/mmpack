@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "bc750f65_7445fa7f",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-03T09:10:44Z",
+      "side": 1,
+      "message": "what about circular deps ?\nwon\u0027t this go awry ?",
+      "parentUuid": "88f5307e_aeccadd5",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 0
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "acb08268_34546921",
         "filename": "src/mmpack/mmpack-autoremove.c",
         "patchSetId": 14
@@ -105,6 +129,30 @@
       "writtenOn": "2020-02-03T08:48:16Z",
       "side": 1,
       "message": "You can advantageaously add xx_calloc() in xx_alloc.h and use it instead",
+      "range": {
+        "startLine": 136,
+        "startChar": 1,
+        "endLine": 137,
+        "endChar": 53
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8310361c_15261def",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-03T09:10:44Z",
+      "side": 1,
+      "message": "I do not find that advantageaous",
+      "parentUuid": "acb08268_34546921",
       "range": {
         "startLine": 136,
         "startChar": 1,
