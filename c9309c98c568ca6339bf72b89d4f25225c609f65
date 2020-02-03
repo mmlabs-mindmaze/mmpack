@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "cb704f48_8558312a",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T09:17:33Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 28
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "448f3c8e_3969175c",
         "filename": "src/mmpack/mmpack-autoremove.c",
         "patchSetId": 14
@@ -118,6 +141,30 @@
     },
     {
       "key": {
+        "uuid": "d5aeba2a_465668d0",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T09:17:33Z",
+      "side": 1,
+      "message": "If we have circular deps (let\u0027s hope not), we are safe... The way this algorithm works ensures that a node is visited only once. So it will natually break the circular loop",
+      "parentUuid": "bc750f65_7445fa7f",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 0
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "acb08268_34546921",
         "filename": "src/mmpack/mmpack-autoremove.c",
         "patchSetId": 14
@@ -165,6 +212,30 @@
     },
     {
       "key": {
+        "uuid": "9ce468f8_3d096b6b",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T09:17:33Z",
+      "side": 1,
+      "message": "This is just a suggestion... I just feel, it might be useful later...",
+      "parentUuid": "8310361c_15261def",
+      "range": {
+        "startLine": 136,
+        "startChar": 1,
+        "endLine": 137,
+        "endChar": 53
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0b51e851_433f1413",
         "filename": "src/mmpack/mmpack-autoremove.c",
         "patchSetId": 14
@@ -176,6 +247,30 @@
       "writtenOn": "2020-02-03T08:48:16Z",
       "side": 1,
       "message": "Use iterators over ctx-\u003emanually_inst instead of this",
+      "range": {
+        "startLine": 140,
+        "startChar": 1,
+        "endLine": 141,
+        "endChar": 52
+      },
+      "revId": "c9309c98c568ca6339bf72b89d4f25225c609f65",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed83b423_ea850070",
+        "filename": "src/mmpack/mmpack-autoremove.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-03T09:17:33Z",
+      "side": 1,
+      "message": "To be more precise, \nUse iterator over ctx-\u003emanually_inst for the first, and iterator over ctx-\u003einstalled for the second",
+      "parentUuid": "0b51e851_433f1413",
       "range": {
         "startLine": 140,
         "startChar": 1,
