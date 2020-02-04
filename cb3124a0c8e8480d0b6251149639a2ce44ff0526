@@ -39,6 +39,24 @@
       "revId": "cb3124a0c8e8480d0b6251149639a2ce44ff0526",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46727701_679f77b8",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1435,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-04T08:35:14Z",
+      "side": 1,
+      "message": "I took the yaml standard and parse them accordingly (actually close to the standard): https://yaml.org/type/bool.html\n\nin yaml there is no 0/1 for boolean.",
+      "parentUuid": "5cd2fa1d_623456f8",
+      "revId": "cb3124a0c8e8480d0b6251149639a2ce44ff0526",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
