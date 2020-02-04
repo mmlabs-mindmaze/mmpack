@@ -284,6 +284,11 @@ def get_host_arch() -> str:
     return arch
 
 
+_DIST_DERIVATIVES = {
+    'debian': {'debian', 'ubuntu', 'linuxmint', 'raspbian'},
+}
+
+
 def get_host_dist() -> str:
     """
     return host distribution
@@ -291,11 +296,19 @@ def get_host_dist() -> str:
     try:
         for line in open("/etc/os-release", "r"):
             if line.startswith('ID='):
-                return line[3:].strip()
+                dist = line[3:].strip()
+                break
     except FileNotFoundError:
         # if not linux, then windows
-        pass
-    return 'windows'
+        dist = 'windows'
+
+    # Remap distributation derivative
+    for orig_dist, derivatives in _DIST_DERIVATIVES.items():
+        if dist in derivatives:
+            dist = orig_dist
+            break
+
+    return dist
 
 
 def get_host_arch_dist() -> str:

@@ -274,6 +274,8 @@ os_id get_os_id(void)
 		goto exit;
 
 	if (strncasecmp(line, "ubuntu", len)
+	    || strncasecmp(line, "linuxmint", len)
+	    || strncasecmp(line, "raspbian", len)
 	    || strncasecmp(line, "debian", len))
 		id = OS_ID_DEBIAN;
 
