@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c3fa26c_58f44fce",
+        "filename": "src/mmpack-build/binary_package.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-04T08:00:38Z",
+      "side": 1,
+      "message": "if self.ghost is a boolean, then this is enough:\n  info[\u0027ghost\u0027] \u003d self.ghost",
+      "range": {
+        "startLine": 112,
+        "startChar": 11,
+        "endLine": 112,
+        "endChar": 21
+      },
+      "revId": "cb3124a0c8e8480d0b6251149639a2ce44ff0526",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5cd2fa1d_623456f8",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1435,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-04T08:00:38Z",
+      "side": 1,
+      "message": "Not sure whether this is a good idea or overkill, but while at it you could add 0/1 to this list of tests",
+      "revId": "cb3124a0c8e8480d0b6251149639a2ce44ff0526",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
