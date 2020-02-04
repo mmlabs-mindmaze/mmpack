@@ -26,6 +26,9 @@ struct cb_data {
 };
 
 
+static int show_ghost_packages = 0;
+
+
 /**
  * print_pkg_if_match() - print package if name match pattern
  * @pkg:        package whose name must be tested
@@ -46,6 +49,10 @@ int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern)
 {
 	// If pattern is provided and the name does not match do nothing
 	if (pattern && (strstr(pkg->name, pattern) == NULL))
+		return 0;
+
+	// Skip showing ghost packages if not requested
+	if (!show_ghost_packages && mmpkg_is_ghost(pkg))
 		return 0;
 
 	mmpkg_print(pkg);
@@ -161,6 +168,14 @@ const struct subcmd list_subcmds[] = {
 	{"upgradeable", list_upgradeable},
 };
 
+static const struct mm_arg_opt cmdline_optv[] = {
+	{"g|show-ghosts", MM_OPT_NOVAL|MM_OPT_INT, "1",
+	 {.iptr = &show_ghost_packages},
+	 "Show ghost packages"},
+};
+
+
+
 
 /**
  * mmpack_list() - main function for the list command
@@ -178,6 +193,7 @@ int mmpack_list(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	struct subcmd_parser parser = {
 		.execname = "mmpack",
 		.args_doc = LIST_SYNOPSIS,
+		.optv = cmdline_optv,
 		.num_subcmd = MM_NELEM(list_subcmds),
 		.subcmds = list_subcmds,
 		.defcmd = "installed",
