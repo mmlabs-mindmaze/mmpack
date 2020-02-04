@@ -123,8 +123,13 @@ static
 int is_file(char const * path)
 {
 	struct mm_stat st;
+	int previous, rv;
 
-	if (mm_stat(path, &st, 0) != 0)
+	// Call mm_stat() without changing error state nor error log
+	previous = mm_error_set_flags(MM_ERROR_SET, MM_ERROR_IGNORE);
+	rv = mm_stat(path, &st, 0);
+	mm_error_set_flags(previous, MM_ERROR_IGNORE);
+	if (rv != 0)
 		return 0;
 
 	return S_ISREG(st.mode);
