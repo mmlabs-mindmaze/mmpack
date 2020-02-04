@@ -82,6 +82,24 @@
       "revId": "cb3124a0c8e8480d0b6251149639a2ce44ff0526",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35794609_94b4337d",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1435,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-04T16:37:43Z",
+      "side": 1,
+      "message": "this standard is of dubious taste",
+      "parentUuid": "46727701_679f77b8",
+      "revId": "cb3124a0c8e8480d0b6251149639a2ce44ff0526",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
