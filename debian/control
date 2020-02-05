@@ -18,7 +18,7 @@ Package: mmpack
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends},
- libdpkg-perl
+ libdpkg-perl, base-files
 Recommends: mmpack-doc
 Description: MindMaze package manager
  This package provides the infrastructure for handling the build,
