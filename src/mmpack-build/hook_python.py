@@ -184,6 +184,11 @@ class MMPackBuildHook(BaseHook):
             shutil.rmtree(pydir)
 
     def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
+        # Discard python2 files
+        py2_re = re.compile(r'(?:usr/)?lib/python2(?:\.\d)?/.*')
+        py2_set = {f for f in install_files if py2_re.match(f)}
+        install_files.difference_update(py2_set)
+
         pkgs = dict()
         for file in install_files:
             try:
