@@ -7,6 +7,7 @@ import filecmp
 import os
 import re
 import shutil
+from collections import namedtuple
 from glob import glob
 from typing import Set, Dict, List
 
@@ -17,9 +18,6 @@ from . provide import Provide, ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
 
 
-_SITEDIR = 'lib/python3/site-packages'
-
-
 # example of matches:
 # 'lib/python3.6/site-packages/foo.so' => foo
 # 'lib/python3/site-packages/_foo.so' => foo
@@ -27,7 +25,10 @@ _SITEDIR = 'lib/python3/site-packages'
 # 'lib/python3/site-packages/foo/__init__.py' => foo
 # 'lib/python3/site-packages/foo/_internal.so' => foo
 # 'lib/python2/site-packages/foo.so' => None
-_PKG_REGEX = re.compile(r'lib/python3(?:\.\d)?/site-packages/_?([\w_]+)')
+_PKG_REGEX = re.compile(
+    r'(lib/python3(?:\.\d)?/(?:dist|site)-packages)'
+    r'/([\w_]+)(?:[^/]*)(\.egg-info/)?'
+)
 
 
 # location relative to the prefix dir where the files of public python packages
@@ -35,17 +36,29 @@ _PKG_REGEX = re.compile(r'lib/python3(?:\.\d)?/site-packages/_?([\w_]+)')
 _MMPACK_REL_PY_SITEDIR = 'lib/python3/site-packages'
 
 
-def _get_py3_public_import_name(filename: str) -> str:
+PyNameInfo = namedtuple('PyNameInfo', ['pyname', 'sitedir', 'is_egginfo'])
+
+def _parse_py3_filename(filename: str) -> PyNameInfo:
     """
-    Return the python3 package name a file should belongs to (ie the one with
+    Get the python3 package name a file should belongs to (ie the one with
     __init__.py file if folder, or the name of the single module if directly in
-    site-packages folder).
+    site-packages folder) along with the site dir that the package belongs to.
+
+    Args:
+        filename: file to test
+
+    Return: NamedTuple(pyname, sitedir, is_egginfo)
+
+    Raises:
+        FileNotFoundError: the file does not belong to a public python package
     """
     res = _PKG_REGEX.search(filename)
     if not res:
-        return None
+        raise FileNotFoundError
 
-    return res.groups()[0]
+    grps = res.groups()
+    is_egg = grps[2] is not None
+    return PyNameInfo(pyname=grps[1], sitedir=grps[0], is_egginfo=is_egg)
 
 
 def _mmpack_pkg_from_pyimport_name(pyimport_name: str):
@@ -173,11 +186,13 @@ class MMPackBuildHook(BaseHook):
     def get_dispatch(self, install_files: Set[str]) -> Dict[str, Set[str]]:
         pkgs = dict()
         for file in install_files:
-            pyname = _get_py3_public_import_name(file)
-            if pyname:
-                mmpack_pkgname = _mmpack_pkg_from_pyimport_name(pyname)
+            try:
+                info = _parse_py3_filename(file)
+                mmpack_pkgname = _mmpack_pkg_from_pyimport_name(info.pyname)
                 pkgfiles = pkgs.setdefault(mmpack_pkgname, set())
                 pkgfiles.add(file)
+            except FileNotFoundError:
+                pass
 
         return pkgs
 
@@ -185,21 +200,30 @@ class MMPackBuildHook(BaseHook):
                         specs_provides: Dict[str, Dict]):
         py3_provides = ProvideList('python')
 
+        py3pkgs = {}
+        for instfile in pkg.files:
+            try:
+                info = _parse_py3_filename(instfile)
+                if info.is_egginfo:
+                    continue
+                data = py3pkgs.setdefault(info.pyname, (info.sitedir, set()))
+                data[1].add(instfile)
+            except FileNotFoundError:
+                pass
+
         # Loop over all python modules contained in the mmpack package and
         # parse the python public entry point of it (ie the entry point of the
         # python package)
-        for pyname in {_get_py3_public_import_name(f) for f in pkg.files}:
-            # file not in python package will generate None, discard them
-            if not pyname:
-                continue
-
-            root = '{}/{}'.format(_MMPACK_REL_PY_SITEDIR, pyname)
-            if not {root+'/__init__.py', root+'.py'}.isdisjoint(pkg.files):
-                symbols = _gen_pysymbols(pyname, pkg, _MMPACK_REL_PY_SITEDIR)
+        for pyname, pypkg_data in py3pkgs.items():
+            sitedir = pypkg_data[0]
+            py_files = pypkg_data[1]
+            root = '{}/{}'.format(sitedir, pyname)
+            if not {root+'/__init__.py', root+'.py'}.isdisjoint(py_files):
+                symbols = _gen_pysymbols(pyname, pkg, sitedir)
             else:
                 raise RuntimeError('Not entry point found for python '
                                    'package {} in {}'
-                                   .format(pyname, _MMPACK_REL_PY_SITEDIR))
+                                   .format(pyname, sitedir))
 
             provide = Provide(pyname)
             provide.pkgdepends = _mmpack_pkg_from_pyimport_name(pyname)
@@ -220,6 +244,6 @@ class MMPackBuildHook(BaseHook):
         if not py_scripts:
             return
 
-        used_symbols = _gen_pydepends(pkg, _SITEDIR)
+        used_symbols = _gen_pydepends(pkg, _MMPACK_REL_PY_SITEDIR)
         imports = {s.split('.', maxsplit=1)[0] for s in used_symbols}
         self._gen_py_deps(pkg, imports, other_pkgs)
