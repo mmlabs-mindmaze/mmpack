@@ -218,7 +218,7 @@ def is_documentation(filename: str) -> bool:
     """
     returns whether a file should be part of a documentation package
     """
-    return 'doc/' in filename
+    return 'share/doc/' in filename or 'share/doc-base/' in filename
 
 
 def is_binary(filename: str) -> bool:
