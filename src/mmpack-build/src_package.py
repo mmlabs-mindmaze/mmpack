@@ -12,6 +12,7 @@ from os import path
 from subprocess import Popen
 from threading import Thread
 from typing import Set
+from tempfile import mkdtemp
 
 from . workspace import Workspace, get_local_install_dir
 from . binary_package import BinaryPackage
@@ -303,7 +304,7 @@ class SrcPackage:
 
         build_env = os.environ.copy()
         build_env['SRCDIR'] = self.unpack_path()
-        build_env['BUILDDIR'] = self.unpack_path() + '/build'
+        build_env['BUILDDIR'] = mkdtemp(dir=self.unpack_path(), prefix='build-')
         build_env['DESTDIR'] = self._local_install_path()
         build_env['PREFIX'] = _get_install_prefix()
         build_env['SKIP_TESTS'] = str(skip_tests)
@@ -357,7 +358,6 @@ class SrcPackage:
         wrk = Workspace()
 
         pushdir(self.unpack_path())
-        os.makedirs('build')
         os.makedirs(self._local_install_path(), exist_ok=True)
 
         if not self.build_system:
