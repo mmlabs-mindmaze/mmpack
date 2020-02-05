@@ -5,7 +5,8 @@ from os import makedirs, getcwd, chdir
 from os.path import dirname, abspath
 from shutil import rmtree
 
-from mmpack_build.common import list_files, parse_soname, shlib_keyname
+from mmpack_build.common import list_files, parse_soname, shlib_keyname, \
+    str2bool
 
 
 REF_FILELIST = [
@@ -136,3 +137,28 @@ class TestFileList(unittest.TestCase):
         for ref_soname, _, _, ref_pkgname in REF_SONAME_DATA:
             pkgname = shlib_keyname(ref_soname)
             self.assertEqual(pkgname, ref_pkgname)
+
+    def test_str2bool(self):
+        """
+        test str2bool()
+        """
+        refdata_for_true = ['true', 'TRUE', 'True',
+                            'on', 'ON', 'On',
+                            ' on', 'on ', ' on ', 'on \n', '\n on',
+                            'yes', 'YES', 'Yes',
+                            '1']
+        refdata_for_false = ['false', 'FALSE', 'False',
+                             'off', 'OFF', 'Off',
+                            ' off', 'off ', ' off ', 'off \n', '\n off',
+                             'no', 'NO', 'No',
+                             '0']
+        refdata_exception = ['dummy', 'tru',  'truefalse', 'true, false', '2']
+
+        for value in refdata_for_true:
+            self.assertIs(str2bool(value), True)
+
+        for value in refdata_for_false:
+            self.assertIs(str2bool(value), False)
+
+        for value in refdata_exception:
+            self.assertRaises(ValueError, str2bool, value)

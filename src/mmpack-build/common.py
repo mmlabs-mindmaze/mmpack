@@ -545,3 +545,24 @@ def find_license(directory: str = '.') -> str:
         return None
     except Exception:  # pylint: disable=broad-except
         return None
+
+
+_TRUE_STRINGS = {'true', 't', 'yes', 'y', 'on', '1'}
+_FALSE_STRINGS = {'false', 'f', 'no', 'n', 'off', '0'}
+
+
+def str2bool(value: str) -> bool:
+    """
+    Convert a string to bool value
+
+    Raise:
+        TypeError: value is not a string
+        ValueError: the string value does not represent a boolean
+    """
+    lowerval = value.strip().lower()
+    if lowerval in _TRUE_STRINGS:
+        return True
+    if lowerval in _FALSE_STRINGS:
+        return False
+
+    raise ValueError('"{}" does not represent a boolean value'.format(value))
