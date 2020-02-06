@@ -69,6 +69,7 @@ mmpack_doc_sources = files(
 mmpack_doc_sources += files(
   'specs/package-sources-strap.rst',
   'specs/package-specfile.rst',
+  'specs/repo.rst',
 )
 
 custom_target('html',

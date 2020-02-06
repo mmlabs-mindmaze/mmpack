@@ -30,17 +30,25 @@ am__v_RM_1 = -@rm -vf
 
 bin_PROGRAMS = mmpack
 pkglibexec_PROGRAMS = mount-mmpack-prefix mmpack-check-sysdep
-bin_SCRIPTS = src/mmpack-build/mmpack-build
-dist_bin_SCRIPTS = \
-	src/repository/mmpack-createrepo \
-	devtools/mmpack-build-slave.sh \
+bin_SCRIPTS = \
+	src/mmpack-build/mmpack-build \
+	src/repository/mmpack_handle_repo \
 	$(eol)
-dist_pkgdata_SCRIPTS = src/mmpack/check-dpkg-installed
+
+dist_bin_SCRIPTS = \
+	devtools/mmpack-build-slave.sh \
+	src/repository/mmpack-createrepo \
+	$(eol)
+dist_pkgdata_SCRIPTS = \
+	src/mmpack/check-dpkg-installed \
+	src/repository/repo.py \
+	$(eol)
 
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST += \
 	src/mmpack-build/mmpack-build.in \
 	src/mmpack-build/settings.py.in \
+	src/repository/mmpack_handle_repo.py.in \
 	$(eol)
 
 mmpackbuilddir = $(pythondir)/mmpack_build
@@ -257,6 +265,12 @@ mmpack_check_sysdep_LDADD = \
 		-e 's,@bindir[@],$(bindir),g' \
 		-e 's,@package_version[@],$(PACKAGE_VERSION),g' \
 		-e 's,@exeext[@],$(EXEEXT),g' < $< > $@
+
+src/repository/mmpack_handle_repo: src/repository/mmpack_handle_repo.py.in Makefile
+	$(AM_V_at)$(MKDIR_P) $(dir $@)
+	$(AM_V_GEN)$(SED) -e 's,@pkgdatadir[@],$(pkgdatadir),g' \
+		-e 's,@bindir[@],$(bindir),g' \
+		< $< > $@
 
 src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
@@ -547,6 +561,7 @@ user_doc_sources += \
 	\
 	docs/specs/package-specfile.rst \
 	docs/specs/package-sources-strap.rst \
+	docs/specs/repo.rst \
 	$(eol)
 
 all_user_doc_sources = $(user_doc_sources) $(RST_MAN_PAGES)
