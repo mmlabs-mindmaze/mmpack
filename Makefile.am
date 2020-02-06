@@ -33,6 +33,8 @@ pkglibexec_PROGRAMS = mount-mmpack-prefix mmpack-check-sysdep
 bin_SCRIPTS = src/mmpack-build/mmpack-build
 dist_bin_SCRIPTS = \
 	src/repository/mmpack-createrepo \
+	src/repository/server.py \
+	src/repository/repo.py \
 	devtools/mmpack-build-slave.sh \
 	$(eol)
 dist_pkgdata_SCRIPTS = src/mmpack/check-dpkg-installed
@@ -536,6 +538,7 @@ user_doc_sources += \
 	\
 	docs/specs/package-specfile.rst \
 	docs/specs/package-sources-strap.rst \
+	docs/specs/repo.rst \
 	$(eol)
 
 all_user_doc_sources = $(user_doc_sources) $(RST_MAN_PAGES)
