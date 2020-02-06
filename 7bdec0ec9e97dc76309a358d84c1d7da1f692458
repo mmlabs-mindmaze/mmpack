@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a5492c9_6e407c44",
+        "filename": "docs/configuration.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-06T15:19:44Z",
+      "side": 1,
+      "message": "please also add that \"enabled\" is optional and defaults to 1 (enabled)",
+      "revId": "7bdec0ec9e97dc76309a358d84c1d7da1f692458",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
