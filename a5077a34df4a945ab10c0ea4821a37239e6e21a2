@@ -22,6 +22,30 @@
       "revId": "a5077a34df4a945ab10c0ea4821a37239e6e21a2",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47da6a85_f5ff91fe",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-06T15:40:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2813fdc3_80283a42",
+      "range": {
+        "startLine": 80,
+        "startChar": 8,
+        "endLine": 88,
+        "endChar": 29
+      },
+      "revId": "a5077a34df4a945ab10c0ea4821a37239e6e21a2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
