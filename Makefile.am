@@ -536,6 +536,7 @@ user_doc_sources += \
 	\
 	docs/specs/package-specfile.rst \
 	docs/specs/package-sources-strap.rst \
+	docs/specs/repo.rst \
 	$(eol)
 
 all_user_doc_sources = $(user_doc_sources) $(RST_MAN_PAGES)
