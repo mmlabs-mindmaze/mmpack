@@ -87,6 +87,13 @@ OPTIONS
   Whichever prefix is used, it needs to be correctly configured for this command
   to work.
 
+``--version-from-git``
+  Updates the version stored in the source package and used to build the binary
+  packages to follow the format of the version incremented since last tag. This
+  essentially returns the version provided by the ``git describe`` command.
+  This option is of course ignored if the packages are not built from a git
+  repository.
+
 
 SEE ALSO
 ========

@@ -6,7 +6,7 @@ Usage:
 
 mmpack pkg-create [--git|--src|--mmpack-src|--path]
                   [--tag <tag>] [--prefix <prefix>] [--skip-build-tests]
-                  [path_or_url]
+                  [--version-from-git] [path_or_url]
 
 Create mmpack package specified in argument. If no argument is provided, look
 through the tree for a mmpack folder, and use the containing folder as root
@@ -77,6 +77,9 @@ def parse_options(argv):
     parser.add_argument('--skip-build-tests',
                         action='store_true', dest='skip_tests',
                         help='indicate that build tests must not be run')
+    parser.add_argument('--version-from-git',
+                        action='store_true', dest='version_from_git',
+                        help='version should be guessed from git repo')
     parser.add_argument('--build-deps',
                         action='store_true', dest='build_deps',
                         help='check and install build dependencies')
@@ -145,7 +148,8 @@ def main(argv):
     if not args.method:
         args.method = _guess_method(args.path_or_url)
 
-    srctarball = SourceTarball(args.method, args.path_or_url, args.tag)
+    srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
+                               version_from_git=args.version_from_git)
     srctarball.prepare_binpkg_build()
 
     specfile = os.path.join(srctarball.detach_srcdir(), 'mmpack/specs')
