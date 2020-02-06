@@ -50,7 +50,7 @@ e.g. type ``man mmpack install`` for info about the install subcommand of mmpack
    :maxdepth: 1
    :glob:
 
-   man/*
+   man/*/*
 
 Features
 --------
