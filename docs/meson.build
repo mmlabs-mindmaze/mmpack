@@ -1,4 +1,5 @@
 man_pages_sources = [
+    'configuration.rst',
     'man/mmpack.rst',
     'man/mmpack-autoremove.rst',
     'man/mmpack-build.rst',
@@ -37,14 +38,20 @@ man_pages_sources = [
 
 rst2man = find_program(['rst2man', 'rst2man3'], required : true)
 foreach rstfile : man_pages_sources
+    if rstfile.startswith('man/')
+        man_section = '1'
+    else
+        man_section = '5'
+    endif
+
     custom_target(rstfile.underscorify(),
         command : [rst2man, files(rstfile)],
-        output : '@BASENAME@.1',
-        capture : '@BASENAME@.1',
+        output : '@BASENAME@.' + man_section,
+        capture : '@BASENAME@.' + man_section,
         input : rstfile,
         build_by_default : true,
         install : true,
-        install_dir : get_option('mandir') / 'man1',
+        install_dir : get_option('mandir') / 'man' + man_section,
     )
 endforeach
 
@@ -63,6 +70,7 @@ mmpack_doc_sources = files(
     'usage.rst',
     'yaml.rst',
 )
+
 # add the user part of the specifications
 mmpack_doc_sources += files(
   'specs/package-sources-strap.rst',
