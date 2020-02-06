@@ -62,6 +62,7 @@ class SourceTarball:
                 it will be located in Workspace().packages
             **kwargs: supported optional keyword arguments are following
                 git_ssh_cmd: ssh cmd to use when cloning git repo through ssh
+                version_from_git: if True, get version from git repo
         """
         # declare class instance attributes
         self.srctar = None
@@ -161,6 +162,12 @@ class SourceTarball:
         file_path = os.path.join(self._srcdir, 'mmpack/src_orig_tracing')
         yaml_serialize(data, file_path, use_block_style=True)
 
+    def _update_version(self, version: str):
+        specs_path = os.path.join(self._srcdir, 'mmpack/specs')
+        specs = yaml_load(specs_path)
+        specs['general']['version'] = version
+        yaml_serialize(specs, specs_path, use_block_style=True)
+
     def _create_srcdir_from_git(self):
         """
         Create a source package folder from git clone
@@ -172,6 +179,9 @@ class SourceTarball:
         # Get tag name if not set yet (use current branch)
         if not self.tag:
             self.tag = _git_subcmd('rev-parse --abbrev-ref HEAD', git_dir)
+
+        if self._kwargs.get('version_from_git', False):
+            self._update_version(_git_subcmd('describe'))
 
         commit_ref = _git_subcmd('rev-parse HEAD', git_dir)
         self.trace['pkg'].update({'url': self._path_url, 'ref': commit_ref})
