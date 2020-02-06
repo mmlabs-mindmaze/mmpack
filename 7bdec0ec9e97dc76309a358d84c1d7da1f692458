@@ -16,6 +16,24 @@
       "revId": "7bdec0ec9e97dc76309a358d84c1d7da1f692458",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ffcc09b_b7498e21",
+        "filename": "docs/configuration.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-02-06T16:15:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a5492c9_6e407c44",
+      "revId": "7bdec0ec9e97dc76309a358d84c1d7da1f692458",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
