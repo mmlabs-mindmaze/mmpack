@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3371f7a8_dc281739",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 56
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-06T08:09:22Z",
+      "side": 1,
+      "message": "is this debian-only ?\nyou seem to have added the code for pacman also",
+      "revId": "3baaecddefb0251bc0dc5580d30e37a76e24d76a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49a6d490_75520657",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 56
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-06T08:09:22Z",
+      "side": 1,
+      "message": "So this will overwrite the given version of generated binary packages, right ?\nhow about the source package ?\n\nCurrently, the source package will be named after the version given in mmpack specs, and the binary packages will be named after the version returned by fetch_unpack()",
+      "revId": "3baaecddefb0251bc0dc5580d30e37a76e24d76a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
