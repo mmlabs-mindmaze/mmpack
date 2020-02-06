@@ -9,25 +9,26 @@ configuration file if working within a prefix, or the global (default)
 configuration file that is located in **$XDG_CONFIG_HOME** folder (defaults to
 $HOME/.config). The mmpack configuration file is called **mmpack-config.yaml**.
 
-There are two configuration options:
+There is currently one configuration option:
 
- :default-prefix: a path to the prefix to use if none given
- :repositories: a list of repository names. Each repository contains two fields
- named respectively url and enabled. The field url provides the url where to
- find the packages of the repository. The url syntax follows RFC 3986. The field
- enabled is a flag either set to 0 or 1: if this flag is set to 0 then the
- repository is not disabled, i.e., the user is not able to access to the
+ ``repositories``: a list of repository names. Each repository contains two
+ fields named respectively url and enabled. The field url provides the url
+ where to find the packages of the repository. The url syntax follows RFC 3986.
+ The field enabled is a flag either set to 0 or 1: if this flag is set to 0
+ then the repository is disabled, i.e., the user is not able to access to the
  packages of the repository; on the contrary, when this flag is set to 1 then
  the repository is enabled, i.e., the user is able to access to the packages of
- the repository.
+ the repository. The enabled flag is optional and it defaults to 1.
 
- example of list of repositories:
+ Example of list of repositories:
 
- repositories:
-   - repo_name:
-         url: url_of_repo
-         enabled: 0
-   - other_repo_name:
-         url: url_of_other_repo
-         enabled: 1
 
+ .. code-block:: yaml
+
+    repositories:
+      - repo_name:
+            url: url_of_repo
+            enabled: 0
+      - other_repo_name:
+            url: url_of_other_repo
+            enabled: 1
