@@ -428,39 +428,45 @@ dist_completion_DATA = \
 # DOC RULES
 #
 
-RST_MAN_PAGES = \
-	docs/man/mmpack.rst \
-	docs/man/mmpack-autoremove.rst \
-	docs/man/mmpack-build.rst \
-	docs/man/mmpack-build-builddep.rst \
-	docs/man/mmpack-build-clean.rst \
-	docs/man/mmpack-build-guess.rst \
-	docs/man/mmpack-build-pkg-create.rst \
-	docs/man/mmpack-check-integrity.rst \
-	docs/man/mmpack-download.rst \
-	docs/man/mmpack-fix-broken.rst \
-	docs/man/mmpack-install.rst \
-	docs/man/mmpack-list.rst \
-	docs/man/mmpack-mkprefix.rst \
-	docs/man/mmpack-provides.rst \
-	docs/man/mmpack-rdepends.rst \
-	docs/man/mmpack-remove.rst \
-	docs/man/mmpack-repo.rst \
-	docs/man/mmpack-run.rst \
-	docs/man/mmpack-search.rst \
-	docs/man/mmpack-show.rst \
-	docs/man/mmpack-source.rst \
-	docs/man/mmpack-update.rst \
-	docs/man/mmpack-upgrade.rst \
+RST_MAN1_PAGES = \
+	docs/man/1/mmpack.rst \
+	docs/man/1/mmpack-autoremove.rst \
+	docs/man/1/mmpack-build.rst \
+	docs/man/1/mmpack-build-builddep.rst \
+	docs/man/1/mmpack-build-clean.rst \
+	docs/man/1/mmpack-build-guess.rst \
+	docs/man/1/mmpack-build-pkg-create.rst \
+	docs/man/1/mmpack-check-integrity.rst \
+	docs/man/1/mmpack-download.rst \
+	docs/man/1/mmpack-fix-broken.rst \
+	docs/man/1/mmpack-install.rst \
+	docs/man/1/mmpack-list.rst \
+	docs/man/1/mmpack-mkprefix.rst \
+	docs/man/1/mmpack-provides.rst \
+	docs/man/1/mmpack-rdepends.rst \
+	docs/man/1/mmpack-remove.rst \
+	docs/man/1/mmpack-repo.rst \
+	docs/man/1/mmpack-run.rst \
+	docs/man/1/mmpack-search.rst \
+	docs/man/1/mmpack-show.rst \
+	docs/man/1/mmpack-source.rst \
+	docs/man/1/mmpack-update.rst \
+	docs/man/1/mmpack-upgrade.rst \
 	$(eof)
-EXTRA_DIST += $(RST_MAN_PAGES)
+RST_MAN5_PAGES = \
+	docs/man/5/mmpack-config.rst \
+	$(eof)
+EXTRA_DIST += $(RST_MAN1_PAGES) $(RST_MAN5_PAGES)
 
-nodist_man_MANS = $(RST_MAN_PAGES:.rst=.1)
+nodist_man_MANS = $(RST_MAN1_PAGES:.rst=.1) $(RST_MAN5_PAGES:.rst=.5)
 CLEANFILES += $(nodist_man_MANS)
 
 # rst2man is part of the docutils package which is a dependency of sphinx
 %.1: %.rst
-	$(AM_V_at) $(MKDIR_P) docs/man
+	$(AM_V_at) $(MKDIR_P) docs/man/1
+	$(AM_V_GEN) $(RST2MAN) $< $@
+%.5: %.rst
+	$(AM_V_at) $(MKDIR_P) docs/man/5
 	$(AM_V_GEN) $(RST2MAN) $< $@
 
 #
