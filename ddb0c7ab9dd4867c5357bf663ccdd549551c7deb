@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8da9525_b7c3ecd9",
+        "filename": "docs/man/5/configuration.rst",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-07T12:27:22Z",
+      "side": 1,
+      "message": "Please leave untouched...\n\nInstead, you need to indent paragraph of repositories.. ie:\n\n:repositories: a list of repository names. Each repository contains two\n   fields named respectively url and enabled. The field url provides the\n   url where to find the packages of the repository. The url syntax follows\n   RFC 3986. The fie...",
+      "range": {
+        "startLine": 14,
+        "startChar": 1,
+        "endLine": 14,
+        "endChar": 17
+      },
+      "revId": "ddb0c7ab9dd4867c5357bf663ccdd549551c7deb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}

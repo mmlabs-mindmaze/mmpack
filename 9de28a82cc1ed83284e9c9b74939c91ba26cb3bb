@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d4d3867_179af326",
+        "filename": "docs/man/5/configuration.rst",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-07T12:27:22Z",
+      "side": 0,
+      "message": "Please keep, the option has not disappear... However it makes sense only for ~/.config/mmpack-config.yaml",
+      "range": {
+        "startLine": 14,
+        "startChar": 1,
+        "endLine": 14,
+        "endChar": 59
+      },
+      "revId": "9de28a82cc1ed83284e9c9b74939c91ba26cb3bb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
