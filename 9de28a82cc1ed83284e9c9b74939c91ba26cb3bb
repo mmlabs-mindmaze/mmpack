@@ -51,6 +51,24 @@
       "revId": "9de28a82cc1ed83284e9c9b74939c91ba26cb3bb",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6316907b_203738b7",
+        "filename": "docs/man/5/configuration.rst",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017476
+      },
+      "writtenOn": "2020-02-07T14:50:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "98ea3b0c_7d694162",
+      "revId": "9de28a82cc1ed83284e9c9b74939c91ba26cb3bb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
