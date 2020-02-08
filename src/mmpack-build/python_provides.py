@@ -210,7 +210,7 @@ def main():
     # If site path folder is specified, add it to sys.path so astroid resolve
     # the imports properly
     if options.site_path:
-        sys.path.append(abspath(options.site_path))
+        sys.path.insert(0, abspath(options.site_path))
 
     # Load list of files in package from stdin
     pkgfiles = {abspath(f.strip()) for f in sys.stdin.readlines()}
