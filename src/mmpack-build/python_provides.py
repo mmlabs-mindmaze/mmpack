@@ -213,7 +213,7 @@ def main():
         sys.path.append(abspath(options.site_path))
 
     # Load list of files in package from stdin
-    pkgfiles = {f.strip() for f in sys.stdin.readlines()}
+    pkgfiles = {abspath(f.strip()) for f in sys.stdin.readlines()}
 
     symbol_set = _gen_pypkg_symbols(options.pypkgname, pkgfiles)
 
