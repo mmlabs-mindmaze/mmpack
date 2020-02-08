@@ -124,7 +124,7 @@ class ProvideList:
             data[provide.soname] = {'depends': provide.pkgdepends,
                                     'symbols': provide.symbols}
 
-        yaml_serialize(data, filename)
+        yaml_serialize(data, filename, use_block_style=True)
 
     def add_from_file(self, filename) -> None:
         """
