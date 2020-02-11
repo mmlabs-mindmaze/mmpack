@@ -20,11 +20,14 @@ package and use this one to run the script.
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath
-from typing import Set
+from typing import Set, Dict
 
 from astroid import parse, AstroidImportError
 from astroid.nodes import Import, ImportFrom, AssignName, FunctionDef, \
     ClassDef, Module
+
+
+PySyms = Dict[str, str]
 
 
 def _is_module_packaged(mod, pkgfiles: Set[str]) -> bool:
@@ -48,7 +51,7 @@ def _is_public_sym(name: str) -> bool:
 
 
 def _process_class_member_and_attrs(cldef: ClassDef,
-                                    pkgfiles: Set[str]) -> Set[str]:
+                                    pkgfiles: Set[str]) -> PySyms:
     """
     Determine the class attributes, methods and instance attributes defined by
     a class. The function will inspect and populate them from the parents while
@@ -64,7 +67,8 @@ def _process_class_member_and_attrs(cldef: ClassDef,
         set of name corresponding to the class attributes and methods and
         instance attributes.
     """
-    syms = set()
+    syms = {}
+    qname_prefix = cldef.qname() + '.'
 
     # add member and attributes from parent classes implemented in files of
     # the same package
@@ -77,16 +81,18 @@ def _process_class_member_and_attrs(cldef: ClassDef,
     for attr in cldef.locals:
         if (isinstance(cldef.locals[attr][-1], AssignName)
                 and _is_public_sym(attr)):
-            syms.add(attr)
+            syms[attr] = qname_prefix + attr
 
     # Add public class methods and instance attributes
-    syms.update({m.name for m in cldef.mymethods() if _is_public_sym(m.name)})
-    syms.update({a for a in cldef.instance_attrs if _is_public_sym(a)})
+    syms.update({m.name: m.qname()
+                 for m in cldef.mymethods() if _is_public_sym(m.name)})
+    syms.update({a: qname_prefix + a
+                 for a in cldef.instance_attrs if _is_public_sym(a)})
 
     return syms
 
 
-def _process_class_node(cldef: ClassDef, pkgfiles: Set[str]):
+def _process_class_node(cldef: ClassDef, pkgfiles: Set[str]) -> PySyms:
     """
     Determine the symbols provided by the class. The returned symbols will
     include the attributes and methods of the class prefixed by the class name
@@ -111,12 +117,13 @@ def _process_class_node(cldef: ClassDef, pkgfiles: Set[str]):
 
     # prefix all attributes and methods name of a class with class name and add
     # class constructor to syms
-    syms = {cldef.name + '.' + s for s in syms}
-    syms.add(cldef.name)
+    syms = {cldef.name + '.' + s: qname  for s, qname in syms.items()}
+    syms[cldef.name] = cldef.qname()
     return syms
 
 
-def _process_import_from(impfrom: ImportFrom, name: str, pkgfiles: Set[str]):
+def _process_import_from(impfrom: ImportFrom, name: str,
+                         pkgfiles: Set[str]) -> PySyms:
     realname = impfrom.real_name(name)
 
     # First try to load the import as module, if not present, let's try to
@@ -126,10 +133,10 @@ def _process_import_from(impfrom: ImportFrom, name: str, pkgfiles: Set[str]):
         if not _is_module_packaged(mod, pkgfiles):
             return set()
 
-        syms = set()
+        syms = {}
         for pub_name in mod.public_names():
             syms.update(_get_provides_from_name(mod, pub_name, pkgfiles))
-        return {name + '.' + s for s in syms}
+        return {name + '.' + s: qname for s, qname in syms.items()}
     except AstroidImportError:
         # If we reach here modname.realname cannot be imported as module. Hence
         # we must then try to load a symbol called realname from the package
@@ -146,31 +153,37 @@ def _process_import_from(impfrom: ImportFrom, name: str, pkgfiles: Set[str]):
         return syms
 
     # replace "real name" prefix by "as name"
-    as_syms = set()
-    for sym in syms:
+    as_syms = {}
+    for sym, qname in syms.items():
         # get the suffix part of prefix.suffix pattern in sym. If sym does not
         # contain '.', suffix will be ''
         suffix = sym.split(sep='.', maxsplit=1)[1:]
-        as_syms.add(name + '.' + suffix if suffix else name)
+        as_name = name + '.' + suffix if suffix else name
+        as_syms[as_name] = qname
     return as_syms
 
 
 def _get_provides_from_name(mod: Module, name: str, pkgfiles: Set[str]):
     _, node_list = mod.lookup(name)
+    if not node_list:
+        return {}
     node = node_list[-1]
+
     if isinstance(node, Import):
-        return set()  # import are always outside of package
+        return {}  # import are always outside of package
     elif isinstance(node, ImportFrom):
         return _process_import_from(node, name, pkgfiles)
     elif isinstance(node, ClassDef):
         return _process_class_node(node, pkgfiles)
-    elif isinstance(node, (FunctionDef, AssignName)):
-        return {node.name}
+    elif isinstance(node, FunctionDef):
+        return {node.name: node.qname()}
+    elif isinstance(node, AssignName):
+        return {node.name: None}
 
     raise AssertionError('Unsupported type of public symbol: {}'.format(name))
 
 
-def _gen_pypkg_symbols(pypkg: str, pkgfiles: Set[str]) -> Set[str]:
+def _gen_pypkg_symbols(pypkg: str, pkgfiles: Set[str]) -> PySyms:
 
     # Parse a simple import in astroid and get the imported's module node
     imp = parse('import {}'.format(pypkg))
@@ -178,11 +191,11 @@ def _gen_pypkg_symbols(pypkg: str, pkgfiles: Set[str]) -> Set[str]:
 
     # Inspect the provides only of the wildcard symbols (ie the public symbols,
     # reduced to the one listed in the __all__ list if present)
-    symbol_set = set()
+    symbols = {}
     for name in mod.wildcard_import_names():
-        symbol_set.update(_get_provides_from_name(mod, name, pkgfiles))
+        symbols.update(_get_provides_from_name(mod, name, pkgfiles))
 
-    return symbol_set
+    return symbols
 
 
 def parse_options():
@@ -215,10 +228,11 @@ def main():
     # Load list of files in package from stdin
     pkgfiles = {abspath(f.strip()) for f in sys.stdin.readlines()}
 
-    symbol_set = _gen_pypkg_symbols(options.pypkgname, pkgfiles)
+    symbols = _gen_pypkg_symbols(options.pypkgname, pkgfiles)
 
     # Return result on stdout
-    for sym in symbol_set:
+    for sym, qname in symbols.items():
+#        print(f'{sym}:   {qname}')
         print(sym)
 
 
