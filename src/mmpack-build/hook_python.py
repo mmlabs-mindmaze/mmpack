@@ -11,9 +11,12 @@ from collections import namedtuple
 from glob import glob
 from typing import Set, Dict, List
 
+import yaml
+
 from . base_hook import BaseHook, PackageInfo
 from . common import shell, Assert
 from . file_utils import is_python_script
+from . mm_version import Version
 from . provide import Provide, ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
 
@@ -51,6 +54,25 @@ _MMPACK_REL_PY_SITEDIR = 'lib/python3/site-packages'
 PyNameInfo = namedtuple('PyNameInfo', ['pyname', 'sitedir', 'is_egginfo'])
 
 
+class PyPkgInfo:
+    # pylint: disable=too-few-public-methods
+    """
+    representiong of how python files must be grouped into python packages
+    """
+    def __init__(self, info: PyNameInfo):
+        self.name = info.pyname
+        self.sitedir = info.sitedir
+        self.files = set()
+
+    def has_entry_point(self) -> bool:
+        """
+        Check the file representing the entry point of the python package is
+        indeed in the list of files of the package
+        """
+        root = '{}/{}'.format(self.sitedir, self.name)
+        return not {root+'/__init__.py', root+'.py'}.isdisjoint(self.files)
+
+
 def _parse_py3_filename(filename: str) -> PyNameInfo:
     """
     Get the python3 package name a file should belongs to (ie the one with
@@ -74,6 +96,24 @@ def _parse_py3_filename(filename: str) -> PyNameInfo:
     return PyNameInfo(pyname=grps[1], sitedir=grps[0], is_egginfo=is_egg)
 
 
+def _gather_py3pkgs(installed_files: Set[str]) -> List[PyPkgInfo]:
+    """
+    From a list of files, determine which python packages they form
+    """
+    py3pkgs = {}
+    for instfile in installed_files:
+        try:
+            info = _parse_py3_filename(instfile)
+            if info.is_egginfo:
+                continue
+            pypkg = py3pkgs.setdefault(info.pyname, PyPkgInfo(info))
+            pypkg.files.add(instfile)
+        except FileNotFoundError:
+            pass
+
+    return py3pkgs.values()
+
+
 def _mmpack_pkg_from_pyimport_name(pyimport_name: str):
     """
     Return the name of the mmpack package that should provide the
@@ -83,13 +123,13 @@ def _mmpack_pkg_from_pyimport_name(pyimport_name: str):
 
 
 def _gen_pysymbols(pyimport_name: str, pkg: PackageInfo,
-                   sitedir: str) -> Set[str]:
+                   sitedir: str) -> Dict[str, str]:
     script = os.path.join(os.path.dirname(__file__), 'python_provides.py')
     cmd = ['python3', script, '--site-path='+sitedir, pyimport_name]
 
     cmd_input = '\n'.join(pkg.files)
     cmd_output = shell(cmd, input_str=cmd_input)
-    return set(cmd_output.split())
+    return yaml.load(cmd_output, Loader=yaml.BaseLoader)
 
 
 def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
@@ -99,6 +139,19 @@ def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
     cmd_input = '\n'.join(pkg.files)
     cmd_output = shell(cmd, input_str=cmd_input)
     return set(cmd_output.split())
+
+
+def _add_qualified_symbol_names(provide: Provide, symbols: Dict[str, str]):
+    for pubsym, qname in symbols.items():
+        if not qname:
+            continue
+
+        # Test qualified name does not already exist. Add it with version of
+        # public symbol (unless it is already in with a hogher version)
+        ver_pubsym = provide.symbols[pubsym]
+        ver_qname = provide.symbols.get(qname, ver_pubsym)
+        if ver_pubsym > ver_qname:
+            provides.symbols[qname] = ver_pubsym
 
 
 #####################################################################
@@ -213,38 +266,29 @@ class MMPackBuildHook(BaseHook):
                         specs_provides: Dict[str, Dict]):
         py3_provides = ProvideList('python')
 
-        py3pkgs = {}
-        for instfile in pkg.files:
-            try:
-                info = _parse_py3_filename(instfile)
-                if info.is_egginfo:
-                    continue
-                data = py3pkgs.setdefault(info.pyname, (info.sitedir, set()))
-                data[1].add(instfile)
-            except FileNotFoundError:
-                pass
-
         # Loop over all python modules contained in the mmpack package and
         # parse the python public entry point of it (ie the entry point of the
         # python package)
-        for pyname, data in py3pkgs.items():
-            sitedir = data[0]
-            py_files = data[1]
-            root = '{}/{}'.format(sitedir, pyname)
-            if not {root+'/__init__.py', root+'.py'}.isdisjoint(py_files):
-                symbols = _gen_pysymbols(pyname, pkg, sitedir)
-            else:
+        py3pkg_symbols = {}
+        for pypkg in _gather_py3pkgs(pkg.files):
+            if not pypkg.has_entry_point():
                 raise RuntimeError('Not entry point found for python '
                                    'package {} in {}'
-                                   .format(pyname, sitedir))
+                                   .format(pypkg.name, pypkg.sitedir))
+            symbols = _gen_pysymbols(pypkg.name, pkg, pypkg.sitedir)
 
-            provide = Provide(pyname)
-            provide.pkgdepends = _mmpack_pkg_from_pyimport_name(pyname)
-            provide.add_symbols(symbols, pkg.version)
+            provide = Provide(pypkg.name)
+            provide.pkgdepends = _mmpack_pkg_from_pyimport_name(pypkg.name)
+            provide.add_symbols(symbols.keys(), pkg.version)
             py3_provides.add(provide)
+            py3pkg_symbols[pypkg.name] = symbols
 
         # update symbol information from .provides file if any
         py3_provides.update_from_specs(specs_provides, pkg.name)
+
+        # Add qualified symbol name to provided symbols
+        for pyname, symbols in py3pkg_symbols.items():
+            _add_qualified_symbol_names(py3_provides.get(pyname), symbols)
 
         pkg.provides['python'] = py3_provides
 
