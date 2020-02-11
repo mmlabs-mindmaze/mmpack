@@ -23,13 +23,13 @@ import stat
 import time
 
 from glob import glob
-from subprocess import PIPE, run
 from tempfile import mkdtemp
 
 import paramiko
 import yaml
 
 from mmpack_build.source_tarball import SourceTarball
+from mmpack_build.common import shell
 
 import gerrit
 
@@ -224,23 +224,6 @@ def _trigger_build(event):
         return do_build, do_upload
     except KeyError:
         return False
-
-
-class ShellException(RuntimeError):
-    """
-    custom exception for shell command error
-    """
-
-
-def shell(cmd):
-    """
-    Wrapper for subprocess.run
-    """
-    ret = run(cmd, stdout=PIPE, shell=True)
-    if ret.returncode == 0:
-        return ret.stdout.decode('utf-8')
-
-    raise ShellException('failed to exec command')
 
 
 def build_packages(node, workdir, tmpdir, srctar):
