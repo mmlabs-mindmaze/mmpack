@@ -79,13 +79,18 @@ def _mmpack_pkg_from_pyimport_name(pyimport_name: str):
 
 
 def _gen_pysymbols(pyimport_name: str, pkg: PackageInfo,
-                   sitedir: str) -> Set[str]:
+                   sitedir: str) -> Dict[str, str]:
     script = os.path.join(os.path.dirname(__file__), 'python_provides.py')
     cmd = ['python3', script, '--site-path='+sitedir, pyimport_name]
 
     cmd_input = '\n'.join(pkg.files)
     cmd_output = shell(cmd, input_str=cmd_input)
-    return set(cmd_output.split())
+
+    pysyms = {}
+    for line in cmd_output.splitlines():
+        sym, qname = line.split(': ')
+        pysyms[sym] = qname
+    return pysyms
 
 
 def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
