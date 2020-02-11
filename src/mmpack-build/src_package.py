@@ -430,7 +430,8 @@ class SrcPackage:
         proc.wait()
         if proc.returncode != 0:
             errmsg = 'Failed to build ' + self.name + '\n'
-            errmsg += 'See mmpack.log file for what went wrong\n'
+            errmsg += 'See {}/mmpack.log file for what went wrong\n' \
+                      .format(self.pkgbuild_path())
             raise RuntimeError(errmsg)
 
         popdir()  # unpack directory
