@@ -1,0 +1,118 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a82697c9_860fd345",
+        "filename": "src/mmpack-build/hook_python.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-12T15:21:31Z",
+      "side": 1,
+      "message": "is this really necessary ?\n\n\"info.files.add(filename)\" vs \"info.add_file(filename)\"",
+      "range": {
+        "startLine": 66,
+        "startChar": 1,
+        "endLine": 70,
+        "endChar": 32
+      },
+      "revId": "86f24a883e0eb5cb5193d15e3697c8d42d3e1f36",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d924a75_00bfbe96",
+        "filename": "src/mmpack-build/hook_python.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-12T15:21:31Z",
+      "side": 1,
+      "message": "I know this is not introduced in this commit, but when do we NOT find a file when we loop through the installed files ?",
+      "revId": "86f24a883e0eb5cb5193d15e3697c8d42d3e1f36",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb98fc45_cc148221",
+        "filename": "src/mmpack-build/hook_python.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-12T15:21:31Z",
+      "side": 1,
+      "message": "use with Loader\u003dyaml.BaseLoader\nOtherwise you\u0027re about to trigger warnings on newer versions of the yaml python package\n\nSee: https://github.com/yaml/pyyaml/wiki/PyYAML-yaml.load(input)-Deprecation",
+      "revId": "86f24a883e0eb5cb5193d15e3697c8d42d3e1f36",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc07ce5a_972ad52e",
+        "filename": "src/mmpack-build/hook_python.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-12T15:21:31Z",
+      "side": 1,
+      "message": "It would be better (simpler) to have both ver_pubsym and ver_qname to be of the same type",
+      "revId": "86f24a883e0eb5cb5193d15e3697c8d42d3e1f36",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7412cae4_cd821195",
+        "filename": "src/mmpack-build/hook_python.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-12T15:21:31Z",
+      "side": 1,
+      "message": "Having both of type Version would allow you to nicely use provide.symbols[qname] \u003d max(ver_pubsym, ver_qname) here",
+      "revId": "86f24a883e0eb5cb5193d15e3697c8d42d3e1f36",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5865487_d6f167db",
+        "filename": "src/mmpack-build/hook_python.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-12T15:21:31Z",
+      "side": 1,
+      "message": "also this is a Version and not a string, isn\u0027t it ?",
+      "range": {
+        "startLine": 159,
+        "startChar": 12,
+        "endLine": 159,
+        "endChar": 34
+      },
+      "revId": "86f24a883e0eb5cb5193d15e3697c8d42d3e1f36",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
