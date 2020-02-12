@@ -75,9 +75,6 @@ class TestPythonHook(unittest.TestCase):
         refsymbols = {
             'multi.FooBar': '',
             'multi.FooBar.__init__': '',
-            'multi.FooBar.a_class_attr': 'multi.foo.MainData.a_class_attr',
-            'multi.FooBar.data1': 'multi.foo.MainData.data1',
-            'multi.FooBar.disclose_private': 'multi.foo.MainData.disclose_private',
             'multi.FooBar.fullname': '',
             'multi.FooBar.hello': '',
             'multi.FooBar.new_data': '',
