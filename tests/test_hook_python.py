@@ -20,11 +20,11 @@ def _load_py_symbols(name: str, pkgfiles: Set[str]) -> Set[str]:
     return _gen_pysymbols(name, pkg, _sitedir)
 
 
-def _get_py_imports(pkgfiles: Set[str]) -> Set[str]:
+def _get_py_depends(pkgfiles: Set[str]) -> Set[str]:
     pkg = PackageInfo('test_pkg')
     pkg.files = {join(_sitedir, f) for f in pkgfiles}
     used_symbols = _gen_pydepends(pkg, _sitedir)
-    return {s.split('.', maxsplit=1)[0] for s in used_symbols}
+    return used_symbols
 
 
 class TestPythonHook(unittest.TestCase):
@@ -116,7 +116,7 @@ class TestPythonHook(unittest.TestCase):
         """test dependent imports with simple package with no import"""
         pkgfiles = ['simple/__init__.py']
         refimports = set()
-        imports = _get_py_imports(pkgfiles)
+        imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)
 
     def test_depends_import_multi(self):
@@ -127,12 +127,16 @@ class TestPythonHook(unittest.TestCase):
             'multi/bar.py',
         ]
         refimports = set()
-        imports = _get_py_imports(pkgfiles)
+        imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)
 
     def test_depends_import_pkg_imported(self):
         """test dependent import with pkg importing another package"""
         pkgfiles = ['pkg_imported/__init__.py']
-        refimports = {'simple'}
-        imports = _get_py_imports(pkgfiles)
+        refimports = {
+            'simple.main_dummy_fn',
+            'simple.MainData.__init__',
+            'simple.MainData.disclose_private',
+        }
+        imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)
