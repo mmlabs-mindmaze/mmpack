@@ -180,7 +180,8 @@ def _gen_pypkg_symbols(pypkg: str, pkgfiles: Set[str]) -> Set[str]:
     # reduced to the one listed in the __all__ list if present)
     symbol_set = set()
     for name in mod.wildcard_import_names():
-        symbol_set.update(_get_provides_from_name(mod, name, pkgfiles))
+        pub_syms = _get_provides_from_name(mod, name, pkgfiles)
+        symbol_set.update({pypkg + '.' + s for s in pub_syms})
 
     return symbol_set
 
