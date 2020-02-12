@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0721cc3_fe555b80",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-12T14:52:44Z",
+      "side": 1,
+      "message": "prefixed",
+      "range": {
+        "startLine": 9,
+        "startChar": 23,
+        "endLine": 9,
+        "endChar": 29
+      },
+      "revId": "6b5658b3f554c6446aa55e705afd57c91a09e448",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "445b2cae_3ce687d2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-12T14:52:44Z",
+      "side": 1,
+      "message": "to be",
+      "range": {
+        "startLine": 9,
+        "startChar": 66,
+        "endLine": 9,
+        "endChar": 68
+      },
+      "revId": "6b5658b3f554c6446aa55e705afd57c91a09e448",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4584a203_1eac745e",
+        "filename": "src/mmpack-build/python_provides.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-12T14:52:44Z",
+      "side": 1,
+      "message": "why not pass pypkg to _get_provides_from_name() instead ?",
+      "revId": "6b5658b3f554c6446aa55e705afd57c91a09e448",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
