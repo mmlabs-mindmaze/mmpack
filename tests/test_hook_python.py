@@ -33,16 +33,16 @@ class TestPythonHook(unittest.TestCase):
         """test provides module without package folder"""
         pkgfiles = ['bare.py']
         refsymbols = {
-            'A_CLASS',
-            'EXPORTED_LIST',
-            'THE_ANSWER',
-            'main_dummy_fn',
-            'MainData',
-            'MainData.a_class_attr',
-            'MainData.__init__',
-            'MainData.data1',
-            'MainData.fullname',
-            'MainData.disclose_private',
+            'bare.A_CLASS',
+            'bare.EXPORTED_LIST',
+            'bare.THE_ANSWER',
+            'bare.main_dummy_fn',
+            'bare.MainData',
+            'bare.MainData.a_class_attr',
+            'bare.MainData.__init__',
+            'bare.MainData.data1',
+            'bare.MainData.fullname',
+            'bare.MainData.disclose_private',
         }
         syms = _load_py_symbols('bare', pkgfiles)
         self.assertEqual(syms, refsymbols)
@@ -51,16 +51,16 @@ class TestPythonHook(unittest.TestCase):
         """test provides no import"""
         pkgfiles = ['simple/__init__.py']
         refsymbols = {
-            'A_CLASS',
-            'EXPORTED_LIST',
-            'THE_ANSWER',
-            'main_dummy_fn',
-            'MainData',
-            'MainData.a_class_attr',
-            'MainData.__init__',
-            'MainData.data1',
-            'MainData.fullname',
-            'MainData.disclose_private',
+            'simple.A_CLASS',
+            'simple.EXPORTED_LIST',
+            'simple.THE_ANSWER',
+            'simple.main_dummy_fn',
+            'simple.MainData',
+            'simple.MainData.a_class_attr',
+            'simple.MainData.__init__',
+            'simple.MainData.data1',
+            'simple.MainData.fullname',
+            'simple.MainData.disclose_private',
         }
         syms = _load_py_symbols('simple', pkgfiles)
         self.assertEqual(syms, refsymbols)
@@ -73,27 +73,27 @@ class TestPythonHook(unittest.TestCase):
             'multi/bar.py',
         ]
         refsymbols = {
-            'argh',
-            'main_dummy_fn',
-            'MainData',
-            'MainData.a_class_attr',
-            'MainData.__init__',
-            'MainData.data1',
-            'MainData.fullname',
-            'MainData.disclose_private',
-            'FooBar',
-            'FooBar.a_class_attr',
-            'FooBar.__init__',
-            'FooBar.data1',
-            'FooBar.fullname',
-            'FooBar.new_data',
-            'FooBar.disclose_private',
-            'FooBar.hello',
-            'bar.print_hello',
-            'bar.Bar',
-            'bar.Bar.__init__',
-            'bar.Bar.drink',
-            'bar.A_BAR',
+            'multi.argh',
+            'multi.main_dummy_fn',
+            'multi.MainData',
+            'multi.MainData.a_class_attr',
+            'multi.MainData.__init__',
+            'multi.MainData.data1',
+            'multi.MainData.fullname',
+            'multi.MainData.disclose_private',
+            'multi.FooBar',
+            'multi.FooBar.a_class_attr',
+            'multi.FooBar.__init__',
+            'multi.FooBar.data1',
+            'multi.FooBar.fullname',
+            'multi.FooBar.new_data',
+            'multi.FooBar.disclose_private',
+            'multi.FooBar.hello',
+            'multi.bar.print_hello',
+            'multi.bar.Bar',
+            'multi.bar.Bar.__init__',
+            'multi.bar.Bar.drink',
+            'multi.bar.A_BAR',
         }
         syms = _load_py_symbols('multi', pkgfiles)
         self.assertEqual(syms, refsymbols)
@@ -102,12 +102,12 @@ class TestPythonHook(unittest.TestCase):
         """test provides pkg importing another package"""
         pkgfiles = ['pkg_imported/__init__.py']
         refsymbols = {
-            'argh',
-            'FooBar',
-            'FooBar.__init__',
-            'FooBar.new_data',
-            'FooBar.fullname',
-            'FooBar.hello',
+            'pkg_imported.argh',
+            'pkg_imported.FooBar',
+            'pkg_imported.FooBar.__init__',
+            'pkg_imported.FooBar.new_data',
+            'pkg_imported.FooBar.fullname',
+            'pkg_imported.FooBar.hello',
         }
         syms = _load_py_symbols('pkg_imported', pkgfiles)
         self.assertEqual(syms, refsymbols)
