@@ -177,7 +177,7 @@ class MMPackBuildHook(BaseHook):
                                                             'python')
         return self._mmpack_py_provides
 
-    def _gen_py_deps(self, currpkg: PackageInfo, imports: Set[str],
+    def _gen_py_deps(self, currpkg: PackageInfo, used_symbols: Set[str],
                      others_pkgs: List[PackageInfo]):
         """
         For each key (imported package name) in `imports` determine the mmpack
@@ -186,18 +186,19 @@ class MMPackBuildHook(BaseHook):
 
         Args:
             currpkg: package whose dependencies are computed (and added)
-            imports: set of imported package names used in currpkg
+            used_symbols: py symbols used in currpkg
             others_pkgs: list of packages cobuilded (may include currpkg)
         """
+        imports = {s.split('.', maxsplit=1)[0] for s in used_symbols}
+
         # provided in the same package or a package being generated
         for pkg in others_pkgs:
-            # TODO[nb] replace set() with the list of symbols
-            dep_list = pkg.provides['python'].gen_deps(imports, set())
+            dep_list = pkg.provides['python'].gen_deps(imports, used_symbols)
             for pkgname, _ in dep_list:
                 currpkg.add_to_deplist(pkgname, pkg.version, pkg.version)
 
         # provided by another mmpack package present in the prefix
-        dep_list = self._get_mmpack_provides().gen_deps(imports, set())
+        dep_list = self._get_mmpack_provides().gen_deps(imports, used_symbols)
         for pkgname, version in dep_list:
             currpkg.add_to_deplist(pkgname, version)
 
@@ -306,5 +307,4 @@ class MMPackBuildHook(BaseHook):
             return
 
         used_symbols = _gen_pydepends(pkg, _MMPACK_REL_PY_SITEDIR)
-        imports = {s.split('.', maxsplit=1)[0] for s in used_symbols}
-        self._gen_py_deps(pkg, imports, other_pkgs)
+        self._gen_py_deps(pkg, used_symbols, other_pkgs)
