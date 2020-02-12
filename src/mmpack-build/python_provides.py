@@ -51,49 +51,7 @@ def _is_public_sym(name: str) -> bool:
     return name.startswith('__') or not name.startswith('_')
 
 
-def _process_class_member_and_attrs(cldef: ClassDef,
-                                    pkgfiles: Set[str]) -> PySyms:
-    """
-    Determine the class attributes, methods and instance attributes defined by
-    a class. The function will inspect and populate them from the parents while
-    the parent is defined by a module file in the same mmpack package.
-
-    This function is called recursively to populate a class.
-
-    Args:
-        cldef: the astroid node defining the class
-        pkgfiles: set of files in the same mmpack package
-
-    Returns:
-        set of name corresponding to the class attributes and methods and
-        instance attributes.
-    """
-    syms = {}
-    qname_prefix = cldef.qname() + '.'
-
-    # add member and attributes from parent classes implemented in files of
-    # the same package
-    for base in cldef.ancestors(recurs=False):
-        mod = base.root()
-        if _is_module_packaged(mod, pkgfiles):
-            syms.update(_process_class_member_and_attrs(base, pkgfiles))
-
-    # Add public class attributes
-    for attr in cldef.locals:
-        if (isinstance(cldef.locals[attr][-1], AssignName)
-                and _is_public_sym(attr)):
-            syms[attr] = qname_prefix + attr
-
-    # Add public class methods and instance attributes
-    syms.update({m.name: m.qname()
-                 for m in cldef.mymethods() if _is_public_sym(m.name)})
-    syms.update({a: qname_prefix + a
-                 for a in cldef.instance_attrs if _is_public_sym(a)})
-
-    return syms
-
-
-def _process_class_node(cldef: ClassDef, pkgfiles: Set[str]) -> PySyms:
+def _process_class_node(cldef: ClassDef) -> PySyms:
     """
     Determine the symbols provided by the class. The returned symbols will
     include the attributes and methods of the class prefixed by the class name
@@ -107,18 +65,26 @@ def _process_class_node(cldef: ClassDef, pkgfiles: Set[str]) -> PySyms:
 
     Args:
         cldef: the astroid node defining the class
-        pkgfiles: set of files in the same mmpack package
 
     Returns:
         set of name defined by the class
     """
-    # Get members and attribute of current class and all ancestors whose
-    # implementation is provided in the same package
-    syms = _process_class_member_and_attrs(cldef, pkgfiles)
+    syms = {}
+    name_prefix = cldef.name + '.'
+    qname_prefix = cldef.qname() + '.'
 
-    # prefix all attributes and methods name of a class with class name and add
-    # class constructor to syms
-    syms = {cldef.name + '.' + s: qname for s, qname in syms.items()}
+    # Add public class attributes
+    for attr in cldef.locals:
+        if (isinstance(cldef.locals[attr][-1], AssignName)
+                and _is_public_sym(attr)):
+            syms[name_prefix + attr] = qname_prefix + attr
+
+    # Add public class methods and instance attributes
+    syms.update({name_prefix + m.name: m.qname()
+                 for m in cldef.mymethods() if _is_public_sym(m.name)})
+    syms.update({name_prefix + a: qname_prefix + a
+                 for a in cldef.instance_attrs if _is_public_sym(a)})
+
     syms[cldef.name] = cldef.qname()
     return syms
 
@@ -175,7 +141,7 @@ def _get_provides_from_name(mod: Module, name: str, pkgfiles: Set[str]):
     elif isinstance(node, ImportFrom):
         return _process_import_from(node, name, pkgfiles)
     elif isinstance(node, ClassDef):
-        return _process_class_node(node, pkgfiles)
+        return _process_class_node(node)
     elif isinstance(node, FunctionDef):
         return {node.name: node.qname()}
     elif isinstance(node, AssignName):
