@@ -42,6 +42,29 @@
     },
     {
       "key": {
+        "uuid": "ba6666e1_9881741b",
+        "filename": "src/repository/parse_manifest.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:44:35Z",
+      "side": 1,
+      "message": "this is a sad name\n\nalso you seem to use \"bin_ind\" a few times vs \"data_bin_ind\" a lot of times.\nwhy not give the long name to the filename instead ?\nAlso, we\u0027ve been using \"binindex\" almost everywhere throughout the code base. Why would you name it \"bin_ind\" here ?\n\nHow about this ?\n  self.binindex_file\n  self.srcindex\n  self.binindex",
+      "range": {
+        "startLine": 45,
+        "startChar": 10,
+        "endLine": 45,
+        "endChar": 22
+      },
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cf462508_2e0a4711",
         "filename": "src/repository/parse_manifest.py",
         "patchSetId": 5
@@ -88,6 +111,52 @@
     },
     {
       "key": {
+        "uuid": "2b7c7c05_c175541c",
+        "filename": "src/repository/parse_manifest.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:44:35Z",
+      "side": 1,
+      "message": "It seems that you\u0027re working on data_manifest[main_key] only, aren\u0027t you ?\nyou could simplify this by taking it as input directly",
+      "range": {
+        "startLine": 61,
+        "startChar": 8,
+        "endLine": 61,
+        "endChar": 38
+      },
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93fa626a_dcf0740e",
+        "filename": "src/repository/parse_manifest.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:44:35Z",
+      "side": 1,
+      "message": "I believe that this is the only important test.\n\nIf you\u0027re not working on a file, you\u0027ll be triggering an exception\nIf you\u0027re not of the right size (or an empty file), you\u0027ll also be raising an exception\n\nYou could do rename this to check_hash() or something, and have this function raise an exception in case of mismatch. The calling function is already calling within a big try/catch, so just add the exception you want to handle within the catch.",
+      "range": {
+        "startLine": 77,
+        "startChar": 21,
+        "endLine": 77,
+        "endChar": 77
+      },
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5a498ebc_6c1ae7bf",
         "filename": "src/repository/parse_manifest.py",
         "patchSetId": 5
@@ -104,6 +173,98 @@
         "startChar": 4,
         "endLine": 104,
         "endChar": 24
+      },
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca09dd42_8556be75",
+        "filename": "src/repository/parse_manifest.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:44:35Z",
+      "side": 1,
+      "message": "this looks strange.\nIsn\u0027t there a simpler way to do things ?",
+      "range": {
+        "startLine": 129,
+        "startChar": 8,
+        "endLine": 133,
+        "endChar": 47
+      },
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "24e942d0_80587572",
+        "filename": "src/repository/parse_manifest.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:44:35Z",
+      "side": 1,
+      "message": "use True\n1 works, but the function expects a boolean",
+      "range": {
+        "startLine": 153,
+        "startChar": 56,
+        "endLine": 153,
+        "endChar": 57
+      },
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd7c01c0_49934033",
+        "filename": "src/repository/parse_manifest.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:44:35Z",
+      "side": 1,
+      "message": "this is describing what _add_or_replace_files() does and therefore should probably be part of its docstring",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 175,
+        "endChar": 22
+      },
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ddf073fc_1fdc212d",
+        "filename": "src/repository/parse_manifest.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:44:35Z",
+      "side": 1,
+      "message": "for pkg_name in data_manifest[\u0027binpkgs\u0027][arch]:",
+      "range": {
+        "startLine": 189,
+        "startChar": 2,
+        "endLine": 191,
+        "endChar": 30
       },
       "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
@@ -332,6 +493,24 @@
       "writtenOn": "2020-02-12T16:51:01Z",
       "side": 1,
       "message": "We need a man page and argument help",
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae88cb7e_5b5f09b2",
+        "filename": "src/repository/server.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:44:35Z",
+      "side": 1,
+      "message": "I would alos be nice to have some specs describing the process you\u0027re implementing, please",
+      "parentUuid": "c95ad7df_cc01165f",
       "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
