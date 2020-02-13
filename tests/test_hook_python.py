@@ -94,6 +94,7 @@ class TestPythonHook(unittest.TestCase):
             'multi.bar.Bar.__init__': 'multi..bar.Bar.__init__',
             'multi.bar.Bar.drink': 'multi..bar.Bar.drink',
             'multi.bar.A_BAR': '',
+            'multi.__main__': '',
         }
         syms = _load_py_symbols('multi', pkgfiles)
         self.assertEqual(syms, refsymbols)
@@ -137,6 +138,16 @@ class TestPythonHook(unittest.TestCase):
             'simple.main_dummy_fn',
             'simple.MainData.__init__',
             'simple.MainData.disclose_private',
+        }
+        imports = _get_py_depends(pkgfiles)
+        self.assertEqual(imports, refimports)
+
+    def test_depends_launcher(self):
+        """test dependent imports with simple package with no import"""
+        pkgfiles = ['launcher']
+        refimports = {
+            'multi.__main__',
+            'pkg_resources.load_entry_point',
         }
         imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)

@@ -21,10 +21,11 @@ from os.path import abspath
 from typing import Set
 
 from astroid import MANAGER as astroid_manager
-from astroid import Uninferable
-from astroid.exceptions import InferenceError, NameInferenceError
+from astroid import Uninferable, inference_tip
+from astroid.exceptions import InferenceError, NameInferenceError, \
+    UseInferenceDefault
 from astroid.modutils import is_standard_module
-from astroid.node_classes import Call
+from astroid.node_classes import Call, Name, Attribute
 from mmpack_build.file_utils import is_python_script
 
 
@@ -85,6 +86,52 @@ def _gen_py_depends(filename: str, pkgfiles: Set[str]) -> Set[str]:
     return used_symbols
 
 
+def _transform_load_entry_point(call: Call, context=None):
+    """
+    Do normal inference, excepting that the __main__ symbol of the module is
+    marked as used
+    """
+    try:
+        # Check that load_entry_point comes indeed from pkg_resources package
+        funcdef = next(call.func.infer())
+        if funcdef.qname() == 'pkg_resources.load_entry_point':
+            # First argument is module loaded along with version, mark module
+            # being used
+            modreq = next(call.args[0].infer()).value
+            modname = modreq.split('==')[0]
+            print(modname + '.__main__')
+    except Exception:  # pylint: disable=broad-except
+        pass
+
+    # Resume default inference
+    raise UseInferenceDefault
+
+
+def _looks_like_load_entry_point(call: Call):
+    """
+    Return true it seems we have a load_entry_point call
+    """
+    if isinstance(call.func, Name):
+        return call.func.name == 'load_entry_point'
+    elif isinstance(call.func, Attribute):
+        return (
+            call.func.attrname == 'load_entry_point'
+            and isinstance(call.func.expr, Name)
+            and call.func.expr.name == 'pkg_resources'
+        )
+    return False
+
+
+def _init_astroid():
+    # Register hook that output module entry used when
+    # call to pkg_resources.load_entry_point is inferred
+    astroid_manager.register_transform(
+        Call,
+        inference_tip(_transform_load_entry_point),
+        _looks_like_load_entry_point
+    )
+
+
 def parse_options():
     """
     parse options
@@ -111,6 +158,8 @@ def main():
 
     pkgfiles = [abspath(f.strip()) for f in sys.stdin.readlines()]
     pyfiles = [f for f in pkgfiles if is_python_script(f)]
+
+    _init_astroid()
 
     symbol_set = set()
     for filename in pyfiles:
