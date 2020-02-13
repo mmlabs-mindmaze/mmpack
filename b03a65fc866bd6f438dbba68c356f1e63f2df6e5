@@ -22,6 +22,30 @@
       "revId": "b03a65fc866bd6f438dbba68c356f1e63f2df6e5",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7a050a12_3f74de36",
+        "filename": "src/mmpack-build/python_provides.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T12:57:14Z",
+      "side": 1,
+      "message": "Yes, but this is for specifying a type for annotation... Don\u0027t you think it would be weird in capitals in this case (not following the other conventions)?",
+      "parentUuid": "1a328063_d1477c38",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 6
+      },
+      "revId": "b03a65fc866bd6f438dbba68c356f1e63f2df6e5",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
