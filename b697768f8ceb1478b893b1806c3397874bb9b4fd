@@ -34,6 +34,24 @@
       "revId": "b697768f8ceb1478b893b1806c3397874bb9b4fd",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c4cf9d3_9f36c247",
+        "filename": "tests/test_hook_python.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T13:01:52Z",
+      "side": 0,
+      "message": "bare.THE_ANSWER\u0027 was between \u0027bare.EXPORTED_LIST\u0027, and \u0027bare.main_dummy_fn\u0027.\nNow, it is between \u0027bare.MainData.fullname\u0027 and \u0027bare.main_dummy_fn\u0027\n\nSo you changed the order",
+      "parentUuid": "05a03af9_ba7b9e9f",
+      "revId": "b697768f8ceb1478b893b1806c3397874bb9b4fd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
