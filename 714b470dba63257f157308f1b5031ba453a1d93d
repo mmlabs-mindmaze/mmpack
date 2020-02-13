@@ -134,6 +134,30 @@
     },
     {
       "key": {
+        "uuid": "1f895f44_ea5c6fcc",
+        "filename": "src/repository/parse_manifest.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:29:23Z",
+      "side": 1,
+      "message": "See my comment on MmpackDbObserver",
+      "parentUuid": "13927e90_e118f6b0",
+      "range": {
+        "startLine": 223,
+        "startChar": 25,
+        "endLine": 223,
+        "endChar": 42
+      },
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5ec22d44_051c4bf0",
         "filename": "src/repository/parse_manifest.py",
         "patchSetId": 5
@@ -261,6 +285,30 @@
       "writtenOn": "2020-02-12T17:08:58Z",
       "side": 1,
       "message": "Why do you ignore event? It will tell you what is the file created",
+      "range": {
+        "startLine": 41,
+        "startChar": 25,
+        "endLine": 41,
+        "endChar": 30
+      },
+      "revId": "714b470dba63257f157308f1b5031ba453a1d93d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "037149e9_56615981",
+        "filename": "src/repository/server.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:29:23Z",
+      "side": 1,
+      "message": "event.src_path is used 2 lines below",
+      "parentUuid": "7e7aca29_bb46dc89",
       "range": {
         "startLine": 41,
         "startChar": 25,
