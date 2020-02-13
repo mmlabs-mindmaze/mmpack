@@ -199,6 +199,16 @@ def _gen_pypkg_symbols(pypkg: str, pkgfiles: Set[str]) -> PySyms:
             pubname = pypkg + '.' + sym
             symbols[pubname] = qname if pubname != qname else ''
 
+    # Try import main and add entry point from here
+    try:
+        main_modname = pypkg + '.__main__'
+        imp = parse('import ' + main_modname)
+        mod = imp.body[0].do_import_module(main_modname)
+        if _is_module_packaged(mod, pkgfiles):
+            symbols[pypkg + '.__main__'] = ''
+    except AstroidImportError:
+        pass
+
     return symbols
 
 
