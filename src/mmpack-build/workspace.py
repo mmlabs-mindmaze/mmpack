@@ -5,6 +5,7 @@ os helpers to manipulate the paths and environments
 
 import os
 import shutil
+import tempfile
 
 from . common import shell, dprint, ShellException, pushdir, popdir, \
     download, sha256sum, iprint
@@ -44,6 +45,7 @@ class Workspace:
         self.build = XDG_CACHE_HOME + '/mmpack/build'
         self.packages = XDG_DATA_HOME + '/mmpack-packages'
         self.cache = XDG_CACHE_HOME + '/mmpack/cache'
+        self.tmp = tempfile.mktemp(dir=self.cache)
         self._cygpath_root = None
         self._mmpack_bin = None
         self.prefix = ''

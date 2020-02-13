@@ -5,9 +5,13 @@ Helpers to find out what files are
 
 import re
 import sysconfig
+import py_compile
+import tempfile
+
 from os.path import islink, basename, splitext
 
 from . common import shell, wprint
+from . workspace import Workspace
 
 
 # Match the interpreter of a shebang line (interpreter will be set in the first
@@ -268,8 +272,16 @@ def is_devel(path: str) -> bool:
             or is_cmake_pkg_desc(path))
 
 
-def is_python_script(filename: str) -> bool:
+def is_python3_script(filename: str) -> bool:
     """
-    returns whether a file is a python script
+    returns whether a file is a python3 script
     """
-    return filetype(filename) in ('py', 'python', 'python3')
+    if not filetype(filename) in ('py', 'python', 'python3'):
+        return False
+
+    # ensure the python script is well-formed python3
+    try:
+        py_compile.compile(dir=Workspace().tmp, cfile=temp)
+        return True
+    except Exception:  # pylint: disable=broad-except
+        return False
