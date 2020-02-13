@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a328063_d1477c38",
+        "filename": "src/mmpack-build/python_provides.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T07:54:26Z",
+      "side": 1,
+      "message": "I believe that we\u0027ve been using capital-only for global variables until now.",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 6
+      },
+      "revId": "b03a65fc866bd6f438dbba68c356f1e63f2df6e5",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
