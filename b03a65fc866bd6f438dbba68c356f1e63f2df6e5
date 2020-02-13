@@ -46,6 +46,30 @@
       "revId": "b03a65fc866bd6f438dbba68c356f1e63f2df6e5",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1be19841_c8fc7292",
+        "filename": "src/mmpack-build/python_provides.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-13T13:04:15Z",
+      "side": 1,
+      "message": "Well ... I think it\u0027s weird to define a global variable just for type annotation.",
+      "parentUuid": "7a050a12_3f74de36",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 6
+      },
+      "revId": "b03a65fc866bd6f438dbba68c356f1e63f2df6e5",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
