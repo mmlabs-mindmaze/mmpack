@@ -37,6 +37,15 @@ def _is_module_packaged(mod, pkgfiles: Set[str]) -> bool:
     return mod.path and mod.path[0] in pkgfiles
 
 
+def _inspect_load_entry_point(call: Call):
+    """
+    Return the __main__ symbol of loaded module
+    """
+    modreq = next(call.args[0].infer()).value
+    modname = modreq.split('==')[0]
+    return modname + '.__main__'
+
+
 def _call_func_iter(call: Call) -> Iterator[FunctionDef]:
     """
     equivalent to call.func.infer() supporting recent version of astroid
@@ -63,7 +72,11 @@ def _inspect_call(call: Call, used_symbols: Set[str], pkgfiles: Set[str]):
                     or _is_module_packaged(orig_mod, pkgfiles)):
                 continue
 
-            used_symbols.add(funcdef.qname())
+            qname = funcdef.qname()
+            if qname == 'pkg_resources.load_entry_point':
+                used_symbols.add(_inspect_load_entry_point(call))
+
+            used_symbols.add(qname)
 
     # As python is a dynamic language, uninferable name lookup or uninferable
     # object can be common (when it highly depends on the context that we
