@@ -13,7 +13,7 @@ from typing import Set, Dict, List
 
 from . base_hook import BaseHook, PackageInfo
 from . common import shell, Assert
-from . file_utils import is_python_script
+from . file_utils import is_python3_script
 from . provide import Provide, ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
 
@@ -257,7 +257,7 @@ class MMPackBuildHook(BaseHook):
         if pkg.ghost:
             return
 
-        py_scripts = [f for f in pkg.files if is_python_script(f)]
+        py_scripts = [f for f in pkg.files if is_python3_script(f)]
         if not py_scripts:
             return
 
