@@ -1,0 +1,233 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2406c8e0_5191a233",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "from mmpack_build.common import yaml_serialize, yaam_load, sha256sum?",
+      "range": {
+        "startLine": 17,
+        "startChar": 1,
+        "endLine": 19,
+        "endChar": 41
+      },
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0c8a819_56627ae0",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "useless and inconsistent with your yaml_load... you have already stored self.db_dir... You can reused it when storing the indices",
+      "range": {
+        "startLine": 43,
+        "startChar": 8,
+        "endLine": 43,
+        "endChar": 13
+      },
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1394b42f_2ca96f89",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "either self.working_dir \u003d abspath(RELPATH_WORKING_DIR) either removed this",
+      "range": {
+        "startLine": 55,
+        "startChar": 8,
+        "endLine": 55,
+        "endChar": 46
+      },
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55a5331a_b85a98c3",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "I don\u0027t feel this has its place here... this is a temporary list of to remove... what about making it as local variable when you will need it.",
+      "range": {
+        "startLine": 56,
+        "startChar": 8,
+        "endLine": 57,
+        "endChar": 36
+      },
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7dfc9aa5_ab782757",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "self.list_to_remove.clear() or self.list_to_remove \u003d []",
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8d3ac9a_653dd679",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "This does not work... You must remove a source version only when all reference to it has disappear, ie when all the binary package built from it have been removed",
+      "range": {
+        "startLine": 181,
+        "startChar": 7,
+        "endLine": 193,
+        "endChar": 40
+      },
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30ed16e7_e6b9999d",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "This does not look nice... And this is useless: it will be overwritten by the new entry",
+      "range": {
+        "startLine": 207,
+        "startChar": 20,
+        "endLine": 207,
+        "endChar": 47
+      },
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1071bfe_517f50dc",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "Why not suppressing the old files here... This simplify the workflow a lot",
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d462a92_ad5b7707",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "What do you think this achieves??? this means that self.clean_upload will be called at the of the program...",
+      "range": {
+        "startLine": 240,
+        "startChar": 8,
+        "endLine": 240,
+        "endChar": 42
+      },
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "158e0f76_4a57fc90",
+        "filename": "src/repository/Repo.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "This is no a proper way to cleanup temporary operations... BTW clean_upload is a method of class Repo, there is no self argument passed here",
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9cb7e6a_de4bffee",
+        "filename": "src/repository/Repo.rst",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-13T21:16:04Z",
+      "side": 1,
+      "message": "no capital in filename please, and in docs folder",
+      "revId": "d6ea0b1129b2f4c398d0b03f227219c8971ee7e1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
