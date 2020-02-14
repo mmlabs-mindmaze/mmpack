@@ -18,13 +18,13 @@ not the name as declared for example in the __init__.py.
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath
-from typing import Set
+from typing import Set, Iterator
 
 from astroid import MANAGER as astroid_manager
-from astroid import Uninferable
+from astroid import Uninferable, FunctionDef
 from astroid.exceptions import InferenceError, NameInferenceError
 from astroid.modutils import is_standard_module
-from astroid.node_classes import Call
+from astroid.node_classes import Call, Attribute
 from mmpack_build.file_utils import is_python_script
 
 
@@ -45,9 +45,23 @@ def _inspect_load_entry_point(call: Call):
     return modname + '.__main__'
 
 
+def _call_func_iter(call: Call) -> Iterator[FunctionDef]:
+    """
+    equivalent to call.func.infer() supporting recent version of astroid
+    """
+    if isinstance(call.func, Attribute):
+        attr = call.func
+        for base in attr.expr.infer():
+            for funcdef in base.getattr(attr.attrname):
+                yield funcdef
+    else:
+        for funcdef in call.func.infer():
+            yield funcdef
+
+
 def _inspect_call(call: Call, used_symbols: Set[str], pkgfiles: Set[str]):
     try:
-        for funcdef in call.func.infer():
+        for funcdef in _call_func_iter(call):
             orig_mod = funcdef.root()
 
             # ignore inferred call that does not generate dependencies
@@ -57,11 +71,10 @@ def _inspect_call(call: Call, used_symbols: Set[str], pkgfiles: Set[str]):
                     or _is_module_packaged(orig_mod, pkgfiles)):
                 continue
 
-            qname = funcdef.qname()
-            if qname == 'pkg_resources.load_entry_point':
-                used_symbols.add(_inspect_load_entry_point(call))
+            used_symbols.add(funcdef.qname())
 
-            used_symbols.add(qname)
+            if funcdef.qname() == 'pkg_resources.load_entry_point':
+                used_symbols.add(_inspect_load_entry_point(call))
 
     # As python is a dynamic language, uninferable name lookup or uninferable
     # object can be common (when it highly depends on the context that we
