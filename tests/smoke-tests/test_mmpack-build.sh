@@ -25,7 +25,7 @@ tar -cvf $TMP_BUILD/mmpack-hello-world.tar --directory=$SRC_PKG .
 tar --update -v -f $TMP_BUILD/mmpack-hello-world.tar --directory=$TMP_BUILD mmpack/specs
 tar --update -v -f $TMP_BUILD/mmpack-hello-world.tar --directory=$TMP_BUILD dummy
 gzip $TMP_BUILD/mmpack-hello-world.tar
-mmpack-build pkg-create --src $TMP_BUILD/mmpack-hello-world.tar.gz
+mmpack-build --debug pkg-create --src $TMP_BUILD/mmpack-hello-world.tar.gz
 
 # check that the packages created are correct
 ls $XDG_DATA_HOME/mmpack-packages/hello*.mmpack-manifest
