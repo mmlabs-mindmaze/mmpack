@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ee94b84_efbcbb8e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-17T09:08:16Z",
+      "side": 1,
+      "message": "out-of-order, or missing words",
+      "range": {
+        "startLine": 11,
+        "startChar": 29,
+        "endLine": 11,
+        "endChar": 68
+      },
+      "revId": "f8d64b39480f9b09cc02aad90e7bfae4f58dfb82",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
