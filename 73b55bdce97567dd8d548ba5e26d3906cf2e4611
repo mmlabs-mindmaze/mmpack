@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc4bf019_9090ead1",
+        "filename": "docs/specs/repo.rst",
+        "patchSetId": 9
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-17T16:45:50Z",
+      "side": 1,
+      "message": "I believe this is not necessary: this is a detail in the deployment, and not a specification of the way each of those deployment work.",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 54
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "03103e55_ce412b61",
+        "filename": "docs/specs/repo.rst",
+        "patchSetId": 9
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-17T16:45:50Z",
+      "side": 1,
+      "message": "this is a laius on systemd specs, not about mmpack itself",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 36
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1afa5ebb_bd6646d6",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-17T16:45:50Z",
+      "side": 1,
+      "message": "please move to the first line inside the class instead:\nthis syntax disables the warning at the level of the file, not the class",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
