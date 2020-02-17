@@ -22,8 +22,8 @@ def argh(val: int) -> None:
 class FooBar(main):
     def __init__(self):
         super().__init__('somedata')
-        self.new_data = truc()
-        self.new_data.v1 = 66
+#        self.new_data = truc()
+#        self.new_data.v1 = 66
         self.fullname = 'John Doe'
 
     def hello(self):
