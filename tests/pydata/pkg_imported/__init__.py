@@ -31,3 +31,5 @@ class FooBar(main):
 
 _hello = FooBar()
 _hello.disclose_private()
+_truc = MainData()
+_truc.disclose_private()

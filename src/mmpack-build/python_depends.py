@@ -18,14 +18,15 @@ not the name as declared for example in the __init__.py.
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath
-from typing import Set, Iterator
+from typing import Set, Iterator, Tuple
 
 from astroid import MANAGER as astroid_manager
-from astroid import Uninferable, FunctionDef
+from astroid.bases import Instance
 from astroid.exceptions import InferenceError, NameInferenceError, \
     AttributeInferenceError
 from astroid.modutils import is_standard_module
-from astroid.node_classes import Call, Attribute
+from astroid.node_classes import Call, Attribute, Name, \
+    Import, ImportFrom, NodeNG
 from mmpack_build.file_utils import is_python_script
 
 
@@ -37,6 +38,11 @@ def _is_module_packaged(mod, pkgfiles: Set[str]) -> bool:
     return mod.path and mod.path[0] in pkgfiles
 
 
+def _is_external_pkg(mod, pkgfiles: Set[str]) -> bool:
+    return not (_is_module_packaged(mod, pkgfiles)
+                or is_standard_module(mod.name))
+
+
 def _inspect_load_entry_point(call: Call):
     """
     Return the __main__ symbol of loaded module
@@ -46,37 +52,95 @@ def _inspect_load_entry_point(call: Call):
     return modname + '.__main__'
 
 
-def _call_func_iter(call: Call) -> Iterator[FunctionDef]:
+def _infer_node_def(node: NodeNG) -> Iterator[NodeNG]:
     """
-    equivalent to call.func.infer() supporting recent version of astroid
+    equivalent to node.infer() supporting recent version of astroid
     """
-    if isinstance(call.func, Attribute):
-        attr = call.func
+    if isinstance(node, Attribute):
+        attr = node
         for base in attr.expr.infer():
-            for funcdef in base.igetattr(attr.attrname):
-                yield funcdef
+            for nodedef in base.igetattr(attr.attrname):
+                yield nodedef
     else:
-        for funcdef in call.func.infer():
-            yield funcdef
+        for nodedef in node.infer():
+            yield nodedef
+
+
+def _get_module_name(imp: Import, name: str,
+                     pkgfiles: Set[str]) -> Tuple[str, bool]:
+    name = imp.real_name(name)
+    module = imp.do_import_module(name)
+    is_external = _is_external_pkg(module, pkgfiles)
+
+    return (name, is_external)
+
+
+def _get_module_namefrom(impfrom: ImportFrom, name: str,
+                         pkgfiles: Set[str]) -> Tuple[str, bool]:
+    impname = impfrom.real_name(name)
+    modname = impfrom.modname
+    module = impfrom.do_import_module(impfrom.modname)
+
+    if module.path[0] not in pkgfiles:
+        return (modname + '.' + impname,
+                not is_standard_module(module.name))
+
+    node = module.getattr(impname)[-1]
+    attrname, is_external = _follow_name_orig(node, impname, pkgfiles)
+    if not attrname:
+        return (None, False)
+
+    return (modname + '.' + attrname, is_external)
+
+
+def _follow_name_orig(lookedup_node: NodeNG, name: str,
+                      pkgfiles: Set[str]) -> Tuple[str, bool]:
+    if isinstance(lookedup_node, Import):
+        return _get_module_name(lookedup_node, name, pkgfiles)
+    elif isinstance(lookedup_node, ImportFrom):
+        return _get_module_namefrom(lookedup_node, name, pkgfiles)
+
+    return (None, False)
+
+
+def _inspect_name(namenode: Name, used_symbols: Set[str], pkgfiles: Set[str]):
+    name = namenode.name
+    _, nodelist = namenode.lookup(name)
+    for node in nodelist:
+        symbol_name, is_external = _follow_name_orig(node, name, pkgfiles)
+        if symbol_name and is_external:
+            used_symbols.add(symbol_name)
+
+
+def _get_used_attr_name(instance: Instance, attrname: str) -> str:
+    pkgname = instance.qname().split('.', maxsplit=1)[0]
+    return '{}.class-{}.{}'.format(pkgname, classdef.name, attrname)
+
+
+def _inspect_attr(attr: Attribute, used_symbols: Set[str], pkgfiles: Set[str]):
+    print(f'*******attr = {attr}')
+    for node in _infer_node_def(attr.expr):
+        print(f'node={node}')
+        if isinstance(node, Instance):
+            instance = node
+            if _is_external_pkg(instance.root(), pkgfiles):
+                print('add' + instance)
+                used_symbols.add(_get_used_attr_name(instance, attr.attrname))
 
 
 def _inspect_call(call: Call, used_symbols: Set[str], pkgfiles: Set[str]):
     try:
-        for funcdef in _call_func_iter(call):
-            orig_mod = funcdef.root()
-
-            # ignore inferred call that does not generate dependencies
-            # (uninferable or call to stdlib or internal call)
-            if (orig_mod == Uninferable
-                    or is_standard_module(orig_mod.name)
-                    or _is_module_packaged(orig_mod, pkgfiles)):
-                continue
-
-            qname = funcdef.qname()
-            if qname == 'pkg_resources.load_entry_point':
+        # Add loaded package entry if function called is
+        # pkg_resources.load_entry_point. However, inference is performed only
+        # the function name match to avoid costly inferrence on all function
+        # calls
+        func = call.func
+        if (isinstance(func, Attribute) and func.attrname == 'load_entry_point'
+                or isinstance(func, Name) and func.name == 'load_entry_point'):
+            funcdef = next(_infer_node_def(call.func))
+            if not _is_module_packaged(funcdef.root(), pkgfiles) \
+                    and funcdef.qname() == 'pkg_resources.load_entry_point':
                 used_symbols.add(_inspect_load_entry_point(call))
-
-            used_symbols.add(qname)
 
     # As python is a dynamic language, uninferable name lookup or uninferable
     # object can be common (when it highly depends on the context that we
@@ -84,13 +148,24 @@ def _inspect_call(call: Call, used_symbols: Set[str], pkgfiles: Set[str]):
     except (NameInferenceError, InferenceError, AttributeInferenceError):
         pass
 
+    for child in call.get_children():
+        _inspect_node(child, used_symbols, pkgfiles)
+
 
 def _inspect_node(node, used_symbols: Set[str], pkgfiles: Set[str]):
     if isinstance(node, Call):
         _inspect_call(node, used_symbols, pkgfiles)
-
-    for child in node.get_children():
-        _inspect_node(child, used_symbols, pkgfiles)
+    elif isinstance(node, Name):
+        _inspect_name(node, used_symbols, pkgfiles)
+    elif isinstance(node, Attribute):
+        _inspect_attr(node, used_symbols, pkgfiles)
+    elif isinstance(node, Import):
+        node.do_import_module(node.real_name())
+    elif isinstance(node, ImportFrom):
+        node.do_import_module(node.modname)
+    else:
+        for child in node.get_children():
+            _inspect_node(child, used_symbols, pkgfiles)
 
 
 def _gen_py_depends(filename: str, pkgfiles: Set[str]) -> Set[str]:
