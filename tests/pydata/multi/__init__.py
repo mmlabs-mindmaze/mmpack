@@ -7,8 +7,11 @@ from . foo import main_dummy_fn, MainData
 from . import bar
 
 
+THE_ANSWER = 42
+
+
 def _print_answer():
-    print(_THE_ANSWER)
+    print(THE_ANSWER)
 
 
 def argh(val: int) -> None:
