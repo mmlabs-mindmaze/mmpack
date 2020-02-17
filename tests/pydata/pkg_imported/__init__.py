@@ -3,7 +3,8 @@
 python package that imports other packages
 """
 
-from simple import main_dummy_fn, MainData as main
+from simple import main_dummy_fn, MainData as md
+import multi
 
 
 def _print_answer():
@@ -19,7 +20,7 @@ def argh(val: int) -> None:
     print('are same')
 
 
-class FooBar(main):
+class FooBar(md):
     def __init__(self):
         super().__init__('somedata')
         self.new_data = truc()
@@ -31,3 +32,11 @@ class FooBar(main):
 
 _hello = FooBar()
 _hello.disclose_private()
+_truc = md('data')
+_truc.disclose_private()
+
+print(multi.THE_ANSWER)
+
+machine = _truc
+helo = machine
+helo.pubfunc()

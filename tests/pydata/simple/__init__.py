@@ -39,6 +39,9 @@ class MainData:
     def disclose_private(self, who: str) -> str:
         return '{} says: {}'.format(who, self._what_does_he_says())
 
+    def pubfunc(self) -> str:
+        return '42'
+
 A_CLASS = MainData('hello')
 A_CLASS.fullname = 'john'
 EXPORTED_LIST = _init_exported_list()
