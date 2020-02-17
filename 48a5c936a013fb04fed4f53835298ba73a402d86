@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "659df3b1_5ed297a7",
+        "filename": "src/mmpack-build/python_provides.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-17T08:55:32Z",
+      "side": 1,
+      "message": "Two issues: \n- there is no way anyone not extremely knowledgeable in python internal workings can understand this\n- this is done to handle __main__.py files within python packages, right ? So it should yield a symbol for mmpack_build itself. To my knowledge, it doesn\u0027t.",
+      "revId": "48a5c936a013fb04fed4f53835298ba73a402d86",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
