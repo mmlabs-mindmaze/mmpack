@@ -138,10 +138,12 @@ def shell(cmd, log: bool = True, input_str: str = None,
     else:
         raise ValueError('Invalid shell argument type: ' + str(type(cmd)))
 
+    input_utf8 = input_str.encode('utf-8') if input_str else None
+    if input_utf8:
+        logmsg = '{} | {}'.format(input_utf8, logmsg)
+
     if log:
         dprint('[shell] {0}'.format(logmsg))
-
-    input_utf8 = input_str.encode('utf-8') if input_str else None
 
     try:
         ret = run(cmd, stdout=PIPE, shell=run_shell, input=input_utf8,
