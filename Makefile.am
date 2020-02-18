@@ -187,7 +187,7 @@ mmpack_SOURCES = \
 	src/mmpack/mmpack.c \
 	$(eol)
 
-licensedir = $(datadir)/common-licenses
+licensedir = $(pkgdatadir)/common-licenses
 dist_license_DATA = \
 	common-licenses/Apache-2.0 \
 	common-licenses/Artistic \
