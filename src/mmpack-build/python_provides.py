@@ -212,6 +212,7 @@ def parse_options():
     parser.add_argument('pypkgname', type=str,
                         help='name of the python package to inspect (name '
                         'supplied to import statement)')
+    parser.add_argument('infiles', type=str, nargs='*')
 
     return parser.parse_args()
 
@@ -228,7 +229,7 @@ def main():
         sys.path.insert(0, abspath(options.site_path))
 
     # Load list of files in package from stdin
-    pkgfiles = {abspath(f.strip()) for f in sys.stdin.readlines()}
+    pkgfiles = {abspath(f.strip()) for f in options.infiles}
 
     symbol_set = _gen_pypkg_symbols(options.pypkgname, pkgfiles)
 

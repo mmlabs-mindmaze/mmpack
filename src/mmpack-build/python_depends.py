@@ -125,6 +125,7 @@ def parse_options():
     parser.add_argument('--site-path', dest='site_path', type=str, nargs='?',
                         help='path of python site-packages or folder '
                         'containing python package')
+    parser.add_argument('infiles', type=str, nargs='*')
 
     return parser.parse_args()
 
@@ -140,7 +141,7 @@ def main():
     if options.site_path:
         sys.path.insert(0, abspath(options.site_path))
 
-    pkgfiles = [abspath(f.strip()) for f in sys.stdin.readlines()]
+    pkgfiles = [abspath(f.strip()) for f in options.infiles]
     pyfiles = [f for f in pkgfiles if is_python_script(f)]
 
     symbol_set = set()
