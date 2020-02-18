@@ -86,18 +86,18 @@ def _gen_pysymbols(pyimport_name: str, pkg: PackageInfo,
                    sitedir: str) -> Set[str]:
     script = os.path.join(os.path.dirname(__file__), 'python_provides.py')
     cmd = ['python3', script, '--site-path='+sitedir, pyimport_name]
+    cmd += list(pkg.files)
 
-    cmd_input = '\n'.join(pkg.files)
-    cmd_output = shell(cmd, input_str=cmd_input)
+    cmd_output = shell(cmd)
     return set(cmd_output.split())
 
 
 def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
     script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
     cmd = ['python3', script, '--site-path='+sitedir]
+    cmd += list(pkg.files)
 
-    cmd_input = '\n'.join(pkg.files)
-    cmd_output = shell(cmd, input_str=cmd_input)
+    cmd_output = shell(cmd)
     return set(cmd_output.split())
 
 
