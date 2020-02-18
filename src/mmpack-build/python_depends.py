@@ -53,6 +53,9 @@ def _call_func_iter(call: Call) -> Iterator[FunctionDef]:
     if isinstance(call.func, Attribute):
         attr = call.func
         for base in attr.expr.infer():
+            if base == Uninferable:
+                continue
+
             for funcdef in base.igetattr(attr.attrname):
                 yield funcdef
     else:
