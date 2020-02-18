@@ -48,6 +48,23 @@
     },
     {
       "key": {
+        "uuid": "b668d694_f18fd958",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "As far as I see, your upload is not resilient to intermediate failure.",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9da3a098_c32ca414",
         "filename": "src/repository/repo.py",
         "patchSetId": 9
@@ -59,6 +76,29 @@
       "writtenOn": "2020-02-18T07:42:14Z",
       "side": 1,
       "message": "please pass through pycodestyle",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f0c82507_cbfd9851",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "Move this in the destructor of the repo class instance (Repo.__del__ method)",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 38
+      },
       "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
@@ -82,6 +122,98 @@
     },
     {
       "key": {
+        "uuid": "3783604a_d7500975",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "This makes only one instance of Class Repo usable at the same time... make this configurable and store the abspath of it in a n attribute of class Repo",
+      "range": {
+        "startLine": 71,
+        "startChar": 17,
+        "endLine": 71,
+        "endChar": 36
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1c14d73_502691ae",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "This is counter productive to catch here...\n\nAnyway, you will have to handle revert in higher level... Just raise an exception here... but if you want my opinion, you can simply do the check when you reference handle each binary/source package",
+      "range": {
+        "startLine": 95,
+        "startChar": 7,
+        "endLine": 95,
+        "endChar": 12
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df3b8630_fd2747c5",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "Useless... \u0027name\u0027 field is never used and when \u0027version\u0027 would simply raise a KeyError exception when referenced",
+      "range": {
+        "startLine": 96,
+        "startChar": 16,
+        "endLine": 96,
+        "endChar": 72
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e93e7d95_ccf02c96",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "for pkginfo in manifest[\u0027binpkgs\u0027][self.arch].values():\n    if not _check_hash(pkginfo):",
+      "range": {
+        "startLine": 100,
+        "startChar": 10,
+        "endLine": 101,
+        "endChar": 72
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3575f345_52d53903",
         "filename": "src/repository/repo.py",
         "patchSetId": 9
@@ -93,6 +225,167 @@
       "writtenOn": "2020-02-18T07:42:14Z",
       "side": 1,
       "message": "this is one important piece of info that should be logged",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d98299af_7cfb083d",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "for pkgname, mpkinfo in manifest[\u0027binpkgs\u0027][self.arch].items():\n    pkg_path \u003d os.path.join(self.curr_dir, mpkinfo[\u0027file\u0027])",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 64
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f74d8f50_1e48169a",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "Move this in a separate function",
+      "range": {
+        "startLine": 142,
+        "startChar": 12,
+        "endLine": 144,
+        "endChar": 44
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa8cf77a_baa2fbfa",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "when self.srcindex is updated with the new one?",
+      "range": {
+        "startLine": 168,
+        "startChar": 0,
+        "endLine": 172,
+        "endChar": 0
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1291aae0_e7606766",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "better:\ndef _get_srcs_refcounts(self) -\u003e dict[str, int]:",
+      "range": {
+        "startLine": 211,
+        "startChar": 3,
+        "endLine": 211,
+        "endChar": 57
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "898c3e35_93a58a31",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "better for comprehension: srcsha",
+      "range": {
+        "startLine": 221,
+        "startChar": 12,
+        "endLine": 221,
+        "endChar": 18
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "23ec486a_12c784b9",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "count \u003d count_src_refs.setdefault(srcsha, 0)\ncount +\u003d 1",
+      "range": {
+        "startLine": 222,
+        "startChar": 12,
+        "endLine": 222,
+        "endChar": 70
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0249d8a2_bc1b6c13",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "This deserves to be a class attribute... just like binindex and srcindex",
+      "range": {
+        "startLine": 238,
+        "startChar": 8,
+        "endLine": 238,
+        "endChar": 22
+      },
       "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
@@ -115,6 +408,29 @@
         "startChar": 12,
         "endLine": 259,
         "endChar": 17
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "97a59cb7_5e820977",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-18T08:56:39Z",
+      "side": 1,
+      "message": "Move this (up to the yaml_load which must stay here, but the glob move) in try_upload() and rename this function as upload_manifest_file() which will take the manifest file argument.",
+      "range": {
+        "startLine": 255,
+        "startChar": 0,
+        "endLine": 262,
+        "endChar": 57
       },
       "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
