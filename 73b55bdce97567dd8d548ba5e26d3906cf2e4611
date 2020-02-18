@@ -48,6 +48,23 @@
     },
     {
       "key": {
+        "uuid": "9da3a098_c32ca414",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "please pass through pycodestyle",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1afa5ebb_bd6646d6",
         "filename": "src/repository/repo.py",
         "patchSetId": 9
@@ -59,6 +76,275 @@
       "writtenOn": "2020-02-17T16:45:50Z",
       "side": 1,
       "message": "please move to the first line inside the class instead:\nthis syntax disables the warning at the level of the file, not the class",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3575f345_52d53903",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "this is one important piece of info that should be logged",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3dd3fac5_87b2b5cf",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "please replace the prints with log instead",
+      "range": {
+        "startLine": 259,
+        "startChar": 12,
+        "endLine": 259,
+        "endChar": 17
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6142081f_c08fffca",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "please replace the prints with log instead",
+      "range": {
+        "startLine": 265,
+        "startChar": 12,
+        "endLine": 265,
+        "endChar": 17
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "642a0af8_9d4566da",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "please replace the prints with log instead",
+      "range": {
+        "startLine": 282,
+        "startChar": 12,
+        "endLine": 282,
+        "endChar": 17
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f38ee505_a7876fe5",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "this is probably not what you want to do.\n\ntry:\n   some code that may raise an exception\nexcept ExceptionX:\n   do some special piece of code in case ExceptionX was raised\n   ... ignore all the other exceptions !\nexcept ExceptionY:\n    pass  # ignore ExceptionY: we don\u0027t care\nexcept ExceptionZ:\n    print(...)\n    raise  # forward exception to caller\nfinally;\n    piece of code that will be run at the end regardless of any raised exceptions\n\nfinally: pass is like ... well ... the default, I guess ?\n\nIf you did not catch some exception, or if the code written when handling an exception triggers itself an exception, then it will be raised to the caller",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51690536_3e7feb6f",
+        "filename": "src/repository/server.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "this is not needed. The names you chose are all accepted by pylint",
+      "range": {
+        "startLine": 2,
+        "startChar": 0,
+        "endLine": 2,
+        "endChar": 1
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf9de82c_c521bb5c",
+        "filename": "src/repository/server.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "please keep this alphabetically ordered",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 10
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1397d99_a189e652",
+        "filename": "src/repository/server.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "1 char too long ;)",
+      "range": {
+        "startLine": 35,
+        "startChar": 79,
+        "endLine": 35,
+        "endChar": 80
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efba67fd_c58c068f",
+        "filename": "src/repository/server.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "this comment is a bit misleading: mmpack packages are *.mpk, not *.tar",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 24
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a51ce5b_b02655f4",
+        "filename": "src/repository/server.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "You\u0027re not keeping much as internal context.\nWhy not keep track of more ?\n\nI mean, at each new package reception, you\u0027re basically reading up the whole package database, take care of references counters between packages, then do a single change.\nAt soon as you\u0027re done, you forget everything and wait for a new package to arrive.\nWhy not keep track of both binindex and srcindex content ? (for example)",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3392dd9_5fab5bc9",
+        "filename": "src/repository/server.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "If I read the code correctly, on_created(), you:\n- parse the whole repository binindex/srcindex\n- extract the request to a tmp dir\n- validate the request\n- to the requested changes in packages\n- regenerate the binindex\n- cleanup\n\nThis on_created() function - as it is written I mean - does not reflect it.",
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0310c6e_21355a6e",
+        "filename": "src/repository/server.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "I have a small naming issue (throughout your commit, truth be told):\nYou upload as a client to a server.\nFrom the server point of view, this is not an action, but a passive reception.",
+      "range": {
+        "startLine": 51,
+        "startChar": 23,
+        "endLine": 51,
+        "endChar": 29
+      },
+      "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92892d22_589e35a9",
+        "filename": "src/repository/server.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 1,
+      "message": "please add a blank line",
       "revId": "73b55bdce97567dd8d548ba5e26d3906cf2e4611",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true

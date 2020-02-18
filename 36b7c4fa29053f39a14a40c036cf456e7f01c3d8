@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b76fed46_f30aea1a",
+        "filename": "docs/specs/repo.rst",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 0,
+      "message": "please add to both docs\u0027 meson.build, and Makefile.am",
+      "revId": "36b7c4fa29053f39a14a40c036cf456e7f01c3d8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "628899b7_60cbfbb3",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-18T07:42:14Z",
+      "side": 0,
+      "message": "Please add those two files src/repository meson.build file, and the root Makefile.am.\nAlso add the entry to a new debian *.install file",
+      "revId": "36b7c4fa29053f39a14a40c036cf456e7f01c3d8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
