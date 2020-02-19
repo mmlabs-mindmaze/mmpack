@@ -95,7 +95,7 @@ def _gen_pysymbols(pyimport_name: str, pkg: PackageInfo,
 def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
     script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
     cmd = ['python3', script, '--site-path='+sitedir]
-    cmd += list(pkg.files)
+    cmd += [f for f in pkg.files if is_python_script(f)]
 
     cmd_output = shell(cmd)
     return set(cmd_output.split())

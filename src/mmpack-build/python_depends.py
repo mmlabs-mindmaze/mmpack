@@ -26,7 +26,6 @@ from astroid.exceptions import InferenceError, NameInferenceError, \
     AttributeInferenceError
 from astroid.modutils import is_standard_module
 from astroid.node_classes import Call, Attribute
-from mmpack_build.file_utils import is_python_script
 
 
 def _is_module_packaged(mod, pkgfiles: Set[str]) -> bool:
@@ -142,10 +141,9 @@ def main():
         sys.path.insert(0, abspath(options.site_path))
 
     pkgfiles = [abspath(f.strip()) for f in options.infiles]
-    pyfiles = [f for f in pkgfiles if is_python_script(f)]
 
     symbol_set = set()
-    for filename in pyfiles:
+    for filename in pkgfiles:
         symbol_set.update(_gen_py_depends(filename, pkgfiles))
 
     # Return sorted results on stdout
