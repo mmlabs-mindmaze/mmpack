@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "619d3532_ff239023",
+        "filename": "Makefile.am",
+        "patchSetId": 11
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-19T16:20:47Z",
+      "side": 1,
+      "message": "please keep things alphabetically ordered",
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a790854a_a6e79cef",
+        "filename": "src/repository/meson.build",
+        "patchSetId": 11
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-19T16:20:47Z",
+      "side": 1,
+      "message": "please keep things alphabetically ordered",
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7a044d9e_26576960",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-19T16:20:47Z",
+      "side": 1,
+      "message": "I do not expect this should be a path, but I cannot see how this has been prevented.",
+      "range": {
+        "startLine": 46,
+        "startChar": 31,
+        "endLine": 46,
+        "endChar": 39
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4151d70_4f1fcb7e",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-19T16:20:47Z",
+      "side": 1,
+      "message": "ValueError, or AssertionError would probably be better fits",
+      "range": {
+        "startLine": 140,
+        "startChar": 18,
+        "endLine": 140,
+        "endChar": 26
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
