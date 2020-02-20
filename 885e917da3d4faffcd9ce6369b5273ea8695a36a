@@ -19,6 +19,92 @@
     },
     {
       "key": {
+        "uuid": "ff3575fc_bbd67079",
+        "filename": "Makefile.am",
+        "patchSetId": 11
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "rename if installed in bin folder",
+      "range": {
+        "startLine": 36,
+        "startChar": 16,
+        "endLine": 36,
+        "endChar": 25
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29894e58_a834227d",
+        "filename": "docs/specs/repo-index.md",
+        "patchSetId": 11
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "has",
+      "range": {
+        "startLine": 19,
+        "startChar": 29,
+        "endLine": 19,
+        "endChar": 31
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3a913bc_016de60b",
+        "filename": "docs/specs/repo-index.md",
+        "patchSetId": 11
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "I am not fond to use yaml here... The hierarchy and fields are way more simpler than for binary package... This is will need to add again quite a ugly machinery in mmpack to parse it... A simple key: value file separated by empty line (or something else) would be more welcome.\n\nAlso I am rather against using a mapping for source entries indexed by srcshash:\n- This makes changing the hash function for srchash more complicated\n- you have intrinsically a list (or set) of entries, the key mapping is just a detail of implementation of mmpack-build for fast retrieval.\n\nHowever, those issues may be addressed later in a subsequent commit. This will not be a blocker of this commit provided the future commit occurs before the next mmpack release AND before the commit implementing the hadling of source index in mmpack",
+      "range": {
+        "startLine": 20,
+        "startChar": 56,
+        "endLine": 22,
+        "endChar": 24
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27fe8a27_bc82ec6a",
+        "filename": "docs/specs/repo-index.md",
+        "patchSetId": 11
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "name is missing according to me",
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a790854a_a6e79cef",
         "filename": "src/repository/meson.build",
         "patchSetId": 11
@@ -30,6 +116,23 @@
       "writtenOn": "2020-02-19T16:20:47Z",
       "side": 1,
       "message": "please keep things alphabetically ordered",
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a4a0d43_eb7325f7",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "No way that this is hardcoded there... If you want to hardcode a value, make it relative to repo_dir. In the worst case this should be placed in a subfolder of the _installed_ localstate dir",
       "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
@@ -59,6 +162,29 @@
     },
     {
       "key": {
+        "uuid": "3b0f16f8_f9fd3c76",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "since \"old_nd_refs +\u003d 1\" does not work, you would better to do in the previous line:\nold_nd_refs \u003d self.count_src_refs.get(srcsha, 0)\nIt would be clearer",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 57
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d4151d70_4f1fcb7e",
         "filename": "src/repository/repo.py",
         "patchSetId": 11
@@ -75,6 +201,144 @@
         "startChar": 18,
         "endLine": 140,
         "endChar": 26
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ba24f04_18163ebd",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "Why doing this here and not in _prepare_update_indexes_repo()",
+      "range": {
+        "startLine": 151,
+        "startChar": 9,
+        "endLine": 154,
+        "endChar": 38
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30ebc48e_defd0428",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "Use os.replace... shutil.move may on some platform if destination already exists",
+      "range": {
+        "startLine": 171,
+        "startChar": 12,
+        "endLine": 171,
+        "endChar": 23
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37e3671d_9b171f93",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "Just add RELPATH_SOURCE_INDEX and RELPATH_BINARY_INDEX in to_add set",
+      "range": {
+        "startLine": 200,
+        "startChar": 8,
+        "endLine": 203,
+        "endChar": 54
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19046387_f68bc39a",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "prev_pkg_info \u003d self.binindex.get(pkg_name)\nif prev_pkg_info:\n     to_remove.add(prev_pkg_info[\u0027filename\u0027])\n     ....",
+      "range": {
+        "startLine": 261,
+        "startChar": 0,
+        "endLine": 266,
+        "endChar": 64
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c4dd6bc_7d0595a2",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "You need to also remove the entry srcindex copy",
+      "range": {
+        "startLine": 269,
+        "startChar": 20,
+        "endLine": 269,
+        "endChar": 71
+      },
+      "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37849e04_1de9425d",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-02-20T08:11:33Z",
+      "side": 1,
+      "message": "You need also to do:\nto_remove.disacard(pkg_filename)",
+      "range": {
+        "startLine": 271,
+        "startChar": 12,
+        "endLine": 271,
+        "endChar": 36
       },
       "revId": "885e917da3d4faffcd9ce6369b5273ea8695a36a",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
