@@ -27,6 +27,9 @@ from astroid.nodes import Import, ImportFrom, AssignName, FunctionDef, \
     ClassDef, Module
 
 
+module_indep_type_symbols = set()
+
+
 def _is_module_packaged(mod, pkgfiles: Set[str]) -> bool:
     """
     test whether a specified module is provided by the file of the same
@@ -59,61 +62,54 @@ def _process_class_member_and_attrs(cldef: ClassDef,
     Args:
         cldef: the astroid node defining the class
         pkgfiles: set of files in the same mmpack package
-
-    Returns:
-        set of name corresponding to the class attributes and methods and
-        instance attributes.
     """
     syms = set()
+
+    pkgname = cldef.qname().split('.', maxsplit=1)[0]
+    classtype_prefix = '{}.class-{}.'.format(pkgname, cldef.name)
 
     # add member and attributes from parent classes implemented in files of
     # the same package
     for base in cldef.ancestors(recurs=False):
         mod = base.root()
         if _is_module_packaged(mod, pkgfiles):
-            syms.update(_process_class_member_and_attrs(base, pkgfiles))
+            _process_class_member_and_attrs(base, pkgfiles)
 
     # Add public class attributes
     for attr in cldef.locals:
         if (isinstance(cldef.locals[attr][-1], AssignName)
                 and _is_public_sym(attr)):
-            syms.add(attr)
+            syms.add(classtype_prefix + attr)
 
     # Add public class methods and instance attributes
-    syms.update({m.name for m in cldef.mymethods() if _is_public_sym(m.name)})
-    syms.update({a for a in cldef.instance_attrs if _is_public_sym(a)})
+    syms.update({classtype_prefix + m.name
+                 for m in cldef.mymethods() if _is_public_sym(m.name)})
+    syms.update({classtype_prefix + a
+                 for a in cldef.instance_attrs if _is_public_sym(a)})
 
-    return syms
+    module_indep_type_symbols.update(syms)
 
 
 def _process_class_node(cldef: ClassDef, pkgfiles: Set[str]):
     """
-    Determine the symbols provided by the class. The returned symbols will
-    include the attributes and methods of the class prefixed by the class name
-    like:
-        cls_name
-        cls_name.attr1
-        cls_name.attr2
-        cls_name.__init__
-        cls_name.method1
-        cls_name.method2
+    Determine the symbols provided by the class. This includes the class
+    constructor. The symbol of the class attribute and method are extracted as
+    well, however their name will added to the list of symbols whose name is
+    lindependent from the module name that declared them.
 
     Args:
         cldef: the astroid node defining the class
         pkgfiles: set of files in the same mmpack package
 
     Returns:
-        set of name defined by the class
+        the public symbol name of the class constructor
     """
     # Get members and attribute of current class and all ancestors whose
     # implementation is provided in the same package
-    syms = _process_class_member_and_attrs(cldef, pkgfiles)
+    _process_class_member_and_attrs(cldef, pkgfiles)
 
-    # prefix all attributes and methods name of a class with class name and add
-    # class constructor to syms
-    syms = {cldef.name + '.' + s for s in syms}
-    syms.add(cldef.name)
-    return syms
+    # Add class constructor to public function symbol
+    return {cldef.name}
 
 
 def _process_import_from(impfrom: ImportFrom, name: str, pkgfiles: Set[str]):
@@ -232,6 +228,9 @@ def main():
     pkgfiles = {abspath(f.strip()) for f in options.infiles}
 
     symbol_set = _gen_pypkg_symbols(options.pypkgname, pkgfiles)
+
+    # Add module independent symbols
+    symbol_set.update(module_indep_type_symbols)
 
     # Return result on stdout
     for sym in symbol_set:
