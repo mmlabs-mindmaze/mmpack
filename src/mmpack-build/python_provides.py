@@ -27,14 +27,6 @@ from astroid.nodes import Import, ImportFrom, AssignName, FunctionDef, \
     ClassDef, Module
 
 
-def _is_module_packaged(mod, pkgfiles: Set[str]) -> bool:
-    """
-    test whether a specified module is provided by the file of the same
-    mmpack package.
-    """
-    return mod.path and mod.path[0] in pkgfiles
-
-
 def _is_public_sym(name: str) -> bool:
     """
     Test from name if symbol is public or implementation details.
@@ -47,141 +39,91 @@ def _is_public_sym(name: str) -> bool:
     return name.startswith('__') or not name.startswith('_')
 
 
-def _process_class_member_and_attrs(cldef: ClassDef,
-                                    pkgfiles: Set[str]) -> Set[str]:
-    """
-    Determine the class attributes, methods and instance attributes defined by
-    a class. The function will inspect and populate them from the parents while
-    the parent is defined by a module file in the same mmpack package.
+class PkgData:
+    def __init__(self, pkgfiles: Set[str]):
+        self.pkgfiles = pkgfiles
+        self.syms = {}
 
-    This function is called recursively to populate a class.
+    def is_module_packaged(self, mod: Module):
+        """
+        test whether a specified module is provided by the file of the same
+        mmpack package.
+        """
+        return mod.path and mod.path[0] in self.pkgfiles
 
-    Args:
-        cldef: the astroid node defining the class
-        pkgfiles: set of files in the same mmpack package
+    def add_module_symbols(self, mod: Module):
+        """
+        Add module public symbols to the symbols exported by the package
+        """
+        if not self.is_module_packaged(mod) or not _is_public_sym(mod.name):
+            return
 
-    Returns:
-        set of name corresponding to the class attributes and methods and
-        instance attributes.
-    """
-    syms = set()
+        qname = mod.qname()
 
-    # add member and attributes from parent classes implemented in files of
-    # the same package
-    for base in cldef.ancestors(recurs=False):
-        mod = base.root()
-        if _is_module_packaged(mod, pkgfiles):
-            syms.update(_process_class_member_and_attrs(base, pkgfiles))
+        # Skip adding if namespace is known
+        if qname in self.syms:
+            return
 
-    # Add public class attributes
-    for attr in cldef.locals:
-        if (isinstance(cldef.locals[attr][-1], AssignName)
-                and _is_public_sym(attr)):
-            syms.add(attr)
+        self.syms[qname] = set(mod.public_names())
 
-    # Add public class methods and instance attributes
-    syms.update({m.name for m in cldef.mymethods() if _is_public_sym(m.name)})
-    syms.update({a for a in cldef.instance_attrs if _is_public_sym(a)})
+        # Loop over class definition and add those with a public name
+        for cldef in mod.nodes_of_class(ClassDef):
+            if _is_public_sym(cldef.name):
+                self.add_class_symbol(cldef)
 
-    return syms
+        # Loop over import statement definition and process imported modules
+        for imp in mod.nodes_of_class(Import):
+            for modname, _ in imp.names:
+                try:
+                    imp_mod = imp.do_import_module(modname)
+                    self.add_module_symbols(imp_mod)
+                except AstroidImportError:
+                    pass
 
+        # Loop over 'from ... import ...' definition and process imported modules
+        for impfrom in mod.nodes_of_class(ImportFrom):
+            try:
+                imp_mod = impfrom.do_import_module(impfrom.modname)
+                self.add_module_symbols(imp_mod)
+            except AstroidImportError:
+                pass
 
-def _process_class_node(cldef: ClassDef, pkgfiles: Set[str]):
-    """
-    Determine the symbols provided by the class. The returned symbols will
-    include the attributes and methods of the class prefixed by the class name
-    like:
-        cls_name
-        cls_name.attr1
-        cls_name.attr2
-        cls_name.__init__
-        cls_name.method1
-        cls_name.method2
+    def add_class_symbol(self, cldef: ClassDef):
+        """
+        Add class attributes symbols and ancestors if they belong to package
+        """
+        qname = cldef.qname()
 
-    Args:
-        cldef: the astroid node defining the class
-        pkgfiles: set of files in the same mmpack package
+        # Skip if class has been already processed
+        if qname in self.syms:
+            return
 
-    Returns:
-        set of name defined by the class
-    """
-    # Get members and attribute of current class and all ancestors whose
-    # implementation is provided in the same package
-    syms = _process_class_member_and_attrs(cldef, pkgfiles)
-
-    # prefix all attributes and methods name of a class with class name and add
-    # class constructor to syms
-    syms = {cldef.name + '.' + s for s in syms}
-    syms.add(cldef.name)
-    return syms
-
-
-def _process_import_from(impfrom: ImportFrom, name: str, pkgfiles: Set[str]):
-    realname = impfrom.real_name(name)
-
-    # First try to load the import as module, if not present, let's try to
-    # import a symbol
-    try:
-        mod = impfrom.do_import_module(impfrom.modname + '.' + realname)
-        if not _is_module_packaged(mod, pkgfiles):
-            return set()
+        # Add ancestors if they belong to package
+        for ancestor in cldef.ancestors():
+            if self.is_module_packaged(ancestor.root()):
+                self.add_class_symbol(ancestor)
 
         syms = set()
-        for pub_name in mod.public_names():
-            syms.update(_get_provides_from_name(mod, pub_name, pkgfiles))
-        return {name + '.' + s for s in syms}
-    except AstroidImportError:
-        # If we reach here modname.realname cannot be imported as module. Hence
-        # we must then try to load a symbol called realname from the package
-        # named modname
-        pass
 
-    mod = impfrom.do_import_module(impfrom.modname)
-    if not _is_module_packaged(mod, pkgfiles):
-        return set()
+        # Add public class attributes
+        for attr in cldef.locals:
+            if (isinstance(cldef.locals[attr][-1], AssignName)
+                    and _is_public_sym(attr)):
+                syms.add(attr)
 
-    # Do lookup in the package and generate symbols
-    syms = _get_provides_from_name(mod, realname, pkgfiles)
-    if realname == name:
-        return syms
+        # Add public class methods and instance attributes
+        syms.update({m.name
+                     for m in cldef.mymethods() if _is_public_sym(m.name)})
+        syms.update({attr
+                     for attr in cldef.instance_attrs if _is_public_sym(attr)})
 
-    # replace "real name" prefix by "as name"
-    as_syms = set()
-    for sym in syms:
-        # get the suffix part of prefix.suffix pattern in sym. If sym does not
-        # contain '.', suffix will be ''
-        suffix = sym.split(sep='.', maxsplit=1)[1:]
-        as_syms.add(name + '.' + suffix if suffix else name)
-    return as_syms
+        self.syms[qname] = syms
 
-
-def _get_provides_from_name(mod: Module, name: str, pkgfiles: Set[str]):
-    _, node_list = mod.lookup(name)
-    node = node_list[-1]
-    if isinstance(node, Import):
-        return set()  # import are always outside of package
-    elif isinstance(node, ImportFrom):
-        return _process_import_from(node, name, pkgfiles)
-    elif isinstance(node, ClassDef):
-        return _process_class_node(node, pkgfiles)
-    elif isinstance(node, (FunctionDef, AssignName)):
-        return {node.name}
-
-    raise AssertionError('Unsupported type of public symbol: {}'.format(name))
-
-
-def _gen_pypkg_symbols(pypkg: str, pkgfiles: Set[str]) -> Set[str]:
-
+def _gen_pypkg_symbols(pypkg: str, pkgdata: PkgData):
     # Parse a simple import in astroid and get the imported's module node
     imp = parse('import {}'.format(pypkg))
     mod = imp.body[0].do_import_module(pypkg)
-
-    # Inspect the provides only of the wildcard symbols (ie the public symbols,
-    # reduced to the one listed in the __all__ list if present)
-    symbol_set = set()
-    for name in mod.wildcard_import_names():
-        pub_syms = _get_provides_from_name(mod, name, pkgfiles)
-        symbol_set.update({pypkg + '.' + s for s in pub_syms})
+    pkgdata.add_module_symbols(mod)
 
     # For a python package, __main__.py holds the contents which will be
     # executed when the module is run with -m. Hence we test the capability of
@@ -192,12 +134,9 @@ def _gen_pypkg_symbols(pypkg: str, pkgfiles: Set[str]) -> Set[str]:
         main_modname = pypkg + '.__main__'
         imp = parse('import ' + main_modname)
         mod = imp.body[0].do_import_module(main_modname)
-        if _is_module_packaged(mod, pkgfiles):
-            symbol_set.add(main_modname)
+        pkgdata.add_module_symbols(mod)
     except AstroidImportError:
         pass
-
-    return symbol_set
 
 
 def parse_options():
@@ -229,13 +168,14 @@ def main():
         sys.path.insert(0, abspath(options.site_path))
 
     # Load list of files in package from stdin
-    pkgfiles = {abspath(f.strip()) for f in options.infiles}
+    pkgdata = PkgData({abspath(f.strip()) for f in options.infiles})
 
-    symbol_set = _gen_pypkg_symbols(options.pypkgname, pkgfiles)
+    _gen_pypkg_symbols(options.pypkgname, pkgdata)
 
     # Return result on stdout
-    for sym in symbol_set:
-        print(sym)
+    for namespace in sorted(pkgdata.syms):
+        for sym in sorted(pkgdata.syms[namespace]):
+            print(namespace + '.' + sym)
 
 
 if __name__ == '__main__':
