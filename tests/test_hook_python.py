@@ -75,20 +75,23 @@ class TestPythonHook(unittest.TestCase):
         ]
         refsymbols = {
             'multi.argh',
+            'multi.bar',
             'multi.main_dummy_fn',
             'multi.MainData',
-            'multi.MainData.a_class_attr',
-            'multi.MainData.__init__',
-            'multi.MainData.data1',
-            'multi.MainData.fullname',
-            'multi.MainData.disclose_private',
+            'multi.foo.MainData',
+            'multi.foo.MainData.a_class_attr',
+            'multi.foo.MainData.__init__',
+            'multi.foo.MainData.data1',
+            'multi.foo.MainData.fullname',
+            'multi.foo.MainData.disclose_private',
+            'multi.foo.A_CLASS',
+            'multi.foo.EXPORTED_LIST',
+            'multi.foo.THE_ANSWER',
+            'multi.foo.main_dummy_fn',
             'multi.FooBar',
-            'multi.FooBar.a_class_attr',
             'multi.FooBar.__init__',
-            'multi.FooBar.data1',
             'multi.FooBar.fullname',
             'multi.FooBar.new_data',
-            'multi.FooBar.disclose_private',
             'multi.FooBar.hello',
             'multi.bar.print_hello',
             'multi.bar.Bar',
@@ -96,6 +99,7 @@ class TestPythonHook(unittest.TestCase):
             'multi.bar.Bar.drink',
             'multi.bar.A_BAR',
             'multi.__main__',
+            'multi.__main__.print_hello',
         }
         syms = _load_py_symbols('multi', pkgfiles)
         self.assertEqual(syms, refsymbols)
@@ -105,6 +109,8 @@ class TestPythonHook(unittest.TestCase):
         pkgfiles = ['pkg_imported/__init__.py']
         refsymbols = {
             'pkg_imported.argh',
+            'pkg_imported.main',
+            'pkg_imported.main_dummy_fn',
             'pkg_imported.FooBar',
             'pkg_imported.FooBar.__init__',
             'pkg_imported.FooBar.new_data',
