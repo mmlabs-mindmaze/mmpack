@@ -74,28 +74,39 @@ class TestPythonHook(unittest.TestCase):
             'multi/bar.py',
         ]
         refsymbols = {
-            'multi.argh',
-            'multi.main_dummy_fn',
-            'multi.MainData',
-            'multi.MainData.a_class_attr',
-            'multi.MainData.__init__',
-            'multi.MainData.data1',
-            'multi.MainData.fullname',
-            'multi.MainData.disclose_private',
+            'multi.foo.DummyData.a_number',
+            'multi.foo.DummyData.an_attr',
+            'multi.foo.DummyData.v1',
+            'multi.foo.DummyData.__init__',
+            'multi.foo.DummyData.useless_method',
+            'multi.foo.DummyData',
+            'multi.foo.MainData',
+            'multi.foo.MainData.a_class_attr',
+            'multi.foo.MainData.__init__',
+            'multi.foo.MainData.data1',
+            'multi.foo.MainData.fullname',
+            'multi.foo.MainData.disclose_private',
+            'multi.foo.somefunc',
+            'multi.foo.A_CLASS',
+            'multi.foo.EXPORTED_LIST',
+            'multi.foo.THE_ANSWER',
+            'multi.foo.main_dummy_fn',
+            'multi.foo.utils',
             'multi.FooBar',
-            'multi.FooBar.a_class_attr',
             'multi.FooBar.__init__',
-            'multi.FooBar.data1',
             'multi.FooBar.fullname',
             'multi.FooBar.new_data',
-            'multi.FooBar.disclose_private',
             'multi.FooBar.hello',
+            'multi.bar',
             'multi.bar.print_hello',
             'multi.bar.Bar',
             'multi.bar.Bar.__init__',
             'multi.bar.Bar.drink',
             'multi.bar.A_BAR',
+            'multi.MainData',
+            'multi.somefunc',
             'multi.__main__',
+            'multi.__main__.print_hello',
         }
         syms = _load_py_symbols('multi', pkgfiles)
         self.assertEqual(syms, refsymbols)
@@ -105,11 +116,16 @@ class TestPythonHook(unittest.TestCase):
         pkgfiles = ['pkg_imported/__init__.py']
         refsymbols = {
             'pkg_imported.argh',
+            'pkg_imported.bar',
+            'pkg_imported.main',
+            'pkg_imported.main_dummy_fn',
+            'pkg_imported.somefunc',
             'pkg_imported.FooBar',
             'pkg_imported.FooBar.__init__',
             'pkg_imported.FooBar.new_data',
             'pkg_imported.FooBar.fullname',
             'pkg_imported.FooBar.hello',
+            'pkg_imported.MainData',
         }
         syms = _load_py_symbols('pkg_imported', pkgfiles)
         self.assertEqual(syms, refsymbols)
@@ -136,7 +152,7 @@ class TestPythonHook(unittest.TestCase):
     def test_depends_import_pkg_imported(self):
         """test dependent import with pkg importing another package"""
         pkgfiles = ['pkg_imported/__init__.py']
-        refimports = {'simple'}
+        refimports = {'simple', 'multi'}
         imports = _get_py_imports(pkgfiles)
         self.assertEqual(imports, refimports)
 

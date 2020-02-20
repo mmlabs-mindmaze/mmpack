@@ -3,6 +3,7 @@
 python package that imports other packages
 """
 
+from multi import *
 from simple import main_dummy_fn, MainData as main
 
 
@@ -22,7 +23,7 @@ def argh(val: int) -> None:
 class FooBar(main):
     def __init__(self):
         super().__init__('somedata')
-        self.new_data = truc()
+        self.new_data = somefunc(24)
         self.new_data.v1 = 66
         self.fullname = 'John Doe'
 
@@ -30,4 +31,4 @@ class FooBar(main):
         print('hello')
 
 _hello = FooBar()
-_hello.disclose_private()
+_hello.disclose_private('No one')

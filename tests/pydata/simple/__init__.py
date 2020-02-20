@@ -34,7 +34,7 @@ class MainData:
         self.fullname = 'Ema Nymton'
 
     def _what_does_he_says(self) -> str:
-        return _non_public_data
+        return self._non_public_data
 
     def disclose_private(self, who: str) -> str:
         return '{} says: {}'.format(who, self._what_does_he_says())

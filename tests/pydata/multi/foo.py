@@ -3,7 +3,19 @@
 python foo module
 """
 
+from multi import utils
+
 THE_ANSWER = 42
+
+
+class DummyData:
+    def __init__(self, val: int):
+        self.an_attr = 'Hello'
+        self.a_number = val
+        self.v1 = 0
+
+    def useless_method(self):
+        pass
 
 
 def main_dummy_fn(an_arg: str, num: int):
@@ -15,6 +27,11 @@ def main_dummy_fn(an_arg: str, num: int):
     i_say_str = 'I say {}'.format(ans)
 
     return [an_arg, he_say_str, 'me', i_say_str]
+
+
+def somefunc(val: int) -> DummyData:
+    _print_answer_multi()
+    return DummyData(val)
 
 
 def _init_exported_list():
