@@ -47,6 +47,7 @@ mmpack_build_unit_tests_sources = files(
     'pydata/multi/__init__.py',
     'pydata/multi/foo.py',
     'pydata/multi/bar.py',
+    'pydata/multi/utils.py',
     'pydata/pkg_imported/__init__.py',
     'pydata/simple/__init__.py',
     'pytests.py',

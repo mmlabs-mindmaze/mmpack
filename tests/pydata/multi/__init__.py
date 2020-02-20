@@ -3,22 +3,19 @@
 python package that is made of several modules with __init__.py
 """
 
-from . foo import main_dummy_fn, MainData
+from . foo import somefunc, MainData, THE_ANSWER as _THE_ANSWER
 from . import bar
 
 
-def _print_answer():
+def _print_answer_multi():
     print(_THE_ANSWER)
 
-
-def argh(val: int) -> None:
-    _print_answer()
 
 
 class FooBar(MainData):
     def __init__(self):
         super().__init__('somedata')
-        self.new_data = truc()
+        self.new_data = somefunc(42)
         self.new_data.v1 = 66
         self.fullname = 'John Doe'
 
