@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2e7589b4_1031af64",
+        "filename": "src/repository/meson.build",
+        "patchSetId": 12
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-24T15:41:23Z",
+      "side": 1,
+      "message": "I don\u0027t like the name.\nYou will NOT launch this service to upload a server, nor to upload to a server.\n\nThis is a service to manage mmpack packages.\n\nAlso, please try to find a name that will make people know it\u0027s about mmpack and not some other kind of server.",
+      "range": {
+        "startLine": 11,
+        "startChar": 10,
+        "endLine": 11,
+        "endChar": 23
+      },
+      "revId": "5da346cd4ac54c34cb644c2d197a3ea05580b895",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5daea73_ba3c672c",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-24T15:41:23Z",
+      "side": 1,
+      "message": "this is not necessary: you can see this within mmpack because we want to have the logs within a working directory for building the package, but htat work dir is setup by mmpack-build itself. This is a small stash to have logs from *before* the working directory is created.\n\nHere you can init the logger right away",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 31
+      },
+      "revId": "5da346cd4ac54c34cb644c2d197a3ea05580b895",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52cbdf41_9fead592",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-24T15:41:23Z",
+      "side": 1,
+      "message": "do we want to print to stdout ?\nif not, you can skip this and only log",
+      "range": {
+        "startLine": 85,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 47
+      },
+      "revId": "5da346cd4ac54c34cb644c2d197a3ea05580b895",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
