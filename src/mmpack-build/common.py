@@ -412,13 +412,15 @@ def concatenate_unix(head_path: str = "", tail_path: str = "") -> str:
     C:/msys64head_pathC:/msys64tail_path)
     """
 
+    if not head_path:
+        return tail_path
+
     if get_host_dist() == 'windows':
-        if head_path:
-            head_path = shell(['cygpath', '-u', head_path], log=False).strip()
+        head_path = shell(['cygpath', '-u', head_path], log=False).strip()
         if tail_path:
             tail_path = shell(['cygpath', '-u', tail_path], log=False).strip()
 
-    if head_path and tail_path and tail_path.startswith('/'):
+    if tail_path and tail_path.startswith('/'):
         tail_path = tail_path[1:]
 
     return os.path.join(head_path, tail_path)
