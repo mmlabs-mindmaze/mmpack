@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "33ae568b_5d0d8e33",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-27T14:13:16Z",
+      "side": 1,
+      "message": "Having the errors displayed to the console is nice.\nHowever:\n- this is not controlled by the --debug/--verbose flags of mmpack-build\n- not logging them means that if someone has any issue in packaging some project, he will not be able to ask for help using the log file (that exists for this single purpose)",
+      "revId": "98b1e246dd0f65c8b6a3a0840c795351c04e3585",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3152567c_b9888b1c",
+        "filename": "src/mmpack-build/python_depends.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-27T14:13:16Z",
+      "side": 1,
+      "message": "I find this to be more clear\n\ntry:\n    node \u003d cldef.instance_attr(attrname)[0]\nexcept AttributeInferenceError:\n    node \u003d Uninferable",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 12
+      },
+      "revId": "98b1e246dd0f65c8b6a3a0840c795351c04e3585",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6becbff_55265093",
+        "filename": "src/mmpack-build/python_depends.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-27T14:13:16Z",
+      "side": 1,
+      "message": "this could be a docstring instead",
+      "range": {
+        "startLine": 222,
+        "startChar": 0,
+        "endLine": 225,
+        "endChar": 15
+      },
+      "revId": "98b1e246dd0f65c8b6a3a0840c795351c04e3585",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10316d47_4ee0b544",
+        "filename": "src/mmpack-build/python_depends.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-27T14:13:16Z",
+      "side": 1,
+      "message": "else ignore ?",
+      "revId": "98b1e246dd0f65c8b6a3a0840c795351c04e3585",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
