@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3c3a12_7fdacee0",
+        "filename": "src/mmpack-build/python_provides.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-27T13:35:09Z",
+      "side": 1,
+      "message": "maybe you should leave a comment explaining why we can ignore import exceptions in a function named \"add_import\"",
+      "revId": "ce319542c0e8916d2306b667d07d9caced2f408e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c8da525_c3e806f5",
+        "filename": "src/mmpack-build/python_provides.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-27T13:35:09Z",
+      "side": 1,
+      "message": "this is self._add_import(mod_prefix + name), isn\u0027t it ?",
+      "range": {
+        "startLine": 91,
+        "startChar": 1,
+        "endLine": 95,
+        "endChar": 24
+      },
+      "revId": "ce319542c0e8916d2306b667d07d9caced2f408e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7201340_89427e10",
+        "filename": "src/mmpack-build/python_provides.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-27T13:35:09Z",
+      "side": 1,
+      "message": "please rename to put some emphasis on the \"public\" part",
+      "range": {
+        "startLine": 128,
+        "startChar": 8,
+        "endLine": 128,
+        "endChar": 26
+      },
+      "revId": "ce319542c0e8916d2306b667d07d9caced2f408e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "919f7670_32d75284",
+        "filename": "src/mmpack-build/python_provides.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-02-27T13:35:09Z",
+      "side": 1,
+      "message": "I\u0027m guessing this about directly public variables.\nYou should add a comment like you did for all the sections below",
+      "revId": "ce319542c0e8916d2306b667d07d9caced2f408e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
