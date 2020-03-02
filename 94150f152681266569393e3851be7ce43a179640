@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3f4393d_9d91db56",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "This makes sense only in the context of mmpack-build... Please stick to a simple version here and remove this option",
+      "range": {
+        "startLine": 37,
+        "startChar": 27,
+        "endLine": 37,
+        "endChar": 56
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "134c49cb_90ec3515",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "Please remove",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 0
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d87d0998_8bf0eaa3",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 0
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3aa82c0a_826b3bab",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "Please remove",
+      "range": {
+        "startLine": 56,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 30
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4208c2cc_96ad1490",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 30
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f910dde_84c211e1",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "there is no architecture argument",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 73
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7bd591f5_5355476e",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "This is worse that it was... Now for a system installation the log is installed in /usr/bin/var/log/mmpack-repo.log.\n\nLet\u0027s sanitize a little bit: remove this part of the code, change the argument from repo_dir to log_filename, ie pass directly the filename of log in argument",
+      "range": {
+        "startLine": 87,
+        "startChar": 4,
+        "endLine": 89,
+        "endChar": 63
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e563ed53_cbf62110",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "remove...",
+      "range": {
+        "startLine": 158,
+        "startChar": 8,
+        "endLine": 161,
+        "endChar": 28
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90b2b71f_effdf32c",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "Assuming the change in _init_logger are done, just pass:\nos.path.join(repo, LOG_FILE)",
+      "range": {
+        "startLine": 167,
+        "startChar": 35,
+        "endLine": 167,
+        "endChar": 39
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b8ce0bd_acf11061",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T09:29:56Z",
+      "side": 1,
+      "message": "I prefer cpy_srcindex.pop(srcsha256)",
+      "range": {
+        "startLine": 365,
+        "startChar": 20,
+        "endLine": 365,
+        "endChar": 47
+      },
+      "revId": "94150f152681266569393e3851be7ce43a179640",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
