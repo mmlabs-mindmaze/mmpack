@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "669fdecd_15886b2b",
+        "filename": "src/mmpack-build/build-makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-02T10:49:41Z",
+      "side": 1,
+      "message": "What about using \"make -q \u003ctarget_to_test\u003e \u003e /dev/null 2\u003e /dev/null\" to determine if a target does not exist?",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 40
+      },
+      "revId": "a6d8a4e2e1ade8043098e29f0f6c2d039de2ad07",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
