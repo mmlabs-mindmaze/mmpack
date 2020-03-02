@@ -3,7 +3,6 @@
 set -e
 
 cd $BUILDDIR
-export LDFLAGS="-Wl,--as-needed $LDFLAGS"
 cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $OPTS
 make
 

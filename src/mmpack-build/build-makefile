@@ -9,7 +9,6 @@ has_check_target=$(($? == 1))
 set -e
 
 cd $SRCDIR
-export LDFLAGS="-Wl,--as-needed $LDFLAGS"
 make $OPTS PREFIX=$PREFIX
 
 if [ "$SKIP_TESTS" != "True" ] ; then
