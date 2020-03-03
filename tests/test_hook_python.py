@@ -5,7 +5,7 @@ from glob import glob
 from os.path import dirname, abspath, join
 from typing import Set
 
-from mmpack_build.base_hook import PackageInfo
+from mmpack_build.package_info import PackageInfo
 from mmpack_build.hook_python import _gen_pysymbols, _gen_pydepends
 
 

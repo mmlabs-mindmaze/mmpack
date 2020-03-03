@@ -69,6 +69,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/mmpack_clean.py \
 	src/mmpack-build/mmpack_guess.py \
 	src/mmpack-build/mmpack_pkg_create.py \
+	src/mmpack-build/package_info.py \
 	src/mmpack-build/pe_utils.py \
 	src/mmpack-build/provide.py \
 	src/mmpack-build/python_depends.py \
