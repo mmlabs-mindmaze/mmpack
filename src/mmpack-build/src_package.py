@@ -11,7 +11,6 @@ import sys
 from os import path
 from subprocess import Popen
 from threading import Thread
-from typing import Set
 from tempfile import mkdtemp
 
 from . workspace import Workspace, get_local_install_dir
@@ -164,20 +163,6 @@ class SrcPackage:
 
         popdir()
 
-    def _get_matching_files(self, pcre: str) -> Set[str]:
-        """
-        given some pcre, return the set of matching files from
-        self.install_files_set.  Those files are removed from the source
-        install file set.
-        """
-        matching_set = set()
-        for inst_file in self.install_files_set:
-            if re.match(pcre, inst_file):
-                matching_set.add(inst_file)
-
-        self.install_files_set.difference_update(matching_set)
-        return matching_set
-
     def _format_description(self, binpkg: BinaryPackage, pkgname: str,
                             pkg_type: str = None):
         """
@@ -213,12 +198,12 @@ class SrcPackage:
     def _remove_ignored_files(self):
         if 'ignore' in self._specs['general']:
             for regex in self._specs['general']['ignore']:
-                _ = self._get_matching_files(regex)
-        # remove *.la and *.def files
-        _ = self._get_matching_files(r'.*\.la$')
-        _ = self._get_matching_files(r'.*\.def$')
-        _ = self._get_matching_files(r'.*/__pycache__/.*')
-        _ = self._get_matching_files(r'.*\.pyc$')
+                extract_matching_set(regex, self.install_files_set)
+        # remove files from default ignored patterns
+        extract_matching_set(r'.*\.la$', self.install_files_set)
+        extract_matching_set(r'.*\.def$', self.install_files_set)
+        extract_matching_set(r'.*/__pycache__/.*', self.install_files_set)
+        extract_matching_set(r'.*\.pyc$', self.install_files_set)
 
     def _parse_specfile_general(self) -> None:
         """
@@ -462,7 +447,8 @@ class SrcPackage:
         for binpkg in self._packages:
             if 'files' in self._specs[binpkg]:
                 for regex in self._specs[binpkg]['files']:
-                    matching_set = self._get_matching_files(regex)
+                    matching_set = extract_matching_set(regex,
+                                                        self.install_files_set)
                     self._packages[binpkg].install_files.update(matching_set)
 
         # check that at least on file is present in each of the custom packages
