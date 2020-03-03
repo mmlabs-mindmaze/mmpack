@@ -114,7 +114,8 @@ class SrcPackage:
         if not self.licenses:
             self._default_license()
 
-        init_mmpack_build_hooks(self.name, get_host_arch_dist())
+        arch_dist = get_host_arch_dist()
+        init_mmpack_build_hooks(self.name, arch_dist, self.description)
 
     def pkgbuild_path(self) -> str:
         """
