@@ -12,6 +12,7 @@ from os import path
 from subprocess import Popen
 from threading import Thread
 from tempfile import mkdtemp
+from typing import Dict
 
 from . workspace import Workspace, get_local_install_dir
 from . binary_package import BinaryPackage
@@ -19,6 +20,7 @@ from . common import *
 from . file_utils import *
 from . hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from . mm_version import Version
+from . package_info import PackageInfo
 from . settings import PKGDATADIR
 from . syspkg_manager import get_syspkg_mgr
 from . mmpack_builddep import process_dependencies, general_specs_builddeps
@@ -47,27 +49,6 @@ def _get_install_prefix() -> str:
         return '/m'
 
     return '/run/mmpack'
-
-
-def _unpack_deps_version(item):
-    """
-    helper to allow simpler mmpack dependency syntax
-
-    expected full mmpack dependency syntax is:
-        <name>: [min_version, max_version]
-
-    this allows the additional with implicit 'any' as maximum:
-        <name>: min_version
-        <name>: any
-    """
-    try:
-        name, minv, maxv = item
-        return (name, Version(minv), Version(maxv))
-    except ValueError:
-        name, minv = item  # if that fails, let the exception be raised
-        minv = Version(minv)
-        maxv = Version('any')
-        return (name, minv, maxv)
 
 
 class SrcPackage:
@@ -163,8 +144,7 @@ class SrcPackage:
 
         popdir()
 
-    def _format_description(self, binpkg: BinaryPackage, pkgname: str,
-                            pkg_type: str = None):
+    def _format_description(self, pkg: PackageInfo, pkg_type: str = None):
         """
         Format BinaryPackage's description.
 
@@ -175,25 +155,22 @@ class SrcPackage:
         Raises:
             ValueError: the description is empty for custom packages
         """
-        try:
-            description = self._specs[pkgname]['description']
-        except KeyError:
-            description = None
+        description = pkg.description
 
-        if binpkg.name in (self.name, self.name + '-devel',
-                           self.name + '-doc', self.name + '-debug'):
-            binpkg.description = self.description
+        if pkg.name in (self.name, self.name + '-devel',
+                        self.name + '-doc', self.name + '-debug'):
+            pkg.description = self.description
             if description:
-                binpkg.description += '\n' + description
+                pkg.description += '\n' + description
         else:
             if not description and pkg_type == 'custom':
                 raise ValueError('Source package {0} has no description'
-                                 .format(pkgname))
+                                 .format(pkg.name))
             elif not description and pkg_type == 'library':
                 description = self.description + '\n'
                 description += 'automatically generated around SONAME '
                 description += self.name
-            binpkg.description = description
+            pkg.description = description
 
     def _remove_ignored_files(self):
         if 'ignore' in self._specs['general']:
@@ -236,21 +213,19 @@ class SrcPackage:
             elif key == 'ghost':
                 self.ghost = str2bool(value)
 
-    def _binpkg_get_create(self, binpkg_name: str,
-                           pkg_type: str = None) -> BinaryPackage:
+    def _pkginfo_get_create(self, name: str, pkgs: Dict[str, PackageInfo],
+                            pkg_type: str = None) -> PackageInfo:
         """
         Returns the newly create BinaryPackage if any
         """
-        if binpkg_name not in self._packages:
-            host_arch = get_host_arch_dist()
-            binpkg = BinaryPackage(binpkg_name, self.version, self.name,
-                                   host_arch, self.tag, self._spec_dir,
-                                   self.src_hash, self.ghost)
-            self._format_description(binpkg, binpkg_name, pkg_type)
-            self._packages[binpkg_name] = binpkg
-            dprint('created package ' + binpkg_name)
-            return binpkg
-        return self._packages[binpkg_name]
+        pkg = pkgs.get(name)
+        if not pkg:
+            # The package cannot be found in existing ones, let's add new one
+            pkg = PackageInfo(name)
+            self._format_description(pkg, pkg_type)
+            pkgs[name] = pkg
+
+        return pkg
 
     def _default_license(self) -> None:
         if self.ghost:
@@ -265,32 +240,6 @@ class SrcPackage:
             wrnmsg = 'Using file: "{}" as license by default' \
                      .format(license_file)
             dprint(wrnmsg)
-
-    def _parse_specfile_binpkgs(self) -> None:
-        """
-        create BinaryPackage skeleton entries foreach custom and default
-        entries.
-        """
-        host_arch = get_host_arch_dist()
-        sysdeps_key = 'sysdepends-' + get_host_dist()
-
-        # create skeleton for explicit packages
-        for pkg in self._specs.keys():
-            if pkg != 'general':
-                binpkg = BinaryPackage(pkg, self.version, self.name,
-                                       host_arch, self.tag, self._spec_dir,
-                                       self.src_hash, self.ghost)
-                self._format_description(binpkg, pkg)
-
-                if 'depends' in self._specs[pkg]:
-                    for dep in self._specs[pkg]['depends']:
-                        item = list(dep.items())[0]
-                        name, minv, maxv = _unpack_deps_version(item)
-                        binpkg.add_depend(name, minv, maxv)
-                if sysdeps_key in self._specs[pkg]:
-                    for dep in self._specs[pkg][sysdeps_key]:
-                        binpkg.add_sysdepend(dep)
-                self._packages[pkg] = binpkg
 
     def _fetch_unpack_syspkg_locally(self):
         """
@@ -439,52 +388,59 @@ class SrcPackage:
         self.install_files_set = set(list_files('.', exclude_dirs=True))
         popdir()
 
-    def _ventilate_custom_packages(self):
+    def _ventilate_custom_packages(self) -> Dict[str, PackageInfo]:
         """
         Ventilates files explicit in the specfile before giving them to the
         default target.
         """
-        self._parse_specfile_binpkgs()
+        dist = get_host_dist()
+        pkgs = {}
 
-        for binpkg in self._packages:
-            if 'files' in self._specs[binpkg]:
-                for regex in self._specs[binpkg]['files']:
-                    matching_set = extract_matching_set(regex,
-                                                        self.install_files_set)
-                    self._packages[binpkg].install_files.update(matching_set)
+        # create skeleton for explicit packages
+        for pkgname, pkgspecs in self._specs.items():
+            if pkgname == 'general':
+                continue
 
-        # check that at least on file is present in each of the custom packages
-        # raise an error if the described package was expecting one
-        # Note: meta-packages are empty and accepted
-        for pkgname, binpkg in self._packages.items():
-            if not binpkg.install_files and self._specs[pkgname].get('files'):
+            pkg = PackageInfo(pkgname)
+            pkg.init_from_specs(pkgspecs, dist, self.install_files_set)
+            self._format_description(pkg)
+
+            # check that at least on file is present in the custom package.
+            # Raise an error if the described package was expecting one.
+            # Note: meta-packages are empty and accepted
+            if not pkg.files and pkgspecs.get('files'):
                 errmsg = 'Custom package {0} is empty !'.format(pkgname)
                 raise FileNotFoundError(errmsg)
 
-    def _ventilate_pkg_create(self):
+            pkgs[pkgname] = pkg
+
+        return pkgs
+
+    def _ventilate_pkg_create(self, pkgs: Dict[str, PackageInfo]):
         """
         first ventilation pass (after custom packages): check amongst the
         remaining files if one of them would trigger the creation of a new
         package.  Eg. a dynamic library will be given its own binary package
         """
         for hook in MMPACK_BUILD_HOOKS:
-            pkgs = hook.get_dispatch(self.install_files_set)
-            for pkgname, files in pkgs.items():
-                pkg = self._binpkg_get_create(pkgname, 'library')
-                pkg.install_files.update(files)
+            hook_dispatch_data = hook.get_dispatch(self.install_files_set)
+            for pkgname, files in hook_dispatch_data.items():
+                pkg = self._pkginfo_get_create(pkgname, pkgs, 'library')
+                pkg.files.update(files)
                 self.install_files_set.difference_update(files)
 
-    def _get_fallback_package(self, bin_pkg_name: str) -> BinaryPackage:
+    def _get_fallback_pkginfo(self,
+                              pkgs: Dict[str, PackageInfo]) -> PackageInfo:
         """
         if a binary package is already created, use it
         if there is no binary package yet, try to fallback with a library pkg
         finally, create and fallback a binary package
         """
-        if bin_pkg_name in self._packages:
-            return self._packages[bin_pkg_name]
+        if self.name in pkgs:
+            return pkgs[self.name]
 
         libpkg = None
-        for pkgname in self._packages:
+        for pkgname in pkgs:
             if (pkgname.startswith('lib')
                     and not (pkgname.endswith('-devel')
                              or pkgname.endswith('-doc')
@@ -496,9 +452,9 @@ class SrcPackage:
                 libpkg = pkgname
         if libpkg:
             dprint('Return default package: ' + libpkg)
-            return self._binpkg_get_create(libpkg)
-        dprint('Return default package: ' + bin_pkg_name)
-        return self._binpkg_get_create(bin_pkg_name)
+            return self._pkginfo_get_create(libpkg, pkgs)
+        dprint('Return default package: ' + self.name)
+        return self._pkginfo_get_create(self.name, pkgs)
 
     def _attach_copyright(self, binpkg: BinaryPackage):
         """
@@ -545,6 +501,20 @@ class SrcPackage:
         # add a copy of the copyright to each package
         binpkg.install_files.add(copyright_file)
 
+    def _create_binpkgs_from_pkginfos(self, pkgs: Dict[str, PackageInfo]):
+        host_arch = get_host_arch_dist()
+        for pkg in pkgs.values():
+            pkg.version = self.version
+            pkg.ghost = self.ghost
+            binpkg = BinaryPackage(pkginfo=pkg,
+                                   source=self.name,
+                                   arch=host_arch,
+                                   tag=self.tag,
+                                   spec_dir=self._spec_dir,
+                                   src_hash=self.src_hash)
+            self._attach_copyright(binpkg)
+            self._packages[pkg.name] = binpkg
+
     def ventilate(self):
         """
         Ventilate files.
@@ -573,37 +543,35 @@ class SrcPackage:
             # working with virtual packages
             iprint('No installed files found! No package will be created.')
 
-        self._ventilate_custom_packages()
-        self._ventilate_pkg_create()
+        pkgs = self._ventilate_custom_packages()
+        self._ventilate_pkg_create(pkgs)
 
         tmpset = set()
         for filename in self.install_files_set:
             if is_binary(filename) or is_exec_manpage(filename):
-                pkg = self._binpkg_get_create(bin_pkg_name)
+                pkg = self._pkginfo_get_create(bin_pkg_name, pkgs)
             elif is_documentation(filename) or is_doc_manpage(filename):
-                pkg = self._binpkg_get_create(doc_pkg_name)
+                pkg = self._pkginfo_get_create(doc_pkg_name, pkgs)
             elif is_devel(filename):
-                pkg = self._binpkg_get_create(devel_pkg_name)
+                pkg = self._pkginfo_get_create(devel_pkg_name, pkgs)
             elif is_debugsym(filename):
-                pkg = self._binpkg_get_create(debug_pkg_name)
+                pkg = self._pkginfo_get_create(debug_pkg_name, pkgs)
             else:
                 # skip this. It will be put in a default fallback
                 # package at the end of the ventilation process
                 continue
 
-            pkg.install_files.add(filename)
+            pkg.files.add(filename)
             tmpset.add(filename)
 
         self.install_files_set.difference_update(tmpset)
 
         # deal with the remaining files:
         if self.install_files_set and not self.ghost:
-            pkg = self._get_fallback_package(bin_pkg_name)
-            pkg.install_files.update(self.install_files_set)
+            pkg = self._get_fallback_pkginfo(pkgs)
+            pkg.files.update(self.install_files_set)
 
-        for binpkg in self._packages.values():
-            self._attach_copyright(binpkg)
-
+        self._create_binpkgs_from_pkginfos(pkgs)
         popdir()  # local-install dir
 
     def _generate_manifest(self) -> str:

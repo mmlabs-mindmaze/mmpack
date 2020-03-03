@@ -51,26 +51,40 @@ class TestSrcPackageClass(unittest.TestCase):
         ref_build_depends = ['libmyotherlib-devel', 'libsomeotherlib-devel']
         self.assertEqual(sorted(test_pkg.build_depends), sorted(ref_build_depends))
 
+        test_pkg.install_files_set = {
+            '/full-binary-package-file-1',
+            '/full-binary-package-file-2',
+            '/full-binary-package-file-3',
+            'foo/full-binary-package-file-1',
+            'bar/full-binary-package-file-2',
+            'baz/full-binary-package-file-3',
+            'bar/custom-package-file-1',
+            'bar/custom-package-file-2',
+            'bar/custom-package-regex/1',
+            'foo/custom-package-regex/2',
+            'bar/custom-package-regex/3',
+        }
+
         # ignore list is not tested here: they are removed from the install list
         # which means that doing a full install is necessary
 
         # test the overloaded and custom packages
         # This does not include the implicit packages
-        test_pkg._parse_specfile_binpkgs()
+        pkgs = test_pkg._ventilate_custom_packages()
         ref_pkg_list_name = ['full', 'custom-package']
-        test_pkg_list_name = test_pkg._packages.keys()
-        self.assertEqual(len(test_pkg._packages), 2)
+        test_pkg_list_name = pkgs.keys()
+        self.assertEqual(len(pkgs), 2)
         self.assertEqual(sorted(ref_pkg_list_name), sorted(test_pkg_list_name))
 
         # test the customized packages further
-        full = test_pkg._packages['full']
-        custom = test_pkg._packages['custom-package']
+        full = pkgs['full']
+        custom = pkgs['custom-package']
 
-        self.assertEqual(len(full._dependencies['depends']), 2)
+        self.assertEqual(len(full.deplist), 2)
         self.assertRegex(full.description,
                          r'This is the fullest mmpack specfile possible.\n\nThis should follow.*')
 
-        self.assertEqual(len(custom._dependencies['sysdepends']), 2)
-        self.assertEqual(len(custom._dependencies['depends']), 2)
+        self.assertEqual(len(custom.sysdeps), 2)
+        self.assertEqual(len(custom.deplist), 2)
         self.assertRegexpMatches(custom.description,
                                  r'This should overload .*')

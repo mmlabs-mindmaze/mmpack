@@ -23,29 +23,33 @@ class BinaryPackage:
     Binary package class
     """
 
-    def __init__(self, name: str, version: Version, source: str, arch: str,
-                 tag: str, spec_dir: str, src_hash: str, ghost: bool):
+    def __init__(self, pkginfo: PackageInfo, source: str, arch: str,
+                 tag: str, spec_dir: str, src_hash: str):
         # pylint: disable=too-many-arguments
-        self.name = name
-        self.version = version
+        self.name = pkginfo.name
+        self.version = pkginfo.version
         self.source = source
         self.arch = arch
         self.tag = tag
         self.spec_dir = spec_dir
         self.src_hash = src_hash
         self.pkg_path = None
-        self.ghost = ghost
+        self.ghost = pkginfo.ghost
 
-        self.description = ''
+        self.description = pkginfo.description
         # * System dependencies are stored as opaque strings.
         #   Those are supposed to be handles by system tools,
         #   => format is a set of strings.
         # * mmpack dependencies are expressed as the triplet
         #   dependency name, min and max version (inclusive)
         #   => format is a dict {depname: [min, max], ...}
-        self._dependencies = {'sysdepends': set(), 'depends': {}}
+        self._dependencies = {'sysdepends': pkginfo.sysdeps, 'depends': {}}
         self.provides = {}
-        self.install_files = set()
+        self.install_files = pkginfo.files
+
+        # Initialize dependencies mapping
+        for dep, minver, maxver in pkginfo.deplist:
+            self.add_depend(dep, minver, maxver)
 
     def licenses_dir(self):
         """
@@ -196,6 +200,7 @@ class BinaryPackage:
         pkginfo.provides = self.provides
         pkginfo.version = self.version
         pkginfo.ghost = self.ghost
+        pkginfo.description = self.description
         return pkginfo
 
     def gen_provides(self):
