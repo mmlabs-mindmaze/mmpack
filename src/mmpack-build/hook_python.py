@@ -110,8 +110,8 @@ class MMPackBuildHook(BaseHook):
     """
     Hook tracking python module used and exposed
     """
-    def __init__(self, srcname: str, host_archdist: str):
-        super().__init__(srcname, host_archdist)
+    def __init__(self, srcname: str, host_archdist: str, description: str):
+        super().__init__(srcname, host_archdist, description)
         self._mmpack_py_provides = None
 
     def _get_mmpack_provides(self) -> ProvideList:
