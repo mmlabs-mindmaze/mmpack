@@ -14,7 +14,7 @@ import platform
 
 from hashlib import sha256
 from subprocess import PIPE, run
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Set
 
 import urllib3
 import yaml
@@ -568,3 +568,22 @@ def str2bool(value: str) -> bool:
         return False
 
     raise ValueError('"{}" does not represent a boolean value'.format(value))
+
+
+def extract_matching_set(pcre: str, str_set: Set[str]) -> Set[str]:
+    """
+    given some pcre, get the set of matching string from str_set.
+    Those matching are removed from this set given in argument
+
+    Args:
+        pcre: regex to test
+        str_set: set of string to update
+
+    Return:
+        The set of string in str_set matching pcre argument
+
+    """
+    matching_re = re.compile(pcre)
+    matching_set = {f for f in str_set if matching_re.match(f)}
+    str_set.difference_update(matching_set)
+    return matching_set
