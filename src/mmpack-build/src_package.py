@@ -470,9 +470,9 @@ class SrcPackage:
         # check that at least on file is present in each of the custom packages
         # raise an error if the described package was expecting one
         # Note: meta-packages are empty and accepted
-        for binpkg in self._packages:
-            if not self._packages[binpkg] and self._packages[binpkg]['files']:
-                errmsg = 'Custom package {0} is empty !'.format(binpkg)
+        for pkgname, binpkg in self._packages.items():
+            if not binpkg.install_files and 'files' in self._specs[pkgname]:
+                errmsg = 'Custom package {0} is empty !'.format(pkgname)
                 raise FileNotFoundError(errmsg)
 
     def _ventilate_pkg_create(self):
