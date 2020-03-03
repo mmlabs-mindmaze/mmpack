@@ -51,12 +51,28 @@ class TestSrcPackageClass(unittest.TestCase):
         ref_build_depends = ['libmyotherlib-devel', 'libsomeotherlib-devel']
         self.assertEqual(sorted(test_pkg.build_depends), sorted(ref_build_depends))
 
+        test_pkg.install_files_set = {
+            '/full-binary-package-file-1',
+            '/full-binary-package-file-2',
+            '/full-binary-package-file-3',
+            'foo/full-binary-package-file-1',
+            'bar/full-binary-package-file-2',
+            'baz/full-binary-package-file-3',
+            'bar/custom-package-file-1',
+            'bar/custom-package-file-2',
+            'bar/custom-package-regex/1',
+            'foo/custom-package-regex/2',
+            'bar/custom-package-regex/3',
+        }
+
         # ignore list is not tested here: they are removed from the install list
         # which means that doing a full install is necessary
 
         # test the overloaded and custom packages
         # This does not include the implicit packages
-        test_pkg._parse_specfile_binpkgs()
+        pkgs = test_pkg._ventilate_custom_packages()
+        test_pkg._create_binpkgs_from_pkginfos(pkgs)
+
         ref_pkg_list_name = ['full', 'custom-package']
         test_pkg_list_name = test_pkg._packages.keys()
         self.assertEqual(len(test_pkg._packages), 2)
