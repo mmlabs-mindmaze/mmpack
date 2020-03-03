@@ -10,10 +10,10 @@ from glob import glob
 from os.path import isfile
 from typing import List, Dict
 
-from . base_hook import PackageInfo
 from . common import *
 from . hooks_loader import MMPACK_BUILD_HOOKS
 from . mm_version import Version
+from . package_info import PackageInfo
 from . workspace import get_staging_dir
 
 
