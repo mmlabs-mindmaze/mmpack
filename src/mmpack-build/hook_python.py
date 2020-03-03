@@ -11,9 +11,10 @@ from collections import namedtuple
 from glob import glob
 from typing import Set, Dict, List
 
-from . base_hook import BaseHook, PackageInfo
+from . base_hook import BaseHook
 from . common import shell, Assert
 from . file_utils import is_python_script
+from . package_info import PackageInfo
 from . provide import Provide, ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
 
