@@ -17,15 +17,18 @@ the following fields must be present:
 ## Index of source packages
 
 The index of source packages has the same role as the index of binary packages
-but for the source packages provided by the repository. It is a YAML file called
-source-index. Each entry describes a source package, possesses a key equals to
-the sha256 of the source and is composed of the following fields:
+but for the source packages provided by the repository. It is a file called
+source-index. Each source package is described thanks to a set of keys and
+values:
 
+ * sha256: SHA256 of the source package.
  * name: name of the source package
  * filename: path on the repository server where the source package can be
    downloaded from
  * size: size in Bytes of the package to download
  * version: version of the source package
+
+In the file each description of package is separated by an empty line.
 
 ## file/package database
 
