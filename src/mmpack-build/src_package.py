@@ -527,7 +527,8 @@ class SrcPackage:
             raise RuntimeError('FATAL: license key is mandatory')
 
         for entry in self.licenses:
-            tmp = os.path.join(PKGDATADIR, 'common-licenses', entry)
+            native_pkgdatadir = convert_path_native(PKGDATADIR)
+            tmp = os.path.join(native_pkgdatadir, 'common-licenses', entry)
             if os.path.isfile(tmp):
                 # TODO: for known licenses, create a dangling symlink to
                 # mmpack common-licenses instead of copying the full file
