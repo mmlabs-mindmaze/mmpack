@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ca3f1c4_1a4b89ab",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 586,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-04T20:15:27Z",
+      "side": 1,
+      "message": "also, please ensure you\u0027re using the call that you want wrt re.match() vs re.fullmatch()",
+      "revId": "5d5f53a268891c4b1d279c501893d8e66c22f7aa",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8982516_5e532aff",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-04T20:15:27Z",
+      "side": 1,
+      "message": "return {f for f in str_set if not matching_re.match(f)}",
+      "range": {
+        "startLine": 587,
+        "startChar": 0,
+        "endLine": 589,
+        "endChar": 23
+      },
+      "revId": "5d5f53a268891c4b1d279c501893d8e66c22f7aa",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
