@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e96b5432_21609ac6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-04T20:22:55Z",
+      "side": 1,
+      "message": "If I get it correctly, the issue is that the packages handled by the hooks don\u0027t have a description. Correct ?\nIf so, please state the bug and the fix at least in the commit message.\n... and if not, well what\u0027s this for ?",
+      "revId": "0d88d5d6f5cd68615d8c699121853f418bf5f4f2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
