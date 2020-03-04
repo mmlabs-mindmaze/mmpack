@@ -135,6 +135,19 @@ int binindex_sorted_foreach(struct binindex * binindex,
                             int (* cb)(struct mmpkg*, void*),
                             void * data);
 
+
+struct srcpkg {
+	mmstr const * name;
+	mmstr const * path;
+	mmstr const * sha256;
+	mmstr const * version;
+	size_t size;
+};
+
+struct srcindex {
+	
+};
+
 struct install_state {
 	struct indextable idx;
 	int pkg_num;
