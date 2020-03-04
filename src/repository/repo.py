@@ -93,6 +93,42 @@ def _info_mpk(pkg_path: str) -> dict:
         return yaml.safe_load(buf)
 
 
+def file_serialize(index: dict, filename: str):
+    """
+    This function serializes a dictionnary into a flat structure in a file.
+
+    Args:
+        index: dictionary to serialize.
+        filename: file in which to serialize the dictionary.
+    """
+    with open(filename, 'w+', newline='\n') as outfile:
+        for value in index.values():
+            lines = ['{}: {}\n'.format(k, v) for k, v in value.items()]
+            outfile.write(''.join(lines) + '\n')
+
+
+def file_load(filename: str) -> dict:
+    """
+    This functions loads the contain of a file under the shape of a dictionary.
+
+    Args:
+        filename: file to read and to transform into a dictionary.
+    """
+    srcindex = {}
+    entry = {}
+
+    for line in open(filename, 'r'):
+        if not line.strip():
+            sha = entry.get('sha256')
+            srcindex[sha] = entry.copy()
+            continue
+
+        key, value = line.split(': ')
+        entry[key] = value.rstrip('\n')
+
+    return srcindex
+
+
 class Repo:
     """
     This class model a repository.
@@ -144,7 +180,7 @@ class Repo:
         if self.binindex is None:
             self.binindex = dict()
         # srcindex: dictionary of the sources present on the database
-        self.srcindex = yaml_load(srcindex_file)
+        self.srcindex = file_load(srcindex_file)
         if self.srcindex is None:
             self.srcindex = dict()
 
@@ -252,7 +288,7 @@ class Repo:
                     sure that the upload will be a sucess.
         """
         srcindex_file = os.path.join(self.working_dir, RELPATH_SOURCE_INDEX)
-        self.yaml_serialize(cp_srcind, srcindex_file, True)
+        file_serialize(cp_srcind, srcindex_file)
         binindex_file = os.path.join(self.working_dir, RELPATH_BINARY_INDEX)
         self.yaml_serialize(cp_binind, binindex_file, True)
 
