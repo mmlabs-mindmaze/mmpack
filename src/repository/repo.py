@@ -93,6 +93,48 @@ def _info_mpk(pkg_path: str) -> dict:
         return yaml.safe_load(buf)
 
 
+def file_serialize(index: dict, filename: str):
+    """
+    This function serializes a dictionnary into a flat structure in a file.
+
+    Args:
+        index: dictionary to serialize.
+        filename: file in which to serialize the dictionary.
+    """
+    with open(filename, 'w+', newline='\n') as outfile:
+        for key, value in index.items():
+            outfile.write('sha256: ' + key + '\n')
+            for subkey, subvalue in value.items():
+                outfile.write(subkey + ': ' + subvalue + '\n')
+
+            outfile.write('\n')
+
+
+def file_load(filename: str) -> dict:
+    """
+    This functions loads the contain of a file under the shape of a dictionary.
+
+    Args:
+        filename: file to read and to transform into a dictionary.
+    """
+    ret = dict()
+    sub_dict = dict()
+    key_sha = None
+
+    with open(filename, 'r') as infile:
+        for line in infile:
+            if line == '\n':
+                ret[key_sha] = sub_dict
+                sub_dict.clear()
+            else:
+                key_value = line.splitlines(': ')
+                if key_value[0] == 'sha256':
+                    key_sha = key_value[1]
+                else:
+                    sub_dict[key_value[0]] = key_value[1]
+        return ret
+
+
 class Repo:
     """
     This class model a repository.
@@ -144,7 +186,7 @@ class Repo:
         if self.binindex is None:
             self.binindex = dict()
         # srcindex: dictionary of the sources present on the database
-        self.srcindex = yaml_load(srcindex_file)
+        self.srcindex = file_load(srcindex_file)
         if self.srcindex is None:
             self.srcindex = dict()
 
@@ -252,7 +294,7 @@ class Repo:
                     sure that the upload will be a sucess.
         """
         srcindex_file = os.path.join(self.working_dir, RELPATH_SOURCE_INDEX)
-        self.yaml_serialize(cp_srcind, srcindex_file, True)
+        file_serialize(cp_srcind, srcindex_file)
         binindex_file = os.path.join(self.working_dir, RELPATH_BINARY_INDEX)
         self.yaml_serialize(cp_binind, binindex_file, True)
 
