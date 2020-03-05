@@ -393,39 +393,6 @@ def yaml_load(filename: str):
     return yaml.load(open(filename, 'rb').read(), Loader=yaml.BaseLoader)
 
 
-def convert_path_native(path: str) -> str:
-    """
-    helper: permits to convert a path in the way the natif system would do
-    """
-
-    if get_host_dist() == 'windows':
-        return shell(['cygpath', '-w', path], log=False).strip()
-    else:
-        return path
-
-
-def concatenate_unix(head_path: str = "", tail_path: str = "") -> str:
-    """
-    helper: permits to concatenate two paths to form a correct one
-    (specially on windows, mingwin automatically writes C:/msys64 at
-    the beginning of every path, so a simple concatenation would give
-    C:/msys64head_pathC:/msys64tail_path)
-    """
-
-    if not head_path:
-        return tail_path
-
-    if get_host_dist() == 'windows':
-        head_path = shell(['cygpath', '-u', head_path], log=False).strip()
-        if tail_path:
-            tail_path = shell(['cygpath', '-u', tail_path], log=False).strip()
-
-    if tail_path and tail_path.startswith('/'):
-        tail_path = tail_path[1:]
-
-    return os.path.join(head_path, tail_path)
-
-
 class Assert(AssertionError):
     """
     Wrapper over AssertionError which also logs the message as an error.
