@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "861913c8_aeb39c4b",
+        "filename": "src/mmpack-build/meson.build",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-05T14:13:44Z",
+      "side": 1,
+      "message": "do we still need those ?\nif not, please remove them\n\nalso, you don\u0027t seem to have kept them in the Makefile",
+      "revId": "77436c859db4b446fb83d2cbc474f53b074505de",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1bbd0128_9ff88f4d",
+        "filename": "src/mmpack-build/settings.py.in",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-05T14:13:44Z",
+      "side": 1,
+      "message": "\"cwd\" is how we usually call this",
+      "range": {
+        "startLine": 9,
+        "startChar": 4,
+        "endLine": 9,
+        "endChar": 12
+      },
+      "revId": "77436c859db4b446fb83d2cbc474f53b074505de",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "87698139_b931c99d",
+        "filename": "src/mmpack-build/settings.py.in",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-05T14:13:44Z",
+      "side": 1,
+      "message": "please define this just above its usage, put the comment to a docstring, and rename the function to something nice.\n_relative_to_abspath() ?",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 61
+      },
+      "revId": "77436c859db4b446fb83d2cbc474f53b074505de",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "386b8572_242f174e",
+        "filename": "src/mmpack-build/settings.py.in",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-05T14:13:44Z",
+      "side": 1,
+      "message": "why isn\u0027t this os.path.abspath() ?",
+      "revId": "77436c859db4b446fb83d2cbc474f53b074505de",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
