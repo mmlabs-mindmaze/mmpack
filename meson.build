@@ -11,6 +11,12 @@ subdir('config/autotools-compat')
 
 if host_machine.system() == 'windows'
     add_project_arguments('-DWIN32_LEAN_AND_MEAN', language : 'c')
+
+    # Store in config the relative path from installed bindir to installed libexecdir
+    bindir = get_option('prefix') / get_option('bindir')
+    libexecdir = get_option('prefix') / get_option('libexecdir')
+    r = run_command('realpath', '-m', '--relative-to=' + bindir, libexecdir)
+    config.set_quoted('BIN_TO_LIBEXECDIR', r.stdout().strip())
 endif
 
 # meson modules

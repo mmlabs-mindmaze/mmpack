@@ -2,6 +2,8 @@ eol=
 ACLOCAL_AMFLAGS = -I m4 --install
 EXTRA_DIST = autogen.sh TODO.md LICENSE
 
+bin_to_libexecdir=`realpath -m --relative-to=$(bindir) $(libexecdir)`
+
 AM_CPPFLAGS = \
 	-I$(srcdir)/src/mmpack \
 	-DSRCDIR=\"$(srcdir)\" \
@@ -9,6 +11,7 @@ AM_CPPFLAGS = \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
 	-DEXEEXT=\"$(EXEEXT)\" \
 	-DPKGDATADIR=\"$(pkgdatadir)\" \
+	-DBIN_TO_LIBEXECDIR=\"$(bin_to_libexecdir)\" \
 	$(CHECK_CPPFLAGS) \
 	$(LIBARCHIVE_CPPFLAGS) \
 	$(eol)

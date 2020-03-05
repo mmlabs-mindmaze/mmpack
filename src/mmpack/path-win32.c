@@ -12,6 +12,7 @@
 #include "mmstring.h"
 #include "path-win32.h"
 #include "utils.h"
+#include "xx-alloc.h"
 
 
 /**
@@ -71,4 +72,51 @@ void conv_env_pathlist_win32_to_posix(const char* envname)
 	posix_value = conv_pathlist_win32_to_posix(envvalue);
 	mm_setenv(envname, posix_value, MM_ENV_OVERWRITE);
 	mmstr_free(posix_value);
+}
+
+
+/**
+ * get_relocated_path() - get relocated absolute path
+ * @rel_path_from_executable: path relative to executable
+ *
+ * Return: the relocated path. When not needed, the returned string must be
+ * freed
+ */
+LOCAL_SYMBOL
+char* get_relocated_path(const char* rel_path_from_executable)
+{
+	DWORD ret;
+	DWORD len = 128;
+	WCHAR* wexepath = NULL;
+	int u8_len, idx;
+	char* abspath_u8;
+
+	// Get absolute path of current executable in UTF-16
+	do {
+		len *= 2;
+		wexepath = xx_realloc(wexepath, len);
+		ret = GetModuleFileNameW(NULL, wexepath, len);
+	} while (ret == len);
+
+	// Get the length of the previous path converted in UTF-8
+	u8_len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
+	                             wexepath, -1, NULL, 0, NULL, NULL);
+
+	// Get executable path in UTF-8. Reserve the size to append the rel_path
+	abspath_u8 = xx_malloc(u8_len + 1 + strlen(rel_path_from_executable));
+	WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, wexepath, -1,
+	                    abspath_u8, u8_len, NULL, NULL);
+
+	free(wexepath);
+
+	// position u8_len to the beginning of the basename
+	for (idx = u8_len; idx > 0; idx--) {
+		if (is_path_separator(abspath_u8[idx-1]))
+			break;
+	}
+
+	// Append the rel_path
+	strcpy(abspath_u8 + idx, rel_path_from_executable);
+
+	return abspath_u8;
 }
