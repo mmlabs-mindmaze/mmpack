@@ -21,7 +21,37 @@
 
 #include "mmpack-run.h"
 
-#define MOUNT_PREFIX_BIN LIBEXECDIR "/mmpack/mount-mmpack-prefix"EXEEXT
+#if !defined (_WIN32)
+
+static
+char* get_mount_prefix_bin(void)
+{
+	return LIBEXECDIR "/mmpack/mount-mmpack-prefix" EXEEXT;
+}
+
+#else // _WIN32
+
+static char* mount_prefix_bin = NULL;
+
+
+MM_DESTRUCTOR(mount_prefix_bin_str)
+{
+	free(mount_prefix_bin);
+}
+
+#define REL_MOUNT_PREFIX_BIN \
+	BIN_TO_LIBEXECDIR "/mmpack/mount-mmpack-prefix" EXEEXT
+
+static
+char* get_mount_prefix_bin(void)
+{
+	if (!mount_prefix_bin)
+		mount_prefix_bin = get_relocated_path(REL_MOUNT_PREFIX_BIN);
+
+	return mount_prefix_bin;
+}
+
+#endif /* if !defined (_WIN32) */
 
 /**
  * mmpack_run() - main function for the command to run commands
@@ -78,7 +108,7 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// new_argv contains: 1 command, 1 prefix, nargs arguments from
 	// argv and one terminating NULL => length = nargs+3
 	new_argv = alloca((nargs+3) * sizeof(*new_argv));
-	new_argv[0] = MOUNT_PREFIX_BIN;
+	new_argv[0] = get_mount_prefix_bin();
 	new_argv[1] = ctx->prefix;
 
 	// args is terminated by NULL (either from argv or default_argv) and

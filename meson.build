@@ -33,6 +33,12 @@ foreach p : python3_required_modules
     endif
 endforeach
 
+# Store in config the relative path from installed bindir to installed libexecdir
+bindir = get_option('prefix') / get_option('bindir')
+libexecdir = get_option('prefix') / get_option('libexecdir')
+r = run_command('realpath', '-m', '--relative-to=' + bindir, libexecdir)
+config.set_quoted('BIN_TO_LIBEXECDIR', r.stdout().strip())
+
 # write config file
 build_cfg = 'config.h'  # named as such to match autotools build system
 configure_file(output : build_cfg, configuration : config)
