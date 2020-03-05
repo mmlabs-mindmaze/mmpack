@@ -66,6 +66,30 @@
     },
     {
       "key": {
+        "uuid": "8f6a4d34_cabe17e5",
+        "filename": "src/mmpack-build/common.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-05T10:03:30Z",
+      "side": 1,
+      "message": "True\nMy mistake.\n\nHowever, looking at you comment on the \u0027_\u0027 we might just stop returning stuff altogether",
+      "parentUuid": "5e103ecc_87829feb",
+      "range": {
+        "startLine": 587,
+        "startChar": 0,
+        "endLine": 589,
+        "endChar": 23
+      },
+      "revId": "5d5f53a268891c4b1d279c501893d8e66c22f7aa",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f6a07078_78aa4d23",
         "filename": "src/mmpack-build/src_package.py",
         "patchSetId": 3
