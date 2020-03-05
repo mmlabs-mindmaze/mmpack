@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d71e729e_74628f69",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-05T17:58:06Z",
+      "side": 1,
+      "message": "Simpler:\n\nsrcindex \u003d {}\nentry \u003d {}\n\nfor line in open(filename, \u0027r\u0027):\n    if not line.strip():\n        sha256 \u003d entry.pop(\u0027sha256\u0027)\n        srcindex[sha256] \u003d entry\n        continue\n\n    key, val \u003d line.strip().split(\u0027: \u0027)\n    entry[key] \u003d val\n\nreturn srcindex",
+      "range": {
+        "startLine": 120,
+        "startChar": 4,
+        "endLine": 136,
+        "endChar": 0
+      },
+      "revId": "102de1b50fe7fd9f1d05fc6b45b96c712957d4dc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
