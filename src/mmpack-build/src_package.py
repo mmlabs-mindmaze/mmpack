@@ -402,9 +402,7 @@ class SrcPackage:
         # Use build script provided in mmpack installed data folder unless
         # it is custom build system. The script is then obtained from
         # mmpack folder in the unpacked sources.
-        build_script = '{0}/build-{1}'\
-                       .format(convert_path_native(PKGDATADIR),
-                               self.build_system)
+        build_script = '{0}/build-{1}'.format(PKGDATADIR, self.build_system)
         if self.build_system == 'custom':
             build_script = 'mmpack/build'
 

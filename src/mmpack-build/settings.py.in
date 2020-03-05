@@ -3,7 +3,10 @@ global system variables helper
 """
 
 import os
-from . common import concatenate_unix
+
+def _abspath_of_relpath_from_this_file(rel_path: str):
+    this_dir = os.path.abspath(os.path.dirname(__file__))
+    return os.path.realpath(os.path.join(this_dir, rel_path))
 
 try:
     CFG_HOME = os.environ['XDG_CONFIG_HOME']
@@ -18,10 +21,13 @@ DPKG_METADATA_PREFIX = DPKG_PREFIX + '/info'
 PACMAN_PREFIX = '\\var\\lib\\pacman'
 
 # variables taken from autotools
-_MMPACK_TEST_PREFIX = os.environ.get('_MMPACK_TEST_PREFIX', '')
 EXEEXT = r'@exeext@'
 
-PKGDATADIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@pkgdatadir@')  # noqa
-LIBEXECDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@libexecdir@')  # noqa
-BINDIR = concatenate_unix(_MMPACK_TEST_PREFIX, r'@bindir@')  # noqa
+# Get absolute path of important installed dirs. Those are stored relative to
+# the path of this file (settings.py) as installed. This makes the installation
+# of mmpack-build relocalizable
+PKGDATADIR = _abspath_of_relpath_from_this_file(r'@rel_pkgdatadir@')
+LIBEXECDIR = _abspath_of_relpath_from_this_file(r'@rel_libexecdir@')
+BINDIR = _abspath_of_relpath_from_this_file(r'@rel_bindir@')
+
 PACKAGE_VERSION = r'@package_version@'

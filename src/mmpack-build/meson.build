@@ -35,11 +35,27 @@ mmpack_build_sources = files(
         'xdg.py',
 )
 
+mmpackbuilddir = python.get_install_dir() / 'mmpackbuild'
+
+bindir = get_option('prefix') / get_option('bindir')
+r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, bindir)
+rel_bindir = r.stdout().strip()
+
+libexecdir = get_option('prefix') / get_option('libexecdir')
+r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, libexecdir)
+rel_libexecdir = r.stdout().strip()
+
+pkgdatadir = get_option('prefix') +'/'+ get_option('datadir') + '/mmpack'
+r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, pkgdatadir)
+rel_pkgdatadir = r.stdout().strip()
+
 config_data = configuration_data({
-    'bindir' :  get_option('prefix') + '/' + get_option('bindir'),
-    'libexecdir' : get_option('prefix') + '/' + get_option('libexecdir'),
-    'mmpackbuilddir' : get_option('prefix') + '/' + get_option('datadir') + '/mmpack/python',
-    'pkgdatadir' : get_option('prefix') + '/' + get_option('datadir') + '/mmpack',
+    'bindir' :  bindir,
+    'libexecdir' : libexecdir,
+    'pkgdatadir' : pkgdatadir,
+    'rel_bindir' :  rel_bindir,
+    'rel_libexecdir' : rel_libexecdir,
+    'rel_pkgdatadir' : rel_pkgdatadir,
     'python_install_dir' : python.get_install_dir(),
     'package_version' : meson.project_version(),
     'exeext' : exeext,
