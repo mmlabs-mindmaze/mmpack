@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "434eeeee_66c352d5",
+        "filename": "src/mmpack-build/hook_python.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-05T06:51:22Z",
+      "side": 1,
+      "message": "This is overkill, and not done in the other hooks.\nYou\u0027re literally replacing a single line of code with another single (granted shorter) other line of code. It just is not worth it.",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 15
+      },
+      "revId": "68a74aac3475c241e688ebf20f91e554a3d89167",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "123ae442_36ba30b9",
+        "filename": "src/mmpack-build/hook_sharedlib.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-05T06:51:22Z",
+      "side": 1,
+      "message": "why do you need to copy here ?",
+      "range": {
+        "startLine": 118,
+        "startChar": 41,
+        "endLine": 118,
+        "endChar": 46
+      },
+      "revId": "68a74aac3475c241e688ebf20f91e554a3d89167",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
