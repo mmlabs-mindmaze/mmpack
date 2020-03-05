@@ -260,9 +260,9 @@ mmpack_check_sysdep_LDADD = \
 # BEFORE the sed call
 %.py : %.py.in Makefile
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
-	$(AM_V_GEN)$(SED) -e 's,@pkgdatadir[@],$(pkgdatadir),g' \
-		-e 's,@libexecdir[@],$(libexecdir),g' \
-		-e 's,@bindir[@],$(bindir),g' \
+	$(AM_V_GEN)$(SED) -e 's,@rel_pkgdatadir[@],$(shell realpath --relative-to=$(mmpackbuilddir) $(pkgdatadir)),g' \
+		-e 's,@rel_libexecdir[@],$(shell realpath --relative-to=$(mmpackbuilddir) $(libexecdir)),g' \
+		-e 's,@rel_bindir[@],$(shell realpath --relative-to=$(mmpackbuilddir) $(bindir)),g' \
 		-e 's,@package_version[@],$(PACKAGE_VERSION),g' \
 		-e 's,@exeext[@],$(EXEEXT),g' < $< > $@
 
