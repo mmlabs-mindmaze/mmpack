@@ -203,7 +203,12 @@ class MMPackBuildHook(BaseHook):
             try:
                 info = _parse_py3_filename(file)
                 mmpack_pkgname = _mmpack_pkg_from_pyimport_name(info.pyname)
-                data.assign_to_pkg(mmpack_pkgname, {file})
+                pkg = data.assign_to_pkg(mmpack_pkgname, {file})
+                if pkg.description:
+                    continue
+
+                pkg.description = '{}\nThis contains the python3 package {}'\
+                                  .format(self._src_description, info.pyname)
             except FileNotFoundError:
                 pass
 

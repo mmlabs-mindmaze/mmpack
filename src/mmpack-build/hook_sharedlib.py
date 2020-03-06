@@ -124,7 +124,11 @@ class MMPackBuildHook(BaseHook):
                 so_filename = os.path.dirname(file) + '/' + soname
                 libfiles = {file, so_filename}
 
-                data.assign_to_pkg(binpkgname, libfiles)
+                pkg = data.assign_to_pkg(binpkgname, libfiles)
+                if not pkg.description:
+                    pkg.description = self._src_description + '\n'
+                    pkg.description += 'automatically generated around SONAME '
+                    pkg.description += soname
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
