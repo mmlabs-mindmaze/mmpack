@@ -8,6 +8,7 @@ strings
 """
 
 import re
+from gettext import GNUTranslations
 
 from . base_hook import BaseHook
 from . package_info import DispatchData
@@ -35,7 +36,6 @@ class MMPackBuildHook(BaseHook):
               same files, which will prevent to coinstall those two packages
               (which is the guarantee for a smooth transition).
         """
-        locales_re = re.compile(r'(usr/|mingw64/)?share/locale/.*')
         locales = {f for f in data.unassigned_files if locales_re.match(f)}
         if not locales:
             return
@@ -44,3 +44,23 @@ class MMPackBuildHook(BaseHook):
         if not pkg.description:
             pkg.description = self._src_description + \
                               '\nThis package the translation files.'
+
+    def update_provides(self, pkg: PackageInfo,
+                        specs_provides: Dict[str, Dict]):
+        mo_files = [f for f in 
+        msgid = {}
+
+        for filename in pkg.files:
+            if not filename.enswith('.mo'):
+                continue
+
+            # Try opening the file as GNU mo file. In case of OSError failure,
+            # this is the wrong file type. Then just ignore
+            try:
+                translation = GNUTranslations(open(filename, 'rb'))
+            except OSError:
+                continue
+
+            msgid            
+
+        pkg.provides['locales'] = {}
