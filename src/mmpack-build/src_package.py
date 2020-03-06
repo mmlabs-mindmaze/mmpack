@@ -144,7 +144,7 @@ class SrcPackage:
 
         popdir()
 
-    def _format_description(self, binpkg: PackageInfo, pkg_type: str = None):
+    def _format_description(self, binpkg: PackageInfo):
         """
         Format BinaryPackage's description.
         If the package is a default target, concat the global project
@@ -159,15 +159,6 @@ class SrcPackage:
             binpkg.description = self.description
             if description:
                 binpkg.description += '\n' + description
-        else:
-            if not description and pkg_type == 'custom':
-                raise ValueError('Package {0} has no description'
-                                 .format(binpkg.name))
-            elif not description and pkg_type == 'library':
-                description = self.description + '\n'
-                description += 'automatically generated around SONAME '
-                description += self.name
-            binpkg.description = description
 
     def _remove_ignored_files(self):
         if 'ignore' in self._specs['general']:
@@ -392,19 +383,6 @@ class SrcPackage:
                 errmsg = 'Custom package {0} is empty !'.format(pkgname)
                 raise FileNotFoundError(errmsg)
 
-    def _ventilate_pkg_create(self, data: DispatchData):
-        """
-        first ventilation pass (after custom packages): check amongst the
-        remaining files if one of them would trigger the creation of a new
-        package.  Eg. a dynamic library will be given its own binary package
-        """
-        for hook in MMPACK_BUILD_HOOKS:
-            hook.dispatch(data)
-
-        for pkg in data.pkgs.values():
-            if not pkg.description:
-                self._format_description(pkg, 'library')
-
     def _get_fallback_pkgname(self, pkg_names: Set[str]) -> str:
         """
         if a binary package is already created, use it
@@ -496,6 +474,10 @@ class SrcPackage:
                 binpkg.add_sysdepend(sysdep)
 
             binpkg.description = pkginfo.description
+            if not binpkg.description:
+                raise ValueError('Package {0} has no description'
+                                 .format(binpkg.name))
+
             self._attach_copyright(binpkg)
             self._packages[binpkg.name] = binpkg
             dprint('created package ' + binpkg.name)
@@ -532,7 +514,8 @@ class SrcPackage:
         # specified in specs and continuing with the result of dispatch hooks
         data = DispatchData(self.install_files_set)
         self._ventilate_custom_packages(data)
-        self._ventilate_pkg_create(data)
+        for hook in MMPACK_BUILD_HOOKS:
+            hook.dispatch(data)
 
         for filename in data.unassigned_files.copy():
             if is_binary(filename) or is_exec_manpage(filename):
