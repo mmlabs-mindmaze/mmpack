@@ -35,6 +35,24 @@
       "revId": "c2229665f9c2b7f8b3ddd9eef555994bdf15b9c4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4237153_69bff49f",
+        "filename": "src/mmpack-build/binary_package.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-06T07:15:39Z",
+      "side": 1,
+      "message": "No it\u0027s not: at the end of the creation (this function), you have a binary package with files and dependencies, but no provides.",
+      "parentUuid": "6cf21dd3_c3b0cc97",
+      "revId": "c2229665f9c2b7f8b3ddd9eef555994bdf15b9c4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
