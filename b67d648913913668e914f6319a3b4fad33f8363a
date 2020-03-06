@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a48c8b63_da13626a",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-06T12:18:06Z",
+      "side": 0,
+      "message": "Note that you\u0027re removing here what you introduced a few commits earlier",
+      "revId": "b67d648913913668e914f6319a3b4fad33f8363a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
