@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "75ec2a65_0f2039fb",
+        "filename": "src/mmpack-build/src_package.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-06T12:16:53Z",
+      "side": 1,
+      "message": "missing space",
+      "range": {
+        "startLine": 403,
+        "startChar": 14,
+        "endLine": 403,
+        "endChar": 16
+      },
+      "revId": "ac79c27eec520abedb2395a75448c9b1088e9d6c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
