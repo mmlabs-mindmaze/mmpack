@@ -40,4 +40,7 @@ class MMPackBuildHook(BaseHook):
         if not locales:
             return
 
-        data.assign_to_pkg(self._srcname + '-locales', locales)
+        pkg = data.assign_to_pkg(self._srcname + '-locales', locales)
+        if not pkg.description:
+            pkg.description = self._src_description + \
+                              '\nThis package the translation files.'
