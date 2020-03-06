@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7fdfac0f_08c0c84a",
+        "filename": "src/mmpack-build/meson.build",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-06T07:33:40Z",
+      "side": 1,
+      "message": "tab -\u003e space",
+      "revId": "49bf0f83966f2396795abe8cc7277d25a5d526eb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
