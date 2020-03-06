@@ -1,22 +1,69 @@
 # @mindmaze_header@
 """
 plugin to package internationalization files
-
-TODO: analyze the strings used in other cobuilded packages to generate the
-right relation between the -locales package and those that use the translated
-strings
 """
 
 import re
+from struct import unpack
+from typing import Dict, List, Set
 
 from . base_hook import BaseHook
-from . package_info import DispatchData
+from . common import shell, Assert
+from . file_utils import filetype
+from . package_info import DispatchData, PackageInfo
+
+
+def _extract_msgids_from_gnu_mo(filename: str) -> Set[str]:
+    """
+    Extract the original strings (msgid) of GNU MO file. The format is simple
+    and described at:
+    https://www.gnu.org/software/gettext/manual/gettext.html#MO-Files
+
+    Returns:
+        set of msgid if filename is indeed a GNU MO file, None otherwise
+    """
+    extension = filename.rsplit('.', maxsplit=1)
+    if extension not in ('gmo', 'mo'):
+        return None
+
+    with open(filename, 'rb') as gmo_fp:
+        # Read header and determine the endianness of the file from its magic
+        # number
+        magic = gmo_fp.read(4)
+        if magic[:4] == b'\x95\x04\x12\xde':
+            fmt = '<I'
+        elif magic[:4] == b'\xde\x12\x04\x95':
+            fmt = '>I'
+        else:
+            return None
+
+        # Read whole file content in gmo_data
+        gmo_fp.seek(0)
+        gmo_data = gmo_fp.read()
+
+    num, tab_offset, rev = unpack(fmt*3, gmo_data[4:16])
+    if rev != 0:
+        raise Assert('{} has an unsupported format revision {}'\
+                     .format(filename, rev))
+
+    # Walk in all entries of original strings
+    msgids = set()
+    for slen, offset in unpack(fmt*2, gmo_data[tab_offset:tab_offset+num*8]):
+        msgids.add(gmo_data[offset:slen+offset].decode('utf-8'))
+
+    return msgids
+
+
+def _get_data_strings(filename: str):
+    cmd = ['strings', '-d', '--output-separator=\x03', filename]
+    return shell(cmd, log=False).split('\x03')
 
 
 class MMPackBuildHook(BaseHook):
     """
     Hook tracking internationalization files
     """
+    _has_locales = False
 
     def dispatch(self, data: DispatchData):
         """
@@ -40,7 +87,51 @@ class MMPackBuildHook(BaseHook):
         if not locales:
             return
 
+        self._has_locales = True
         pkg = data.assign_to_pkg(self._srcname + '-locales', locales)
         if not pkg.description:
             pkg.description = self._src_description + \
                               '\nThis package the translation files.'
+
+    def update_provides(self, pkg: PackageInfo,
+                        specs_provides: Dict[str, Dict]):
+        if not self._has_locales or pkg.ghost:
+            return
+
+        # Collect the translated strings from all message file contained in the
+        # package
+        msgids = set()
+        for filename in pkg.files:
+            mo_keys = _extract_msgids_from_gnu_mo(filename)
+            if mo_keys:
+                msgids.update(mo_keys)
+
+        msgids.discard('')  # workaround: the catalog has special '' entry
+        pkg.provides['locales'] = msgids
+
+    def update_depends(self, pkg: PackageInfo, other_pkgs: List[PackageInfo]):
+        if not self._has_locales or pkg.ghost:
+            return
+
+        # Collect all strings of data section in binary executable or shared
+        # library. This should encompass translatated strings if any
+        used_keys = set()
+        for filename in pkg.files:
+            file_type = filetype(filename)
+            if file_type not in ('pe', 'elf'):
+                continue
+            used_keys.update(_get_data_strings(filename))
+
+        # Inspect locales provided by other cobuilded package
+        for other in other_pkgs:
+            locale_msgids = pkg.provides.get('locales')
+            if other == pkg or not locale_msgids:
+                continue
+
+            # Compute the number of strings that are present in binary that
+            # appear to be also strings that are translated. If this number is
+            # 33% of the number of translated strings, we consider that the
+            # package uses the locale in the other package.
+            used_msgids = locale_msgids.intersection(used_keys)
+            if len(used_msgids) > (len(locale_msgids) / 3):
+                pkg.add_to_deplist(other.name)
