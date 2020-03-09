@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "777cd2cc_71afd0be",
+        "filename": "src/mmpack-build/hook_locales.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T15:42:44Z",
+      "side": 1,
+      "message": "why not use 0 ?",
+      "parentUuid": "73af0c5b_85e86745",
+      "range": {
+        "startLine": 62,
+        "startChar": 48,
+        "endLine": 62,
+        "endChar": 52
+      },
+      "revId": "801e9a606b719a4423808c9707f6410bc0642928",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ceac064f_714447ff",
         "filename": "src/mmpack-build/hook_locales.py",
         "patchSetId": 7
