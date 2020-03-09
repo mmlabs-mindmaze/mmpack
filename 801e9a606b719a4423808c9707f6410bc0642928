@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "93409c4a_5347638c",
+        "filename": "src/mmpack-build/hook_locales.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T13:05:44Z",
+      "side": 1,
+      "message": "you might want to improve (then use) filetype() from file_utils.py for this",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 23
+      },
+      "revId": "801e9a606b719a4423808c9707f6410bc0642928",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25e3e3d3_c7a67e0d",
+        "filename": "src/mmpack-build/hook_locales.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T13:05:44Z",
+      "side": 1,
+      "message": "This is a strange idea: you\u0027re using the end-of-text char as a separator.\nIt kind of negates its purpose.",
+      "range": {
+        "startLine": 62,
+        "startChar": 48,
+        "endLine": 62,
+        "endChar": 52
+      },
+      "revId": "801e9a606b719a4423808c9707f6410bc0642928",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ceac064f_714447ff",
+        "filename": "src/mmpack-build/hook_locales.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T13:05:44Z",
+      "side": 1,
+      "message": "really ?\nthis is dangerously not stable.",
+      "revId": "801e9a606b719a4423808c9707f6410bc0642928",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
