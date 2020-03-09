@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "4b9f0e82_189c3644",
+        "filename": "src/mmpack-build/hook_locales.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T16:02:05Z",
+      "side": 1,
+      "message": "Because this is impossible to pass this separator as argument. To understand why, just think about how to write the arguments if we were hypothetically calling strings binary in C:\n\nchar* argv[] \u003d {\n     \"strings\",\n     \"-d\",\n     \"--output-separator\u003d\\0\", // This is not doing what we would want\n};\nexecv(argv[0], argv);\n\nthe fault is on strings which does not allow use to workaround the problem",
+      "parentUuid": "777cd2cc_71afd0be",
+      "range": {
+        "startLine": 62,
+        "startChar": 48,
+        "endLine": 62,
+        "endChar": 52
+      },
+      "revId": "801e9a606b719a4423808c9707f6410bc0642928",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ceac064f_714447ff",
         "filename": "src/mmpack-build/hook_locales.py",
         "patchSetId": 7
