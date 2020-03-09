@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "26c9a06e_8dd59fb6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T15:39:10Z",
+      "side": 1,
+      "message": "please don\u0027t: you cannot make more generic than this.\nwithin a week, no one\u0027s going to have any idea what it\u0027s all about with only this summary.\n\nalso this is not about mmpack: the mmpack prefix tag is for us to know that this is impacting the mmpack code (ie. not mmpack-build, nor repository)\n\nHow about this instead ?\n\nrepository - fix count_src_refs on new src pkg upload",
+      "range": {
+        "startLine": 7,
+        "startChar": 8,
+        "endLine": 7,
+        "endChar": 15
+      },
+      "revId": "8200472a924a1b5ee27b4da0a82f8b832510e0c6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
