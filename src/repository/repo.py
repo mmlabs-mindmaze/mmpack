@@ -270,8 +270,7 @@ class Repo:
             destination = os.path.join(self.repo_dir, filename)
             os.replace(source, destination)
 
-    def _dump_cpy_indexes_working_dir(self, cp_binind: dict, cp_srcind: dict,
-                                      to_add: set):
+    def _dump_indexes_working_dir(self, to_add: set):
         """
         Writes the updated binary-index and source-index into the working
         directory. If no problem occurs while writting these files, then this
@@ -280,43 +279,33 @@ class Repo:
         binary-index and source-index previously written into the repository.
 
         Args:
-            cp_binind: dictionary containing the updated information about the
-                       binary packages present in the repository.
-            cp_srcind: dictionary containing the updated information about the
-                       source package present in the repository.
             to_add: set to fill with packages that MUST be removed once we are
                     sure that the upload will be a sucess.
         """
         srcindex_file = os.path.join(self.working_dir, RELPATH_SOURCE_INDEX)
-        file_serialize(cp_srcind, srcindex_file)
+        file_serialize(self.srcindex, srcindex_file)
         binindex_file = os.path.join(self.working_dir, RELPATH_BINARY_INDEX)
-        self.yaml_serialize(cp_binind, binindex_file, True)
-
-        self.srcindex = cp_srcind
-        self.binindex = cp_binind
+        self.yaml_serialize(self.binindex, binindex_file, True)
 
         to_add.add(RELPATH_SOURCE_INDEX)
         to_add.add(RELPATH_BINARY_INDEX)
 
-    def _prepare_update_indexes_repo(self, manifest: dict, cpy_binindex: dict,
-                                     cpy_srcindex: dict):
+    def _prepare_update_indexes_repo(self, manifest: dict):
         """
-        Adds to a copy of the binary-index and to a copy of the source-index of
-        the repository the packages uploaded in the repository.
+        Adds to the binary-index and to the source-index of the repository the
+        packages uploaded in the repository.
 
         Args:
             manifest: dictionary of the manifest file uploaded by the user.
-            cpy_binindex: copy of the dictionary containing the information
-                          of the binary-index file.
-            cpy_srcindex: copy of the dictionary containing the information
-                          of the source-index file.
         """
         # Update source-index
-        cpy_srcindex[manifest['source']['sha256']] = {
+        self.srcindex[manifest['source']['sha256']] = {
             'name': manifest['name'],
             'filename': manifest['source']['file'],
+            'sha256': manifest['source']['sha256'],
             'size': manifest['source']['size'],
-            'version': manifest['version']}
+            'version': manifest['version']
+        }
 
         # Update binary-index
         for pkg_name, pkg_info in manifest['binpkgs'][self.arch].items():
@@ -328,11 +317,10 @@ class Repo:
                                   'size': pkg_info['size'],
                                   'sha256': pkg_info['sha256']})
 
-            cpy_binindex[pkg_name] = buf[pkg_name]
+            self.binindex[pkg_name] = buf[pkg_name]
 
     def _prepare_handle_upload_binary_packages(self, manifest: dict,
-                                               to_remove: set, to_add: set,
-                                               cpy_srcindex: dict):
+                                               to_remove: set, to_add: set):
         """
         Puts in a set the binary packages (files .mpk) that HAVE TO be added
         to the repository. The binary packages that are not needed anymore
@@ -346,11 +334,7 @@ class Repo:
         source package is decremented. When the number of references of a
         source package reaches 0, it is added to the set of packages that MUST
         be removed once we are sure that the upload will be a success. In that
-        case the source-index should also be removed from this package (the
-        package is removed from the copy of the dictionary containing the
-        information about the source packages present in the repository, and
-        the actual removed will be effected when this copy will be written on
-        the repository)
+        case the source-index should also be removed from this package.
 
         Args:
             manifest: dictionary of the manifest file uploaded by the user.
@@ -362,14 +346,19 @@ class Repo:
         for pkg_name, pkg_info in manifest['binpkgs'][self.arch].items():
             pkg_filename = pkg_info['file']
 
-            pkg_info = self.binindex.get(pkg_name)
-            if pkg_info:
-                to_remove.add(pkg_info['filename'])
-                srcsha256 = pkg_info['srcsha256']
-                self.count_src_refs[srcsha256] -= 1
-                if self.count_src_refs[srcsha256] == 0:
-                    to_remove.add(self.srcindex[srcsha256]['filename'])
-                    cpy_srcindex.pop(srcsha256)
+            binpkg_info = self.binindex.get(pkg_name)
+            if binpkg_info:
+                srcsha256 = binpkg_info['srcsha256']
+                to_remove.add(binpkg_info['filename'])
+                if srcsha256 != manifest['source']['sha256']:
+                    self.count_src_refs[srcsha256] -= 1
+                    if self.count_src_refs[srcsha256] == 0:
+                        to_remove.add(self.srcindex[srcsha256]['filename'])
+                        self.srcindex.pop(srcsha256)
+                    self.count_src_refs[manifest['source']['sha256']] += 1
+                    to_add.add(pkg_filename)
+            else:
+                self.count_src_refs[manifest['source']['sha256']] += 1
 
             to_add.add(pkg_filename)
 
@@ -388,15 +377,13 @@ class Repo:
         # Upload binary packages and remove the binary packages that are not
         # needed anymore
         to_remove = set()
-        cpy_binindex = self.binindex.copy()
-        cpy_srcindex = self.srcindex.copy()
         self._prepare_handle_upload_binary_packages(manifest, to_remove,
-                                                    to_add, cpy_srcindex)
+                                                    to_add)
 
         # Update the binary-index and the source-index with the new packages
-        self._prepare_update_indexes_repo(manifest, cpy_binindex, cpy_srcindex)
+        self._prepare_update_indexes_repo(manifest)
         # Remove the files that are not needed anymore
-        self._dump_cpy_indexes_working_dir(cpy_binindex, cpy_srcindex, to_add)
+        self._dump_indexes_working_dir(to_add)
         self._effective_handle_upload(to_add, to_remove)
 
     def _mv_files_working_dir(self, manifest_file: str, manifest: dict):
@@ -440,6 +427,10 @@ class Repo:
                            to upload.
         """
         try:
+            backup_srcindex = self.srcindex.copy()
+            backup_binindex = self.binindex.copy()
+            backup_counter = self.count_src_refs.copy()
+
             os.mkdir(self.working_dir)
             self.logger.info('Checking {}'.format(manifest_file))
 
@@ -448,7 +439,10 @@ class Repo:
             self._handle_upload(manifest)
             self.logger.info('Data proceeded successfully')
 
-        except (KeyError, IOError) as exception:
-            self.logger.error('Error: {}'.format(exception.strerror))
+        except (KeyError, IOError):
+            self.logger.error("KeyError or IOError, revert data processing")
+            self.srcindex = backup_srcindex
+            self.binindex = backup_binindex
+            self.count_src_refs = backup_counter
         finally:
             shutil.rmtree(self.working_dir)
