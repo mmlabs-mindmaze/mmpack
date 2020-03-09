@@ -12,7 +12,7 @@ It will print on standard output the qualified name of the public symbols used.
 
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from os.path import abspath
+from os.path import abspath, dirname
 from typing import Set, Iterator, Tuple, Union
 
 from astroid import MANAGER as astroid_manager
@@ -20,9 +20,23 @@ from astroid import Uninferable, Module, Instance, ClassDef, \
     Import, ImportFrom, Call, Attribute, Name
 from astroid.exceptions import InferenceError, NameInferenceError, \
     AttributeInferenceError, AstroidImportError
-from astroid.modutils import is_standard_module
+from astroid.modutils import is_standard_module, modpath_from_file
 from astroid.node_classes import NodeNG
 from astroid.objects import Super
+
+
+def _belong_to_public_package(filename: str):
+    """
+    Test a file is a submodule of a public package, ie submodule accessible
+    through sys.path.
+    """
+    try:
+        modpath_from_file(filename)
+        return True
+    except ImportError:
+        pass
+
+    return False
 
 
 def _is_builtin(node: NodeNG, builtin_typename=None):
@@ -264,8 +278,18 @@ class DependsInspector:
             print('{} failed to be parsed'.format(filename), file=sys.stderr)
             return
 
+        # If not public module, add directory to simulate calling the script
+        # directly
+        is_public_submodule = _belong_to_public_package(filename)
+        if not is_public_submodule:
+            sys.path.insert(0, dirname(filename))
+
         for node in tree.nodes_of_class((Call, Name, Attribute)):
             self._inspect_node(node)
+
+        # Reverting sys.path if modified
+        if not is_public_submodule:
+            sys.path.pop(0)
 
 
 def parse_options():
