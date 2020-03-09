@@ -66,10 +66,10 @@ class BinaryPackage:
         """
         # TODO: also work with the last package published
         provide_spec_name = '{}/{}.provides'.format(self.spec_dir, self.name)
-        dprint('reading symbols from ' + provide_spec_name)
         specs_provides = dict()
         try:
             specs_provides.update(yaml_load(provide_spec_name))
+            dprint('symbols read from ' + provide_spec_name)
         except FileNotFoundError:
             # return an empty dict if nothing has been provided
             pass
