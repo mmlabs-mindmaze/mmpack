@@ -200,6 +200,24 @@
       "revId": "801e9a606b719a4423808c9707f6410bc0642928",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "78d905c3_a3e26984",
+        "filename": "src/mmpack-build/hook_locales.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T18:28:42Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "e92628cc_10847b91",
+      "revId": "801e9a606b719a4423808c9707f6410bc0642928",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
