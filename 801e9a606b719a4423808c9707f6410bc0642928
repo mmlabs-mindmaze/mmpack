@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0474e04f_62f7bfd4",
+        "filename": "src/mmpack-build/hook_locales.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T13:54:49Z",
+      "side": 1,
+      "message": "Having filetype() handling gmo/mo file will not lift the need to read the magic number here since this give us the endianness of the file.\n\nI can add the support of gmo in filetype() but this will be used only in this file. Then I wonder whether it is worth to modify filetype() at all.",
+      "parentUuid": "93409c4a_5347638c",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 23
+      },
+      "revId": "801e9a606b719a4423808c9707f6410bc0642928",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "25e3e3d3_c7a67e0d",
         "filename": "src/mmpack-build/hook_locales.py",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "73af0c5b_85e86745",
+        "filename": "src/mmpack-build/hook_locales.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T13:54:49Z",
+      "side": 1,
+      "message": "if --output-separator is not present, it is implicit set to \u0027\\n\u0027 which leads to trouble because some translated string contains \u0027\\n\u0027. We need to use set a non-default separator. IMO end-of-text is not a bad candidate because it is very unlikely you will ever encounter it in a string to translate.",
+      "parentUuid": "25e3e3d3_c7a67e0d",
+      "range": {
+        "startLine": 62,
+        "startChar": 48,
+        "endLine": 62,
+        "endChar": 52
+      },
+      "revId": "801e9a606b719a4423808c9707f6410bc0642928",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ceac064f_714447ff",
         "filename": "src/mmpack-build/hook_locales.py",
         "patchSetId": 7
@@ -59,6 +107,24 @@
       "writtenOn": "2020-03-09T13:05:44Z",
       "side": 1,
       "message": "really ?\nthis is dangerously not stable.",
+      "revId": "801e9a606b719a4423808c9707f6410bc0642928",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e92628cc_10847b91",
+        "filename": "src/mmpack-build/hook_locales.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T13:54:49Z",
+      "side": 1,
+      "message": "what about this threshold \"if there is at least one string that is present in the binary that match a translated string\" ?\n\nIn that case, we might overestimated the dependency link, but on the other hand, having the locales package installed while unneeded is rather harmless.",
+      "parentUuid": "ceac064f_714447ff",
       "revId": "801e9a606b719a4423808c9707f6410bc0642928",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
