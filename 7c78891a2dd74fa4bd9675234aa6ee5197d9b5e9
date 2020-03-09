@@ -16,6 +16,86 @@
       "revId": "7c78891a2dd74fa4bd9675234aa6ee5197d9b5e9",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb6bfe28_b4d5011e",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T12:40:49Z",
+      "side": 1,
+      "message": "Creating a list just to joint it as a string is a tad excessive.\n... I know we don\u0027t really care about performances here ... but ...",
+      "revId": "7c78891a2dd74fa4bd9675234aa6ee5197d9b5e9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "481817ec_6c9dd963",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T12:40:49Z",
+      "side": 1,
+      "message": "So ... if you don\u0027t find the sha256, then you raise a KeyError exception (because srcindex[None] is not found).\nIs this what you want ?",
+      "range": {
+        "startLine": 122,
+        "startChar": 18,
+        "endLine": 122,
+        "endChar": 37
+      },
+      "revId": "7c78891a2dd74fa4bd9675234aa6ee5197d9b5e9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3892463c_2a5ea7e7",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T12:40:49Z",
+      "side": 1,
+      "message": "This is why we wanted the yaml file format.\nThis **might** mean less C code, but this is noise for yaml.load()/yaml.dump()",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 19
+      },
+      "revId": "7c78891a2dd74fa4bd9675234aa6ee5197d9b5e9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "44f77525_5b135907",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-09T12:40:49Z",
+      "side": 1,
+      "message": "maybe name those backup instead of copy: it reflects what they\u0027re here for better",
+      "revId": "7c78891a2dd74fa4bd9675234aa6ee5197d9b5e9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
