@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48f4d714_0429d063",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T12:32:44Z",
+      "side": 1,
+      "message": "While I have not big comment regarding what is done here, it seems you mix a bugfix and a feature change (flat srcindex).\n\nPlease split this in 2 commits",
+      "revId": "7c78891a2dd74fa4bd9675234aa6ee5197d9b5e9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
