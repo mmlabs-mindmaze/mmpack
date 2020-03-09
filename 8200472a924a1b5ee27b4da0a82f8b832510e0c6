@@ -22,6 +22,121 @@
       "revId": "8200472a924a1b5ee27b4da0a82f8b832510e0c6",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c64d735_b9a6a502",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T15:54:25Z",
+      "side": 1,
+      "message": "counter bug",
+      "range": {
+        "startLine": 7,
+        "startChar": 12,
+        "endLine": 7,
+        "endChar": 15
+      },
+      "revId": "8200472a924a1b5ee27b4da0a82f8b832510e0c6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84b74d08_4d36a20d",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T15:54:25Z",
+      "side": 1,
+      "message": "this must be unconditionally",
+      "range": {
+        "startLine": 353,
+        "startChar": 15,
+        "endLine": 353,
+        "endChar": 61
+      },
+      "revId": "8200472a924a1b5ee27b4da0a82f8b832510e0c6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3db0d01_4f67b06b",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T15:54:25Z",
+      "side": 1,
+      "message": "Don\u0027t do that when you handle the past binpkg entry",
+      "range": {
+        "startLine": 358,
+        "startChar": 20,
+        "endLine": 359,
+        "endChar": 44
+      },
+      "revId": "8200472a924a1b5ee27b4da0a82f8b832510e0c6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c106f050_b8045bf3",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T15:54:25Z",
+      "side": 1,
+      "message": "wrong: this must not be done here... but before\n\"binpkg_info \u003d self.binindex.get(pkg_name)\"\n\nYou must increase the counter of the source when a binary package is added.\n\nAlso this means that adding the new source entry must be done before...\n\nAll of this point to... merge _prepare_handle_upload_binary_packages() and _prepare_update_indexes_repo() together...",
+      "range": {
+        "startLine": 360,
+        "startChar": 12,
+        "endLine": 361,
+        "endChar": 70
+      },
+      "revId": "8200472a924a1b5ee27b4da0a82f8b832510e0c6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a70cbca6_3a152b19",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-09T15:54:25Z",
+      "side": 1,
+      "message": "to be put when the source entry is created",
+      "range": {
+        "startLine": 376,
+        "startChar": 8,
+        "endLine": 376,
+        "endChar": 46
+      },
+      "revId": "8200472a924a1b5ee27b4da0a82f8b832510e0c6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
