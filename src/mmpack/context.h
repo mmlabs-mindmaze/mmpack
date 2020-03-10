@@ -35,6 +35,7 @@ struct mmpack_ctx {
 	CURL * curl;
 	char curl_errbuf[CURL_ERROR_SIZE];
 	struct binindex binindex;
+	struct srcindex srcindex;
 	struct install_state installed;
 	struct strset manually_inst;
 	struct settings settings;
