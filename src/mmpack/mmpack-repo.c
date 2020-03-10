@@ -24,6 +24,7 @@
 
 
 STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
+STATIC_CONST_MMSTR(srcindex_relpath, SRC_INDEX_RELPATH);
 
 
 static
@@ -42,7 +43,7 @@ int repo_add(struct mmpack_ctx* ctx, int argc, char const ** argv)
 	repo->url = mmstr_malloc_from_cstr(argv[1]);
 	repo->enabled = 1;
 
-	if (create_empty_binindex_file(ctx->prefix, argv[0]) == -1) {
+	if (create_empty_index_files(ctx->prefix, argv[0]) == -1) {
 		info("binindex file was not created\n");
 		return -1;
 	}
@@ -73,16 +74,17 @@ int repo_list(struct mmpack_ctx* ctx, int argc, char const ** argv)
 
 
 static
-int remove_binindex_file(const mmstr* prefix, char const * name)
+int remove_one_index_file(const mmstr* prefix, const mmstr * index,
+                          char const * name)
 {
 	mmstr * avllist_relpath;
 	int rv = 0;
 	int len;
 
-	len = mmstrlen(prefix) + mmstrlen(repo_relpath) + strlen(name) + 2;
+	len = mmstrlen(prefix) + mmstrlen(index) + strlen(name) + 2;
 	avllist_relpath = mmstr_malloc(len);
 
-	mmstr_join_path(avllist_relpath, prefix, repo_relpath);
+	mmstr_join_path(avllist_relpath, prefix, index);
 
 	// Append the name of the repo
 	mmstrcat_cstr(mmstrcat_cstr(avllist_relpath, "."), name);
@@ -93,6 +95,17 @@ int remove_binindex_file(const mmstr* prefix, char const * name)
 
 	mmstr_free(avllist_relpath);
 	return rv;
+}
+
+
+static
+int remove_index_files(const mmstr * prefix, char const * name)
+{
+	if (remove_one_index_file(prefix, repo_relpath, name)
+	    || remove_one_index_file(prefix, srcindex_relpath, name))
+		return -1;
+
+	return 0;
 }
 
 
@@ -109,33 +122,33 @@ int repo_remove(struct mmpack_ctx* ctx, int argc, char const ** argv)
 		return -1;
 	}
 
-	remove_binindex_file(ctx->prefix, argv[0]);
+	remove_index_files(ctx->prefix, argv[0]);
 
 	return settings_serialize(ctx->prefix, &ctx->settings, 1);
 }
 
 
 static
-int rename_binindex_file(const mmstr* prefix, char const * old_name,
-                         char const * new_name)
+int rename_one_index_file(const mmstr* prefix, const mmstr * index,
+                          char const * old_name, char const * new_name)
 {
 	mmstr * old, * new;
 	int old_len, new_len;
 	int rv = 0;
 
-	// create the path of the old and new names
-	old_len = mmstrlen(prefix) + mmstrlen(repo_relpath) +
+	// create the path of the old and new names of binindex
+	old_len = mmstrlen(prefix) + mmstrlen(index) +
 	          strlen(old_name) + 2;
-	new_len = mmstrlen(prefix) + mmstrlen(repo_relpath) +
+	new_len = mmstrlen(prefix) + mmstrlen(index) +
 	          strlen(new_name) + 2;
 
 	old = mmstr_malloca(old_len);
 	new = mmstr_malloca(new_len);
 
-	mmstr_join_path(old, prefix, repo_relpath);
+	mmstr_join_path(old, prefix, index);
 	mmstrcat_cstr(mmstrcat_cstr(old, "."), old_name);
 
-	mmstr_join_path(new, prefix, repo_relpath);
+	mmstr_join_path(new, prefix, index);
 	mmstrcat_cstr(mmstrcat_cstr(new, "."), new_name);
 
 	if (rename(old, new) != 0) {
@@ -145,6 +158,19 @@ int rename_binindex_file(const mmstr* prefix, char const * old_name,
 	mmstr_freea(old);
 	mmstr_freea(new);
 	return rv;
+}
+
+
+static
+int rename_index_files(const mmstr * prefix, char const * old_name,
+                       char const * new_name)
+{
+	if (rename_one_index_file(prefix, repo_relpath, old_name, new_name)
+	    || rename_one_index_file(prefix, srcindex_relpath, old_name,
+	                             new_name))
+		return -1;
+
+	return 0;
 }
 
 
@@ -172,7 +198,7 @@ int repo_rename(struct mmpack_ctx* ctx, int argc, char const ** argv)
 
 			mmstr_free(elt->name);
 			elt->name = mmstr_malloc_from_cstr(argv[1]);
-			rename_binindex_file(ctx->prefix, argv[0], argv[1]);
+			rename_index_files(ctx->prefix, argv[0], argv[1]);
 			return settings_serialize(ctx->prefix,
 			                          &ctx->settings, 1);
 		}
