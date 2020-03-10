@@ -15,6 +15,7 @@
 
 #include <mmerrno.h>
 #include <mmlib.h>
+#include <mmsysio.h>
 
 #include "common.h"
 #include "indextable.h"
@@ -23,6 +24,18 @@
 #include "settings.h"
 #include "utils.h"
 #include "xx-alloc.h"
+
+struct srclist_entry {
+	struct srcpkg pkg;
+	struct srclist_entry * next;
+};
+
+struct srclist {
+	const mmstr * pkg_name;
+	struct srclist_entry * head;
+	int num_pkg;
+	int id;
+};
 
 struct rdepends {
 	int num;
@@ -259,6 +272,24 @@ struct from_repo* mmpkg_get_or_create_from_repo(struct mmpkg* pkg,
 	return pkg->from_repo;
 }
 
+
+static
+void srcpkg_init(struct srcpkg * pkg, const mmstr * name)
+{
+	*pkg = (struct srcpkg) {.name = name};
+}
+
+
+static
+void srcpkg_deinit(struct srcpkg * pkg)
+{
+	mmstr_free(pkg->name);
+	mmstr_free(pkg->filename);
+	mmstr_free(pkg->sha256);
+	mmstr_free(pkg->version);
+
+	srcpkg_init(pkg, NULL);
+}
 
 static
 void mmpkg_init(struct mmpkg* pkg, const mmstr* name)
@@ -602,6 +633,33 @@ void rdepends_add(struct rdepends* rdeps, int pkgname_id)
  *                                                                        *
  **************************************************************************/
 
+
+static
+void srclist_init(struct srclist* list, const mmstr* name, int id)
+{
+	*list = (struct srclist) {.pkg_name = mmstrdup(name), .id = id};
+}
+
+
+static
+void srclist_deinit(struct srclist* list)
+{
+	struct srclist_entry * entry, * next;
+
+	entry = list->head;
+	while (entry) {
+		next = entry->next;
+
+		srcpkg_deinit(&entry->pkg);
+		free(entry);
+
+		entry = next;
+	}
+
+	mmstr_free(list->pkg_name);
+}
+
+
 /**
  * pkglist_init() - initialize a new package list
  * @list:       package list struct to initialize
@@ -673,6 +731,55 @@ void mmpkg_add_from_repo_list(struct mmpkg* pkg_in, struct from_repo* list)
 	}
 }
 
+
+static
+struct srcpkg* srclist_add_or_modify(struct srclist* list, struct srcpkg* pkg)
+{
+	struct srclist_entry* entry;
+	struct srclist_entry** pnext;
+	struct srcpkg* pkg_in_list;
+	const mmstr* next_version;
+	int vercmp;
+
+	// Loop over entry and check whether there is an identical package
+	// (ie has the same sumsha and version).
+	for (entry = list->head; entry != NULL; entry = entry->next) {
+		// Check the entry match version and sumsha
+		if (!mmstrequal(pkg->version, entry->pkg.version)
+		    || !mmstrequal(pkg->sha256, entry->pkg.sha256))
+			continue;
+
+		pkg_in_list = &entry->pkg;
+
+		return pkg_in_list;
+	}
+
+	// Find where to insert entry (package version are sorted)
+	for (pnext = &list->head; *pnext != NULL; pnext = &(*pnext)->next) {
+		next_version = (*pnext)->pkg.version;
+		vercmp = pkg_version_compare(next_version, pkg->version);
+		if (vercmp < 0)
+			break;
+	}
+
+	// Add new entry to the list
+	entry = xx_malloc(sizeof(*entry));
+	entry->next = *pnext;
+	*pnext = entry;
+
+	// copy the whole package structure
+	entry->pkg = *pkg;
+	entry->pkg.name = list->pkg_name;
+	entry->pkg.name_id = list->id;
+
+	// reset package fields since they have been taken over by the new
+	// entry
+	srcpkg_init(pkg, NULL);
+
+	list->num_pkg++;
+
+	return &entry->pkg;
+}
 
 /**
  * pkglist_add_or_modify() - allocate or modifyt a package to list
@@ -918,6 +1025,31 @@ int binindex_sorted_foreach(struct binindex * binindex,
 
 
 LOCAL_SYMBOL
+void srcindex_init(struct srcindex* srcindex)
+{
+	*srcindex = (struct srcindex) {0};
+	indextable_init(&srcindex->pkgname_idx, -1, -1);
+}
+
+
+LOCAL_SYMBOL
+void srcindex_deinit(struct srcindex* srcindex)
+{
+	int i;
+
+	for (i = 0; i < srcindex->num_pkgname; i++)
+		srclist_deinit(&srcindex->pkgname_table[i]);
+
+	free(srcindex->pkgname_table);
+	srcindex->pkgname_table = NULL;
+
+	indextable_deinit(&srcindex->pkgname_idx);
+
+	srcindex->num_pkgname = 0;
+}
+
+
+LOCAL_SYMBOL
 void binindex_init(struct binindex* binindex)
 {
 	*binindex = (struct binindex) {0};
@@ -1046,6 +1178,44 @@ int binindex_is_pkg_upgradeable(struct binindex const * binindex,
 	mm_check(list != NULL);
 
 	return (pkg_version_compare(list->head->pkg.version, pkg->version) > 0);
+}
+
+
+LOCAL_SYMBOL
+int srcindex_get_pkgname_id(struct srcindex* srcindex, const mmstr* name)
+{
+	struct srclist* new_tab;
+	struct srclist* pkglist;
+	struct indextable* idx;
+	struct it_entry* entry;
+	struct it_entry defval = {.key = name, .ivalue = -1};
+	size_t tab_sz;
+	int pkgname_id;
+
+	idx = &srcindex->pkgname_idx;
+	entry = indextable_lookup_create_default(idx, name, defval);
+	pkgname_id = entry->ivalue;
+
+	// Create package list if not existing yet
+	if (pkgname_id == -1) {
+		// Resize pkgname table
+		tab_sz = (srcindex->num_pkgname + 1) * sizeof(*new_tab);
+		new_tab = xx_realloc(srcindex->pkgname_table, tab_sz);
+		srcindex->pkgname_table = new_tab;
+
+		// Assign an new pkgname id
+		pkgname_id = srcindex->num_pkgname++;
+
+		// Initialize the package list associated to id
+		pkglist = &srcindex->pkgname_table[pkgname_id];
+		srclist_init(pkglist, name, pkgname_id);
+
+		// Reference the new package list in the index table
+		entry->ivalue = pkgname_id;
+		entry->key = pkglist->pkg_name;
+	}
+
+	return pkgname_id;
 }
 
 
@@ -1325,6 +1495,18 @@ const int* binindex_get_potential_rdeps(const struct binindex* binindex,
 	pkglist = &binindex->pkgname_table[pkgname_id];
 	*num_rdeps = pkglist->rdeps.num;
 	return pkglist->rdeps.ids;
+}
+
+
+static
+struct srcpkg* srcindex_add_pkg(struct srcindex* srcindex, struct srcpkg* pkg)
+{
+	struct srclist* srclist;
+	int pkgname_id;
+
+	pkgname_id = srcindex_get_pkgname_id(srcindex, pkg->name);
+	srclist = &srcindex->pkgname_table[pkgname_id];
+	return srclist_add_or_modify(srclist, pkg);
 }
 
 
@@ -2044,6 +2226,111 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 
 exit:
 	yaml_parser_delete(&ctx.parser);
+	return rv;
+}
+
+
+/**
+ * srcindex_populate() - populate source package database from package list
+ * @binindex:   binary package index to populate
+ * @index_filename: repository package list file
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+
+int srcindex_populate(struct srcindex * srcindex, char const * index_filename)
+{
+	int fd, rv = 0;
+	char * line, * eol, * field;
+	size_t key_len;
+	void * map;
+	struct mm_stat buf;
+	struct srcpkg srcpkg;
+
+	mmstr * key = NULL;
+	mmstr * name = NULL;
+	mmstr * filename = NULL;
+	mmstr * sha = NULL;
+	mmstr * version = NULL;
+
+	fd = mm_open(index_filename, O_RDONLY, 0);
+	if (fd == -1)
+		return -1;
+
+	mm_fstat(fd, &buf);
+	map = mm_mapfile(fd, 0, buf.size, MM_MAP_READ|MM_MAP_SHARED);
+
+	if (buf.size == 0)
+		goto exit;
+
+	mm_check(map != NULL);
+
+	srcpkg_init(&srcpkg, NULL);
+	line = map;
+	while ((eol = strchr(line, '\n')) != NULL) {
+		field = strchr(line, ' ');
+
+		if (field == NULL) {
+			// the source-index file is empty
+			if (name == NULL && filename == NULL
+			    && sha == NULL && version == NULL)
+				goto exit;
+
+			// the source-index file is not well-formed
+			if (name == NULL || filename == NULL
+			    || sha == NULL || version == NULL) {
+				rv = -1;
+				goto exit;
+			}
+
+			srcpkg.name = name;
+			srcpkg.filename = filename;
+			srcpkg.sha256 = sha;
+			srcpkg.version = version;
+			srcindex_add_pkg(srcindex, &srcpkg);
+			mmstr_free(key);
+			mmstr_free(name);
+			mmstr_free(filename);
+			mmstr_free(sha);
+			mmstr_free(version);
+			key = NULL;
+			name = NULL;
+			filename = NULL;
+			sha = NULL;
+			version = NULL;
+			srcpkg_init(&srcpkg, NULL);
+		}
+
+		key_len = field - line;
+		key = mmstr_copy_realloc(key, line, key_len);
+		if (STR_EQUAL(key, key_len, "name") == 0) {
+			mmstr_free(name);
+			name = mmstrdup(field);
+		} else if (STR_EQUAL(key, key_len, "filename") == 0) {
+			mmstr_free(filename);
+			filename = mmstrdup(field);
+		} else if (STR_EQUAL(key, key_len, "sha256") == 0) {
+			mmstr_free(field);
+			sha = mmstrdup(field);
+		} else if (STR_EQUAL(key, key_len, "size") == 0) {
+			srcpkg.size = atoi(field);
+		} else if (STR_EQUAL(key, key_len, "version") == 0) {
+			mmstr_free(version);
+			version = mmstrdup(field);
+		}
+
+		line = eol + 1;
+	}
+
+exit:
+	srcpkg_deinit(&srcpkg);
+	mmstr_free(key);
+	mmstr_free(name);
+	mmstr_free(filename);
+	mmstr_free(sha);
+	mmstr_free(version);
+	mm_unmap(map);
+	mm_close(fd);
 	return rv;
 }
 

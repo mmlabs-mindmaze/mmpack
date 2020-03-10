@@ -105,6 +105,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	if (load_user_config(ctx))
 		return -1;
 
+	srcindex_init(&ctx->srcindex);
 	binindex_init(&ctx->binindex);
 	install_state_init(&ctx->installed);
 
@@ -164,6 +165,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 	}
 
 	binindex_deinit(&ctx->binindex);
+	srcindex_deinit(&ctx->srcindex);
 	install_state_deinit(&ctx->installed);
 	strset_deinit(&ctx->manually_inst);
 	settings_deinit(&ctx->settings);
@@ -194,6 +196,7 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 {
 	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH);
 	mmstr* repo_cache;
+	mmstr* srcindex_filename;
 	mmstr* installed_index_path;
 	int i, num_repo, len;
 	struct repolist_elt * repo;
@@ -220,7 +223,10 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 			continue;
 
 		repo_cache = mmpack_get_repocache_path(ctx, repo->name);
-		if (binindex_populate(&ctx->binindex, repo_cache, repo))
+		srcindex_filename =
+			mmpack_get_srcindex_filename(ctx, repo->name);
+		if (binindex_populate(&ctx->binindex, repo_cache, repo)
+		    || srcindex_populate(&ctx->srcindex, srcindex_filename))
 			printf("Cache file of repository %s is missing, "
 			       "updating may fix the issue\n", repo->name);
 
@@ -378,6 +384,36 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 	mmstr_join_path(ctx->pkgcachedir, ctx->prefix, pkgcache_relpath);
 
 	return ctx->pkgcachedir;
+}
+
+
+/**
+ * mmpack_get_srcindex_filename() - Function that computes the path of the
+ *                                  source-index file.
+ * ctx: initialized mmpack context
+ * repo_name: name of the repository where the source index file is located
+ *
+ * Return: the path of the source index file of the repository @repo_name.
+ */
+LOCAL_SYMBOL
+mmstr* mmpack_get_srcindex_filename(struct mmpack_ctx * ctx, char * repo_name)
+{
+	STATIC_CONST_MMSTR(srcindex_relpath, SRC_INDEX_RELPATH);
+	int len;
+	mmstr * path;
+
+	len = mmstrlen(ctx->prefix) + mmstrlen(srcindex_relpath) +
+	      strlen(repo_name) + 2;
+	path = mmstr_malloc(len);
+
+	// Form destination cache index basen in prefix
+	mmstr_join_path(path, ctx->prefix, srcindex_relpath);
+
+	// Append the name of the repo
+	mmstrcat_cstr(path, ".");
+	mmstrcat_cstr(path, repo_name);
+
+	return path;
 }
 
 
