@@ -55,7 +55,7 @@ Description: MindMaze package development tools
 Package: mmpack-repo-tools
 Architecture: all
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, ${python3:Depends}
 Description: MindMaze repository management tools
  This package provides the infrastructure for handling the build,
  installation and removal of mmpack software packages.
