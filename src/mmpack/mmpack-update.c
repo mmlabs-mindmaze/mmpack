@@ -20,13 +20,14 @@ static
 int download_repo_index(struct mmpack_ctx * ctx, int repo_index)
 {
 	STATIC_CONST_MMSTR(pkglist, "binary-index");
+	STATIC_CONST_MMSTR(binpath, REPO_INDEX_RELPATH);
 	mmstr* path;
 	int rv = -1;
 	struct repolist_elt * repo;
 
 	repo = settings_get_repo(&ctx->settings, repo_index);
 
-	path = mmpack_get_repocache_path(ctx, repo->name);
+	path = mmpack_repo_cachepath(ctx, repo->name, binpath);
 
 	if (download_from_repo(ctx, repo->url, pkglist, NULL, path)) {
 		error("Failed to download package list from %s (%s)\n",

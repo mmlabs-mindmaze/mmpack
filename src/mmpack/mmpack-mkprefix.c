@@ -143,7 +143,7 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	}
 
 	if (create_initial_empty_files(prefix, force_mkprefix)
-	    || create_initial_binindex_files(prefix, repo_list)
+	    || create_initial_index_files(prefix, repo_list)
 	    || settings_serialize(prefix, &ctx->settings, force_mkprefix)) {
 		fprintf(stderr, "Failed to create mmpack prefix: %s\n", prefix);
 		return -1;
