@@ -35,6 +35,7 @@ struct mmpack_ctx {
 	CURL * curl;
 	char curl_errbuf[CURL_ERROR_SIZE];
 	struct binindex binindex;
+	struct srcindex srcindex;
 	struct install_state installed;
 	struct strset manually_inst;
 	struct settings settings;
@@ -49,6 +50,7 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx);
 int mmpack_ctx_use_prefix(struct mmpack_ctx * ctx, int flags);
 int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx);
 const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx);
+mmstr* mmpack_get_srcindex_filename(struct mmpack_ctx * ctx, char * repo_name);
 mmstr* mmpack_get_repocache_path(struct mmpack_ctx * ctx, char * repo_name);
 
 static inline
