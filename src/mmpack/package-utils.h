@@ -48,6 +48,7 @@ struct constraints {
 	mmstr * sumsha;
 };
 
+
 void constraints_deinit(struct constraints * c);
 int constraints_is_empty(struct constraints * c);
 
@@ -135,6 +136,21 @@ int binindex_sorted_foreach(struct binindex * binindex,
                             int (* cb)(struct mmpkg*, void*),
                             void * data);
 
+struct srcpkg {
+	mmstr const * name;
+	mmstr const * filename;
+	mmstr const * sha256;
+	mmstr const * version;
+	size_t size;
+	int name_id;
+};
+
+struct srcindex {
+	struct indextable pkgname_idx;
+	struct srclist * pkgname_table;
+	int num_pkgname;
+};
+
 struct install_state {
 	struct indextable idx;
 	int pkg_num;
@@ -215,14 +231,23 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
                                     struct constraints const * c);
 int binindex_is_pkg_upgradeable(struct binindex const * binindex,
                                 struct mmpkg const * pkg);
+struct mmpkg const* binindex_get_latest_pkg(struct binindex* binindex,
+                                            mmstr const * name,
+                                            char const * max_version);
+void srcindex_init(struct srcindex* srcindex);
+void srcindex_deinit(struct srcindex* srcindex);
 void binindex_init(struct binindex* binindex);
 void binindex_deinit(struct binindex* binindex);
+struct mmpkg* add_pkgfile_to_srcindex(struct srcindex* srcindex,
+                                      char const * filename);
 struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
                                       char const * filename);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
                       struct repolist_elt * repo);
+int srcindex_populate(struct srcindex * srcindex, char const * index_filename);
 void binindex_dump(struct binindex const * binindex);
 int binindex_compute_rdepends(struct binindex* binindex);
+int srcindex_get_pkgname_id(struct srcindex* srcindex, const mmstr* name);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
 struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
                                               struct mmpkg* pkg,
