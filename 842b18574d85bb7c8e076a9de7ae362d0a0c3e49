@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ddbb3f9_33048a2b",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-10T15:33:23Z",
+      "side": 1,
+      "message": "you could to_remove.difference_update(to_add) on top instead.",
+      "range": {
+        "startLine": 250,
+        "startChar": 0,
+        "endLine": 251,
+        "endChar": 24
+      },
+      "revId": "842b18574d85bb7c8e076a9de7ae362d0a0c3e49",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
