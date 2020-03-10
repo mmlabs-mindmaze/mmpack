@@ -53,6 +53,8 @@ mmpack_lib_sources = files(
 	'settings.h',
 	'sha256.c',
 	'sha256.h',
+	'srcindex.c',
+	'srcindex.h',
 	'strview.h',
 	'strview.c',
 	'sysdeps.c',
