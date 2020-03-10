@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4aa84da6_83f6051d",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-10T15:48:08Z",
+      "side": 1,
+      "message": "1",
+      "range": {
+        "startLine": 122,
+        "startChar": 21,
+        "endLine": 122,
+        "endChar": 58
+      },
+      "revId": "e00720a6b69e513a3c7c1532a5d8ce73f8e00d3a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e6e99bf_d7eb6876",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-10T15:48:08Z",
+      "side": 1,
+      "message": "2",
+      "range": {
+        "startLine": 192,
+        "startChar": 21,
+        "endLine": 192,
+        "endChar": 69
+      },
+      "revId": "e00720a6b69e513a3c7c1532a5d8ce73f8e00d3a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eba5b035_ac2b44ee",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-10T15:48:08Z",
+      "side": 1,
+      "message": "3",
+      "range": {
+        "startLine": 312,
+        "startChar": 16,
+        "endLine": 312,
+        "endChar": 70
+      },
+      "revId": "e00720a6b69e513a3c7c1532a5d8ce73f8e00d3a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc2dde88_0005d66e",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-10T15:48:08Z",
+      "side": 1,
+      "message": "4",
+      "range": {
+        "startLine": 332,
+        "startChar": 26,
+        "endLine": 333,
+        "endChar": 53
+      },
+      "revId": "e00720a6b69e513a3c7c1532a5d8ce73f8e00d3a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
