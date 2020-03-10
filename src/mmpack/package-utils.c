@@ -2048,6 +2048,27 @@ exit:
 }
 
 
+/**
+ * srcindex_populate() - populate source package database from package list
+ * @srcindex:   source package index to populate
+ * @index_filename: repository package list file
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int srcindex_populate(struct srcindex * srcindex, char const * index_filename)
+{
+	FILE * file;
+
+	file = fopen(index_filename, "r");
+	if (file == NULL) {
+		mm_raise_error(EINVAL, "failed to open source index file");
+		return -1;
+	}
+
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                              Install state                             *
