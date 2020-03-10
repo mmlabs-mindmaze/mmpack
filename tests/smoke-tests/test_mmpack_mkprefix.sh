@@ -11,13 +11,14 @@ cleanup
 # test that the tree of files from $PREFIX_TEST is the one expected
 diff_tree()
 {
-	if [ $# -eq 1 ]
+	if [ $# -eq 2 ]
 	then
 		diff - <(find $PREFIX_TEST -type f | sort) <<EOF
 $PREFIX_TEST/etc/mmpack-config.yaml
 $1
 $PREFIX_TEST/var/lib/mmpack/installed.yaml
 $PREFIX_TEST/var/lib/mmpack/manually-installed.txt
+$2
 $PREFIX_TEST/var/log/mmpack.log
 EOF
 	else
@@ -32,10 +33,11 @@ EOF
 
 tests_tree_and_files()
 {
-	diff_tree $1
-	if [ $# -eq 1 ]
+	diff_tree $1 $2
+	if [ $# -eq 2 ]
 	then
 		file -b $1 | grep "^empty$"
+		file -b $2 | grep "^empty$"
 	fi
 	file -b $PREFIX_TEST/var/lib/mmpack/installed.yaml | grep "^empty$"
 	file -b $PREFIX_TEST/var/lib/mmpack/manually-installed.txt | grep "^empty$"
@@ -56,7 +58,7 @@ cleanup
 # test mkprefix with url but no name
 mmpack mkprefix --url=my_url $PREFIX_TEST
 
-tests_tree_and_files $PREFIX_TEST/var/lib/mmpack/binindex.yaml.repo-0
+tests_tree_and_files $PREFIX_TEST/var/lib/mmpack/binindex.yaml.repo-0 $PREFIX_TEST/var/lib/mmpack/srcindex.repo-0
 
 diff - $PREFIX_TEST/etc/mmpack-config.yaml <<EOF
 repositories:
@@ -70,7 +72,7 @@ cleanup
 # test mkprefix with url and name
 mmpack mkprefix --name=my_name --url=my_url $PREFIX_TEST
 
-tests_tree_and_files $PREFIX_TEST/var/lib/mmpack/binindex.yaml.my_name
+tests_tree_and_files $PREFIX_TEST/var/lib/mmpack/binindex.yaml.my_name $PREFIX_TEST/var/lib/mmpack/srcindex.my_name
 
 diff - $PREFIX_TEST/etc/mmpack-config.yaml <<EOF
 repositories:

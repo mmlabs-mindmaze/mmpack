@@ -174,6 +174,8 @@ mmpack_lib_sources = \
 	src/mmpack/settings.h \
 	src/mmpack/sha256.c \
 	src/mmpack/sha256.h \
+	src/mmpack/srcindex.c \
+	src/mmpack/srcindex.h \
 	src/mmpack/sysdeps.c \
 	src/mmpack/sysdeps.h \
 	src/mmpack/utils.c \
