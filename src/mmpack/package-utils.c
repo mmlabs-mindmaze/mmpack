@@ -15,6 +15,7 @@
 
 #include <mmerrno.h>
 #include <mmlib.h>
+#include <mmsysio.h>
 
 #include "common.h"
 #include "indextable.h"
@@ -23,6 +24,18 @@
 #include "settings.h"
 #include "utils.h"
 #include "xx-alloc.h"
+
+struct srclist_entry {
+	struct srcpkg pkg;
+	struct srclist_entry * next;
+};
+
+struct srclist {
+	const mmstr * pkg_name;
+	struct srclist_entry * head;
+	int num_pkg;
+	int id;
+};
 
 struct rdepends {
 	int num;
@@ -261,6 +274,23 @@ struct from_repo* mmpkg_get_or_create_from_repo(struct mmpkg* pkg,
 
 
 static
+void srcpkg_init(struct srcpkg * pkg, const mmstr * name)
+{
+	*pkg = (struct srcpkg) {.name = name};
+}
+
+
+static
+void srcpkg_deinit(struct srcpkg * pkg) {
+	mmstr_free(pkg->name);
+	mmstr_free(pkg->filename);
+	mmstr_free(pkg->sha256);
+	mmstr_free(pkg->version);
+
+	srcpkg_init(pkg, NULL);
+}
+
+static
 void mmpkg_init(struct mmpkg* pkg, const mmstr* name)
 {
 	*pkg = (struct mmpkg) {.name = name};
@@ -299,15 +329,15 @@ int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
                               struct repolist_elt const * repo)
 {
 	struct from_repo * from;
-
+		
 	if (!repo)
 		return 1;
-
+		
 	for (from = pkg->from_repo; from != NULL; from = from->next) {
 		if (from->repo == repo)
 			return 1;
 	}
-
+		
 	return 0;
 }
 
@@ -357,14 +387,14 @@ void mmpkg_print(struct mmpkg const * pkg)
 {
 	const char* state;
 	struct from_repo * from;
-
+		
 	if (pkg->state == MMPACK_PKG_INSTALLED)
 		state = "[installed]";
 	else
 		state = "[available]";
-
+		
 	printf("%s %s (%s) ", state, pkg->name, pkg->version);
-
+		
 	if (pkg->from_repo) {
 		printf("from repositories:");
 		for (from = pkg->from_repo; from != NULL; from = from->next) {
@@ -422,10 +452,9 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 	        "    version: %s\n"
 	        "    source: %s\n"
 	        "    sumsha256sums: %s\n"
-	        "    ghost: %s\n",
+		"    ghost: %s\n", 
 	        pkg->name, pkg->version, pkg->source, pkg->sumsha,
 	        mmpkg_is_ghost(pkg) ? "true" : "false");
-
 
 	fprintf(fp, "    depends:");
 	mmpkg_dep_save_to_index(pkg->mpkdeps, fp, 2 /*indentation level*/);
@@ -602,6 +631,33 @@ void rdepends_add(struct rdepends* rdeps, int pkgname_id)
  *                                                                        *
  **************************************************************************/
 
+	
+static
+void srclist_init(struct srclist* list, const mmstr* name, int id)
+{
+	*list = (struct srclist) {.pkg_name = mmstrdup(name), .id = id};
+}
+
+	
+static
+void srclist_deinit(struct srclist* list)
+{
+	struct srclist_entry * entry, * next;
+
+	entry = list->head;
+	while (entry) {
+		next = entry->next;
+
+		srcpkg_deinit(&entry->pkg);
+		free(entry);
+
+		entry = next;
+	}
+
+	mmstr_free(list->pkg_name);
+}
+
+
 /**
  * pkglist_init() - initialize a new package list
  * @list:       package list struct to initialize
@@ -673,6 +729,55 @@ void mmpkg_add_from_repo_list(struct mmpkg* pkg_in, struct from_repo* list)
 	}
 }
 
+
+static
+struct srcpkg* srclist_add_or_modify(struct srclist* list, struct srcpkg* pkg)
+{
+	struct srclist_entry* entry;
+	struct srclist_entry** pnext;
+	struct srcpkg* pkg_in_list;
+	const mmstr* next_version;
+	int vercmp;
+
+	// Loop over entry and check whether there is an identical package
+	// (ie has the same sumsha and version).
+	for (entry = list->head; entry != NULL; entry = entry->next) {
+		// Check the entry match version and sumsha
+		if (!mmstrequal(pkg->version, entry->pkg.version)
+		    || !mmstrequal(pkg->sha256, entry->pkg.sha256))
+			continue;
+
+		pkg_in_list = &entry->pkg;
+
+		return pkg_in_list;
+	}
+
+	// Find where to insert entry (package version are sorted)
+	for (pnext = &list->head; *pnext != NULL; pnext = &(*pnext)->next) {
+		next_version = (*pnext)->pkg.version;
+		vercmp = pkg_version_compare(next_version, pkg->version);
+		if (vercmp < 0)
+			break;
+	}
+
+	// Add new entry to the list
+	entry = xx_malloc(sizeof(*entry));
+	entry->next = *pnext;
+	*pnext = entry;
+
+	// copy the whole package structure
+	entry->pkg = *pkg;
+	entry->pkg.name = list->pkg_name;
+	entry->pkg.name_id = list->id;
+
+	// reset package fields since they have been taken over by the new
+	// entry
+	srcpkg_init(pkg, NULL);
+
+	list->num_pkg++;
+
+	return &entry->pkg;
+}
 
 /**
  * pkglist_add_or_modify() - allocate or modifyt a package to list
@@ -820,19 +925,19 @@ int mmpkg_cmp(const void * v1, const void * v2)
 {
 	const struct mmpkg * pkg1, * pkg2;
 	int res;
-
+		
 	pkg1 = *((const struct mmpkg**) v1);
 	pkg2 = *((const struct mmpkg**) v2);
-
+		
 	res = strcmp(pkg1->name, pkg2->name);
-
+		
 	if (res == 0)
 		res = pkg_version_compare(pkg1->version, pkg2->version);
-
+		
 	return res;
 }
-
-
+		
+		
 /**
  * install_state_sorted_pkgs - get a sorted array of packages
  * @is:   struct install_state
@@ -849,20 +954,20 @@ const struct mmpkg** install_state_sorted_pkgs(struct install_state * is)
 	struct it_entry* entry;
 	const struct mmpkg ** pkgs;
 	int cnt, i = 0;
-
+		
 	cnt = is->pkg_num;
 	pkgs = xx_malloc(sizeof(*pkgs) * (cnt + 1));
-
+		
 	i = 0;
 	entry = it_iter_first(&iter, &is->idx);
 	while (entry != NULL && i < cnt) {
 		pkgs[i++] = entry->value;
 		entry = it_iter_next(&iter);
 	}
-
+		
 	qsort(pkgs, cnt, sizeof(struct mmpkg*), mmpkg_cmp);
 	pkgs[cnt] = NULL;
-
+		
 	return pkgs;
 }
 
@@ -882,24 +987,24 @@ struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex)
 	struct pkg_iter iter;
 	struct mmpkg ** pkgs, * pkg;
 	int cnt, i = 0;
-
+		
 	cnt = binindex->pkg_num;
 	pkgs = xx_malloc(sizeof(*pkgs) * (cnt + 1));
-
+	
 	i = 0;
 	pkg = pkg_iter_first(&iter, binindex);
 	while (pkg != NULL && i < cnt) {
 		pkgs[i++] = pkg;
 		pkg = pkg_iter_next(&iter);
 	}
-
+		
 	qsort(pkgs, cnt, sizeof(struct mmpkg*), mmpkg_cmp);
 	pkgs[cnt] = NULL;
-
+		
 	return pkgs;
 }
 
-
+	
 LOCAL_SYMBOL
 int binindex_sorted_foreach(struct binindex * binindex,
                             int (* cb)(struct mmpkg*, void*),
@@ -914,6 +1019,31 @@ int binindex_sorted_foreach(struct binindex * binindex,
 
 	free(pkgs);
 	return 0;
+}
+
+
+LOCAL_SYMBOL
+void srcindex_init(struct srcindex* srcindex)
+{
+	*srcindex = (struct srcindex) {0};
+	indextable_init(&srcindex->pkgname_idx, -1, -1);
+}
+
+
+LOCAL_SYMBOL
+void srcindex_deinit(struct srcindex* srcindex)
+{
+	int i;
+
+	for (i = 0; i < srcindex->num_pkgname; i++)
+		srclist_deinit(&srcindex->pkgname_table[i]);
+
+	free(srcindex->pkgname_table);
+	srcindex->pkgname_table = NULL;
+
+	indextable_deinit(&srcindex->pkgname_idx);
+
+	srcindex->num_pkgname = 0;
 }
 
 
@@ -1002,27 +1132,27 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 	struct pkglist_entry * pkgentry;
 	struct pkglist * list;
 	char const * version = (c && c->version) ? c->version : "any";
-
+	
 	list = binindex_get_pkglist(binindex, name);
 	if (list == NULL)
 		return NULL;
 
 	for (pkgentry = list->head; pkgentry; pkgentry = pkgentry->next) {
 		pkg = &pkgentry->pkg;
-
+		
 		if (c && c->sumsha && mmstrcmp(c->sumsha, pkg->sumsha))
 			continue;
 
 		if (c && c->repo && !mmpkg_is_provided_by_repo(pkg, c->repo))
 			continue;
-
+		
 		if (pkg_version_compare(version, pkg->version))
 			continue;
-
+		
 		return pkg;
 	}
-
 	return NULL;
+		
 }
 
 
@@ -1046,6 +1176,44 @@ int binindex_is_pkg_upgradeable(struct binindex const * binindex,
 	mm_check(list != NULL);
 
 	return (pkg_version_compare(list->head->pkg.version, pkg->version) > 0);
+}	
+
+	
+LOCAL_SYMBOL
+int srcindex_get_pkgname_id(struct srcindex* srcindex, const mmstr* name)
+{
+	struct srclist* new_tab;
+	struct srclist* pkglist;
+	struct indextable* idx;
+	struct it_entry* entry;
+	struct it_entry defval = {.key = name, .ivalue = -1};
+	size_t tab_sz;
+	int pkgname_id;
+
+	idx = &srcindex->pkgname_idx;
+	entry = indextable_lookup_create_default(idx, name, defval);
+	pkgname_id = entry->ivalue;
+
+	// Create package list if not existing yet
+	if (pkgname_id == -1) {
+		// Rezize pkgname table
+		tab_sz = (srcindex->num_pkgname + 1) * sizeof(*new_tab);
+		new_tab = xx_realloc(srcindex->pkgname_table, tab_sz);
+		srcindex->pkgname_table = new_tab;
+
+		// Assign an new pkgname id
+		pkgname_id = srcindex->num_pkgname++;
+
+		// Initialize the package list associated to id
+		pkglist = &srcindex->pkgname_table[pkgname_id];
+		srclist_init(pkglist, name, pkgname_id);
+
+		// Reference the new package list in the index table
+		entry->ivalue = pkgname_id;
+		entry->key = pkglist->pkg_name;
+	}
+
+	return pkgname_id;
 }
 
 
@@ -1329,19 +1497,31 @@ const int* binindex_get_potential_rdeps(const struct binindex* binindex,
 
 
 static
+struct srcpkg * srcindex_add_pkg(struct srcindex* srcindex, struct srcpkg* pkg)
+{
+	struct srclist* srclist;
+	int pkgname_id;
+
+	pkgname_id = srcindex_get_pkgname_id(srcindex, pkg->name);
+	srclist = &srcindex->pkgname_table[pkgname_id];
+	return srclist_add_or_modify(srclist, pkg);
+}
+
+
+static
 struct mmpkg* binindex_add_pkg(struct binindex* binindex, struct mmpkg* pkg)
 {
 	struct pkglist* pkglist;
 	int pkgname_id, elem_num;
-
+	
 	pkgname_id = binindex_get_pkgname_id(binindex, pkg->name);
 	pkglist = &binindex->pkgname_table[pkgname_id];
-
+	
 	elem_num = pkglist->num_pkg;
 	pkg = pkglist_add_or_modify(pkglist, pkg);
 	if (pkglist->num_pkg > elem_num)
 		binindex->pkg_num++;
-
+		
 	return pkg;
 }
 
@@ -1435,10 +1615,10 @@ static
 int get_yaml_bool_value(const char* value, size_t valuelen)
 {
 	char tmp[8] = "";
-
+		
 	if (valuelen > sizeof(tmp) - 1)
 		goto error;
-
+		
 	memcpy(tmp, value, valuelen);
 	if (mm_strcasecmp(tmp, "true") == 0)
 		return 1;
@@ -1456,7 +1636,7 @@ int get_yaml_bool_value(const char* value, size_t valuelen)
 		return 1;
 	else if (mm_strcasecmp(tmp, "n") == 0)
 		return 0;
-
+		
 error:
 	mm_raise_error(EINVAL, "invalid bool value: %.*s", valuelen, value);
 	return -1;
@@ -2045,6 +2225,59 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 exit:
 	yaml_parser_delete(&ctx.parser);
 	return rv;
+}
+
+
+/**
+ * srcindex_populate() - populate source package database from package list
+ * @binindex:   binary package index to populate
+ * @index_filename: repository package list file
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+
+int srcindex_populate(struct srcindex * srcindex, char const * index_filename)
+{
+	int fd;
+	char * line, * eol, * field;
+	size_t key_len;
+	void * map;
+	struct mm_stat buf;
+	struct srcpkg srcpkg;
+
+	fd = mm_open(index_filename, O_RDONLY, 0);
+	if (fd == -1)
+		return -1;
+
+	mm_fstat(fd, &buf);
+	map = mm_mapfile(fd, 0, buf.size, MM_MAP_READ|MM_MAP_SHARED);
+
+	mm_check(map != NULL);
+
+	srcpkg_init(&srcpkg, NULL);
+	line = map;
+	while ((eol = strchr(line, '\n')) != NULL) {
+		field = strchr(line, ' ');
+		key_len = field - line;
+
+		if (strncmp(line, "name", key_len) == 0)
+			srcpkg.name = mmstrdup(field);
+		else if (strncmp(line, "filename", key_len) == 0)
+			srcpkg.filename = mmstrdup(field);
+		else if (strncmp(line, "sha256", key_len) == 0)
+			srcpkg.sha256 = mmstrdup(field);
+		else if (strncmp(line, "size", key_len) == 0)
+			srcpkg.size = atoi(field);
+		else if (strncmp(line, "version", key_len) == 0)
+			srcpkg.version = mmstrdup(field);
+	}
+
+	srcindex_add_pkg(srcindex, &srcpkg);
+
+	srcpkg_deinit(&srcpkg);
+	mm_unmap(map);
+	mm_close(fd);
+	return 0;
 }
 
 

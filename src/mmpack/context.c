@@ -105,6 +105,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	if (load_user_config(ctx))
 		return -1;
 
+	srcindex_init(&ctx->srcindex);
 	binindex_init(&ctx->binindex);
 	install_state_init(&ctx->installed);
 
@@ -164,6 +165,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 	}
 
 	binindex_deinit(&ctx->binindex);
+	srcindex_deinit(&ctx->srcindex);
 	install_state_deinit(&ctx->installed);
 	strset_deinit(&ctx->manually_inst);
 	settings_deinit(&ctx->settings);
@@ -220,7 +222,8 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 			continue;
 
 		repo_cache = mmpack_get_repocache_path(ctx, repo->name);
-		if (binindex_populate(&ctx->binindex, repo_cache, repo))
+		if (binindex_populate(&ctx->binindex, repo_cache, repo)
+		    || srcindex_populate(&ctx->srcindex, repo_cache))
 			printf("Cache file of repository %s is missing, "
 			       "updating may fix the issue\n", repo->name);
 
