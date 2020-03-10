@@ -465,24 +465,16 @@ int settings_serialize(const mmstr* prefix,
 }
 
 
-/**
- * create_empty_binindex_file() - create the binindex file corresponding to
- *                                repository name passed in argument
- * @prefix:   prefix
- * @name: name of the repository
- *
- * Return: 0 in case of success, -1 otherwise
- */
-LOCAL_SYMBOL
-int create_empty_binindex_file(const mmstr* prefix, char const * name)
+static
+int create_one_empty_index_file(const mmstr * prefix, const mmstr * index,
+                                const char * name)
 {
 	int fd, oflag, len;
 	mmstr * avllist_relpath;
 
-	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
-	len = mmstrlen(repo_relpath) + strlen(name) + 1;
+	len = mmstrlen(index) + strlen(name) + 1;
 	avllist_relpath = mmstr_malloc(len);
-	sprintf(avllist_relpath, "%s.%s", repo_relpath, name);
+	sprintf(avllist_relpath, "%s.%s", index, name);
 	mmstr_setlen(avllist_relpath, len);
 
 	oflag = O_WRONLY|O_CREAT|O_TRUNC;
@@ -499,7 +491,28 @@ int create_empty_binindex_file(const mmstr* prefix, char const * name)
 
 
 /**
- * create_initial_binindex_files() - create the binindex files corresponding to
+ * create_empty_index_file() - create the index file corresponding to
+ *                                repository name passed in argument
+ * @prefix:   prefix
+ * @name: name of the repository
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int create_empty_index_files(const mmstr* prefix, char const * name)
+{
+	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
+	STATIC_CONST_MMSTR(srcindex_relpath, SRC_INDEX_RELPATH);
+	if (create_one_empty_index_file(prefix, repo_relpath, name)
+	    || create_one_empty_index_file(prefix, srcindex_relpath, name))
+		return -1;
+
+	return 0;
+}
+
+
+/**
+ * create_initial_index_files() - create the binindex files corresponding to
  *                                   repository names passed in the list
  * @prefix:   prefix
  * @name: list of repositories
@@ -507,13 +520,13 @@ int create_empty_binindex_file(const mmstr* prefix, char const * name)
  * Return: 0 in case of success, -1 otherwise
  */
 LOCAL_SYMBOL
-int create_initial_binindex_files(const mmstr* prefix, struct repolist* repos)
+int create_initial_index_files(const mmstr* prefix, struct repolist* repos)
 {
 	struct repo_iter iter;
 	struct repo* r;
 
 	for (r = repo_iter_first(&iter, repos); r; r = repo_iter_next(&iter)) {
-		if (create_empty_binindex_file(prefix, r->name))
+		if (create_empty_index_files(prefix, r->name))
 			return -1;
 	}
 
