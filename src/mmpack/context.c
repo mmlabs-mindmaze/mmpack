@@ -105,6 +105,7 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 	if (load_user_config(ctx))
 		return -1;
 
+	srcindex_init(&ctx->srcindex);
 	binindex_init(&ctx->binindex);
 	install_state_init(&ctx->installed);
 
@@ -164,6 +165,7 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 	}
 
 	binindex_deinit(&ctx->binindex);
+	srcindex_deinit(&ctx->srcindex);
 	install_state_deinit(&ctx->installed);
 	strset_deinit(&ctx->manually_inst);
 	settings_deinit(&ctx->settings);
@@ -192,8 +194,11 @@ int set_installed(struct mmpkg* pkg, void * data)
 LOCAL_SYMBOL
 int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 {
+	STATIC_CONST_MMSTR(binpath, REPO_INDEX_RELPATH);
+	STATIC_CONST_MMSTR(srcpath, SRC_INDEX_RELPATH);
 	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH);
-	mmstr* repo_cache;
+	mmstr* binindex_cache;
+	mmstr* srcindex_cache;
 	mmstr* installed_index_path;
 	int i, num_repo, len;
 	struct repolist_elt * repo;
@@ -219,12 +224,17 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 		if (repo->enabled == 0)
 			continue;
 
-		repo_cache = mmpack_get_repocache_path(ctx, repo->name);
-		if (binindex_populate(&ctx->binindex, repo_cache, repo))
+		binindex_cache =
+			mmpack_repo_cachepath(ctx, repo->name, binpath);
+		srcindex_cache =
+			mmpack_repo_cachepath(ctx, repo->name, srcpath);
+		if (binindex_populate(&ctx->binindex, binindex_cache, repo)
+		    || srcindex_populate(&ctx->srcindex, srcindex_cache, repo))
 			printf("Cache file of repository %s is missing, "
 			       "updating may fix the issue\n", repo->name);
 
-		mmstr_free(repo_cache);
+		mmstr_free(binindex_cache);
+		mmstr_free(srcindex_cache);
 	}
 
 	binindex_compute_rdepends(&ctx->binindex);
@@ -369,28 +379,26 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 
 
 /**
- * mmpack_get_repocache_path() - get path in prefix of repo cache pkglist
- * @ctx:        initialized mmpack context
- * @repo_name: name of the repository
+ * mmpack_repo_cachepath() - Function that computes the path of a given file.
+ * ctx: initialized mmpack context
+ * repo_name: name of the repository where the index file is located
+ * relpath: relative path of the file
  *
- * Return: An allocated mmstr pointer to the file in prefix where the repository
- * cached package info is stored. It must be freed with mmstr_free() when it is
- * no longer needed.
+ * Return: the path of the file @relpath in the repository @repo_name.
  */
 LOCAL_SYMBOL
-mmstr* mmpack_get_repocache_path(struct mmpack_ctx * ctx, char * repo_name)
+mmstr* mmpack_repo_cachepath(struct mmpack_ctx * ctx, char * repo_name,
+                             char const * relpath)
 {
-	STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
 	int len;
 	mmstr * path;
 
-	// Alloc string if not done yet
-	len = mmstrlen(ctx->prefix) + mmstrlen(repo_relpath) +
+	len = mmstrlen(ctx->prefix) + mmstrlen(relpath) +
 	      strlen(repo_name) + 2;
 	path = mmstr_malloc(len);
 
 	// Form destination cache index basen in prefix
-	mmstr_join_path(path, ctx->prefix, repo_relpath);
+	mmstr_join_path(path, ctx->prefix, relpath);
 
 	// Append the name of the repo
 	mmstrcat_cstr(path, ".");

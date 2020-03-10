@@ -20,26 +20,38 @@ static
 int download_repo_index(struct mmpack_ctx * ctx, int repo_index)
 {
 	STATIC_CONST_MMSTR(pkglist, "binary-index");
-	mmstr* path;
+	STATIC_CONST_MMSTR(srclist, "source-index");
+	STATIC_CONST_MMSTR(binpath, REPO_INDEX_RELPATH);
+	STATIC_CONST_MMSTR(srcpath, SRC_INDEX_RELPATH);
+	mmstr* binindex_path = NULL;
+	mmstr* srcindex_path = NULL;
 	int rv = -1;
 	struct repolist_elt * repo;
 
 	repo = settings_get_repo(&ctx->settings, repo_index);
 
-	path = mmpack_get_repocache_path(ctx, repo->name);
-
-	if (download_from_repo(ctx, repo->url, pkglist, NULL, path)) {
+	// download binary index of repo
+	binindex_path = mmpack_repo_cachepath(ctx, repo->name, binpath);
+	if (download_from_repo(ctx, repo->url, pkglist, NULL, binindex_path)) {
 		error("Failed to download package list from %s (%s)\n",
 		      repo->name, repo->url);
 
 		goto exit;
 	}
 
+	// download source index of repo (optional step)
+	srcindex_path = mmpack_repo_cachepath(ctx, repo->name, srcpath);
+	if (download_from_repo(ctx, repo->url, srclist, NULL, srcindex_path)) {
+		info("Failed to download source package list from %s (%s)\n",
+		     repo->name, repo->url);
+	}
+
 	rv = 0;
 	info("Updated package list from repository: %s\n", repo->name);
 
 exit:
-	mmstr_free(path);
+	mmstr_free(binindex_path);
+	mmstr_free(srcindex_path);
 	return rv;
 }
 
