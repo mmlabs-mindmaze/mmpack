@@ -41,6 +41,8 @@ int is_path_separator(char c)
 	MMPACK_STATEDIR_RELPATH "/manually-installed.txt"
 #define REPO_INDEX_RELPATH \
 	MMPACK_STATEDIR_RELPATH "/binindex.yaml"
+#define SRC_INDEX_RELPATH \
+	MMPACK_STATEDIR_RELPATH "/srcindex"
 #define METADATA_RELPATH \
 	MMPACK_STATEDIR_RELPATH "/metadata"
 
