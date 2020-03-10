@@ -1,7 +1,7 @@
 general:
   name: mmpack
-  version: 0.1.1
-  maintainer: gabriel.ganne@mindmaze.ch
+  version: 0.2.0
+  maintainer: gabriel.ganne@mindmaze.com
   url: ssh://intranet.mindmaze.ch:29418/mmpack
   licenses: [ GPL-3 ]
   copyright: 'MindMaze Holdings SA'

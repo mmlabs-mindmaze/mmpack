@@ -1,10 +1,10 @@
-mmpack (0.2.0) UNRELEASED; urgency=medium
+mmpack (0.2.0) unstable; urgency=medium
 
   [ Luca Baldesi ]
   * add licenses spec field
   * add copyright spec field
 
- -- Luca Baldesi <luca.baldesi@mindmaze.com>  Mon, 20 Jan 2020 16:11:16 +0100
+ -- Nicolas Bourdaud <nicolas.bourdaud@mindmaze.com>  Tue, 10 Mar 2020 18:32:16 +0100
 
 mmpack (0.1.1) unstable; urgency=medium
 
