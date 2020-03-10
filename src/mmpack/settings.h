@@ -7,8 +7,8 @@
 #include "mmstring.h"
 #include "repo.h"
 
-int create_empty_binindex_file(const mmstr* prefix, char const * name);
-int create_initial_binindex_files(const mmstr* prefix, struct repolist* repos);
+int create_empty_index_files(const mmstr* prefix, char const * name);
+int create_initial_index_files(const mmstr* prefix, struct repolist* repos);
 
 struct settings {
 	struct repolist repo_list;
