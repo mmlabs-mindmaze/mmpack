@@ -28,3 +28,7 @@ paramiko
 [mmpack-db]
 # debian: python3-watchdog
 watchdog
+
+[mmpack-repo]
+# debian: python3-watchdog
+watchdog

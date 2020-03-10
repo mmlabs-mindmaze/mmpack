@@ -1,1 +1,3 @@
 /usr/bin/mmpack-createrepo
+/usr/bin/mmpack_handle_repo
+/usr/share/mmpack/repo.py
