@@ -48,6 +48,54 @@
     },
     {
       "key": {
+        "uuid": "10961cc5_9863aa7f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-03-10T15:21:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0c64d735_b9a6a502",
+      "range": {
+        "startLine": 7,
+        "startChar": 12,
+        "endLine": 7,
+        "endChar": 15
+      },
+      "revId": "8200472a924a1b5ee27b4da0a82f8b832510e0c6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f8d4b60_9a96e1cf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-03-10T15:21:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "26c9a06e_8dd59fb6",
+      "range": {
+        "startLine": 7,
+        "startChar": 8,
+        "endLine": 7,
+        "endChar": 15
+      },
+      "revId": "8200472a924a1b5ee27b4da0a82f8b832510e0c6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84b74d08_4d36a20d",
         "filename": "src/repository/repo.py",
         "patchSetId": 1
