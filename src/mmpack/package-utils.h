@@ -34,24 +34,6 @@ typedef enum {
 
 int pkg_version_compare(char const * v1, char const * v2);
 
-
-/**
- * strcut constraints - structure containing all the possible constraints
- *                      imposed by the user in the command line.
- * @version: package version
- * @repo_name: the repository in which the package should be searched
- * @sumsha: package sumsha
- **/
-struct constraints {
-	mmstr * version;
-	const struct repolist_elt * repo;
-	mmstr * sumsha;
-};
-
-void constraints_deinit(struct constraints * c);
-int constraints_is_empty(struct constraints * c);
-
-
 struct from_repo {
 	mmstr const * filename;
 	mmstr const * sha256;
@@ -59,9 +41,6 @@ struct from_repo {
 	struct repolist_elt * repo;
 	struct from_repo * next;
 };
-
-
-#define MMPKG_FLAGS_GHOST       (1 << 0)
 
 struct mmpkg {
 	int name_id;
@@ -74,7 +53,6 @@ struct mmpkg {
 	struct from_repo * from_repo;
 
 	pkg_state state;
-	int flags;
 
 	struct mmpkg_dep * mpkdeps;
 	struct strlist sysdeps;
@@ -115,29 +93,35 @@ struct compiled_dep {
  * @pkgname_idx:        index table mapping package name to package name ID.
  * @pkgname_table:      table of list of package sharing the same name. This
  *                      table is indexed by the package name ID.
- * @pkg_num:            number of packages in struct binindex, counting
- *                      different versions.
- * @num_pkgname:        number of package in struct binindex without counting
- *                      different versions. This corresponds to the length of
- *                      @pkgname_table.
+ * @num_pkgname:        number of different package in struct binindex. This
+ *                      corresponds to the length of @pkgname_table.
  */
 struct binindex {
 	struct indextable pkgname_idx;
 	struct pkglist* pkgname_table;
 	int num_pkgname;
-	int pkg_num;
 };
 int binindex_foreach(struct binindex * binindex,
                      int (* cb)(struct mmpkg*, void*),
                      void * data);
 
-int binindex_sorted_foreach(struct binindex * binindex,
-                            int (* cb)(struct mmpkg*, void*),
-                            void * data);
+struct srcpkg {
+	mmstr const * name;
+	mmstr const * path;
+	mmstr const * sha256;
+	mmstr const * version;
+	size_t size;
+	int name_id;
+};
+
+struct srcindex {
+	struct indextable pkgname_idx;
+	struct srclist * pkgname_table;
+	int num_pkgname;
+};
 
 struct install_state {
 	struct indextable idx;
-	int pkg_num;
 };
 
 
@@ -180,28 +164,7 @@ struct rdeps_iter {
 };
 
 
-static inline
-void mmpkg_update_flags(struct mmpkg* pkg, int mask, int set)
-{
-	if (set)
-		pkg->flags |= mask;
-	else
-		pkg->flags &= ~mask;
-}
-
-
-static inline
-int mmpkg_is_ghost(struct mmpkg const * pkg)
-{
-	return pkg->flags & MMPKG_FLAGS_GHOST;
-}
-
-
-int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
-                              struct repolist_elt const * repo);
-
 void mmpkg_dump(struct mmpkg const * pkg);
-void mmpkg_print(struct mmpkg const * pkg);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
 void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);
 
@@ -211,12 +174,16 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name,
-                                    struct constraints const * c);
-int binindex_is_pkg_upgradeable(struct binindex const * binindex,
-                                struct mmpkg const * pkg);
+                                    mmstr const * name, char const * version);
+struct mmpkg const* binindex_get_latest_pkg(struct binindex* binindex,
+                                            mmstr const * name,
+                                            char const * max_version);
+void srcsindex_init(struct srcindex* srcindex);
+void srcindex_deinit(struct srcindex* srcindex);
 void binindex_init(struct binindex* binindex);
 void binindex_deinit(struct binindex* binindex);
+struct mmpkg* add_pkgfile_to_srcindex(struct srcindex* srcindex,
+                                      char const * filename);
 struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
                                       char const * filename);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
@@ -253,7 +220,6 @@ void install_state_add_pkg(struct install_state* state,
 void install_state_rm_pkgname(struct install_state* state,
                               const mmstr* pkgname);
 void install_state_save_to_index(struct install_state* state, FILE* fp);
-const struct mmpkg** install_state_sorted_pkgs(struct install_state * is);
 
 const struct mmpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
                                           const struct mmpkg* pkg,
