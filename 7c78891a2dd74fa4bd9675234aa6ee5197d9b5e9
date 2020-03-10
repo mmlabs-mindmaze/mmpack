@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "d12e443f_33cc5fe0",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-10T15:28:08Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a498289a_a35955a0",
+      "revId": "7c78891a2dd74fa4bd9675234aa6ee5197d9b5e9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "481817ec_6c9dd963",
         "filename": "src/repository/repo.py",
         "patchSetId": 4
@@ -239,6 +257,30 @@
       "revId": "7c78891a2dd74fa4bd9675234aa6ee5197d9b5e9",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be892a52_a3e9a078",
+        "filename": "src/repository/repo.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-10T15:28:08Z",
+      "side": 1,
+      "message": "sounds like laziness to me, but let\u0027s not overly care",
+      "parentUuid": "8e42e325_2ceb0f86",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 19
+      },
+      "revId": "7c78891a2dd74fa4bd9675234aa6ee5197d9b5e9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     },
     {
       "key": {
