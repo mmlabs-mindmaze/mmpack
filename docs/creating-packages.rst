@@ -117,3 +117,11 @@ How to create a local repository using the package I created ?
    cat ~/.config/mmpack-config.yaml
    repositories:
      - file:///home/gandalf/.local/share/mmpack-packages
+
+
+Managing repositories
+#####################
+
+
+.. include:: specs/repo.rst
+
