@@ -15,7 +15,7 @@ import logging.handlers
 import os
 import shutil
 import tarfile
-from typing import Union
+from typing import Union, Callable
 import yaml
 
 RELPATH_BINARY_INDEX = 'binary-index'
@@ -363,7 +363,8 @@ class Repo:
         self._dump_indexes_working_dir(to_add)
         self._commit_upload(to_add, to_remove)
 
-    def _mv_files_working_dir(self, manifest_file: str, manifest: dict):
+    def _mv_files_working_dir(self, manifest_file: str, manifest: dict,
+                              mv_op: Callable[[str, str], None]):
         """
         This function moves the manifest file as well as all the packages
         described in the manifest file into the working directory.
@@ -373,6 +374,7 @@ class Repo:
                            information about the packages that the user wants
                            to upload.
             manifest: dictionary of the manifest file uploaded by the user.
+            mv_op: move/copy function to use
         """
         upload_dir = os.path.dirname(manifest_file)
 
@@ -380,23 +382,24 @@ class Repo:
         # directory
         manifest_basename = os.path.basename(manifest_file)
         destination = os.path.join(self.working_dir, manifest_basename)
-        os.replace(manifest_file, destination)
+        mv_op(manifest_file, destination)
 
         # Move the binary packages from the sas directory to the working
         # directory
         for pkg_info in manifest['binpkgs'][self.arch].values():
             source = os.path.join(upload_dir, pkg_info['file'])
             destination = os.path.join(self.working_dir, pkg_info['file'])
-            os.replace(source, destination)
+            mv_op(source, destination)
 
         # Move the source package from the upload_dir directory to the working
         # directory
         src_filename = manifest['source']['file']
         source = os.path.join(upload_dir, src_filename)
         destination = os.path.join(self.working_dir, src_filename)
-        os.replace(source, destination)
+        mv_op(source, destination)
 
-    def try_handle_upload(self, manifest_file: str):
+    def try_handle_upload(self, manifest_file: str,
+                          remove_upload: bool = True):
         """
         This function tries to handle the packages upload of the user.
 
@@ -404,6 +407,8 @@ class Repo:
             manifest_file: path through the manifest file containing
                            information about the packages that the user wants
                            to upload.
+            remove_upload: if true, files (referenced packages and manifest)
+                           are removed from upload dir.
         """
         try:
             backup_srcindex = self.srcindex.copy()
@@ -414,7 +419,8 @@ class Repo:
             self.logger.info('Checking {}'.format(manifest_file))
 
             manifest = yaml_load(manifest_file)
-            self._mv_files_working_dir(manifest_file, manifest)
+            mv_op = os.replace if remove_upload else shutil.copy
+            self._mv_files_working_dir(manifest_file, manifest, mv_op)
             self._handle_upload(manifest)
             self.logger.info('Data proceeded successfully')
 
