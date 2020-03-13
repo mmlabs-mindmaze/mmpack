@@ -20,16 +20,22 @@ import logging.handlers
 import os
 import shutil
 import stat
+import sys
 import time
 
 from glob import glob
 from tempfile import mkdtemp
 
 import paramiko
-import yaml
+
+CURR_DIR = os.path.abspath(os.path.dirname(__file__))
+ABS_REPOSCRIPT_DIR = os.path.abspath(os.path.join(CURR_DIR, '../..'))
+sys.path.insert(0, ABS_REPOSCRIPT_DIR)
+#pylint: disable=wrong-import-position
 
 from mmpack_build.source_tarball import SourceTarball
-from mmpack_build.common import shell
+from mmpack_build.common import yaml_load, yaml_serialize
+from repo import Repo
 
 import gerrit
 
@@ -38,6 +44,7 @@ import gerrit
 CONFIG_FILEPATH = '/etc/gerrit-mmpack-build/config.yaml'
 CONFIG = None
 BUILDER_LIST = []
+REPO_LIST = []
 
 # repository variables
 REPOSITORY_ROOT_PATH = '/data/build/mmpack/unstable'
@@ -259,6 +266,26 @@ def build_packages(node, workdir, tmpdir, srctar):
         return -1
 
 
+def merge_manifests(pkgdir: str):
+    """
+    find all mmpack manifest of a folder, remove them and create and aggregated
+    version of them
+    """
+    data = {}
+    for manifest_file in glob(pkgdir + '/*.mmpack-manifest'):
+        elt_data = yaml_load(manifest_file)
+        if 'source' not in data:
+            data = elt_data
+        else:
+            data['binpkgs'].update(elt_data['binpkgs'])
+
+    filename = '{}/{}_{}.mmpack-manifest'.format(pkgdir,
+                                                 data['name'],
+                                                 data['version'])
+    yaml_serialize(data, filename)
+    return filename
+
+
 def process_event(event, tmpdir):
     """
     filter and processes event
@@ -310,24 +337,9 @@ def process_event(event, tmpdir):
     if not do_upload:
         return 0
 
-    for node in BUILDER_LIST:
-        # upload packages to repository
-        dstdir = os.path.join(CONFIG['repository-root-path'], node.name)
-        node.exec('mkdir -p ' + dstdir)
-        # copy source package
-        shutil.copy(srctarball.srctar, dstdir)
-        # Copy binary packages
-        for filename in glob(tmpdir + '/*-{}.mpk'.format(node.name)):
-            shutil.copy(os.path.join(tmpdir, filename), dstdir)
-        # Copy source package
-        for filename in glob(tmpdir + '/*-{}_src.*'.format(node.name)):
-            shutil.copy(os.path.join(tmpdir, filename), dstdir)
-
-        # update repository index
-        repository_root = '{}/{}'.format(CONFIG['repository-root-path'],
-                                         node.name)
-        cmd = 'mmpack-createrepo {0} {0}'.format(repository_root)
-        shell(cmd)
+    manifest_file = merge_manifests(tmpdir)
+    for repo in REPO_LIST:
+        repo.try_handle_upload(manifest_file, remove_upload=False)
 
     return 0
 
@@ -355,10 +367,15 @@ def load_config(filename):
     global CONFIG
     # pylint: disable=global-variable-not-assigned
     global BUILDER_LIST
+    # pylint: disable=global-variable-not-assigned
+    global REPO_LIST
 
-    CONFIG = yaml.load(open(filename, 'rb', Loader=yaml.BaseLoader).read())
+    CONFIG = yaml_load(filename)
     for name, node in CONFIG['builders'].items():
         BUILDER_LIST.append(SSH(name=name, **node))
+    for _, node in CONFIG['repositories'].items():
+        REPO_LIST.append(Repo(repo=node['path'],
+                              architecture=node['architecture']))
 
 
 def main():
