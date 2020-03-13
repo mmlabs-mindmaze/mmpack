@@ -44,7 +44,7 @@ class MmpackDbObserver(PatternMatchingEventHandler):
         super().__init__()
         self.to_observe = to_observe
         self.architecture = architecture
-        self.repo = repo.Repo(to_observe, REPO_DIR, architecture)
+        self.repo = repo.Repo(REPO_DIR, architecture)
 
     def on_created(self, event):
         """

@@ -140,19 +140,17 @@ class Repo:
     # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, sas: str, repo: str, architecture: str):
+    def __init__(self, repo: str, architecture: str):
         """
-        Initializes a repository: retrieves the path of the upload directory
-        (named sas_dir), the path of the working directory and the directory
-        containing all the packages (named repo_dir), retrieves the data under
-        the form of dictionary of the repository binary-index and of the
-        repository source-index, creates a logger, retrieves the architecture
-        on which the packages of the repository can be deployed, and registers
-        the number of binary packages referencing each source package.
+        Initializes a repository: retrieves the path of the working directory
+        and the directory containing all the packages (named repo_dir),
+        retrieves the data under the form of dictionary of the repository
+        binary-index and of the repository source-index, creates a logger,
+        retrieves the architecture on which the packages of the repository can
+        be deployed, and registers the number of binary packages referencing
+        each source package.
 
         Args:
-            sas: the directory where the packages and the manifest file are
-                 uploaded.
             repo: the directory where the packages, the binary-index and
                        the source-index are stored.
             architecture: architecture on which the packages of the repository
@@ -171,7 +169,6 @@ class Repo:
         if not os.path.isfile(srcindex_file):
             open(srcindex_file, 'w+')
 
-        self.sas_dir = sas
         self.repo_dir = abs_path_repo
         self.working_dir = os.path.abspath(os.path.join(abs_path,
                                                         RELPATH_WORKING_DIR))
@@ -377,23 +374,25 @@ class Repo:
                            to upload.
             manifest: dictionary of the manifest file uploaded by the user.
         """
-        # Move the manifest file from the sas directory to the working
+        upload_dir = os.path.dirname(manifest_file)
+
+        # Move the manifest file from the upload dir to the working
         # directory
-        manifest_basename = os.path.basename(manifest_file).split('_')[0]
+        manifest_basename = os.path.basename(manifest_file)
         destination = os.path.join(self.working_dir, manifest_basename)
         os.replace(manifest_file, destination)
 
         # Move the binary packages from the sas directory to the working
         # directory
         for pkg_info in manifest['binpkgs'][self.arch].values():
-            source = os.path.join(self.sas_dir, pkg_info['file'])
+            source = os.path.join(upload_dir, pkg_info['file'])
             destination = os.path.join(self.working_dir, pkg_info['file'])
             os.replace(source, destination)
 
-        # Move the source package from the sas directory to the working
+        # Move the source package from the upload_dir directory to the working
         # directory
         src_filename = manifest['source']['file']
-        source = os.path.join(self.sas_dir, src_filename)
+        source = os.path.join(upload_dir, src_filename)
         destination = os.path.join(self.working_dir, src_filename)
         os.replace(source, destination)
 
