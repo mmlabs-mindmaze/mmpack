@@ -93,11 +93,11 @@ class SSH:
     """
     # pylint: disable=too-many-arguments
     def __init__(self, name, hostname, username,
-                 port=22, keyfile=None, password=None):
+                 port='22', keyfile=None, password=None):
         self.name = name
         self.hostname = hostname
         self.username = username
-        self.port = port
+        self.port = int(port)
         self.keyfile = keyfile
         self.password = password
 
