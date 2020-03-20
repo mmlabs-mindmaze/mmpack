@@ -156,8 +156,7 @@ class Repo:
             architecture: architecture on which the packages of the repository
                           can be deployed.
         """
-        abs_path = os.path.dirname(__file__)
-        abs_path_repo = os.path.abspath(os.path.join(abs_path, repo))
+        abs_path_repo = os.path.abspath(repo)
         if not os.path.isdir(abs_path_repo):
             os.mkdir(abs_path_repo)
 
@@ -170,7 +169,7 @@ class Repo:
             open(srcindex_file, 'w+')
 
         self.repo_dir = abs_path_repo
-        self.working_dir = os.path.abspath(os.path.join(abs_path,
+        self.working_dir = os.path.abspath(os.path.join(abs_path_repo,
                                                         RELPATH_WORKING_DIR))
         self.logger = _init_logger(os.path.join(self.repo_dir, LOG_FILE))
 
