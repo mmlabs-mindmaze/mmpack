@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=invalid-name
 # pylint: disable=logging-format-interpolation
+# pylint: disable=wrong-import-position
 """
 Simple script which listens to gerrit for merge events
 to create the updated package of the project.
@@ -20,27 +21,31 @@ import logging.handlers
 import os
 import shutil
 import stat
+import sys
 import time
 
 from glob import glob
 from tempfile import mkdtemp
 
 import paramiko
-import yaml
 
 from mmpack_build.source_tarball import SourceTarball
-from mmpack_build.common import shell
+from mmpack_build.common import yaml_load, yaml_serialize
 
-import gerrit
+CURR_DIR = os.path.abspath(os.path.dirname(__file__))
+ABS_REPOSCRIPT_DIR = os.path.abspath(os.path.join(CURR_DIR, '../..'))
+sys.path.insert(0, ABS_REPOSCRIPT_DIR)
+
+from repo import Repo  # noqa
+
+import gerrit  # noqa
 
 
 # configuration global variable
 CONFIG_FILEPATH = '/etc/gerrit-mmpack-build/config.yaml'
 CONFIG = None
 BUILDER_LIST = []
-
-# repository variables
-REPOSITORY_ROOT_PATH = '/data/build/mmpack/unstable'
+REPO_LIST = []
 
 # logging
 logger = None
@@ -259,6 +264,37 @@ def build_packages(node, workdir, tmpdir, srctar):
         return -1
 
 
+def merge_manifests(pkgdir: str) -> str:
+    """
+    find all mmpack manifest of a folder, and create an aggregated
+    version of them in the same folder
+
+    Return: the path to the aggregated manifest.
+    """
+    common_keys = ('name', 'source', 'version')
+
+    merged = {}
+    for manifest_file in glob(pkgdir + '/*.mmpack-manifest'):
+        elt_data = yaml_load(manifest_file)
+        if not merged:
+            merged = elt_data
+
+        # Check consistency between source, name and source version
+        merged_common = {k: v for k, v in merged.items() if k in common_keys}
+        elt_common = {k: v for k, v in elt_data.items() if k in common_keys}
+        if merged_common != elt_common:
+            raise RuntimeError('merging inconsistent manifest')
+
+        # merged list of binary packages for each architecture
+        merged['binpkgs'].update(elt_data['binpkgs'])
+
+    filename = '{}/{}_{}.mmpack-manifest'.format(pkgdir,
+                                                 merged['name'],
+                                                 merged['version'])
+    yaml_serialize(merged, filename)
+    return filename
+
+
 def process_event(event, tmpdir):
     """
     filter and processes event
@@ -310,24 +346,9 @@ def process_event(event, tmpdir):
     if not do_upload:
         return 0
 
-    for node in BUILDER_LIST:
-        # upload packages to repository
-        dstdir = os.path.join(CONFIG['repository-root-path'], node.name)
-        node.exec('mkdir -p ' + dstdir)
-        # copy source package
-        shutil.copy(srctarball.srctar, dstdir)
-        # Copy binary packages
-        for filename in glob(tmpdir + '/*-{}.mpk'.format(node.name)):
-            shutil.copy(os.path.join(tmpdir, filename), dstdir)
-        # Copy source package
-        for filename in glob(tmpdir + '/*-{}_src.*'.format(node.name)):
-            shutil.copy(os.path.join(tmpdir, filename), dstdir)
-
-        # update repository index
-        repository_root = '{}/{}'.format(CONFIG['repository-root-path'],
-                                         node.name)
-        cmd = 'mmpack-createrepo {0} {0}'.format(repository_root)
-        shell(cmd)
+    manifest_file = merge_manifests(tmpdir)
+    for repo in REPO_LIST:
+        repo.try_handle_upload(manifest_file, remove_upload=False)
 
     return 0
 
@@ -355,10 +376,15 @@ def load_config(filename):
     global CONFIG
     # pylint: disable=global-variable-not-assigned
     global BUILDER_LIST
+    # pylint: disable=global-variable-not-assigned
+    global REPO_LIST
 
-    CONFIG = yaml.load(open(filename, 'rb', Loader=yaml.BaseLoader).read())
+    CONFIG = yaml_load(filename)
     for name, node in CONFIG['builders'].items():
         BUILDER_LIST.append(SSH(name=name, **node))
+    for _, node in CONFIG['repositories'].items():
+        REPO_LIST.append(Repo(repo=node['path'],
+                              architecture=node['architecture']))
 
 
 def main():
