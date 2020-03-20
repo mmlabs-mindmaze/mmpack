@@ -1,0 +1,170 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1159fa4f_898fe29a",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T12:31:02Z",
+      "side": 1,
+      "message": "please add documentation for this function",
+      "revId": "b57b4b3fc6096f2ebf0241c17d263fc008dc322b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d7a2fa5_a7805dd5",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T12:31:02Z",
+      "side": 1,
+      "message": "I do not understand: you\u0027re not testing for any previous allocation",
+      "range": {
+        "startLine": 397,
+        "startChar": 17,
+        "endLine": 397,
+        "endChar": 32
+      },
+      "revId": "b57b4b3fc6096f2ebf0241c17d263fc008dc322b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad0aa05e_bc9f58c6",
+        "filename": "src/mmpack/mmpack-repo.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T12:31:02Z",
+      "side": 1,
+      "message": "the \"one\" emphasis is a tad much",
+      "range": {
+        "startLine": 77,
+        "startChar": 11,
+        "endLine": 77,
+        "endChar": 15
+      },
+      "revId": "b57b4b3fc6096f2ebf0241c17d263fc008dc322b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7676401_fee83d28",
+        "filename": "src/mmpack/mmpack-repo.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T12:31:02Z",
+      "side": 1,
+      "message": "this is not quite so very elegant",
+      "revId": "b57b4b3fc6096f2ebf0241c17d263fc008dc322b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "143a493b_1baba020",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 748,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T12:31:02Z",
+      "side": 1,
+      "message": "why test both ?\nIf the sha256 is different, then the rest does not matter does it ?",
+      "revId": "b57b4b3fc6096f2ebf0241c17d263fc008dc322b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29f5aff4_bfd292cf",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 1201,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T12:31:02Z",
+      "side": 1,
+      "message": "resize",
+      "range": {
+        "startLine": 1201,
+        "startChar": 5,
+        "endLine": 1201,
+        "endChar": 12
+      },
+      "revId": "b57b4b3fc6096f2ebf0241c17d263fc008dc322b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02f8eed8_d80528df",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 2254,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T12:31:02Z",
+      "side": 1,
+      "message": "what do you use those for ?\nI mean, you don\u0027t, do you ?",
+      "range": {
+        "startLine": 2250,
+        "startChar": 1,
+        "endLine": 2254,
+        "endChar": 24
+      },
+      "revId": "b57b4b3fc6096f2ebf0241c17d263fc008dc322b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d489bf8_fbfaf8be",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 2273,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T12:31:02Z",
+      "side": 1,
+      "message": "I would prefer NULL",
+      "range": {
+        "startLine": 2273,
+        "startChar": 15,
+        "endLine": 2273,
+        "endChar": 16
+      },
+      "revId": "b57b4b3fc6096f2ebf0241c17d263fc008dc322b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
