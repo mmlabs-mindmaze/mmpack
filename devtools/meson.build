@@ -44,6 +44,8 @@ if codespell.found()
     )
 endif # codespell
 
+pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
+
 pylint = find_program(['pylint3', 'pylint'], required : false)
 if pylint.found()
     run_target('pylint',
@@ -53,7 +55,8 @@ if pylint.found()
             '--disable=locally-disabled',
             '--rcfile', files('pylint-config'),
             deployment_dir + python.get_install_dir() + '/mmpack_build',
-            files('gerrit/gerrit-mmpack-build.py'),
+            deployment_dir + pkgdatadir + '/repo.py',
+            deployment_dir + pkgdatadir + '/gerrit/python/gerrit-mmpack-build.py',
         ],
         depends : do_deployment_test,
     )
