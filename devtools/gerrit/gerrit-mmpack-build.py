@@ -97,7 +97,7 @@ class SSH:
         self.name = name
         self.hostname = hostname
         self.username = username
-        self.port = port
+        self.port = int(port)
         self.keyfile = keyfile
         self.password = password
 
