@@ -358,6 +358,8 @@ def load_config(filename):
 
     CONFIG = yaml.load(open(filename, 'rb', Loader=yaml.BaseLoader).read())
     for name, node in CONFIG['builders'].items():
+        if 'port' in node:
+            node['port'] = int(node['port'])
         BUILDER_LIST.append(SSH(name=name, **node))
 
 
