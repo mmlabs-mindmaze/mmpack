@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2be8d573_618c550b",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2268,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T15:07:46Z",
+      "side": 1,
+      "message": "you must srcpkg_init() before goto exit\notherwise you will clean up an uninitialized srcpkg",
+      "range": {
+        "startLine": 2263,
+        "startChar": 1,
+        "endLine": 2268,
+        "endChar": 28
+      },
+      "revId": "648c9c53cb6655821bd0a80f59f49b68af33973b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6cc47eb0_6bec0db9",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2295,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-20T15:07:46Z",
+      "side": 1,
+      "message": "This does not seem logical to me.\n\nIf srcpkg takes ownership of those pointers, then you cannot free them. As a matter of fact (and if you just gave ownership), then you do not have any right on those. You probably should just do key \u003d name \u003d sha \u003d ... \u003d NULL\n\nIf srcpackage has NOT taken ownership of those pointers, then it means that srcindex_pkg_add() duplicates the whole structure, and reallocs everything, and that\u0027s probably not the simplest way to go.",
+      "range": {
+        "startLine": 2286,
+        "startChar": 1,
+        "endLine": 2295,
+        "endChar": 23
+      },
+      "revId": "648c9c53cb6655821bd0a80f59f49b68af33973b",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
