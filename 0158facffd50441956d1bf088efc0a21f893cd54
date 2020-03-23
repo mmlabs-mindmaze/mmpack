@@ -1,0 +1,325 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0544678a_f8087e9f",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "call it srcindex_cache, this is no less understandable and it will avoid to break line in line 227",
+      "range": {
+        "startLine": 199,
+        "startChar": 8,
+        "endLine": 199,
+        "endChar": 25
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1062d347_6e23eb02",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "there is a memleak here",
+      "range": {
+        "startLine": 226,
+        "startChar": 2,
+        "endLine": 227,
+        "endChar": 49
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f66794e_9d22bfdf",
+        "filename": "src/mmpack/context.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "merge the implementation of the 2 using an third one (static function) implement the bulk the the function like:\n\nmmpack_get_cachepath(struct mmpack_ctx * ctx, const char* name,\n                     const mmstr* relpath)",
+      "range": {
+        "startLine": 398,
+        "startChar": 0,
+        "endLine": 450,
+        "endChar": 0
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8cf4e61_0072693d",
+        "filename": "src/mmpack/context.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "By consistency, I would rename both:\nmmpack_repo_srcindex_cachepath() and \nmmpack_repo_binindex_cachepath()",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 76
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed008836_d0bb8057",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "srcindex shares next to nothing with the internals of binindex... Please implement the whole srcindex stuff in a dedicated .h and .c file. This will avoid to clutter package-utils.h and package-utils.c which is already (too) big.",
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b6cb938_4c0578e0",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 1509,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "I am not convinced at all by the organization of srcindex...\n\nWhy indexing with source package name? This mimics binindex but this is not necessary.\n\nThe retrieval that you will need is given a source name AND a version AND a srchash, what is the source package to get. Hence you only need to index your source package entries using the string:\n  \u003csrcname\u003e_\u003csrcversion\u003e_\u003csrchash\u003e\nthen you no longer need srclist and srcindex-\u003epkgname_table since you will directly allocate the key and the srcpkg struct in the entries of the indextable.\n\nAlso then srcindex_get_pkgname_id() become completly useless",
+      "range": {
+        "startLine": 1504,
+        "startChar": 1,
+        "endLine": 1509,
+        "endChar": 44
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a173a4db_5845ff55",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 2241,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "Function implement a little bit long, what about spliting it?",
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7545040_7ec7f20c",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 2256,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "Please remove: this is already initialized in context... if you do that here, you just wipe the content of srcindex from the repo that have been already processed",
+      "range": {
+        "startLine": 2256,
+        "startChar": 1,
+        "endLine": 2256,
+        "endChar": 28
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e16d699_3a6c631f",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 2301,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "What is the use of this? Simply use the pointer line to the STR_EQUAL test.",
+      "range": {
+        "startLine": 2301,
+        "startChar": 2,
+        "endLine": 2301,
+        "endChar": 47
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0eaee3c5_cac1acf3",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 2304,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "This is wrong... field as it is span up to the end of the file... You have to do:\nfieldlen \u003d eol - field;\nname \u003d mmstr_copy_realloc(name, field, fieldlen);\n\nAlso... while you are at it, why don\u0027t you assign name directly to srcpkg.name?",
+      "range": {
+        "startLine": 2303,
+        "startChar": 3,
+        "endLine": 2304,
+        "endChar": 26
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42db6d8f_c050525d",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 2322,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 2322,
+        "startChar": 1,
+        "endLine": 2322,
+        "endChar": 24
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ceec660_c1cfcd9f",
+        "filename": "src/mmpack/package-utils.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "What about the repos that provide the source package?",
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae65e01b_c248d193",
+        "filename": "src/mmpack/package-utils.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "This function is useless (and not implemented)... remove",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 238,
+        "endChar": 61
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0605b6ec_6441a681",
+        "filename": "src/mmpack/package-utils.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "You miss a repolist_elt* argument: You need to know which repo was providing this source file (at least to know the URL of the server from where to download the source)",
+      "range": {
+        "startLine": 243,
+        "startChar": 4,
+        "endLine": 243,
+        "endChar": 79
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "14046185_b8d772cc",
+        "filename": "tests/smoke-tests/test_mmpack_mkprefix.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T10:36:39Z",
+      "side": 1,
+      "message": "I don\u0027t understand how this set of modification do test anything... As far as I understand for the current state of the commit, the srcindex is never created in test...",
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
