@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f88b4aa5_f23542f9",
+        "filename": "devtools/gerrit/gerrit-mmpack-build.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-03-23T07:38:37Z",
+      "side": 1,
+      "message": "Why if there is not \u0027source\u0027 in data we suppress all the existing binary packages already present in data?\nWhatever \u0027source\u0027 exist or not in data I would have done:\ndata[\u0027binpkgs\u0027].update(elt_data[\u0027binpkgs\u0027])",
+      "range": {
+        "startLine": 278,
+        "startChar": 8,
+        "endLine": 279,
+        "endChar": 27
+      },
+      "revId": "fbee3c90c367b177fd05835f28cc31f3ebdb62c7",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "407f37a0_fbccd367",
+        "filename": "devtools/gerrit/gerrit-mmpack-build.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-03-23T07:38:37Z",
+      "side": 1,
+      "message": "Normally there is only one source package possible in a manifest. We should check that this is the same source among all the manifest merged.",
+      "revId": "fbee3c90c367b177fd05835f28cc31f3ebdb62c7",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c41d06c_42162ca9",
+        "filename": "devtools/gerrit/gerrit-mmpack-build.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-03-23T07:38:37Z",
+      "side": 1,
+      "message": "The source package should be present in the manifest. We should add the source section in data before serializing it.",
+      "revId": "fbee3c90c367b177fd05835f28cc31f3ebdb62c7",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
