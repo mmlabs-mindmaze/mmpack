@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "22fc394d_c9da9eee",
+        "filename": "devtools/gerrit/gerrit-mmpack-build.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-03-23T15:02:44Z",
+      "side": 1,
+      "message": "add the fact that you return a string.",
+      "range": {
+        "startLine": 270,
+        "startChar": 31,
+        "endLine": 270,
+        "endChar": 33
+      },
+      "revId": "62390764bc50caaeb026adbe03f32ffc835eb845",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
