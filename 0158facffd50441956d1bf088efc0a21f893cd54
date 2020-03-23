@@ -134,6 +134,30 @@
     },
     {
       "key": {
+        "uuid": "60c46c97_43945175",
+        "filename": "src/mmpack/package-utils.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 1509,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-23T11:32:32Z",
+      "side": 1,
+      "message": "Actually I am wrong the lookup we will likely do is \u003csrcname\u003e_\u003csrchash\u003e. Ghost binary package can indeed have a version different from the source package (to adjust to the version of source package).",
+      "parentUuid": "7b6cb938_4c0578e0",
+      "range": {
+        "startLine": 1504,
+        "startChar": 1,
+        "endLine": 1509,
+        "endChar": 44
+      },
+      "revId": "0158facffd50441956d1bf088efc0a21f893cd54",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a173a4db_5845ff55",
         "filename": "src/mmpack/package-utils.c",
         "patchSetId": 15
