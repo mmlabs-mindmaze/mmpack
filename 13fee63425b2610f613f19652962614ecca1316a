@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "45f325ad_d91551e7",
+        "filename": "devtools/gerrit/gerrit-mmpack-build.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-23T12:59:30Z",
+      "side": 1,
+      "message": "please also fix port default value to string \u002722\u0027 instead",
+      "range": {
+        "startLine": 96,
+        "startChar": 17,
+        "endLine": 100,
+        "endChar": 29
+      },
+      "revId": "13fee63425b2610f613f19652962614ecca1316a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
