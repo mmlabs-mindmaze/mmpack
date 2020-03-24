@@ -42,7 +42,7 @@ import gerrit  # noqa
 
 
 # configuration global variable
-CONFIG_FILEPATH = '/etc/gerrit-mmpack-build/config.yaml'
+CONFIG_FILEPATH = '/etc/mmpack-ci-builder/config.yaml'
 CONFIG = None
 BUILDER_LIST = []
 REPO_LIST = []
