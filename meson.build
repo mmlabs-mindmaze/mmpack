@@ -56,6 +56,7 @@ subdir('common-licenses')
 subdir('src/mmpack')
 subdir('src/mmpack-build')
 subdir('src/repository')
+subdir('src/ci-builder')
 subdir('data')
 
 deployment_dir = meson.build_root() + '/deployment-test'

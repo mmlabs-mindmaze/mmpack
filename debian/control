@@ -63,7 +63,7 @@ Description: MindMaze repository management tools
  This package contains the tools needed to manage repositories of mmpack
  packages
 
-Package: mmpack-gerrit-builder-master
+Package: mmpack-ci-builder-master
 Section: devel
 Architecture: all
 Pre-Depends: ${misc:Pre-Depends}, adduser
@@ -77,7 +77,7 @@ Description: MindMaze package repository update tools (master)
  This package contains the tools needed to update repository upon git repo
  update (master server)
 
-Package: mmpack-gerrit-builder-slave
+Package: mmpack-ci-builder-slave
 Section: devel
 Architecture: all
 Pre-Depends: ${misc:Pre-Depends}, adduser

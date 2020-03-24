@@ -3,8 +3,8 @@ Description=MMPACK repository updater
 After=network.target
 
 [Service]
-ExecStartPre=/usr/bin/test -e /etc/gerrit-mmpack-build/config.yaml
-ExecStart=/usr/share/mmpack/gerrit/python/gerrit-mmpack-build.py
+ExecStartPre=/usr/bin/test -e /etc/mmpack-ci-builder/config.yaml
+ExecStart=/usr/share/mmpack/ci-builder/ci_builder.py
 User=mmpack-builder
 Restart=on-failure
 
