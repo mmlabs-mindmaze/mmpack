@@ -1,3 +1,9 @@
+mmpack (0.2.0+next) UNRELEASED; urgency=medium
+
+  * rename packages mmpack-gerrit-builder-* in mmpack-ci-builder-*
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Tue, 24 Mar 2020 14:25:26 +0100
+
 mmpack (0.2.0) unstable; urgency=medium
 
   [ Luca Baldesi ]
