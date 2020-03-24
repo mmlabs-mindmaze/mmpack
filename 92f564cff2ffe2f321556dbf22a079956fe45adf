@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc57e7a0_0ee86be0",
+        "filename": "src/mmpack/srcindex.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-24T10:03:15Z",
+      "side": 1,
+      "message": "if name is not NULL, there is a invalid access, what you must do is to remove mmstr_free(): the second call is a realloc...",
+      "range": {
+        "startLine": 266,
+        "startChar": 3,
+        "endLine": 267,
+        "endChar": 53
+      },
+      "revId": "92f564cff2ffe2f321556dbf22a079956fe45adf",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
