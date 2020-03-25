@@ -90,6 +90,12 @@ mmpackbuild_PYTHON =\
 
 ci_builderdir =  $(pkgdatadir)/ci-builder
 ci_builder_PYTHON = \
+	src/ci-builder/builder.py \
+	src/ci-builder/buildjob.py \
+	src/ci-builder/common.py \
+	src/ci-builder/eventsrc.py \
+	src/ci-builder/eventsrc_gerrit.py \
+	src/ci-builder/jobqueue.py \
 	src/ci-builder/main.py \
 	src/ci-builder/gerrit.py \
 	$(eol)
