@@ -21,7 +21,7 @@ urllib3
 # pacman: mingw-w64-x86_64-python3-astroid
 astroid
 
-[gerrit-mmpack-merge]
+[ci-mmpack-merge]
 # debian: python3-paramiko
 paramiko
 

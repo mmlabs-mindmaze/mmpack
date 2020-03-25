@@ -39,7 +39,7 @@ bin_SCRIPTS = \
 	$(eol)
 
 dist_bin_SCRIPTS = \
-	devtools/mmpack-build-slave.sh \
+	src/ci-builder/mmpack-build-slave.sh \
 	src/repository/mmpack-createrepo \
 	$(eol)
 dist_pkgdata_SCRIPTS = \
@@ -88,12 +88,10 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/xdg.py \
 	$(eol)
 
-mmpack_build_gerritdir =  $(pkgdatadir)/gerrit/python
-mmpack_build_gerrit_SCRIPTS = \
-	devtools/gerrit/gerrit-mmpack-build.py \
-	$(eol)
-mmpack_build_gerrit_PYTHON = \
-	devtools/gerrit/gerrit.py \
+ci_builderdir =  $(pkgdatadir)/ci-builder
+ci_builder_PYTHON = \
+	src/ci-builder/main.py \
+	src/ci-builder/gerrit.py \
 	$(eol)
 
 mmpack_db_service = \
@@ -111,12 +109,12 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 .PHONY: pycodestyle
 pycodestyle: deployment-test
 	pycodestyle --show-source deployment-test$(pythondir)/mmpack_build
-	pycodestyle --show-source deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
+	pycodestyle --show-source deployment-test$(datadir)/mmpack/ci-builder
 
 .PHONY: pylint
 pylint: devtools/pylint-config deployment-test
 	pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build
-	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
+	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) pylint3 --jobs=0 --disable=locally-disabled --ignore=gerrit.py --rcfile=$< deployment-test$(datadir)/mmpack/ci-builder
 
 .PHONY: syntax
 syntax: pycodestyle pylint
@@ -289,7 +287,7 @@ src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
 user_doc_sources =
 .PHONY: spelling
 spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) \
-		$(mmpack_build_gerrit_SCRIPTS) $(mmpack_build_gerrit_PYTHON) \
+		$(ci_builder_SCRIPTS) $(ci_server_PYTHON) \
 		$(user_doc_sources) $(mmpack_db_service)
 	$(AM_V_at) codespell $^
 
@@ -343,8 +341,8 @@ checkstyle: devtools/uncrustify.cfg pycodestyle
 deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES) $(mmpackbuild_PYTHON) \
 		$(nodist_mmpackbuild_PYTHON) \
-		$(mmpack_build_gerrit_SCRIPTS) \
-		$(mmpack_build_gerrit_PYTHON)
+		$(ci_builder_SCRIPTS) \
+		$(ci_builder_PYTHON)
 	DESTDIR=$(shell readlink -f $@) $(MAKE) install
 	@touch $@
 
