@@ -82,6 +82,20 @@ def init_logger():
     logger.setLevel(logging.INFO)
 
 
+def log_error(msg: str):
+    """
+    Log message with error level
+    """
+    log_error(msg)
+
+
+def log_info(msg: str):
+    """
+    Log message with info level
+    """
+    log_info(msg)
+
+
 def isdir(sftp_client, path):
     """
     test whether remote path is dir or not
@@ -160,7 +174,7 @@ class SSH:
                 client.close()
         if ret:
             errmsg = 'SSH error executing {}'.format(command)
-            logger.error(errmsg)
+            log_error(errmsg)
             raise Exception(errmsg)
 
     def _rec_download(self, sftp_client, remote_dir_path, local_dir_path):
@@ -189,7 +203,7 @@ class SSH:
             errmsg = 'SSH error retrieving {} from {} into {}' \
                      .format(remote_dir_path, self, local_dir_path)
             errmsg += 'Error: ' + str(e)
-            logger.error(errmsg)
+            log_error(errmsg)
         finally:
             if client:
                 client.close()
@@ -207,7 +221,7 @@ class SSH:
             errmsg = 'SSH error sending {} to {} in {}\n' \
                      .format(local_file_path, self, remote_path)
             errmsg += 'Error: ' + str(e)
-            logger.error(errmsg)
+            log_error(errmsg)
         finally:
             if client:
                 client.close()
@@ -260,7 +274,7 @@ def build_packages(node, workdir, tmpdir, srctar):
     except Exception as e:  # pylint: disable=broad-except
         errmsg = 'Failed to build package {} on node {}. Exception: {}' \
                  .format(workdir, node, str(e))
-        logger.error(errmsg)
+        log_error(errmsg)
         return -1
 
 
@@ -310,10 +324,10 @@ def process_event(event, tmpdir):
                 branch = event['patchSet']['revision']
         except KeyError:
             # it is impossible to notify gerrit in such a case
-            logger.error('Malformed event')
+            log_error('Malformed event')
             return 0
 
-        logger.info('building {} branch {}'.format(project, branch))
+        log_info('building {} branch {}'.format(project, branch))
 
         workdir = os.path.join('/tmp/mmpack', project, branch)
 
@@ -332,15 +346,15 @@ def process_event(event, tmpdir):
 
         # If project is not packaged with mmpack, just skip
         if not srctarball.srctar:
-            logger.info('No mmpack packaging, build cancelled')
+            log_info('No mmpack packaging, build cancelled')
             return 0
 
         for node in BUILDER_LIST:
-            logger.info('building {} on {} using remote folder {}'
-                        .format(project, node, workdir))
+            log_info('building {} on {} using remote folder {}'
+                     .format(project, node, workdir))
             if build_packages(node, workdir, tmpdir, srctarball.srctar):
                 return -1
-            logger.info('building {} done on {}'.format(project, node))
+            log_info('building {} done on {}'.format(project, node))
     # At this point, all builders have succeeded
     # upload packages only if trigger is a merge action
     if not do_upload:
@@ -365,7 +379,7 @@ def gerrit_notify_error(g, event):
     except Exception as e:  # pylint: disable=broad-except
         errmsg = 'Failed to notify gerrit of build error.\n'
         errmsg += 'Error: ' + str(e)
-        logger.error(errmsg)
+        log_error(errmsg)
 
 
 def load_config(filename):
@@ -410,7 +424,7 @@ def main():
             # an error occurred, but NOT one involving package generation
             # just let slide, it may be caused by a hiccup in the
             # infrastructure.
-            logger.error('ignoring exception {}'.format(str(err)))
+            log_error('ignoring exception {}'.format(str(err)))
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
