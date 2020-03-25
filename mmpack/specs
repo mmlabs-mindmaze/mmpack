@@ -13,14 +13,14 @@ general:
     It is designed to work without any need for root access, and to allow
     multiple coexisting project versions within project prefixes.
 
-mmpack-gerrit-builder-master:
+mmpack-ci-builder-master:
   description: |
     This package contains the tools needed to update repository upon git repo
     update (master server)
   files:
-    - .*/gerrit/
+    - .*/ci-builder/
 
-mmpack-gerrit-builder-slave:
+mmpack-ci-builder-slave:
   description: |
     This package contains the tools needed to update repository upon git repo
     update (slave server)

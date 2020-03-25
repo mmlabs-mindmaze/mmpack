@@ -1,17 +1,3 @@
-install_data(files('mmpack-build-slave.sh'),
-        install_dir : get_option('bindir'),
-        install_mode: 'rwxr-xr-x'
-)
-
-mmpack_build_gerrit_files = files(
-        'gerrit/gerrit-mmpack-build.py',
-        'gerrit/gerrit.py',
-)
-install_data(mmpack_build_gerrit_files,
-    install_dir : get_option('datadir') / 'mmpack/gerrit/python',
-)
-
-
 #
 # dev targets
 #
@@ -56,7 +42,7 @@ if pylint.found()
             '--rcfile', files('pylint-config'),
             deployment_dir + python.get_install_dir() + '/mmpack_build',
             deployment_dir + pkgdatadir + '/repo.py',
-            deployment_dir + pkgdatadir + '/gerrit/python/gerrit-mmpack-build.py',
+            deployment_dir + pkgdatadir + '/ci-builder/ci_builder.py',
         ],
         depends : do_deployment_test,
     )
