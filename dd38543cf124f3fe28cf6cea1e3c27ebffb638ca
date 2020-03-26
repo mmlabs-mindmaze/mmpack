@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cfced2c2_cb5fd2d4",
+        "filename": "devtools/gerrit/gerrit-mmpack-build.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-26T07:22:24Z",
+      "side": 1,
+      "message": "logger.error(msg)",
+      "range": {
+        "startLine": 89,
+        "startChar": 4,
+        "endLine": 89,
+        "endChar": 18
+      },
+      "revId": "dd38543cf124f3fe28cf6cea1e3c27ebffb638ca",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c11105c6_3e8ff699",
+        "filename": "devtools/gerrit/gerrit-mmpack-build.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-26T07:22:24Z",
+      "side": 1,
+      "message": "same mistake here",
+      "range": {
+        "startLine": 96,
+        "startChar": 4,
+        "endLine": 96,
+        "endChar": 17
+      },
+      "revId": "dd38543cf124f3fe28cf6cea1e3c27ebffb638ca",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
