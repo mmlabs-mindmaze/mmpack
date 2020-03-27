@@ -33,6 +33,18 @@ struct mmstring {
 
 typedef char mmstr;
 
+
+/**
+ * struct strbuf: string view on constant buffer
+ * @buf:        pointer of the string memory (not null terminated)
+ * @len:        length of the string
+ */
+struct strbuf {
+	const char* buf;
+	int len;
+};
+
+
 /**
  * macro STATIC_CONST_MMSTR - declare and initialize statically a mmstr*
  * @name:       name of the variable declared
@@ -323,6 +335,96 @@ static inline NONNULL_ARGS(2)
 mmstr* mmstrcpy_cstr_realloc(mmstr* restrict dst, const char* restrict csrc)
 {
 	return mmstr_copy_realloc(dst, csrc, strlen(csrc));
+}
+
+
+/**
+ * strbuf_getline() - extract view of next line
+ * @in:         pointer to input string view
+ *
+ * Extract from pointed view @in a new view reflecting the first line
+ * contained in @in. If a new line delimiter cannot be found, the result will
+ * be equal to the input.
+ *
+ * The pointed view by @in is updated to map the content of the input string
+ * just after the new line character found. If none is found, the updated view
+ * shall be empty (reflecting that the line found has consumed all the string).
+ *
+ * Returns: the string view of the first line.
+ */
+static inline
+struct strbuf strbuf_getline(struct strbuf *in)
+{
+	struct strbuf line = {.buf = in->buf};
+
+	for (line.len = 0; line.len < in->len; line.len++) {
+		if (line.buf[line.len] == '\n') {
+			in->buf++;
+			in->len--;
+			break;
+		}
+	}
+
+	in->buf += line.len;
+	in->len -= line.len;
+	return line;
+}
+
+
+static inline
+int is_whitespace(int c)
+{
+	return (c == '\t'
+	     || c == '\r'
+	     || c == '\n'
+	     || c == '\v'
+	     || c == '\f'
+	     || c == ' ');
+}
+
+
+static inline
+struct strbuf strbuf_strip(struct strbuf in)
+{
+	struct strbuf out = in;
+	int i;
+
+	// Remove trailing whitspaces
+	for (; out.len > 0; out.len--) {
+		if (!is_whitespace(out.buf[out.len]))
+			break;
+	}
+
+	// Remove leading whitespaces
+	for (i = 0; i < out.len; i++) {
+		if (!is_whitespace(out.buf[i]))
+			break;
+	}
+	out.buf += i;
+	out.len -= i;
+
+	return out;
+}
+
+
+static inline
+int strbuf_extract_keyval(struct strbuf in, int c,
+                          struct strbuf* key, struct strbuf* val)
+{
+	int cpos;
+
+	for (cpos = 0; cpos < in.len; cpos++) {
+		if (in.buf[cpos] == c)
+			break;
+	}
+
+	if (cpos == in.len)
+		return -1;
+
+	*key = strbuf_strip((struct strbuf){in.buf, cpos});
+	*val = strbuf_strip((struct strbuf){in.buf+cpos+1, in.len-cpos-1});
+
+	return cpos;
 }
 
 
