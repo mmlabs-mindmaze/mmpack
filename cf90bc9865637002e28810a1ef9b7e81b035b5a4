@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e951480f_2aacf225",
+        "filename": "src/mmpack/srcindex.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-03-27T09:13:07Z",
+      "side": 1,
+      "message": "Please also fix https://opensource.mindmaze.com/jenkins/job/mmpack-linux-autotools/799/console\n  error: array subscript -4 is below array bounds of ‘char[2]’ [-Werror\u003darray-bounds]",
+      "revId": "cf90bc9865637002e28810a1ef9b7e81b035b5a4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
