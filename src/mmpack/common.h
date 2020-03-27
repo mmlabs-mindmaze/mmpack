@@ -41,4 +41,29 @@ uint64_t next_pow2_u64(uint64_t v)
 #define MOUNT_TARGET "/run/mmpack"
 #endif
 
+
+static inline
+int is_whitespace(int c)
+{
+	return (c == '\t'
+	        || c == '\n'
+	        || c == '\v'
+	        || c == '\f'
+	        || c == '\r'
+	        || c == ' ');
+}
+
+
+static inline
+int clamp(int v, int min, int max)
+{
+	if (v < min)
+		v = min;
+	else if (v > max)
+		v = max;
+
+	return v;
+}
+
+
 #endif /* COMMON_H */
