@@ -19,7 +19,6 @@ struct srcpkg {
 
 struct srcindex {
 	struct indextable pkgname_idx;
-	int num_pkgname;
 };
 
 void srcindex_init(struct srcindex* srcindex);

@@ -14,9 +14,9 @@
 
 
 static
-void srcpkg_init(struct srcpkg * pkg, mmstr * name)
+void srcpkg_init(struct srcpkg * pkg)
 {
-	*pkg = (struct srcpkg) {.name = name};
+	*pkg = (struct srcpkg) {NULL};
 }
 
 
@@ -27,8 +27,6 @@ void srcpkg_deinit(struct srcpkg * pkg)
 	mmstr_free(pkg->filename);
 	mmstr_free(pkg->sha256);
 	mmstr_free(pkg->version);
-
-	srcpkg_init(pkg, NULL);
 }
 
 
@@ -44,31 +42,74 @@ LOCAL_SYMBOL
 void srcindex_deinit(struct srcindex* srcindex)
 {
 	indextable_deinit(&srcindex->pkgname_idx);
-	srcindex->num_pkgname = 0;
 }
 
 
-void srcindex_add_pkg(struct srcindex* srcindex, struct srcpkg* pkg)
+static
+int srcindex_add_pkg(struct srcindex* srcindex, struct srcpkg* pkg)
 {
 	struct it_entry * entry;
-	mmstr * name_id = NULL;
-	int len = mmstrlen(pkg->name);
+	struct srcpkg* pkg_in_idx;
+	mmstr* name_id;
 
-	name_id = mmstr_realloc(name_id, len);
-	name_id = mmstrcpy(name_id, pkg->name);
+	if (!pkg->name || !pkg->version || !pkg->filename || !pkg->sha256)
+		return -1;
 
-	len += 1;
-	name_id = mmstr_realloc(name_id, len);
-	name_id = mmstrcat(name_id, "_");
+	// Form the indexing key "<name>_<srcsha>"
+	name_id = mmstr_malloc(mmstrlen(pkg->name) + mmstrlen(pkg->sha256) + 1);
+	mmstrcpy(name_id, pkg->name);
+	mmstrcat_cstr(name_id, "_");
+	mmstrcat(name_id, pkg->sha256);
 
-	len += mmstrlen(pkg->sha256);
-	name_id = mmstr_realloc(name_id, len);
-	name_id = mmstrcat(name_id, pkg->sha256);
-
+	// Try to create the entry in the indextable. If already existing (ie
+	// entry->value != NULL), skip adding a source package
 	entry = indextable_lookup_create(&srcindex->pkgname_idx, name_id);
-	*((struct srcpkg*) entry->value) = *pkg;
+	if (entry->value) {
+		mmstr_free(name_id);
+		return 0;
+	}
 
-	mmstr_free(name_id);
+	// Create a packge in table that take ownership of all fields of pkg
+	pkg_in_idx = xx_malloc(sizeof(*pkg_in_idx));
+	srcpkg_init(pkg_in_idx);
+	*pkg_in_idx = *pkg;
+	srcpkg_init(pkg);
+
+	// This is a new entry, set the key and val fields to created objects
+	entry->key = name_id;
+	entry->value = pkg_in_idx;
+
+	return 0;
+}
+
+
+static
+int srcpkg_setfield(struct srcpkg* pkg, struct strbuf line)
+{
+	struct strbuf key, val;
+	mmstr** str_ptr;
+
+	if (strbuf_extract_keyval(line, ':', &key, &val) == -1)
+		return -1;
+
+	if (STR_EQUAL(key.buf, key.len, "size") == 0) {
+		char cstr[16] = "";
+		// Copy value to a nul-terminated string
+		memcpy(cstr, key.buf, MIN(key.len, MM_NELEM(cstr)-1));
+		pkg->size = atoi(cstr);
+		return 0;
+	} else if (STR_EQUAL(key.buf, key.len, "name") == 0) {
+		str_ptr = &pkg->name;
+	} else if (STR_EQUAL(key.buf, key.len, "filename") == 0) {
+		str_ptr = &pkg->filename;
+	} else if (STR_EQUAL(key.buf, key.len, "sha256") == 0) {
+		str_ptr = &pkg->sha256;
+	} else if (STR_EQUAL(key.buf, key.len, "version") == 0) {
+		str_ptr = &pkg->version;
+	}
+
+	*str_ptr = mmstr_copy_realloc(*str_ptr, val.buf, val.len);
+	return 0;
 }
 
 
@@ -84,13 +125,13 @@ int srcindex_populate(struct srcindex * srcindex, char const * index_filename,
                       struct repolist_elt * repo)
 {
 	int fd, rv = 0;
-	char * line, * eol, * field;
-	size_t key_len, field_len;
-	void * map;
+	struct strbuf line, filedata;
 	struct mm_stat buf;
-	struct srcpkg srcpkg;
+	struct srcpkg pkg;
+	void* map;
 
-	srcpkg_init(&srcpkg, NULL);
+	srcpkg_init(&pkg);
+	pkg.repo = repo;
 
 	fd = mm_open(index_filename, O_RDONLY, 0);
 	if (fd == -1)
@@ -98,62 +139,25 @@ int srcindex_populate(struct srcindex * srcindex, char const * index_filename,
 
 	mm_fstat(fd, &buf);
 	map = mm_mapfile(fd, 0, buf.size, MM_MAP_READ|MM_MAP_SHARED);
+	mm_check(filedata.buf != NULL);
 
-	if (buf.size == 0)
-		goto exit;
+	filedata.len = buf.size;
+	filedata.buf = map;
 
-	mm_check(map != NULL);
+	while (filedata.len && rv == 0) {
+		line = strbuf_getline(&filedata);
 
-	line = map;
-	while ((eol = strchr(line, '\n')) != NULL) {
-		field = strchr(line, ' ');
-
-		if (field == NULL) {
-			// the source-index file is empty
-			if (srcpkg.name == NULL && srcpkg.filename == NULL
-			    && srcpkg.sha256 == NULL && srcpkg.version == NULL)
-				goto exit;
-
-			// the source-index file is not well-formed
-			if (srcpkg.name == NULL || srcpkg.filename == NULL
-			    || srcpkg.sha256 == NULL ||
-			    srcpkg.version == NULL) {
-				rv = -1;
-				goto exit;
-			}
-
-			srcpkg.repo = repo;
-			srcindex_add_pkg(srcindex, &srcpkg);
-			srcpkg_init(&srcpkg, NULL);
+		if (line.len == 0) {
+			srcindex_add_pkg(srcindex, &pkg);
+			srcpkg_deinit(&pkg);
+			srcpkg_init(&pkg);
+			pkg.repo = repo;
+		} else {
+			rv = srcpkg_setfield(&pkg, line);
 		}
-
-		key_len = field - line;
-		field_len = eol - field;
-		if (STR_EQUAL(line, key_len, "name") == 0) {
-			srcpkg.name = mmstr_copy_realloc(srcpkg.name,
-			                                 field,
-			                                 field_len);
-		} else if (STR_EQUAL(line, key_len, "filename") == 0) {
-			srcpkg.filename = mmstr_copy_realloc(srcpkg.filename,
-			                                     field,
-			                                     field_len);
-		} else if (STR_EQUAL(line, key_len, "sha256") == 0) {
-			srcpkg.sha256 = mmstr_copy_realloc(srcpkg.sha256,
-			                                   field,
-			                                   field_len);
-		} else if (STR_EQUAL(line, key_len, "size") == 0) {
-			srcpkg.size = atoi(field);
-		} else if (STR_EQUAL(line, key_len, "version") == 0) {
-			srcpkg.version = mmstr_copy_realloc(srcpkg.version,
-			                                    field,
-			                                    field_len);
-		}
-
-		line = eol + 1;
 	}
 
-exit:
-	srcpkg_deinit(&srcpkg);
+	srcpkg_deinit(&pkg);
 	mm_unmap(map);
 	mm_close(fd);
 	return rv;
