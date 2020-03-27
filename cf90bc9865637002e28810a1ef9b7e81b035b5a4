@@ -16,6 +16,70 @@
       "revId": "cf90bc9865637002e28810a1ef9b7e81b035b5a4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f18adf77_608b0f4e",
+        "filename": "src/mmpack/srcindex.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-27T09:37:09Z",
+      "side": 1,
+      "message": "This is is proposed fix I have made:\n\nmmstrcat(name_id, \"_\"); \u003d\u003e mmstrcat_cstr(name_id, \"_\");",
+      "parentUuid": "e951480f_2aacf225",
+      "revId": "cf90bc9865637002e28810a1ef9b7e81b035b5a4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "508ae847_2b1d936a",
+        "filename": "src/mmpack/srcindex.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-27T09:37:09Z",
+      "side": 1,
+      "message": "entry-\u003evalue does not point to a srcpkg... it has never been allocated... Same for entry-\u003ekey it must be set to an allocated name_id",
+      "range": {
+        "startLine": 69,
+        "startChar": 1,
+        "endLine": 69,
+        "endChar": 41
+      },
+      "revId": "cf90bc9865637002e28810a1ef9b7e81b035b5a4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ef41296_23eb99b9",
+        "filename": "src/mmpack/srcindex.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-27T09:37:09Z",
+      "side": 1,
+      "message": "This is prone to out of bound reading: if the file mapped is not terminated by a \u0027\\n\u0027... Typically an empty file is not terminated by \u0027\\n\u0027...\n\nI am in the process to try an addition to mmstring which should simplify typically the file parsing. Since a simplify will impact how the rest of srcindex_populate() might be implemented, I suggest you put this commit on pause until I came up with the proposal.",
+      "range": {
+        "startLine": 108,
+        "startChar": 1,
+        "endLine": 109,
+        "endChar": 28
+      },
+      "revId": "cf90bc9865637002e28810a1ef9b7e81b035b5a4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
     }
   ]
 }
