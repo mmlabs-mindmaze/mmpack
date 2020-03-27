@@ -732,25 +732,17 @@ void strlist_deinit(struct strlist* list)
 }
 
 
-/**
- * strlist_add() - add string to the list
- * @list: initialized strlist structure
- * @str: string to add (standard char array)
- *
- * Return: always return 0
- */
 LOCAL_SYMBOL
-int strlist_add(struct strlist* list, const char* str)
+int strlist_add_strchunk(struct strlist* list, struct strchunk sv)
 {
 	struct strlist_elt* elt;
-	int len;
 
 	// Create the new element
-	len = strlen(str);
-	elt = xx_malloc(sizeof(*elt) + len + 1);
-	elt->str.max = len;
-	elt->str.len = len;
-	memcpy(elt->str.buf, str, len + 1);
+	elt = xx_malloc(sizeof(*elt) + sv.len + 1);
+	elt->str.max = sv.len;
+	elt->str.len = sv.len;
+	memcpy(elt->str.buf, sv.buf, sv.len);
+	elt->str.buf[sv.len] = '\0';
 	elt->next = NULL;
 
 	// Set as new head if list is empty
@@ -764,6 +756,21 @@ int strlist_add(struct strlist* list, const char* str)
 	list->last->next = elt;
 	list->last = elt;
 	return 0;
+}
+
+
+/**
+ * strlist_add() - add string to the list
+ * @list: initialized strlist structure
+ * @str: string to add (standard char array)
+ *
+ * Return: always return 0
+ */
+LOCAL_SYMBOL
+int strlist_add(struct strlist* list, const char* str)
+{
+	struct strchunk sv = {.buf = str, .len = strlen(str)};
+	return strlist_add_strchunk(list, sv);
 }
 
 
