@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb08e506_3f294872",
+        "filename": "src/mmpack/srcindex.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-27T08:38:16Z",
+      "side": 1,
+      "message": "static",
+      "revId": "b49d549332c9c9596c74d9e91c9e3ad3ea9a85ca",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "186b73ee_e7bb63b9",
+        "filename": "src/mmpack/srcindex.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-27T08:38:16Z",
+      "side": 1,
+      "message": "mmstrcat_cstr",
+      "range": {
+        "startLine": 60,
+        "startChar": 11,
+        "endLine": 60,
+        "endChar": 19
+      },
+      "revId": "b49d549332c9c9596c74d9e91c9e3ad3ea9a85ca",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8475a54d_903f2a0b",
+        "filename": "src/mmpack/srcindex.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-03-27T08:38:16Z",
+      "side": 1,
+      "message": "since these are not the _realloc version, you are garanteed that return value is equal to dst. Hence the reassignment is not necessary, thus it is simpler to do this:\n\nmmstrcpy(name_id, pkg-\u003ename);\nmmstrcat_cstr(name_id, \"_\");\nmmstrcat(name_id, pkg-\u003esha256);",
+      "range": {
+        "startLine": 59,
+        "startChar": 1,
+        "endLine": 61,
+        "endChar": 42
+      },
+      "revId": "b49d549332c9c9596c74d9e91c9e3ad3ea9a85ca",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
