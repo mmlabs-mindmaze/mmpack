@@ -8,6 +8,7 @@
 #include <mmlog.h>
 #include <stdio.h>
 #include "mmstring.h"
+#include "strview.h"
 
 typedef enum {
 	OS_IS_UNKNOWN,
@@ -71,6 +72,7 @@ int prompt_user_confirm(void);
 
 char* strchr_or_end(const char * s, int c);
 
+
 /**************************************************************************
  *                                                                        *
  *                            string list                                 *
@@ -89,6 +91,7 @@ struct strlist {
 
 void strlist_init(struct strlist* list);
 void strlist_deinit(struct strlist* list);
+int strlist_add_strview(struct strlist* list, struct strview sv);
 int strlist_add(struct strlist* list, const char* str);
 void strlist_remove(struct strlist* list, const mmstr* str);
 
