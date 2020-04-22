@@ -14,7 +14,7 @@ elif [ -r configure.ac ] ; then
 fi
 
 cd $BUILDDIR
-$SRCDIR/configure --prefix=$PREFIX $OPTS
+eval $SRCDIR/configure --prefix=$PREFIX $OPTS
 make
 
 if [ "$SKIP_TESTS" != "True" ] ; then

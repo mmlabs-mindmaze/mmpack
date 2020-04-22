@@ -3,7 +3,7 @@
 set -e
 
 cd $BUILDDIR
-cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $OPTS
+eval cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $OPTS
 make
 
 if [ "$SKIP_TESTS" != "True" ] ; then

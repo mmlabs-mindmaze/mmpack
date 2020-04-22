@@ -9,7 +9,7 @@ has_check_target=$(($? == 1))
 set -e
 
 cd $SRCDIR
-make $OPTS PREFIX=$PREFIX
+eval make $OPTS PREFIX=$PREFIX
 
 if [ "$SKIP_TESTS" != "True" ] ; then
 	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
