@@ -2,6 +2,8 @@
 
 set -e
 
+initial_opts='CFLAGS="-flto -O3"'
+
 cd $SRCDIR
 if [ -x configure ] ; then
 	echo "Configure found; skipping reconfiguration ..."
@@ -14,7 +16,7 @@ elif [ -r configure.ac ] ; then
 fi
 
 cd $BUILDDIR
-eval $SRCDIR/configure --prefix=$PREFIX $OPTS
+eval $SRCDIR/configure --prefix=$PREFIX $initial_opts $OPTS
 make
 
 if [ "$SKIP_TESTS" != "True" ] ; then
