@@ -8,20 +8,22 @@ has_check_target=$(($? == 1))
 
 set -e
 
+initial_opts='CFLAGS="-flto -O2" LDFLAGS="$LDFLAGS -flto"'
+
 cd $SRCDIR
-eval make $OPTS PREFIX=$PREFIX
+eval make $initial_opts $OPTS PREFIX=$PREFIX
 
 if [ "$SKIP_TESTS" != "True" ] ; then
 	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 	if [ $has_check_target -eq 1 ] ; then
-		LD_LIBRARY_PATH=$ld_lib_path make check $OPTS PREFIX=$PREFIX
+		LD_LIBRARY_PATH=$ld_lib_path eval make check $initial_opts $OPTS PREFIX=$PREFIX
 	elif [ $has_test_target -eq 1 ] ; then
-		LD_LIBRARY_PATH=$ld_lib_path make test $OPTS PREFIX=$PREFIX
+		LD_LIBRARY_PATH=$ld_lib_path eval make test $initial_opts $OPTS PREFIX=$PREFIX
 	else
 		echo "No test target found" 1>&2
 		exit 1
 	fi
 fi
 
-make install $OPTS PREFIX=$PREFIX DESTDIR=$DESTDIR
+eval make install $initial_opts $OPTS PREFIX=$PREFIX DESTDIR=$DESTDIR

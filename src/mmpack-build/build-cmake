@@ -2,8 +2,10 @@
 
 set -e
 
+initial_opts='-DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE'
+
 cd $BUILDDIR
-eval cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $OPTS
+eval cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $initial_opts $OPTS
 make
 
 if [ "$SKIP_TESTS" != "True" ] ; then
