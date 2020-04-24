@@ -1056,7 +1056,7 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 	}
 
 	// suppress the content of the directory in which the files are unpacked
-	mm_remove(UNPACK_CACHEDIR_RELPATH, MM_RECURSIVE);
+	mm_remove(UNPACK_CACHEDIR_RELPATH, MM_DT_ANY|MM_RECURSIVE);
 
 	// Restore previous current directory
 	mm_chdir(ctx->cwd);
