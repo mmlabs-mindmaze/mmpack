@@ -28,7 +28,6 @@
  **************************************************************************/
 #define READ_ARCHIVE_BLOCK 10240
 #define READ_ARCHIVE_EOF 1
-#define SKIP_UNPACK 1
 
 /**
  * fullwrite() - write fully data buffer to a file
@@ -208,52 +207,6 @@ int is_mmpack_metadata(mmstr const * path)
 }
 
 
-/**
- * redirect_metadata() - modify path of inspected file if metadata
- * @pathname:   pointer to mmstr* holding the original path on input and
- *              modified path on output
- * @metadata_prefix: path to prefix to apply when metadata file
- *
- * This function inspect *@pathname of the file about to be inspected from
- * archive and identifies if it is a metadata or not. A file is a metadata
- * if it starts with "./MMPACK".
- *
- * Return: SKIP_UNPACK if the file entry of archive must be skipped, 0
- * otherwise.
- */
-static
-int redirect_metadata(mmstr** pathname, const mmstr* metadata_prefix)
-{
-	mmstr* basename;
-	mmstr* path = *pathname;
-
-	if (mmstrlen(path) == 0)
-		return SKIP_UNPACK;
-
-	// Keep path NOT starting with MMPACK untouched
-	if (!is_mmpack_metadata(path))
-		return 0;
-
-	// MMPACK/info is not installed and MMPACK/ must not be created
-	if (mmstrequal(path, mmstr_alloca_from_cstr("MMPACK/info"))
-	    || mmstrequal(path, mmstr_alloca_from_cstr("MMPACK/")))
-		return SKIP_UNPACK;
-
-	basename = mmstr_malloca(mmstrlen(path));
-
-	// Change destination
-	mmstr_basename(basename, path);
-	path = mmstrcpy_realloc(path, metadata_prefix);
-	path = mmstrcat_realloc(path, basename);
-
-	mmstr_freea(basename);
-
-	*pathname = path;
-
-	return 0;
-}
-
-
 STATIC_CONST_MMSTR(metadata_dirpath, METADATA_RELPATH);
 
 
@@ -297,7 +250,6 @@ int rename_all(struct strlist* to_rename)
 
 /**
  * pkg_unpack_files() - extract files of a given package
- * @pkg:          package whose files should be extracted
  * @mpk_filename: filename of the downloaded package file
  * @files:        files to be removed
  *
@@ -310,14 +262,12 @@ int rename_all(struct strlist* to_rename)
  * Return: 0 on success, a negative value otherwise.
  */
 static
-int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
-                     struct strlist* files)
+int pkg_unpack_files(const char* mpk_filename, struct strlist* files)
 {
-	mmstr* metadata_prefix;
 	const char* entry_path;
 	struct archive_entry * entry;
 	struct archive * a;
-	int len, r, rv;
+	int r, rv;
 	mmstr* path = NULL;
 	struct strlist to_rename;
 	int cpt = 0;
@@ -336,12 +286,6 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 		archive_read_free(a);
 		return -1;
 	}
-
-	// Set the metadata prefix (var/lib/mmpack/metadata/<pkgname>.)
-	len = mmstrlen(pkg->name) + mmstrlen(metadata_dirpath) + 2;
-	metadata_prefix = mmstr_malloca(len);
-	mmstr_join_path(metadata_prefix, metadata_dirpath, pkg->name);
-	mmstrcat_cstr(metadata_prefix, ".");
 
 	// Loop over each entry in the archive and process them
 	rv = 0;
@@ -362,11 +306,10 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 		}
 
 		// Obtain the pathname (with leading "./" stripped) of the
-		// file being extracted and redirect to metadata folder if
-		// it is a metadata file
+		// file being extracted and skip metadata (MMPACK/*)
 		entry_path = archive_entry_pathname_utf8(entry);
 		path = mmstrcpy_cstr_realloc(path, entry_path+2);
-		if (redirect_metadata(&path, metadata_prefix) == SKIP_UNPACK)
+		if (!mmstrlen(path) || is_mmpack_metadata(path))
 			continue;
 
 		rv = pkg_unpack_entry(a, entry, path, cpt);
@@ -381,7 +324,6 @@ int pkg_unpack_files(const struct mmpkg* pkg, const char* mpk_filename,
 			strlist_remove(files, path);
 	}
 
-	mmstr_freea(metadata_prefix);
 	mmstr_free(path);
 
 	// Cleanup
@@ -523,9 +465,6 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 			               pkg->name, path);
 			goto exit;
 		}
-
-		if (redirect_metadata(&path, metadata_prefix) == SKIP_UNPACK)
-			continue;
 
 		// Skip folder (path terminated with '/')
 		if (is_path_separator(path[mmstrlen(path)-1]))
@@ -851,7 +790,7 @@ int install_package(struct mmpack_ctx* ctx,
 
 	mm_log_info("\tsumsha: %s", pkg->sumsha);
 
-	rv = pkg_unpack_files(pkg, mpkfile, NULL);
+	rv = pkg_unpack_files(mpkfile, NULL);
 	if (rv) {
 		error("Failed!\n");
 		return -1;
@@ -938,7 +877,7 @@ int upgrade_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg,
 	strlist_init(&files);
 
 	if (pkg_list_rm_files(oldpkg, &files)
-	    || pkg_unpack_files(pkg, mpkfile, &files)
+	    || pkg_unpack_files(mpkfile, &files)
 	    || rm_files_from_list(&files)) {
 		rv = -1;
 	}
