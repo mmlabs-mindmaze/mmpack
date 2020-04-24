@@ -21,6 +21,38 @@
 #include "utils.h"
 #include "sysdeps.h"
 
+
+/**
+ * sha256sums_path() - get path to sha256sums file of given package
+ * @ctx:      mmpack context. If NULL, current dir is assumed to be the root
+ *            the mmpack prefix where to search the installed files.
+ * @pkg:      package whose sha256sums file must be obtained.
+ *
+ * Return:
+ * An allocated sha256sums path string. The returned pointer must be freed with
+ * mmstr_free() when done with it.
+ */
+static
+mmstr* sha256sums_path(const struct mmpack_ctx * ctx, const struct mmpkg* pkg)
+{
+	int len = sizeof(METADATA_RELPATH "/.sha256sums") + mmstrlen(pkg->name)
+	          + (ctx ? mmstrlen(ctx->prefix)+1 : 0);
+	mmstr* sha256sums = mmstr_malloc(len);
+
+	// Prepend prefix path with trailing '/' if context is provided
+	if (ctx) {
+		mmstrcpy(sha256sums, ctx->prefix);
+		mmstrcat_cstr(sha256sums, "/");
+	}
+
+	mmstrcat_cstr(sha256sums, METADATA_RELPATH "/");
+	mmstrcat(sha256sums, pkg->name);
+	mmstrcat_cstr(sha256sums, ".sha256sums");
+
+	return sha256sums;
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                      Packages files unpacking                          *
@@ -205,9 +237,6 @@ int is_mmpack_metadata(mmstr const * path)
 {
 	return STR_STARTS_WITH(path, (size_t) mmstrlen(path), "MMPACK");
 }
-
-
-STATIC_CONST_MMSTR(metadata_dirpath, METADATA_RELPATH);
 
 
 /**
@@ -428,22 +457,11 @@ int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
 static
 int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 {
-	int len, rv = -1;
+	int rv = -1;
 	FILE* fp;
 	mmstr* path;
-	mmstr* metadata_prefix;
 
-	path = mmstr_malloc(UNPACK_MAXPATH);
-
-	// Set the metadata prefix (var/lib/mmpack/metadata/<pkgname>.)
-	len = mmstrlen(metadata_dirpath) + mmstrlen(pkg->name) + 2;
-	metadata_prefix = mmstr_malloca(len);
-	mmstr_join_path(metadata_prefix, metadata_dirpath, pkg->name);
-	mmstrcat_cstr(metadata_prefix, ".");
-
-	// Open package's sha256sums file to get file list
-	mmstrcpy(path, metadata_prefix);
-	mmstrcat_cstr(path, "sha256sums");
+	path = sha256sums_path(NULL, pkg);
 	fp = fopen(path, "rb");
 	if (fp == NULL) {
 		mm_raise_from_errno("Can't open %s", path);
@@ -478,7 +496,6 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 
 exit:
 	mmstr_free(path);
-	mmstr_freea(metadata_prefix);
 	return rv;
 }
 
@@ -550,27 +567,31 @@ int check_file_pkg(const mmstr * ref_sha, const mmstr * parent,
 
 
 /**
- * check_pkg() - check integrity of installed package from its list of sha256
- * @parent: prefix directory to prepend to @filename to get the
- *          final path of the file to hash. This may be NULL
- * @sumsha: sha256sums file name
+ * check_installed_pkg() - check integrity of installed package
+ * @ctx:        mmpack context. If NULL, current dir is assumed to be the root
+ *              the mmpack prefix where to search the installed files.
+ * @pkg:        installed package whose integrity must be checked
  *
  * Return: 0 if no issue has been found, -1 otherwise
  */
 LOCAL_SYMBOL
-int check_pkg(mmstr const * parent, mmstr const * sumsha)
+int check_installed_pkg(const struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 {
 	mmstr * filename;
 	mmstr * ref_sha;
+	mmstr * sumsha_path;
 	char * line, * eol;
 	size_t line_len, filename_len;
 	int fd;
 	void * map;
 	struct mm_stat buf;
 
-	fd = mm_open(sumsha, O_RDONLY, 0);
-	if (fd == -1)
+	sumsha_path = sha256sums_path(ctx, pkg);
+	fd = mm_open(sumsha_path, O_RDONLY, 0);
+	if (fd == -1) {
+		mmstr_free(sumsha_path);
 		return -1;
+	}
 
 	mm_fstat(fd, &buf);
 
@@ -605,7 +626,7 @@ int check_pkg(mmstr const * parent, mmstr const * sumsha)
 		if (is_mmpack_metadata(filename))
 			goto check_continue;
 
-		if (check_file_pkg(ref_sha, parent, filename) != 0)
+		if (check_file_pkg(ref_sha, ctx->prefix, filename) != 0)
 			break;
 
 check_continue:
@@ -614,6 +635,7 @@ check_continue:
 
 	mmstr_free(filename);
 	mmstr_free(ref_sha);
+	mmstr_free(sumsha_path);
 	mm_unmap(map);
 	mm_close(fd);
 
