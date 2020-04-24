@@ -67,14 +67,10 @@ static
 int binindex_cb(struct mmpkg* pkg, void * void_data)
 {
 	int rv;
-	mmstr * sha256sums;
 	struct cb_data * data = (struct cb_data*) void_data;
 
 	if (pkg->state == MMPACK_PKG_INSTALLED) {
-		sha256sums = get_sha256sums_file(data->ctx->prefix, pkg->name);
-		rv = check_pkg(data->ctx->prefix, sha256sums);
-		mmstr_free(sha256sums);
-
+		rv = check_installed_pkg(data->ctx, pkg);
 		if (rv != 0) {
 			data->found = 1;
 			info("Trying to fix broken installed package: "
