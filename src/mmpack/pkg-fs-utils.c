@@ -44,6 +44,59 @@ mmstr* sha256sums_path(const struct mmpkg* pkg)
 }
 
 
+/**
+ * read_sha256sums() - parse the sha256sums of an installed package
+ * @ctx:      mmpack prefix context containing @pkg (may be NULL)
+ * @pkg:      package whose sha256sums file must be obtained.
+ * @filelist: string list receiving the list of file in package
+ * @hashlist: string list receiving the hash for each file in @filelist. If
+ *            NULL, the hash list is ignored.
+ *
+ * Open and parse the sha256sums file of the installed package @pkg from the
+ * mmpack prefix context @ctx. If @ctx is NULL, the installed package is
+ * assumed to be located relatively to the current directory.
+ *
+ * Return: 0 in case of success, -1 otherwise.
+ */
+static
+int read_sha256sums(const mmstr* prefix, const mmstr* path,
+                    struct strlist* filelist, struct strlist* hashlist)
+{
+	struct strchunk data_to_parse, line;
+	int pos, rv;
+	void* map = NULL;
+	size_t mapsize = 0;
+
+	rv = map_file_in_prefix(prefix, path, &map, &mapsize);
+	if (rv == -1)
+		goto exit;
+
+	data_to_parse = (struct strchunk) {.buf = map, .len = mapsize};
+	while (data_to_parse.len) {
+		line = strchunk_getline(&data_to_parse);
+		pos = strchunk_rfind(line, ':');
+		if (pos == -1) {
+			rv = mm_raise_error(EBADMSG,
+			                    "Error while parsing %s", path);
+			break;
+		}
+
+		strlist_add_strchunk(filelist, strchunk_lpart(line, pos));
+
+		if (!hashlist)
+			continue;
+
+		// Skip space after colon before reading hash value
+		strlist_add_strchunk(hashlist, strchunk_rpart(line, pos+1));
+	}
+
+
+exit:
+	mm_unmap(map);
+	return rv;
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                      Packages files unpacking                          *
@@ -436,8 +489,6 @@ int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
  *                                                                        *
  **************************************************************************/
 
-#define UNPACK_MAXPATH 512
-
 /**
  * pkg_list_rm_files() - list files of a package to be removed
  * @pkg:        package about to be removed
@@ -448,45 +499,14 @@ int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
 static
 int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 {
-	int rv = -1;
-	FILE* fp;
+	int rv;
 	mmstr* path;
 
 	path = sha256sums_path(pkg);
-	fp = fopen(path, "rb");
-	if (fp == NULL) {
-		mm_raise_from_errno("Can't open %s", path);
-		goto exit;
-	}
 
-	// Add immediately the path of sha256sums
 	strlist_add(files, path);
+	rv = read_sha256sums(NULL, path, files, NULL);
 
-	path = mmstr_realloc(path, UNPACK_MAXPATH);
-	while (fscanf(fp, "%"MM_STRINGIFY (UNPACK_MAXPATH)"[^:]: %*s ",
-	              path) == 1) {
-		mmstr_update_len_from_buffer(path);
-
-		// Check the path has not been truncated
-		if (mmstrlen(path) == UNPACK_MAXPATH) {
-			mm_raise_error(ENAMETOOLONG, "Path of file"
-			               " installed by %s has been truncated"
-			               " (truncated path: %s)",
-			               pkg->name, path);
-			goto exit;
-		}
-
-		// Skip folder (path terminated with '/')
-		if (is_path_separator(path[mmstrlen(path)-1]))
-			continue;
-
-		strlist_add(files, path);
-	}
-
-	fclose(fp);
-	rv = 0;
-
-exit:
 	mmstr_free(path);
 	return rv;
 }
@@ -569,59 +589,40 @@ int check_file_pkg(const mmstr * ref_sha, const mmstr * parent,
 LOCAL_SYMBOL
 int check_installed_pkg(const struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 {
-	mmstr * filename;
-	mmstr * ref_sha;
-	mmstr * sumsha_path;
-	char * line, * eol;
-	size_t line_len, filename_len, mapsize;
-	void * map;
-	int rv;
+	mmstr * filename, * ref_sha, * sumsha_path;
+	struct strlist filelist, hashlist;
+	struct strlist_elt * file_elt, * hash_elt;
+	int rv = -1;
+
+	strlist_init(&filelist);
+	strlist_init(&hashlist);
 
 	sumsha_path = sha256sums_path(pkg);
-	rv = map_file_in_prefix(ctx->prefix, sumsha_path, &map, &mapsize);
+	rv = read_sha256sums(ctx->prefix, sumsha_path, &filelist, &hashlist);
 	mmstr_free(sumsha_path);
 	if (rv == -1)
-		return -1;
+		goto exit;
 
-	line = map;
-	filename = ref_sha = NULL;
-	while ((eol = strchr(line, '\n')) != NULL) {
-		line_len = eol - line;
-
-		if (line_len < SHA_HEXSTR_LEN) {
-			mm_raise_error(EBADMSG,
-			               "Error while parsing SHA-256 file");
-			break;
-		}
-
-		ref_sha = mmstr_copy_realloc(ref_sha,
-		                             &line[line_len - SHA_HEXSTR_LEN],
-		                             SHA_HEXSTR_LEN);
-
-		/* 2 is for len(': ') */
-		if (line_len <= SHA_HEXSTR_LEN + 2) {
-			mm_raise_error(EBADMSG,
-			               "Error while parsing SHA-256 file");
-			break;;
-		}
-
-		filename_len = line_len - SHA_HEXSTR_LEN - 2;
-		filename = mmstr_copy_realloc(filename, line, filename_len);
-		if (is_mmpack_metadata(filename))
-			goto check_continue;
+	file_elt = filelist.head;
+	hash_elt = hashlist.head;
+	while (file_elt) {
+		mm_check(hash_elt != NULL);
+		filename = file_elt->str.buf;
+		ref_sha = hash_elt->str.buf;
 
 		if (check_file_pkg(ref_sha, ctx->prefix, filename) != 0)
 			break;
 
-check_continue:
-		line = eol + 1;
+		file_elt = file_elt->next;
+		hash_elt = hash_elt->next;
 	}
 
-	mmstr_free(filename);
-	mmstr_free(ref_sha);
-	mm_unmap(map);
+	rv = 0;
 
-	return (eol == NULL) ? 0 : -1;
+exit:
+	strlist_deinit(&filelist);
+	strlist_deinit(&hashlist);
+	return rv;
 }
 
 
