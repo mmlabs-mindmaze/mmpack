@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05958458_c1d8148e",
+        "filename": "src/mmpack/pkg-fs-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-04-29T07:28:26Z",
+      "side": 1,
+      "message": "when do we need this ?",
+      "range": {
+        "startLine": 27,
+        "startChar": 30,
+        "endLine": 28,
+        "endChar": 68
+      },
+      "revId": "9058161e9f3c30ef00c3a2580728d26549c600c2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11445c3b_bc8c8ac5",
+        "filename": "src/mmpack/pkg-fs-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-04-29T07:28:26Z",
+      "side": 1,
+      "message": "if ctx \u003d\u003d NULL, you\u0027ll be trying to concat into an uninitialized variable.\nYou need to at least write 0 into sha256sums\u0027s first Byte.",
+      "revId": "9058161e9f3c30ef00c3a2580728d26549c600c2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
