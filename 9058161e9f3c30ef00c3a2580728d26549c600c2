@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3d0ec6c2_672811b0",
+        "filename": "src/mmpack/pkg-fs-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-04-29T07:49:52Z",
+      "side": 1,
+      "message": "when called in pkg_list_rm_files()... There, the path to sha256sums file must be added to the list of files to be removed. In this situation the path must be exactly only the subpath without prefix, ie var/lib/metadata/\u003cpkg\u003e.sh256sums. Otherwise it won\u0027t match the name of the file that would be overwritten (in case of package upgrade for example).",
+      "parentUuid": "05958458_c1d8148e",
+      "range": {
+        "startLine": 27,
+        "startChar": 30,
+        "endLine": 28,
+        "endChar": 68
+      },
+      "revId": "9058161e9f3c30ef00c3a2580728d26549c600c2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11445c3b_bc8c8ac5",
         "filename": "src/mmpack/pkg-fs-utils.c",
         "patchSetId": 2
@@ -39,6 +63,24 @@
       "revId": "9058161e9f3c30ef00c3a2580728d26549c600c2",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc0f963a_c9bf4ab4",
+        "filename": "src/mmpack/pkg-fs-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-04-29T07:49:52Z",
+      "side": 1,
+      "message": "This is not needed: when mmstr are allocated, mmstr_init() is called internally which is initialized to a 0 length string (including \u0027\\0\u0027 termination)",
+      "parentUuid": "11445c3b_bc8c8ac5",
+      "revId": "9058161e9f3c30ef00c3a2580728d26549c600c2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
