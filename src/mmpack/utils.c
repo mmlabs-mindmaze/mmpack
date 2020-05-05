@@ -243,6 +243,49 @@ exit:
 }
 
 
+/**
+ * map_file_in_prefix() - map file from a prefix in memory
+ * @prefix:     folder from where to open the file (may be NULL)
+ * @relpath:    path relative to @prefix of the file to open
+ * @map:        pointer to void* receiving the address of mapped data
+ * @len:        pointer to size_t variable receiving the length of mapped data
+ *
+ * This function maps the content of the file located at @relpath relatively to
+ * a folder specified by @prefix if not NULL. The base address of the mapped
+ * memory and its length will be set into the values pointed respectively by
+ * @map and @len.
+ *
+ * When the mapping is no longer needed, it must be unmapped with mm_unmap().
+ *
+ * Return: 0 in case of success. Otherwise -1 is returned with error state set
+ * accordingly.
+ */
+LOCAL_SYMBOL
+int map_file_in_prefix(const mmstr* prefix, const mmstr* relpath,
+                       void** map, size_t* len)
+{
+	struct mm_stat buf;
+	int fd;
+
+	fd = open_file_in_prefix(prefix, relpath, O_RDONLY);
+	if (fd == -1)
+		return -1;
+
+	mm_fstat(fd, &buf);
+	*len = buf.size;
+
+	if (buf.size) {
+		*map = mm_mapfile(fd, 0, buf.size, MM_MAP_READ);
+		mm_check(*map != NULL);
+	} else {
+		*map = NULL;
+	}
+
+	mm_close(fd);
+	return 0;
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                            Host OS detection                           *
