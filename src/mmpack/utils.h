@@ -61,6 +61,8 @@ mmstr* mmstr_join_path(mmstr* restrict dst,
                        const mmstr* restrict p1, const mmstr* restrict p2);
 
 int open_file_in_prefix(const mmstr* prefix, const mmstr* relpath, int oflag);
+int map_file_in_prefix(const mmstr* prefix, const mmstr* relpath,
+                       void** map, size_t* len);
 
 void report_user_and_log(int mm_log_level, const char* fmt, ...);
 

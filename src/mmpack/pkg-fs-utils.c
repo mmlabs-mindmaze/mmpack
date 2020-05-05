@@ -572,23 +572,15 @@ int check_installed_pkg(const struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 	mmstr * ref_sha;
 	mmstr * sumsha_path;
 	char * line, * eol;
-	size_t line_len, filename_len;
-	int fd;
+	size_t line_len, filename_len, mapsize;
 	void * map;
-	struct mm_stat buf;
+	int rv;
 
 	sumsha_path = sha256sums_path(pkg);
-	fd = open_file_in_prefix(ctx->prefix, sumsha_path, O_RDONLY);
-	if (fd == -1) {
-		mmstr_free(sumsha_path);
+	rv = map_file_in_prefix(ctx->prefix, sumsha_path, &map, &mapsize);
+	mmstr_free(sumsha_path);
+	if (rv == -1)
 		return -1;
-	}
-
-	mm_fstat(fd, &buf);
-
-	map = mm_mapfile(fd, 0, buf.size, MM_MAP_READ|MM_MAP_SHARED);
-
-	mm_check(map != NULL);
 
 	line = map;
 	filename = ref_sha = NULL;
@@ -626,9 +618,7 @@ check_continue:
 
 	mmstr_free(filename);
 	mmstr_free(ref_sha);
-	mmstr_free(sumsha_path);
 	mm_unmap(map);
-	mm_close(fd);
 
 	return (eol == NULL) ? 0 : -1;
 }

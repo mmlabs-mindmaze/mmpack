@@ -256,22 +256,16 @@ int load_manually_installed(const mmstr * prefix, struct strset * manually_inst)
 {
 	STATIC_CONST_MMSTR(manually_inst_relpath, MANUALLY_INST_RELPATH);
 	mmstr * pkg_name = NULL;
-	int fd, line_len;
+	int line_len;
 	char * line, * eol;
-	struct mm_stat buf;
-	void * map = NULL;
+	void* map = NULL;
+	size_t mapsize;
 
-	fd = open_file_in_prefix(prefix, manually_inst_relpath, O_RDONLY);
-	if (fd == -1)
+	if (map_file_in_prefix(prefix, manually_inst_relpath, &map, &mapsize))
 		return -1;
 
-	mm_fstat(fd, &buf);
-
-	if (!buf.size)
+	if (!mapsize)
 		goto exit;
-
-	map = mm_mapfile(fd, 0, buf.size, MM_MAP_READ);
-	mm_check(map != NULL);
 
 	line = map;
 	while ((eol = strchr(line, '\n')) != NULL) {
@@ -282,7 +276,6 @@ int load_manually_installed(const mmstr * prefix, struct strset * manually_inst)
 	}
 
 exit:
-	mm_close(fd);
 	mm_unmap(map);
 	mmstr_free(pkg_name);
 	return 0;
