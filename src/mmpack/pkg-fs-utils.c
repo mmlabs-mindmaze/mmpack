@@ -24,26 +24,17 @@
 
 /**
  * sha256sums_path() - get path to sha256sums file of given package
- * @ctx:      mmpack context. If NULL, current dir is assumed to be the root
- *            the mmpack prefix where to search the installed files.
  * @pkg:      package whose sha256sums file must be obtained.
  *
  * Return:
- * An allocated sha256sums path string. The returned pointer must be freed with
- * mmstr_free() when done with it.
+ * An allocated sha256sums path string relative to a prefix path. The returned
+ * pointer must be freed with mmstr_free() when done with it.
  */
 static
-mmstr* sha256sums_path(const struct mmpack_ctx * ctx, const struct mmpkg* pkg)
+mmstr* sha256sums_path(const struct mmpkg* pkg)
 {
-	int len = sizeof(METADATA_RELPATH "/.sha256sums") + mmstrlen(pkg->name)
-	          + (ctx ? mmstrlen(ctx->prefix)+1 : 0);
+	int len = sizeof(METADATA_RELPATH "/.sha256sums") + mmstrlen(pkg->name);
 	mmstr* sha256sums = mmstr_malloc(len);
-
-	// Prepend prefix path with trailing '/' if context is provided
-	if (ctx) {
-		mmstrcpy(sha256sums, ctx->prefix);
-		mmstrcat_cstr(sha256sums, "/");
-	}
 
 	mmstrcat_cstr(sha256sums, METADATA_RELPATH "/");
 	mmstrcat(sha256sums, pkg->name);
@@ -461,7 +452,7 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 	FILE* fp;
 	mmstr* path;
 
-	path = sha256sums_path(NULL, pkg);
+	path = sha256sums_path(pkg);
 	fp = fopen(path, "rb");
 	if (fp == NULL) {
 		mm_raise_from_errno("Can't open %s", path);
@@ -586,8 +577,8 @@ int check_installed_pkg(const struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 	void * map;
 	struct mm_stat buf;
 
-	sumsha_path = sha256sums_path(ctx, pkg);
-	fd = mm_open(sumsha_path, O_RDONLY, 0);
+	sumsha_path = sha256sums_path(pkg);
+	fd = open_file_in_prefix(ctx->prefix, sumsha_path, O_RDONLY);
 	if (fd == -1) {
 		mmstr_free(sumsha_path);
 		return -1;
