@@ -255,27 +255,21 @@ static
 int load_manually_installed(const mmstr * prefix, struct strset * manually_inst)
 {
 	STATIC_CONST_MMSTR(manually_inst_relpath, MANUALLY_INST_RELPATH);
-	mmstr * pkg_name = NULL;
-	int line_len;
-	char * line, * eol;
+	struct strchunk line, data_to_parse;
+	mmstr* pkg_name = NULL;
 	void* map = NULL;
 	size_t mapsize;
 
 	if (map_file_in_prefix(prefix, manually_inst_relpath, &map, &mapsize))
 		return -1;
 
-	if (!mapsize)
-		goto exit;
-
-	line = map;
-	while ((eol = strchr(line, '\n')) != NULL) {
-		line_len = eol - line;
-		pkg_name = mmstr_copy_realloc(pkg_name, line, line_len);
+	data_to_parse = (struct strchunk) {.buf = map, .len = mapsize};
+	while (data_to_parse.len != 0) {
+		line = strchunk_getline(&data_to_parse);
+		pkg_name = mmstr_copy_realloc(pkg_name, line.buf, line.len);
 		strset_add(manually_inst, pkg_name);
-		line = eol + 1;
 	}
 
-exit:
 	mm_unmap(map);
 	mmstr_free(pkg_name);
 	return 0;
