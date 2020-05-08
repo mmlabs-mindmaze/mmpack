@@ -471,6 +471,7 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 	// Add immediately the path of sha256sums
 	strlist_add(files, path);
 
+	path = mmstr_realloc(path, UNPACK_MAXPATH);
 	while (fscanf(fp, "%"MM_STRINGIFY (UNPACK_MAXPATH)"[^:]: %*s ",
 	              path) == 1) {
 		mmstr_update_len_from_buffer(path);
