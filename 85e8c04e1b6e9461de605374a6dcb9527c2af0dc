@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b41474cb_8ed9f81b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-05-17T13:18:28Z",
+      "side": 1,
+      "message": "sha",
+      "range": {
+        "startLine": 11,
+        "startChar": 5,
+        "endLine": 11,
+        "endChar": 8
+      },
+      "revId": "85e8c04e1b6e9461de605374a6dcb9527c2af0dc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "290d04f3_572e09d0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-05-17T13:18:28Z",
+      "side": 1,
+      "message": "explain quickly what was the bug.",
+      "range": {
+        "startLine": 14,
+        "startChar": 35,
+        "endLine": 14,
+        "endChar": 71
+      },
+      "revId": "85e8c04e1b6e9461de605374a6dcb9527c2af0dc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8133697c_1444be1f",
+        "filename": "src/mmpack/pkg-fs-utils.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-05-17T13:18:28Z",
+      "side": 1,
+      "message": "name it pkg to be coherent with the linuxdoc.",
+      "range": {
+        "startLine": 62,
+        "startChar": 54,
+        "endLine": 62,
+        "endChar": 58
+      },
+      "revId": "85e8c04e1b6e9461de605374a6dcb9527c2af0dc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
