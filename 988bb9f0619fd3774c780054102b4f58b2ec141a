@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4a8db34_96702504",
+        "filename": "src/mmpack/srcindex.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1017443
+      },
+      "writtenOn": "2020-05-17T14:08:26Z",
+      "side": 1,
+      "message": "I do not understand the goal of this line.",
+      "range": {
+        "startLine": 138,
+        "startChar": 1,
+        "endLine": 138,
+        "endChar": 59
+      },
+      "revId": "988bb9f0619fd3774c780054102b4f58b2ec141a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
