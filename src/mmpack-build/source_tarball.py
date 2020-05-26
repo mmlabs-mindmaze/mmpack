@@ -17,7 +17,7 @@ def _git_subcmd(subcmd: str, gitdir: str = '.git') -> str:
     return shell(cmd).strip()
 
 
-def _git_clone(url: str, clonedir: str, tag: str = None,
+def _git_clone(url: str, clonedir: str, refspec: str = None,
                git_ssh_cmd: str = None):
     """
     create a shallow clone of a git repo
@@ -25,24 +25,33 @@ def _git_clone(url: str, clonedir: str, tag: str = None,
     Args:
         url: url of git repository
         clonedir: folder where the repo must be cloned into
-        tag: option tag, branch, commit hash to check out
+        refspec: tag, branch, commit hash to check out
         git_ssh_cmd: optional, ssh cmd to use when cloning git repo through ssh
     """
-    git_opts = '--quiet --depth=1'
-    if tag:
-        git_opts += ' --branch ' + tag
-
     if os.path.isdir(url):
         url = 'file://' + os.path.abspath(url)
 
-    cmd_env = ''
-    if git_ssh_cmd:
-        cmd_env += 'GIT_SSH_COMMAND="{}"'.format(git_ssh_cmd)
+    if not refspec:
+        refspec = 'HEAD'
 
-    iprint('cloning {} into tmp dir {}'.format(url, clonedir))
-    git_clone_sh_cmd = '{0} git clone {1} {2} {3}'\
-                       .format(cmd_env, git_opts, url, clonedir)
-    shell(git_clone_sh_cmd)
+    iprint('cloning {} ({}) into tmp dir {}'.format(url, refspec, clonedir))
+
+    # Create and init git repository
+    shell('git init --quiet ' + clonedir)
+    pushdir(clonedir)
+
+    # Fetch git refspec
+    fetch_env = ''
+    if git_ssh_cmd:
+        fetch_env += 'GIT_SSH_COMMAND="{}"'.format(git_ssh_cmd)
+    git_fetch_sh_cmd = '{0} git fetch --quiet --depth=1 {1} {2}'\
+                       .format(fetch_env, url, refspec)
+    shell(git_fetch_sh_cmd)
+
+    # Checkout the specified refspec
+    shell('git checkout --quiet --detach FETCH_HEAD')
+
+    popdir()
 
 
 class SourceTarball:
