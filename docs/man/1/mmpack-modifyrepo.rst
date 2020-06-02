@@ -16,6 +16,8 @@ SYNOPSIS
 
 **mmpack-modifyrepo** [*options*] **add** *manifest_file*
 
+**mmpack-modifyrepo** [*options*] **batch**
+
 **mmpack-modifyrepo** -h|--help
 
 
@@ -48,6 +50,31 @@ package will be added to the repository along with the binary package matching
 its architecture. The source and binary indices are updated and the command
 returns afterward. The success of the operation is reported in the exit code of
 the command.
+
+batch subcommand
+----------------
+The standard input is read line by line. In each line a command can be issued
+(empty line are ignored):
+
+   ADD
+      take the path to a manifest written on the rest of the line and stage the
+      changes that would be carried to the repository if **mmpack-modifyrepo
+      add** were called. However changes are not yet visible in the repository
+      folder.
+
+   COMMIT
+      commit the changes that have been staged so far. The content of the
+      repository folder will then show the changes. This command cannot fail.
+
+   ROLLBACK
+      cancel the stagged changes and revert internal state to the one after the
+      last commit or the initial state when **mmpack-modifyrepo batch** was
+      called. This command cannot fail.
+
+For each line of command issued, when the operation is finished, the result is
+reported on one line of standard output with **OK** in case of success, or
+**FAIL** in case of failure. In such a case, the error message the reported on
+the rest on the line.
 
 
 OPTIONS
