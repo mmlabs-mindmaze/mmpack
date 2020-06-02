@@ -12,7 +12,9 @@ modify mmpack repository
 
 SYNOPSIS
 ========
-**mmpack-modifyrepo** [*options*] *upload_dir*
+**mmpack-modifyrepo** [*options*] **watch** *upload_dir*
+
+**mmpack-modifyrepo** [*options*] **add** *manifest_file*
 
 **mmpack-modifyrepo** -h|--help
 
@@ -25,8 +27,12 @@ changed with the **--path** option. If the repository folder do not exist yet,
 the folder along with its metadata files will be created. The architecture used
 will be then the one specified by the **--arch** option.
 
-Once the repository has been opened or created,
-the folder *upload_dir* is watched for modification. Whenever a manifest file
+Once the repository has been opened or created, the behavior of
+**mmpack-modifyrepo** will depend on the specified subcommand.
+
+watch subcommand
+----------------
+The folder *upload_dir* is watched for modification. Whenever a manifest file
 is copied into it, it will be processed and the packages matching the
 architecture of the repository will be added to the repository. The binary and
 sources packages listed in the manifest are assumed to be copied in *upload_dir*
@@ -34,6 +40,14 @@ before the manifest is itself copied. Once a manifest file is successfully
 processed the related mmpack source and binary package are eventually moved to
 the repository folder and the source and binary indices files are updated
 accordingly.
+
+add subcommand
+--------------
+This processes the mmpack manifest specified by *manifest_file*. The source
+package will be added to the repository along with the binary package matching
+its architecture. The source and binary indices are updated and the command
+returns afterward. The success of the operation is reported in the exit code of
+the command.
 
 
 OPTIONS

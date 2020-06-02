@@ -118,21 +118,36 @@ def parse_options():
                         action='store', dest='repo_arch', type=str,
                         help='architecture of repository if created')
 
-    parser.add_argument('to_observe',
-                        help='folder to watch for incoming manifest')
+    subparsers = parser.add_subparsers(dest='cmd', required=True)
+
+    # watch command parser
+    watch_subparser = subparsers.add_parser('watch')
+    watch_subparser.add_argument('to_observe',
+                                 help='folder to watch for incoming manifest')
+
+    # update command parser
+    update_subparser = subparsers.add_parser('add')
+    update_subparser.add_argument('manifest', help='manifest file')
 
     return parser.parse_args()
 
 
-def main():
+def main() -> int:
     """
     main program entry
     """
     opts = parse_options()
     repo = load_repository(opts)
+    success = True
 
-    watch_folder_for_change(repo, opts.to_observe)
+    if opts.cmd == 'watch':
+        watch_folder_for_change(repo, opts.to_observe)
+    elif opts.cmd == 'add':
+        success = repo.try_handle_upload(opts.manifest, remove_upload=False)
+        print('manifest added' if success else 'update failed')
+
+    return 0 if success else 1
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
