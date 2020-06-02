@@ -117,6 +117,7 @@ pycodestyle: deployment-test
 pylint: devtools/pylint-config deployment-test
 	pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build
 	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
+	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(bindir)/mmpack-modifyrepo
 
 .PHONY: syntax
 syntax: pycodestyle pylint
@@ -344,7 +345,9 @@ deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES) $(mmpackbuild_PYTHON) \
 		$(nodist_mmpackbuild_PYTHON) \
 		$(mmpack_build_gerrit_SCRIPTS) \
-		$(mmpack_build_gerrit_PYTHON)
+		$(mmpack_build_gerrit_PYTHON) \
+		$(dist_pkgdata_SCRIPTS) \
+		$(bin_SCRIPTS)
 	DESTDIR=$(shell readlink -f $@) $(MAKE) install
 	@touch $@
 
