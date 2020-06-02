@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Server handling the upload of packages
+Tool handling the upload of packages to a repository
 
-Usage: server_upload *directory_to_listen* *architecture*
+Usage: mmpack-repo *directory_to_listen* *architecture*
 """
 # pylint: disable=wrong-import-position
 
