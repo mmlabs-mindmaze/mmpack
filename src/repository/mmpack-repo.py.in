@@ -81,6 +81,18 @@ def watch_folder_for_change(repo: Repo, to_observe: str):
         cleanup_exit()
 
 
+def add_manifest(repo: Repo, manifest: str):
+    """
+    Add packages listed in manifest to repository
+    """
+    if not manifest:
+        print('FAIL missing argument', flush=True)
+        return
+
+    repo.try_handle_upload(manifest, remove_upload=False)
+    print('OK', flush=True)
+
+
 def load_repository(opts) -> Repo:
     """
     Load repository according to command line options
@@ -118,8 +130,16 @@ def parse_options():
                         action='store', dest='repo_arch', type=str,
                         help='architecture of repository if created')
 
-    parser.add_argument('to_observe',
-                         help='folder to watch for incoming manifest')
+    subparsers = parser.add_subparsers(dest='cmd', required=True)
+
+    # watch command parser
+    watch_subparser = subparsers.add_parser('watch')
+    watch_subparser.add_argument('to_observe',
+                                 help='folder to watch for incoming manifest')
+
+    # update command parser
+    update_subparser = subparsers.add_parser('add')
+    update_subparser.add_argument('manifest', help='manifest file')
 
     return parser.parse_args()
 
@@ -131,7 +151,10 @@ def main():
     opts = parse_options()
     repo = load_repository(opts)
 
-    watch_folder_for_change(repo, opts.to_observe)
+    if opts.cmd == 'watch':
+        watch_folder_for_change(repo, opts.to_observe)
+    elif opts.cmd == 'add':
+        add_manifest(repo, opts.manifest)
 
 
 if __name__ == '__main__':
