@@ -93,6 +93,29 @@ def add_manifest(repo: Repo, manifest: str):
     print('OK', flush=True)
 
 
+def batch_updates(repo: Repo):
+    """
+    Read stdin and perform repository update specified in each line
+    This is useful to implement a repository update in a subprocess
+    communicating over pipes.
+    """
+    for line in sys.stdin:
+        cmdargs = line.split(maxsplit=1)
+        if not cmdargs:
+            continue
+
+        if len(cmdargs) == 1:
+            cmdargs.append('')
+
+        cmd = cmdargs[0]
+        args = cmdargs[1]
+
+        if cmd == 'add':
+            add_manifest(repo, args)
+        else:
+            print('FAIL unknown command')
+
+
 def load_repository(opts) -> Repo:
     """
     Load repository according to command line options
@@ -141,6 +164,9 @@ def parse_options():
     update_subparser = subparsers.add_parser('add')
     update_subparser.add_argument('manifest', help='manifest file')
 
+    # batch command parser
+    subparsers.add_parser('batch')
+
     return parser.parse_args()
 
 
@@ -155,6 +181,8 @@ def main():
         watch_folder_for_change(repo, opts.to_observe)
     elif opts.cmd == 'add':
         add_manifest(repo, opts.manifest)
+    elif opts.cmd == 'batch':
+        batch_updates(repo)
 
 
 if __name__ == '__main__':
