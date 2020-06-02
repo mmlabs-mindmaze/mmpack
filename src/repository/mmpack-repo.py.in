@@ -10,6 +10,7 @@ import sys
 import time
 import os
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from typing import Tuple
 
 import yaml
 
@@ -81,6 +82,46 @@ def watch_folder_for_change(repo: Repo, to_observe: str):
         cleanup_exit()
 
 
+def batch_cmd_add(repo: Repo, manifest: str) -> Tuple[bool, str]:
+    """
+    Add packages listed in manifest to repository
+    """
+    if not manifest:
+        return (False, 'missing argument')
+
+    success = repo.try_handle_upload(manifest, remove_upload=False)
+    if not success:
+        return (False, 'adding manifest failed')
+
+    return (success, '')
+
+
+def batch_updates(repo: Repo):
+    """
+    Read stdin and perform repository update specified in each line
+    This is useful to implement a repository update in a subprocess
+    communicating over pipes.
+    """
+    for line in sys.stdin:
+        cmdargs = line.split(maxsplit=1)
+        if not cmdargs:
+            continue
+
+        if len(cmdargs) == 1:
+            cmdargs.append('')
+
+        cmd = cmdargs[0]
+        args = cmdargs[1]
+
+        if cmd == 'add':
+            success, errmsg = batch_cmd_add(repo, args)
+        else:
+            success = False
+            errmsg = 'unknown command'
+
+        print('OK' if success else ('FAIL ' + errmsg), flush=True)
+
+
 def load_repository(opts) -> Repo:
     """
     Load repository according to command line options
@@ -129,6 +170,9 @@ def parse_options():
     update_subparser = subparsers.add_parser('add')
     update_subparser.add_argument('manifest', help='manifest file')
 
+    # batch command parser
+    subparsers.add_parser('batch')
+
     return parser.parse_args()
 
 
@@ -145,6 +189,8 @@ def main() -> int:
     elif opts.cmd == 'add':
         success = repo.try_handle_upload(opts.manifest, remove_upload=False)
         print('manifest added' if success else 'update failed')
+    elif opts.cmd == 'batch':
+        batch_updates(repo)
 
     return 0 if success else 1
 
