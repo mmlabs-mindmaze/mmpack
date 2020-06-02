@@ -35,7 +35,7 @@ bin_PROGRAMS = mmpack
 pkglibexec_PROGRAMS = mount-mmpack-prefix mmpack-check-sysdep
 bin_SCRIPTS = \
 	src/mmpack-build/mmpack-build \
-	src/repository/mmpack_handle_repo \
+	src/repository/mmpack-modifyrepo \
 	$(eol)
 
 dist_bin_SCRIPTS = \
@@ -51,7 +51,7 @@ CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST += \
 	src/mmpack-build/mmpack-build.in \
 	src/mmpack-build/settings.py.in \
-	src/repository/mmpack_handle_repo.py.in \
+	src/repository/mmpack-modifyrepo.py.in \
 	$(eol)
 
 mmpackbuilddir = $(pythondir)/mmpack_build
@@ -270,7 +270,7 @@ mmpack_check_sysdep_LDADD = \
 		-e 's,@package_version[@],$(PACKAGE_VERSION),g' \
 		-e 's,@exeext[@],$(EXEEXT),g' < $< > $@
 
-src/repository/mmpack_handle_repo: src/repository/mmpack_handle_repo.py.in Makefile
+src/repository/mmpack-modifyrepo: src/repository/mmpack-modifyrepo.py.in Makefile
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
 	$(AM_V_GEN)$(SED) -e 's,@pkgdatadir[@],$(pkgdatadir),g' \
 		-e 's,@bindir[@],$(bindir),g' \
