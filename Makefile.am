@@ -110,13 +110,16 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 .PHONY: pycodestyle
 pycodestyle: deployment-test
-	pycodestyle --show-source deployment-test$(pythondir)/mmpack_build
-	pycodestyle --show-source deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
+	pycodestyle --show-source deployment-test$(pythondir)/mmpack_build \
+	                          deployment-test$(pkgdatadir)/*.py \
+				  deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py \
+	                          deployment-test$(bindir)/mmpack-modifyrepo
 
 .PHONY: pylint
 pylint: devtools/pylint-config deployment-test
-	$(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build
+	$(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build deployment-test$(pkgdatadir)/*.py
 	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) $(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
+	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) $(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(bindir)/mmpack-modifyrepo
 
 .PHONY: syntax
 syntax: pycodestyle pylint
@@ -344,7 +347,9 @@ deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES) $(mmpackbuild_PYTHON) \
 		$(nodist_mmpackbuild_PYTHON) \
 		$(mmpack_build_gerrit_SCRIPTS) \
-		$(mmpack_build_gerrit_PYTHON)
+		$(mmpack_build_gerrit_PYTHON) \
+		$(dist_pkgdata_SCRIPTS) \
+		$(bin_SCRIPTS)
 	DESTDIR=$(shell readlink -f $@) $(MAKE) install
 	@touch $@
 
