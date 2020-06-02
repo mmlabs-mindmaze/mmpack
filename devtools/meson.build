@@ -57,6 +57,7 @@ if pylint.found()
             deployment_dir + python.get_install_dir() + '/mmpack_build',
             deployment_dir + pkgdatadir + '/repo.py',
             deployment_dir + pkgdatadir + '/gerrit/python/gerrit-mmpack-build.py',
+            deployment_dir + bindir + '/mmpack-modifyrepo',
         ],
         depends : do_deployment_test,
     )
