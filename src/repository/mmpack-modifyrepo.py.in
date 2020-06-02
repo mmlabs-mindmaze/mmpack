@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 Tool handling the upload of packages to a repository
-
-Usage: mmpack-repo *directory_to_listen* *architecture*
 """
 # pylint: disable=wrong-import-position
 # pylint: disable=invalid-name
@@ -11,6 +9,9 @@ import signal
 import sys
 import time
 import os
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
+
+import yaml
 
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
@@ -20,14 +21,11 @@ PRIVATE_SCRIPT_DIR = os.path.relpath(r'@pkgdatadir@', r'@bindir@')  # pylint: di
 CURR_DIR = os.path.abspath(os.path.dirname(__file__))
 ABS_SCRIPT_DIR = os.path.abspath(os.path.join(CURR_DIR, PRIVATE_SCRIPT_DIR))
 sys.path.insert(0, ABS_SCRIPT_DIR)
-import repo  # noqa
+from repo import Repo  # noqa
 
 
 # configuration global variable
 OBSERVERS = []
-
-REPO_DIR = 'repository'
-
 
 class MmpackDbObserver(PatternMatchingEventHandler):
     """
@@ -41,29 +39,16 @@ class MmpackDbObserver(PatternMatchingEventHandler):
     """
     patterns = ['*.mmpack-manifest']
 
-    def __init__(self, to_observe, architecture):
+    def __init__(self, to_observe, repo: Repo):
         super().__init__()
         self.to_observe = to_observe
-        self.architecture = architecture
-        self.repo = repo.Repo(REPO_DIR, architecture)
+        self.repo = repo
 
     def on_created(self, event):
         """
         creation callback
         """
         self.repo.try_handle_upload(event.src_path)
-
-
-def main(to_observe: str, architecture: str):
-    """
-    entry point to update the repository
-    """
-    # watch folder for changes
-    observer = Observer()
-    observer.schedule(MmpackDbObserver(to_observe, architecture),
-                      to_observe, recursive=False)
-    observer.start()
-    return observer
 
 
 def cleanup_exit(sig=None, frame=None):
@@ -76,11 +61,17 @@ def cleanup_exit(sig=None, frame=None):
     exit(0)
 
 
-signal.signal(signal.SIGINT, cleanup_exit)
-
-
-if __name__ == '__main__':
-    OBSERVERS.append(main(sys.argv[1], sys.argv[2]))
+def watch_folder_for_change(repo: Repo, to_observe: str):
+    """
+    entry point to update the repository
+    """
+    # watch folder for changes
+    observer = Observer()
+    observer.schedule(MmpackDbObserver(to_observe, repo),
+                      to_observe, recursive=False)
+    observer.start()
+    OBSERVERS.append(observer)
+    signal.signal(signal.SIGINT, cleanup_exit)
 
     # sleep until manual interrupt
     try:
@@ -88,3 +79,60 @@ if __name__ == '__main__':
             time.sleep(1)
     except KeyboardInterrupt:
         cleanup_exit()
+
+
+def load_repository(opts) -> Repo:
+    """
+    Load repository according to command line options
+    """
+    repo_path = opts.repo_path
+    os.makedirs(repo_path, exist_ok=True)
+
+    # Load metadata from repo or create if not existing
+    metadata_path = os.path.join(repo_path, 'metadata')
+    try:
+        metadata = yaml.load(open(metadata_path, 'rt'), Loader=yaml.BaseLoader)
+    except FileNotFoundError:
+        # Create initial repo metadata if new repo
+        if not opts.repo_arch:
+            print('New repository must have architecture specified', file=sys.stderr)
+            sys.exit(1)
+        metadata = {'architecture': opts.repo_arch}
+        yaml.dump(metadata, open(metadata_path, 'wt'), default_flow_style=False)
+
+    repo_arch = metadata['architecture']
+    return Repo(repo_path, repo_arch)
+
+
+def parse_options():
+    """
+    parse options
+    """
+    parser = ArgumentParser(description=__doc__,
+                            formatter_class=RawDescriptionHelpFormatter)
+
+    parser.add_argument('-p', '--path', default='.',
+                        action='store', dest='repo_path', type=str,
+                        help='path to repository')
+    parser.add_argument('-a', '--arch',
+                        action='store', dest='repo_arch', type=str,
+                        help='architecture of repository if created')
+
+    parser.add_argument('to_observe',
+                        help='folder to watch for incoming manifest')
+
+    return parser.parse_args()
+
+
+def main():
+    """
+    main program entry
+    """
+    opts = parse_options()
+    repo = load_repository(opts)
+
+    watch_folder_for_change(repo, opts.to_observe)
+
+
+if __name__ == '__main__':
+    main()
