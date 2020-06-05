@@ -8,7 +8,7 @@ with the information given in the manifest.
 - It provides a helper to replace the files upload with the old files (if any)
 """
 
-from collections import Counter
+from collections import Counter, namedtuple
 from hashlib import sha256
 import logging
 import logging.handlers
@@ -22,6 +22,10 @@ RELPATH_BINARY_INDEX = 'binary-index'
 RELPATH_SOURCE_INDEX = 'source-index'
 RELPATH_WORKING_DIR = 'working_dir'
 LOG_FILE = 'mmpack-repo.log'
+
+
+IndicesStates = namedtuple('IndicesStates',
+                           ['binindex', 'srcindex', 'counter'])
 
 
 # The functions sha256sum, yaml_serialize, and yaml_load
@@ -192,6 +196,12 @@ class Repo:
             src_id = _srcid(pkg_info['source'], pkg_info['srcsha256'])
             self.count_src_refs[src_id] += 1
 
+        self.to_remove = set()
+        self.to_add = set()
+        self.backup = IndicesStates(srcindex=self.srcindex,
+                                    binindex=self.binindex,
+                                    counter=self.count_src_refs)
+
     def yaml_serialize(self, obj: Union[list, dict], filename: str,
                        use_block_style: bool = False) -> None:
         """
@@ -234,28 +244,53 @@ class Repo:
         if sha256sum(filepath) != package['sha256']:
             raise ValueError
 
-    def _commit_upload(self, to_add: set, to_remove: set):
+    def _clear_change_data(self):
+        self.to_add = set()
+        self.to_remove = set()
+        self.backup = IndicesStates(srcindex=self.srcindex,
+                                    binindex=self.binindex,
+                                    counter=self.count_src_refs)
+        shutil.rmtree(self.working_dir)
+
+    def begin_change(self):
+        """
+        Initiates a new set of stagged changes. The states of source and binary
+        indices and counter are stored internally to be reverted later if
+        necessary during a call to rollback_change()
+        """
+        self.backup = IndicesStates(srcindex=self.srcindex.copy(),
+                                    binindex=self.binindex.copy(),
+                                    counter=self.count_src_refs.copy())
+        os.mkdir(self.working_dir)
+
+    def rollback_change(self):
+        """
+        Cancel the changes done in the source and binary indices and counters
+        since last call to begin_change().
+        """
+        self.srcindex = self.backup.srcindex
+        self.binindex = self.backup.binindex
+        self.count_src_refs = self.backup.counter
+        self._clear_change_data()
+
+    def commit_change(self):
         """
         Moves the packages asked to be uploaded from the working directory to
         the repository. Removes the packages of the repository that are not
         needed anymore.
-
-        Args:
-            to_add: set of packages that have to be added to the repository.
-            to_remove: set of packages of the repository that have to be
-                       removed.
         """
-        to_remove.difference_update(to_add)
-        for filename in to_remove:
+        for filename in self.to_remove:
             self.logger.info('Remove {} from repository'.format(filename))
             file_path = os.path.join(self.repo_dir, filename)
             os.remove(file_path)
 
-        for filename in to_add:
+        for filename in self.to_add:
             self.logger.info('Add {} in repository'.format(filename))
             source = os.path.join(self.working_dir, filename)
             destination = os.path.join(self.repo_dir, filename)
             os.replace(source, destination)
+
+        self._clear_change_data()
 
     def _dump_indexes_working_dir(self, to_add: set):
         """
@@ -344,23 +379,40 @@ class Repo:
 
             self.binindex.update(buf)
 
-    def _handle_upload(self, manifest: dict):
+    def stage_upload(self, manifest_file: str,
+                     remove_upload: bool = False) -> bool:
         """
-        This function handles the upload.
+        This function modifies the stagged changes to reflect a manifest upload
 
         Args:
-            manifest: dictionary of the manifest file uploaded by the user.
-        """
-        to_add = set()
-        to_remove = set()
-        # Update the binary-index and the source-index with the new packages
-        # and upload binary packages and remove the binary packages that are
-        # not needed anymore
-        self._prepare_upload(manifest, to_remove, to_add)
+            manifest_file: path through the manifest file containing
+                           information about the packages that the user wants
+                           to upload.
+            remove_upload: if true, files (referenced packages and manifest)
+                           are removed from upload dir.
 
-        # Remove the files that are not needed anymore
-        self._dump_indexes_working_dir(to_add)
-        self._commit_upload(to_add, to_remove)
+        Returns:
+            True if the modifications to the repository have been successfully
+            stagged to the upcoming change. Otherwise false is returned.
+        """
+        try:
+            manifest = yaml_load(manifest_file)
+            mv_op = os.replace if remove_upload else shutil.copy
+            self._mv_files_working_dir(manifest_file, manifest, mv_op)
+
+            # Update the binary-index and the source-index with the new
+            # packages and upload binary packages and remove the binary
+            # packages that are not needed anymore
+            self._prepare_upload(manifest, self.to_remove, self.to_add)
+        except (KeyError, IOError, ValueError):
+            return False
+
+        self._dump_indexes_working_dir(self.to_add)
+
+        # Don't remove files that are uploaded (ie, overwritten)
+        self.to_remove.difference_update(self.to_add)
+
+        return True
 
     def _mv_files_working_dir(self, manifest_file: str, manifest: dict,
                               mv_op: Callable[[str, str], None]):
@@ -414,25 +466,14 @@ class Repo:
             false is returned and repository would be reverted to its state
             just before the call.
         """
-        try:
-            backup_srcindex = self.srcindex.copy()
-            backup_binindex = self.binindex.copy()
-            backup_counter = self.count_src_refs.copy()
+        self.logger.info('Checking {}'.format(manifest_file))
+        self.begin_change()
 
-            os.mkdir(self.working_dir)
-            self.logger.info('Checking {}'.format(manifest_file))
-
-            manifest = yaml_load(manifest_file)
-            mv_op = os.replace if remove_upload else shutil.copy
-            self._mv_files_working_dir(manifest_file, manifest, mv_op)
-            self._handle_upload(manifest)
-            self.logger.info('Data proceeded successfully')
-            return True
-        except (KeyError, IOError, ValueError):
+        if not self.stage_upload(manifest_file, remove_upload):
+            self.rollback_change()
             self.logger.error("Error, revert data processing")
-            self.srcindex = backup_srcindex
-            self.binindex = backup_binindex
-            self.count_src_refs = backup_counter
             return False
-        finally:
-            shutil.rmtree(self.working_dir)
+
+        self.commit_change()
+        self.logger.info('Data proceeded successfully')
+        return True
