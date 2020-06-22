@@ -393,7 +393,7 @@ class Repo:
         mv_op(source, destination)
 
     def try_handle_upload(self, manifest_file: str,
-                          remove_upload: bool = True):
+                          remove_upload: bool = True) -> bool:
         """
         This function tries to handle the packages upload of the user.
 
@@ -403,6 +403,11 @@ class Repo:
                            to upload.
             remove_upload: if true, files (referenced packages and manifest)
                            are removed from upload dir.
+
+        Returns:
+            True if the repository has been successfully updated. Otherwise
+            false is returned and repository would be reverted to its state
+            just before the call.
         """
         try:
             backup_srcindex = self.srcindex.copy()
@@ -417,11 +422,12 @@ class Repo:
             self._mv_files_working_dir(manifest_file, manifest, mv_op)
             self._handle_upload(manifest)
             self.logger.info('Data proceeded successfully')
-
+            return True
         except (KeyError, IOError, ValueError):
             self.logger.error("Error, revert data processing")
             self.srcindex = backup_srcindex
             self.binindex = backup_binindex
             self.count_src_refs = backup_counter
+            return False
         finally:
             shutil.rmtree(self.working_dir)
