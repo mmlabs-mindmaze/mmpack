@@ -21,6 +21,8 @@ AC_SET_HOSTSYSTEM
 # Check for programs
 AC_CHECK_PROGS(RST2MAN, [rst2man rst2man3], [none])
 AS_IF([test $RST2MAN = none], [AC_MSG_ERROR([rst2man is required for doc generation])])
+AC_CHECK_PROGS(PATCHELF, [patchelf], [none])
+AS_IF([test $PATCHELF = none -a $os_system = posix], [AC_MSG_ERROR([patchelf is required on posix platforms])])
 
 AC_PROG_CC_C99
 AM_PROG_CC_C_O
