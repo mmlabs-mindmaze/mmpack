@@ -9,7 +9,9 @@ Build-Depends: debhelper (>= 10), dh-python,
  libarchive-dev, libyaml-dev, libmmlib-dev,
  libcurl4-gnutls-dev | libcurl-dev,
  libdpkg-perl,
- python3-sphinx, python3-sphinx-rtd-theme
+ python3-sphinx, python3-sphinx-rtd-theme, python3-docutils,
+ python3-astroid, python3-pefile, python3-pyelftools, python3-urllib3,
+ python3-yaml, python3-paramiko, python3-watchdog
 Standards-Version: 3.9.8
 Vcs-Git: https://intranet.mindmaze.ch/mmlabs/gerrit
 Vcs-browser:  https://intranet.mindmaze.ch/mmlabs/gerrit/gitweb?p=mmpack.git
