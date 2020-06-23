@@ -6,6 +6,7 @@ For a list of all mmpack-build commands
 >>> mmpack-build list-commands
 """
 
+import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . import mmpack_builddep
@@ -56,7 +57,7 @@ def launch_subcommand(command, args):
                     except KeyboardInterrupt:
                         ret = 130
                     except SystemExit as sysexit:
-                        ret = sysexit.code if sysexit.code else 0
+                        ret = 0 if sysexit.code is None else sysexit.code
                     except Exception as inst:
                         print('Exception: ', inst)
                         ret = 1
@@ -104,4 +105,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())
