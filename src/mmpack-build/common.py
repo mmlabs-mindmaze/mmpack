@@ -145,7 +145,7 @@ def shell(cmd, log: bool = True, input_str: str = None,
 
     try:
         ret = run(cmd, stdout=PIPE, shell=run_shell, input=input_utf8,
-                  stderr=PIPE if log_stderr else None)
+                  stderr=PIPE if log_stderr else None, check=False)
 
         # Reproduce stderr of command with eprint() if requested
         if log_stderr:

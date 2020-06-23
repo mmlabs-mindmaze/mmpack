@@ -80,7 +80,7 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
     if system_builddeps:
         sysdep_cmd = [LIBEXECDIR + '/mmpack/mmpack-check-sysdep']
         sysdep_cmd += system_builddeps
-        ret = run(sysdep_cmd)
+        ret = run(sysdep_cmd, check=False)
         if ret.returncode:
             return ret.returncode
 
@@ -98,7 +98,7 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
 
     cmd += ' '.join(mmpack_builddeps)
     dprint('[shell] {0}'.format(cmd))
-    ret = run(cmd, shell=True)
+    ret = run(cmd, shell=True, check=False)
 
     return ret.returncode
 

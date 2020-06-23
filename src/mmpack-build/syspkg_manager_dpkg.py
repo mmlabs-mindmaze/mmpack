@@ -8,6 +8,7 @@ import os
 import re
 
 from glob import glob
+from importlib import import_module
 from typing import List, TextIO, Iterator
 
 from . common import *
@@ -47,7 +48,7 @@ def dpkg_find_shlibs_file(target_soname: str):
 def _prune_soname_symbols(library_path: str, symbols_list: List[str]):
     # to the import at the last moment in order to prevent windows
     # from failing to import elftools
-    from . elf_utils import symbols_set
+    symbols_set = import_module('.elf_utils').symbols_set
     for sym in symbols_set(library_path):
         if sym in symbols_list:
             symbols_list.remove(sym)
@@ -164,7 +165,8 @@ def dpkg_parse_symbols(filename: str, target_soname: str,
         line = line.strip('\n')
         if line.startswith('*'):  # field name: field-value
             continue  # ignored
-        elif line.startswith('|'):  # alternate dependency
+
+        if line.startswith('|'):  # alternate dependency
             alt_dependency_template = line[2:]
             templates[templates_cpt] = alt_dependency_template
             templates_cpt += 1

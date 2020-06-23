@@ -209,11 +209,9 @@ class SrcPackage:
         if not license_file:
             errmsg = '"licenses" field unspecified and no license file found'
             raise ValueError(errmsg)
-        else:
-            self.licenses = [license_file]
-            wrnmsg = 'Using file: "{}" as license by default' \
-                     .format(license_file)
-            dprint(wrnmsg)
+
+        self.licenses = [license_file]
+        dprint('Using file: "{}" as license by default'.format(license_file))
 
     def _fetch_unpack_syspkg_locally(self):
         """
