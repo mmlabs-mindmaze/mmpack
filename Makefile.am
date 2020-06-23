@@ -115,8 +115,8 @@ pycodestyle: deployment-test
 
 .PHONY: pylint
 pylint: devtools/pylint-config deployment-test
-	pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build
-	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) pylint3 --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
+	$(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build
+	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) $(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
 
 .PHONY: syntax
 syntax: pycodestyle pylint
