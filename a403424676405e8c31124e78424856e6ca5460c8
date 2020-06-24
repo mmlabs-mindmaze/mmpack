@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "935af658_ddbd3c8c",
+        "filename": "src/mmpack-build/__main__.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1017136
+      },
+      "writtenOn": "2020-06-24T08:31:59Z",
+      "side": 1,
+      "message": "this looks worse to me",
+      "revId": "a403424676405e8c31124e78424856e6ca5460c8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
