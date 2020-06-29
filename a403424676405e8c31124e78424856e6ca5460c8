@@ -16,6 +16,24 @@
       "revId": "a403424676405e8c31124e78424856e6ca5460c8",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b41e5b34_04591765",
+        "filename": "src/mmpack-build/__main__.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2020-06-29T08:29:23Z",
+      "side": 1,
+      "message": "I agree... Hence I prefer to disable the pylint warning",
+      "parentUuid": "935af658_ddbd3c8c",
+      "revId": "a403424676405e8c31124e78424856e6ca5460c8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
     }
   ]
 }
