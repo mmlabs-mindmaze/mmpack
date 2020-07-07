@@ -470,6 +470,7 @@ RST_MAN1_PAGES = \
 	docs/man/1/mmpack-install.rst \
 	docs/man/1/mmpack-list.rst \
 	docs/man/1/mmpack-mkprefix.rst \
+	docs/man/1/mmpack-modifyrepo.rst \
 	docs/man/1/mmpack-provides.rst \
 	docs/man/1/mmpack-rdepends.rst \
 	docs/man/1/mmpack-remove.rst \

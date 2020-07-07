@@ -12,6 +12,7 @@ man_pages_sources = [
     'man/1/mmpack-install.rst',
     'man/1/mmpack-list.rst',
     'man/1/mmpack-mkprefix.rst',
+    'man/1/mmpack-modifyrepo.rst',
     'man/1/mmpack-provides.rst',
     'man/1/mmpack-rdepends.rst',
     'man/1/mmpack-remove.rst',
