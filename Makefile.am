@@ -44,6 +44,8 @@ dist_bin_SCRIPTS = \
 	$(eol)
 dist_pkgdata_SCRIPTS = \
 	src/mmpack/check-dpkg-installed \
+	$(eol)
+pkgdata_DATA = \
 	src/repository/repo.py \
 	$(eol)
 
