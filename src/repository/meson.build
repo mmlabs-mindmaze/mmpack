@@ -15,10 +15,8 @@ mmpack_repo_scripts += configure_file(
 
 install_data(mmpack_repo_scripts,
         install_dir : get_option('bindir'),
-        install_mode: 'rwxr-xr-x'
 )
 
 install_data(mmpack_repo_private,
         install_dir : get_option('datadir') + '/mmpack',
-        install_mode: 'rw-r--r--'
 )
