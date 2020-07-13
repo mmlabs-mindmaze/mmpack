@@ -192,18 +192,13 @@ class Repo:
             src_id = _srcid(pkg_info['source'], pkg_info['srcsha256'])
             self.count_src_refs[src_id] += 1
 
-    def yaml_serialize(self, obj: Union[list, dict], filename: str,
-                       use_block_style: bool = False) -> None:
+    def yaml_serialize(self, obj: Union[list, dict], filename: str) -> None:
         """
         Save object as yaml file of given name
         """
-        default_flow_style = None
-        if use_block_style:
-            default_flow_style = False
-
         with open(filename, 'w+', newline='\n') as outfile:
             yaml.dump(obj, outfile,
-                      default_flow_style=default_flow_style,
+                      default_flow_style=None,
                       allow_unicode=True,
                       indent=4)
         self.logger.info('wrote {0}'.format(filename))
@@ -272,7 +267,7 @@ class Repo:
         srcindex_file = os.path.join(self.working_dir, RELPATH_SOURCE_INDEX)
         file_serialize(self.srcindex, srcindex_file)
         binindex_file = os.path.join(self.working_dir, RELPATH_BINARY_INDEX)
-        self.yaml_serialize(self.binindex, binindex_file, True)
+        self.yaml_serialize(self.binindex, binindex_file)
 
         to_add.add(RELPATH_SOURCE_INDEX)
         to_add.add(RELPATH_BINARY_INDEX)
