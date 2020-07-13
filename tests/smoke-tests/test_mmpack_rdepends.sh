@@ -8,7 +8,7 @@ prepare_env
 trap cleanup EXIT
 cleanup
 
-mmpack mkprefix --name=repo --url=$REPO_URL $PREFIX_TEST
+mmpack mkprefix --name=repo --url=$REPO_URL/0 $PREFIX_TEST
 mmpack update
 
 output="$(mmpack rdepends toto | $dos2unix)"
@@ -45,7 +45,7 @@ expected="call-hello (1.0.0)
 hello (1.0.0)"
 [ "$output" == "$expected" ]
 
-output="$(mmpack rdepends hello-data=hash:9f68904c9c1761388382afdb7d7b7618101e353b5b93b872b10cc71f0a7c8a34 | $dos2unix)"
+output="$(mmpack rdepends hello-data=hash:8dc8f06e9277b4404661045a43d31dbc0f85bebd5f26e29a801a0efb12d064b6 | $dos2unix)"
 expected="hello (1.0.0)"
 [ "$output" == "$expected" ]
 

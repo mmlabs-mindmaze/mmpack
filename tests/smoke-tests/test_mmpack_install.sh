@@ -9,6 +9,6 @@ trap cleanup EXIT
 cleanup
 
 mmpack mkprefix $PREFIX_TEST
-mmpack install -y $REPO/hello_1.0.0.mpk $REPO/hello-data_1.0.0.mpk
+mmpack install -y $REPO/0/hello_1.0.0.mpk $REPO/0/hello-data_1.0.0.mpk
 
 $PREFIX_TEST/bin/hello-world
