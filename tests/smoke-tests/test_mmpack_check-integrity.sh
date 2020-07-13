@@ -9,7 +9,7 @@ trap cleanup EXIT
 cleanup
 
 mmpack mkprefix $PREFIX_TEST
-mmpack install $REPO/hello-data_1.0.0*.mpk
+mmpack install $REPO/0/hello-data_1.0.0*.mpk
 
 mmpack check-integrity
 
@@ -18,7 +18,7 @@ mmpack check-integrity
 # this needs a repository containing the good package
 cleanup
 
-mmpack mkprefix --url=$REPO_URL $PREFIX_TEST
+mmpack mkprefix --url=$REPO_URL/0 $PREFIX_TEST
 mmpack update
 mmpack install -y hello
 

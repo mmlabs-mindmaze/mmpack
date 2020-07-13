@@ -8,7 +8,7 @@ prepare_env
 trap cleanup EXIT
 cleanup
 
-mmpack mkprefix --name=my_name --url=$REPO_URL $PREFIX_TEST
+mmpack mkprefix --name=my_name --url=$REPO_URL/0 $PREFIX_TEST
 
 # test mmpack repo add
 mmpack repo add other_name other_url
@@ -16,7 +16,7 @@ mmpack repo add other_name other_url
 diff - $PREFIX_TEST/etc/mmpack-config.yaml << EOF
 repositories:
   - my_name:
-        url: $REPO_URL
+        url: $REPO_URL/0
         enabled: 1
   - other_name:
         url: other_url
@@ -28,7 +28,7 @@ mmpack repo add other_name dum_url && false || echo "Failed as expected"
 # test mmpack repo list
 diff - <(mmpack repo list | $dos2unix) << EOF
 other_name (enabled)	other_url
-my_name (enabled)	$REPO_URL
+my_name (enabled)	$REPO_URL/0
 EOF
 
 # test mmpack repo rename
@@ -37,7 +37,7 @@ mmpack repo rename other_name name
 diff - $PREFIX_TEST/etc/mmpack-config.yaml << EOF
 repositories:
   - my_name:
-        url: $REPO_URL
+        url: $REPO_URL/0
         enabled: 1
   - name:
         url: other_url
@@ -52,7 +52,7 @@ mmpack repo disable my_name
 diff - $PREFIX_TEST/etc/mmpack-config.yaml << EOF
 repositories:
   - my_name:
-        url: $REPO_URL
+        url: $REPO_URL/0
         enabled: 0
   - name:
         url: other_url
@@ -61,7 +61,7 @@ EOF
 
 diff - <(mmpack repo list | $dos2unix) << EOF
 name (enabled)	other_url
-my_name (disabled)	$REPO_URL
+my_name (disabled)	$REPO_URL/0
 EOF
 
 diff - <(mmpack list all | $dos2unix) << EOF
@@ -74,7 +74,7 @@ mmpack repo enable my_name
 diff - $PREFIX_TEST/etc/mmpack-config.yaml << EOF
 repositories:
   - my_name:
-        url: $REPO_URL
+        url: $REPO_URL/0
         enabled: 1
   - name:
         url: other_url
@@ -87,7 +87,6 @@ diff - <(mmpack list all | sort | $dos2unix) << EOF
 [available] call-hello (1.0.0) from repositories: my_name
 [available] hello (1.0.0) from repositories: my_name
 [available] hello-data (1.0.0) from repositories: my_name
-[available] hello-data (2.0.0) from repositories: my_name
 EOF
 
 # test mmpack repo remove

@@ -8,7 +8,8 @@ prepare_env
 trap cleanup EXIT
 cleanup
 
-mmpack mkprefix --url=$REPO_URL $PREFIX_TEST
+mmpack mkprefix --url=$REPO_URL/0 $PREFIX_TEST
+mmpack repo add repo-1 $REPO_URL/1
 mmpack update
 mmpack install -y hello
 

@@ -8,7 +8,7 @@ prepare_env
 trap cleanup EXIT
 cleanup
 
-mmpack mkprefix --url=$REPO_URL $PREFIX_TEST
+mmpack mkprefix --url=$REPO_URL/0 $PREFIX_TEST
 mmpack update
 
 mmpack download hello-data=1.0.0
