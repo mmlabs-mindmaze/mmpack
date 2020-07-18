@@ -75,8 +75,8 @@ int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 
 	num_repo = settings_num_repo(&ctx->settings);
 	if (num_repo == 0) {
-		error("Repository URL unspecified\n");
-		return -1;
+		info("No repository specified, nothing to update\n");
+		return 0;
 	}
 
 	for (i = 0; i < num_repo; i++) {
