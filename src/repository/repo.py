@@ -201,6 +201,7 @@ class Repo:
         self.backup = IndicesStates(srcindex=self.srcindex,
                                     binindex=self.binindex,
                                     counter=self.count_src_refs)
+        shutil.rmtree(self.working_dir, ignore_errors=True)
 
     def yaml_serialize(self, obj: Union[list, dict], filename: str) -> None:
         """
@@ -240,8 +241,8 @@ class Repo:
             raise ValueError
 
     def _clear_change_data(self):
-        self.to_add = set()
-        self.to_remove = set()
+        self.to_add.clear()
+        self.to_remove.clear()
         self.backup = IndicesStates(srcindex=self.srcindex,
                                     binindex=self.binindex,
                                     counter=self.count_src_refs)
