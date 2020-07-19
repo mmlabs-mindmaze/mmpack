@@ -1,8 +1,8 @@
 general:
   name: mmpack
-  version: 0.2.0
-  maintainer: gabriel.ganne@mindmaze.com
-  url: ssh://intranet.mindmaze.ch:29418/mmpack
+  version: 0.3.0
+  maintainer: nicolas.bourdaud@gmail.com
+  url: https://github.com/mmlabs-mindmaze/mmpack
   licenses: [ GPL-3 ]
   copyright: 'MindMaze Holdings SA'
   build-system: meson

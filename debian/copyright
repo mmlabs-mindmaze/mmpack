@@ -1,10 +1,8 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: mmpack
-Upstream-Contact: Gabriel Ganne <gabriel.ganne@mindmaze.ch>
-Source: http://intranet.mindmaze.ch
+Upstream-Contact: Nicolas Bourdaud <nicolas.bourdaud@gmail.com>
+Source: https://github.com/mmlabs-mindmaze/mmpack
 
 Files: *
-Copyright: 2018, Mindmaze SA
-License: proprietary
- Copyright (C) 2018  MindMaze SA
- All right reserved
+Copyright: 2018-2020, Mindmaze SA
+License: GPL-3
