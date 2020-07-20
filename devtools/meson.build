@@ -103,3 +103,6 @@ if uncrustify.found()
         ],
     )
 endif # uncrustify
+
+
+meson.add_dist_script('expand_headers')
