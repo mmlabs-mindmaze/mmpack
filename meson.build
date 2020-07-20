@@ -152,3 +152,5 @@ message('=====================')
 message('* Tests : @0@'.format(tests_state))
 message('  - run long tests : @0@'.format(get_option('long-tests')))
 message('* Doc building : @0@'.format(docs_state))
+
+meson.add_dist_script('copyright-autoheader')
