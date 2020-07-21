@@ -13,43 +13,53 @@ repo management
 SYNOPSIS
 ========
 
-``mmpack repo`` -h|--help
-``mmpack repo`` add <name> <url>
-``mmpack repo`` [list]
-``mmpack repo`` remove <name>
-``mmpack repo`` rename <old-name> <new-name>
-``mmpack repo`` enable <name>
-``mmpack repo`` disable <name>
+**mmpack** [options] **repo** [**list**]
+
+**mmpack** [options] **repo add** <name> <url>
+
+**mmpack** [options] **repo remove** <name>
+
+**mmpack** [options] **repo rename** <old-name> <new-name>
+
+**mmpack** [options] **repo enable** <name>
+
+**mmpack** [options] **repo disable** <name>
+
+**mmpack repo** -h|--help
 
 DESCRIPTION
 ===========
 
 **mmpack-repo** is a tool to manage the repositories of a prefix. It mimics
 the *git remote* command. A call to **mmpack-update** is required for the
-changes to take effect.
+changes to take effect. It supports the following subccommands:
 
-**mmpack repo add** adds a repository named **<name>** pointing to the
-repository at **<url>**. The comand will fail to add a repository with a name
-that already exists.
+   add
+      adds a repository named *name* pointing to the repository at *url*. The
+      comand will fail to add a repository with a name that already exists.
 
-**mmpack repo list** shows a list of existing repositories.
+   list
+      shows a list of existing repositories. This is the default command.
 
-**mmpack repo remove** removes the repository named **<name>**.
+   remove
+      removes the repository named *name*.
 
-**mmpack repo rename** changes the name given to a repository from
-**<old-name>** to **<new-name>**.
+   rename
+      changes the name given to a repository from *old-name* to *new-name*.
 
-**mmpack repo enable** makes the repository named **<name>** enabled, i.e., the
-packages provided by the repository **<name>** are available after the next call
-to mmpack update.
+   enable
+      makes the repository named *name* enabled, i.e., the packages provided by
+      the repository *name* are available after the next call to mmpack update.
 
-**mmpack repo disable** makes the repository named **<name>** disabled, i.e.,
-the packages provided by the repository **<name>** are not available anymore.
+   disable
+      makes the repository named *name* disabled, i.e., the packages provided
+      by the repository *name* are not available anymore.
 
 OPTIONS
 =======
-``-h|--help``
-  Show help and exit
+
+-h|--help
+   Show help and exit
 
 SEE ALSO
 ========
