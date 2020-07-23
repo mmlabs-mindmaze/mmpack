@@ -1,3 +1,10 @@
+mmpack (0.3.1) unstable; urgency=medium
+
+  * fix detection of system package on elf platform when calling mmpack-build
+  * fix mmpack-repo manpage
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 23 Jul 2020 17:37:34 +0200
+
 mmpack (0.3.0) unstable; urgency=medium
 
   * rename tool to manipulate repo as mmpack-modifyrepo
