@@ -12,19 +12,30 @@ from . common import *
 from . workspace import Workspace, cached_download
 
 
-def _git_subcmd(subcmd: str, gitdir: str = '.git') -> str:
-    cmd = 'git --git-dir={} {}'.format(gitdir, subcmd)
-    return shell(cmd).strip()
+def _git_subcmd(subcmd: str, gitdir: str = None, worktree: str = None,
+                git_ssh_cmd: str = None) -> str:
+    env = None
+    if gitdir or worktree or git_ssh_cmd:
+        env = os.environ.copy()
+        if gitdir:
+            env['GIT_DIR'] = gitdir
+        if worktree:
+            env['GIT_WORK_TREE'] = worktree
+        if git_ssh_cmd:
+            env['GIT_SSH_COMMAND'] = git_ssh_cmd
+
+    return shell('git ' + subcmd, env=env).strip()
 
 
-def _git_clone(url: str, clonedir: str, refspec: str = None,
-               git_ssh_cmd: str = None):
+def _git_clone(url: str, worktree: str, gitdir: str = None,
+               refspec: str = None, git_ssh_cmd: str = None):
     """
     create a shallow clone of a git repo
 
     Args:
         url: url of git repository
-        clonedir: folder where the repo must be cloned into
+        worktree: folder where the repo must be checked out into
+        gitdir: optional folder that will hold the git repository.
         refspec: tag, branch, commit hash to check out
         git_ssh_cmd: optional, ssh cmd to use when cloning git repo through ssh
     """
@@ -34,26 +45,23 @@ def _git_clone(url: str, clonedir: str, refspec: str = None,
     if not refspec:
         refspec = 'HEAD'
 
-    iprint('cloning {} ({}) into tmp dir {}'.format(url, refspec, clonedir))
+    if not gitdir and worktree:
+        gitdir = worktree + '/.git'
+
+    iprint('cloning {} ({}) into tmp dir {}'.format(url, refspec, worktree))
 
     # Create and init git repository
-    shell('git init --quiet ' + clonedir)
-    pushdir(clonedir)
+    _git_subcmd('init --quiet', gitdir)
 
     # Fetch git refspec
-    fetch_env = ''
-    if git_ssh_cmd:
-        fetch_env += 'GIT_SSH_COMMAND="{}"'.format(git_ssh_cmd)
-    git_fetch_sh_cmd = '{0} git fetch --quiet --depth=1 {1} {2}'\
-                       .format(fetch_env, url, refspec)
-    shell(git_fetch_sh_cmd)
+    _git_subcmd('fetch --quiet --depth=1 {0} {1}'.format(url, refspec),
+                gitdir, worktree, git_ssh_cmd)
 
     # Checkout the specified refspec
-    shell('git checkout --quiet --detach FETCH_HEAD')
-
-    popdir()
+    _git_subcmd('checkout --quiet --detach FETCH_HEAD', gitdir, worktree)
 
 
+# pylint: disable=too-many-instance-attributes
 class SourceTarball:
     """
     Class managing source tarball creation
@@ -78,18 +86,20 @@ class SourceTarball:
         self.name = None
         self._path_url = path_url
         self._kwargs = kwargs
-        self._srcdir = mkdtemp(dir=Workspace().sources)
+        self._builddir = mkdtemp(dir=Workspace().sources)
+        self.srcdir = None
+        self.vcsdir = None
         self.trace = dict()
 
         # Fetch sources following the specified method and move them to the
         # temporary source build folder
         dprint('extracting sources in the temporary directory: {}'
-               .format(self._srcdir))
+               .format(self._builddir))
         self._create_srcdir(method)
 
         # extract minimal metadata from package
         try:
-            name, version = get_name_version_from_srcdir(self._srcdir)
+            name, version = get_name_version_from_srcdir(self.srcdir)
             self.name = name
         except FileNotFoundError:  # raised if srcdir lack mmpack specs
             return
@@ -105,24 +115,23 @@ class SourceTarball:
         # Create source package tarball
         self.srctar = '{0}/{1}_{2}_src.tar.xz'.format(outdir, name, version)
         dprint('Building source tarball ' + self.srctar)
-        create_tarball(self._srcdir, self.srctar, 'xz')
+        create_tarball(self.srcdir, self.srctar, 'xz')
 
     def __del__(self):
         # If source build dir has been created and not detach, remove it at
         # instance destruction
-        if self._srcdir:
-            dprint('Destroying temporary source build dir ' + self._srcdir)
-            shutil.rmtree(self._srcdir)
+        dprint('Destroying temporary source build dir ' + self._builddir)
+        shutil.rmtree(self._builddir)
 
     def _get_unpacked_upstream_dir(self):
         """
         Get location when upstream source code is expected to be extracted if
         fetched. This does not created the folder.
         """
-        return os.path.join(self._srcdir, 'mmpack/upstream')
+        return os.path.join(self._builddir, 'upstream')
 
     def _process_source_strap(self):
-        source_strap = os.path.join(self._srcdir, 'mmpack/sources-strap')
+        source_strap = os.path.join(self.srcdir, 'mmpack/sources-strap')
         try:
             specs = yaml_load(source_strap)
         except FileNotFoundError:
@@ -134,8 +143,8 @@ class SourceTarball:
         """
         Remove ownership of extracted srcdir from SourceTarball and return it
         """
-        srcdir = self._srcdir
-        self._srcdir = None
+        srcdir = self.srcdir
+        self.srcdir = None
         return srcdir
 
     def prepare_binpkg_build(self):
@@ -150,14 +159,14 @@ class SourceTarball:
         unpackdir = os.path.join(builddir, self.name)
 
         iprint('moving unpacked sources from {0} to {1}'
-               .format(self._srcdir, unpackdir))
-        shutil.move(self._srcdir, unpackdir)
+               .format(self.srcdir, unpackdir))
+        shutil.move(self.srcdir, unpackdir)
 
         # Copy package tarball in package builddir
         new_srctar = os.path.join(builddir, os.path.basename(self.srctar))
         shutil.copyfile(self.srctar, new_srctar)
 
-        self._srcdir = unpackdir
+        self.srcdir = unpackdir
         self.srctar = new_srctar
 
     def _store_src_orig_tracing(self):
@@ -167,25 +176,27 @@ class SourceTarball:
         upstream_info = self.trace.get('upstream', {'method': 'in-src-pkg'})
         data = {'packaging': self.trace['pkg'], 'upstream': upstream_info}
 
-        file_path = os.path.join(self._srcdir, 'mmpack/src_orig_tracing')
+        file_path = os.path.join(self.srcdir, 'mmpack/src_orig_tracing')
         yaml_serialize(data, file_path, use_block_style=True)
 
     def _create_srcdir_from_git(self):
         """
         Create a source package folder from git clone
         """
+        self.vcsdir = self._builddir + '/vcsdir.git'
         git_ssh_cmd = self._kwargs.get('git_ssh_cmd')
-        _git_clone(self._path_url, self._srcdir, self.tag, git_ssh_cmd)
-        git_dir = self._srcdir + '/.git'
+        _git_clone(url=self._path_url,
+                   worktree=self.srcdir,
+                   gitdir=self.vcsdir,
+                   refspec=self.tag,
+                   git_ssh_cmd=git_ssh_cmd)
 
         # Get tag name if not set yet (use current branch)
         if not self.tag:
-            self.tag = _git_subcmd('rev-parse --abbrev-ref HEAD', git_dir)
+            self.tag = _git_subcmd('rev-parse --abbrev-ref HEAD', self.vcsdir)
 
-        commit_ref = _git_subcmd('rev-parse HEAD', git_dir)
+        commit_ref = _git_subcmd('rev-parse HEAD', self.vcsdir)
         self.trace['pkg'].update({'url': self._path_url, 'ref': commit_ref})
-
-        shutil.rmtree(git_dir, ignore_errors=True)
 
     def _create_srcdir_from_tar(self):
         """
@@ -193,7 +204,7 @@ class SourceTarball:
         following mmpack src tarball convention.
         """
         tar = tarfile.open(self._path_url, 'r:*')
-        tar.extractall(path=self._srcdir)
+        tar.extractall(path=self.srcdir)
 
         # Get tag name if not set yet
         if not self.tag:
@@ -212,10 +223,10 @@ class SourceTarball:
         for dentry in os.listdir(self._path_url):
             elt_path = os.path.join(self._path_url, dentry)
             if os.path.isdir(elt_path):
-                dstdir = os.path.join(self._srcdir, dentry)
+                dstdir = os.path.join(self.srcdir, dentry)
                 shutil.copytree(elt_path, dstdir, symlinks=True)
             else:
-                shutil.copy(elt_path, self._srcdir, follow_symlinks=False)
+                shutil.copy(elt_path, self.srcdir, follow_symlinks=False)
 
         # Get tag name if not set yet
         if not self.tag:
@@ -236,6 +247,8 @@ class SourceTarball:
             'tar': self._create_srcdir_from_tar,
             'srcpkg': self._create_srcdir_from_tar,
         }
+        self.srcdir = self._builddir + '/src'
+        os.mkdir(self.srcdir)
 
         create_srcdir_callable = method_mapping.get(method)
         if not create_srcdir_callable:
@@ -252,14 +265,18 @@ class SourceTarball:
             specs: dict of settings put in source-strap file
         """
         srcdir = self._get_unpacked_upstream_dir()
-        gitdir = srcdir + '/.git'
+        gitdir = self._builddir + '/upstream.git'
         url = specs['url']
-        _git_clone(url, srcdir, specs.get('branch'))
 
-        gitref = _git_subcmd('rev-parse HEAD', gitdir)
+        os.mkdir(srcdir)
+
+        _git_clone(url=url,
+                   worktree=srcdir,
+                   gitdir=gitdir,
+                   refspec=specs.get('branch'))
+
+        gitref = _git_subcmd('rev-parse HEAD', gitdir=gitdir)
         self.trace['upstream'].update({'url': url, 'ref': gitref})
-
-        shutil.rmtree(gitdir)
 
     def _fetch_upstream_from_tar(self, specs: Dict[str, str]):
         """
@@ -270,7 +287,7 @@ class SourceTarball:
         """
         url = specs['url']
         filename = os.path.basename(url)
-        downloaded_file = os.path.join(self._srcdir, 'mmpack', filename)
+        downloaded_file = os.path.join(self._builddir, filename)
         expected_sha256 = specs.get('sha256')
 
         cached_download(url, downloaded_file, expected_sha256)
@@ -285,8 +302,6 @@ class SourceTarball:
         # Extract downloaded_file in upstreamdir
         with tarfile.open(downloaded_file, 'r:*') as tar:
             tar.extractall(path=self._get_unpacked_upstream_dir())
-
-        os.remove(downloaded_file)
 
     def _fetch_upstream(self, specs: Dict[str, str]):
         """
@@ -330,7 +345,4 @@ class SourceTarball:
         # Move extracted upstream sources except mmpack packaging
         for elt in dir_content:
             if elt != 'mmpack':
-                shutil.move(os.path.join(upstream_srcdir, elt), self._srcdir)
-
-        # Clean leftover of temporary extracted
-        shutil.rmtree(self._get_unpacked_upstream_dir())
+                shutil.move(os.path.join(upstream_srcdir, elt), self.srcdir)
