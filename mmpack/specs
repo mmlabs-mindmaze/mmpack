@@ -32,7 +32,9 @@ mmpack-repo-tools:
     This package contains the tools needed to manage repositories of mmpack
     packages
   files:
-    - .*/mmpack-createrepo
+    - .*/bin/mmpack-modifyrepo
+    - .*/share/mmpack/repo.py
+    - .*/man/man1/mmpack-modifyrepo\.1
 
 mmpack-build:
   description: |
