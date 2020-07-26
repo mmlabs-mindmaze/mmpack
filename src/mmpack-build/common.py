@@ -14,7 +14,7 @@ import platform
 
 from hashlib import sha256
 from subprocess import PIPE, run
-from typing import Union, Tuple, List, Set
+from typing import Union, Dict, Tuple, List, Set
 
 import urllib3
 import yaml
@@ -111,7 +111,7 @@ class ShellException(RuntimeError):
 
 
 def shell(cmd, log: bool = True, input_str: str = None,
-          log_stderr: bool = True) -> str:
+          log_stderr: bool = True, env: Dict[str, str] = None) -> str:
     """
     Wrapper for subprocess.run
 
@@ -122,6 +122,8 @@ def shell(cmd, log: bool = True, input_str: str = None,
         log: log command string on debug output if True
         input_str: string to send on standard input of the created process
         log_stderr: capture stderr and display with eprint() if True
+        env: full environment with which the process must be executed. If None,
+            the environment is inherited from the current process
     Raises:
         ValueError: if type of cmd is invalid
         ShellException: if the command run failed
@@ -145,7 +147,7 @@ def shell(cmd, log: bool = True, input_str: str = None,
 
     try:
         ret = run(cmd, stdout=PIPE, shell=run_shell, input=input_utf8,
-                  stderr=PIPE if log_stderr else None, check=False)
+                  stderr=PIPE if log_stderr else None, check=False, env=env)
 
         # Reproduce stderr of command with eprint() if requested
         if log_stderr:
