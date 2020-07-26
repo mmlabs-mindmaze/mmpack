@@ -40,7 +40,6 @@ bin_SCRIPTS = \
 
 dist_bin_SCRIPTS = \
 	devtools/mmpack-build-slave.sh \
-	src/repository/mmpack-createrepo \
 	$(eol)
 dist_pkgdata_SCRIPTS = \
 	src/mmpack/check-dpkg-installed \

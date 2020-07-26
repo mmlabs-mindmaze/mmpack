@@ -1,5 +1,3 @@
-mmpack_repo_scripts = files('mmpack-createrepo')
-
 mmpack_repo_private = files('repo.py')
 
 conf_data = configuration_data({
@@ -7,7 +5,7 @@ conf_data = configuration_data({
 	'bindir': get_option('bindir'),
 })
 
-mmpack_repo_scripts += configure_file(
+mmpack_repo_scripts = configure_file(
 	output: 'mmpack-modifyrepo',
 	input: files('mmpack-modifyrepo.py.in'),
 	configuration: conf_data,
