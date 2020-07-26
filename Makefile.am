@@ -38,9 +38,6 @@ bin_SCRIPTS = \
 	src/repository/mmpack-modifyrepo \
 	$(eol)
 
-dist_bin_SCRIPTS = \
-	devtools/mmpack-build-slave.sh \
-	$(eol)
 dist_pkgdata_SCRIPTS = \
 	src/mmpack/check-dpkg-installed \
 	$(eol)
@@ -89,14 +86,6 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/xdg.py \
 	$(eol)
 
-mmpack_build_gerritdir =  $(pkgdatadir)/gerrit/python
-mmpack_build_gerrit_SCRIPTS = \
-	devtools/gerrit/gerrit-mmpack-build.py \
-	$(eol)
-mmpack_build_gerrit_PYTHON = \
-	devtools/gerrit/gerrit.py \
-	$(eol)
-
 mmpack_db_service = \
 	src/repository/mmpack-db.py \
 	$(eol)
@@ -113,13 +102,11 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 pycodestyle: deployment-test
 	pycodestyle --show-source deployment-test$(pythondir)/mmpack_build \
 	                          deployment-test$(pkgdatadir)/*.py \
-				  deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py \
 	                          deployment-test$(bindir)/mmpack-modifyrepo
 
 .PHONY: pylint
 pylint: devtools/pylint-config deployment-test
 	$(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build deployment-test$(pkgdatadir)/*.py
-	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) $(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(datadir)/mmpack/gerrit/python/gerrit-mmpack-build.py
 	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) $(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(bindir)/mmpack-modifyrepo
 
 .PHONY: syntax
@@ -295,7 +282,6 @@ src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
 user_doc_sources =
 .PHONY: spelling
 spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) \
-		$(mmpack_build_gerrit_SCRIPTS) $(mmpack_build_gerrit_PYTHON) \
 		$(user_doc_sources) $(mmpack_db_service)
 	$(AM_V_at) codespell $^
 
@@ -349,8 +335,6 @@ checkstyle: devtools/uncrustify.cfg pycodestyle
 deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES) $(mmpackbuild_PYTHON) \
 		$(nodist_mmpackbuild_PYTHON) \
-		$(mmpack_build_gerrit_SCRIPTS) \
-		$(mmpack_build_gerrit_PYTHON) \
 		$(dist_pkgdata_SCRIPTS) \
 		$(bin_SCRIPTS)
 	DESTDIR=$(shell readlink -f $@) $(MAKE) install

@@ -13,20 +13,6 @@ general:
     It is designed to work without any need for root access, and to allow
     multiple coexisting project versions within project prefixes.
 
-mmpack-gerrit-builder-master:
-  description: |
-    This package contains the tools needed to update repository upon git repo
-    update (master server)
-  files:
-    - .*/gerrit/
-
-mmpack-gerrit-builder-slave:
-  description: |
-    This package contains the tools needed to update repository upon git repo
-    update (slave server)
-  files:
-    - .*/mmpack-build-slave.sh
-
 mmpack-repo-tools:
   description: |
     This package contains the tools needed to manage repositories of mmpack
