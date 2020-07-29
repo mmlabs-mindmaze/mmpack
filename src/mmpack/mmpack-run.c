@@ -10,6 +10,7 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "common.h"
@@ -53,6 +54,26 @@ char* get_mount_prefix_bin(void)
 
 #endif /* if !defined (_WIN32) */
 
+
+static
+char* expand_abspath(const char* prefix)
+{
+	char* res;
+
+	// TODO Implement a proper version of realpath in mmlib
+#if _WIN32
+	res = _fullpath(NULL, prefix, 32768);
+#else
+	res = realpath(prefix, NULL);
+#endif
+	if (!res) {
+		mm_raise_from_errno("Cannot expand %s", prefix);
+		return NULL;
+	}
+	return res;
+}
+
+
 /**
  * mmpack_run() - main function for the command to run commands
  * @ctx: mmpack context
@@ -71,6 +92,7 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	int nargs;
 	const char** args;
 	char** new_argv;
+	const char* full_prefix;
 	const char* default_shell_argv[] = {
 		mm_getenv("SHELL", "sh"),
 		NULL,
@@ -116,13 +138,17 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// from args, the NULL termination will be added to new_argv
 	memcpy(new_argv+2, args, (nargs+1) * sizeof(*args));
 
+	full_prefix = expand_abspath(ctx->prefix);
+	if (!full_prefix)
+		return -1;
+
 	// Add prefix path to environment variables
 	if (mm_setenv("PATH", MOUNT_TARGET "/bin", MM_ENV_PREPEND)
 	    || mm_setenv("CPATH", MOUNT_TARGET "/include", MM_ENV_PREPEND)
 	    || mm_setenv("LIBRARY_PATH", MOUNT_TARGET "/lib", MM_ENV_PREPEND)
 	    || mm_setenv("MANPATH", MOUNT_TARGET "/share/man", MM_ENV_PREPEND)
-	    || mm_setenv("MMPACK_PREFIX", ctx->prefix, MM_ENV_OVERWRITE)
-	    || mm_setenv("MMPACK_ACTIVE_PREFIX", ctx->prefix, MM_ENV_OVERWRITE)
+	    || mm_setenv("MMPACK_PREFIX", full_prefix, MM_ENV_OVERWRITE)
+	    || mm_setenv("MMPACK_ACTIVE_PREFIX", full_prefix, MM_ENV_OVERWRITE)
 	    /* XXX: check PYTHONPATH value once a pure-python mmpack package has
 	     * been created */
 	    || mm_setenv("PYTHONPATH",
