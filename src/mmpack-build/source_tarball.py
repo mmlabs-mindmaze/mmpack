@@ -12,7 +12,7 @@ from . common import *
 from . workspace import Workspace, cached_download
 
 
-def _git_subcmd(subcmd: str, gitdir: str = None, worktree: str = None,
+def _git_subcmd(subcmd: List[str], gitdir: str = None, worktree: str = None,
                 git_ssh_cmd: str = None) -> str:
     env = None
     if gitdir or worktree or git_ssh_cmd:
@@ -24,7 +24,9 @@ def _git_subcmd(subcmd: str, gitdir: str = None, worktree: str = None,
         if git_ssh_cmd:
             env['GIT_SSH_COMMAND'] = git_ssh_cmd
 
-    return shell('git ' + subcmd, env=env).strip()
+    args = subcmd.copy()
+    args.insert(0, 'git')
+    return shell(args, env=env).strip()
 
 
 def _git_clone(url: str, worktree: str, gitdir: str = None,
@@ -51,14 +53,15 @@ def _git_clone(url: str, worktree: str, gitdir: str = None,
     iprint('cloning {} ({}) into tmp dir {}'.format(url, refspec, worktree))
 
     # Create and init git repository
-    _git_subcmd('init --quiet', gitdir)
+    _git_subcmd(['init', '--quiet'], gitdir)
 
     # Fetch git refspec
-    _git_subcmd('fetch --quiet --depth=1 {0} {1}'.format(url, refspec),
+    _git_subcmd(['fetch', '--quiet', '--depth=1', url, refspec],
                 gitdir, worktree, git_ssh_cmd)
 
     # Checkout the specified refspec
-    _git_subcmd('checkout --quiet --detach FETCH_HEAD', gitdir, worktree)
+    _git_subcmd(['checkout', '--quiet', '--detach', 'FETCH_HEAD'],
+                gitdir, worktree)
 
 
 # pylint: disable=too-many-instance-attributes
@@ -193,9 +196,9 @@ class SourceTarball:
 
         # Get tag name if not set yet (use current branch)
         if not self.tag:
-            self.tag = _git_subcmd('rev-parse --abbrev-ref HEAD', self._vcsdir)
+            self.tag = _git_subcmd(['rev-parse', '--abbrev-ref', 'HEAD'], self._vcsdir)
 
-        commit_ref = _git_subcmd('rev-parse HEAD', self._vcsdir)
+        commit_ref = _git_subcmd(['rev-parse', 'HEAD'], self._vcsdir)
         self.trace['pkg'].update({'url': self._path_url, 'ref': commit_ref})
 
     def _create_srcdir_from_tar(self):
@@ -275,7 +278,7 @@ class SourceTarball:
                    gitdir=gitdir,
                    refspec=specs.get('branch'))
 
-        gitref = _git_subcmd('rev-parse HEAD', gitdir=gitdir)
+        gitref = _git_subcmd(['rev-parse', 'HEAD'], gitdir=gitdir)
         self.trace['upstream'].update({'url': url, 'ref': gitref})
 
     def _fetch_upstream_from_tar(self, specs: Dict[str, str]):
