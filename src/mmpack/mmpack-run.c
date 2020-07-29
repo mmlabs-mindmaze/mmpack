@@ -137,6 +137,7 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	conv_env_pathlist_win32_to_posix("CPATH");
 	conv_env_pathlist_win32_to_posix("LIBRARY_PATH");
 	conv_env_pathlist_win32_to_posix("MANPATH");
+	conv_env_pathlist_win32_to_posix("ACLOCAL_PATH");
 #endif
 
 	return mm_execv(new_argv[0], 0, NULL, 0, new_argv, NULL);
