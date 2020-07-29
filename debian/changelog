@@ -1,3 +1,10 @@
+mmpack (0.3.2) unstable; urgency=medium
+
+  * mmpack-run set MMPACK_PREFIX and MMPACK_ACTIVE_PREFIX environment
+    variables with absolute path.
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 29 Jul 2020 13:44:15 +0200
+
 mmpack (0.3.1) unstable; urgency=medium
 
   * fix detection of system package on elf platform when calling mmpack-build
