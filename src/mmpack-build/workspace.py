@@ -13,7 +13,7 @@ from . settings import BINDIR, EXEEXT
 from . xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
 
 
-def find_project_root_folder() -> str:
+def find_project_root_folder(find_multiproj: bool = False) -> str:
     """
     Look for folder named 'mmpack' in the current directory or any parent
     folder.
@@ -22,6 +22,9 @@ def find_project_root_folder() -> str:
 
     while True:
         if os.path.isfile(path + '/mmpack/specs'):
+            break
+
+        if find_multiproj and os.path.isfile(path + '/projects.mmpack'):
             break
 
         path, current = os.path.split(path)
