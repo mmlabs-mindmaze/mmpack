@@ -88,7 +88,7 @@ def parse_options(argv):
     args = parser.parse_args(argv)
 
     if not args.path_or_url:
-        args.path_or_url = find_project_root_folder()
+        args.path_or_url = find_project_root_folder(find_multiproj=True)
         if not args.path_or_url:
             raise ValueError('did not find project to package')
 
@@ -137,17 +137,8 @@ def _guess_method(path_or_url: str) -> str:
     return 'git'
 
 
-def main(argv):
-    """
-    entry point to create a mmpack package
-    """
-    args = parse_options(argv[1:])
-    if not args.method:
-        args.method = _guess_method(args.path_or_url)
-
-    srctarball = SourceTarball(args.method, args.path_or_url, args.tag)
-    package = SrcPackage(srctarball.srctar, srctarball.tag,
-                         srctarball.get_srcdir())
+def _build_mmpack_packages(srctar: str, tag: str, srcdir: str, args):
+    package = SrcPackage(srctar, tag, srcdir)
 
     if args.build_deps:
         package.install_builddeps(prefix=args.prefix, assumeyes=args.assumeyes)
@@ -157,3 +148,17 @@ def main(argv):
     package.local_install(args.skip_tests)
     package.ventilate()
     package.generate_binary_packages()
+
+
+def main(argv):
+    """
+    entry point to create a mmpack package
+    """
+    args = parse_options(argv[1:])
+    if not args.method:
+        args.method = _guess_method(args.path_or_url)
+
+    srctarball = SourceTarball(args.method, args.path_or_url, args.tag)
+    for prj_src in srctarball.iter_mmpack_srcs():
+        _build_mmpack_packages(prj_src.tarball, srctarball.tag,
+                               prj_src.srcdir, args)
