@@ -5,11 +5,16 @@ Fetch/gather sources of a mmpack package and create source tarball
 
 import os
 import shutil
+from collections import namedtuple
 from tempfile import mkdtemp
-from typing import Dict
+from typing import Dict, Iterator
 
 from . common import *
 from . workspace import Workspace, cached_download
+
+
+ProjectSource = namedtuple('ProjectSource',
+                           ['name', 'version', 'tarball', 'srcdir'])
 
 
 def _git_subcmd(subcmd: List[str], gitdir: str = None, worktree: str = None,
@@ -92,6 +97,7 @@ class SourceTarball:
         self._builddir = mkdtemp(dir=Workspace().sources)
         self._srcdir = None
         self._vcsdir = None
+        self._outdir = outdir
         self.trace = dict()
 
         # Fetch sources following the specified method and move them to the
@@ -100,31 +106,47 @@ class SourceTarball:
                .format(self._builddir))
         self._create_srcdir(method)
 
-        # extract minimal metadata from package
-        try:
-            name, version = get_name_version_from_srcdir(self._srcdir)
-            self.name = name
-        except FileNotFoundError:  # raised if srcdir lack mmpack specs
-            return
-
         # If the input was a mmpack source package, there is nothing else to do
         if method == 'srcpkg':
+            name, _ = get_name_version_from_srcdir(self._srcdir)
+            self.name = name
             self.srctar = path_url
             return
 
-        self._process_source_strap()
-        self._store_src_orig_tracing()
-
-        # Create source package tarball
-        self.srctar = '{0}/{1}_{2}_src.tar.xz'.format(outdir, name, version)
-        dprint('Building source tarball ' + self.srctar)
-        create_tarball(self._srcdir, self.srctar, 'xz')
+        # Try generate the source from the root folder of project
+        try:
+            prj_src = self._gen_project_sources()
+            self.name = prj_src.name
+            self.srctar = prj_src.tarball
+        except FileNotFoundError:  # raised if srcdir lack mmpack specs
+            return
 
     def __del__(self):
         # If source build dir has been created and not detach, remove it at
         # instance destruction
         dprint('Destroying temporary source build dir ' + self._builddir)
         shutil.rmtree(self._builddir)
+
+    def _gen_project_sources(self, subdir: str = '') -> ProjectSource:
+        srcdir = self._srcdir
+        if subdir:
+            self.trace['pkg']['subdir'] = subdir
+            srcdir += '/' + subdir
+
+        # extract minimal metadata from package
+        name, version = get_name_version_from_srcdir(srcdir)
+
+        self._process_source_strap(srcdir)
+        self._store_src_orig_tracing(srcdir)
+
+        # Create source package tarball
+        srctar = '{0}/{1}_{2}_src.tar.xz'.format(self._outdir, name, version)
+        dprint('Building source tarball ' + srctar)
+        create_tarball(srcdir, srctar, 'xz')
+        return ProjectSource(name=name,
+                             version=version,
+                             tarball=srctar,
+                             srcdir=srcdir)
 
     def _get_unpacked_upstream_dir(self):
         """
@@ -133,14 +155,14 @@ class SourceTarball:
         """
         return os.path.join(self._builddir, 'upstream')
 
-    def _process_source_strap(self):
-        source_strap = os.path.join(self._srcdir, 'mmpack/sources-strap')
+    def _process_source_strap(self, srcdir):
+        source_strap = os.path.join(srcdir, 'mmpack/sources-strap')
         try:
             specs = yaml_load(source_strap)
         except FileNotFoundError:
             return  # There is no source strap, nothing to be done
 
-        self._fetch_upstream(specs)
+        self._fetch_upstream(specs, srcdir)
 
     def get_srcdir(self) -> str:
         """
@@ -148,14 +170,36 @@ class SourceTarball:
         """
         return self._srcdir
 
-    def _store_src_orig_tracing(self):
+    def iter_mmpack_srcs(self) -> Iterator[ProjectSource]:
+        """
+        Get an iterator of sources of all project referenced in the repository
+        """
+        # If the extracted/cloned data contains a mmpack packaging at the root
+        # folder, this is the only project to return
+        if self.srctar:
+            yield ProjectSource(name=self.name,
+                                version=self.tag,
+                                tarball=self.srctar,
+                                srcdir=self._srcdir)
+            return
+
+        try:
+            prjlist_path = self._srcdir + '/projects.mmpack'
+            subdirs = [l.strip() for l in open(prjlist_path, 'rt')]
+        except FileNotFoundError:
+            return
+
+        for subdir in subdirs:
+            yield self._gen_project_sources(subdir)
+
+    def _store_src_orig_tracing(self, subdir: str):
         """
         Write src_orig_tracing file from trace information
         """
         upstream_info = self.trace.get('upstream', {'method': 'in-src-pkg'})
         data = {'packaging': self.trace['pkg'], 'upstream': upstream_info}
 
-        file_path = os.path.join(self._srcdir, 'mmpack/src_orig_tracing')
+        file_path = os.path.join(self._srcdir, subdir, 'mmpack/src_orig_tracing')
         yaml_serialize(data, file_path, use_block_style=True)
 
     def _create_srcdir_from_git(self):
@@ -283,7 +327,7 @@ class SourceTarball:
         with tarfile.open(downloaded_file, 'r:*') as tar:
             tar.extractall(path=self._get_unpacked_upstream_dir())
 
-    def _fetch_upstream(self, specs: Dict[str, str]):
+    def _fetch_upstream(self, specs: Dict[str, str], srcdir: str):
         """
         Fetch upstream sources using specified method and extract it to src dir
 
@@ -294,6 +338,10 @@ class SourceTarball:
             'git': self._fetch_upstream_from_git,
             'tar': self._fetch_upstream_from_tar,
         }
+
+        # Remove left over of upstream of other projects
+        upstream_srcdir = self._get_unpacked_upstream_dir()
+        shutil.rmtree(upstream_srcdir)
 
         # check that mandatory keys are present in sources-strap file
         missings_keys = {'method', 'url'}.difference(specs)
@@ -313,7 +361,6 @@ class SourceTarball:
 
         # Determine in which subfolder of extracted upstream dir the source are
         # actually located
-        upstream_srcdir = self._get_unpacked_upstream_dir()
         dir_content = list(os.listdir(upstream_srcdir))
         while len(dir_content) == 1:
             elt = os.path.join(upstream_srcdir, dir_content[0])
@@ -325,4 +372,4 @@ class SourceTarball:
         # Move extracted upstream sources except mmpack packaging
         for elt in dir_content:
             if elt != 'mmpack':
-                shutil.move(os.path.join(upstream_srcdir, elt), self._srcdir)
+                shutil.move(os.path.join(upstream_srcdir, elt), srcdir)
