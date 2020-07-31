@@ -137,6 +137,19 @@ def _guess_method(path_or_url: str) -> str:
     return 'git'
 
 
+def _build_mmpack_tarball(srctar: str, tag: str, srcdir: str, args):
+    package = SrcPackage(os.path.join(srcdir, 'mmpack/specs'), tag, srctar)
+
+    if args.build_deps:
+        package.install_builddeps(prefix=args.prefix, assumeyes=args.assumeyes)
+
+    set_log_file(package.pkgbuild_path() + '/mmpack.log')
+
+    package.local_install(args.skip_tests)
+    package.ventilate()
+    package.generate_binary_packages()
+
+
 def main(argv):
     """
     entry point to create a mmpack package
@@ -148,14 +161,5 @@ def main(argv):
     srctarball = SourceTarball(args.method, args.path_or_url, args.tag)
     srctarball.prepare_binpkg_build()
 
-    specfile = os.path.join(srctarball.detach_srcdir(), 'mmpack/specs')
-    package = SrcPackage(specfile, srctarball.tag, srctarball.srctar)
-
-    if args.build_deps:
-        package.install_builddeps(prefix=args.prefix, assumeyes=args.assumeyes)
-
-    set_log_file(package.pkgbuild_path() + '/mmpack.log')
-
-    package.local_install(args.skip_tests)
-    package.ventilate()
-    package.generate_binary_packages()
+    _build_mmpack_tarball(srctarball.srctar, srctarball.tag,
+                          srctarball.detach_srcdir(), args)

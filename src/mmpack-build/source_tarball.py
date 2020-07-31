@@ -100,16 +100,18 @@ class SourceTarball:
                .format(self._builddir))
         self._create_srcdir(method)
 
+        # If the input was a mmpack source package, there is nothing else to do
+        if method == 'srcpkg':
+            name, _ = get_name_version_from_srcdir(self._srcdir)
+            self.name = name
+            self.srctar = path_url
+            return
+
         # extract minimal metadata from package
         try:
             name, version = get_name_version_from_srcdir(self._srcdir)
             self.name = name
         except FileNotFoundError:  # raised if srcdir lack mmpack specs
-            return
-
-        # If the input was a mmpack source package, there is nothing else to do
-        if method == 'srcpkg':
-            self.srctar = path_url
             return
 
         self._process_source_strap()
@@ -126,6 +128,24 @@ class SourceTarball:
         dprint('Destroying temporary source build dir ' + self._builddir)
         shutil.rmtree(self._builddir)
 
+    def _gen_project_sources(self, subdir: str,
+                             outdir: str) -> Tuple[str, str, str]:
+        srcdir = self._srcdir
+        if subdir:
+            srcdir += '/' + subdir
+
+        # extract minimal metadata from package
+        name, version = get_name_version_from_srcdir(srcdir)
+
+        self._process_source_strap()
+        self._store_src_orig_tracing()
+
+        # Create source package tarball
+        srctar = '{0}/{1}_{2}_src.tar.xz'.format(outdir, name, version)
+        dprint('Building source tarball ' + srctar)
+        create_tarball(srcdir, srctar, 'xz')
+        return (name, srctar, srcdir)
+
     def _get_unpacked_upstream_dir(self):
         """
         Get location when upstream source code is expected to be extracted if
@@ -133,8 +153,8 @@ class SourceTarball:
         """
         return os.path.join(self._builddir, 'upstream')
 
-    def _process_source_strap(self):
-        source_strap = os.path.join(self._srcdir, 'mmpack/sources-strap')
+    def _process_source_strap(self, srcdir):
+        source_strap = os.path.join(srcdir, 'mmpack/sources-strap')
         try:
             specs = yaml_load(source_strap)
         except FileNotFoundError:
