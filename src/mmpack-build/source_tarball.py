@@ -139,35 +139,11 @@ class SourceTarball:
 
         self._fetch_upstream(specs)
 
-    def detach_srcdir(self) -> str:
+    def get_srcdir(self) -> str:
         """
-        Remove ownership of extracted srcdir from SourceTarball and return it
+        get directory of extracted source
         """
-        srcdir = self._srcdir
-        self._srcdir = None
-        return srcdir
-
-    def prepare_binpkg_build(self):
-        """
-        prepare folder for building the binary packages
-        """
-        wrk = Workspace()
-
-        # Init workspace folders
-        wrk.clean(self.name, self.tag)
-        builddir = wrk.builddir(self.name, self.tag)
-        unpackdir = os.path.join(builddir, self.name)
-
-        iprint('moving unpacked sources from {0} to {1}'
-               .format(self._srcdir, unpackdir))
-        shutil.move(self._srcdir, unpackdir)
-
-        # Copy package tarball in package builddir
-        new_srctar = os.path.join(builddir, os.path.basename(self.srctar))
-        shutil.copyfile(self.srctar, new_srctar)
-
-        self._srcdir = unpackdir
-        self.srctar = new_srctar
+        return self._srcdir
 
     def _store_src_orig_tracing(self):
         """
