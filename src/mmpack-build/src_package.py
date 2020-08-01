@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import sys
+import tarfile
 
 from os import path
 from subprocess import Popen
@@ -50,23 +51,29 @@ def _get_install_prefix() -> str:
     return '/run/mmpack'
 
 
+def _extract_mmpack_source(srctar_path: str) -> str:
+    srcdir = mkdtemp(dir=Workspace().sources)
+    tarfile.open(srctar_path, 'r:*').extractall(path=srcdir)
+    return srcdir
+
+
 class SrcPackage:
     # pylint: disable=too-many-instance-attributes
     """
     Source package class.
     """
 
-    def __init__(self, specfile: str, tag: str, srctar_path: str):
+    def __init__(self, srctar: str, buildtag: str, srcdir: str = None):
         # pylint: disable=too-many-arguments
         self.name = ''
-        self.tag = tag
+        self.tag = buildtag
         self.version = Version(None)
         self.url = ''
         self.maintainer = ''
         self.ghost = False
         self.files_sysdep = None  # Useful only for ghost packages
-        self.src_tarball = srctar_path
-        self.src_hash = sha256sum(srctar_path)
+        self.src_tarball = ''
+        self.src_hash = sha256sum(srctar)
         self.licenses = []
         self.copyright = ''
 
@@ -82,19 +89,45 @@ class SrcPackage:
         self.install_files_set = set()
         self._metadata_files_list = []
 
-        dprint('loading specfile: ' + specfile)
-        # keep raw dictionary version of the specfile
-        self._specs = yaml_load(specfile)
-        self._spec_dir = path.dirname(specfile)
+        self._specs = {}
+        self._spec_dir = ''
+
+        # Extract source tarball to temporary folder if a folder with extracted
+        # source is not provided
+        if not srcdir:
+            srcdir = _extract_mmpack_source(srctar)
 
         # Init source package from unpacked dir
-        self._parse_specfile_general()
+        self._parse_specfile_general(srcdir)
+        self._prepare_pkgbuilddir(srcdir, srctar)
 
         if not self.licenses:
             self._default_license()
 
         arch_dist = get_host_arch_dist()
         init_mmpack_build_hooks(self.name, arch_dist, self.description)
+
+    def _prepare_pkgbuilddir(self, tmp_srcdir: str, srctar: str):
+        """
+        prepare folder for building the binary packages
+        """
+        wrk = Workspace()
+
+        # Init workspace folders
+        wrk.clean(self.name, self.tag)
+        builddir = self.pkgbuild_path()
+        unpackdir = os.path.join(builddir, self.name)
+
+        iprint('moving unpacked sources from {0} to {1}'
+               .format(tmp_srcdir, unpackdir))
+        shutil.move(tmp_srcdir, unpackdir)
+
+        # Copy package tarball in package builddir
+        new_srctar = os.path.join(builddir, os.path.basename(srctar))
+        shutil.copyfile(srctar, new_srctar)
+
+        self.src_tarball = new_srctar
+        self._spec_dir = path.dirname(unpackdir + '/mmpack')
 
     def pkgbuild_path(self) -> str:
         """
@@ -170,13 +203,18 @@ class SrcPackage:
         extract_matching_set(r'.*/__pycache__/.*', self.install_files_set)
         extract_matching_set(r'.*\.pyc$', self.install_files_set)
 
-    def _parse_specfile_general(self) -> None:
+    def _parse_specfile_general(self, srcdir: str) -> None:
         """
         Parses the mmpack/specs file's general section.
         This will:
             - fill all the main fields of the source package.
             - prune the ignore files from the install_files_list
         """
+        # keep raw dictionary version of the specfile
+        specfile = srcdir + '/mmpack/specs'
+        dprint('loading specfile: ' + specfile)
+        self._specs = yaml_load(specfile)
+
         for key, value in self._specs['general'].items():
             if key == 'name':
                 self.name = value

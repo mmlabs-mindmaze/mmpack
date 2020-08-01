@@ -146,10 +146,8 @@ def main(argv):
         args.method = _guess_method(args.path_or_url)
 
     srctarball = SourceTarball(args.method, args.path_or_url, args.tag)
-    srctarball.prepare_binpkg_build()
-
-    specfile = os.path.join(srctarball.detach_srcdir(), 'mmpack/specs')
-    package = SrcPackage(specfile, srctarball.tag, srctarball.srctar)
+    package = SrcPackage(srctarball.srctar, srctarball.tag,
+                         srctarball.get_srcdir())
 
     if args.build_deps:
         package.install_builddeps(prefix=args.prefix, assumeyes=args.assumeyes)
