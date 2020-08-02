@@ -18,17 +18,17 @@ def find_project_root_folder() -> str:
     Look for folder named 'mmpack' in the current directory or any parent
     folder.
     """
-    pwd = os.getcwd()
-    if os.path.isdir('mmpack') and os.path.isfile('mmpack/specs'):
-        return pwd
+    path = os.getcwd()
 
-    parent, current = os.path.split(pwd)
-    if not current:
-        return None
-    pushdir(parent)
-    root_folder = find_project_root_folder()
-    popdir()
-    return root_folder
+    while True:
+        if os.path.isfile(path + '/mmpack/specs'):
+            break
+
+        path, current = os.path.split(path)
+        if not current:
+            return None
+
+    return path
 
 
 @singleton
