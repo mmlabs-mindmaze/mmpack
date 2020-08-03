@@ -34,6 +34,7 @@ def init_mmpack_build_hooks(srcname: str, host_archdist: str,
         None
     """
     global MMPACK_BUILD_HOOKS  # pylint: disable=global-statement
+    MMPACK_BUILD_HOOKS.clear()
 
     for _, name, _ in pkgutil.iter_modules([dirname(__file__)]):
         if not name.startswith('hook_'):
