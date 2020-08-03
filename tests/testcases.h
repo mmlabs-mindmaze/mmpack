@@ -7,6 +7,7 @@
 #include <check.h>
 
 TCase* create_binindex_tcase(void);
+TCase* create_srcindex_tcase(void);
 TCase* create_config_tcase(void);
 TCase* create_dependencies_tcase(void);
 TCase* create_version_tcase(void);

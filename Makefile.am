@@ -414,6 +414,7 @@ EXTRA_DIST += \
 	tests/test_readme_parsing.py \
 	tests/test_version.py \
 	tests/binary-indexes \
+	tests/source-indexes \
 	$(eol)
 
 unittests_tap_SOURCES = \
@@ -424,6 +425,7 @@ unittests_tap_SOURCES = \
 	tests/indextable_test.c \
 	tests/misc_test.c \
 	tests/sha_test.c \
+	tests/srcindex_test.c \
 	tests/testcases.h \
 	tests/unittests.c \
 	tests/version_test.c \
