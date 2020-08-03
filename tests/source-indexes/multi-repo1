@@ -1,0 +1,12 @@
+size: 230728
+sha256: 2f3c82900a1e8aa6647f7a7cf2f461f83e498fcc395da86d0aa9eba48283dccc
+version: 1.2.2
+name: pkg-src-b
+filename: bname_src_1.2.2_src.tar.xz
+
+sha256: ae7876456bcd98798768757658545456457658bbb97659659876876997080984
+filename: pkg-aname_1.4_src.tar.xz
+size: 66960
+name: pkg-src-a
+version: 1.4
+
