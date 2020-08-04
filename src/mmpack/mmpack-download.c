@@ -67,9 +67,9 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if ((pkg = parse_pkg(ctx, argv[arg_index])) == NULL)
 		return -1;
 
-	if (pkg->from_repo != NULL) {
-		basename = mmstr_malloc(mmstrlen(pkg->from_repo->filename));
-		mmstr_basename(basename, pkg->from_repo->filename);
+	if (pkg->remote_res != NULL) {
+		basename = mmstr_malloc(mmstrlen(pkg->remote_res->filename));
+		mmstr_basename(basename, pkg->remote_res->filename);
 		rv = download_package(ctx, pkg, basename);
 		mmstr_free(basename);
 	} else

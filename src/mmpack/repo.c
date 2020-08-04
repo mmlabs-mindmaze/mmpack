@@ -192,3 +192,44 @@ int repolist_remove(struct repolist * list, const char * name)
 
 	return -1;
 }
+
+
+LOCAL_SYMBOL
+struct remote_resource* remote_resource_create(const struct repo* repo)
+{
+	struct remote_resource* res;
+
+	res = xx_malloc(sizeof(*res));
+	*res = (struct remote_resource) {.repo = repo};
+
+	return res;
+}
+
+
+LOCAL_SYMBOL
+void remote_resource_destroy(struct remote_resource* res)
+{
+	struct remote_resource *elt, *next;
+
+	elt = res;
+	while (elt) {
+		next = elt->next;
+		mmstr_free(elt->filename);
+		mmstr_free(elt->sha256);
+		free(elt);
+		elt = next;
+	}
+}
+
+
+LOCAL_SYMBOL
+struct remote_resource* remote_resource_from_repo(struct remote_resource* res,
+                                                  const struct repo* repo)
+{
+	for (; res != NULL; res = res->next) {
+		if (res->repo == repo)
+			break;
+	}
+
+	return res;
+}

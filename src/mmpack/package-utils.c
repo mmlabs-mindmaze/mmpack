@@ -205,25 +205,8 @@ int pkg_version_compare(char const * v1, char const * v2)
 }
 
 
-static
-void from_repolist_deinit(struct from_repo* list)
-{
-	struct from_repo * elt, * next;
-
-	elt = list;
-
-	while (elt) {
-		next = elt->next;
-		mmstr_free(elt->filename);
-		mmstr_free(elt->sha256);
-		free(elt);
-		elt = next;
-	}
-}
-
-
 /**
- * mmpkg_get_or_create_from_repo() - returns or create and returns a from_repo
+ * mmpkg_get_or_create_remote_res() - returns or create and returns a remote
  * @pkg:       a package already registered
  * @repo:      a repository from which the package pkg is provided
  *
@@ -232,31 +215,27 @@ void from_repolist_deinit(struct from_repo* list)
  * returns the repository, otherwise it creates a from_repo pointing to the
  * appropriate repository.
  *
- * A from_repo will be added to a package only if there is a filename, a sha256,
+ * A remote_resource will be added to a package only if there is a filename, a sha256,
  * or a size read in the yaml file describing the package, otherwise
- * the package is created with a from_repo set to NULL.
+ * the package is created with a remote_resource set to NULL.
  */
 static
-struct from_repo* mmpkg_get_or_create_from_repo(struct mmpkg* pkg,
-                                                const struct repo* repo)
+struct remote_resource* mmpkg_get_or_create_remote_res(struct mmpkg* pkg,
+                                                       const struct repo* repo)
 {
-	struct from_repo * from;
+	struct remote_resource* res;
 
 	// check that the repository of the package is not already known
-	for (from = pkg->from_repo; from != NULL; from = from->next) {
-		if (from->repo == repo)
-			return from;
-	}
+	res = remote_resource_from_repo(pkg->remote_res, repo);
+	if (res)
+		return res;
 
-	// add the new repository
-	from = xx_malloc(sizeof(*from));
+	// add the new remote resource to the list
+	res = remote_resource_create(repo);
+	res->next = pkg->remote_res;
+	pkg->remote_res = res;
 
-	*from = (struct from_repo) {
-		.next = pkg->from_repo,
-		.repo = repo
-	};
-	pkg->from_repo = from;
-	return pkg->from_repo;
+	return res;
 }
 
 
@@ -276,8 +255,8 @@ void mmpkg_deinit(struct mmpkg * pkg)
 	mmstr_free(pkg->desc);
 	mmstr_free(pkg->sumsha);
 
-	from_repolist_deinit(pkg->from_repo);
-	pkg->from_repo = NULL;
+	remote_resource_destroy(pkg->remote_res);
+	pkg->remote_res = NULL;
 	mmpkg_dep_destroy(pkg->mpkdeps);
 	strlist_deinit(&pkg->sysdeps);
 	free(pkg->compdep);
@@ -295,20 +274,14 @@ void mmpkg_deinit(struct mmpkg * pkg)
  * Return: 1 if @pkg is provided by @repo or if no repository is given in
  * parameter, 0 otherwise.
  */
+LOCAL_SYMBOL
 int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
                               const struct repo* repo)
 {
-	struct from_repo * from;
-
 	if (!repo)
 		return 1;
 
-	for (from = pkg->from_repo; from != NULL; from = from->next) {
-		if (from->repo == repo)
-			return 1;
-	}
-
-	return 0;
+	return remote_resource_from_repo(pkg->remote_res, repo) != NULL;
 }
 
 
@@ -356,7 +329,7 @@ LOCAL_SYMBOL
 void mmpkg_print(struct mmpkg const * pkg)
 {
 	const char* state;
-	struct from_repo * from;
+	struct remote_resource* res;
 
 	if (pkg->state == MMPACK_PKG_INSTALLED)
 		state = "[installed]";
@@ -365,13 +338,13 @@ void mmpkg_print(struct mmpkg const * pkg)
 
 	printf("%s %s (%s) ", state, pkg->name, pkg->version);
 
-	if (pkg->from_repo) {
+	if (pkg->remote_res) {
 		printf("from repositories:");
-		for (from = pkg->from_repo; from != NULL; from = from->next) {
-			mm_check(from->repo != NULL);
+		for (res = pkg->remote_res; res != NULL; res = res->next) {
+			mm_check(res->repo != NULL);
 			printf(" %s%c",
-			       from->repo->name,
-			       from->next ? ',' : '\n');
+			       res->repo->name,
+			       res->next ? ',' : '\n');
 		}
 	} else {
 		printf("from repositories: unknown\n");
@@ -382,9 +355,9 @@ void mmpkg_print(struct mmpkg const * pkg)
 static
 int from_repo_check_valid(struct mmpkg const * pkg)
 {
-	struct from_repo * elt;
+	struct remote_resource* elt;
 
-	for (elt = pkg->from_repo; elt != NULL; elt = elt->next) {
+	for (elt = pkg->remote_res; elt != NULL; elt = elt->next) {
 		if (!elt->sha256 || !elt->size || !elt->filename)
 			return mm_raise_error(EINVAL,
 			                      "Invalid package data for %s."
@@ -645,20 +618,21 @@ void pkglist_deinit(struct pkglist* list)
 
 
 /**
- * mmpkg_add_from_repo_list() - add the repositories from which a package comes
- *                              from
+ * mmpkg_add_remote_resource() - add remote resource providing the package
  * @pkg_in:       package already registered
- * @list:         list of repositories from which the package pkg_in is provided
+ * @res_added:    list of remote resource through which the package @pkg_in is
+ *                provided
  *
  * Be careful when using this function: the function takes ownership on the
  * fields filename and sha256 of the argument list.
  */
 static
-void mmpkg_add_from_repo_list(struct mmpkg* pkg_in, struct from_repo* list)
+void mmpkg_add_remote_resource(struct mmpkg* pkg_in,
+                               struct remote_resource* res_added)
 {
-	struct from_repo * src, * dst, * next;
-	for (src = list; src != NULL; src = src->next) {
-		dst = mmpkg_get_or_create_from_repo(pkg_in, src->repo);
+	struct remote_resource * src, * dst, * next;
+	for (src = res_added; src != NULL; src = src->next) {
+		dst = mmpkg_get_or_create_remote_res(pkg_in, src->repo);
 		mmstr_free(dst->filename);
 		mmstr_free(dst->sha256);
 
@@ -669,7 +643,7 @@ void mmpkg_add_from_repo_list(struct mmpkg* pkg_in, struct from_repo* list)
 
 		// the field of src have been taken over by dst, hence we
 		// need to reset them so that src is freed properly
-		*src = (struct from_repo) {.next = src->next};
+		*src = (struct remote_resource) {.next = src->next};
 	}
 }
 
@@ -714,7 +688,7 @@ struct mmpkg* pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 		// Update repo specific fields if repo index is not set
 		pkg_in_list = &entry->pkg;
 
-		mmpkg_add_from_repo_list(pkg_in_list, pkg->from_repo);
+		mmpkg_add_remote_resource(pkg_in_list, pkg->remote_res);
 		return pkg_in_list;
 	}
 
@@ -1485,7 +1459,7 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
                            const struct repo* repo)
 {
 	const mmstr** field = NULL;
-	struct from_repo * from_repo;
+	struct remote_resource* res;
 	int bval;
 
 	switch (type) {
@@ -1494,13 +1468,13 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 		break;
 
 	case FIELD_FILENAME:
-		from_repo = mmpkg_get_or_create_from_repo(pkg, repo);
-		field = &from_repo->filename;
+		res = mmpkg_get_or_create_remote_res(pkg, repo);
+		field = &res->filename;
 		break;
 
 	case FIELD_SHA:
-		from_repo = mmpkg_get_or_create_from_repo(pkg, repo);
-		field = &from_repo->sha256;
+		res = mmpkg_get_or_create_remote_res(pkg, repo);
+		field = &res->sha256;
 		break;
 
 	case FIELD_SOURCE:
@@ -1524,8 +1498,8 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 		return 0;
 
 	case FIELD_SIZE:
-		from_repo = mmpkg_get_or_create_from_repo(pkg, repo);
-		from_repo->size = atoi(value);
+		res = mmpkg_get_or_create_remote_res(pkg, repo);
+		res->size = atoi(value);
 		return 0;
 
 	default:
@@ -1959,7 +1933,7 @@ mmstr const* parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
 	/* additionally, load the package name from the buffer */
 	delim = strchr(base, ':');
 	pkg->name = mmstr_malloc_copy(base, delim - base);
-	pkg->from_repo->repo = NULL;
+	pkg->remote_res->repo = NULL;
 
 	return pkg->name;
 }
@@ -1982,15 +1956,15 @@ struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
 	struct buffer buffer;
 	struct mmpkg * pkg;
 	struct mmpkg tmppkg;
-	struct from_repo * from;
+	struct remote_resource* res;
 	mmstr const * name;
 
 	pkg = NULL;
 	name = NULL;
 	buffer_init(&buffer);
 	mmpkg_init(&tmppkg, NULL);
-	from = mmpkg_get_or_create_from_repo(&tmppkg, NULL);
-	from->filename = mmstr_malloc_from_cstr(filename);
+	res = mmpkg_get_or_create_remote_res(&tmppkg, NULL);
+	res->filename = mmstr_malloc_from_cstr(filename);
 
 	rv = pkg_get_mmpack_info(filename, &buffer);
 	if (rv != 0)

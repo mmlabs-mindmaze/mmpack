@@ -62,4 +62,21 @@ struct repo* repo_iter_first(struct repo_iter* iter, struct repolist* list)
 	return repo_iter_next(iter);
 }
 
+
+/**
+ * struct remote_resource -
+ */
+struct remote_resource {
+	const mmstr* filename;
+	const mmstr* sha256;
+	size_t size;
+	const struct repo* repo;
+	struct remote_resource* next;
+};
+
+struct remote_resource* remote_resource_create(const struct repo* repo);
+void remote_resource_destroy(struct remote_resource* res);
+struct remote_resource* remote_resource_from_repo(struct remote_resource* res,
+                                                  const struct repo* repo);
+
 #endif /* ifndef REPO_H */
