@@ -57,9 +57,9 @@ END_TEST
 
 
 static
-int check_from_repo_fully_set(struct from_repo * from_repo)
+int check_from_repo_fully_set(struct remote_resource* res)
 {
-	struct from_repo * elt = from_repo;
+	struct remote_resource* elt = res;
 
 	while (elt) {
 		ck_assert(elt->size != 0);
@@ -78,8 +78,8 @@ int check_pkg_fully_set(struct mmpkg* pkg, void * data)
 	int* count = data;
 
 	(*count)++;
-	ck_assert(pkg->from_repo != NULL);
-	check_from_repo_fully_set(pkg->from_repo);
+	ck_assert(pkg->remote_res != NULL);
+	check_from_repo_fully_set(pkg->remote_res);
 	return 0;
 }
 

@@ -52,15 +52,6 @@ void constraints_deinit(struct constraints * c);
 int constraints_is_empty(struct constraints * c);
 
 
-struct from_repo {
-	mmstr const * filename;
-	mmstr const * sha256;
-	size_t size;
-	const struct repo* repo;
-	struct from_repo * next;
-};
-
-
 #define MMPKG_FLAGS_GHOST       (1 << 0)
 
 struct mmpkg {
@@ -71,7 +62,7 @@ struct mmpkg {
 	mmstr const * desc;
 	mmstr const * sumsha;
 
-	struct from_repo * from_repo;
+	struct remote_resource* remote_res;
 
 	pkg_state state;
 	int flags;
@@ -200,7 +191,7 @@ int mmpkg_is_ghost(struct mmpkg const * pkg)
 static inline
 int mmpkg_is_available(struct mmpkg const * pkg)
 {
-	return pkg->from_repo != NULL;
+	return pkg->remote_res != NULL;
 }
 
 
