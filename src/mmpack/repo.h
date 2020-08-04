@@ -62,4 +62,35 @@ struct repo* repo_iter_first(struct repo_iter* iter, struct repolist* list)
 	return repo_iter_next(iter);
 }
 
+
+/**
+ * struct remote_resource - data available in remote server
+ * @filename:   path to resource in repository @repo relative to its url
+ * @sha256:     hash of the file to download
+ * @size:       size of the file to dowload
+ * @repo:       pointer to repository from which the file must be downloaded
+ * @next:       pointer to the next resource element (same resource provided by
+ *              another repository)
+ *
+ * This structure represents the node in the list of resource that are
+ * available in remote repository. Each node has a size and an hash that may or
+ * may not be different from the other node in the list. This is done on
+ * purpose. The same resource can indeed by provided by in different format
+ * depending on the repository. For example, different mmpack binary package
+ * can provide the same underlying data, ie, same sumsha, but the package could
+ * be generated using for example different compression level or algorithm.
+ */
+struct remote_resource {
+	const mmstr* filename;
+	const mmstr* sha256;
+	size_t size;
+	const struct repo* repo;
+	struct remote_resource* next;
+};
+
+struct remote_resource* remote_resource_create(const struct repo* repo);
+void remote_resource_destroy(struct remote_resource* res);
+struct remote_resource* remote_resource_from_repo(struct remote_resource* res,
+                                                  const struct repo* repo);
+
 #endif /* ifndef REPO_H */

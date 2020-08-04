@@ -28,7 +28,7 @@ int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 	mmstr * source_pkg_name;
 	const mmstr* url;
 	size_t source_pkg_name_len;
-	struct from_repo * from;
+	struct remote_resource* res;
 
 
 	/* source pkg name: name_version_src.tar.gz */
@@ -38,10 +38,10 @@ int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 	sprintf(source_pkg_name, "%s_%s_src.tar.gz", pkg->source, pkg->version);
 	mmstr_setlen(source_pkg_name, source_pkg_name_len);
 
-	for (from = pkg->from_repo; from != NULL; from = from->next) {
-		mm_check(from->repo != NULL);
+	for (res = pkg->remote_res; res != NULL; res = res->next) {
+		mm_check(res->repo != NULL);
 
-		url = from->repo->url;
+		url = res->repo->url;
 		rv = download_from_repo(ctx, url, source_pkg_name,
 		                        NULL, source_pkg_name);
 		if (rv == 0)

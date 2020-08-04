@@ -68,7 +68,7 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return -1;
 
 	if (mmpkg_is_available(pkg)) {
-		basename = mmstr_basename(NULL, pkg->from_repo->filename);
+		basename = mmstr_basename(NULL, pkg->remote_res->filename);
 		rv = download_package(ctx, pkg, basename);
 		mmstr_free(basename);
 	} else

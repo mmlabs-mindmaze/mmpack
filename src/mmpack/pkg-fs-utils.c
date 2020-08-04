@@ -645,12 +645,12 @@ void action_set_pathname_into_dir(struct action* act, const mmstr* dir)
 {
 	mmstr* pkgbase;
 	int len;
-	struct from_repo * from_repo = act->pkg->from_repo;
+	const struct remote_resource* res = act->pkg->remote_res;
 
-	pkgbase = mmstr_malloca(mmstrlen(from_repo->filename));
+	pkgbase = mmstr_malloca(mmstrlen(res->filename));
 
 	// Get base filename of downloaded package
-	mmstr_basename(pkgbase, from_repo->filename);
+	mmstr_basename(pkgbase, res->filename);
 
 	// Store the joined cachedir and base filename in act->pathname
 	len = mmstrlen(pkgbase) + mmstrlen(dir) + 1;
@@ -681,11 +681,11 @@ LOCAL_SYMBOL
 int download_package(struct mmpack_ctx * ctx, struct mmpkg const * pkg,
                      mmstr const * pathname)
 {
-	struct from_repo * from;
+	const struct remote_resource* from;
 
 	info("Downloading %s (%s)... ", pkg->name, pkg->version);
 
-	for (from = pkg->from_repo; from != NULL; from = from->next) {
+	for (from = pkg->remote_res; from != NULL; from = from->next) {
 		if (!from->repo)
 			return -1;
 
@@ -724,7 +724,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 {
 	mmstr* mpkfile = NULL;
 	const struct mmpkg* pkg;
-	struct from_repo * from;
+	struct remote_resource* from;
 	struct action* act;
 	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 	int i;
@@ -735,7 +735,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
 			continue;
 
-		from = act->pkg->from_repo;
+		from = act->pkg->remote_res;
 		if (!from)
 			return -1;
 

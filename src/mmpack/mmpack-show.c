@@ -15,6 +15,7 @@
 #include <string.h>
 #include "cmdline.h"
 #include "context.h"
+#include "repo.h"
 #include "settings.h"
 #include "package-utils.h"
 
@@ -28,7 +29,7 @@ static
 int binindex_cb(struct mmpkg* pkg, void * void_data)
 {
 	struct cb_data * data = (struct cb_data*) void_data;
-	struct from_repo * from;
+	struct remote_resource* from;
 
 	if (strcmp(pkg->name, data->pkg_name) == 0) {
 		data->found = 1;
@@ -37,7 +38,7 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 
 		printf("SUMSHA256: %s\n", pkg->sumsha);
 
-		for (from = pkg->from_repo; from != NULL; from = from->next) {
+		for (from = pkg->remote_res; from != NULL; from = from->next) {
 			printf("Repository: %s\n", from->repo ?
 			       from->repo->name : "unknown");
 			printf("\tPackage file: %s\n", from->filename);
