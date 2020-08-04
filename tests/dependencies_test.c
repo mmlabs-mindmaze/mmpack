@@ -12,6 +12,7 @@
 #include "common.h"
 #include "context.h"
 #include "package-utils.h"
+#include "repo.h"
 #include "testcases.h"
 
 #define TEST_BININDEX_DIR SRCDIR"/tests/binary-indexes"
@@ -199,7 +200,7 @@ START_TEST(test_valid_dependencies)
 	int rv;
 	struct action_stack * actions;
 	struct pkg_request req;
-	struct repolist_elt * repo = settings_get_repo(&ctx.settings, 0);
+	struct repo* repo = &ctx.settings.repo_list.head->repo;
 
 	rv = binindex_populate(&ctx.binindex, valid_binindexes[_i], repo);
 	ck_assert(rv == 0);
@@ -223,7 +224,7 @@ START_TEST(test_valid_dependencies_multiple_req)
 	int rv;
 	struct action_stack * actions;
 	struct pkg_request req[2];
-	struct repolist_elt * repo = settings_get_repo(&ctx.settings, 0);
+	struct repo* repo = &ctx.settings.repo_list.head->repo;
 
 	rv = binindex_populate(&ctx.binindex, TEST_BININDEX_DIR"/simple.yaml",
 	                       repo);
@@ -248,7 +249,7 @@ START_TEST(test_invalid_dependencies)
 	int rv;
 	struct action_stack * actions;
 	struct pkg_request req;
-	struct repolist_elt * repo = settings_get_repo(&ctx.settings, 0);
+	struct repo* repo = &ctx.settings.repo_list.head->repo;
 
 	rv = binindex_populate(&ctx.binindex, invalid_binindexes[_i], repo);
 	ck_assert(rv == 0);

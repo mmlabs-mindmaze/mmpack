@@ -94,7 +94,7 @@ void dump_reverse_dependencies(struct list_pkgs * list)
 static
 int find_reverse_dependencies(struct binindex binindex,
                               struct mmpkg const* pkg,
-                              const struct repolist_elt * repo,
+                              const struct repo* repo,
                               struct list_pkgs** rdep_list)
 {
 	struct rdeps_iter rdep_it;
@@ -140,7 +140,7 @@ int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	struct mmpkg const* pkg;
 	struct pkg_parser pp;
 	struct constraints * cons = &pp.cons;
-	struct repolist_elt * repo = NULL;
+	struct repo* repo = NULL;
 	int arg_index, rv = -1;
 	struct list_pkgs * rdep_list = NULL;
 

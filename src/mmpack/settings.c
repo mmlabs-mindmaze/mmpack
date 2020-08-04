@@ -16,6 +16,7 @@
 #include <mmsysio.h>
 
 #include "mmstring.h"
+#include "repo.h"
 #include "utils.h"
 
 
@@ -24,170 +25,6 @@ enum {
 	REPOSITORIES,
 	DEFAULT_PREFIX,
 };
-
-
-/**
- * repolist_init() - init repolist structure
- * @list: repolist structure to initialize
- *
- * To be cleansed by calling repolist_deinit()
- */
-LOCAL_SYMBOL
-void repolist_init(struct repolist* list)
-{
-	*list = (struct repolist) {0};
-}
-
-
-/**
- * repolist_deinit() - cleanup repolist structure
- * @list: repolist structure to cleanse
- */
-LOCAL_SYMBOL
-void repolist_deinit(struct repolist* list)
-{
-	struct repolist_elt * elt, * next;
-
-	elt = list->head;
-
-	while (elt) {
-		next = elt->next;
-		mmstr_free(elt->url);
-		mmstr_free(elt->name);
-		free(elt);
-		elt = next;
-	}
-}
-
-
-/**
- * repolist_reset() - empty and reinit repolist structure
- * @list: repolist structure to reset
- */
-LOCAL_SYMBOL
-void repolist_reset(struct repolist* list)
-{
-	repolist_deinit(list);
-	repolist_init(list);
-}
-
-
-/**
- * repolist_num_repo() - count the number of repositories in the repo list
- * @list: initialized repolist structure
- *
- * Returns: the number of repositories
- */
-static
-int repolist_num_repo(const struct repolist* list)
-{
-	struct repolist_elt* elt;
-	int num;
-
-	num = 0;
-	for (elt = list->head; elt; elt = elt->next)
-		num++;
-
-	return num;
-}
-
-
-/**
- * repolist_add() - add a repository to the list
- * @list: initialized repolist structure
- * @name: the short name referencing the url
- *
- * Returns: the repolist_elt created in case of success, NULL otherwise.
- */
-LOCAL_SYMBOL
-struct repolist_elt* repolist_add(struct repolist* list, const char* name)
-{
-	struct repolist_elt* elt;
-	char default_name[16];
-
-	// set index-based default name if name unset
-	if (name == NULL) {
-		sprintf(default_name, "repo-%i", repolist_num_repo(list));
-		name = default_name;
-	}
-
-	// check that no repository possesses already this name
-	if (repolist_lookup(list, name)) {
-		error("repository \"%s\" already exists\n", name);
-		return NULL;
-	}
-
-	// Insert the element at the head of the list
-	elt = xx_malloc(sizeof(*elt));
-	*elt = (struct repolist_elt) {
-		.name = mmstr_malloc_from_cstr(name),
-		.next = list->head,
-		.enabled = 1,
-	};
-	list->head = elt;
-	return elt;
-}
-
-
-/**
- * repolist_lookup() - lookup a repository from the list by name
- * @list: pointer to an initialized repolist structure
- * @name: the short name referencing the url
- *
- * Return: a pointer to the repolist element on success, NULL otherwise.
- */
-LOCAL_SYMBOL
-struct repolist_elt* repolist_lookup(struct repolist * list,
-                                     const char * name)
-{
-	int name_len = strlen(name);
-	struct repolist_elt * elt;
-
-	for (elt = list->head; elt != NULL; elt = elt->next) {
-		if (name_len == mmstrlen(elt->name)
-		    && strncmp(elt->name, name, name_len) == 0) {
-			return elt;
-		}
-	}
-
-	return NULL;
-}
-
-
-/**
- * repolist_remove() - remove a repository to the list
- * @list: pointer to an initialized repolist structure
- * @name: the short name referencing the url
- *
- * Return: always return 0 on success, a negative value otherwise
- */
-LOCAL_SYMBOL
-int repolist_remove(struct repolist * list, const char * name)
-{
-	int name_len = strlen(name);
-	struct repolist_elt * elt;
-	struct repolist_elt * prev = NULL;
-
-	for (elt = list->head; elt != NULL; elt = elt->next) {
-		if (name_len == mmstrlen(elt->name)
-		    && strncmp(elt->name, name, name_len) == 0) {
-
-			if (prev != NULL)
-				prev->next = elt->next;
-			else
-				list->head = elt->next;
-
-			mmstr_free(elt->url);
-			mmstr_free(elt->name);
-			free(elt);
-			return 0;
-		}
-
-		prev = elt;
-	}
-
-	return -1;
-}
 
 
 static
@@ -251,7 +88,7 @@ enum field_type get_scalar_field_type(const char* key)
 
 
 static
-int repo_set_scalar_field(struct repolist_elt * repo, enum field_type type,
+int repo_set_scalar_field(struct repo* repo, enum field_type type,
                           const char * data)
 {
 	switch (type) {
@@ -270,7 +107,7 @@ int repo_set_scalar_field(struct repolist_elt * repo, enum field_type type,
 
 
 static
-int parse_one_repo(yaml_parser_t * parser, struct repolist_elt * repo)
+int parse_one_repo(yaml_parser_t * parser, struct repo* repo)
 {
 	int rv = -1;
 	int type = -1;
@@ -343,7 +180,7 @@ int fill_repositories(yaml_parser_t* parser, struct settings* settings)
 	int cpt = 0; // counter to know when the list of repositories ends
 	int rv = -1;
 	char * name = NULL;
-	struct repolist_elt * repo;
+	struct repo* repo;
 
 	repolist_reset(repo_list);
 	while (1) {
@@ -567,62 +404,6 @@ void settings_reset(struct settings* settings)
 
 
 /**
- * settings_num_repo() - count the number of repositories in the configuration
- * @settings: an initialized settings structure
- *
- * Returns: the number of repositories
- */
-LOCAL_SYMBOL
-int settings_num_repo(const struct settings* settings)
-{
-	return repolist_num_repo(&settings->repo_list);
-}
-
-
-/**
- * settings_get_repo_url() - pick one url from the settings
- * @settings: an initialized settings structure
- * @index: index of the url to get
- *
- * Return: a pointer to a mmstr structure describing the url on success
- *         NULL otherwise
- */
-LOCAL_SYMBOL
-const mmstr* settings_get_repo_url(const struct settings* settings, int index)
-{
-	struct repolist_elt* repo = settings_get_repo(settings, index);
-
-	return repo->url;
-}
-
-
-/**
- * settings_get_repo() - pick one repository from the settings
- * @settings: an initialized settings structure
- * @index: index of the repository to get
- *
- * Return: a pointer to a struct repolist_elt describing the repository on
- * success NULL otherwise
- */
-LOCAL_SYMBOL
-struct repolist_elt* settings_get_repo(const struct settings* settings,
-                                       int index)
-{
-	struct repolist_elt* elt = settings->repo_list.head;
-	int i;
-
-	for (i = 0; i < index; i++) {
-		if (!elt)
-			return NULL;
-
-		elt = elt->next;
-	}
-
-	return elt;
-}
-
-
-/**
  * dump_repo_elt_and_children() - write all subsequent repo elements
  * @fd:  file descriptor of the configuration file to write
  * @elt: current repo element (can be NULL)
@@ -635,6 +416,7 @@ struct repolist_elt* settings_get_repo(const struct settings* settings,
 static
 void dump_repo_elt_and_children(int fd, struct repolist_elt* elt)
 {
+	struct repo* repo;
 	int len;
 	char* line;
 	char linefmt[] = "  - %s:\n        url: %s\n        enabled: %d\n";
@@ -645,11 +427,14 @@ void dump_repo_elt_and_children(int fd, struct repolist_elt* elt)
 	// Write children element before current
 	dump_repo_elt_and_children(fd, elt->next);
 
+	repo = &elt->repo;
+
 	// Allocate buffer large enough
-	len = sizeof(linefmt) + mmstrlen(elt->url) + mmstrlen(elt->name) + 10;
+	len = sizeof(linefmt) + mmstrlen(repo->url)
+	      + mmstrlen(repo->name) + 10;
 	line = xx_malloca(len);
 
-	len = sprintf(line, linefmt, elt->name, elt->url, elt->enabled);
+	len = sprintf(line, linefmt, repo->name, repo->url, repo->enabled);
 	mm_write(fd, line, len);
 
 	mm_freea(line);
@@ -724,9 +509,10 @@ int create_empty_binindex_file(const mmstr* prefix, char const * name)
 LOCAL_SYMBOL
 int create_initial_binindex_files(const mmstr* prefix, struct repolist* repos)
 {
-	struct repolist_elt * r;
+	struct repo_iter iter;
+	struct repo* r;
 
-	for (r = repos->head; r != NULL; r = r->next) {
+	for (r = repo_iter_first(&iter, repos); r; r = repo_iter_next(&iter)) {
 		if (create_empty_binindex_file(prefix, r->name))
 			return -1;
 	}

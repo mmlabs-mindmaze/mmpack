@@ -15,6 +15,7 @@
 #include "mmstring.h"
 #include "utils.h"
 #include "package-utils.h"
+#include "repo.h"
 
 #include "mmpack-mkprefix.h"
 
@@ -103,7 +104,7 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		.execname = "mmpack",
 	};
 	struct repolist* repo_list = &ctx->settings.repo_list;
-	struct repolist_elt * repo;
+	struct repo* repo;
 
 	arg_index = mm_arg_parse(&parser, argc, (char**)argv);
 	if (mm_arg_is_completing()) {

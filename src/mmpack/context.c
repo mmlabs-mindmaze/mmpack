@@ -19,6 +19,7 @@
 #include "indextable.h"
 #include "mmstring.h"
 #include "package-utils.h"
+#include "repo.h"
 #include "settings.h"
 
 #define ALIAS_PREFIX_FOLDER "mmpack-prefix"
@@ -195,8 +196,9 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH);
 	mmstr* repo_cache;
 	mmstr* installed_index_path;
-	int i, num_repo, len;
-	struct repolist_elt * repo;
+	int len;
+	struct repo_iter iter;
+	const struct repo* repo;
 	int rv = -1;
 
 	// Form the path of installed package from prefix
@@ -211,10 +213,8 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	binindex_foreach(&ctx->binindex, set_installed, ctx);
 
 	// populate the repository cached package list
-	num_repo = settings_num_repo(&ctx->settings);
-	for (i = 0; i < num_repo; i++) {
-		repo = settings_get_repo(&ctx->settings, i);
-
+	repo = repo_iter_first(&iter, &ctx->settings.repo_list);
+	for (; repo != NULL; repo = repo_iter_next(&iter)) {
 		// discard repositories that are disable
 		if (repo->enabled == 0)
 			continue;
