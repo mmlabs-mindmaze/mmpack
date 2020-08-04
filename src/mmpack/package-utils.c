@@ -20,7 +20,7 @@
 #include "indextable.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
-#include "settings.h"
+#include "repo.h"
 #include "utils.h"
 #include "xx-alloc.h"
 
@@ -51,7 +51,7 @@ struct pkg_iter {
 
 struct parsing_ctx {
 	yaml_parser_t parser;
-	struct repolist_elt * repo;
+	const struct repo* repo;
 };
 
 /* standard isdigit() is locale dependent making it unnecessarily slow.
@@ -238,7 +238,7 @@ void from_repolist_deinit(struct from_repo* list)
  */
 static
 struct from_repo* mmpkg_get_or_create_from_repo(struct mmpkg* pkg,
-                                                struct repolist_elt * repo)
+                                                const struct repo* repo)
 {
 	struct from_repo * from;
 
@@ -296,7 +296,7 @@ void mmpkg_deinit(struct mmpkg * pkg)
  * parameter, 0 otherwise.
  */
 int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
-                              struct repolist_elt const * repo)
+                              const struct repo* repo)
 {
 	struct from_repo * from;
 
@@ -1482,7 +1482,7 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
                            enum field_type type,
                            const char* value,
                            size_t valuelen,
-                           struct repolist_elt * repo)
+                           const struct repo* repo)
 {
 	const mmstr** field = NULL;
 	struct from_repo * from_repo;
@@ -2014,14 +2014,14 @@ exit:
  * binindex_populate() - populate package database from package list
  * @binindex:   binary package index to populate
  * @index_filename: repository package list file
- * @repo_index: index of the repository list being read (use -1 if package
- *              list is the list of installed package)
+ * @repo:       pointer to repository from which the binary index is read (use
+ *              NULL if package list is the list of installed package)
  *
  * Return: 0 in case of success, -1 otherwise
  */
 LOCAL_SYMBOL
 int binindex_populate(struct binindex* binindex, char const * index_filename,
-                      struct repolist_elt * repo)
+                      const struct repo* repo)
 {
 	int rv = -1;
 	FILE * index_fh;

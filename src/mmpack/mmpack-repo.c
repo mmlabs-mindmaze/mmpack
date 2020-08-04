@@ -19,6 +19,7 @@
 #include "mmpack-repo.h"
 #include "mmstring.h"
 #include "package-utils.h"
+#include "repo.h"
 #include "settings.h"
 #include "utils.h"
 
@@ -29,7 +30,7 @@ STATIC_CONST_MMSTR(repo_relpath, REPO_INDEX_RELPATH);
 static
 int repo_add(struct mmpack_ctx* ctx, int argc, char const ** argv)
 {
-	struct repolist_elt * repo;
+	struct repo* repo;
 
 	if (argc != 2) {
 		printf("usage: mmpack repo add <name> <url>\n");
@@ -54,7 +55,8 @@ int repo_add(struct mmpack_ctx* ctx, int argc, char const ** argv)
 static
 int repo_list(struct mmpack_ctx* ctx, int argc, char const ** argv)
 {
-	struct repolist_elt * repo;
+	struct repo_iter iter;
+	struct repo* repo;
 
 	(void) argv; /* silence unused warnings */
 	if (argc > 0) {
@@ -62,11 +64,11 @@ int repo_list(struct mmpack_ctx* ctx, int argc, char const ** argv)
 		return -1;
 	}
 
-	for (repo = ctx->settings.repo_list.head;
-	     repo != NULL;
-	     repo = repo->next)
+	repo = repo_iter_first(&iter, &ctx->settings.repo_list);
+	for (; repo != NULL; repo = repo_iter_next(&iter)) {
 		printf("%s (%s)\t%s\n", repo->name,
 		       repo->enabled ? "enabled" : "disabled", repo->url);
+	}
 
 	return 0;
 }
@@ -151,14 +153,13 @@ int rename_binindex_file(const mmstr* prefix, char const * old_name,
 static
 int repo_rename(struct mmpack_ctx* ctx, int argc, char const ** argv)
 {
+	char const* name = argv[0];
+	struct repo* repo;
+
 	if (argc != 2) {
 		printf("usage: mmpack repo rename <old> <new>\n");
 		return -1;
 	}
-
-	char const * name = argv[0];
-	int name_len = strlen(name);
-	struct repolist_elt * elt = ctx->settings.repo_list.head;
 
 	// check that no repository possesses already this name
 	if (repolist_lookup(&ctx->settings.repo_list, argv[1])) {
@@ -166,29 +167,23 @@ int repo_rename(struct mmpack_ctx* ctx, int argc, char const ** argv)
 		return -1;
 	}
 
-	while (elt != NULL) {
-		if (name_len == mmstrlen(elt->name)
-		    && strncmp(elt->name, name, name_len) == 0) {
-
-			mmstr_free(elt->name);
-			elt->name = mmstr_malloc_from_cstr(argv[1]);
-			rename_binindex_file(ctx->prefix, argv[0], argv[1]);
-			return settings_serialize(ctx->prefix,
-			                          &ctx->settings, 1);
-		}
-
-		elt = elt->next;
+	repo = repolist_lookup(&ctx->settings.repo_list, name);
+	if (!repo) {
+		printf("No such repository: \"%s\"\n", name);
+		return -1;
 	}
 
-	printf("No such repository: \"%s\"\n", name);
-	return -1;
+	repo->name = mmstrcpy_cstr(repo->name, argv[1]);
+	rename_binindex_file(ctx->prefix, argv[0], argv[1]);
+
+	return settings_serialize(ctx->prefix, &ctx->settings, 1);
 }
 
 
 static
 int repo_enable(struct mmpack_ctx* ctx, int argc, char const ** argv)
 {
-	struct repolist_elt * repo;
+	struct repo* repo;
 
 	if (argc != 1) {
 		printf("usage: mmpack repo enable <name>\n");
@@ -209,7 +204,7 @@ int repo_enable(struct mmpack_ctx* ctx, int argc, char const ** argv)
 static
 int repo_disable(struct mmpack_ctx* ctx, int argc, char const ** argv)
 {
-	struct repolist_elt * repo;
+	struct repo* repo;
 
 	if (argc != 1) {
 		printf("usage: mmpack repo disable <name>\n");

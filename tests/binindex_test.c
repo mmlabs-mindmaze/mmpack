@@ -9,6 +9,7 @@
 #include <check.h>
 
 #include "package-utils.h"
+#include "repo.h"
 #include "testcases.h"
 #include "settings.h"
 
@@ -40,7 +41,7 @@ void ctx_teardown(void)
 START_TEST(test_binindex_parsing)
 {
 	int rv;
-	struct repolist_elt repo;
+	struct repo repo;
 
 	repo.url = mmstr_malloc_from_cstr(binindexes[_i]);
 	repo.name = mmstr_malloc_from_cstr(binindexes[_i]);
@@ -88,7 +89,7 @@ START_TEST(test_deduplicate)
 {
 	int rv;
 	int count;
-	struct repolist_elt repo;
+	struct repo repo;
 
 	repo.url = mmstr_malloc_from_cstr("http://url_simple.com");
 	repo.name = mmstr_malloc_from_cstr("name_simple");

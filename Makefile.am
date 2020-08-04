@@ -165,6 +165,8 @@ mmpack_lib_sources = \
 	src/mmpack/package-utils.h \
 	src/mmpack/pkg-fs-utils.c \
 	src/mmpack/pkg-fs-utils.h \
+	src/mmpack/repo.c \
+	src/mmpack/repo.h \
 	src/mmpack/settings.c \
 	src/mmpack/settings.h \
 	src/mmpack/sha256.c \

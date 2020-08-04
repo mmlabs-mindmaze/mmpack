@@ -18,6 +18,7 @@
 #include "context.h"
 #include "download.h"
 #include "package-utils.h"
+#include "repo.h"
 
 static int update_db = 0;
 static char provides_doc[] =
@@ -34,10 +35,10 @@ STATIC_CONST_MMSTR(file_db, "/var/lib/mmpack/file-db.yaml");
 STATIC_CONST_MMSTR(file_db_tmp, "/var/lib/mmpack/.file-db.yaml.tmp");
 
 static
-int download_file_db(struct mmpack_ctx * ctx, int repo_index)
+int download_file_db(struct mmpack_ctx * ctx, const struct repo* repo)
 {
 	STATIC_CONST_MMSTR(file_db_name, "mmpack-file-db.yaml");
-	mmstr const * url = settings_get_repo_url(&ctx->settings, repo_index);
+	mmstr const * url = repo->url;
 
 	if (download_from_repo(ctx, url, file_db_name, ctx->prefix,
 	                       file_db_tmp)) {
@@ -197,7 +198,8 @@ LOCAL_SYMBOL
 int mmpack_provides(struct mmpack_ctx * ctx, int argc, char const ** argv)
 {
 	int nreq, arg_index;
-	int i, num_repo;
+	struct repo_iter iter;
+	struct repo* repo;
 	int rv = -1;
 	const char** req_args;
 	struct indextable file_db_index;
@@ -234,8 +236,7 @@ int mmpack_provides(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	num_repo = settings_num_repo(&ctx->settings);
-	if (num_repo == 0) {
+	if (repolist_num_repo(&ctx->settings.repo_list) == 0) {
 		error("Repository URL unspecified\n");
 		return -1;
 	}
@@ -247,8 +248,9 @@ int mmpack_provides(struct mmpack_ctx * ctx, int argc, char const ** argv)
 
 	/* download/update mmpack-file-db.yaml if needed */
 	if (update_db) {
-		for (i = 0; i < num_repo; i++) {
-			if (download_file_db(ctx, i))
+		repo = repo_iter_first(&iter, &ctx->settings.repo_list);
+		for (; repo != NULL; repo = repo_iter_next(&iter)) {
+			if (download_file_db(ctx, repo))
 				goto exit;
 
 			// update file-db from intermediary file -> indextable

@@ -49,6 +49,8 @@ mmpack_lib_sources = files(
 	'package-utils.h',
 	'pkg-fs-utils.c',
 	'pkg-fs-utils.h',
+	'repo.c',
+	'repo.h',
 	'settings.c',
 	'settings.h',
 	'sha256.c',

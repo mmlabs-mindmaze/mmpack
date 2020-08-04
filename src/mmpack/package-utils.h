@@ -8,7 +8,7 @@
 
 #include "indextable.h"
 #include "mmstring.h"
-#include "settings.h"
+#include "repo.h"
 #include "utils.h"
 
 
@@ -44,7 +44,7 @@ int pkg_version_compare(char const * v1, char const * v2);
  **/
 struct constraints {
 	mmstr * version;
-	const struct repolist_elt * repo;
+	const struct repo* repo;
 	mmstr * sumsha;
 };
 
@@ -56,7 +56,7 @@ struct from_repo {
 	mmstr const * filename;
 	mmstr const * sha256;
 	size_t size;
-	struct repolist_elt * repo;
+	const struct repo* repo;
 	struct from_repo * next;
 };
 
@@ -198,7 +198,7 @@ int mmpkg_is_ghost(struct mmpkg const * pkg)
 
 
 int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
-                              struct repolist_elt const * repo);
+                              const struct repo* repo);
 
 void mmpkg_dump(struct mmpkg const * pkg);
 void mmpkg_print(struct mmpkg const * pkg);
@@ -220,7 +220,7 @@ void binindex_deinit(struct binindex* binindex);
 struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
                                       char const * filename);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
-                      struct repolist_elt * repo);
+                      const struct repo* repo);
 void binindex_dump(struct binindex const * binindex);
 int binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);

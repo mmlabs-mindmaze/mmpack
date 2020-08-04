@@ -17,14 +17,11 @@
 
 
 static
-int download_repo_index(struct mmpack_ctx * ctx, int repo_index)
+int download_repo_index(struct mmpack_ctx * ctx, const struct repo* repo)
 {
 	STATIC_CONST_MMSTR(pkglist, "binary-index");
 	mmstr* path;
 	int rv = -1;
-	struct repolist_elt * repo;
-
-	repo = settings_get_repo(&ctx->settings, repo_index);
 
 	path = mmpack_get_repocache_path(ctx, repo->name);
 
@@ -57,7 +54,9 @@ exit:
 LOCAL_SYMBOL
 int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 {
-	int i, num_repo;
+	struct repo_iter iter;
+	struct repolist* list;
+	const struct repo* r;
 
 	if (mm_arg_is_completing())
 		return 0;
@@ -73,15 +72,14 @@ int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	if (mmpack_ctx_use_prefix(ctx, CTX_SKIP_PKGLIST))
 		return -1;
 
-	num_repo = settings_num_repo(&ctx->settings);
-	if (num_repo == 0) {
+	list = &ctx->settings.repo_list;
+	if (repolist_num_repo(list) == 0) {
 		info("No repository specified, nothing to update\n");
 		return 0;
 	}
 
-	for (i = 0; i < num_repo; i++) {
-		download_repo_index(ctx, i);
-	}
+	for (r = repo_iter_first(&iter, list); r; r = repo_iter_next(&iter))
+		download_repo_index(ctx, r);
 
 	return 0;
 }
