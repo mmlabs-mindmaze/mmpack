@@ -66,7 +66,7 @@ int binindex_cb_all(struct mmpkg* pkg, void * void_data)
 	struct cb_data * data = (struct cb_data*) void_data;
 
 	// Exclude package not in repo if only available requested
-	if (data->only_available && !pkg->from_repo)
+	if (data->only_available && !mmpkg_is_available(pkg))
 		return 0;
 
 	data->found |= print_pkg_if_match(pkg, data->pkg_name_pattern);
@@ -128,7 +128,7 @@ int list_extras(struct mmpack_ctx* ctx, int argc, const char* argv[])
 
 	pkgs = install_state_sorted_pkgs(&ctx->installed);
 	while ((pkg = pkgs[i++])) {
-		if (!pkg->from_repo)
+		if (!mmpkg_is_available(pkg))
 			found |= print_pkg_if_match(pkg, pattern);
 	}
 

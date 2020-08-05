@@ -197,6 +197,13 @@ int mmpkg_is_ghost(struct mmpkg const * pkg)
 }
 
 
+static inline
+int mmpkg_is_available(struct mmpkg const * pkg)
+{
+	return pkg->from_repo != NULL;
+}
+
+
 int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
                               const struct repo* repo);
 
