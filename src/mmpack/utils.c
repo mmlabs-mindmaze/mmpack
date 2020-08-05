@@ -579,6 +579,41 @@ exit:
 	return rv;
 }
 
+
+/**
+ * check_hash() - Check integrity of given file
+ * @ref_sha: reference file sha256 to compare against
+ * @parent: prefix directory to prepend to @filename to get the
+ *          final path of the file to hash. This may be NULL
+ * @filename: path of file whose hash must be computed
+ *
+ * Return: 0 if no issue has been found, -1 otherwise
+ */
+LOCAL_SYMBOL
+int check_hash(const mmstr* refsha, const mmstr* parent, const mmstr* filename)
+{
+	int follow;
+	mmstr* sha = mmstr_alloca(SHA_HEXSTR_LEN);
+
+	// If reference hash contains type prefix (ie its length is
+	// SHA_HEXSTR_LEN), symlink must not be followed
+	follow = 0;
+	if (mmstrlen(refsha) != SHA_HEXSTR_LEN)
+		follow = 1;
+
+	if (sha_compute(sha, filename, parent, follow))
+		return -1;
+
+	if (!mmstrequal(sha, refsha)) {
+		mm_raise_error(EBADMSG, "bad SHA-256 detected %s", filename);
+		return -1;
+	}
+
+	return 0;
+}
+
+
+
 /**
  * strchr_or_end() - gives a pointer to the first occurrence of a character on
  *                   a string.
