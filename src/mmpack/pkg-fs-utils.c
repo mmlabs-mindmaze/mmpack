@@ -613,7 +613,7 @@ int check_installed_pkg(const struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 		ref_sha = hash_elt->str.buf;
 
 		if (check_file_pkg(ref_sha, ctx->prefix, filename) != 0)
-			break;
+			goto exit;
 
 		file_elt = file_elt->next;
 		hash_elt = hash_elt->next;
