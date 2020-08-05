@@ -547,40 +547,6 @@ int rm_files_from_list(struct strlist* files)
  *                                                                        *
  **************************************************************************/
 /**
- * check_file_pkg() - Check integrity of given file
- * @ref_sha: reference file sha256 to compare against
- * @parent: prefix directory to prepend to @filename to get the
- *          final path of the file to hash. This may be NULL
- * @filename: path of file whose hash must be computed
- *
- * Return: 0 if no issue has been found, -1 otherwise
- */
-static
-int check_file_pkg(const mmstr * ref_sha, const mmstr * parent,
-                   const mmstr * filename)
-{
-	int follow;
-	mmstr* sha = mmstr_alloca(SHA_HEXSTR_LEN);
-
-	// If reference hash contains type prefix (ie its length is
-	// SHA_HEXSTR_LEN), symlink must not be followed
-	follow = 0;
-	if (mmstrlen(ref_sha) != SHA_HEXSTR_LEN)
-		follow = 1;
-
-	if (sha_compute(sha, filename, parent, follow))
-		return -1;
-
-	if (!mmstrequal(sha, ref_sha)) {
-		mm_raise_error(EBADMSG, "bad SHA-256 detected %s", filename);
-		return -1;
-	}
-
-	return 0;
-}
-
-
-/**
  * check_installed_pkg() - check integrity of installed package
  * @ctx:        mmpack context. If NULL, current dir is assumed to be the root
  *              the mmpack prefix where to search the installed files.
@@ -612,7 +578,7 @@ int check_installed_pkg(const struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 		filename = file_elt->str.buf;
 		ref_sha = hash_elt->str.buf;
 
-		if (check_file_pkg(ref_sha, ctx->prefix, filename) != 0)
+		if (check_hash(ref_sha, ctx->prefix, filename) != 0)
 			goto exit;
 
 		file_elt = file_elt->next;
@@ -696,7 +662,7 @@ int download_package(struct mmpack_ctx * ctx, struct mmpkg const * pkg,
 		}
 
 		/* verify integrity of what has been downloaded */
-		if (check_file_pkg(from->sha256, NULL, pathname)) {
+		if (check_hash(from->sha256, NULL, pathname)) {
 			error("Integrity check failed!\n");
 			return -1;
 		}
@@ -754,7 +720,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 
 		// Skip if there is a valid package already downloaded
 		if (mm_check_access(mpkfile, F_OK) == 0
-		    && check_file_pkg(from->sha256, NULL, mpkfile) == 0) {
+		    && check_hash(from->sha256, NULL, mpkfile) == 0) {
 			mm_log_info("Going to install %s (%s) from cache",
 			            pkg->name, pkg->version);
 			continue;

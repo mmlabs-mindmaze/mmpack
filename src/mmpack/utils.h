@@ -54,6 +54,7 @@ mmstr* get_config_filename(void);
 
 int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent,
                 int follow);
+int check_hash(const mmstr* sha, const mmstr* parent, const mmstr* filename);
 
 
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path);
