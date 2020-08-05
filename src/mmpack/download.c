@@ -8,10 +8,12 @@
 
 #include "download.h"
 
+#include <stdio.h>
 #include <mmerrno.h>
 #include <mmsysio.h>
 
 #include "context.h"
+#include "repo.h"
 #include "utils.h"
 
 // On systems (Win32 that do not define EREMOTEIO, alias it to EIO
@@ -186,4 +188,105 @@ exit:
 	mm_close(fd);
 	mmstr_freea(url);
 	return rv;
+}
+
+
+#define XFER_SIZE       4096
+static
+int copy_file(const char* dst, const char* src)
+{
+	int fd_src, fd_dst;
+	char* buff;
+	ssize_t rsz;
+	int rv = -1;
+
+	buff = xx_malloc(XFER_SIZE);
+	fd_src = mm_open(src, O_RDONLY, 0);
+	fd_dst = open_file_in_prefix(NULL, dst, O_WRONLY|O_CREAT|O_TRUNC);
+	if (fd_src == -1 || fd_dst == -1)
+		goto exit;
+
+	while (1) {
+		rsz = mm_read(fd_src, buff, XFER_SIZE);
+		if (rsz < 0)
+			goto exit;
+
+		if (rsz == 0)
+			break;
+
+		rsz = mm_write(fd_dst, buff, rsz);
+		if (rsz < 0)
+			goto exit;
+	}
+	rv = 0;
+
+exit:
+	mm_close(fd_dst);
+	mm_close(fd_src);
+	free(buff);
+	return rv;
+}
+
+
+/**
+ * download_remote_resource() - get a remote resource
+ * @ctx:        mmpack context used (used to get curl handle)
+ * @res:        remote resource to fetch
+ * @filename:   path which the downloaded file must be written to
+ *
+ * This functions tries alternatively all remote repository and settle once
+ * remote file has been succesfully downloaded.
+ *
+ * Returns: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int download_remote_resource(struct mmpack_ctx * ctx,
+                             const struct remote_resource* res,
+                             const mmstr* filename)
+{
+	const struct remote_resource* from;
+	const struct repo* repo;
+	int previous;
+	int done = 0;
+	int rv = -1;
+
+	// Stop logging error (still error are reported in state)
+	previous = mm_error_set_flags(MM_ERROR_SET, MM_ERROR_NOLOG);
+
+	// Skip if there is a valid package already downloaded
+	if (mm_check_access(filename, F_OK) == 0) {
+		mm_error_set_flags(MM_ERROR_SET, MM_ERROR_IGNORE);
+		for (from = res; from != NULL && !done; from = from->next) {
+			if (check_hash(from->sha256, NULL, filename) == 0) {
+				done = 1;
+				break;
+			}
+		}
+		mm_error_set_flags(previous, MM_ERROR_IGNORE);
+	}
+
+	// Download file from one of the repo.
+	for (from = res; from != NULL && !done; from = from->next) {
+		repo = res->repo;
+		if (repo) {
+			printf("try download %s from %s... ",
+			       from->filename, repo->url);
+			rv = download_from_repo(ctx, repo->url, from->filename,
+					        NULL, filename);
+			printf("%s\n", rv ? "failed": "ok");
+		} else {
+			// Package has been provided on command line
+			rv = copy_file(filename, from->filename);
+		}
+
+		// Check previous download operation result and hash. If both
+		// are success, then we are done here
+		if (rv == 0 && check_hash(from->sha256, NULL, filename) == 0)
+			done = 1;
+	}
+
+	// Restore error logging behavior
+	mm_error_set_flags(previous, MM_ERROR_NOLOG);
+
+	return done ? 0 : -1;
 }

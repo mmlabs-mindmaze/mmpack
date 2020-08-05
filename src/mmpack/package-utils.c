@@ -1975,8 +1975,6 @@ struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
 	if (name != NULL)
 		pkg = binindex_add_pkg(binindex, &tmppkg);
 
-	/* TODO: add package to cache ? */
-
 exit:
 	mmstr_free(name);
 	mmpkg_deinit(&tmppkg);
