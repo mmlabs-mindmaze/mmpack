@@ -40,7 +40,7 @@ LOCAL_SYMBOL
 int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	int arg_index, rv = -1;
-	mmstr * basename;
+	mmstr * basename = NULL;
 	struct mmpkg const * pkg;
 	struct mm_arg_parser parser = {
 		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
@@ -68,8 +68,7 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return -1;
 
 	if (mmpkg_is_available(pkg)) {
-		basename = mmstr_malloc(mmstrlen(pkg->from_repo->filename));
-		mmstr_basename(basename, pkg->from_repo->filename);
+		basename = mmstr_basename(NULL, pkg->from_repo->filename);
 		rv = download_package(ctx, pkg, basename);
 		mmstr_free(basename);
 	} else

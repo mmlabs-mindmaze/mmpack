@@ -67,13 +67,15 @@ const char* get_basename_ptr(const mmstr* path)
 
 /**
  * mmstr_basename() - get basename of a path
- * @basepath:   mmstr receiving the result (its maxlen must be large enough)
+ * @basepath:   mmstr receiving the result
  * @path:       path whose basename must be computed
  *
  * NOTE: If maximum length of @basepath is greater or equal to length of @path,
  * then it is guaranteed that the result will not overflow @basepath.
  *
- * Return: the pointer to @basepath.
+ * Return:
+ * the pointer to @basepath or the reallocated mmstr pointer if its maximum
+ * length was not large enough.
  */
 LOCAL_SYMBOL
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path)
@@ -91,19 +93,20 @@ mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path)
 	if (len <= 0)
 		len = 1;
 
-	return mmstr_copy(basepath, baseptr, len);
+	return mmstr_copy_realloc(basepath, baseptr, len);
 }
 
 
 /**
  * mmstr_dirname() - get directory name of a path
- * @dirpath:    mmstr receiving the result (its maxlen must be large enough)
+ * @dirpath:    mmstr receiving the result
  * @path:       path whose dirname must be computed
  *
  * NOTE: If maximum length of @dirpath is greater or equal to length of @path,
  * then it is guaranteed that the result will not overflow @dirpath.
  *
- * Return: the pointer to @dirpath.
+ * the pointer to @dirpath or the reallocated mmstr pointer if its maximum
+ * length was not large enough.
  */
 LOCAL_SYMBOL
 mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
@@ -126,7 +129,7 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 	while (lastptr > path && is_path_separator(*lastptr))
 		lastptr--;
 
-	return mmstr_copy(dirpath, path, lastptr - path + 1);
+	return mmstr_copy_realloc(dirpath, path, lastptr - path + 1);
 }
 
 
