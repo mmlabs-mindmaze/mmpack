@@ -17,7 +17,7 @@
 #include "cmdline.h"
 #include "context.h"
 #include "package-utils.h"
-#include "pkg-fs-utils.h"
+#include "download.h"
 #include "utils.h"
 
 
@@ -69,7 +69,7 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 
 	if (mmpkg_is_available(pkg)) {
 		basename = mmstr_basename(NULL, pkg->remote_res->filename);
-		rv = download_package(ctx, pkg, basename);
+		rv = download_remote_resource(ctx, pkg->remote_res, basename);
 		mmstr_free(basename);
 	} else
 		error("package %s is not present in known repositories\n",
