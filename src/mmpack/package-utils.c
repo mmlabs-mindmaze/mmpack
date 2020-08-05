@@ -1952,12 +1952,12 @@ LOCAL_SYMBOL
 struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
                                       char const * filename)
 {
-	int rv;
 	struct buffer buffer;
 	struct mmpkg * pkg;
 	struct mmpkg tmppkg;
 	struct remote_resource* res;
 	mmstr const * name;
+	mmstr* hash;
 
 	pkg = NULL;
 	name = NULL;
@@ -1965,9 +1965,10 @@ struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
 	mmpkg_init(&tmppkg, NULL);
 	res = mmpkg_get_or_create_remote_res(&tmppkg, NULL);
 	res->filename = mmstr_malloc_from_cstr(filename);
+	res->sha256 = hash = mmstr_malloc(SHA_HEXSTR_LEN);
 
-	rv = pkg_get_mmpack_info(filename, &buffer);
-	if (rv != 0)
+	if (pkg_get_mmpack_info(filename, &buffer)
+	    || sha_compute(hash, filename, NULL, 1))
 		goto exit;
 
 	name = parse_package_info(&tmppkg, &buffer);
