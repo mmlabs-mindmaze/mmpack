@@ -61,6 +61,7 @@ struct mmpkg {
 	mmstr const * source;
 	mmstr const * desc;
 	mmstr const * sumsha;
+	mmstr const * srcsha;
 
 	struct remote_resource* remote_res;
 
