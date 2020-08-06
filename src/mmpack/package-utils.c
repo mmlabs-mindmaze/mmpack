@@ -254,6 +254,7 @@ void mmpkg_deinit(struct mmpkg * pkg)
 	mmstr_free(pkg->source);
 	mmstr_free(pkg->desc);
 	mmstr_free(pkg->sumsha);
+	mmstr_free(pkg->srcsha);
 
 	remote_resource_destroy(pkg->remote_res);
 	pkg->remote_res = NULL;
@@ -1385,6 +1386,7 @@ enum field_type {
 	FIELD_DESC,
 	FIELD_SUMSHA,
 	FIELD_GHOST,
+	FIELD_SRCSHA,
 };
 
 static
@@ -1402,6 +1404,7 @@ const char* scalar_field_names[] = {
 	// same, even in their installed (unpacked) form
 	[FIELD_SUMSHA] = "sumsha256sums",
 	[FIELD_GHOST] = "ghost",
+	[FIELD_SRCSHA] = "srcsha256",
 };
 
 
@@ -1487,6 +1490,10 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 
 	case FIELD_SUMSHA:
 		field = &pkg->sumsha;
+		break;
+
+	case FIELD_SRCSHA:
+		field = &pkg->srcsha;
 		break;
 
 	case FIELD_GHOST:
