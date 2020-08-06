@@ -17,44 +17,33 @@
 #include "cmdline.h"
 #include "context.h"
 #include "download.h"
+#include "mmstring.h"
 #include "package-utils.h"
+#include "repo.h"
+#include "srcindex.h"
+#include "utils.h"
 
 
 static
 int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 {
-	int rv = -1;
+	const struct srcpkg* srcpkg;
+	mmstr* dst;
+	int rv;
 
-	mmstr * source_pkg_name;
-	const mmstr* url;
-	size_t source_pkg_name_len;
-	struct remote_resource* res;
-
-
-	/* source pkg name: name_version_src.tar.gz */
-	source_pkg_name_len = strlen(pkg->source) + 1 + strlen(pkg->version)
-	                      + 1 + sizeof("_src.tar.gz");
-	source_pkg_name = mmstr_malloc(source_pkg_name_len);
-	sprintf(source_pkg_name, "%s_%s_src.tar.gz", pkg->source, pkg->version);
-	mmstr_setlen(source_pkg_name, source_pkg_name_len);
-
-	for (res = pkg->remote_res; res != NULL; res = res->next) {
-		mm_check(res->repo != NULL);
-
-		url = res->repo->url;
-		rv = download_from_repo(ctx, url, source_pkg_name,
-		                        NULL, source_pkg_name);
-		if (rv == 0)
-			break;
+	srcpkg = srcindex_lookup(&ctx->srcindex,
+	                         pkg->source, pkg->version, pkg->srcsha);
+	if (!srcpkg) {
+		printf("Cannot source of package %s %s (%s)\n",
+		       pkg->source, pkg->version, pkg->srcsha);
+		return -1;
 	}
 
-	if (rv == 0)
-		info("Downloaded: %s\n", source_pkg_name);
-	else
-		error("Failed to download: %s\n", source_pkg_name);
+	dst = mmstr_basename(NULL, srcpkg->remote_res->filename);
+	rv = download_remote_resource(ctx, srcpkg->remote_res, dst);
+	mmstr_free(dst);
 
-	mmstr_free(source_pkg_name);
-	return rv < 0 ? rv : 0;
+	return rv;
 }
 
 
