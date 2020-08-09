@@ -5,6 +5,7 @@ os helpers to manipulate the paths and environments
 
 import os
 import shutil
+from tempfile import mkdtemp
 
 from . common import shell, dprint, ShellException, download, sha256sum, iprint
 from . decorators import singleton
@@ -86,6 +87,14 @@ class Workspace:
             self._mmpack_bin = mmpack_bin
 
         return self._mmpack_bin
+
+    def tmpdir(self):
+        """
+        Get a temporary folder in mmpack build dir
+        """
+        os.makedirs(self.build, exist_ok=True)
+        tmpdir = mkdtemp(dir=self.build)
+        return tmpdir
 
     def builddir(self, srcpkg: str, tag: str):
         """
