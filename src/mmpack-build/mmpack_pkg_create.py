@@ -4,24 +4,13 @@ Create a mmpack package
 
 Usage:
 
-mmpack pkg-create [--git|--src|--mmpack-src|--path]
-                  [--tag <tag>] [--prefix <prefix>] [--skip-build-tests]
+mmpack pkg-create [mksource_options]
+                  [--prefix <prefix>] [--skip-build-tests]
                   [path_or_url]
 
 Create mmpack package specified in argument. If no argument is provided, look
 through the tree for a mmpack folder, and use the containing folder as root
-directory.
-
-The type of argument is guessed and the appropriate create method will be used.
-However the method used can be forced using the flags:
- '--git': assumes a git url or path to a local git repo
- '--src': assumes a source tarball
- '--path': assumes path to a mmpack packaging
- '--mmpack-src': assumes argument is a mmpack source tarball
-
-In case of git method, if tag is specified, it will be used to build the commit
-referenced by it. Additionally, for all method, it will indicate the name of
-sub folder in the cache to use to build the packages.
+directory as mksource subcommand does.
 
 If a prefix is given, work within it instead.
 
@@ -38,6 +27,7 @@ import os
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . common import set_log_file
+from . mmpack_mksource import add_mksource_parser_argument
 from . src_package import SrcPackage
 from . workspace import Workspace
 from . source_tarball import SourceTarball
@@ -52,23 +42,7 @@ def parse_options(argv):
     """
     parser = ArgumentParser(description=__doc__,
                             formatter_class=RawDescriptionHelpFormatter)
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument('--git', dest='method',
-                       action='store_const', const='git',
-                       help='interpret argument as url/path to git repository')
-    group.add_argument('--path', dest='method',
-                       action='store_const', const='path',
-                       help='interpret argument as path to folder with '
-                            'a mmpack dir containing specs')
-    group.add_argument('--src', dest='method',
-                       action='store_const', const='tar',
-                       help='interpret argument as source tarball')
-    group.add_argument('--mmpack-src', dest='method',
-                       action='store_const', const='srcpkg',
-                       help='interpret argument as mmpack source tarball')
-    parser.add_argument('-t', '--tag',
-                        action='store', dest='tag', type=str,
-                        help='project tag')
+    add_mksource_parser_argument(parser)
     parser.add_argument('-p', '--prefix',
                         action='store', dest='prefix', type=str,
                         help='prefix within which to work')
@@ -81,8 +55,6 @@ def parse_options(argv):
     parser.add_argument('-y', '--yes',
                         action='store_true', dest='assumeyes',
                         help='always assume yes to any prompted question')
-    parser.add_argument('path_or_url', nargs='?',
-                        help='path or url to project providing mmpack package')
     args = parser.parse_args(argv)
 
     # set workspace prefix
