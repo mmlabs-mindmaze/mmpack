@@ -43,7 +43,7 @@ class Workspace:
 
     def __init__(self):
         self.build = XDG_CACHE_HOME + '/mmpack/build'
-        self.packages = XDG_DATA_HOME + '/mmpack-packages'
+        self._packages = XDG_DATA_HOME + '/mmpack-packages'
         self.cache = XDG_CACHE_HOME + '/mmpack/cache'
         self._cygpath_root = None
         self._mmpack_bin = None
@@ -51,7 +51,6 @@ class Workspace:
 
         # create the directories if they do not exist
         os.makedirs(self.build, exist_ok=True)
-        os.makedirs(self.packages, exist_ok=True)
         os.makedirs(self.cache, exist_ok=True)
 
     def cygroot(self) -> str:
@@ -94,6 +93,13 @@ class Workspace:
         tmpdir = mkdtemp(dir=self.build)
         return tmpdir
 
+    def outdir(self):
+        """
+        get package output directory. Create it if needed.
+        """
+        os.makedirs(self._packages, exist_ok=True)
+        return self._packages
+
     def builddir(self, srcpkg: str, tag: str):
         """
         get package build directory. Create it if needed.
@@ -116,7 +122,7 @@ class Workspace:
         clean sources, build, staging, and all packages
         """
         self.clean()
-        shell('rm -vrf {0}/* {1}/*'.format(self.packages, self.cache))
+        shell('rm -vrf {0}/* {1}/*'.format(self._packages, self.cache))
 
     def cache_get(self, path: str, expected_sha256: str = None) -> bool:
         """

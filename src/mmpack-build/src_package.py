@@ -613,12 +613,12 @@ class SrcPackage:
         instdir = self._local_install_path(True)
         pushdir(instdir)
 
-        wrk = Workspace()
+        outdir = Workspace().outdir()
 
         # Copy source package
-        shutil.copy(self.src_tarball, wrk.packages)
+        shutil.copy(self.src_tarball, outdir)
         iprint('source {} copied in {}'
-               .format(path.basename(self.src_tarball), wrk.packages))
+               .format(path.basename(self.src_tarball), outdir))
 
         # we need all of the provide infos before starting the dependencies
         for pkgname, binpkg in self._packages.items():
@@ -646,15 +646,14 @@ class SrcPackage:
 
         for pkgname, binpkg in self._packages.items():
             pkgfile = binpkg.create(instdir, self.pkgbuild_path())
-            shutil.copy(pkgfile, wrk.packages)
+            shutil.copy(pkgfile, outdir)
             iprint('generated package: {} : {}'
-                   .format(pkgname,
-                           path.join(wrk.packages, path.basename(pkgfile))))
+                   .format(pkgname, path.join(outdir, path.basename(pkgfile))))
 
         manifest = self._generate_manifest()
-        shutil.copy(manifest, wrk.packages)
+        shutil.copy(manifest, outdir)
         iprint('generated manifest: {}'
-               .format(path.join(wrk.packages, path.basename(manifest))))
+               .format(path.join(outdir, path.basename(manifest))))
 
         popdir()  # local install path
 
