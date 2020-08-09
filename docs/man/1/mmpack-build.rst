@@ -36,6 +36,9 @@ COMMANDS
   pkg-create
     build the source and the binary packages of a project
 
+  mksource
+    build the source packages of a project
+
   builddep
     install build dependency of a progject in the specified prefix
 
@@ -107,3 +110,4 @@ SEE ALSO
 **mmpack-build-clean**\(1),
 **mmpack-build-builddep**\(1),
 **mmpack-build-guess**\(1),
+**mmpack-build-mksource**\(1),
