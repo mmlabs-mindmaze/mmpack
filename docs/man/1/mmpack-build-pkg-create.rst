@@ -14,9 +14,9 @@ build mmpack package
 SYNOPSIS
 ========
 
-``mmpack-build pkg-create`` -h|--help
+**mmpack-build pkg-create** [--skip-build-tests] [--git | --src | --mmpack-src | --path] [-t|--tag *tag*] [-y|--yes] [--build-deps] [path_or_url]
 
-``mmpack-build pkg-create`` [--skip-build-tests] [--git | --src | --mmpack-src | --path] [-t|--tag *tag*] [-y|--yes] [--build-deps] [path_or_url]
+**mmpack-build pkg-create** -h|--help
 
 DESCRIPTION
 ===========

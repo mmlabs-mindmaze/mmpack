@@ -14,7 +14,7 @@ show packages
 SYNOPSIS
 ========
 
-``mmpack show`` [-h|--help] *package*
+**mmpack show** [-h|--help] *package*
 
 DESCRIPTION
 ===========
@@ -22,14 +22,14 @@ DESCRIPTION
 
 OPTIONS
 =======
-``-h|--help``
+--help, -h
   Show help and exit
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-install``\(1),
-``mmpack-mkprefix``\(1),
-``mmpack-remove``\(1),
-``mmpack-run``\(1),
-``mmpack-update``\(1),
+**mmpack**\(1),
+**mmpack-install**\(1),
+**mmpack-mkprefix**\(1),
+**mmpack-remove**\(1),
+**mmpack-run**\(1),
+**mmpack-update**\(1),

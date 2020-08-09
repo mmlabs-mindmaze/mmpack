@@ -14,9 +14,10 @@ clean mmpack-build files
 SYNOPSIS
 ========
 
-``mmpack-build clean`` -h|--help
+**mmpack-build clean** [--wipe]
 
-``mmpack-build clean`` [--wipe]
+**mmpack-build clean** -h|--help
+
 
 DESCRIPTION
 ===========
@@ -26,13 +27,13 @@ mmpack-build temporary files. It may also remove generated packages.
 OPTIONS
 =======
 
-``-h|--help``
+--help, -h
   Show help and exit
 
-``--wipe``
+--wipe
   wipe all files including generated packages
 
 SEE ALSO
 ========
 
-``mmpack-build``\(1)
+**mmpack-build**\(1)

@@ -63,6 +63,6 @@ OPTIONS
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-mkprefix``\(1),
-``mmpack-update``\(1),
+**mmpack**\(1),
+**mmpack-mkprefix**\(1),
+**mmpack-update**\(1),

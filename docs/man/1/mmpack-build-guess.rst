@@ -13,7 +13,7 @@ guess package specifications
 SYNOPSIS
 ========
 
-``mmpack-build guess``
+**mmpack-build guess**
 
 DESCRIPTION
 ===========
@@ -24,4 +24,4 @@ It expects to be called from the root of the git repository.
 
 SEE ALSO
 ========
-``mmpack-build``\(1),
+**mmpack-build**\(1),
