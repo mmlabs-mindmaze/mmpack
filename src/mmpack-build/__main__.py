@@ -84,10 +84,24 @@ def main():
                         action="store_true", default=False)
     parser.add_argument("-d", "--debug", help="toggle debug mode",
                         action="store_true", default=False)
+    parser.add_argument("-o", "--outdir", help="output folder",
+                        action="store_true", dest='outdir', nargs='?')
+    parser.add_argument("--builddir", help="build folder",
+                        action="store_true", dest='builddir', nargs='?')
+    parser.add_argument("--cachedir", help="cache folder",
+                        action="store_true", dest='cachedir', nargs='?')
 
     args, subargs = parser.parse_known_args()
     common.CONFIG['verbose'] = not args.quiet
     common.CONFIG['debug'] = args.debug
+
+    wrk = Workspace()
+    if args.outdir:
+        wrk.set_outdir(args.outdir)
+    if args.builddir:
+        wrk.set_builddir(args.builddir)
+    if args.cachedir:
+        wrk.set_cachedir(args.cachedir)
 
     if args.help or args.version:  # handle flags
         if args.command:
