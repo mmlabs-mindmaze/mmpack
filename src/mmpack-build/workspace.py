@@ -44,14 +44,13 @@ class Workspace:
     def __init__(self):
         self.build = XDG_CACHE_HOME + '/mmpack/build'
         self._packages = XDG_DATA_HOME + '/mmpack-packages'
-        self.cache = XDG_CACHE_HOME + '/mmpack/cache'
+        self._cache = XDG_CACHE_HOME + '/mmpack/cache'
         self._cygpath_root = None
         self._mmpack_bin = None
         self.prefix = ''
 
         # create the directories if they do not exist
         os.makedirs(self.build, exist_ok=True)
-        os.makedirs(self.cache, exist_ok=True)
 
     def cygroot(self) -> str:
         """
@@ -122,7 +121,7 @@ class Workspace:
         clean sources, build, staging, and all packages
         """
         self.clean()
-        shell('rm -vrf {0}/* {1}/*'.format(self._packages, self.cache))
+        shell('rm -vrf {0}/* {1}/*'.format(self._packages, self._cache))
 
     def cache_get(self, path: str, expected_sha256: str = None) -> bool:
         """
@@ -134,7 +133,7 @@ class Workspace:
 
         Return: True if the a cached version has been copied, False otherwise
         """
-        cache_file = os.path.join(self.cache, os.path.basename(path))
+        cache_file = os.path.join(self._cache, os.path.basename(path))
         try:
             if not expected_sha256 or expected_sha256 == sha256sum(cache_file):
                 shutil.copyfile(cache_file, path)
@@ -148,7 +147,8 @@ class Workspace:
         """
         Copy file into cache
         """
-        cache_file = os.path.join(self.cache, os.path.basename(path))
+        os.makedirs(self._cache, exist_ok=True)
+        cache_file = os.path.join(self._cache, os.path.basename(path))
         shutil.copyfile(path, cache_file)
 
 
