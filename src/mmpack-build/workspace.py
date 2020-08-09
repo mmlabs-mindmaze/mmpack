@@ -9,7 +9,7 @@ import shutil
 from . common import shell, dprint, ShellException, download, sha256sum, iprint
 from . decorators import singleton
 from . settings import BINDIR, EXEEXT
-from . xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
+from . xdg import XDG_CACHE_HOME, XDG_DATA_HOME
 
 
 def find_project_root_folder(find_multiproj: bool = False) -> str:
@@ -41,7 +41,6 @@ class Workspace:
     """
 
     def __init__(self):
-        self.config = XDG_CONFIG_HOME + '/mmpack-config.yaml'
         self.sources = XDG_CACHE_HOME + '/mmpack/sources'
         self.build = XDG_CACHE_HOME + '/mmpack/build'
         self.packages = XDG_DATA_HOME + '/mmpack-packages'
@@ -51,7 +50,6 @@ class Workspace:
         self.prefix = ''
 
         # create the directories if they do not exist
-        os.makedirs(XDG_CONFIG_HOME, exist_ok=True)
         os.makedirs(self.build, exist_ok=True)
         os.makedirs(self.sources, exist_ok=True)
         os.makedirs(self.packages, exist_ok=True)

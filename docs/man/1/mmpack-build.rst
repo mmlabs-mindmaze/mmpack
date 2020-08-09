@@ -49,10 +49,6 @@ command
 ENVIRONMENT
 ===========
 
-``XDG_CONFIG_HOME``
-  Defaults to ``~/.config`` if unset.
-  Contains mmpack configuration file: ``mmpack-config.yaml``
-
 ``XDG_CACHE_HOME``
   Defaults to ``~/.cache`` if unset.
   Contains mmpack temporary files. Those can be deleted or overwritten at
