@@ -42,15 +42,12 @@ class Workspace:
     """
 
     def __init__(self):
-        self.build = XDG_CACHE_HOME + '/mmpack/build'
+        self._build = XDG_CACHE_HOME + '/mmpack/build'
         self._packages = XDG_DATA_HOME + '/mmpack-packages'
         self._cache = XDG_CACHE_HOME + '/mmpack/cache'
         self._cygpath_root = None
         self._mmpack_bin = None
         self.prefix = ''
-
-        # create the directories if they do not exist
-        os.makedirs(self.build, exist_ok=True)
 
     def cygroot(self) -> str:
         """
@@ -88,8 +85,8 @@ class Workspace:
         """
         Get a temporary folder in mmpack build dir
         """
-        os.makedirs(self.build, exist_ok=True)
-        tmpdir = mkdtemp(dir=self.build)
+        os.makedirs(self._build, exist_ok=True)
+        tmpdir = mkdtemp(dir=self._build)
         return tmpdir
 
     def outdir(self):
@@ -103,7 +100,7 @@ class Workspace:
         """
         get package build directory. Create it if needed.
         """
-        builddir = self.build + '/' + srcpkg + '/' + tag
+        builddir = self._build + '/' + srcpkg + '/' + tag
         os.makedirs(builddir, exist_ok=True)
         return builddir
 
@@ -114,7 +111,7 @@ class Workspace:
         explicted, only tag specific subfolder of srcpkg is cleaned.
         """
         dprint('cleaning {0} workspace'.format(srcpkg + '/' + tag))
-        shell('rm -rvf {0}/{1}/{2}'.format(self.build, srcpkg, tag))
+        shell('rm -rvf {0}/{1}/{2}'.format(self._build, srcpkg, tag))
 
     def wipe(self):
         """
