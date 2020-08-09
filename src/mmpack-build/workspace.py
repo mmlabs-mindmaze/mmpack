@@ -81,6 +81,24 @@ class Workspace:
 
         return self._mmpack_bin
 
+    def set_outdir(self, path: str):
+        """
+        set package output directory.
+        """
+        self._packages = path
+
+    def set_builddir(self, path: str):
+        """
+        set build directory.
+        """
+        self._build = path
+
+    def set_cachedir(self, path: str):
+        """
+        set cache directory.
+        """
+        self._cache = path
+
     def tmpdir(self):
         """
         Get a temporary folder in mmpack build dir
