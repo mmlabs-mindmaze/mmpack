@@ -74,7 +74,7 @@ class SourceTarball:
     Class managing source tarball creation
     """
     def __init__(self, method: str, path_url: str, tag: str = None,
-                 outdir: str = Workspace().packages, **kwargs):
+                 outdir: str = None, **kwargs):
         """
         Create a source package from various methods
 
@@ -96,7 +96,7 @@ class SourceTarball:
         self._builddir = Workspace().tmpdir()
         self._srcdir = None
         self._vcsdir = None
-        self._outdir = outdir
+        self._outdir = outdir if outdir else Workspace().packages
         self.trace = dict()
 
         # Fetch sources following the specified method and move them to the
