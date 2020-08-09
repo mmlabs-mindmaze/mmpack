@@ -83,7 +83,7 @@ class SourceTarball:
             path_url: path or url to the mmpack sources
             tag: the name of the commit/tag/branch to checkout (may be None)
             outdir: folder where to put the generated source package. If None,
-                it will be located in Workspace().packages
+                it will be located in Workspace().outdir()
             **kwargs: supported optional keyword arguments are following
                 git_ssh_cmd: ssh cmd to use when cloning git repo through ssh
         """
@@ -96,7 +96,7 @@ class SourceTarball:
         self._builddir = Workspace().tmpdir()
         self._srcdir = None
         self._vcsdir = None
-        self._outdir = outdir if outdir else Workspace().packages
+        self._outdir = outdir if outdir else Workspace().outdir()
         self.trace = dict()
 
         # Fetch sources following the specified method and move them to the
