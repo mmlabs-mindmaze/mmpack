@@ -6,7 +6,6 @@ Fetch/gather sources of a mmpack package and create source tarball
 import os
 import shutil
 from collections import namedtuple
-from tempfile import mkdtemp
 from typing import Dict, Iterator
 
 from . common import *
@@ -94,7 +93,7 @@ class SourceTarball:
         self.name = None
         self._path_url = path_url
         self._kwargs = kwargs
-        self._builddir = mkdtemp(dir=Workspace().sources)
+        self._builddir = Workspace().tmpdir()
         self._srcdir = None
         self._vcsdir = None
         self._outdir = outdir

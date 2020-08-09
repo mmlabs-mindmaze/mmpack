@@ -42,7 +42,6 @@ class Workspace:
     """
 
     def __init__(self):
-        self.sources = XDG_CACHE_HOME + '/mmpack/sources'
         self.build = XDG_CACHE_HOME + '/mmpack/build'
         self.packages = XDG_DATA_HOME + '/mmpack-packages'
         self.cache = XDG_CACHE_HOME + '/mmpack/cache'
@@ -52,7 +51,6 @@ class Workspace:
 
         # create the directories if they do not exist
         os.makedirs(self.build, exist_ok=True)
-        os.makedirs(self.sources, exist_ok=True)
         os.makedirs(self.packages, exist_ok=True)
         os.makedirs(self.cache, exist_ok=True)
 
@@ -104,16 +102,6 @@ class Workspace:
         os.makedirs(builddir, exist_ok=True)
         return builddir
 
-    def srcclean(self, srcpkg: str = ''):
-        """
-        remove all copied sources.
-        if pkg is explicit, will only clean given package
-        """
-        if srcpkg:
-            dprint('cleaning {0} sources'.format(srcpkg))
-
-        shell('rm -rvf {0}/{1}*'.format(self.sources, srcpkg))
-
     def clean(self, srcpkg: str = '', tag: str = ''):
         """
         remove all temporary build objects keep generated packages. if
@@ -127,7 +115,6 @@ class Workspace:
         """
         clean sources, build, staging, and all packages
         """
-        self.srcclean()
         self.clean()
         shell('rm -vrf {0}/* {1}/*'.format(self.packages, self.cache))
 

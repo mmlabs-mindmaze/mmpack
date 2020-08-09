@@ -52,7 +52,7 @@ def _get_install_prefix() -> str:
 
 
 def _extract_mmpack_source(srctar_path: str) -> str:
-    srcdir = mkdtemp(dir=Workspace().sources)
+    srcdir = Workspace().tmpdir()
     tarfile.open(srctar_path, 'r:*').extractall(path=srcdir)
     return srcdir
 
