@@ -69,6 +69,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/mmpack_builddep.py \
 	src/mmpack-build/mmpack_clean.py \
 	src/mmpack-build/mmpack_guess.py \
+	src/mmpack-build/mmpack_mksource.py \
 	src/mmpack-build/mmpack_pkg_create.py \
 	src/mmpack-build/package_info.py \
 	src/mmpack-build/pe_utils.py \
@@ -456,6 +457,7 @@ RST_MAN1_PAGES = \
 	docs/man/1/mmpack-build-builddep.rst \
 	docs/man/1/mmpack-build-clean.rst \
 	docs/man/1/mmpack-build-guess.rst \
+	docs/man/1/mmpack-build-mksource.rst \
 	docs/man/1/mmpack-build-pkg-create.rst \
 	docs/man/1/mmpack-check-integrity.rst \
 	docs/man/1/mmpack-download.rst \
