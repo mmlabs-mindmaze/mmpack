@@ -14,9 +14,9 @@ download packages
 SYNOPSIS
 ========
 
-``mmpack download`` *pkg1* [= *version1*]
+**mmpack download** *pkg1* [= *version1*]
 
-``mmpack download`` -h|--help
+**mmpack download** -h|--help
 
 DESCRIPTION
 ===========
@@ -31,14 +31,14 @@ the package cache of the mmpack prefix (**$MMPACK_PREFIX**) located in the path:
 
 OPTIONS
 =======
-``-h|--help``
+--help, -h
   Show help and exit
 
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-mkprefix``\(1),
-``mmpack-search``\(1),
-``mmpack-source``\(1),
-``mmpack-install``\(1),
+**mmpack**\(1),
+**mmpack-mkprefix**\(1),
+**mmpack-search**\(1),
+**mmpack-source**\(1),
+**mmpack-install**\(1),

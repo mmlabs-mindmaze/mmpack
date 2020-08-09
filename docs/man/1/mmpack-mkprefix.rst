@@ -14,16 +14,17 @@ create prefix command
 SYNOPSIS
 ========
 
-``mmpack mkprefix`` -h|--help
+**mmpack mkprefix** -h|--help
 
-``mmpack mkprefix`` [-f|--force] --url= *repository* --name= *name* *prefix-path*
+**mmpack mkprefix** [-f|--force] [--url= *repo_url*] [--name= *name*] [*prefix-path*]
 
 DESCRIPTION
 ===========
 **mmpack-prefix** allows you to create a new prefix in folder specified by
-*prefix-path* which will pull packages from the repository whose URL is
-optionally set by ``--url`` and whose short name is given optionally by
-``--name``.
+*prefix-path* which will pull packages from *repo_url* vwhose URL is
+optionally set by **--url** and whose short name is given optionally by
+**--name**.
+
 If *prefix-path* is omitted, the argument of --prefix of mmpack and the
 environment variable MMPACK_PREFIX are considered for determine the prefix
 path.
@@ -34,27 +35,24 @@ that has been already setup.
 
 OPTIONS
 =======
-``-h|--help``
-  Show help and exit
-
-``-f|--force``
+--force, -f
   Force setting up prefix folder even if it was already setup.
 
-``--url= *repository*``
-  Specify repository as the address of package repository
+--url=repo_url
+  Specify *repo_url* as the URL of package repository
 
-``--name= *name*``
-  Specify name as the short name of the repository
+--name=name
+  Specify *name* as the short name of the repository
 
-**prefix-path**
-  Folder within which to create the prefix
+--help, -h
+  Show help and exit
 
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-install``\(1),
-``mmpack-remove``\(1),
-``mmpack-run``\(1),
-``mmpack-search``\(1),
-``mmpack-update``\(1),
+**mmpack**\(1),
+**mmpack-install**\(1),
+**mmpack-remove**\(1),
+**mmpack-run**\(1),
+**mmpack-search**\(1),
+**mmpack-update**\(1),

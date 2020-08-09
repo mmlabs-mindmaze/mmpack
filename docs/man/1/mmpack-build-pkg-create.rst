@@ -14,9 +14,9 @@ build mmpack package
 SYNOPSIS
 ========
 
-``mmpack-build pkg-create`` -h|--help
+**mmpack-build pkg-create** [--skip-build-tests] [--git | --src | --mmpack-src | --path] [-t|--tag *tag*] [-y|--yes] [--build-deps] [path_or_url]
 
-``mmpack-build pkg-create`` [--skip-build-tests] [--git | --src | --mmpack-src | --path] [-t|--tag *tag*] [-y|--yes] [--build-deps] [path_or_url]
+**mmpack-build pkg-create** -h|--help
 
 DESCRIPTION
 ===========
@@ -31,28 +31,25 @@ directory.
 OPTIONS
 =======
 
-``-h|--help``
-  Show help and exit
-
-``--skip-build-tests``
+--skip-build-tests
   If passed, do not run the default test target after the build.
   Ie. make check or make test depending on the build system.
 
-``--git``
+--git
   Interpret *path_or_url* argument as git url or path to a local git repository.
 
-``--src``
+--src
   Interpret *path_or_url* argument as source package tarball.
 
-``--mmpack-src``
+--mmpack-src
   Interpret *path_or_url* argument as mmpack source package tarball. **mmpack-build** will
   preserve this tarball as it is and pass it directly to binary packages build
   stages.
 
-``--path``
+--path
   Interpret *path_or_url* argument as folder containing mmpack packaging specification.
 
-``-t|--tag= *tag*``
+--tag=tag, -t tag
   The project's tag to use.
   If a git repository (local or remote url) is being built, this will specify
   the commit to build. This can actually be any kind of object recognized by
@@ -65,14 +62,13 @@ OPTIONS
   For the other type of build, *tag* will be the string which will be used to
   identify a package build in the cache folder.
 
-``-p|--prefix= *path*``
+--prefix=path, -p path
   Use *path* as install prefix if needed.
 
-``-y|--yes``
+--assumes-yes, -y
   Assume yes as answer to all prompts and run non-interactively.
 
-``--build-deps``
-
+--build-deps
   Check for build dependencies:
 
     * abort on missing system ones.
@@ -87,8 +83,35 @@ OPTIONS
   Whichever prefix is used, it needs to be correctly configured for this command
   to work.
 
+--help, -h
+  Show help and exit
+
+EXAMPLE
+=======
+.. code-block:: sh
+
+  # create mmpack package from local sources during development on a branch named *feature*
+  mmpack-build pkg-create --git --tag=feature /path/to/sources
+
+  # same but also skipping the tests
+  mmpack-build pkg-create --git --tag=feature --skip-build-tests /path/to/sources
+
+  # create arbitrary project on tag v1.2.3 from git server
+  mmpack-build pkg-create --git --tag=v1.2.3 https://github.com/user/project
+
+  # create packages from source tarball
+  mmpack-build pkg-create --tar https://my.proj.com/project_1.2.3.tar.gz
+
+  # create package from the current HEAD of local git project
+  cd path/to/project
+  mmpack-build
+
+  # create package from the current project (file modified will be used)
+  cd path/to/project
+  mmpack-build pkg-create --path
+
 
 SEE ALSO
 ========
 
-``mmpack-build``\(1)
+**mmpack-build**\(1)

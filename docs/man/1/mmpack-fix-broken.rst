@@ -14,9 +14,9 @@ fix broken packages
 SYNOPSIS
 ========
 
-``mmpack fix-broken`` [*pkg* [...]]
+**mmpack fix-broken** [*pkg* [...]]
 
-``mmpack fix-broken`` -h|--help
+**mmpack fix-broken** -h|--help
 
 DESCRIPTION
 ===========
@@ -38,7 +38,7 @@ In this described case, fix-broken will only repair the sha256sums file.
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-install``\(1),
-``mmpack-remove``\(1),
-``mmpack-upgrade``\(1),
+**mmpack**\(1),
+**mmpack-install**\(1),
+**mmpack-remove**\(1),
+**mmpack-upgrade**\(1),

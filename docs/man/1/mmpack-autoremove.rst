@@ -9,9 +9,9 @@ autoremove packages
 SYNOPSIS
 ========
 
-``mmpack autoremove`` [-y|--assume-yes]
+**mmpack autoremove** [-y|--assume-yes]
 
-``mmpack autoremove`` [-h|--help]
+**mmpack autoremove** [-h|--help]
 
 DESCRIPTION
 ===========
@@ -21,8 +21,9 @@ indirectly.
 
 OPTIONS
 =======
-``-y|--assume-yes``
+
+--assume-yes, -y
   Assume yes as answer to all prompts and run non-interactively
 
-``-h|--help``
+--help, -h
   Show help and exit

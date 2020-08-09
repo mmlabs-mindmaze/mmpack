@@ -14,7 +14,7 @@ source packages
 SYNOPSIS
 ========
 
-``mmpack source`` [-h|--help] *package*
+**mmpack source** [-h|--help] *package*
 
 DESCRIPTION
 ===========
@@ -22,12 +22,12 @@ DESCRIPTION
 
 OPTIONS
 =======
-``-h|--help``
+--help, -h
   Show help and exit
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-install``\(1),
-``mmpack-remove``\(1),
-``mmpack-show``\(1),
+**mmpack**\(1),
+**mmpack-install**\(1),
+**mmpack-remove**\(1),
+**mmpack-show**\(1),

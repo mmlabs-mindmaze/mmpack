@@ -13,7 +13,7 @@ list packages
 SYNOPSIS
 ========
 
-``mmpack list`` [-h|--help] [all|available|upgradeable|installed|extras] [*pattern*]
+**mmpack list** [-h|--help] [all|available|upgradeable|installed|extras] [*pattern*]
 
 DESCRIPTION
 ===========
@@ -43,12 +43,12 @@ filtered by that pattern.
 
 OPTIONS
 =======
-``-h|--help``
+--help, -h
   Show help and exit
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-search``\(1),
-``mmpack-show``\(1),
-``mmpack-update``\(1),
+**mmpack**\(1),
+**mmpack-search**\(1),
+**mmpack-show**\(1),
+**mmpack-update**\(1),

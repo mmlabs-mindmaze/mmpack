@@ -14,7 +14,7 @@ check-integrity packages
 SYNOPSIS
 ========
 
-``mmpack check-integrity`` [-h|--help] [*package*]
+**mmpack check-integrity** [-h|--help] [*package*]
 
 DESCRIPTION
 ===========
@@ -22,11 +22,11 @@ DESCRIPTION
 
 OPTIONS
 =======
-``-h|--help``
+--help, -h
   Show help and exit
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-install``\(1),
-``mmpack-remove``\(1),
+**mmpack**\(1),
+**mmpack-install**\(1),
+**mmpack-remove**\(1),

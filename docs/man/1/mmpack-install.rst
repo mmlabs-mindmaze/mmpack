@@ -14,9 +14,9 @@ install packages
 SYNOPSIS
 ========
 
-``mmpack install`` [-y|--assume-yes] *pkg1* [= *version1*] [*pkg2* [= *version2*] [...]]
+**mmpack install** [-y|--assume-yes] *pkg1* [= *version1*] [*pkg2* [= *version2*] [...]]
 
-``mmpack install`` -h|--help
+**mmpack install** -h|--help
 
 DESCRIPTION
 ===========
@@ -32,19 +32,19 @@ answer is negative). Otherwise it will proceed to the installation.
 
 OPTIONS
 =======
-``-h|--help``
-  Show help and exit
-
-``-y|--assume-yes``
+--assume-yes, -y
   Assume yes as answer to all prompts and run non-interactively.
+
+--help, -h
+  Show help and exit
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-mkprefix``\(1),
-``mmpack-remove``\(1),
-``mmpack-run``\(1),
-``mmpack-search``\(1),
-``mmpack-source``\(1),
-``mmpack-update``\(1),
-``mmpack-upgrade``\(1),
+**mmpack**\(1),
+**mmpack-mkprefix**\(1),
+**mmpack-remove**\(1),
+**mmpack-run**\(1),
+**mmpack-search**\(1),
+**mmpack-source**\(1),
+**mmpack-update**\(1),
+**mmpack-upgrade**\(1),

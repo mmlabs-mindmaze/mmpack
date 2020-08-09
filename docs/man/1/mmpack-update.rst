@@ -14,7 +14,7 @@ update command
 SYNOPSIS
 ========
 
-``mmpack update [-h|--help]``
+**mmpack update [-h|--help]**
 
 DESCRIPTION
 ===========
@@ -23,23 +23,23 @@ DESCRIPTION
 
 OPTIONS
 =======
-``-h|--help``
+--help, -h
   Show help and exit
 
 FILES
 =====
-``/etc/mmpack-config.yaml``
+**/etc/mmpack-config.yaml**
   Config file containing the repositories URL.
 
-``/var/lib/mmpack/binindex.yaml``
+**/var/lib/mmpack/binindex.yaml**
   Local cache for mmpack package metadata.
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-install``\(1),
-``mmpack-mkprefix``\(1),
-``mmpack-remove``\(1),
-``mmpack-run``\(1),
-``mmpack-search``\(1),
-``mmpack-upgrade``\(1),
+**mmpack**\(1),
+**mmpack-install**\(1),
+**mmpack-mkprefix**\(1),
+**mmpack-remove**\(1),
+**mmpack-run**\(1),
+**mmpack-search**\(1),
+**mmpack-upgrade**\(1),

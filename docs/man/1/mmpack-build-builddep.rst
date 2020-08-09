@@ -14,9 +14,9 @@ builddep packages
 SYNOPSIS
 ========
 
-``mmpack-build builddep`` [-p|--prefix=*path*] [-y|--yes] [*path/to/specfile*]
+**mmpack-build builddep** [-p|--prefix=*path*] [-y|--yes] [*path/to/specfile*]
 
-``mmpack-build builddep`` -h|--help
+**mmpack-build builddep** -h|--help
 
 DESCRIPTION
 ===========
@@ -33,20 +33,20 @@ It will fail otherwise.
 OPTIONS
 =======
 
-``-h|--help``
+--help, -h
   Show help and exit
 
-``-p|--prefix=*path*``
+--prefix=path, -p path
   Use *path* as install prefix.
   Can also be given through ``MMPACK_PREFIX`` environment variable
 
-``-y|--assume-yes``
+--assume-yes, -y
   Assume yes as answer to all prompts and run non-interactively.
 
 ENVIRONMENT
 ===========
 
-``MMPACK_PREFIX``
+MMPACK_PREFIX
   If set, **mmpack-build** will parse the given prefix tree when looking for
   package dependencies. If unset, **mmpack-build** will only use the system
   tree.
@@ -54,8 +54,8 @@ ENVIRONMENT
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-source``\(1),
-``mmpack-install``\(1),
-``mmpack-mkprefix``\(1),
-``mmpack-build``\(1),
+**mmpack**\(1),
+**mmpack-source**\(1),
+**mmpack-install**\(1),
+**mmpack-mkprefix**\(1),
+**mmpack-build**\(1),

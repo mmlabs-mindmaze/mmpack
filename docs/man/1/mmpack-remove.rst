@@ -14,9 +14,9 @@ remove package
 SYNOPSIS
 ========
 
-``mmpack install`` -h|--help
+**mmpack remove** [-y|--assume-yes] *pkg1* [*pkg2* [...]]
 
-``mmpack remove`` [-y|--assume-yes] *pkg1* [*pkg2* [...]]
+**mmpack remove** -h|--help
 
 DESCRIPTION
 ===========
@@ -33,17 +33,17 @@ Note:  **mmpack remove** and **mmpack uninstall** are aliases.
 
 OPTIONS
 =======
-``-h|--help``
+--help, -h
   Show help and exit
 
-``-y|--assume-yes``
+--assume-yes, -y
   Assume yes as answer to all prompts and run non-interactively.
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-mkprefix``\(1),
-``mmpack-install``\(1),
-``mmpack-run``\(1),
-``mmpack-search``\(1),
-``mmpack-update``\(1),
+**mmpack**\(1),
+**mmpack-mkprefix**\(1),
+**mmpack-install**\(1),
+**mmpack-run**\(1),
+**mmpack-search**\(1),
+**mmpack-update**\(1),

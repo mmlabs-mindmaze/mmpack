@@ -14,9 +14,9 @@ upgrade command
 SYNOPSIS
 ========
 
-``mmpack upgrade`` [-y|--assume-yes] [*pkg* [...]]
+**mmpack upgrade** [-y|--assume-yes] [*pkg* [...]]
 
-``mmpack upgrade [-h|--help]``
+**mmpack upgrade** [-h|--help]
 
 DESCRIPTION
 ===========
@@ -30,19 +30,19 @@ New packages may be installed if required to satisfy new dependencies.
 
 OPTIONS
 =======
-``-h|--help``
+--help, -h
   Show help and exit
 
-``-y|--assume-yes``
+--assume-yes, -y
   Assume yes as answer to all prompts and run non-interactively.
 
 
 SEE ALSO
 ========
-``mmpack``\(1),
-``mmpack-install``\(1),
-``mmpack-list``\(1),
-``mmpack-mkprefix``\(1),
-``mmpack-remove``\(1),
-``mmpack-search``\(1),
-``mmpack-update``\(1),
+**mmpack**\(1),
+**mmpack-install**\(1),
+**mmpack-list**\(1),
+**mmpack-mkprefix**\(1),
+**mmpack-remove**\(1),
+**mmpack-search**\(1),
+**mmpack-update**\(1),
