@@ -52,15 +52,18 @@ OPTIONS
 
 --outdir=path, -o path
   places generated source and binary packages into *path*. If not set, default
-  location will be derived from environment variable **XDG_DATA_HOME**.
+  location will be derived from environment variables **MMPACK_BUILD_OUTDIR**
+  or **XDG_DATA_HOME**.
 
 --builddir=path
   Use *path* to hold temporary files during package generation. If not set,
-  default location will be derived from environment variable **XDG_CACHE_HOME**.
+  default location will be derived from environment variables
+  **MMPACK_BUILD_BUILDDIR** or **XDG_CACHE_HOME**.
 
 --cachedir=path
   Use *path* to hold cached files during package generation. If not set, default
-  location will be derived from environment variable **XDG_CACHE_HOME**.
+  location will be derived from environment variables **MMPACK_BUILD_CACHEDIR**
+  or **XDG_CACHE_HOME**.
 
 --version
   Display **mmpack-build** version
@@ -75,6 +78,28 @@ MMPACK_PREFIX
   If set, **mmpack-build** will parse the given prefix tree when looking for
   package dependencies. If unset, **mmpack-build** will only use the system
   tree.
+
+MMPACK_BUILD_OUTDIR
+  default folder where generated source and binary package are placed.
+  **--outdir** option takes precedence over this environment variable. If not
+  set, default location will be in **$XDG_DATA_HOME/mmpack-packages** or
+  **~/.local/share/mmpack-packages** if **XDG_DATA_HOME** environment variable
+  is not set.
+
+MMPACK_BUILD_BUILDDIR
+  default folder where temporary files are placed for package generation.
+  **--builddir** option takes precedence over this environment variable. If not
+  set, default location will be in **$XDG_CACHE_HOME/mmpack/build** or
+  **~/.cache/mmpack/build** if **XDG_CACHE_HOME** environment variable is not
+  set.
+
+MMPACK_BUILD_CACHEDIR
+  default folder where to place cached files during package generation.
+  **--cachedir** option takes precedence over this environment variable. If not
+  set, default location will be in **$XDG_CACHE_HOME/mmpack/cache** or
+  **~/.cache/mmpack/cache** if **XDG_CACHE_HOME** environment variable is not
+  set.
+
 
 EXAMPLE
 =======

@@ -19,7 +19,7 @@ prepare_env()
 	export TMP_BUILD=$BUILDDIR/tmp-build_$build_sys
 	export XDG_CONFIG_HOME=$BUILDDIR/config_$build_sys
 	export XDG_CACHE_HOME=$BUILDDIR/cache_$build_sys
-	export XDG_DATA_HOME=$BUILDDIR/data_$build_sys
+	export MMPACK_BUILD_OUTDIR=$BUILDDIR/data_$build_sys
 	export PYTHONPATH=${_MMPACK_TEST_PREFIX}${PYTHON_INSTALL_DIR}
 	SRC_PKG=$BUILDDIR/test-packages/smoke/
 
@@ -32,7 +32,7 @@ cleanup()
 
     rm -rf $XDG_CONFIG_HOME
     rm -rf $XDG_CACHE_HOME
-    rm -rf $XDG_DATA_HOME
+    rm -rf $MMPACK_BUILD_OUTDIR
     rm -rf $TMP_BUILD
 }
 
