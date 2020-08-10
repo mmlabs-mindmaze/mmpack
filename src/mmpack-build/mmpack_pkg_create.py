@@ -35,13 +35,11 @@ ssh://git@intranet.mindmaze.ch:7999/~user/XXX.git
 """
 
 import os
-import tarfile
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from subprocess import call, DEVNULL
 
 from . common import set_log_file
 from . src_package import SrcPackage
-from . workspace import Workspace, find_project_root_folder
+from . workspace import Workspace
 from . source_tarball import SourceTarball
 
 
@@ -87,11 +85,6 @@ def parse_options(argv):
                         help='path or url to project providing mmpack package')
     args = parser.parse_args(argv)
 
-    if not args.path_or_url:
-        args.path_or_url = find_project_root_folder(find_multiproj=True)
-        if not args.path_or_url:
-            raise ValueError('did not find project to package')
-
     # set workspace prefix
     if not args.prefix:
         try:
@@ -102,39 +95,6 @@ def parse_options(argv):
         Workspace().prefix = os.path.abspath(args.prefix)
 
     return args
-
-
-def _is_git_dir(path: str) -> bool:
-    if os.path.isdir(path + '/.git'):
-        return True
-
-    retcode = call(['git', '--git-dir='+path, 'rev-parse', '--git-dir'],
-                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
-    return retcode == 0
-
-
-def _is_tarball_file(path: str) -> bool:
-    try:
-        with tarfile.open(path, 'r') as tar:
-            return 'mmpack/specs' in tar.getnames()
-    # pylint: disable=broad-except
-    except Exception:
-        return False
-
-
-def _guess_method(path_or_url: str) -> str:
-    if _is_git_dir(path_or_url):
-        return 'git'
-    elif os.path.isdir(path_or_url):
-        return 'path'
-    elif _is_tarball_file(path_or_url):
-        if path_or_url.endswith('_src.tar.xz'):
-            return 'srcpkg'
-        else:
-            return 'tar'
-
-    # If nothing has worked before, lets assume this is a git remote url
-    return 'git'
 
 
 def _build_mmpack_packages(srctar: str, tag: str, srcdir: str, args):
@@ -155,9 +115,6 @@ def main(argv):
     entry point to create a mmpack package
     """
     args = parse_options(argv[1:])
-    if not args.method:
-        args.method = _guess_method(args.path_or_url)
-
     srctarball = SourceTarball(args.method, args.path_or_url, args.tag)
     for prj_src in srctarball.iter_mmpack_srcs():
         _build_mmpack_packages(prj_src.tarball, srctarball.tag,

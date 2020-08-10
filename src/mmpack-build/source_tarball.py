@@ -5,15 +5,50 @@ Fetch/gather sources of a mmpack package and create source tarball
 
 import os
 import shutil
+import tarfile
 from collections import namedtuple
+from subprocess import call, DEVNULL
 from typing import Dict, Iterator
 
 from . common import *
-from . workspace import Workspace, cached_download
+from . workspace import Workspace, cached_download, find_project_root_folder
 
 
 ProjectSource = namedtuple('ProjectSource',
                            ['name', 'version', 'tarball', 'srcdir'])
+
+
+def _is_git_dir(path: str) -> bool:
+    if os.path.isdir(path + '/.git'):
+        return True
+
+    retcode = call(['git', '--git-dir='+path, 'rev-parse', '--git-dir'],
+                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
+    return retcode == 0
+
+
+def _is_tarball_file(path: str) -> bool:
+    try:
+        with tarfile.open(path, 'r') as tar:
+            return 'mmpack/specs' in tar.getnames()
+    # pylint: disable=broad-except
+    except Exception:
+        return False
+
+
+def _guess_method(path_or_url: str) -> str:
+    if _is_git_dir(path_or_url):
+        return 'git'
+    elif os.path.isdir(path_or_url):
+        return 'path'
+    elif _is_tarball_file(path_or_url):
+        if path_or_url.endswith('_src.tar.xz'):
+            return 'srcpkg'
+        else:
+            return 'tar'
+
+    # If nothing has worked before, lets assume this is a git remote url
+    return 'git'
 
 
 def _git_subcmd(subcmd: List[str], gitdir: str = None, worktree: str = None,
@@ -73,20 +108,35 @@ class SourceTarball:
     """
     Class managing source tarball creation
     """
-    def __init__(self, method: str, path_url: str, tag: str = None,
-                 outdir: str = None, **kwargs):
+    def __init__(self,
+                 method: str = 'guess',
+                 path_url: str = None,
+                 tag: str = None,
+                 outdir: str = None,
+                 **kwargs):
         """
         Create a source package from various methods
 
         Args:
-            method: 'tar', 'srcpkg', 'path' or 'git'
-            path_url: path or url to the mmpack sources
+            method: 'tar', 'srcpkg', 'path' or 'git'. If 'guess' or None, the
+                method will be guessed.
+            path_url: path or url to the mmpack sources. If None, the path to
+                mmpack project will be search in the current directory or one
+                of its parent.
             tag: the name of the commit/tag/branch to checkout (may be None)
             outdir: folder where to put the generated source package. If None,
                 it will be located in Workspace().outdir()
             **kwargs: supported optional keyword arguments are following
                 git_ssh_cmd: ssh cmd to use when cloning git repo through ssh
         """
+        if not path_url:
+            path_url = find_project_root_folder(find_multiproj=True)
+            if not path_url:
+                raise ValueError('did not find project to package')
+
+        if not method or method == 'guess':
+            method = _guess_method(path_url)
+
         # declare class instance attributes
         self.srctar = None
         self.tag = tag
