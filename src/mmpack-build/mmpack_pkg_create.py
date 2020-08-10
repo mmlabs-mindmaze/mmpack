@@ -51,6 +51,7 @@ def parse_options(argv):
     parse and check options
     """
     parser = ArgumentParser(description=__doc__,
+                            prog='mmpack-build ' + CMD,
                             formatter_class=RawDescriptionHelpFormatter)
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--git', dest='method',
