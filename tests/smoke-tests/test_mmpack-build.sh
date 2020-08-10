@@ -28,34 +28,34 @@ gzip $TMP_BUILD/mmpack-hello-world.tar
 mmpack-build --debug pkg-create --src $TMP_BUILD/mmpack-hello-world.tar.gz
 
 # check that the packages created are correct
-ls $XDG_DATA_HOME/mmpack-packages/hello*.mmpack-manifest
-ls $XDG_DATA_HOME/mmpack-packages/hello*.mpk
-ls $XDG_DATA_HOME/mmpack-packages/libhello*.mpk
-ls $XDG_DATA_HOME/mmpack-packages/hello-devel*.mpk
-ls $XDG_DATA_HOME/mmpack-packages/hello*src.tar.*
+ls $MMPACK_BUILD_OUTDIR/hello*.mmpack-manifest
+ls $MMPACK_BUILD_OUTDIR/hello*.mpk
+ls $MMPACK_BUILD_OUTDIR/libhello*.mpk
+ls $MMPACK_BUILD_OUTDIR/hello-devel*.mpk
+ls $MMPACK_BUILD_OUTDIR/hello*src.tar.*
 
 # check that the packages contains the expected files
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep MMPACK/info
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/hello-world
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/head-libexec-world
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep bin/shell-exec.py
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep libexec/hello/libexec-world
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep var/lib/mmpack/metadata/hello.sha256sums
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep share/licenses/hello/dummy
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello_*.mpk | grep share/licenses/hello/copyright
+tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep MMPACK/info
+tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep bin/hello-world
+tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep bin/head-libexec-world
+tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep bin/shell-exec.py
+tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep libexec/hello/libexec-world
+tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep var/lib/mmpack/metadata/hello.sha256sums
+tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep share/licenses/hello/dummy
+tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep share/licenses/hello/copyright
 
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep include/libhello.h
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep -e lib/libhello.dll.a -e lib/libhello.so
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep share/licenses/hello-devel/dummy
-tar -tvf $XDG_DATA_HOME/mmpack-packages/hello-devel_*.mpk | grep share/licenses/hello-devel/copyright
+tar -tvf $MMPACK_BUILD_OUTDIR/hello-devel_*.mpk | grep include/libhello.h
+tar -tvf $MMPACK_BUILD_OUTDIR/hello-devel_*.mpk | grep -e lib/libhello.dll.a -e lib/libhello.so
+tar -tvf $MMPACK_BUILD_OUTDIR/hello-devel_*.mpk | grep share/licenses/hello-devel/dummy
+tar -tvf $MMPACK_BUILD_OUTDIR/hello-devel_*.mpk | grep share/licenses/hello-devel/copyright
 
-tar -tvf $XDG_DATA_HOME/mmpack-packages/libhello*.mpk | grep -e lib/libhello.so.1.0.0 -e bin/libhello-1.dll
-tar -tvf $XDG_DATA_HOME/mmpack-packages/libhello*.mpk | grep -P share/licenses/libhello[0-9]*/copyright
-tar -tvf $XDG_DATA_HOME/mmpack-packages/libhello*.mpk | grep -P share/licenses/libhello[0-9]*/dummy
+tar -tvf $MMPACK_BUILD_OUTDIR/libhello*.mpk | grep -e lib/libhello.so.1.0.0 -e bin/libhello-1.dll
+tar -tvf $MMPACK_BUILD_OUTDIR/libhello*.mpk | grep -P share/licenses/libhello[0-9]*/copyright
+tar -tvf $MMPACK_BUILD_OUTDIR/libhello*.mpk | grep -P share/licenses/libhello[0-9]*/dummy
 
 # check that the package files are well formed
 pushd $TMP_BUILD
-tar -xvf $XDG_DATA_HOME/mmpack-packages/hello*src.tar.*
+tar -xvf $MMPACK_BUILD_OUTDIR/hello*src.tar.*
 cmp hello-world.c $SRC_PKG/hello-world.c
 cmp head-libexec-world.c $SRC_PKG/head-libexec-world.c
 cmp shell-exec.py $SRC_PKG/shell-exec.py

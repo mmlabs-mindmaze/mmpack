@@ -49,7 +49,7 @@ mmpack-build --debug
 popd
 
 
-pushd $XDG_DATA_HOME/mmpack-packages &> /dev/null
+pushd $MMPACK_BUILD_OUTDIR &> /dev/null
 
 # check that the expected files are created
 ls hello_1.0.0*.mmpack-manifest
