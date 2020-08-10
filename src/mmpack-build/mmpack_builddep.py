@@ -24,6 +24,7 @@ def parse_option(argv):
     parse options
     """
     parser = ArgumentParser(description=__doc__,
+                            prog='mmpack-build ' + CMD,
                             formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument('specfile', type=str, nargs='?',
                         default=find_project_root_folder() + '/mmpack/specs',
