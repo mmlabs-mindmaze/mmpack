@@ -17,6 +17,7 @@ def main(argv):
     """
     # pylint: disable=invalid-name
     parser = ArgumentParser(description=__doc__,
+                            prog='mmpack-build ' + CMD,
                             formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument('--wipe',
                         action='store_true',
