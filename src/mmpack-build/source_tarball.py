@@ -140,13 +140,14 @@ class SourceTarball:
         # declare class instance attributes
         self.srctar = None
         self.tag = tag
-        self.name = None
+        self._method = method
         self._path_url = path_url
         self._kwargs = kwargs
         self._builddir = Workspace().tmpdir()
         self._srcdir = None
         self._vcsdir = None
         self._outdir = outdir if outdir else Workspace().outdir()
+        self._prj_src = None
         self.trace = dict()
 
         # Fetch sources following the specified method and move them to the
@@ -155,18 +156,10 @@ class SourceTarball:
                .format(self._builddir))
         self._create_srcdir(method)
 
-        # If the input was a mmpack source package, there is nothing else to do
-        if method == 'srcpkg':
-            name, _ = get_name_version_from_srcdir(self._srcdir)
-            self.name = name
-            self.srctar = path_url
-            return
-
         # Try generate the source from the root folder of project
         try:
-            prj_src = self._gen_project_sources()
-            self.name = prj_src.name
-            self.srctar = prj_src.tarball
+            self._prj_src = self._gen_project_sources()
+            self.srctar = self._prj_src.tarball
         except FileNotFoundError:  # raised if srcdir lack mmpack specs
             return
 
@@ -184,14 +177,21 @@ class SourceTarball:
 
         # extract minimal metadata from package
         name, version = get_name_version_from_srcdir(srcdir)
-
-        self._process_source_strap(srcdir)
-        self._store_src_orig_tracing(srcdir)
-
-        # Create source package tarball
         srctar = '{0}/{1}_{2}_src.tar.xz'.format(self._outdir, name, version)
-        dprint('Building source tarball ' + srctar)
-        create_tarball(srcdir, srctar, 'xz')
+
+        if self._method == 'srcpkg':
+            # If the input was a mmpack source package, there is nothing else
+            # to do besides copy the mmpack source tarball
+            dprint('Copying mmpack source tarball ' + self._path_url)
+            shutil.copy(self._path_url, srctar)
+        else:
+            self._process_source_strap(srcdir)
+            self._store_src_orig_tracing(srcdir)
+
+            # Create source package tarball
+            dprint('Building source tarball ' + srctar)
+            create_tarball(srcdir, srctar, 'xz')
+
         return ProjectSource(name=name,
                              version=version,
                              tarball=srctar,
@@ -225,11 +225,8 @@ class SourceTarball:
         """
         # If the extracted/cloned data contains a mmpack packaging at the root
         # folder, this is the only project to return
-        if self.srctar:
-            yield ProjectSource(name=self.name,
-                                version=self.tag,
-                                tarball=self.srctar,
-                                srcdir=self._srcdir)
+        if self._prj_src:
+            yield self._prj_src
             return
 
         try:
