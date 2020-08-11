@@ -103,6 +103,14 @@ def _git_clone(url: str, worktree: str, gitdir: str = None,
                 gitdir, worktree)
 
 
+def _git_modified_files(gitdir: str, commit: str = 'HEAD') -> List[str]:
+    """
+    get list of file modified by check
+    """
+    args = ['diff-tree', '--no-commit-id', '--name-only', '-r', commit]
+    return _git_subcmd(args, gitdir).splitlines()
+
+
 # pylint: disable=too-many-instance-attributes
 class SourceTarball:
     """
@@ -234,12 +242,21 @@ class SourceTarball:
             yield self._prj_src
             return
 
+        # List subdirs listed in projects.mmpack if any
         try:
             prjlist_path = self._srcdir + '/projects.mmpack'
             subdirs = [l.strip() for l in open(prjlist_path, 'rt')]
         except FileNotFoundError:
             return
 
+        # Filter subdirs if requested in named argument build_only_modified
+        only_modified = self._kwargs.get('build_only_modified', False)
+        if only_modified and self._method == 'git':
+            files = _git_modified_files(self._vcsdir)
+            subdirs = [d for d in subdirs
+                       if any([f.startswith(d + '/') for f in files])]
+
+        # iterate over project subdirs and generate the source package
         for subdir in subdirs:
             yield self._gen_project_sources(subdir)
 

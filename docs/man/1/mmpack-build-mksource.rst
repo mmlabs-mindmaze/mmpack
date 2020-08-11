@@ -31,7 +31,8 @@ directory is considered to be a mmpack multi projects. In that case, this file
 is assumed to contains the list (element in each line) of path to an individual
 mmpack packaging specification (path relative to folder containing
 **mmpack.projects**). **mksource** subcommand will then generate the source
-package of each listed subprojects.
+package of each listed subprojects (unless **--multiproject-only-modified** is
+provided to options).
 
 For the each mmpack source package produced, the command will print on a line
 of standard output the name of the project, the version packaged and the path
@@ -66,6 +67,11 @@ OPTIONS
 
   For the other type of build, *tag* will be the string which will be used to
   identify a package build in the cache folder.
+
+--multiproject-only-modified
+  If specified, in case of mmpack multi projects, the command will generate the
+  mmpack source package of only subfolders modified by the git commit being
+  checked out.
 
 --help, -h
   Show help and exit

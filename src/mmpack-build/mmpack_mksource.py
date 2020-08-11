@@ -36,6 +36,10 @@ def add_mksource_parser_argument(parser: ArgumentParser):
                         help='project tag')
     parser.add_argument('path_or_url', nargs='?',
                         help='path or url to project providing mmpack package')
+    parser.add_argument('--multiproject-only-modified',
+                        action='store_true', dest='only_modified',
+                        help='indicate that the only projects to build are '
+                             'those modified by the git commit')
 
 
 def parse_options(argv):
@@ -54,6 +58,7 @@ def main(argv):
     entry point to create a mmpack package
     """
     args = parse_options(argv[1:])
-    srctarball = SourceTarball(args.method, args.path_or_url, args.tag)
+    srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
+                               build_only_modified=args.only_modified)
     for prj in srctarball.iter_mmpack_srcs():
         print('{} {} {}'.format(prj.name, prj.version, prj.tarball))
