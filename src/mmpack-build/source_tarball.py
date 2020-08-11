@@ -226,8 +226,9 @@ class SourceTarball:
         # If the extracted/cloned data contains a mmpack packaging at the root
         # folder, this is the only project to return
         if self.srctar:
-            yield ProjectSource(name=self.name,
-                                version=self.tag,
+            name, version = get_name_version_from_srcdir(self._srcdir)
+            yield ProjectSource(name=name,
+                                version=version,
                                 tarball=self.srctar,
                                 srcdir=self._srcdir)
             return
