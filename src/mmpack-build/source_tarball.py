@@ -140,7 +140,6 @@ class SourceTarball:
         # declare class instance attributes
         self.srctar = None
         self.tag = tag
-        self.name = None
         self._path_url = path_url
         self._kwargs = kwargs
         self._builddir = Workspace().tmpdir()
@@ -157,15 +156,12 @@ class SourceTarball:
 
         # If the input was a mmpack source package, there is nothing else to do
         if method == 'srcpkg':
-            name, _ = get_name_version_from_srcdir(self._srcdir)
-            self.name = name
             self.srctar = path_url
             return
 
         # Try generate the source from the root folder of project
         try:
             prj_src = self._gen_project_sources()
-            self.name = prj_src.name
             self.srctar = prj_src.tarball
         except FileNotFoundError:  # raised if srcdir lack mmpack specs
             return
