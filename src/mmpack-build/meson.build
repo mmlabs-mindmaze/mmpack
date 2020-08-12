@@ -35,6 +35,7 @@ mmpack_build_sources = files(
         'mm_version.py',
         'workspace.py',
         'xdg.py',
+        'yaml_dumper.py',
 )
 
 mmpackbuilddir = python.get_install_dir() / 'mmpackbuild'
