@@ -85,6 +85,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/mm_version.py \
 	src/mmpack-build/workspace.py \
 	src/mmpack-build/xdg.py \
+	src/mmpack-build/yaml_dumper.py \
 	$(eol)
 
 mmpack_db_service = \
