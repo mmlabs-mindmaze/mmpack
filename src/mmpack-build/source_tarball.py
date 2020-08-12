@@ -68,8 +68,10 @@ def _git_subcmd(subcmd: List[str], gitdir: str = None, worktree: str = None,
     return shell(args, env=env).strip()
 
 
+# pylint: disable=too-many-arguments
 def _git_clone(url: str, worktree: str, gitdir: str = None,
-               refspec: str = None, git_ssh_cmd: str = None):
+               refspec: str = None, git_ssh_cmd: str = None,
+               fetch_only_commit: bool = True):
     """
     create a shallow clone of a git repo
 
@@ -79,6 +81,8 @@ def _git_clone(url: str, worktree: str, gitdir: str = None,
         gitdir: optional folder that will hold the git repository.
         refspec: tag, branch, commit hash to check out
         git_ssh_cmd: optional, ssh cmd to use when cloning git repo through ssh
+        fetch_only_commit: if true, limit fetching to the commit specified by
+            refspec, otherwise, fetch whole git history
     """
     if os.path.isdir(url):
         url = 'file://' + os.path.abspath(url)
@@ -94,9 +98,11 @@ def _git_clone(url: str, worktree: str, gitdir: str = None,
     # Create and init git repository
     _git_subcmd(['init', '--quiet'], gitdir)
 
-    # Fetch git refspec
-    _git_subcmd(['fetch', '--quiet', '--depth=2', url, refspec],
-                gitdir, worktree, git_ssh_cmd)
+    # Fetch git refspec (or whole history)
+    fetch_args = ['fetch', '--quiet']
+    fetch_args += ['--depth=2'] if fetch_only_commit else ['--tags']
+    fetch_args += [url, refspec]
+    _git_subcmd(fetch_args, gitdir, worktree, git_ssh_cmd)
 
     # Checkout the specified refspec
     _git_subcmd(['checkout', '--quiet', '--detach', 'FETCH_HEAD'],
@@ -157,6 +163,7 @@ class SourceTarball:
         self._outdir = outdir if outdir else Workspace().outdir()
         self._prj_src = None
         self.trace = dict()
+        self._update_version = kwargs.get('version_from_vcs', False)
 
         # Fetch sources following the specified method and move them to the
         # temporary source build folder
@@ -270,22 +277,46 @@ class SourceTarball:
         file_path = os.path.join(srcdir, 'mmpack/src_orig_tracing')
         yaml_serialize(data, file_path, use_block_style=True)
 
+    def _update_version_from_git(self):
+        """
+        rewrite the version of the project using git describe. This will work
+        and is meaningful only if there is a mmapck/specs at the root directory
+        of project, ie, it is not a multi project.
+        """
+        # Try load the specs of the project and describe from the tag named
+        # after the version in the specs. In case of no packaging or multi
+        # project, this will fail. Just return in that case.
+        try:
+            specs_path = os.path.join(self._srcdir, 'mmpack/specs')
+            specs = yaml_load(specs_path)
+            tag = specs['general']['version']
+            version = _git_subcmd(['describe', '--match', tag], self._vcsdir)
+            specs['general']['version'] = version
+            yaml_serialize(specs, specs_path, use_block_style=True)
+        except (FileNotFoundError, ShellException):
+            pass
+
     def _create_srcdir_from_git(self):
         """
         Create a source package folder from git clone
         """
         self._vcsdir = self._builddir + '/vcsdir.git'
         git_ssh_cmd = self._kwargs.get('git_ssh_cmd')
+
         _git_clone(url=self._path_url,
                    worktree=self._srcdir,
                    gitdir=self._vcsdir,
                    refspec=self.tag,
-                   git_ssh_cmd=git_ssh_cmd)
+                   git_ssh_cmd=git_ssh_cmd,
+                   fetch_only_commit=not self._update_version)
 
         # Get tag name if not set yet (use current branch)
         if not self.tag:
             self.tag = _git_subcmd(['rev-parse', '--abbrev-ref', 'HEAD'],
                                    self._vcsdir)
+
+        if self._update_version:
+            self._update_version_from_git()
 
         commit_ref = _git_subcmd(['rev-parse', 'HEAD'], self._vcsdir)
         self.trace['pkg'].update({'url': self._path_url, 'ref': commit_ref})

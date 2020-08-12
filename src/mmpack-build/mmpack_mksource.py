@@ -40,6 +40,9 @@ def add_mksource_parser_argument(parser: ArgumentParser):
                         action='store_true', dest='only_modified',
                         help='indicate that the only projects to build are '
                              'those modified by the git commit')
+    parser.add_argument('--update-version-from-vcs',
+                        action='store_true', default=False,
+                        help='update version from commits since version tag')
 
 
 def parse_options(argv):
@@ -59,6 +62,7 @@ def main(argv):
     """
     args = parse_options(argv[1:])
     srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
-                               build_only_modified=args.only_modified)
+                               build_only_modified=args.only_modified,
+                               version_from_vcs=args.update_version_from_vcs)
     for prj in srctarball.iter_mmpack_srcs():
         print('{} {} {}'.format(prj.name, prj.version, prj.tarball))
