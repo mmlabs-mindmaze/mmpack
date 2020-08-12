@@ -124,6 +124,12 @@ def batch_updates(repo: Repo):
         elif cmd == 'ROLLBACK':
             repo.rollback_changes()
             repo.begin_changes()
+        elif cmd == 'BEGIN_CHANGES':
+            repo.begin_changes()
+        elif cmd == 'COMMIT_CHANGES':
+            repo.commit_changes()
+        elif cmd == 'ROLLBACK_CHANGES':
+            repo.rollback_changes()
         else:
             success = False
             errmsg = 'unknown command'
