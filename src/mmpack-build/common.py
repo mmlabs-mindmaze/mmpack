@@ -19,6 +19,8 @@ from typing import Union, Dict, Tuple, List, Set
 import urllib3
 import yaml
 
+from .yaml_dumper import MMPackDumper
+
 CONFIG = {'debug': True, 'verbose': True}
 LOGGER = None
 
@@ -216,7 +218,8 @@ def yaml_serialize(obj: Union[list, dict], filename: str,
         yaml.dump(obj, outfile,
                   default_flow_style=default_flow_style,
                   allow_unicode=True,
-                  indent=4)
+                  indent=4,
+                  Dumper=MMPackDumper)
     dprint('wrote {0}'.format(filename))
 
 
