@@ -62,14 +62,23 @@ The standard input is read line by line. In each line a command can be issued
       add** were called. However changes are not yet visible in the repository
       folder.
 
-   COMMIT
+   BEGIN_CHANGES
+      start staging changes that will be applied to repository
+
+   COMMIT_CHANGES
       commit the changes that have been staged so far. The content of the
       repository folder will then show the changes. This command cannot fail.
-
-   ROLLBACK
+      
+   ROLLBACK_CHANGES
       cancel the stagged changes and revert internal state to the one after the
       last commit or the initial state when **mmpack-modifyrepo batch** was
       called. This command cannot fail.
+
+   COMMIT
+      combines COMMIT_CHANGES with BEGIN_CHANGES
+
+   ROLLBACK
+      combines ROLLBACK_CHANGES with BEGIN_CHANGES
 
 For each line of command issued, when the operation is finished, the result is
 reported on one line of standard output with **OK** in case of success, or
