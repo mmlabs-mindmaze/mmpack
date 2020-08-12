@@ -73,6 +73,10 @@ OPTIONS
   mmpack source package of only subfolders modified by the git commit being
   checked out.
 
+--update-version-from-vcs
+  update version stored in the generated source package as update since tag
+  named after the version in the specs.
+
 --help, -h
   Show help and exit
 
