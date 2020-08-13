@@ -1,9 +1,15 @@
-mmpack (0.4.0) UNRELEASED; urgency=medium
+mmpack (0.4.0) unstable; urgency=medium
 
   * Remove mmpack-gerrit-builder-* packages: ci server is provided on external
     project mmpack-ci-server.
+  * add mksource command to mmpack-build
+  * Add --update-version-from-vcs option to generate version of source package
+    from git
+  * Add support for multi mmpack projects in one repository
+  * mmpack-build allow to specify from cmdline output, build and cache dir
+  * mmpack source now makes use of source-index of repo 
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Sun, 26 Jul 2020 12:01:51 +0200
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 13 Aug 2020 10:09:59 +0200
 
 mmpack (0.3.2) unstable; urgency=medium
 
