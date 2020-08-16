@@ -12,11 +12,18 @@ from collections import Counter, namedtuple
 from hashlib import sha256
 import logging
 import logging.handlers
+import platform
 import os
 import shutil
 import tarfile
 from typing import Union, Callable
 import yaml
+
+if platform.system() == 'Windows':
+    import msvcrt
+else:
+    import fcntl
+
 
 RELPATH_BINARY_INDEX = 'binary-index'
 RELPATH_SOURCE_INDEX = 'source-index'
@@ -137,6 +144,14 @@ def file_load(filename: str) -> dict:
     return srcindex
 
 
+def _create_empty_if_not_exist(filename: str):
+    """
+    Ensures filename exists, create it as empty if needed
+    """
+    if not os.path.isfile(filename):
+        open(filename, 'w+')
+
+
 class Repo:
     """
     This class model a repository.
@@ -164,13 +179,10 @@ class Repo:
         if not os.path.isdir(abs_path_repo):
             os.mkdir(abs_path_repo)
 
-        binindex_file = os.path.join(abs_path_repo, RELPATH_BINARY_INDEX)
-        srcindex_file = os.path.join(abs_path_repo, RELPATH_SOURCE_INDEX)
-        if not os.path.isfile(binindex_file):
-            open(binindex_file, 'w+')
-
-        if not os.path.isfile(srcindex_file):
-            open(srcindex_file, 'w+')
+        self.binindex_file = os.path.join(abs_path_repo, RELPATH_BINARY_INDEX)
+        self.srcindex_file = os.path.join(abs_path_repo, RELPATH_SOURCE_INDEX)
+        _create_empty_if_not_exist(self.binindex_file)
+        _create_empty_if_not_exist(self.srcindex_file)
 
         self.repo_dir = abs_path_repo
         self.working_dir = os.path.abspath(os.path.join(abs_path_repo,
@@ -178,13 +190,29 @@ class Repo:
         self.logger = _init_logger(os.path.join(self.repo_dir, LOG_FILE))
 
         self.arch = architecture
+        self.binindex = dict()
+        self.srcindex = dict()
+        self.count_src_refs = Counter()
+        self._reload_indices_from_files()
+        self.last_update = 0
+        self.lockfile = None
 
-        # binindex: dictionary of the packages mpk present on the database
-        self.binindex = yaml_load(binindex_file)
+        self.to_remove = set()
+        self.to_add = set()
+        self.backup = IndicesStates(srcindex=self.srcindex,
+                                    binindex=self.binindex,
+                                    counter=self.count_src_refs)
+        shutil.rmtree(self.working_dir, ignore_errors=True)
+
+
+    def _reload_indices_from_files(self):
+        self.last_update = os.stat(self.binindex_file).st_mtime
+
+        self.binindex = yaml_load(self.binindex_file)
         if self.binindex is None:
             self.binindex = dict()
-        # srcindex: dictionary of the sources present on the database
-        self.srcindex = file_load(srcindex_file)
+
+        self.srcindex = file_load(self.srcindex_file)
         if self.srcindex is None:
             self.srcindex = dict()
 
@@ -195,13 +223,6 @@ class Repo:
         for pkg_info in self.binindex.values():
             src_id = _srcid(pkg_info['source'], pkg_info['srcsha256'])
             self.count_src_refs[src_id] += 1
-
-        self.to_remove = set()
-        self.to_add = set()
-        self.backup = IndicesStates(srcindex=self.srcindex,
-                                    binindex=self.binindex,
-                                    counter=self.count_src_refs)
-        shutil.rmtree(self.working_dir, ignore_errors=True)
 
     def yaml_serialize(self, obj: Union[list, dict], filename: str) -> None:
         """
@@ -240,6 +261,16 @@ class Repo:
         if sha256sum(filepath) != package['sha256']:
             raise ValueError
 
+    def _lock_repo(self):
+        self.lockfile = open(os.path.join(self.repo_dir, 'lock'), 'w')
+        if platform.system() == 'Windows':
+            msvcrt.locking(self.lockfile.fileno(), msvcrt.LK_LOCK, 4096)
+        else:
+            fcntl.flock(self.lockfile.fileno(), fcntl.LOCK_EX)
+
+    def _unlock_repo(self):
+        self.lockfile.close()
+
     def _clear_change_data(self):
         self.to_add.clear()
         self.to_remove.clear()
@@ -247,6 +278,7 @@ class Repo:
                                     binindex=self.binindex,
                                     counter=self.count_src_refs)
         shutil.rmtree(self.working_dir)
+        self._unlock_repo()
 
     def begin_changes(self):
         """
@@ -254,6 +286,12 @@ class Repo:
         indices and counter are stored internally to be reverted later if
         necessary during a call to rollback_changes()
         """
+        self._lock_repo()
+
+        # Reload indices if attribute data is outdated
+        if self.last_update < os.stat(self.binindex_file).st_mtime:
+            self._reload_indices_from_files()
+
         self.backup = IndicesStates(srcindex=self.srcindex.copy(),
                                     binindex=self.binindex.copy(),
                                     counter=self.count_src_refs.copy())
@@ -286,6 +324,7 @@ class Repo:
             destination = os.path.join(self.repo_dir, filename)
             os.replace(source, destination)
 
+        self.last_update = os.stat(self.binindex_file).st_mtime
         self._clear_change_data()
 
     def _dump_indexes_working_dir(self, to_add: set):
@@ -300,10 +339,10 @@ class Repo:
             to_add: set to fill with packages that MUST be removed once we are
                     sure that the upload will be a sucess.
         """
-        srcindex_file = os.path.join(self.working_dir, RELPATH_SOURCE_INDEX)
-        file_serialize(self.srcindex, srcindex_file)
-        binindex_file = os.path.join(self.working_dir, RELPATH_BINARY_INDEX)
-        self.yaml_serialize(self.binindex, binindex_file)
+        file_serialize(self.srcindex,
+                       os.path.join(self.working_dir, RELPATH_SOURCE_INDEX))
+        self.yaml_serialize(self.binindex,
+                            os.path.join(self.working_dir, RELPATH_BINARY_INDEX))
 
         to_add.add(RELPATH_SOURCE_INDEX)
         to_add.add(RELPATH_BINARY_INDEX)
