@@ -23,8 +23,27 @@ class Provide:
         self.pkgdepends = None
         self.symbols = dict()
 
-    def _get_symbol(self, name: str):
-        return self.symbols.get(name)
+    def _get_symbol(self, name: str) -> Tuple[str, str]:
+        """
+        Look up for symbol name in the known symbols. It might be more advanced
+        that a simple dictionary lookup to accomodate complex case of provide
+        type where symbol name can be slightly different depending on the
+        platform. Hence it might be possible that the returned symbol name is
+        different from name passed in argument.
+
+        Args:
+            name: generic name to search in the known symbol
+
+        Returns:
+            Tuple of version string and full symbol name. If the symbol could
+            not have been found, (None, None) is returned.
+        """
+        version = self.symbols.get(name)
+        if not version:
+            return (None, None)
+
+        # In its base version, the lookup is a simple dictionary lookup
+        return (version, name)
 
     def add_symbols(self, symbols: Set[str],
                     version: Version = Version('any')) -> None:
@@ -67,18 +86,18 @@ class Provide:
         specs_symbols = pkg_specs.get('symbols', dict())
         for name, str_version in specs_symbols.items():
             # type conversion will raise an error if malformed
-            curr_version = self._get_symbol(name)
+            curr_version, symbol_name = self._get_symbol(name)
             if not curr_version:
                 raise ValueError('Specified symbol {0} not found '
                                  'in package files'.format(name))
 
             version = Version(str_version)
             if version <= curr_version:
-                self.symbols[name] = version
+                self.symbols[symbol_name] = version
             else:  # version > self.version:
                 raise ValueError('Specified version of symbol {0} ({1})'
                                  'is greater than current version ({2})'
-                                 .format(name, version, curr_version))
+                                 .format(symbol_name, version, curr_version))
 
         # if a specs file is provided, but is incomplete, display a warning
         diff = self._get_symbols_keys() - set(specs_symbols.keys())
