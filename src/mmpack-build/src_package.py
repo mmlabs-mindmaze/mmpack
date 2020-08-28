@@ -127,7 +127,7 @@ class SrcPackage:
         shutil.copyfile(srctar, new_srctar)
 
         self.src_tarball = new_srctar
-        self._spec_dir = path.dirname(unpackdir + '/mmpack')
+        self._spec_dir = unpackdir + '/mmpack'
 
     def pkgbuild_path(self) -> str:
         """
