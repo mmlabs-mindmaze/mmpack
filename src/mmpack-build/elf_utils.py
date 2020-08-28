@@ -4,7 +4,7 @@ helper module containing elf parsing functions
 """
 
 import os
-from typing import List
+from typing import List, Tuple
 
 from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
@@ -296,15 +296,15 @@ class ShlibProvide(Provide):
     """
     Specialized Provide class which strips the version part of the symbol name.
     """
-    def _get_symbol(self, name: str):
+    def _get_symbol(self, name: str) -> Tuple[str, str]:
         if name in self.symbols:
-            return self.symbols[name]
+            return (self.symbols[name], name)
 
         for fullname, version in self.symbols.items():
             if sym_basename(fullname) == name:
-                return version
+                return (version, fullname)
 
-        return None
+        return (None, None)
 
     def _get_symbols_keys(self):
         return {sym_basename(x) for x in self.symbols.keys()}
