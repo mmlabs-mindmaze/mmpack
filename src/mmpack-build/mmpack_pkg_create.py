@@ -71,7 +71,8 @@ def main(argv):
     """
     args = parse_options(argv[1:])
     srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
-                               build_only_modified=args.only_modified)
+                               build_only_modified=args.only_modified,
+                               version_from_vcs=args.update_version_from_vcs)
     for prj_src in srctarball.iter_mmpack_srcs():
         _build_mmpack_packages(prj_src.tarball, srctarball.tag,
                                prj_src.srcdir, args)
