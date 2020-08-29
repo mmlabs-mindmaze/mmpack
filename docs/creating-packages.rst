@@ -107,16 +107,24 @@ How to create a local repository using the package I created ?
 
    # assuming you did not change your config, the mmpack packages are created
    # in the following folder
-   REPO="$HOME/.local/share/mmpack-packages/"
+   PKG_FOLDER="$HOME/.local/share/mmpack-packages/"
+   REPO="$HOME/mmpack-repo"
+   ARCH=amd64-debian # amd64-windows for windows
 
-   mmpack-createrepo $REPO $REPO
+   for manifest in *.mmpack-manifest
+   do
+      mmpack-modifyrepo --path=$REPO --arch=$ARCH add $manifest
+   done
 
    # add the repository to your list of repositories by adding file://$REPO
    # to your mmpack config "repositories" list
    # It could look like this
-   cat ~/.config/mmpack-config.yaml
+   cat > ~/.config/mmpack-config.yaml <<EOF
    repositories:
-     - file:///home/gandalf/.local/share/mmpack-packages
+     - home-repo:
+        url: file:///home/gandalf/mmpack-repo
+        enabled: 1
+   EOF
 
 
 Managing repositories
