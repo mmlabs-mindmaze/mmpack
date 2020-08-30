@@ -143,8 +143,10 @@ List of fields to specify a package:
       Any text describing the package
  :files:
      List of built files to include into the package.
-     Follows the PCRE format.
-     e.g. ``.*\.so`` to include all the files with ``so`` extension
+     Follows the PCRE format. The regular expression will match the whole path
+     relatively to the prefix root.
+     e.g. ``.*\.so`` to include all the files with ``so`` extension,
+     ``bin/program(\.exe)?`` to include **program** executable.
 
 Note on the default packages
 ````````````````````````````
