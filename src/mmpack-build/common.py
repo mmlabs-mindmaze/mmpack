@@ -557,6 +557,6 @@ def extract_matching_set(pcre: str, str_set: Set[str]) -> Set[str]:
 
     """
     matching_re = re.compile(pcre)
-    matching_set = {f for f in str_set if matching_re.match(f)}
+    matching_set = {f for f in str_set if matching_re.fullmatch(f)}
     str_set.difference_update(matching_set)
     return matching_set
