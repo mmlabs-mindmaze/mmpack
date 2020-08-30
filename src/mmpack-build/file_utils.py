@@ -169,11 +169,9 @@ def is_manpage(filename: str) -> int:
         -1 on error
     """
     # eg matches:
-    #  - man/file.1
-    #  - /path/to/man/file.2
-    #  - man2/file.3
-    #  - man/man3/file.9
-    match = re.match(r'.*man\d?/.*(\d)', filename)
+    #  - share/man/man1/file.1
+    #  - share/man/man2/file.2
+    match = re.fullmatch(r'share/man/man\d?/.*\.(\d)', filename)
     if match:
         return int(match.groups(0)[0])
     return -1
