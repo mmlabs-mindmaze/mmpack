@@ -349,8 +349,9 @@ deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 deployment-test-clean:
 	@$(RM) -rvf deployment-test
 
-test-repo: tests/create-test-repo.sh deployment-test
-	$^ $@
+test-repo.timestamp: tests/create-test-repo.sh deployment-test
+	$(AM_V_GEN)$< $(builddir)/deployment-test $(builddir)/test-repo
+	@touch $@
 
 test-sysrepo.timestamp: tests/create-test-sysrepo.sh tests/test-packages
 	$(AM_V_GEN)$< $(builddir)/test-sysrepo true
@@ -362,7 +363,7 @@ test-packages.timestamp: tests/create-test-pkg.sh tests/test-packages
 
 noinst_PYTHON = tests/pytests.py
 
-check_DATA = deployment-test test-repo test-packages.timestamp test-sysrepo.timestamp
+check_DATA = deployment-test test-repo.timestamp test-packages.timestamp test-sysrepo.timestamp
 
 TESTS = \
 	tests/python-unittests.tap \
