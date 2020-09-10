@@ -1,3 +1,9 @@
+mmpack (0.4.1) unstable; urgency=medium
+
+  * Fix various bugs in mmpack-build
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 10 Sep 2020 12:40:13 +0200
+
 mmpack (0.4.0) unstable; urgency=medium
 
   * Remove mmpack-gerrit-builder-* packages: ci server is provided on external
