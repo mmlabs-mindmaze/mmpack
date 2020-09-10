@@ -1,5 +1,5 @@
 project('mmpack', 'c',
-        version: '0.4.0',
+        version: '0.4.1',
         license: 'GPL3',
         meson_version: '>= 0.49',
 )
