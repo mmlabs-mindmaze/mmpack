@@ -172,11 +172,12 @@ class SourceTarball:
         self._create_srcdir(method)
 
         # Try generate the source from the root folder of project
-        try:
-            self._prj_src = self._gen_project_sources()
-            self.srctar = self._prj_src.tarball
-        except FileNotFoundError:  # raised if srcdir lack mmpack specs
+        prj = self._gen_project_sources()
+        if not prj:  # None if srcdir lack mmpack specs
             return
+
+        self._prj_src = prj
+        self.srctar = self._prj_src.tarball
 
     def __del__(self):
         # If source build dir has been created and not detach, remove it at
@@ -191,7 +192,10 @@ class SourceTarball:
             srcdir += '/' + subdir
 
         # extract minimal metadata from package
-        name, version = get_name_version_from_srcdir(srcdir)
+        try:
+            name, version = get_name_version_from_srcdir(srcdir)
+        except FileNotFoundError:
+            return None
         srctar = '{0}/{1}_{2}_src.tar.xz'.format(self._outdir, name, version)
 
         # If the input was a mmpack source package, nothing to do besides copy
