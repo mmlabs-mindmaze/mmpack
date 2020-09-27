@@ -442,9 +442,12 @@ class SourceTarball:
             'tar': self._fetch_upstream_from_tar,
         }
 
-        # Remove left over of upstream of other projects
+        # Remove left over of upstream of other projects. Use if exists over
+        # rmtree(ignore_errors=True) to avoid hiding error different from
+        # inexisting folder.
         upstream_srcdir = self._get_unpacked_upstream_dir()
-        shutil.rmtree(upstream_srcdir)
+        if os.path.exists(upstream_srcdir):
+            shutil.rmtree(upstream_srcdir)
 
         # check that mandatory keys are present in sources-strap file
         missings_keys = {'method', 'url'}.difference(specs)
