@@ -405,6 +405,8 @@ class SourceTarball:
         gitref = _git_subcmd(['rev-parse', 'HEAD'], gitdir=gitdir)
         self.trace['upstream'].update({'url': url, 'ref': gitref})
 
+        shutil.rmtree(gitdir)
+
     def _fetch_upstream_from_tar(self, specs: Dict[str, str]):
         """
         Fetch upstream sources from remote tar
