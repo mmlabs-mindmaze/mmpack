@@ -198,6 +198,13 @@ class MMPackBuildHook(BaseHook):
             # Remove the remainings
             shutil.rmtree(pydir)
 
+        # Transform versioned egg-info to unversioned one
+        egginfo_re = re.compile('(.*)-py3(?:\.\d\w*)*.egg-info$')
+        for eggdir in glob(_MMPACK_REL_PY_SITEDIR + '/*.egg-info'):
+            match = egginfo_re.fullmatch(eggdir)
+            if match:
+                os.rename(eggdir, match.group(1) + '.egg-info')
+
     def dispatch(self, data: DispatchData):
         for file in data.unassigned_files.copy():
             try:
