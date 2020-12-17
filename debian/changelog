@@ -1,3 +1,9 @@
+mmpack (0.4.2) unstable; urgency=medium
+
+  * Fix detection of dependency on installed mmpack python packages
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 17 Dec 2020 19:12:21 +0100
+
 mmpack (0.4.1) unstable; urgency=medium
 
   * Fix various bugs in mmpack-build
