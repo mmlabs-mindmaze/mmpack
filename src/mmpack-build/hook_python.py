@@ -17,6 +17,7 @@ from . file_utils import is_python_script
 from . package_info import PackageInfo, DispatchData
 from . provide import Provide, ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
+from . workspace import Workspace
 
 
 # example of matches:
@@ -97,6 +98,12 @@ def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
     script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
     cmd = ['python3', script, '--site-path='+sitedir]
     cmd += [f for f in pkg.files if is_python_script(f)]
+
+    # run in prefix if one is being used, this allows to establish dependency
+    # against installed mmpack packages
+    wrk = Workspace()
+    if wrk.prefix:
+        cmd = [wrk.mmpack_bin(), '--prefix='+wrk.prefix, 'run'] + cmd
 
     cmd_output = shell(cmd)
     return set(cmd_output.split())
