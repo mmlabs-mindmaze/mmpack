@@ -8,6 +8,7 @@ import os
 import re
 import shutil
 from collections import namedtuple
+from email.parser import Parser
 from glob import glob
 from typing import Set, Dict, List
 
@@ -41,7 +42,7 @@ from . workspace import Workspace
 #               => None
 _PKG_REGEX = re.compile(
     r'((?:usr/|mingw64/)?lib/python3(?:\.\d)?/(?:dist|site)-packages)'
-    r'/_?([\w_]+)([^/]*)'
+    r'/_?([\w-]+)([^/]*)'
 )
 
 
@@ -51,6 +52,10 @@ _MMPACK_REL_PY_SITEDIR = 'lib/python3/site-packages'
 
 
 PyNameInfo = namedtuple('PyNameInfo', ['pyname', 'sitedir', 'is_egginfo'])
+
+
+def _parse_metadata(filename: str) -> dict:
+    return dict(Parser().parse(open(filename)))
 
 
 def _parse_py3_filename(filename: str) -> PyNameInfo:
@@ -72,16 +77,13 @@ def _parse_py3_filename(filename: str) -> PyNameInfo:
         raise FileNotFoundError
 
     grps = res.groups()
-    is_egg = grps[2].endswith('.egg-info')
-    return PyNameInfo(pyname=grps[1], sitedir=grps[0], is_egginfo=is_egg)
 
+    sitedir = grps[0]
+    name = grps[1]
+    ext = grps[2]
 
-def _mmpack_pkg_from_pyimport_name(pyimport_name: str):
-    """
-    Return the name of the mmpack package that should provide the
-    `pyimport_name` passed in argument.
-    """
-    return 'python3-' + pyimport_name.lower()
+    is_egg = ext.endswith('.egg-info')
+    return PyNameInfo(pyname=name, sitedir=sitedir, is_egginfo=is_egg)
 
 
 def _gen_pysymbols(pyimport_name: str, pkg: PackageInfo,
@@ -107,6 +109,53 @@ def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
 
     cmd_output = shell(cmd)
     return set(cmd_output.split())
+
+
+class _PyPkg:
+    def __init__(self, toplevel: str):
+        self.files = set()
+        self.name = None
+        self.toplevel = toplevel
+        self.only_metadata = True
+
+    def add(self, filename: str, is_metadata: False):
+        """
+        Register an installed file in python package
+        """
+        self.only_metadata = self.only_metadata and is_metadata
+        self.files.add(filename)
+
+    def update_metada(self):
+        """
+        Compute metadata from registered files
+        """
+        for filename in self.files:
+            if filename.endswith('.egg-info') \
+               or filename.endswith('.egg-info/PKG-INFO'):
+                self.name = _parse_metadata(filename)['Name']
+
+            if filename.endswith('.egg-info/top_level.txt'):
+                self.toplevel = open(filename).read().strip()
+
+    def merge_pkg(self, pypkg):
+        """
+        Merge registered file of 2 python package and update their metadata
+        accordingly
+        """
+        self.files.update(pypkg.files)
+        self.only_metadata = self.only_metadata and pypkg.only_metadata
+        if not self.name:
+            self.name = pypkg.name
+
+    def mmpack_pkgname(self) -> str:
+        """
+        Return the name of the mmpack package python package
+        """
+        name = self.name if self.name else self.toplevel
+        name = name.lower().replace('_', '-')
+        if name.startswith('python-'):
+            name = name[len('python-'):]
+        return 'python3-' + name
 
 
 #####################################################################
@@ -213,18 +262,37 @@ class MMPackBuildHook(BaseHook):
                 os.rename(eggdir, match.group(1) + '.egg-info')
 
     def dispatch(self, data: DispatchData):
+        pypkgs = {}
         for file in data.unassigned_files.copy():
             try:
                 info = _parse_py3_filename(file)
-                mmpack_pkgname = _mmpack_pkg_from_pyimport_name(info.pyname)
-                pkg = data.assign_to_pkg(mmpack_pkgname, {file})
-                if pkg.description:
-                    continue
-
-                pkg.description = '{}\nThis contains the python3 package {}'\
-                                  .format(self._src_description, info.pyname)
+                pypkg = pypkgs.setdefault(info.pyname, _PyPkg(info.pyname))
+                pypkg.add(file, info.is_egginfo)
             except FileNotFoundError:
                 pass
+
+        # Read python package metadata file and merge together package matching
+        # the toplevel field
+        for key, pypkg in pypkgs.copy().items():
+            pypkg.update_metada()
+            if pypkg.toplevel != key:
+                pypkgs.pop(key)
+                pypkgs[pypkg.toplevel].merge_pkg(pypkg)
+
+        pkglist = list(pypkgs.values())
+        if len([p for p in pkglist if not p.only_metadata]) == 1:
+            for pypkg in pkglist[1:]:
+                pkglist[0].merge_pkg(pypkg)
+            pkglist = [pkglist[0]]
+
+        for pypkg in pkglist:
+            pkgname = pypkg.mmpack_pkgname()
+            pkg = data.assign_to_pkg(pkgname, pypkg.files)
+            if pkg.description:
+                continue
+
+            pkg.description = '{}\nThis contains the python3 package {}'\
+                              .format(self._src_description, pypkg.name)
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
