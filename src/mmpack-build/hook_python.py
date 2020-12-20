@@ -256,7 +256,7 @@ class MMPackBuildHook(BaseHook):
                                    .format(pyname, sitedir))
 
             provide = Provide(pyname)
-            provide.pkgdepends = _mmpack_pkg_from_pyimport_name(pyname)
+            provide.pkgdepends = pkg.name
             provide.add_symbols(symbols, pkg.version)
             py3_provides.add(provide)
 
