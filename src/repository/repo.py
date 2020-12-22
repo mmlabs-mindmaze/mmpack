@@ -363,6 +363,32 @@ class Repo:
         to_add.add(RELPATH_SOURCE_INDEX)
         to_add.add(RELPATH_BINARY_INDEX)
 
+    def _find_src_id(self, srcname: str, version: str) -> str:
+        for srcid, srcinfo in self.srcindex.items():
+            if srcinfo['name'] == srcname and srcinfo['version'] == version:
+                return srcid
+
+        return None
+
+    def _remove_binpkg(self, pkginfo: dict, to_remove: set):
+        to_remove.add(pkginfo['filename'])
+        src_id = _srcid(pkginfo['source'], pkginfo['srcsha256'])
+        self.count_src_refs[src_id] -= 1
+        # If associated source package has no binary package remove it
+        if self.count_src_refs[src_id] == 0:
+            srcinfo = self.srcindex.pop(src_id)
+            to_remove.add(srcinfo['filename'])
+            self.count_src_refs.pop(src_id)
+
+    def _prepare_remove(self, src_id: str, to_remove: set):
+        dropped_pkgnames = set()
+        for pkgname, pkginfo in self.binindex.items():
+            self._remove_binpkg(pkginfo, to_remove)
+            dropped_pkgnames.add(pkgname)
+
+        for pkgname in pkgnames:
+            self.binindex.pop(pkgname)
+
     def _prepare_upload(self, manifest: dict, to_remove: set, to_add: set):
         """
         Adds to the binary-index and to the source-index of the repository the
@@ -392,7 +418,6 @@ class Repo:
                     sure that the upload will be a sucess.
         """
         # add src entry
-        self._check_hash(manifest['source'])
         # source id is name_srcsha256
         src_id = _srcid(manifest['name'], manifest['source']['sha256'])
         self.srcindex[src_id] = {
@@ -413,14 +438,7 @@ class Repo:
             # Remove previous binary package entry if any
             prev_pkginfo = self.binindex.get(pkg_name)
             if prev_pkginfo:
-                to_remove.add(prev_pkginfo['filename'])
-                prev_id = _srcid(prev_pkginfo['source'],
-                                 prev_pkginfo['srcsha256'])
-                self.count_src_refs[prev_id] -= 1
-                # If previous source package has not binary package remove it
-                if self.count_src_refs[prev_id] == 0:
-                    to_remove.add(self.srcindex[prev_id]['filename'])
-                    self.srcindex.pop(prev_id)
+                self._remove_binpkg(prev_pkginfo)
 
             # Add new binary package entry
             buf = _info_mpk(os.path.join(self.working_dir, pkginfo['file']))
@@ -450,6 +468,9 @@ class Repo:
             manifest = yaml_load(manifest_file)
             mv_op = os.replace if remove_upload else shutil.copy
             self._mv_files_working_dir(manifest_file, manifest, mv_op)
+
+            self._check_hash(manifest['source'])
+            src_id = self._find_src_id(manifest)
 
             # Update the binary-index and the source-index with the new
             # packages and upload binary packages and remove the binary
