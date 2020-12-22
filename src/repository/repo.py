@@ -16,7 +16,7 @@ import logging.handlers
 import os
 import shutil
 import tarfile
-from typing import Union, Callable
+from typing import Union, Callable, Set
 import yaml
 
 
@@ -363,6 +363,60 @@ class Repo:
         to_add.add(RELPATH_SOURCE_INDEX)
         to_add.add(RELPATH_BINARY_INDEX)
 
+    def _matching_srcids(self, srcname: str = None, version: str = None,
+                         srcsha256: str = None) -> Set[str]:
+        """
+        Get the set of source package id that match the passed criteria
+        """
+        srcids = set()
+
+        for srcid, srcinfo in self.srcindex.items():
+            if srcname and srcinfo['name'] != srcname:
+                continue
+
+            if version and srcinfo['version'] != version:
+                continue
+
+            if srcsha256 and srcinfo['sha256'] != srcsha256:
+                continue
+
+            srcids.add(srcid)
+
+        return srcids
+
+    def _remove_srcpkg(self, src_id: str, to_remove: str):
+        srcinfo = self.srcindex.pop(src_id)
+        to_remove.add(srcinfo['filename'])
+        self.count_src_refs.pop(src_id)
+
+    def _remove_binpkg(self, pkg_name: str, to_remove: set,
+                       ignore_missing: bool = False):
+        """
+        Remove binary package from index and stage package file removal. If it
+        were the last package referencing a source package, the source package
+        will be removed as well.
+        """
+        pkginfo = self.binindex.pop(pkg_name, None)
+        if not pkginfo:
+            if not ignore_missing:
+                raise ValueError(f'package {pkg_name} not present')
+            return
+
+        to_remove.add(pkginfo['filename'])
+        src_id = _srcid(pkginfo['source'], pkginfo['srcsha256'])
+        self.count_src_refs[src_id] -= 1
+        # If associated source package has no binary package remove it
+        if self.count_src_refs[src_id] == 0:
+            self._remove_srcpkg(src_id, to_remove)
+
+    def _remove_src_and_bin_pkgs(self, src_id: str, to_remove: set):
+        # Remove all binary packages associated to the source package. The
+        # associated source package will be removed upon the last binary
+        # package removal
+        for pkgname, pkginfo in list(self.binindex.items()):
+            if pkginfo['srcsha256'] == src_id:
+                self._remove_binpkg(pkgname, to_remove)
+
     def _prepare_upload(self, manifest: dict, to_remove: set, to_add: set):
         """
         Adds to the binary-index and to the source-index of the repository the
@@ -392,7 +446,6 @@ class Repo:
                     sure that the upload will be a sucess.
         """
         # add src entry
-        self._check_hash(manifest['source'])
         # source id is name_srcsha256
         src_id = _srcid(manifest['name'], manifest['source']['sha256'])
         self.srcindex[src_id] = {
@@ -405,22 +458,13 @@ class Repo:
         to_add.add(manifest['source']['file'])
 
         # Add binary package entries
-        for pkg_name, pkginfo in manifest['binpkgs'][self.arch].items():
+        for pkg_name, pkginfo in list(manifest['binpkgs'][self.arch].items()):
             self._check_hash(pkginfo)
             self.count_src_refs[src_id] += 1
             to_add.add(pkginfo['file'])
 
             # Remove previous binary package entry if any
-            prev_pkginfo = self.binindex.get(pkg_name)
-            if prev_pkginfo:
-                to_remove.add(prev_pkginfo['filename'])
-                prev_id = _srcid(prev_pkginfo['source'],
-                                 prev_pkginfo['srcsha256'])
-                self.count_src_refs[prev_id] -= 1
-                # If previous source package has not binary package remove it
-                if self.count_src_refs[prev_id] == 0:
-                    to_remove.add(self.srcindex[prev_id]['filename'])
-                    self.srcindex.pop(prev_id)
+            self._remove_binpkg(pkg_name, to_remove, ignore_missing=True)
 
             # Add new binary package entry
             buf = _info_mpk(os.path.join(self.working_dir, pkginfo['file']))
@@ -450,6 +494,15 @@ class Repo:
             manifest = yaml_load(manifest_file)
             mv_op = os.replace if remove_upload else shutil.copy
             self._mv_files_working_dir(manifest_file, manifest, mv_op)
+            self._check_hash(manifest['source'])
+
+            # Remove previous source and binary package if matching source name
+            # and version exist: this means that a rebuild is buing uploaded,
+            # hence we need to remove the previous build
+            name = manifest['name']
+            version = manifest['version']
+            for src_id in self._matching_srcids(srcname=name, version=version):
+                self._remove_src_and_bin_pkgs(src_id, self.to_remove)
 
             # Update the binary-index and the source-index with the new
             # packages and upload binary packages and remove the binary
