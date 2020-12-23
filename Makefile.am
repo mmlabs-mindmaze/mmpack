@@ -52,7 +52,7 @@ EXTRA_DIST += \
 	src/repository/mmpack-modifyrepo.py.in \
 	$(eol)
 
-mmpackbuilddir = $(pythondir)/mmpack_build
+mmpackbuilddir = $(pkgdatadir)/mmpack_build
 mmpackbuild_PYTHON =\
 	src/mmpack-build/__init__.py \
 	src/mmpack-build/__main__.py \
@@ -102,14 +102,14 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 .PHONY: pycodestyle
 pycodestyle: deployment-test
-	pycodestyle --show-source deployment-test$(pythondir)/mmpack_build \
+	pycodestyle --show-source deployment-test$(mmpackbuilddir) \
 	                          deployment-test$(pkgdatadir)/*.py \
 	                          deployment-test$(bindir)/mmpack-modifyrepo
 
 .PHONY: pylint
 pylint: devtools/pylint-config deployment-test
-	$(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(pythondir)/mmpack_build deployment-test$(pkgdatadir)/*.py
-	PYTHONPATH=deployment-test$(pythondir):deployment-test$(pkgdatadir) $(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(bindir)/mmpack-modifyrepo
+	$(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(mmpackbuilddir) deployment-test$(pkgdatadir)/*.py
+	PYTHONPATH=deployment-test$(pkgdatadir) $(PYLINT) --jobs=0 --disable=locally-disabled --rcfile=$< deployment-test$(bindir)/mmpack-modifyrepo
 
 .PHONY: syntax
 syntax: pycodestyle pylint
@@ -282,6 +282,7 @@ src/repository/mmpack-modifyrepo: src/repository/mmpack-modifyrepo.py.in Makefil
 src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
 	$(AM_V_GEN)$(SED) -e 's,@bindir[@],$(bindir),g' \
+		-e 's,@bindir_to_pydir[@],$(shell realpath -m --relative-to=$(bindir) $(mmpackbuilddir)),g' \
 		-e 's,@python_install_dir[@],$(pythondir),g' < $< > $@
 
 #

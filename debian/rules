@@ -27,5 +27,5 @@ override_dh_install:
 	dh_install -X.la --fail-missing
 
 override_dh_python3:
-	dh_python3 -ppython3-mmpack-build --requires=3rdparty-python --depends-section=mmpack-build
+	dh_python3 -pmmpack-build --requires=3rdparty-python --depends-section=mmpack-build /usr/share/mmpack/mmpack_build
 	dh_python3 -pmmpack-repo-tools --requires=3rdparty-python --depends-section=mmpack-repo
