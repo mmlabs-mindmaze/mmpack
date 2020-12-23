@@ -219,6 +219,10 @@ dist_license_DATA = \
 
 dist_pkgdata_DATA = \
 	src/mmpack/prompt.bash \
+	$(eol)
+
+buildscriptsdir = $(mmpackbuilddir)/buildscripts
+dist_buildscripts_DATA = \
 	src/mmpack-build/build-autotools \
 	src/mmpack-build/build-cmake \
 	src/mmpack-build/build-makefile \

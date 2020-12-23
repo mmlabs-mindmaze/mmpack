@@ -346,7 +346,8 @@ class SrcPackage:
         # Use build script provided in mmpack installed data folder unless
         # it is custom build system. The script is then obtained from
         # mmpack folder in the unpacked sources.
-        build_script = '{0}/build-{1}'.format(PKGDATADIR, self.build_system)
+        scriptdir = os.path.join(os.path.dirname(__file__), 'buildscripts')
+        build_script = '{0}/build-{1}'.format(scriptdir, self.build_system)
         if self.build_system == 'custom':
             build_script = 'mmpack/build'
 

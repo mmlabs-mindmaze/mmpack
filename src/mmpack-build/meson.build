@@ -88,5 +88,5 @@ mmpack_build_plugins = files(
 	'build-python',
 )
 install_data(mmpack_build_plugins,
-    install_dir : get_option('datadir') / 'mmpack',
+    install_dir : mmpackbuilddir + '/buildscripts',
 )
