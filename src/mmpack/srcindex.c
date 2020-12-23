@@ -237,7 +237,7 @@ int srcindex_populate(struct srcindex * srcindex, char const * index_filename,
 	int rv;
 	struct strchunk line, data_to_parse;
 	struct srcpkg pkg;
-	void* map;
+	void* map = NULL;
 	size_t mapsize;
 
 	srcpkg_init(&pkg, repo);
