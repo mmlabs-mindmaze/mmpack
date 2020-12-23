@@ -52,7 +52,7 @@ EXTRA_DIST += \
 	src/repository/mmpack-modifyrepo.py.in \
 	$(eol)
 
-mmpackbuilddir = $(pythondir)/mmpack_build
+mmpackbuilddir = $(pkgdatadir)/mmpack_build
 mmpackbuild_PYTHON =\
 	src/mmpack-build/__init__.py \
 	src/mmpack-build/__main__.py \
@@ -102,7 +102,7 @@ CLEANFILES += $(nodist_mmpackbuild_PYTHON)
 
 .PHONY: pycodestyle
 pycodestyle: deployment-test
-	pycodestyle --show-source deployment-test$(pythondir)/mmpack_build \
+	pycodestyle --show-source deployment-test$(mmpackbuilddir) \
 	                          deployment-test$(pkgdatadir)/*.py \
 	                          deployment-test$(bindir)/mmpack-modifyrepo
 
