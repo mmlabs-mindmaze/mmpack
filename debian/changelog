@@ -1,3 +1,10 @@
+mmpack (0.4.3) UNRELEASED; urgency=medium
+
+  * Transform mmpack_build python package as private one and package it in
+    mmpack-build.
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 23 Dec 2020 15:06:30 +0100
+
 mmpack (0.4.2) unstable; urgency=medium
 
   * Fix detection of dependency on installed mmpack python packages

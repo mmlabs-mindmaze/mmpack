@@ -2,9 +2,7 @@
 
 PYTHON=${PYTHON:-python3}
 DIR=$(dirname $(realpath $0))
-BINDIR=@bindir@
-PYTHON_INSTALL_DIR=@python_install_dir@
+MMPACKBUILD_PYTHONPATH=$(realpath -e $DIR/@bindir_to_pydir@)
+export PYTHONPATH=$MMPACKBUILD_PYTHONPATH${PYTHONPATH:+":$PYTHONPATH"}
 
-PYTHON_INSTALL_DIR=$(realpath -m --relative-to=$BINDIR $PYTHON_INSTALL_DIR)
-
-PYTHONPATH=$DIR/$PYTHON_INSTALL_DIR $PYTHON -m mmpack_build $@
+exec $PYTHON -m mmpack_build $@

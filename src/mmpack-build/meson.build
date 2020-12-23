@@ -38,17 +38,20 @@ mmpack_build_sources = files(
         'yaml_dumper.py',
 )
 
-mmpackbuilddir = python.get_install_dir() / 'mmpack_build'
-
 bindir = get_option('prefix') / get_option('bindir')
+pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
+libexecdir = get_option('prefix') / get_option('libexecdir')
+mmpackbuilddir = pkgdatadir / 'mmpack_build'
+
+r = run_command('realpath', '-m', '--relative-to=' + bindir, mmpackbuilddir)
+bindir_to_pydir = r.stdout().strip()
+
 r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, bindir)
 pydir_to_bindir = r.stdout().strip()
 
-libexecdir = get_option('prefix') / get_option('libexecdir')
 r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, libexecdir)
 pydir_to_libexecdir = r.stdout().strip()
 
-pkgdatadir = get_option('prefix') +'/'+ get_option('datadir') + '/mmpack'
 r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, pkgdatadir)
 pydir_to_pkgdatadir = r.stdout().strip()
 
@@ -57,7 +60,7 @@ config_data = configuration_data({
     'pydir_to_bindir' :  pydir_to_bindir,
     'pydir_to_libexecdir' : pydir_to_libexecdir,
     'pydir_to_pkgdatadir' : pydir_to_pkgdatadir,
-    'python_install_dir' : python.get_install_dir(),
+    'bindir_to_pydir' : bindir_to_pydir,
     'package_version' : meson.project_version(),
     'exeext' : exeext,
 })
@@ -69,7 +72,7 @@ settings_py = configure_file(
 )
 mmpack_build_sources += settings_py
 
-python.install_sources(mmpack_build_sources, subdir : 'mmpack_build')
+install_data(mmpack_build_sources, install_dir : mmpackbuilddir)
 
 mmpack_build = configure_file(
         output : 'mmpack-build',
