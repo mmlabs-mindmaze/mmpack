@@ -38,7 +38,7 @@ mmpack_build_sources = files(
         'yaml_dumper.py',
 )
 
-mmpackbuilddir = python.get_install_dir() / 'mmpackbuild'
+mmpackbuilddir = python.get_install_dir() / 'mmpack_build'
 
 bindir = get_option('prefix') / get_option('bindir')
 r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, bindir)
