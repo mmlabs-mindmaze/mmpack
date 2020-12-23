@@ -40,7 +40,7 @@ if pylint.found()
             '--jobs=0',
             '--disable=locally-disabled',
             '--rcfile', files('pylint-config'),
-            deployment_dir + python.get_install_dir() + '/mmpack_build',
+            deployment_dir + mmpackbuilddir,
             deployment_dir + pkgdatadir + '/repo.py',
             deployment_dir + bindir + '/mmpack-modifyrepo',
         ],
