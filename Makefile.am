@@ -347,6 +347,7 @@ deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES) $(mmpackbuild_PYTHON) \
 		$(nodist_mmpackbuild_PYTHON) \
 		$(dist_pkgdata_SCRIPTS) \
+		$(pkgdata_DATA) \
 		$(bin_SCRIPTS)
 	DESTDIR=$(shell readlink -f $@) $(MAKE) install
 	@touch $@
