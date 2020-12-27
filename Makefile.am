@@ -281,9 +281,7 @@ src/repository/mmpack-modifyrepo: src/repository/mmpack-modifyrepo.py.in Makefil
 
 src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
-	$(AM_V_GEN)$(SED) -e 's,@bindir[@],$(bindir),g' \
-		-e 's,@bindir_to_pydir[@],$(shell realpath -m --relative-to=$(bindir) $(mmpackbuilddir)),g' \
-		-e 's,@python_install_dir[@],$(pythondir),g' < $< > $@
+	$(AM_V_GEN)$(SED) -e 's,@bindir_to_pkgdatadir[@],$(shell realpath -m --relative-to=$(bindir) $(pkgdatadir)),g' < $< > $@
 
 #
 # DEVEL TARGETS
@@ -400,7 +398,7 @@ check_PROGRAMS = \
 # The variable _MMPACK_TEST_PREFIX is needed by mmpack and mmpack-build to find
 # everything in the right place during the tests (that require a local
 # installation of mmpack project).
-TESTS_ENVIRONMENT = _MMPACK_TEST_PREFIX=$(abs_builddir)/deployment-test PYTHON_INSTALL_DIR=$(pythondir) \
+TESTS_ENVIRONMENT = _MMPACK_TEST_PREFIX=$(abs_builddir)/deployment-test PKGDATADIR=$(pkgdatadir) \
 					SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir) PREFIX=$(prefix) REPO=$(abs_builddir)/test-repo
 TEST_EXTENSIONS = .test .tap .sh
 

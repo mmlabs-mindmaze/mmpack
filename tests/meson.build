@@ -73,7 +73,7 @@ mmpack_build_unit_tests_sources = files(
 # installation of mmpack project).
 env = environment()
 env.set('_MMPACK_TEST_PREFIX', deployment_dir)
-env.set('PYTHON_INSTALL_DIR', python.get_install_dir())
+env.set('PKGDATADIR', get_option('prefix') / get_option('datadir') + '/mmpack')
 env.set('SRCDIR', meson.source_root())
 env.set('BUILDDIR', meson.build_root())
 env.set('PREFIX', get_option('prefix'))
