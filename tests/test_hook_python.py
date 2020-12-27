@@ -111,6 +111,51 @@ class TestPythonHook(unittest.TestCase):
         syms = _load_py_symbols('multi', pkgfiles)
         self.assertEqual(syms, refsymbols)
 
+    def test_provides_multi2(self):
+        """test provides pkg with multiple modules"""
+        pkgfiles = [
+            'multi2/__main__.py',
+            'multi2/__init__.py',
+            'multi2/foo.py',
+            'multi2/bar.py',
+        ]
+        refsymbols = {
+            'multi2.foo.DummyData.a_number',
+            'multi2.foo.DummyData.an_attr',
+            'multi2.foo.DummyData.v1',
+            'multi2.foo.DummyData.__init__',
+            'multi2.foo.DummyData.useless_method',
+            'multi2.foo.DummyData',
+            'multi2.foo.MainData',
+            'multi2.foo.MainData.a_class_attr',
+            'multi2.foo.MainData.__init__',
+            'multi2.foo.MainData.data1',
+            'multi2.foo.MainData.fullname',
+            'multi2.foo.MainData.disclose_private',
+            'multi2.foo.somefunc',
+            'multi2.foo.A_CLASS',
+            'multi2.foo.EXPORTED_LIST',
+            'multi2.foo.THE_ANSWER',
+            'multi2.foo.main_dummy_fn',
+            'multi2.foo.utils',
+            'multi2.FooBar',
+            'multi2.FooBar.__init__',
+            'multi2.FooBar.fullname',
+            'multi2.FooBar.new_data',
+            'multi2.FooBar.hello',
+            'multi2.bar.print_hello',
+            'multi2.bar.Bar',
+            'multi2.bar.Bar.__init__',
+            'multi2.bar.Bar.drink',
+            'multi2.bar.A_BAR',
+            'multi2.MainData',
+            'multi2.somefunc',
+            'multi2.__main__',
+            'multi2.__main__.print_hello',
+        }
+        syms = _load_py_symbols('multi2', pkgfiles)
+        self.assertEqual(syms, refsymbols)
+
     def test_provides_pkg_imported(self):
         """test provides pkg importing another package"""
         pkgfiles = ['pkg_imported/__init__.py']

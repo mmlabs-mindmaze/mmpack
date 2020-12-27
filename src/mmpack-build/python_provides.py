@@ -19,10 +19,10 @@ package and use this one to run the script.
 
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from os.path import abspath
+from os.path import abspath, basename, dirname
 from typing import Set, Union
 
-from astroid import parse, AstroidImportError
+from astroid import AstroidImportError, MANAGER
 from astroid.nodes import Import, ImportFrom, AssignName, ClassDef, Module
 
 
@@ -164,26 +164,34 @@ class PkgData:
         ns_symset = self.syms.setdefault(namespace, set())
         ns_symset.add(symbol)
 
+    def gen_pypkg_symbols(self):
+        """
+        Generate set symbols of python package
+        """
+        pyfiles = {f for f in self.pkgfiles if f.endswith('.py')}
+        initfiles = [f for f in pyfiles if basename(f) == '__init__.py']
+        for initfile in initfiles:
+            # Process first init file
+            initmod = MANAGER.ast_from_file(initfile)
+            self.add_module_public_symbols(initmod)
+            pyfiles.discard(initfile)
 
-def _gen_pypkg_symbols(pypkg: str, pkgdata: PkgData):
-    # Parse a simple import in astroid and get the imported's module node
-    imp = parse('import {}'.format(pypkg))
-    mod = imp.body[0].do_import_module(pypkg)
-    pkgdata.add_module_public_symbols(mod)
+            # Process all files that in the package
+            subdir = dirname(initfile)
+            for pyfile in {f for f in pyfiles if dirname(f) == subdir}:
+                self.add_module_public_symbols(MANAGER.ast_from_file(pyfile))
+                pyfiles.discard(pyfile)
 
-    # For a python package, __main__.py holds the contents which will be
-    # executed when the module is run with -m. Hence we test the capability of
-    # a package to be runnable by trying to import the <pypkg>.__main__ module.
-    # If the import is possible <pypkg>.__main__ will be added to the public
-    # symbols.
-    try:
-        main_modname = pypkg + '.__main__'
-        imp = parse('import ' + main_modname)
-        mod = imp.body[0].do_import_module(main_modname)
-        pkgdata.add_namespace_symbol(pypkg, '__main__')
-        pkgdata.add_module_public_symbols(mod)
-    except AstroidImportError:
-        pass
+                # For a python package, __main__.py holds the contents which
+                # will be executed when the module is run with -m. If module
+                # exists, <pypkg>.__main__ will be added to the public symbols.
+                if basename(pyfile) == '__main__.py':
+                    self.add_namespace_symbol(initmod.qname(), '__main__')
+
+        # Process all single module file (those at the level of sitedir)
+        for pyfile in {f for f in pyfiles if dirname(f) in sys.path}:
+            mod = MANAGER.ast_from_file(pyfile)
+            self.add_module_public_symbols(mod)
 
 
 def parse_options():
@@ -216,8 +224,7 @@ def main():
 
     # Load list of files in package from stdin
     pkgdata = PkgData({abspath(f.strip()) for f in options.infiles})
-
-    _gen_pypkg_symbols(options.pypkgname, pkgdata)
+    pkgdata.gen_pypkg_symbols()
 
     # Return result on stdout
     for namespace in sorted(pkgdata.syms):
