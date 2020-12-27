@@ -13,14 +13,14 @@ prepare_env()
 	    _MMPACK_TEST_PREFIX=$(cygpath -u $_MMPACK_TEST_PREFIX)
 	    BUILDDIR=$(cygpath -u $BUILDDIR)
 	    PREFIX=$(cygpath -u $PREFIX)
-	    PYTHON_INSTALL_DIR=$(cygpath -u $PYTHON_INSTALL_DIR)
+	    PKGDATADIR=$(cygpath -u $PKGDATADIR)
 	fi
 
 	export TMP_BUILD=$BUILDDIR/tmp-build_$build_sys
 	export XDG_CONFIG_HOME=$BUILDDIR/config_$build_sys
 	export XDG_CACHE_HOME=$BUILDDIR/cache_$build_sys
 	export MMPACK_BUILD_OUTDIR=$BUILDDIR/data_$build_sys
-	export PYTHONPATH=${_MMPACK_TEST_PREFIX}${PYTHON_INSTALL_DIR}
+	export PYTHONPATH=${_MMPACK_TEST_PREFIX}${PKGDATADIR}
 	SRC_PKG=$BUILDDIR/test-packages/smoke/
 
 	export PATH=$_MMPACK_TEST_PREFIX$PREFIX/bin:$PATH
