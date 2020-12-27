@@ -282,7 +282,7 @@ src/repository/mmpack-modifyrepo: src/repository/mmpack-modifyrepo.py.in Makefil
 src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
 	$(AM_V_GEN)$(SED) -e 's,@bindir[@],$(bindir),g' \
-		-e 's,@bindir_to_pydir[@],$(shell realpath -m --relative-to=$(bindir) $(mmpackbuilddir)),g' \
+		-e 's,@bindir_to_pkgdatadir[@],$(shell realpath -m --relative-to=$(bindir) $(pkgdatadir)),g' \
 		-e 's,@python_install_dir[@],$(pythondir),g' < $< > $@
 
 #
