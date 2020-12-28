@@ -19,8 +19,8 @@ package and use this one to run the script.
 
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from os.path import abspath, basename, dirname
-from typing import Set, Union
+from os.path import abspath, basename, dirname, commonpath
+from typing import Set, Union, List
 
 from astroid import AstroidImportError, MANAGER
 from astroid.nodes import Import, ImportFrom, AssignName, ClassDef, Module
@@ -40,6 +40,18 @@ def _is_public_sym(name: str) -> bool:
             return False
 
     return True
+
+
+def _is_in_dirs(path: str, dirs: List[str]) -> bool:
+    """
+    Return true if path is in one of the directory or subdirectory of list dirs
+    """
+    pathdir = dirname(path)
+    for direlt in dirs:
+        if commonpath([direlt, pathdir]) == direlt:
+            return True
+
+    return False
 
 
 class PkgData:
@@ -164,11 +176,12 @@ class PkgData:
         ns_symset = self.syms.setdefault(namespace, set())
         ns_symset.add(symbol)
 
-    def gen_pypkg_symbols(self):
+    def gen_pypkg_symbols(self, sitedirs: List[str]):
         """
-        Generate set symbols of python package
+        Generate set symbols of python package located in specified sitedirs
         """
-        pyfiles = {f for f in self.pkgfiles if f.endswith('.py')}
+        pyfiles = {f for f in self.pkgfiles
+                   if f.endswith('.py') and _is_in_dirs(f, sitedirs)}
         initfiles = [f for f in pyfiles if basename(f) == '__init__.py']
         for initfile in initfiles:
             # Process first init file
@@ -200,12 +213,10 @@ def parse_options():
     """
     parser = ArgumentParser(description=__doc__,
                             formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('--site-path', dest='site_path', type=str, nargs='?',
+    parser.add_argument('--site-path', dest='site_paths', type=str, nargs='?',
+                        action='append', default=[],
                         help='path of python site-packages or folder '
                         'containing python package')
-    parser.add_argument('pypkgname', type=str,
-                        help='name of the python package to inspect (name '
-                        'supplied to import statement)')
     parser.add_argument('infiles', type=str, nargs='*')
 
     return parser.parse_args()
@@ -216,15 +227,16 @@ def main():
     python_provides utility entry point
     """
     options = parse_options()
+    sitedirs = [abspath(path) for path in options.site_paths]
+    files = {abspath(f.strip()) for f in options.infiles}
 
     # If site path folder is specified, add it to sys.path so astroid resolve
     # the imports properly
-    if options.site_path:
-        sys.path.insert(0, abspath(options.site_path))
+    sys.path = sitedirs + sys.path
 
     # Load list of files in package from stdin
-    pkgdata = PkgData({abspath(f.strip()) for f in options.infiles})
-    pkgdata.gen_pypkg_symbols()
+    pkgdata = PkgData(files)
+    pkgdata.gen_pypkg_symbols(sitedirs)
 
     # Return result on stdout
     for namespace in sorted(pkgdata.syms):
