@@ -200,12 +200,10 @@ def parse_options():
     """
     parser = ArgumentParser(description=__doc__,
                             formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('--site-path', dest='site_path', type=str, nargs='?',
+    parser.add_argument('--site-path', dest='site_paths', type=str, nargs='?',
+                        action='append', default=[],
                         help='path of python site-packages or folder '
                         'containing python package')
-    parser.add_argument('pypkgname', type=str,
-                        help='name of the python package to inspect (name '
-                        'supplied to import statement)')
     parser.add_argument('infiles', type=str, nargs='*')
 
     return parser.parse_args()
@@ -217,10 +215,10 @@ def main():
     """
     options = parse_options()
 
-    # If site path folder is specified, add it to sys.path so astroid resolve
-    # the imports properly
-    if options.site_path:
-        sys.path.insert(0, abspath(options.site_path))
+    # If site path folders are specified, add them to sys.path so that astroid
+    # resolve the imports properly
+    for sitedir in options.site_paths:
+        sys.path.insert(0, abspath(sitedir))
 
     # Load list of files in package from stdin
     pkgdata = PkgData({abspath(f.strip()) for f in options.infiles})
