@@ -86,14 +86,27 @@ def _parse_py3_filename(filename: str) -> PyNameInfo:
     return PyNameInfo(pyname=name, sitedir=sitedir, is_egginfo=is_egg)
 
 
-def _gen_pysymbols(pyimport_name: str, pkg: PackageInfo,
-                   sitedir: str) -> Set[str]:
+def _gen_pysymbols(pkg: PackageInfo, sitedirs: List[str]) -> Set[str]:
     script = os.path.join(os.path.dirname(__file__), 'python_provides.py')
-    cmd = ['python3', script, '--site-path='+sitedir, pyimport_name]
+    cmd = ['python3', script]
+    cmd += ['--site-path='+path for path in sitedirs]
     cmd += list(pkg.files)
 
     cmd_output = shell(cmd)
     return set(cmd_output.split())
+
+
+def _gen_py_provides(pkg: PackageInfo, sitedirs: List[str]) -> ProvideList:
+    providelist = ProvideList('python')
+    symbols = _gen_pysymbols(pkg, sitedirs)
+    for pyname in {s.split('.', maxsplit=1)[0] for s in symbols}:
+        pyname_syms = {s for s in symbols if s.startswith(pyname + '.')}
+        provide = Provide(pyname)
+        provide.pkgdepends = pkg.name
+        provide.add_symbols(pyname_syms, pkg.version)
+        providelist.add(provide)
+
+    return providelist
 
 
 def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
@@ -198,6 +211,7 @@ class MMPackBuildHook(BaseHook):
         # provided in the same package or a package being generated
         for pkg in others_pkgs:
             dep_list = pkg.provides['python'].gen_deps(imports, used_symbols)
+            dep_list += pkg.provides['pypriv'].gen_deps(imports, used_symbols)
             for pkgname, _ in dep_list:
                 currpkg.add_to_deplist(pkgname, pkg.version, pkg.version)
 
@@ -296,42 +310,16 @@ class MMPackBuildHook(BaseHook):
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
-        py3_provides = ProvideList('python')
-
-        py3pkgs = {}
-        for instfile in pkg.files:
-            try:
-                info = _parse_py3_filename(instfile)
-                if info.is_egginfo:
-                    continue
-                data = py3pkgs.setdefault(info.pyname, (info.sitedir, set()))
-                data[1].add(instfile)
-            except FileNotFoundError:
-                pass
-
-        # Loop over all python modules contained in the mmpack package and
-        # parse the python public entry point of it (ie the entry point of the
-        # python package)
-        for pyname, data in py3pkgs.items():
-            sitedir = data[0]
-            py_files = data[1]
-            root = '{}/{}'.format(sitedir, pyname)
-            if not {root+'/__init__.py', root+'.py'}.isdisjoint(py_files):
-                symbols = _gen_pysymbols(pyname, pkg, sitedir)
-            else:
-                raise RuntimeError('Not entry point found for python '
-                                   'package {} in {}'
-                                   .format(pyname, sitedir))
-
-            provide = Provide(pyname)
-            provide.pkgdepends = pkg.name
-            provide.add_symbols(symbols, pkg.version)
-            py3_provides.add(provide)
-
-        # update symbol information from .provides file if any
+        # Add public python package
+        py3_provides = _gen_py_provides(pkg, [_MMPACK_REL_PY_SITEDIR])
         py3_provides.update_from_specs(specs_provides, pkg.name)
-
         pkg.provides['python'] = py3_provides
+
+        # Register private python package for cobuilded package dependency
+        # resolution
+        priv_sitedirs = ['share/' + self._srcname, 'share/' + pkg.name]
+        priv_provides = _gen_py_provides(pkg, priv_sitedirs)
+        pkg.provides['pypriv'] = priv_provides
 
     def store_provides(self, pkg: PackageInfo, folder: str):
         filename = '{}/{}.pyobjects'.format(folder, pkg.name)
