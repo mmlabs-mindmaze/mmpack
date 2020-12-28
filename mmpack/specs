@@ -30,9 +30,8 @@ mmpack-build:
   files:
     - bin/mmpack-build(\.exe)?
     - libexec/mmpack/mmpack-check-sysdep.*
-    - share/mmpack/python/.*
     - share/bash-completion/completions/mmpack-build
-    - share/mmpack/build-.*
+    - share/mmpack/mmpack-build/.*
     - share/man/man1/mmpack-build.*\.1
 
 mmpack-repo-tools:
