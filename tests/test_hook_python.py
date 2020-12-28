@@ -13,11 +13,9 @@ _testdir = dirname(abspath(__file__))
 _sitedir = join(_testdir, 'pydata')
 
 
-def _load_py_symbols(name: str, pkgfiles: Set[str]) -> Set[str]:
-    pkg = PackageInfo('test_pkg')
-    pkg.files = {join(_sitedir, f) for f in pkgfiles}
-
-    return _gen_pysymbols(name, pkg, _sitedir)
+def _load_py_symbols(pkgfiles: Set[str]) -> Set[str]:
+    files = {join(_sitedir, f) for f in pkgfiles}
+    return _gen_pysymbols(files, [_sitedir])
 
 
 def _get_py_depends(pkgfiles: Set[str]) -> Set[str]:
@@ -44,7 +42,7 @@ class TestPythonHook(unittest.TestCase):
             'bare.MainData.fullname',
             'bare.MainData.disclose_private',
         }
-        syms = _load_py_symbols('bare', pkgfiles)
+        syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
     def test_provides_simple(self):
@@ -62,7 +60,7 @@ class TestPythonHook(unittest.TestCase):
             'simple.MainData.fullname',
             'simple.MainData.disclose_private',
         }
-        syms = _load_py_symbols('simple', pkgfiles)
+        syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
     def test_provides_multi(self):
@@ -108,7 +106,7 @@ class TestPythonHook(unittest.TestCase):
             'multi.__main__',
             'multi.__main__.print_hello',
         }
-        syms = _load_py_symbols('multi', pkgfiles)
+        syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
     def test_provides_multi2(self):
@@ -153,7 +151,7 @@ class TestPythonHook(unittest.TestCase):
             'multi2.__main__',
             'multi2.__main__.print_hello',
         }
-        syms = _load_py_symbols('multi2', pkgfiles)
+        syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
     def test_provides_pkg_imported(self):
@@ -172,7 +170,7 @@ class TestPythonHook(unittest.TestCase):
             'pkg_imported.FooBar.hello',
             'pkg_imported.MainData',
         }
-        syms = _load_py_symbols('pkg_imported', pkgfiles)
+        syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
     def test_depends_import_simple(self):
