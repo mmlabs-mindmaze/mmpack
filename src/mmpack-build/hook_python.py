@@ -9,11 +9,11 @@ import re
 import shutil
 from collections import namedtuple
 from email.parser import Parser
-from glob import glob
-from typing import Set, Dict, List
+from glob import glob, iglob
+from typing import Set, Dict, List, Iterable
 
 from . base_hook import BaseHook
-from . common import shell, Assert
+from . common import shell, Assert, iprint
 from . file_utils import is_python_script
 from . package_info import PackageInfo, DispatchData
 from . provide import Provide, ProvideList, load_mmpack_provides
@@ -169,6 +169,7 @@ class MMPackBuildHook(BaseHook):
     def __init__(self, srcname: str, host_archdist: str, description: str):
         super().__init__(srcname, host_archdist, description)
         self._mmpack_py_provides = None
+        self._private_sitedirs = []
 
     def _get_mmpack_provides(self) -> ProvideList:
         """
@@ -217,6 +218,16 @@ class MMPackBuildHook(BaseHook):
                 raise Assert(errmsg)
 
             currpkg.add_sysdep(sysdep)
+
+    def _guess_private_sitedirs(self, pkgnames: Iterable[str]):
+        for name in set(list(pkgnames) + [self._srcname]):
+            # Search for python files in potential private sitedir
+            sitedir = 'share/' + name
+            for path in iglob(sitedir + '/**', recursive=True):
+                if os.path.isfile(path) and is_python_script(path):
+                    iprint(f'{sitedir} could be a private python sitedir')
+                    self._private_sitedirs.append(sitedir)
+                    break
 
     def post_local_install(self):
         """
@@ -293,6 +304,8 @@ class MMPackBuildHook(BaseHook):
 
             pkg.description = '{}\nThis contains the python3 package {}'\
                               .format(self._src_description, pypkg.name)
+
+        self._guess_private_sitedirs(data.pkgs.keys())
 
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
