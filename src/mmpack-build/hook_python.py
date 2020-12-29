@@ -109,9 +109,10 @@ def _gen_py_provides(pkg: PackageInfo, sitedirs: List[str]) -> ProvideList:
     return providelist
 
 
-def _gen_pydepends(pkg: PackageInfo, sitedir: str) -> Set[str]:
+def _gen_pydepends(pkg: PackageInfo, sitedirs: List[str]) -> Set[str]:
     script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
-    cmd = ['python3', script, '--site-path='+sitedir]
+    cmd = ['python3', script]
+    cmd += ['--site-path='+path for path in sitedirs]
     cmd += [f for f in pkg.files if is_python_script(f)]
 
     # run in prefix if one is being used, this allows to establish dependency
@@ -334,5 +335,8 @@ class MMPackBuildHook(BaseHook):
         if not py_scripts:
             return
 
-        used_symbols = _gen_pydepends(pkg, _MMPACK_REL_PY_SITEDIR)
+        sitedirs = [_MMPACK_REL_PY_SITEDIR,
+                    'share/' + self._srcname,
+                    'share/' + pkg.name]
+        used_symbols = _gen_pydepends(pkg, sitedirs)
         self._gen_py_deps(pkg, used_symbols, other_pkgs)
