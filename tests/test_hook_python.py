@@ -21,7 +21,7 @@ def _load_py_symbols(pkgfiles: Set[str]) -> Set[str]:
 def _get_py_depends(pkgfiles: Set[str]) -> Set[str]:
     pkg = PackageInfo('test_pkg')
     pkg.files = {join(_sitedir, f) for f in pkgfiles}
-    used_symbols = _gen_pydepends(pkg, _sitedir)
+    used_symbols = _gen_pydepends(pkg, [_sitedir])
     return used_symbols
 
 
