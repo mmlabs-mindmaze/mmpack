@@ -23,6 +23,23 @@
 
 
 /**
+ * struct fschange - data carried over file system actions
+ * ctx: mmpack prefix context
+ * inst_files:  list of files being installed
+ * rm_files:    list of files being removed
+ *
+ * This structure holds data that needs to be shared over the installation,
+ * removal or upgrade of the different packages when applying the actions
+ * stack.
+ */
+struct fschange {
+	struct mmpack_ctx* ctx;
+	struct strlist inst_files;
+	struct strlist rm_files;
+};
+
+
+/**
  * sha256sums_path() - get path to sha256sums file of given package
  * @pkg:      package whose sha256sums file must be obtained.
  *
@@ -324,9 +341,9 @@ int rename_all(struct strlist* to_rename)
 
 
 /**
- * pkg_unpack_files() - extract files of a given package
+ * fschange_pkg_unpack() - extract files of a given package
+ * @fsc:        file system change data
  * @mpk_filename: filename of the downloaded package file
- * @files:        files to be removed
  *
  * In order the install and upgrade commands to be atomic, the extraction is
  * done in two steps: first all the regular files and symlink are extracted in a
@@ -337,17 +354,14 @@ int rename_all(struct strlist* to_rename)
  * Return: 0 on success, a negative value otherwise.
  */
 static
-int pkg_unpack_files(const char* mpk_filename, struct strlist* files)
+int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
 {
 	const char* entry_path;
 	struct archive_entry * entry;
 	struct archive * a;
 	int r, rv;
 	mmstr* path = NULL;
-	struct strlist to_rename;
 	int cpt = 0;
-
-	strlist_init(&to_rename);
 
 	// Initialize an archive stream
 	a = archive_read_new();
@@ -390,13 +404,12 @@ int pkg_unpack_files(const char* mpk_filename, struct strlist* files)
 		rv = pkg_unpack_entry(a, entry, path, cpt);
 
 		if (rv == 1) {
-			strlist_add(&to_rename, path);
+			strlist_add(&fsc->inst_files, path);
 			cpt++;
 			rv = 0;
 		}
 
-		if (files)
-			strlist_remove(files, path);
+		strlist_remove(&fsc->rm_files, path);
 	}
 
 	mmstr_free(path);
@@ -409,10 +422,8 @@ int pkg_unpack_files(const char* mpk_filename, struct strlist* files)
 		// proceed to the rename of the files that have been unpacked in
 		// another directory than the "true" one, in order to execute an
 		// atomic upgrade
-		rv = rename_all(&to_rename);
+		rv = rename_all(&fsc->inst_files);
 	}
-
-	strlist_deinit(&to_rename);
 
 	return rv;
 }
@@ -492,22 +503,24 @@ int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
  **************************************************************************/
 
 /**
- * pkg_list_rm_files() - list files of a package to be removed
+ * fschange_list_pkg_rm_files() - list files of a package to be removed
+ * @fsc:        file system change data
  * @pkg:        package about to be removed
- * @files:      pointer to initialized strlist to populate
+ *
+ * @fsc->rm_files is updated with the list of files of package to be removed.
  *
  * Return: 0 in case of success, -1 otherwise with error
  */
 static
-int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
+int fschange_list_pkg_rm_files(struct fschange* fsc, const struct mmpkg* pkg)
 {
 	int rv;
 	mmstr* path;
 
 	path = sha256sums_path(pkg);
 
-	strlist_add(files, path);
-	rv = read_sha256sums(NULL, path, files, NULL);
+	strlist_add(&fsc->rm_files, path);
+	rv = read_sha256sums(NULL, path, &fsc->rm_files, NULL);
 
 	mmstr_free(path);
 	return rv;
@@ -515,16 +528,13 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 
 
 static
-int rm_files_from_list(struct strlist* files)
+int fschange_apply_rm_files_list(struct fschange* fsc)
 {
 	struct strlist_elt * elt;
 	const mmstr* path;
 
-	elt = files->head;
-
-	while (elt) {
+	for (elt = fsc->rm_files.head; elt != NULL; elt = elt->next) {
 		path = elt->str.buf;
-
 		if (mm_unlink(path)) {
 			// If this has failed because the file is not found,
 			// nothing prevent us to continue (maybe the user
@@ -533,8 +543,6 @@ int rm_files_from_list(struct strlist* files)
 			if (mm_get_lasterror_number() != ENOENT)
 				return -1;
 		}
-
-		elt = elt->next;
 	}
 
 	return 0;
@@ -673,44 +681,44 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
  *                                                                        *
  **************************************************************************/
 
+
 /**
- * install_package() - install a package in the prefix
- * @ctx:        mmpack context
+ * fschange_install_pkg() - install a package in the prefix
+ * @fsc:        file system change data
  * @pkg:        mmpack package to be installed
  * @mpkfile:    filename of the downloaded package file
  *
  * This function install a package in a prefix hierarchy. The list of installed
- * package of context @ctx will be updated.
+ * package of context @fsc->ctx will be updated.
  *
  * NOTE: this function assumes current directory is the prefix path
  *
  * Return: 0 in case of success, -1 otherwise
  */
 static
-int install_package(struct mmpack_ctx* ctx,
-                    const struct mmpkg* pkg, const mmstr* mpkfile)
+int fschange_install_pkg(struct fschange* fsc,
+                         const struct mmpkg* pkg, const mmstr* mpkfile)
 {
-	int rv;
+	struct mmpack_ctx* ctx = fsc->ctx;
 
 	info("Installing package %s (%s)... ", pkg->name, pkg->version);
 
 	mm_log_info("\tsumsha: %s", pkg->sumsha);
 
-	rv = pkg_unpack_files(mpkfile, NULL);
-	if (rv) {
+	if (fschange_pkg_unpack(fsc, mpkfile)) {
 		error("Failed!\n");
 		return -1;
 	}
 
 	install_state_add_pkg(&ctx->installed, pkg);
 	info("OK\n");
-	return rv;
+	return 0;
 }
 
 
 /**
- * remove_package() - remove a package from the prefix
- * @ctx:        mmpack context
+ * fschange_remove_pkg() - remove a package from the prefix
+ * @fsc:        file system change data
  * @pkg:        package to remove
  *
  * This function removes a package from a prefix hierarchy. The list of
@@ -721,39 +729,30 @@ int install_package(struct mmpack_ctx* ctx,
  * Return: 0 in case of success, -1 otherwise
  */
 static
-int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
+int fschange_remove_pkg(struct fschange* fsc, const struct mmpkg* pkg)
 {
-	int rv = 0;
-	struct strlist files;
+	struct mmpack_ctx* ctx = fsc->ctx;
 
 	info("Removing package %s ... ", pkg->name);
 
-	strlist_init(&files);
-
-	if (pkg_list_rm_files(pkg, &files)
-	    || rm_files_from_list(&files)) {
-		rv = -1;
-		goto exit;
+	if (fschange_list_pkg_rm_files(fsc, pkg)
+	    || fschange_apply_rm_files_list(fsc)) {
+		error("Failed!\n");
+		return -1;
 	}
 
 	install_state_rm_pkgname(&ctx->installed, pkg->name);
 	strset_remove(&ctx->manually_inst, pkg->name);
 
-exit:
-	strlist_deinit(&files);
+	info("OK\n");
 
-	if (rv)
-		error("Failed!\n");
-	else
-		info("OK\n");
-
-	return rv;
+	return 0;
 }
 
 
 /**
- * upgrade_package() - remove a package from the prefix
- * @ctx:        mmpack context
+ * fschange_upgrade_pkg() - remove a package from the prefix
+ * @fsc:        file system change data
  * @pkg:        package to install
  * @oldpkg:     package to remove (replaced by installed package)
  * @mpkfile:    filename of the downloaded package file
@@ -766,11 +765,11 @@ exit:
  * Return: 0 in case of success, -1 otherwise
  */
 static
-int upgrade_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg,
-                    const struct mmpkg* oldpkg, const mmstr* mpkfile)
+int fschange_upgrade_pkg(struct fschange* fsc, const struct mmpkg* pkg,
+                         const struct mmpkg* oldpkg, const mmstr* mpkfile)
 {
 	int rv = 0;
-	struct strlist files;
+	struct mmpack_ctx* ctx = fsc->ctx;
 	const char* operation;
 
 	if (pkg_version_compare(pkg->version, oldpkg->version) < 0)
@@ -781,15 +780,11 @@ int upgrade_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg,
 	info("%s package %s (%s) over (%s) ... ", operation,
 	     pkg->name, pkg->version, oldpkg->version);
 
-	strlist_init(&files);
-
-	if (pkg_list_rm_files(oldpkg, &files)
-	    || pkg_unpack_files(mpkfile, &files)
-	    || rm_files_from_list(&files)) {
+	if (fschange_list_pkg_rm_files(fsc, oldpkg)
+	    || fschange_pkg_unpack(fsc, mpkfile)
+	    || fschange_apply_rm_files_list(fsc)) {
 		rv = -1;
 	}
-
-	strlist_deinit(&files);
 
 	install_state_add_pkg(&ctx->installed, pkg);
 
@@ -803,23 +798,29 @@ int upgrade_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg,
 
 
 static
-int apply_action(struct mmpack_ctx* ctx, struct action* act)
+int fschange_apply_action(struct fschange* fsc, struct action* act)
 {
 	int rv, type;
+
+	strlist_init(&fsc->inst_files);
+	strlist_init(&fsc->rm_files);
 
 	type = act->action;
 
 	switch (type) {
 	case INSTALL_PKG:
-		rv = install_package(ctx, act->pkg, act->pathname);
+		rv = fschange_install_pkg(fsc, act->pkg, act->pathname);
 		break;
 
 	case REMOVE_PKG:
-		rv = remove_package(ctx, act->pkg);
+		rv = fschange_remove_pkg(fsc, act->pkg);
 		break;
 
 	case UPGRADE_PKG:
-		rv = upgrade_package(ctx, act->pkg, act->oldpkg, act->pathname);
+		rv = fschange_upgrade_pkg(fsc,
+		                          act->pkg,
+		                          act->oldpkg,
+		                          act->pathname);
 		break;
 
 	default:
@@ -827,7 +828,24 @@ int apply_action(struct mmpack_ctx* ctx, struct action* act)
 		break;
 	}
 
+	strlist_deinit(&fsc->inst_files);
+	strlist_deinit(&fsc->rm_files);
+
 	return rv;
+}
+
+
+static
+void fschange_init(struct fschange* fsc, struct mmpack_ctx* ctx)
+{
+	*fsc = (struct fschange) {.ctx = ctx};
+}
+
+
+static
+void fschange_deinit(struct fschange* fsc)
+{
+	(void) fsc;
 }
 
 
@@ -870,6 +888,7 @@ int check_new_sysdeps(struct action_stack* stack)
 int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 {
 	int i, rv;
+	struct fschange fschange;
 
 	if (check_new_sysdeps(stack) != DEPS_OK)
 		return -1;
@@ -892,11 +911,14 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 	 * installed and not be removed if a back-dependency failed to be
 	 * removed.
 	 */
+	fschange_init(&fschange, ctx);
 	for (i = 0; i < stack->index; i++) {
-		rv = apply_action(ctx, &stack->actions[i]);
+		rv = fschange_apply_action(&fschange, &stack->actions[i]);
 		if (rv != 0)
 			break;
 	}
+
+	fschange_deinit(&fschange);
 
 	// suppress the content of the directory in which the files are unpacked
 	mm_remove(UNPACK_CACHEDIR_RELPATH, MM_DT_ANY|MM_RECURSIVE);
