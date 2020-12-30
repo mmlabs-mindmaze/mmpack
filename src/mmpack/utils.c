@@ -754,6 +754,8 @@ void strlist_init(struct strlist* list)
 /**
  * strlist_deinit() - cleanup strlist structure
  * @list: strlist structure to cleanse
+ *
+ * NOTE: this function is idempotent
  */
 LOCAL_SYMBOL
 void strlist_deinit(struct strlist* list)
@@ -761,6 +763,8 @@ void strlist_deinit(struct strlist* list)
 	struct strlist_elt * elt, * next;
 
 	elt = list->head;
+	list->head = NULL;
+	list->last = NULL;
 
 	while (elt) {
 		next = elt->next;
