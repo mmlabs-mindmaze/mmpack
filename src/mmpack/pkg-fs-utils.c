@@ -10,6 +10,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <mmsysio.h>
+#include <mmlib.h>
 #include <mmerrno.h>
 
 #include "common.h"
@@ -27,6 +28,7 @@
  * ctx: mmpack prefix context
  * inst_files:  list of files being installed
  * rm_files:    list of files being removed
+ * rm_dirs:     set of folders to try to remove at the end of stack application
  *
  * This structure holds data that needs to be shared over the installation,
  * removal or upgrade of the different packages when applying the actions
@@ -36,6 +38,7 @@ struct fschange {
 	struct mmpack_ctx* ctx;
 	struct strlist inst_files;
 	struct strlist rm_files;
+	struct strset rm_dirs;
 };
 
 
@@ -525,13 +528,38 @@ int pkg_list_rm_files(const struct mmpkg* pkg, struct strlist* files)
 }
 
 
+/**
+ * fschange_update_rmdirs() - add parent dir of path to rm_dirs set
+ * @fsc:        file system change data
+ * @path:       path of removed file
+ *
+ * NOTE: @path content is destroyed
+ */
 static
-int rm_files_from_list(struct strlist* files)
+void fschange_update_rmdirs(struct fschange* fsc, mmstr* path)
+{
+	STATIC_CONST_MMSTR(prefix_root, ".");
+
+	do {
+		// Change path inplace to get the parent directory
+		mmstr_setlen(path, mm_dirname(path, path));
+		if (mmstrequal(path, prefix_root))
+			return;
+	
+		// Try to add path to the set. If it did not get added, it is
+		// already present, hence the parent dir doesn't need to be
+		// processed
+	}while (strset_add(&fsc->rm_dirs, path));
+}
+
+
+static
+int fschange_apply_rm_files_list(struct fschange* fsc)
 {
 	struct strlist_elt * elt;
-	const mmstr* path;
+	mmstr* path;
 
-	elt = files->head;
+	elt = fsc->rm_files.head;
 
 	while (elt) {
 		path = elt->str.buf;
@@ -545,6 +573,7 @@ int rm_files_from_list(struct strlist* files)
 				return -1;
 		}
 
+		fschange_update_rmdirs(fsc, path);
 		elt = elt->next;
 	}
 
@@ -742,7 +771,7 @@ int fschange_remove_pkg(struct fschange* fsc, const struct mmpkg* pkg)
 	info("Removing package %s ... ", pkg->name);
 
 	if (pkg_list_rm_files(pkg, &fsc->rm_files)
-	    || rm_files_from_list(&fsc->rm_files)) {
+	    || fschange_apply_rm_files_list(fsc)) {
 		error("Failed!\n");
 		return -1;
 	}
@@ -788,7 +817,7 @@ int fschange_upgrade_pkg(struct fschange* fsc, const struct mmpkg* pkg,
 
 	if (pkg_list_rm_files(oldpkg, &fsc->rm_files)
 	    || fschange_pkg_unpack(fsc, mpkfile)
-	    || rm_files_from_list(&fsc->rm_files)) {
+	    || fschange_apply_rm_files_list(fsc)) {
 		rv = -1;
 	}
 
@@ -842,13 +871,15 @@ static
 void fschange_init(struct fschange* fsc, struct mmpack_ctx* ctx)
 {
 	*fsc = (struct fschange) {.ctx = ctx};
+
+	strset_init(&fsc->rm_dirs, STRSET_HANDLE_STRINGS_MEM);
 }
 
 
 static
 void fschange_deinit(struct fschange* fsc)
 {
-	(void) fsc;
+	strset_deinit(&fsc->rm_dirs);
 }
 
 
