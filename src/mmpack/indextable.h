@@ -126,7 +126,7 @@ void strset_deinit(struct strset* set)
 
 
 static inline
-void strset_add(struct strset* set, const mmstr* str)
+int strset_add(struct strset* set, const mmstr* str)
 {
 	struct it_entry* entry;
 	mmstr* key;
@@ -134,7 +134,7 @@ void strset_add(struct strset* set, const mmstr* str)
 	entry = indextable_lookup_create(&set->idx, str);
 
 	if (entry->value)
-		return;
+		return 0;
 
 	// Copy string if the set must manage the string memory
 	if (set->mem_handling == STRSET_HANDLE_STRINGS_MEM)
@@ -144,6 +144,7 @@ void strset_add(struct strset* set, const mmstr* str)
 
 	entry->key = key;
 	entry->value = key;
+	return 1;
 }
 
 
