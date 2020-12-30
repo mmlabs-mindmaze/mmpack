@@ -737,6 +737,7 @@ int remove_package(struct mmpack_ctx* ctx, const struct mmpkg* pkg)
 	}
 
 	install_state_rm_pkgname(&ctx->installed, pkg->name);
+	strset_remove(&ctx->manually_inst, pkg->name);
 
 exit:
 	strlist_deinit(&files);
@@ -815,9 +816,6 @@ int apply_action(struct mmpack_ctx* ctx, struct action* act)
 
 	case REMOVE_PKG:
 		rv = remove_package(ctx, act->pkg);
-		if (!rv)
-			strset_remove(&ctx->manually_inst, act->pkg->name);
-
 		break;
 
 	case UPGRADE_PKG:
