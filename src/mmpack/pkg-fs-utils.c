@@ -429,6 +429,30 @@ int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
 }
 
 
+static
+int fschange_preinst(struct fschange* fsc,
+                     const struct mmpkg* old, const struct mmpkg* pkg)
+{
+	(void) fsc;
+	(void) pkg;
+	(void) old;
+
+	return 0;
+}
+
+
+static
+int fschange_postinst(struct fschange* fsc,
+                      const struct mmpkg* old, const struct mmpkg* pkg)
+{
+	(void) fsc;
+	(void) pkg;
+	(void) old;
+
+	return 0;
+}
+
+
 /* same as archive_read_data_into_fd(), but into a buffer */
 static
 int unpack_entry_into_buffer(struct archive * archive,
@@ -544,6 +568,30 @@ int fschange_apply_rm_files_list(struct fschange* fsc)
 				return -1;
 		}
 	}
+
+	return 0;
+}
+
+
+static
+int fschange_prerm(struct fschange* fsc,
+                   const struct mmpkg* pkg, const struct mmpkg* new)
+{
+	(void) fsc;
+	(void) pkg;
+	(void) new;
+
+	return 0;
+}
+
+
+static
+int fschange_postrm(struct fschange* fsc,
+                    const struct mmpkg* pkg, const struct mmpkg* new)
+{
+	(void) fsc;
+	(void) pkg;
+	(void) new;
 
 	return 0;
 }
@@ -705,7 +753,9 @@ int fschange_install_pkg(struct fschange* fsc,
 
 	mm_log_info("\tsumsha: %s", pkg->sumsha);
 
-	if (fschange_pkg_unpack(fsc, mpkfile)) {
+	if (fschange_preinst(fsc, NULL, pkg)
+	    || fschange_pkg_unpack(fsc, mpkfile)
+	    || fschange_postinst(fsc, NULL, pkg)) {
 		error("Failed!\n");
 		return -1;
 	}
@@ -736,7 +786,9 @@ int fschange_remove_pkg(struct fschange* fsc, const struct mmpkg* pkg)
 	info("Removing package %s ... ", pkg->name);
 
 	if (fschange_list_pkg_rm_files(fsc, pkg)
-	    || fschange_apply_rm_files_list(fsc)) {
+	    || fschange_prerm(fsc, pkg, NULL)
+	    || fschange_apply_rm_files_list(fsc)
+	    || fschange_postrm(fsc, pkg, NULL)) {
 		error("Failed!\n");
 		return -1;
 	}
@@ -781,8 +833,11 @@ int fschange_upgrade_pkg(struct fschange* fsc, const struct mmpkg* pkg,
 	     pkg->name, pkg->version, oldpkg->version);
 
 	if (fschange_list_pkg_rm_files(fsc, oldpkg)
+	    || fschange_prerm(fsc, oldpkg, pkg)
 	    || fschange_pkg_unpack(fsc, mpkfile)
-	    || fschange_apply_rm_files_list(fsc)) {
+	    || fschange_apply_rm_files_list(fsc)
+	    || fschange_postrm(fsc, oldpkg, pkg)
+	    || fschange_postinst(fsc, oldpkg, pkg)) {
 		rv = -1;
 	}
 
