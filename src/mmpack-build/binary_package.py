@@ -7,7 +7,7 @@ packaging as mmpack file.
 import os
 
 from glob import glob
-from os.path import isfile
+from os.path import isdir
 from typing import List, Dict
 
 from . common import *
@@ -91,7 +91,7 @@ class BinaryPackage:
         cksums = {}
         for filename in glob('**', recursive=True):
             # skip folder and MMPACK/info
-            if not isfile(filename) or filename == 'MMPACK/info':
+            if isdir(filename) or filename == 'MMPACK/info':
                 continue
 
             # Add file with checksum
