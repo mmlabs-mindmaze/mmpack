@@ -10,7 +10,9 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <mmsysio.h>
+#include <mmlib.h>
 #include <mmerrno.h>
+#include <stdlib.h>
 
 #include "common.h"
 #include "context.h"
@@ -27,6 +29,7 @@
  * ctx: mmpack prefix context
  * inst_files:  list of files being installed
  * rm_files:    list of files being removed
+ * rm_dirs:     set of folders to try to remove at the end of stack application
  *
  * This structure holds data that needs to be shared over the installation,
  * removal or upgrade of the different packages when applying the actions
@@ -36,6 +39,7 @@ struct fschange {
 	struct mmpack_ctx* ctx;
 	struct strlist inst_files;
 	struct strlist rm_files;
+	struct strset rm_dirs;
 };
 
 
@@ -573,6 +577,76 @@ int fschange_apply_rm_files_list(struct fschange* fsc)
 }
 
 
+/**
+ * fschange_update_rmdirs() - add parent dirs of path to rm_dirs set
+ * @fsc:        file system change data
+ * @path:       path of removed file
+ *
+ * NOTE: this alters the contents of @fsc->rm_list elements
+ */
+static
+void fschange_update_rm_dirs(struct fschange* fsc)
+{
+	STATIC_CONST_MMSTR(prefix_root, ".");
+	mmstr* dirpath;
+	struct strlist_elt* elt;
+
+	for (elt = fsc->rm_files.head; elt != NULL; elt = elt->next) {
+		dirpath = elt->str.buf;
+		do {
+			// Change dirpath inplace to get the parent directory
+			mmstr_setlen(dirpath, mm_dirname(dirpath, dirpath));
+			if (mmstrequal(dirpath, prefix_root))
+				break;
+
+			// Try to add path to the set. If it did not get added,
+			// it is already present, hence the parent dir doesn't
+			// need to be processed
+		} while (strset_add(&fsc->rm_dirs, dirpath));
+	}
+}
+
+
+static
+int reverse_mmstr_cmp(const void* s1, const void* s2)
+{
+	return mmstrcmp(*(mmstr* const *) s2, *(mmstr* const *) s1);
+}
+
+
+static
+void fschange_apply_rm_dirs(struct fschange* fsc)
+{
+	struct strset_iterator it;
+	struct buffer dirs_buff;
+	const mmstr* dir;
+	const mmstr** dirs;
+	int i, numdir, previous;
+
+	buffer_init(&dirs_buff);
+
+	// Copy the element into a buffer
+	dir = strset_iter_first(&it, &fsc->rm_dirs);
+	for (; dir != NULL; dir = strset_iter_next(&it))
+		buffer_push(&dirs_buff, &dir, sizeof(dir));
+
+	// Get the sorted array of directories to try to remove in the reverse
+	// order. This makes leaves of file hierarchy removed first
+	dirs = dirs_buff.base;
+	numdir = dirs_buff.size / sizeof(*dirs);
+	qsort(dirs, numdir, sizeof(*dirs), reverse_mmstr_cmp);
+
+	// Try to remove all listed directories, but make any error silent.
+	previous = mm_error_set_flags(MM_ERROR_SET, MM_ERROR_NOLOG);
+	for (i = 0; i < numdir; i++)
+		mm_rmdir(dirs[i]);
+
+	mm_error_set_flags(previous, MM_ERROR_NOLOG);
+
+	buffer_deinit(&dirs_buff);
+}
+
+
 static
 int fschange_prerm(struct fschange* fsc,
                    const struct mmpkg* pkg, const struct mmpkg* new)
@@ -589,10 +663,10 @@ static
 int fschange_postrm(struct fschange* fsc,
                     const struct mmpkg* pkg, const struct mmpkg* new)
 {
-	(void) fsc;
 	(void) pkg;
 	(void) new;
 
+	fschange_update_rm_dirs(fsc);
 	return 0;
 }
 
@@ -895,13 +969,16 @@ static
 void fschange_init(struct fschange* fsc, struct mmpack_ctx* ctx)
 {
 	*fsc = (struct fschange) {.ctx = ctx};
+
+	strset_init(&fsc->rm_dirs, STRSET_HANDLE_STRINGS_MEM);
 }
 
 
 static
 void fschange_deinit(struct fschange* fsc)
 {
-	(void) fsc;
+	fschange_apply_rm_dirs(fsc);
+	strset_deinit(&fsc->rm_dirs);
 }
 
 
