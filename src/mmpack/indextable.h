@@ -86,6 +86,7 @@ enum strset_mgmt {
 struct strset {
 	struct indextable idx;
 	enum strset_mgmt mem_handling;
+	int num_item;
 };
 
 struct strset_iterator {
@@ -97,6 +98,7 @@ static inline
 int strset_init(struct strset* set, enum strset_mgmt mem_handling)
 {
 	set->mem_handling = mem_handling;
+	set->num_item = 0;
 
 	// Use an non default initial size of the indextable because the
 	// the default indextable size (512) is way too big for the typical
@@ -122,6 +124,7 @@ void strset_deinit(struct strset* set)
 	}
 
 	indextable_deinit(&set->idx);
+	set->num_item = 0;
 }
 
 
@@ -144,6 +147,7 @@ int strset_add(struct strset* set, const mmstr* str)
 
 	entry->key = key;
 	entry->value = key;
+	set->num_item++;
 	return 1;
 }
 
@@ -163,6 +167,8 @@ int strset_remove(struct strset* set, const mmstr* str)
 
 	rv = indextable_remove(&set->idx, str);
 	mmstr_free(string);
+	if (rv == 0)
+		set->num_item--;
 
 	return rv;
 }
