@@ -468,6 +468,53 @@ int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
 
 
 static
+void fschange_compile_pyscripts(struct fschange* fsc)
+{
+	struct strlist pyscripts;
+	struct strlist_elt* elt;
+	struct strchunk base, ext;
+	const mmstr* path;
+	int i, num_scripts;
+	char** argv = NULL;
+
+	strlist_init(&pyscripts);
+
+	// Scan all files listed for installation
+	num_scripts = 0;
+	for (elt = fsc->inst_files.head; elt != NULL; elt = elt->next) {
+		path = elt->str.buf;
+
+		// Extract path component and skip if not .py file
+		split_path(path, &base, &ext);
+		if (strncmp(ext.buf, "py", ext.len) != 0)
+			continue;
+
+		strlist_add(&pyscripts, path);
+		num_scripts++;
+	}
+
+	if (!num_scripts)
+		goto exit;
+
+	i = 0;
+	argv = xx_malloca((num_scripts + 5) * sizeof(*argv));
+	argv[i++] = "python3";
+	argv[i++] = "-m";
+	argv[i++] = "compileall";
+	argv[i++] = "-q";
+	for (elt = pyscripts.head; elt != NULL; elt = elt->next)
+		argv[i++] = elt->str.buf;
+
+	argv[i++] = NULL;
+	execute_cmd(argv);
+	mm_freea(argv);
+
+exit:
+	strlist_deinit(&pyscripts);
+}
+
+
+static
 int fschange_preinst(struct fschange* fsc,
                      const struct mmpkg* old, const struct mmpkg* pkg)
 {
@@ -483,10 +530,10 @@ static
 int fschange_postinst(struct fschange* fsc,
                       const struct mmpkg* old, const struct mmpkg* pkg)
 {
-	(void) fsc;
 	(void) pkg;
 	(void) old;
 
+	fschange_compile_pyscripts(fsc);
 	return 0;
 }
 
