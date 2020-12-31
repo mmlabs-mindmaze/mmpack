@@ -13,6 +13,7 @@
 #include <mmlib.h>
 #include <mmerrno.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 #include "context.h"
@@ -117,6 +118,39 @@ int read_sha256sums(const struct mmpack_ctx* ctx, const mmstr* sha256sums_path,
 exit:
 	mm_unmap(map);
 	return rv;
+}
+
+
+/**
+ * split_path() - split path into, parent folder, base and extension components
+ * @path:       mmstr* pointer to path to split
+ * @base:       pointer to struct strchunk receiving the base without extension
+ * @ext:        pointer to struct strchunk receiving the extension
+ *
+ * Split @path into <dir>/<base.><ext>
+ *
+ * Return: struct strchunk holding the parent folder component
+ */
+static
+struct strchunk split_path(const mmstr* path,
+                           struct strchunk * base,
+                           struct strchunk * ext)
+{
+	int basepos, extpos;
+	struct strchunk filename;
+	struct strchunk path_chunk = {
+		.buf = path,
+		.len = mmstrlen(path)
+	};
+
+	basepos = strchunk_rfind(path_chunk, '/');
+	filename = strchunk_rpart(path_chunk, basepos);
+
+	extpos = strchunk_rfind(filename, '.');
+	*ext = strchunk_rpart(filename, extpos);
+	*base = strchunk_lpart(filename, extpos + 1);
+
+	return strchunk_lpart(path_chunk, basepos);
 }
 
 
@@ -646,13 +680,67 @@ void fschange_apply_rm_dirs(struct fschange* fsc)
 
 
 static
+void fschange_remove_rmfiles_pycache(struct fschange* fsc)
+{
+	STATIC_CONST_MMSTR(pycache_subdir, "/__pycache__/");
+	struct strlist_elt* elt;
+	const struct mm_dirent* f;
+	mmstr* cachedir = NULL;
+	mmstr* cache = NULL;
+	struct strchunk base, dir, ext;
+	int cachedirlen;
+	MM_DIR* d;
+
+	// Scan all files listed for removal
+	for (elt = fsc->rm_files.head; elt != NULL; elt = elt->next) {
+		// Extract path component and skip if not .py file
+		dir = split_path(elt->str.buf, &base, &ext);
+		if (strncmp(ext.buf, "py", ext.len) != 0)
+			continue;
+
+		// Set cachedir to cache folder of pyfile
+		cachedir = mmstr_copy_realloc(cachedir, dir.buf, dir.len);
+		cachedir = mmstrcat_realloc(cachedir, pycache_subdir);
+
+		// Add cachedir to the set of folders to be removed
+		strset_add(&fsc->rm_dirs, cachedir);
+
+		// Prepare cache filename to starts with cachedir
+		cache = mmstrcpy_realloc(cache, cachedir);
+		cachedirlen = mmstrlen(cachedir);
+
+		d = mm_opendir(cachedir);
+		while ((f = mm_readdir(d, NULL))) {
+			// skip if file in cache path is not cache of the
+			// python source script
+			if (!strncmp(base.buf, f->name, base.len))
+				continue;
+
+			// Set basename of the found cache file to cache string
+			mmstr_setlen(cache, cachedirlen);
+			cache = mmstr_realloc(cache, cachedirlen + f->reclen);
+			mmstrcat_cstr(cache, f->name);
+
+			// Remove cache file
+			mm_unlink(cache);
+		}
+
+		mm_closedir(d);
+	}
+
+	mmstr_free(cachedir);
+	mmstr_free(cache);
+}
+
+
+static
 int fschange_prerm(struct fschange* fsc,
                    const struct mmpkg* pkg, const struct mmpkg* new)
 {
-	(void) fsc;
 	(void) pkg;
 	(void) new;
 
+	fschange_remove_rmfiles_pycache(fsc);
 	return 0;
 }
 
