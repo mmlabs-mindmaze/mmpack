@@ -969,6 +969,8 @@ int fschange_install_pkg(struct fschange* fsc,
 
 	install_state_add_pkg(&ctx->installed, pkg);
 	info("OK\n");
+
+	mm_unlink(mpkfile);
 	return 0;
 }
 
@@ -1055,6 +1057,7 @@ int fschange_upgrade_pkg(struct fschange* fsc, const struct mmpkg* pkg,
 	else
 		info("OK\n");
 
+	mm_unlink(mpkfile);
 	return rv;
 }
 
