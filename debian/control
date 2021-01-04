@@ -35,6 +35,8 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: mmpack (= ${binary:Version}),
  ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends},
  git, build-essential, automake, libtool, gnulib, meson, cmake, patchelf
+Breaks: python3-mmpack-build (<< 0.5.0)
+Replaces: python3-mmpack-build (<< 0.5.0)
 Recommends: mmpack-doc
 Description: MindMaze package development tools
  This package provides the infrastructure for handling the build,
