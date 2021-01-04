@@ -1,8 +1,8 @@
-mmpack (0.5.1) UNRELEASED; urgency=medium
+mmpack (0.5.1) unstable; urgency=medium
 
   * mmpack-build replaces former python3-mmpack-build debian package
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 04 Jan 2021 16:45:39 +0100
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 04 Jan 2021 16:46:29 +0100
 
 mmpack (0.5.0) unstable; urgency=medium
 
