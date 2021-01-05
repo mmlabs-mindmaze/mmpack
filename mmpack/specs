@@ -29,7 +29,6 @@ mmpack-build:
     This package contains the tools needed to build mmpack package from source
   files:
     - bin/mmpack-build(\.exe)?
-    - libexec/mmpack/mmpack-check-sysdep.*
     - share/bash-completion/completions/mmpack-build
     - share/mmpack/mmpack_build/.*
     - share/man/man1/mmpack-build.*\.1
