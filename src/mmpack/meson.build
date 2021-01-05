@@ -14,6 +14,8 @@ mmpack_lib_sources = files(
 	'mmpack-autoremove.h',
 	'mmpack-check-integrity.c',
 	'mmpack-check-integrity.h',
+	'mmpack-check-sysdep.c',
+	'mmpack-check-sysdep.h',
 	'mmpack-download.c',
 	'mmpack-download.h',
 	'mmpack-fix-broken.c',
@@ -88,23 +90,6 @@ mmpack = executable('mmpack',
         link_with : libmmpack,
         install : true,
         dependencies: [libcurl, libarchive, libyaml, libmmlib],
-)
-
-mmpack_check_sysdep_sources = files(
-	'indextable.h',
-	'indextable.c',
-	'mmpack-check-sysdep.c',
-	'sha256.c',
-	'sysdeps.h',
-	'sysdeps.c',
-	'utils.c',
-)
-mmpack_check_sysdep = executable('mmpack-check-sysdep',
-        mmpack_check_sysdep_sources,
-        include_directories : inc,
-        dependencies : [libmmlib],
-        install : true,
-        install_dir : get_option('libexecdir') / 'mmpack',
 )
 
 if host_machine.system() == 'windows'

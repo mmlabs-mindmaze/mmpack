@@ -1,5 +1,4 @@
 /usr/bin/mmpack-build
-/usr/lib/*/mmpack/mmpack-check-sysdep
 /usr/share/bash-completion/completions/mmpack-build
 /usr/share/mmpack/mmpack_build/
 /usr/share/mmpack/common-licenses

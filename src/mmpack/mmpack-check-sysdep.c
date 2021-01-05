@@ -6,11 +6,25 @@
 # include <config.h>
 #endif
 
+#include "mmpack-check-sysdep.h"
+
+#include "context.h"
 #include "indextable.h"
 #include "sysdeps.h"
 
-int main(int argc, char const ** argv)
+
+/**
+ * mmpack_check_sysdep() - Check system deps specified on cmdline are fulfilled
+ * @ctx: mmpack context
+ * @argc: number of arguments
+ * @argv: array of arguments
+ *
+ * Return: 0 on success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int mmpack_check_sysdep(struct mmpack_ctx * ctx, int argc, char const* argv[])
 {
+	(void)ctx;
 	int i, rv;
 	struct strset sysdeps;
 
