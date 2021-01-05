@@ -32,7 +32,7 @@ am__v_RM_0 = -rm -f
 am__v_RM_1 = -@rm -vf
 
 bin_PROGRAMS = mmpack
-pkglibexec_PROGRAMS = mount-mmpack-prefix mmpack-check-sysdep
+pkglibexec_PROGRAMS = mount-mmpack-prefix
 bin_SCRIPTS = \
 	src/mmpack-build/mmpack-build \
 	src/repository/mmpack-modifyrepo \
@@ -132,6 +132,8 @@ mmpack_lib_sources = \
 	src/mmpack/mmpack-autoremove.h \
 	src/mmpack/mmpack-check-integrity.c \
 	src/mmpack/mmpack-check-integrity.h \
+	src/mmpack/mmpack-check-sysdep.c \
+	src/mmpack/mmpack-check-sysdep.h \
 	src/mmpack/mmpack-download.c \
 	src/mmpack/mmpack-download.h \
 	src/mmpack/mmpack-fix-broken.c \
@@ -248,20 +250,6 @@ if OS_KERNEL_NT
 mount_mmpack_prefix_SOURCES += src/mmpack/mount-prefix-nt.c
 endif
 
-mmpack_check_sysdep_SOURCES = \
-	src/mmpack/indextable.h \
-	src/mmpack/indextable.c \
-	src/mmpack/mmpack-check-sysdep.c \
-	src/mmpack/sha256.c \
-	src/mmpack/sysdeps.h \
-	src/mmpack/sysdeps.c \
-	src/mmpack/utils.c \
-	$(eol)
-
-mmpack_check_sysdep_LDADD = \
-	$(MMLIB_LIB) \
-	$(eol)
-
 
 # write the 2nd @ between [] in order to prevent autotools replacing it
 # BEFORE the sed call
@@ -327,21 +315,21 @@ EXTRA_DIST += devtools/uncrustify.cfg
 .PHONY: fix-c-style
 fix-c-style: devtools/uncrustify.cfg
 	cd $(srcdir) && uncrustify -c devtools/uncrustify.cfg -l C --replace --no-backup \
-		$(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
+		$(mmpack_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES)
 
 # check all the source files for correct coding style
 .PHONY: checkstyle
 checkstyle: devtools/uncrustify.cfg pycodestyle
 	cd $(srcdir) && uncrustify -c devtools/uncrustify.cfg -l C --check \
-	   $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
+	   $(mmpack_SOURCES) \
 	   $(mount_mmpack_prefix_SOURCES)
 
 #
 # TESTS RULES
 #
 
-deployment-test: $(mmpack_SOURCES) $(mmpack_check_sysdep_SOURCES) \
+deployment-test: $(mmpack_SOURCES) \
 		$(mount_mmpack_prefix_SOURCES) $(mmpackbuild_PYTHON) \
 		$(nodist_mmpackbuild_PYTHON) \
 		$(dist_pkgdata_SCRIPTS) \

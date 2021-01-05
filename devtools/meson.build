@@ -4,7 +4,6 @@
 
 all_c_sources = (mmpack_sources
         + mmpack_lib_sources
-        + mmpack_check_sysdep_sources
         + mount_mmpack_prefix_sources)
 
 all_sources = (all_c_sources

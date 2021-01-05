@@ -18,6 +18,7 @@
 #include "common.h"
 #include "mmpack-autoremove.h"
 #include "mmpack-check-integrity.h"
+#include "mmpack-check-sysdep.h"
 #include "mmpack-download.h"
 #include "mmpack-fix-broken.h"
 #include "mmpack-install.h"
@@ -38,6 +39,7 @@ static
 const struct subcmd mmpack_subcmds[] = {
 	{"autoremove", mmpack_autoremove},
 	{"check-integrity", mmpack_check_integrity},
+	{"check-sysdep", mmpack_check_sysdep},
 	{"download", mmpack_download},
 	{"fix-broken", mmpack_fix_broken},
 	{"info", mmpack_show},
@@ -71,6 +73,7 @@ static const char mmpack_doc[] =
 static const char arguments_docs[] =
 	"[options] "AUTOREMOVE_SYNOPSIS "\n"
 	"[options] "CHECK_INTEGRITY_SYNOPSIS "\n"
+	"[options] "CHECK_SYSDEP_SYNOPSIS "\n"
 	"[options] "DOWNLOAD_SYNOPSIS "\n"
 	"[options] "FIX_BROKEN_SYNOPSIS "\n"
 	"[options] "INSTALL_SYNOPSIS "\n"

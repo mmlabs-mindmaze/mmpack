@@ -77,10 +77,11 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
     1/ check sysdeps for presence
     2/ install mmpack deps if missing
     """
+    mmpack_bin = Workspace().mmpack_bin()
+
     # check sysdeps first
     if system_builddeps:
-        sysdep_cmd = [LIBEXECDIR + '/mmpack/mmpack-check-sysdep']
-        sysdep_cmd += system_builddeps
+        sysdep_cmd = [mmpack_bin, 'check-sysdep'] + system_builddeps
         ret = run(sysdep_cmd, check=False)
         if ret.returncode:
             return ret.returncode
@@ -90,7 +91,7 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
 
     # install missing mmpack packages
     # forward options to mmpack install
-    cmd = Workspace().mmpack_bin()
+    cmd = mmpack_bin
     if prefix:
         cmd += ' --prefix=' + prefix
     cmd += ' install '
