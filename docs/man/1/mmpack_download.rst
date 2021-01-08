@@ -1,5 +1,5 @@
 ===============
-mmpack-download
+mmpack download
 ===============
 
 -----------------
@@ -20,7 +20,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-download** downloads given packages into the current mmpack prefix
+**mmpack download** downloads given packages into the current mmpack prefix
 cache folder. The package itself is not parsed by mmpack, and its dependencies
 are not looked for.
 
@@ -38,7 +38,7 @@ OPTIONS
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-mkprefix**\(1),
-**mmpack-search**\(1),
-**mmpack-source**\(1),
-**mmpack-install**\(1),
+**mmpack_mkprefix**\(1),
+**mmpack_search**\(1),
+**mmpack_source**\(1),
+**mmpack_install**\(1),

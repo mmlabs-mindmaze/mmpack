@@ -1,5 +1,5 @@
 ===============
-mmpack-rdepends
+mmpack_rdepends
 ===============
 
 -----------------------------------------
@@ -19,7 +19,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-rdepends** show the reverse dependencies of a package named *package*
+**mmpack rdepends** show the reverse dependencies of a package named *package*
 for which the reverse dependencies are searched. In the case where the option
 **--sumsha** is set, *package* corresponds to the sumsha of the package.
 

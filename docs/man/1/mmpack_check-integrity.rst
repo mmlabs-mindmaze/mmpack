@@ -1,5 +1,5 @@
 ======================
-mmpack-check-integrity
+mmpack_check-integrity
 ======================
 
 ------------------------
@@ -18,7 +18,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-check-integrity** check package integrity, or all packages if none given
+**mmpack check-integrity** checks package integrity, or all packages if none given
 
 OPTIONS
 =======
@@ -28,5 +28,5 @@ OPTIONS
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-install**\(1),
-**mmpack-remove**\(1),
+**mmpack_install**\(1),
+**mmpack_remove**\(1),

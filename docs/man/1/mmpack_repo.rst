@@ -1,5 +1,5 @@
 ===========
-mmpack-repo
+mmpack_repo
 ===========
 
 ---------------
@@ -30,8 +30,8 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-**mmpack-repo** is a tool to manage the repositories of a prefix. It mimics
-the *git remote* command. A call to **mmpack-update** is required for the
+**mmpack repo** is a tool to manage the repositories of a prefix. It mimics
+the *git remote* command. A call to **mmpack update** is required for the
 changes to take effect. It supports the following subccommands:
 
    add
@@ -64,5 +64,5 @@ OPTIONS
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-mkprefix**\(1),
-**mmpack-update**\(1),
+**mmpack_mkprefix**\(1),
+**mmpack_update**\(1),

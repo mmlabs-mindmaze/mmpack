@@ -1,5 +1,5 @@
 ===============
-mmpack-show
+mmpack_show
 ===============
 
 -------------
@@ -18,7 +18,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-show** show given package metadata.
+**mmpack show** show given package metadata.
 
 OPTIONS
 =======
@@ -28,8 +28,8 @@ OPTIONS
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-install**\(1),
-**mmpack-mkprefix**\(1),
-**mmpack-remove**\(1),
-**mmpack-run**\(1),
-**mmpack-update**\(1),
+**mmpack_install**\(1),
+**mmpack_mkprefix**\(1),
+**mmpack_remove**\(1),
+**mmpack_run**\(1),
+**mmpack_update**\(1),

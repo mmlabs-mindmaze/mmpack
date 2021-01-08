@@ -17,7 +17,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-build-guess** will attempt to guess a mmpack specfile from the current
+**mmpack-build guess** will attempt to guess a mmpack specfile from the current
 tree and prints it to stdout.
 
 It expects to be called from the root of the git repository.

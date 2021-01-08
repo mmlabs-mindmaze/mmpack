@@ -1,5 +1,5 @@
 ===============
-mmpack-install
+mmpack_install
 ===============
 
 ----------------
@@ -20,7 +20,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-install** installs given packages and their dependencies into the
+**mmpack install** installs given packages and their dependencies into the
 current prefix.
 
 If **mmpack** finds missing systems dependencies, then it will abort the
@@ -41,10 +41,10 @@ OPTIONS
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-mkprefix**\(1),
-**mmpack-remove**\(1),
-**mmpack-run**\(1),
-**mmpack-search**\(1),
-**mmpack-source**\(1),
-**mmpack-update**\(1),
-**mmpack-upgrade**\(1),
+**mmpack_mkprefix**\(1),
+**mmpack_remove**\(1),
+**mmpack_run**\(1),
+**mmpack_search**\(1),
+**mmpack_source**\(1),
+**mmpack_update**\(1),
+**mmpack_upgrade**\(1),

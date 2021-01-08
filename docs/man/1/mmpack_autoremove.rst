@@ -1,5 +1,5 @@
 =================
-mmpack-autoremove
+mmpack_autoremove
 =================
 
 -------------------
