@@ -1,5 +1,5 @@
 ===============
-mmpack-remove
+mmpack_remove
 ===============
 
 --------------
@@ -20,7 +20,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-remove** removes given packages and the packages depending upon them
+**mmpack remove** removes given packages and the packages depending upon them
 from the current prefix.
 
 First *mmpack** adds all given packages and the packages depending upon them
@@ -42,8 +42,8 @@ OPTIONS
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-mkprefix**\(1),
-**mmpack-install**\(1),
-**mmpack-run**\(1),
-**mmpack-search**\(1),
-**mmpack-update**\(1),
+**mmpack_mkprefix**\(1),
+**mmpack_install**\(1),
+**mmpack_run**\(1),
+**mmpack_search**\(1),
+**mmpack_update**\(1),

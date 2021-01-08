@@ -1,5 +1,5 @@
 ===============
-mmpack-mkprefix
+mmpack_mkprefix
 ===============
 
 ---------------------
@@ -20,7 +20,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-prefix** allows you to create a new prefix in folder specified by
+**mmpack mkprefix** allows you to create a new prefix in folder specified by
 *prefix-path* which will pull packages from *repo_url* vwhose URL is
 optionally set by **--url** and whose short name is given optionally by
 **--name**.
@@ -51,8 +51,8 @@ OPTIONS
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-install**\(1),
-**mmpack-remove**\(1),
-**mmpack-run**\(1),
-**mmpack-search**\(1),
-**mmpack-update**\(1),
+**mmpack_install**\(1),
+**mmpack_remove**\(1),
+**mmpack_run**\(1),
+**mmpack_search**\(1),
+**mmpack_update**\(1),

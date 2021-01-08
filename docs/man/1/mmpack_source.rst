@@ -1,5 +1,5 @@
 ===============
-mmpack-source
+mmpack_source
 ===============
 
 ----------------
@@ -18,7 +18,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-source** download given package sources into current directory.
+**mmpack source** download given package sources into current directory.
 
 OPTIONS
 =======
@@ -28,6 +28,6 @@ OPTIONS
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-install**\(1),
-**mmpack-remove**\(1),
-**mmpack-show**\(1),
+**mmpack_install**\(1),
+**mmpack_remove**\(1),
+**mmpack_show**\(1),

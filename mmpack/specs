@@ -22,7 +22,7 @@ mmpack:
     - share/mmpack/check-dpkg-installed
     - share/mmpack/prompt.bash
     - share/bash-completion/completions/mmpack
-    - share/man/man1/mmpack-(?!build|modifyrepo).*\.1
+    - share/man/man1/mmpack_.*\.1
 
 mmpack-build:
   description: |

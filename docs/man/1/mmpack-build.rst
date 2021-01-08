@@ -106,8 +106,8 @@ MMPACK_BUILD_CACHEDIR
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-build-pkg-create**\(1),
-**mmpack-build-clean**\(1),
-**mmpack-build-builddep**\(1),
-**mmpack-build-guess**\(1),
-**mmpack-build-mksource**\(1),
+**mmpack-build_pkg-create**\(1),
+**mmpack-build_clean**\(1),
+**mmpack-build_builddep**\(1),
+**mmpack-build_guess**\(1),
+**mmpack-build_mksource**\(1),

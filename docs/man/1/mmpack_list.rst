@@ -1,5 +1,5 @@
 ===========
-mmpack-list
+mmpack_list
 ===========
 
 -------------
@@ -49,6 +49,6 @@ OPTIONS
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-search**\(1),
-**mmpack-show**\(1),
-**mmpack-update**\(1),
+**mmpack_search**\(1),
+**mmpack_show**\(1),
+**mmpack_update**\(1),

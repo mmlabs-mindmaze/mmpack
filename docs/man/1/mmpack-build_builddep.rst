@@ -20,11 +20,11 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-build-builddep** downloads and install the build dependencies of given
+**mmpack-build builddep** downloads and install the build dependencies of given
 packages into the current prefix.
 It will also check for the presence of mentioned system packages.
 
-**mmpack-build-builddep** will succeed if all the system packages are already
+**mmpack-build builddep** will succeed if all the system packages are already
 installed and if all the mmpack packages are already present or successfully
 added by the current command.
 It will fail otherwise.
@@ -55,7 +55,7 @@ MMPACK_PREFIX
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-source**\(1),
-**mmpack-install**\(1),
-**mmpack-mkprefix**\(1),
+**mmpack_source**\(1),
+**mmpack_install**\(1),
+**mmpack_mkprefix**\(1),
 **mmpack-build**\(1),
