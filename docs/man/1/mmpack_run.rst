@@ -1,5 +1,5 @@
 ==========
-mmpack-run
+mmpack_run
 ==========
 
 ---------------------
@@ -18,7 +18,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-run** runs given *command* within current prefix.
+**mmpack run** runs given *command* within current prefix.
 If no command was given, it will open an interactive shell within the current
 prefix instead.
 
@@ -64,8 +64,8 @@ implements this and can be sourced in your bash initialization file.
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-mkprefix**\(1),
-**mmpack-install**\(1),
-**mmpack-remove**\(1),
-**mmpack-search**\(1),
-**mmpack-update**\(1),
+**mmpack_mkprefix**\(1),
+**mmpack_install**\(1),
+**mmpack_remove**\(1),
+**mmpack_search**\(1),
+**mmpack_update**\(1),

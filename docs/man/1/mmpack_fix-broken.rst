@@ -1,5 +1,5 @@
 =================
-mmpack-fix-broken
+mmpack_fix-broken
 =================
 
 -------------------
@@ -20,10 +20,10 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-fix-broken** resets an already-installed package to its original
+**mmpack fix-broken** resets an already-installed package to its original
 state, meaning as if it was just installed.
 
-if no argument is given, **mmpack-fix-broken** will go through all the
+if no argument is given, **mmpack fix-broken** will go through all the
 installed packages to try and fix them, otherwise it will only process the
 packages given in the command line.
 
@@ -33,12 +33,12 @@ used to describe the broken package content). However, the package can at the
 same time be installed, and even be working as expected.
 In this described case, fix-broken will only repair the sha256sums file.
 
-**mmpack-fix-broken** only works on already-installed packages.
+**mmpack fix-broken** only works on already-installed packages.
 
 
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-install**\(1),
-**mmpack-remove**\(1),
-**mmpack-upgrade**\(1),
+**mmpack_install**\(1),
+**mmpack_remove**\(1),
+**mmpack_upgrade**\(1),

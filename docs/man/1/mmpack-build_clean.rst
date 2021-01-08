@@ -21,7 +21,7 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack-build-clean** is the **mmpack-build** subcommand which removes
+**mmpack-build clean** is the **mmpack-build** subcommand which removes
 mmpack-build temporary files. It may also remove generated packages.
 
 OPTIONS

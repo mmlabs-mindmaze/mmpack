@@ -446,30 +446,30 @@ dist_completion_DATA = \
 
 RST_MAN1_PAGES = \
 	docs/man/1/mmpack.rst \
-	docs/man/1/mmpack-autoremove.rst \
+	docs/man/1/mmpack_autoremove.rst \
 	docs/man/1/mmpack-build.rst \
-	docs/man/1/mmpack-build-builddep.rst \
-	docs/man/1/mmpack-build-clean.rst \
-	docs/man/1/mmpack-build-guess.rst \
-	docs/man/1/mmpack-build-mksource.rst \
-	docs/man/1/mmpack-build-pkg-create.rst \
-	docs/man/1/mmpack-check-integrity.rst \
-	docs/man/1/mmpack-download.rst \
-	docs/man/1/mmpack-fix-broken.rst \
-	docs/man/1/mmpack-install.rst \
-	docs/man/1/mmpack-list.rst \
-	docs/man/1/mmpack-mkprefix.rst \
+	docs/man/1/mmpack-build_builddep.rst \
+	docs/man/1/mmpack-build_clean.rst \
+	docs/man/1/mmpack-build_guess.rst \
+	docs/man/1/mmpack-build_mksource.rst \
+	docs/man/1/mmpack-build_pkg-create.rst \
+	docs/man/1/mmpack_check-integrity.rst \
+	docs/man/1/mmpack_download.rst \
+	docs/man/1/mmpack_fix-broken.rst \
+	docs/man/1/mmpack_install.rst \
+	docs/man/1/mmpack_list.rst \
+	docs/man/1/mmpack_mkprefix.rst \
 	docs/man/1/mmpack-modifyrepo.rst \
-	docs/man/1/mmpack-provides.rst \
-	docs/man/1/mmpack-rdepends.rst \
-	docs/man/1/mmpack-remove.rst \
-	docs/man/1/mmpack-repo.rst \
-	docs/man/1/mmpack-run.rst \
-	docs/man/1/mmpack-search.rst \
-	docs/man/1/mmpack-show.rst \
-	docs/man/1/mmpack-source.rst \
-	docs/man/1/mmpack-update.rst \
-	docs/man/1/mmpack-upgrade.rst \
+	docs/man/1/mmpack_provides.rst \
+	docs/man/1/mmpack_rdepends.rst \
+	docs/man/1/mmpack_remove.rst \
+	docs/man/1/mmpack_repo.rst \
+	docs/man/1/mmpack_run.rst \
+	docs/man/1/mmpack_search.rst \
+	docs/man/1/mmpack_show.rst \
+	docs/man/1/mmpack_source.rst \
+	docs/man/1/mmpack_update.rst \
+	docs/man/1/mmpack_upgrade.rst \
 	$(eof)
 RST_MAN5_PAGES = \
 	docs/man/5/mmpack-config.rst \

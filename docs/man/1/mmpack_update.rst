@@ -1,5 +1,5 @@
 =============
-mmpack-update
+mmpack_update
 =============
 
 --------------
@@ -19,7 +19,7 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-**mmpack-update** update local package list from repository list in config file.
+**mmpack update** update local package list from repository list in config file.
 
 OPTIONS
 =======
@@ -37,9 +37,9 @@ FILES
 SEE ALSO
 ========
 **mmpack**\(1),
-**mmpack-install**\(1),
-**mmpack-mkprefix**\(1),
-**mmpack-remove**\(1),
-**mmpack-run**\(1),
-**mmpack-search**\(1),
-**mmpack-upgrade**\(1),
+**mmpack_install**\(1),
+**mmpack_mkprefix**\(1),
+**mmpack_remove**\(1),
+**mmpack_run**\(1),
+**mmpack_search**\(1),
+**mmpack_upgrade**\(1),

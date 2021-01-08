@@ -85,5 +85,5 @@ SEE ALSO
 ========
 
 **mmpack-build**\(1)
-**mmpack-build-pkg-create**\(1)
+**mmpack-build_pkg-create**\(1)
 

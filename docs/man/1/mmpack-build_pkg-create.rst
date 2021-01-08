@@ -84,4 +84,4 @@ SEE ALSO
 ========
 
 **mmpack-build**\(1)
-**mmpack-build-mksource**\(1)
+**mmpack-build_mksource**\(1)
