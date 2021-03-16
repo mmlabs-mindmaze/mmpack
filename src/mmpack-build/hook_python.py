@@ -139,10 +139,10 @@ def _gen_pydepends(pkg: PackageInfo, sitedirs: List[str]) -> Set[str]:
 
 
 class _PyPkg:
-    def __init__(self, toplevel: str):
+    def __init__(self):
         self.files = set()
         self.name = None
-        self.toplevel = toplevel
+        self.toplevel = set()
         self.only_metadata = True
 
     def add(self, filename: str, is_metadata: False):
@@ -162,7 +162,7 @@ class _PyPkg:
                 self.name = _parse_metadata(filename)['Name']
 
             if filename.endswith('.egg-info/top_level.txt'):
-                self.toplevel = open(filename).read().strip()
+                self.toplevel = {d.strip() for d in open(filename).readlines()}
 
     def merge_pkg(self, pypkg):
         """
@@ -170,6 +170,7 @@ class _PyPkg:
         accordingly
         """
         self.files.update(pypkg.files)
+        self.toplevel.update(pypkg.toplevel)
         self.only_metadata = self.only_metadata and pypkg.only_metadata
         if not self.name:
             self.name = pypkg.name
@@ -305,7 +306,7 @@ class MMPackBuildHook(BaseHook):
         for file in data.unassigned_files.copy():
             try:
                 info = _parse_py3_filename(file)
-                pypkg = pypkgs.setdefault(info.pyname, _PyPkg(info.pyname))
+                pypkg = pypkgs.setdefault(info.pyname, _PyPkg())
                 pypkg.add(file, info.is_egginfo)
             except FileNotFoundError:
                 pass
@@ -314,9 +315,11 @@ class MMPackBuildHook(BaseHook):
         # the toplevel field
         for key, pypkg in pypkgs.copy().items():
             pypkg.update_metada()
-            if pypkg.toplevel != key:
-                pypkgs.pop(key)
-                pypkgs[pypkg.toplevel].merge_pkg(pypkg)
+            for topdir in pypkg.toplevel:
+                try:
+                    pypkg.merge_pkg(pypkgs.pop(topdir))
+                except KeyError:
+                    pass
 
         pkglist = list(pypkgs.values())
         if len([p for p in pkglist if not p.only_metadata]) == 1:
