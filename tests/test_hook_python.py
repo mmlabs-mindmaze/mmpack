@@ -209,7 +209,7 @@ class TestPythonHook(unittest.TestCase):
         """test dependent imports with simple package with no import"""
         pkgfiles = ['launcher']
         refimports = {
-            'multi.__main__',
+            'multi.__main__.main',
             'pkg_resources.load_entry_point',
         }
         imports = _get_py_depends(pkgfiles)
