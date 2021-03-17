@@ -1,0 +1,15 @@
+Metadata-Version: 1.2
+Name: Multi
+Version: 1.0
+Summary: Dummy project
+Home-page: https://nourl.com
+Maintainer: Ema Nymton
+Maintainer-email: ema.nymton@fake.com
+License: BSD
+Description: multi
+        =====
+        
+	No description
+        
+Platform: any
+Requires-Python: >=3.6
