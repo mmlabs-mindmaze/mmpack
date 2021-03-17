@@ -42,10 +42,14 @@ def _belong_to_public_package(filename: str):
 def _is_builtin(node: NodeNG, builtin_typename=None):
     try:
         pytype = node.pytype()
-        if builtin_typename:
-            return pytype == 'builtins.' + builtin_typename
+        if pytype.startswith('builtins.'):
+            if not builtin_typename:
+                return True
 
-        return pytype.startswith('builtins.')
+            if isinstance(builtin_typename, str):
+                builtin_typename = (builtin_typename,)
+
+            return pytype in ('builtins.' + t for t in builtin_typename)
     except AttributeError:
         return False
 
@@ -190,7 +194,8 @@ class DependsInspector:
                 base = _get_classbase_defining_attr(base, attr.attrname)
 
             # Add symbol if base does not belong to packaged files
-            if self._is_external_pkg(base) and not _is_builtin(base, 'tuple'):
+            if self._is_external_pkg(base) \
+                    and not _is_builtin(base, ('tuple', 'type')):
                 sym = base.qname() + '.' + attr.attrname
                 self.used_symbols.add(sym)
 
@@ -206,7 +211,8 @@ class DependsInspector:
         _, nodelist = namenode.lookup(name)
         for node in nodelist:
             symbol_name, node_def = self._follow_name_origin(node, name)
-            if self._is_external_pkg(node_def):
+            if self._is_external_pkg(node_def) \
+                    and not _is_builtin(node_def, 'type'):
                 self.used_symbols.add(symbol_name)
 
     def _inspect_node_call(self, call: Call):
