@@ -15,6 +15,8 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, dirname
 from typing import Set, Iterator, Tuple, Union
 
+import pkg_resources
+
 from astroid import MANAGER as astroid_manager
 from astroid import Uninferable, Module, Instance, ClassDef, \
     Import, ImportFrom, Call, Attribute, Name
@@ -238,9 +240,12 @@ class DependsInspector:
         if self._is_external_pkg(funcdef) \
                 and funcdef.qname() == 'pkg_resources.load_entry_point':
             # Add main entry of imported package
-            pkgreq = next(call.args[0].infer()).value
-            pkgname = pkgreq.split('==')[0]
-            self.used_symbols.add(pkgname + '.__main__')
+            args = [next(a.infer()).value for a in call.args]
+            entry = pkg_resources.get_entry_info(*args)
+            sym = entry.module_name
+            if entry.attrs:
+                sym += '.' + '.'.join(entry.attrs)
+            self.used_symbols.add(sym)
 
     def _inspect_node(self, node: NodeNG):
         """
@@ -298,6 +303,19 @@ class DependsInspector:
             sys.path.pop(0)
 
 
+def add_to_pkg_resources(entry):
+    """
+    Add path entry to the list of python package provider known by
+    pkg_resources. If a packge were already known (as parsed by initial
+    sys.path), it will be replaced.
+    """
+    working_set = pkg_resources.working_set
+    working_set.entry_keys.setdefault(entry, [])
+    working_set.entries.append(entry)
+    for dist in pkg_resources.find_distributions(entry, True):
+        working_set.add(dist, entry, replace=True)
+
+
 def parse_options():
     """
     parse options
@@ -323,6 +341,7 @@ def main():
     # the imports properly
     for sitedir in options.site_paths:
         sys.path.insert(0, abspath(sitedir))
+        add_to_pkg_resources(sys.path[0])
 
     pkgfiles = [abspath(f.strip()) for f in options.infiles]
 
