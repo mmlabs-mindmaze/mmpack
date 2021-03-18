@@ -3,8 +3,11 @@
 A set of helpers used throughout the mmpack project
 """
 
+import bz2
 import logging
 import logging.handlers
+import lzma
+import gzip
 import os
 import re
 import sys
@@ -450,6 +453,24 @@ def create_tarball(srcdir: str, dstfile: str, compression: str = '') -> None:
     tar = tarfile.open(dstfile, 'w:' + compression)
     tar.add(srcdir, recursive=True, filter=_reset_entry_attrs, arcname='.')
     tar.close()
+
+
+def open_compressed_file(path, mode, **kwargs):
+    """
+    Open a compressed or uncompressed file transparently. The selection of
+    compression is done based on path extension.
+    """
+    if 'r' not in mode:
+        raise ValueError('open_compressed_file() supports only read mode')
+
+    if path.endswith('.gz'):
+        return gzip.GzipFile(path, mode, **kwargs)
+    elif path.endswith('.xz'):
+        return lzma.open(path, mode, **kwargs)
+    elif path.endswith('.bz2'):
+        return bz2.open(path, mode, **kwargs)
+
+    return open(path, mode, **kwargs)
 
 
 def get_name_version_from_srcdir(srcdir: str) -> Tuple[str, str]:
