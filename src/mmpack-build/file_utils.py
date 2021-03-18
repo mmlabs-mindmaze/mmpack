@@ -142,11 +142,12 @@ def is_dynamic_library(filename: str, host_archdist: str) -> bool:
         # 'lib/libfoo.so.1'
         # 'lib/libfoo.so.1.2.3'
         # 'usr/lib/libfoo.so.1.2.3'
+        # 'usr/lib/libfoo++.so.1.2.3'
         # 'usr/lib/x86_64-linux-gnu/libfoo.so.1.2.3'
         # 'lib/libfoo_awesome-special.so.1.2.3'
         # 'lib/libfoo45.so.1.2.3'
         # 'lib/libfoo3.5.so.1.2.3'
-        elffile = r'(?:usr/)?lib/(?:{}/)?lib(?:[.\w-]+)\.so[.0-9]*' \
+        elffile = r'(?:usr/)?lib/(?:{}/)?lib(?:[+.\w-]+)\.so[.0-9]*' \
                   .format(multiarch)
         if not re.match(elffile, filename):
             return False
