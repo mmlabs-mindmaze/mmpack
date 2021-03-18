@@ -399,7 +399,8 @@ def yaml_load(filename: str):
     """
     helper: load yaml file with BasicLoader
     """
-    return yaml.load(open(filename, 'rb').read(), Loader=yaml.BaseLoader)
+    with open_compressed_file(filename, 'rb') as fileobj:
+        return yaml.load(fileobj.read(), Loader=yaml.BaseLoader)
 
 
 class Assert(AssertionError):
