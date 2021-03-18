@@ -3,7 +3,9 @@
 common classes to specify provided symbols to other packages
 """
 
-from glob import glob
+import re
+from os import listdir
+from os.path import exists
 from typing import Set, Dict, Tuple, List
 
 from . common import wprint, yaml_serialize, yaml_load
@@ -277,11 +279,16 @@ def load_mmpack_provides(extension: str, symtype) -> ProvideList:
         installed mmpack packages matching symtype
     """
     wrk = Workspace()
-    symfiles = glob('{}/var/lib/mmpack/metadata/**.{}'
-                    .format(wrk.prefix, extension))
+    metadatadir = wrk.prefix + '/var/lib/mmpack/metadata/'
+    pattern = re.compile(r'.*.{}(?:.gz)?'.format(extension))
 
     provides = ProvideList(symtype)
-    for symfile in symfiles:
-        provides.add_from_file(symfile)
+
+    if not exists(metadatadir):
+        return provides
+
+    for symfile in listdir(metadatadir):
+        if pattern.fullmatch(symfile):
+            provides.add_from_file(metadatadir + symfile)
 
     return provides
