@@ -377,7 +377,7 @@ def shlib_keyname(soname: str) -> str:
     if name[-1].isdigit() and version:
         name += '-'
 
-    name = name.lower()
+    name = name.lower().replace('_', '-')
 
     # Sometime on some platform, mostly on windows, shared libraries names are
     # not prefixed with "lib". This is an issue because often, those project on
