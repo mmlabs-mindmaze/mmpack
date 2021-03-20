@@ -575,7 +575,9 @@ class SrcPackage:
         # deal with the remaining files:
         if data.unassigned_files and not self.ghost:
             pkgname = self._get_fallback_pkgname(data.pkgs.keys())
-            data.assign_to_pkg(pkgname, data.unassigned_files)
+            pkg = data.assign_to_pkg(pkgname, data.unassigned_files)
+            if not pkg.description:
+                self._format_description(pkg)
 
         self._create_binpkgs_from_dispatch(data)
         popdir()  # local-install dir
