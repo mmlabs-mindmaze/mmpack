@@ -456,16 +456,13 @@ def create_tarball(srcdir: str, dstfile: str, compression: str = '') -> None:
     tar.close()
 
 
-def open_compressed_file(path, mode, **kwargs):
+def open_compressed_file(path, mode='rt', **kwargs):
     """
     Open a compressed or uncompressed file transparently. The selection of
     compression is done based on path extension.
     """
-    if 'r' not in mode:
-        raise ValueError('open_compressed_file() supports only read mode')
-
     if path.endswith('.gz'):
-        return gzip.GzipFile(path, mode, **kwargs)
+        return gzip.open(path, mode, **kwargs)
     elif path.endswith('.xz'):
         return lzma.open(path, mode, **kwargs)
     elif path.endswith('.bz2'):
