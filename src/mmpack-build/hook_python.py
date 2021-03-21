@@ -138,6 +138,21 @@ def _gen_pydepends(pkg: PackageInfo, sitedirs: List[str]) -> Set[str]:
     return set(cmd_output.split())
 
 
+def _get_packaged_public_sitedirs(pkg: PackageInfo) -> Set[str]:
+    if not pkg.ghost:
+        return {_MMPACK_REL_PY_SITEDIR}
+
+    # List python3 sitedir that expose public packages
+    sitedirs = set()
+    for pkgfile in pkg.files:
+        match = _PKG_REGEX.match(pkgfile)
+        if not match:
+            continue
+        sitedirs.add(match.groups()[0])
+
+    return sitedirs
+
+
 class _PyPkg:
     def __init__(self):
         self.files = set()
@@ -341,7 +356,8 @@ class MMPackBuildHook(BaseHook):
     def update_provides(self, pkg: PackageInfo,
                         specs_provides: Dict[str, Dict]):
         # Add public python package
-        py3_provides = _gen_py_provides(pkg, [_MMPACK_REL_PY_SITEDIR])
+        public_sitedirs = _get_packaged_public_sitedirs(pkg)
+        py3_provides = _gen_py_provides(pkg, public_sitedirs)
         py3_provides.update_from_specs(specs_provides, pkg.name)
         pkg.provides['python'] = py3_provides
 
