@@ -603,9 +603,11 @@ class SrcPackage:
                            'size': path.getsize(self.src_tarball),
                            'sha256': self.src_hash}}
 
-        manifest_path = '{}_{}_{}.mmpack-manifest'.format(self.name,
-                                                          self.version,
-                                                          arch)
+        outdir = self.pkgbuild_path()
+        manifest_path = '{}/{}_{}_{}.mmpack-manifest'.format(outdir,
+                                                             self.name,
+                                                             self.version,
+                                                             arch)
         yaml_serialize(data, manifest_path, use_block_style=True)
         return manifest_path
 
