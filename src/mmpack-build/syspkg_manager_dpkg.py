@@ -3,7 +3,6 @@
 helper module containing dpkg files parsing functions
 """
 
-import gzip
 import os
 import re
 
@@ -344,18 +343,26 @@ class Dpkg(SysPkgManager):
 
         arch = get_host_arch()
         suffix = dist.replace('/', '_')
-        gzipped_index = os.path.join(builddir, 'Packages_{}.gz'.format(suffix))
-        pkgindex_url = '{}/dists/{}/binary-{}/Packages.gz'\
-                       .format(repo_url, dist, arch)
 
-        # download compressed index
-        cached_download(pkgindex_url, gzipped_index)
+        for ext in ('.gz', '.xz', ''):
+            index = os.path.join(builddir, 'Packages_{}{}'.format(suffix, ext))
+            pkgindex_url = '{}/dists/{}/binary-{}/Packages{}'\
+                           .format(repo_url, dist, arch, ext)
 
-        # Parse compressed package index
-        for pkg in _list_debpkg_index(gzip.open(gzipped_index, 'rt')):
-            if pkg.source == srcname:
-                pkg.url = repo_url + '/' + pkg.filename
-                pkg.filename = os.path.basename(pkg.filename)
-                pkg_list.append(pkg)
+            # download compressed index
+            try:
+                cached_download(pkgindex_url, index)
+            except RuntimeError:
+                continue
 
-        return pkg_list
+            # Parse compressed package index
+            for pkg in _list_debpkg_index(open_compressed_file(index)):
+                if pkg.source == srcname:
+                    pkg.url = repo_url + '/' + pkg.filename
+                    pkg.filename = os.path.basename(pkg.filename)
+                    pkg_list.append(pkg)
+
+            return pkg_list
+
+        raise RuntimeError('Could not find {} or any compressed version!'
+                           .format(index))
