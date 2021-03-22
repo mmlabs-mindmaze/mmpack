@@ -18,6 +18,7 @@ import tarfile
 import platform
 
 from hashlib import sha256
+from io import TextIOWrapper
 from subprocess import PIPE, run
 from typing import Union, Dict, Tuple, List, Set
 
@@ -464,7 +465,10 @@ def open_compressed_file(path, mode='rt', **kwargs):
     compression is done based on path extension.
     """
     if path.endswith('.gz'):
-        return gzip.open(path, mode, **kwargs)
+        fileobj = gzip.GzipFile(path, mode.replace('t', ''), mtime=0)
+        if 'b' not in mode:
+            fileobj = TextIOWrapper(fileobj, **kwargs)
+        return fileobj
     elif path.endswith('.xz'):
         return lzma.open(path, mode, **kwargs)
     elif path.endswith('.bz2'):
