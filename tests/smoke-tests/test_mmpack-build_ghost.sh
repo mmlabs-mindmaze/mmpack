@@ -90,7 +90,7 @@ cmp <(tar -tf $pkgfile) <<EOF
 ./var/lib/mmpack/
 ./var/lib/mmpack/metadata/
 ./var/lib/mmpack/metadata/$pkgname.sha256sums
-./var/lib/mmpack/metadata/$pkgname.symbols
+./var/lib/mmpack/metadata/$pkgname.symbols.gz
 EOF
 
 

@@ -156,7 +156,7 @@ class MMPackBuildHook(BaseHook):
         pkg.provides['sharedlib'] = shlib_provides
 
     def store_provides(self, pkg: PackageInfo, folder: str):
-        filename = '{}/{}.symbols'.format(folder, pkg.name)
+        filename = '{}/{}.symbols.gz'.format(folder, pkg.name)
         pkg.provides['sharedlib'].serialize(filename)
 
     def update_depends(self, pkg: PackageInfo, other_pkgs: List[PackageInfo]):
