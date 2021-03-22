@@ -10,6 +10,8 @@ import lzma
 import gzip
 import os
 import re
+import shutil
+import stat
 import sys
 import tarfile
 
@@ -579,3 +581,21 @@ def extract_matching_set(pcre: str, str_set: Set[str]) -> Set[str]:
     matching_set = {f for f in str_set if matching_re.fullmatch(f)}
     str_set.difference_update(matching_set)
     return matching_set
+
+
+def _onerror_handler(func, path, exc_info):
+    if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWRITE)
+        try:
+            os.remove(path)
+        except IsADirectoryError:
+            os.rmdir(path)
+
+def rmtree_force(path: str):
+    """
+    Call to shutil.rmtree() that tries to delete file even they are read-only.
+    On POSIX, a file can always be removed if the calling process has the write
+    access on containing folder. On Windows the write permission must be added
+    as well.
+    """
+    shutil.rmtree(path, onerror=_onerror_handler)
