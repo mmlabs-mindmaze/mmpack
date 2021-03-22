@@ -183,7 +183,7 @@ class SourceTarball:
         # If source build dir has been created and not detach, remove it at
         # instance destruction
         dprint('Destroying temporary source build dir ' + self._builddir)
-        shutil.rmtree(self._builddir)
+        rmtree_force(self._builddir)
 
     def _gen_project_sources(self, subdir: str = '') -> ProjectSource:
         srcdir = self._srcdir
@@ -405,7 +405,7 @@ class SourceTarball:
         gitref = _git_subcmd(['rev-parse', 'HEAD'], gitdir=gitdir)
         self.trace['upstream'].update({'url': url, 'ref': gitref})
 
-        shutil.rmtree(gitdir)
+        rmtree_force(gitdir)
 
     def _fetch_upstream_from_tar(self, specs: Dict[str, str]):
         """
@@ -449,7 +449,7 @@ class SourceTarball:
         # inexisting folder.
         upstream_srcdir = self._get_unpacked_upstream_dir()
         if os.path.exists(upstream_srcdir):
-            shutil.rmtree(upstream_srcdir)
+            rmtree_force(upstream_srcdir)
 
         # check that mandatory keys are present in sources-strap file
         missings_keys = {'method', 'url'}.difference(specs)

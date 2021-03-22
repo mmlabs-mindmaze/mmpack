@@ -6,14 +6,13 @@ plugin tracking containing python file handling functions
 import filecmp
 import os
 import re
-import shutil
 from collections import namedtuple
 from email.parser import Parser
 from glob import glob, iglob
 from typing import Set, Dict, List, Iterable
 
 from . base_hook import BaseHook
-from . common import shell, Assert, iprint
+from . common import shell, Assert, iprint, rmtree_force
 from . file_utils import is_python_script
 from . package_info import PackageInfo, DispatchData
 from . provide import Provide, ProvideList, load_mmpack_provides
@@ -307,7 +306,7 @@ class MMPackBuildHook(BaseHook):
                     os.replace(src, dst)
 
             # Remove the remainings
-            shutil.rmtree(pydir)
+            rmtree_force(pydir)
 
         # Transform versioned egg-info to unversioned one
         egginfo_re = re.compile(r'(.*)-py3(?:\.\d\w*)*.egg-info$')
