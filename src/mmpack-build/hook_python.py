@@ -365,7 +365,7 @@ class MMPackBuildHook(BaseHook):
         pkg.provides['pypriv'] = _gen_py_provides(pkg, self._private_sitedirs)
 
     def store_provides(self, pkg: PackageInfo, folder: str):
-        filename = '{}/{}.pyobjects'.format(folder, pkg.name)
+        filename = '{}/{}.pyobjects.gz'.format(folder, pkg.name)
         pkg.provides['python'].serialize(filename)
 
     def update_depends(self, pkg: PackageInfo, other_pkgs: List[PackageInfo]):
