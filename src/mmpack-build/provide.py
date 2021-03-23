@@ -6,11 +6,107 @@ common classes to specify provided symbols to other packages
 import re
 from os import listdir
 from os.path import exists
-from typing import Set, Dict, Tuple, List
+from typing import Set, Dict, Tuple, List, NamedTuple, Iterator, Optional
 
 from . common import wprint, yaml_serialize, yaml_load
 from . mm_version import Version
 from . workspace import Workspace
+
+
+# pylint: disable=too-few-public-methods
+class ProvidedSymbol:
+    """
+    data describing a symbol provided by a library known from its name key
+    (referenceable in spec file) and the actual full symbol name
+    """
+    __slots__ = ('symbol', 'name')
+
+    def __init__(self, name: str, symbol: Optional[str] = None):
+        if not symbol:
+            symbol = name
+        self.name = name
+        self.symbol = symbol
+
+    def __repr__(self):
+        return f'(name={self.name}, sym={self.symbol})'
+
+
+class _SpecSymbol(NamedTuple):
+    name: str
+    version: str
+    tags: List[str]
+
+
+class _SpecsSymbols:
+    def __init__(self, symbols: Optional[Dict[str, Version]]):
+        self._older = []  # type: List[ProvidedSymbol]
+        self._removed = set()
+        self._symbols = symbols if symbols else {}
+        self.used = set()
+
+    def known_symbols(self) -> Iterator[_SpecSymbol]:
+        """
+        provides a iterator of the symbol specified in the spec file.
+        """
+        for keyopt, version in self._symbols.items():
+            # Parse possible tags in front key in the form: '(tag1,tag2)symkey'
+            if keyopt.startswith('('):
+                tagstr, key = keyopt[1:].split(')', 1)
+                tags = tagstr.split(',')
+            else:
+                key = keyopt
+                tags = []
+
+            yield _SpecSymbol(name=key, version=version, tags=tags)
+
+    def mark_older(self, specsym: _SpecSymbol):
+        """
+        mark symbol as provided in a earlier version than expected in the spec
+        """
+        self._older.append(specsym)
+
+    def mark_used(self, provsym: ProvidedSymbol):
+        """
+        mark the symbol as used
+        """
+        self.used.add(provsym.name)
+
+    def mark_removed(self, sym: _SpecSymbol):
+        """
+        mark the symbol found in the specs, absent from the provided symbol of
+        library
+        """
+        self._removed.add(sym.name)
+
+    def report_new_symbols(self, provided_symbols: Set[str]):
+        """
+        Print warning log in new symbol have been found, not listed in spec
+        """
+        diff = provided_symbols - self.used
+        if diff:
+            wprint('The following symbols were found but not specified:\n\t'
+                   + '\n\t'.join(diff))
+            wprint('They will all be considered as introduced in the current'
+                   ' project version.')
+
+    def report_older_symbols(self):
+        """
+        Print warning about symbols appearing in earlier version than expected
+        """
+        if not self._older:
+            return
+
+        oldsyms = [f'{s.name}' for s in self._older]
+        wprint('The following symbols have been introduced before expected:\n\t'
+               + '\n\t'.join(oldsyms))
+
+    def report_removed_symbols(self):
+        """
+        Print warning about symbol removed in new version
+        """
+        if self._removed:
+            wprint('The following symbols appear to have been removed:\n\t'
+                   + '\n\t'.join(self._removed))
 
 
 class Provide:
@@ -25,27 +121,8 @@ class Provide:
         self.pkgdepends = None
         self.symbols = dict()
 
-    def _get_symbol(self, name: str) -> Tuple[str, str]:
-        """
-        Look up for symbol name in the known symbols. It might be more advanced
-        that a simple dictionary lookup to accommodate complex case of provide
-        type where symbol name can be slightly different depending on the
-        platform. Hence it might be possible that the returned symbol name is
-        different from name passed in argument.
-
-        Args:
-            name: generic name to search in the known symbol
-
-        Returns:
-            Tuple of version string and full symbol name. If the symbol could
-            not have been found, (None, None) is returned.
-        """
-        version = self.symbols.get(name)
-        if not version:
-            return (None, None)
-
-        # In its base version, the lookup is a simple dictionary lookup
-        return (version, name)
+    def _get_decorated_symbols(self) -> List[ProvidedSymbol]:
+        return [ProvidedSymbol(s) for s in self.symbols.key()]
 
     def add_symbols(self, symbols: Set[str],
                     version: Version = Version('any')) -> None:
@@ -53,9 +130,6 @@ class Provide:
         add a set of symbol along with a minimal version.
         """
         self.symbols.update(dict.fromkeys(symbols, version))
-
-    def _get_symbols_keys(self):
-        return set(self.symbols.keys())
 
     def update_from_specs(self, pkg_specs: dict) -> None:
         """
@@ -74,40 +148,45 @@ class Provide:
 
         Returns:
             None
-
-        Raises:
-            ValueError: a symbol specified in pkg_specs['symbols'] is not found
-                in self.symbols or the associated version is more recent than
-                the current version.
         """
         # Update package deps associated with the provide only if specified
         self.pkgdepends = pkg_specs.get('depends', self.pkgdepends)
 
+        specs_symbols = _SpecsSymbols(pkg_specs.get('symbols'))
+        provided_syms = self._get_decorated_symbols()
+
+        # Generate a lookup table with all provided symbols keyed by both the
+        # full symbol name and the reduced symbol name. If 2 symbols share the
+        # same key, priority will be given to the symbol whose reduced name is
+        # same as symbol
+        lut_syms = {s.symbol: s for s in provided_syms}
+        lut_syms.update({s.name: s for s in provided_syms})
+        lut_syms.update({s.name: s for s in provided_syms
+                         if s.name == s.symbol})
+
         # Update minimal version associated with symbol for all symbols found
         # in dep_specs['symbols'] dictionary
-        specs_symbols = pkg_specs.get('symbols', dict())
-        for name, str_version in specs_symbols.items():
-            # type conversion will raise an error if malformed
-            curr_version, symbol_name = self._get_symbol(name)
-            if not curr_version:
-                raise ValueError('Specified symbol {0} not found '
-                                 'in package files'.format(name))
+        for specsym in specs_symbols.known_symbols():
+            # Find full symbol name with matching key
+            provsym = lut_syms.get(specsym.name)
 
-            version = Version(str_version)
-            if version <= curr_version:
-                self.symbols[symbol_name] = version
-            else:  # version > self.version:
-                raise ValueError('Specified version of symbol {0} ({1})'
-                                 'is greater than current version ({2})'
-                                 .format(symbol_name, version, curr_version))
+            # No match, report only in symbol in spec is not optional
+            if not provsym:
+                if 'optional' not in specsym.tags:
+                    specs_symbols.mark_removed(specsym)
+                continue
+            else:
+                specs_symbols.mark_used(provsym)
+                provsym_version = self.symbols[provsym.symbol]
+                version = Version(specsym.version)
+                if version <= provsym_version:
+                    self.symbols[provsym.symbol] = version
+                else:  # version > self.version:
+                    specs_symbols.mark_older(provsym)
 
-        # if a specs file is provided, but is incomplete, display a warning
-        diff = self._get_symbols_keys() - set(specs_symbols.keys())
-        if diff:
-            wprint('The following symbols were found but not specified:\n\t'
-                   + '\n\t'.join(diff))
-            wprint('They will all be considered as introduced in the current'
-                   'project version.')
+        specs_symbols.report_new_symbols({s.name for s in provided_syms})
+        specs_symbols.report_older_symbols()
+        specs_symbols.report_removed_symbols()
 
 
 class ProvideList:
