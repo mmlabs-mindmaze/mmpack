@@ -4,14 +4,14 @@ helper module containing elf parsing functions
 """
 
 import os
-from typing import List, Tuple
+from typing import List
 
 from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
 from elftools.elf.dynamic import DynamicSection
 
 from . common import shell, wprint
-from . provide import Provide
+from . provide import Provide, ProvidedSymbol
 
 
 def _subpath_in_prefix(prefix: str, path: str) -> str:
@@ -296,15 +296,6 @@ class ShlibProvide(Provide):
     """
     Specialized Provide class which strips the version part of the symbol name.
     """
-    def _get_symbol(self, name: str) -> Tuple[str, str]:
-        if name in self.symbols:
-            return (self.symbols[name], name)
-
-        for fullname, version in self.symbols.items():
-            if sym_basename(fullname) == name:
-                return (version, fullname)
-
-        return (None, None)
-
-    def _get_symbols_keys(self):
-        return {sym_basename(x) for x in self.symbols.keys()}
+    def _get_decorated_symbols(self) -> List[ProvidedSymbol]:
+        return [ProvidedSymbol(name=sym_basename(s), symbol=s)
+                for s in self.symbols.keys()]
