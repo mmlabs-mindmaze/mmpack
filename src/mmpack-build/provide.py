@@ -185,7 +185,8 @@ class Provide:
             for provsym in matchsyms:
                 specs_symbols.mark_used(provsym)
                 provsym_version = self.symbols[provsym.symbol]
-                version = Version(specsym.version)
+                version = Version(specsym.version) \
+                          if specsym.version != 'CURRENT' else provsym_version
                 if version <= provsym_version:
                     self.symbols[provsym.symbol] = version
                 else:  # version > self.version:
