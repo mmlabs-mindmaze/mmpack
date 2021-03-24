@@ -167,15 +167,22 @@ class Provide:
         # Update minimal version associated with symbol for all symbols found
         # in dep_specs['symbols'] dictionary
         for specsym in specs_symbols.known_symbols():
-            # Find full symbol name with matching key
-            provsym = lut_syms.get(specsym.name)
+            if 'regex' in specsym.tags:
+                pattern = re.compile(specsym.name)
+                matchsyms = [s for k, s in lut_syms.items()
+                             if pattern.fullmatch(k)]
+            else:
+                # Find full symbol name with matching key
+                sym = lut_syms.get(specsym.name)
+                matchsyms = [sym] if sym else []
 
             # No match, report only in symbol in spec is not optional
-            if not provsym:
+            if not matchsyms:
                 if 'optional' not in specsym.tags:
                     specs_symbols.mark_removed(specsym)
                 continue
-            else:
+
+            for provsym in matchsyms:
                 specs_symbols.mark_used(provsym)
                 provsym_version = self.symbols[provsym.symbol]
                 version = Version(specsym.version)
