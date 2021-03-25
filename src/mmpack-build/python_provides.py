@@ -22,7 +22,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, basename, dirname
 from typing import Set, Union
 
-from astroid import AstroidImportError, MANAGER
+from astroid import AstroidImportError, AstroidSyntaxError, MANAGER
 from astroid.nodes import Import, ImportFrom, AssignName, ClassDef, Module
 
 
@@ -169,29 +169,41 @@ class PkgData:
         Generate set symbols of python package
         """
         pyfiles = {f for f in self.pkgfiles if f.endswith('.py')}
-        initfiles = [f for f in pyfiles if basename(f) == '__init__.py']
-        for initfile in initfiles:
+
+        # Generate process order
+        processing_list = []
+        for initfile in [f for f in pyfiles if basename(f) == '__init__.py']:
             # Process first init file
-            initmod = MANAGER.ast_from_file(initfile)
-            self.add_module_public_symbols(initmod)
+            processing_list.append(initfile)
             pyfiles.discard(initfile)
 
             # Process all files that in the package
             subdir = dirname(initfile)
             for pyfile in {f for f in pyfiles if dirname(f) == subdir}:
-                self.add_module_public_symbols(MANAGER.ast_from_file(pyfile))
+                processing_list.append(pyfile)
                 pyfiles.discard(pyfile)
 
-                # For a python package, __main__.py holds the contents which
-                # will be executed when the module is run with -m. If module
-                # exists, <pypkg>.__main__ will be added to the public symbols.
-                if basename(pyfile) == '__main__.py':
-                    self.add_namespace_symbol(initmod.qname(), '__main__')
-
         # Process all single module file (those at the level of sitedir)
-        for pyfile in {f for f in pyfiles if dirname(f) in sys.path}:
-            mod = MANAGER.ast_from_file(pyfile)
+        processing_list += [f for f in pyfiles if dirname(f) in sys.path]
+
+        for pyfile in processing_list:
+            try:
+                mod = MANAGER.ast_from_file(pyfile)
+            except AstroidSyntaxError as error:
+                print(f'Warning: {pyfile} has raised a syntax error:\n'
+                      f' {error}\n'
+                      ' => Skipping its processing for provides',
+                      file=sys.stderr)
+                continue
+
             self.add_module_public_symbols(mod)
+
+            # For a python package, __main__.py holds the contents which
+            # will be executed when the module is run with -m. If module
+            # exists, <pypkg>.__main__ will be added to the public symbols.
+            if basename(pyfile) == '__main__.py':
+                pkg_namespace = mod.qname().rsplit('.', 1)[0]
+                self.add_namespace_symbol(pkg_namespace, '__main__')
 
 
 def parse_options():
