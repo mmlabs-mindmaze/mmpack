@@ -41,7 +41,7 @@ from . workspace import Workspace
 #               => None
 _PKG_REGEX = re.compile(
     r'((?:usr/|mingw64/)?lib/python3(?:\.\d)?/(?:dist|site)-packages)'
-    r'/_?([\w-]+)([^/]*)'
+    r'/([\w-]+)([^/]*)'
 )
 
 
