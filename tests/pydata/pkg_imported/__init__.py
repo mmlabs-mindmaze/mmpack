@@ -4,12 +4,19 @@ python package that imports other packages
 """
 
 from multi import *
+from multi.bar import Employee, Employee2
 from simple import main_dummy_fn, MainData as main
 
 
 def _print_answer():
     a = 42
     print(a)
+
+    e = Employee(name='Bla')
+    print(e.name)
+    e2 = Employee2(name2='boo')
+    print(e2.name2)
+
     return a
 
 
