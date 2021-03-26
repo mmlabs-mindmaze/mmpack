@@ -4,6 +4,7 @@ python foo module
 """
 
 from multi import utils
+from .bar import Employee, Employee2
 
 THE_ANSWER = 42
 
@@ -25,6 +26,11 @@ def main_dummy_fn(an_arg: str, num: int):
     ans = THE_ANSWER
     he_say_str = '{} says {}'.format(an_arg, num)
     i_say_str = 'I say {}'.format(ans)
+
+    employee = Employee(name=_THE_ANSWER)
+    print(employee.name)
+    employee2 = Employee2(name2=_THE_ANSWER)
+    print(employee2.name2)
 
     return [an_arg, he_say_str, 'me', i_say_str]
 

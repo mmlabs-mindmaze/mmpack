@@ -193,8 +193,12 @@ class DependsInspector:
 
             # Add symbol if base does not belong to packaged files
             if self._is_external_pkg(base) and not _is_builtin(base, 'tuple'):
-                sym = base.qname() + '.' + attr.attrname
-                self.used_symbols.add(sym)
+                qname = base.qname()
+                # skip base whose origin could not be found (mostly likely to
+                # astroid transform that has dropped the module of the original
+                # node)
+                if not qname.startswith('.'):
+                    self.used_symbols.add(qname + '.' + attr.attrname)
 
     def _inspect_node_name(self, namenode: Name):
         """
@@ -209,7 +213,11 @@ class DependsInspector:
         for node in nodelist:
             symbol_name, node_def = self._follow_name_origin(node, name)
             if self._is_external_pkg(node_def):
-                self.used_symbols.add(symbol_name)
+                # skip base whose origin could not be found (mostly likely to
+                # astroid transform that has dropped the module of the original
+                # node)
+                if not node_def.qname().startswith('.'):
+                    self.used_symbols.add(symbol_name)
 
     def _inspect_node_call(self, call: Call):
         """

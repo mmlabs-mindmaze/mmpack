@@ -3,6 +3,9 @@
 python bar module
 """
 
+from typing import NamedTuple
+
+
 def print_hello():
     print('hello')
 
@@ -21,6 +24,13 @@ class _NeverEndingBar(Bar):
 
     def drink(self):
         self._full = True
+
+
+Employee = NamedTuple('Employee', [('name', str), ('id', int)])
+
+class Employee2(NamedTuple):
+    name2: str
+    id2: int
 
 
 A_BAR = None
