@@ -273,6 +273,7 @@ def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
             if not line.strip():
                 if not pkg.source:
                     pkg.source = pkg.name
+                pkg.source = pkg.source.split(' ', 1)[0]
                 yield pkg
                 pkg = DebPkg()
 
