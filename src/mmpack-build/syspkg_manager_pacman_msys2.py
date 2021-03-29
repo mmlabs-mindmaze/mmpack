@@ -172,14 +172,20 @@ class PacmanMsys2(SysPkgManager):
         files = shell(cmd).splitlines()
         return [f.rstrip('/') for f in files]
 
-    def _parse_pkgindex(self, builddir: str, srcname: str) -> List[SysPkg]:
+    def _parse_pkgindex(self, builddir: str,
+                        srcnames: List[str]) -> List[SysPkg]:
         repo_url = _get_repo_baseurl()
 
-        # Search first in mingw* repository
-        pkg_list = _parse_pkgindex_comp(repo_url, 'mingw', builddir,
+        for srcname in srcnames:
+            # Search first in mingw* repository
+            pkgs = _parse_pkgindex_comp(repo_url, 'mingw', builddir,
                                         'mingw-w64-' + srcname)
-        if pkg_list:
-            return pkg_list
+            if pkgs:
+                return pkgs
 
-        # Fallback to msys repository
-        return _parse_pkgindex_comp(repo_url, 'msys', builddir, srcname)
+            # Fallback to msys repository
+            pkgs = _parse_pkgindex_comp(repo_url, 'msys', builddir, srcname)
+            if pkgs:
+                return pkgs
+
+        return []

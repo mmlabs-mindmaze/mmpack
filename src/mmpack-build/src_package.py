@@ -9,6 +9,7 @@ import shutil
 import sys
 import tarfile
 
+from copy import copy
 from os import path
 from subprocess import Popen
 from threading import Thread
@@ -261,16 +262,21 @@ class SrcPackage:
         os.makedirs(builddir)
 
         # Get syspkg source name (maybe remapped)
-        srcname_remap = self._specs['general'].get('syspkg-srcnames', {})
         dist_srcname = self.name
+        srcname_remap = copy(self._specs['general'].get('syspkg-srcnames', {}))
+        try:
+            dist_srcname = srcname_remap.pop('default')
+        except KeyError:
+            pass
         dist = get_host_dist()
         for regex, srcname in srcname_remap.items():
             if re.fullmatch(regex, dist):
                 dist_srcname = srcname
+        srcnames = list(map(lambda s: s.strip(), dist_srcname.split(',')))
 
         # Download and unpack system packages depending on target platform
         syspkg_mgr = get_syspkg_mgr()
-        version, sysdeps = syspkg_mgr.fetch_unpack(dist_srcname,
+        version, sysdeps = syspkg_mgr.fetch_unpack(srcnames,
                                                    builddir, unpackdir)
         self.version = version
         self.files_sysdep = sysdeps

@@ -64,14 +64,15 @@ class SysPkgManager:
         """
         raise NotImplementedError
 
-    def _parse_pkgindex(self, builddir: str, srcname: str) -> List[SysPkg]:
+    def _parse_pkgindex(self, builddir: str,
+                        srcnames: List[str]) -> List[SysPkg]:
         """
         fetch and parse system repository index and generate the list of system
         package that are created from the same source.
 
         Args:
             builddir: path where to download temporary files
-            srcname: name of source project
+            srcnames: list of name of source project that must be tested
 
         Return: List of system package description
         """
@@ -96,13 +97,14 @@ class SysPkgManager:
         """
         raise NotImplementedError
 
-    def fetch_unpack(self, srcname: str, builddir: str,
+    def fetch_unpack(self, srcnames: List[str], builddir: str,
                      unpackdir: str) -> (str, Dict[str, str]):
         """
         Download and unpack system package matching the source name
 
         Args:
-            srcname: name of the source used to list the binary packages
+            srcnames: list of name of the source used to list the binary
+                packages. To be search in the list order.
             builddir: path where to download the temporary files (repo, pkgs)
             unpackdir: path where to unpack the matching system packages
 
@@ -110,10 +112,10 @@ class SysPkgManager:
             Couple of system package version as downloaded and the mapping of
             file to package name that provides them
         """
-        pkg_list = self._parse_pkgindex(builddir, srcname)
+        pkg_list = self._parse_pkgindex(builddir, srcnames)
         if not pkg_list:
-            raise FileNotFoundError('No system package matching {} found'
-                                    .format(srcname))
+            raise FileNotFoundError('No system package found matching {}'
+                                    .format(' or '.join(srcnames)))
 
         files_sysdep = dict()
         for pkg in pkg_list:

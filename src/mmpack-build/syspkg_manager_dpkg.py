@@ -278,12 +278,16 @@ def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
                 pkg = DebPkg()
 
 
-def _get_repo(srcname) -> (str, str):
+def _get_repo(srcnames: List[str]) -> (str, str):
     repo_str = os.getenv('MMPACK_BUILD_DPKG_REPO')
     if repo_str:
         return repo_str.split()
 
-    cmd_output = shell(['apt-cache', 'madison', srcname])
+    for srcname in srcnames:
+        cmd_output = shell(['apt-cache', 'madison', srcname])
+        if cmd_output:
+            break
+
     if not cmd_output:
         raise ValueError
 
@@ -297,6 +301,25 @@ def _get_repo(srcname) -> (str, str):
 
     # If we reach here, there was no source package called srcname
     raise ValueError
+
+
+def _download_debpkg_index(repo_url: str, dist: str, arch: str,
+                           builddir: str) -> str:
+    suffix = dist.replace('/', '_')
+
+    for ext in ('.gz', '.xz', ''):
+        index = os.path.join(builddir, 'Packages_{}{}'.format(suffix, ext))
+        pkgindex_url = '{}/dists/{}/binary-{}/Packages{}'\
+                       .format(repo_url, dist, arch, ext)
+
+        # download compressed index
+        try:
+            cached_download(pkgindex_url, index)
+            return index
+        except RuntimeError:
+            pass
+
+    raise RuntimeError(f'Could not find debpkg index for {repo_url} {arch}')
 
 
 class Dpkg(SysPkgManager):
@@ -333,37 +356,32 @@ class Dpkg(SysPkgManager):
 
         return [f.lstrip('./') for f in files]
 
-    def _parse_pkgindex(self, builddir: str, srcname: str) -> List[SysPkg]:
+    def _parse_pkgindex(self, builddir: str,
+                        srcnames: List[str]) -> List[SysPkg]:
         pkg_list = []
 
         # Try to get the repo that provide the specified source package
         try:
-            repo_url, dist = _get_repo(srcname)
+            repo_url, dist = _get_repo(srcnames)
         except ValueError:
             return pkg_list
 
         arch = get_host_arch()
-        suffix = dist.replace('/', '_')
+        index = _download_debpkg_index(repo_url, dist, arch, builddir)
 
-        for ext in ('.gz', '.xz', ''):
-            index = os.path.join(builddir, 'Packages_{}{}'.format(suffix, ext))
-            pkgindex_url = '{}/dists/{}/binary-{}/Packages{}'\
-                           .format(repo_url, dist, arch, ext)
-
-            # download compressed index
-            try:
-                cached_download(pkgindex_url, index)
-            except RuntimeError:
-                continue
-
-            # Parse compressed package index
+        pkg_list = []
+        for srcname in srcnames:
+            # Parse compressed package index for binary package matching source
             for pkg in _list_debpkg_index(open_compressed_file(index)):
                 if pkg.source == srcname:
                     pkg.url = repo_url + '/' + pkg.filename
                     pkg.filename = os.path.basename(pkg.filename)
                     pkg_list.append(pkg)
 
-            return pkg_list
+            # If list of binary package is not empty, we don't have to test for
+            # other source name alternative.
+            if pkg_list:
+                return pkg_list
 
         raise RuntimeError('Could not find {} or any compressed version!'
                            .format(index))
