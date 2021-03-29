@@ -6,10 +6,9 @@ plugin tracking containing python file handling functions
 import filecmp
 import os
 import re
-from collections import namedtuple
 from email.parser import Parser
 from glob import glob, iglob
-from typing import Set, Dict, List, Iterable
+from typing import Set, Dict, List, Iterable, NamedTuple
 
 from . base_hook import BaseHook
 from . common import shell, Assert, iprint, rmtree_force
@@ -50,7 +49,14 @@ _PKG_REGEX = re.compile(
 _MMPACK_REL_PY_SITEDIR = 'lib/python3/site-packages'
 
 
-PyNameInfo = namedtuple('PyNameInfo', ['pyname', 'sitedir', 'is_egginfo'])
+class PyNameInfo(NamedTuple):
+    """
+    information about a file regarding import name, sitedir and whether the
+    file contains metadata.
+    """
+    pyname: str
+    sitedir: str
+    is_egginfo: bool
 
 
 def _parse_metadata(filename: str) -> dict:
@@ -66,7 +72,7 @@ def _parse_py3_filename(filename: str) -> PyNameInfo:
     Args:
         filename: file to test
 
-    Return: NamedTuple(pyname, sitedir, is_egginfo)
+    Return: PyNameInfo data about `filename`
 
     Raises:
         FileNotFoundError: the file does not belong to a public python package
