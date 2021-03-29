@@ -6,16 +6,18 @@ Fetch/gather sources of a mmpack package and create source tarball
 import os
 import shutil
 import tarfile
-from collections import namedtuple
 from subprocess import call, DEVNULL
-from typing import Dict, Iterator
+from typing import Dict, Iterator, NamedTuple
 
 from . common import *
 from . workspace import Workspace, cached_download, find_project_root_folder
 
 
-ProjectSource = namedtuple('ProjectSource',
-                           ['name', 'version', 'tarball', 'srcdir'])
+class ProjectSource(NamedTuple):
+    name: str
+    version: str
+    tarball: str
+    srcdir: str
 
 
 def _is_git_dir(path: str) -> bool:
