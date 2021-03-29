@@ -163,26 +163,31 @@ class _PyPkg:
         self.files = set()
         self.name = None
         self.toplevel = set()
-        self.only_metadata = True
+        self.is_single_file_egginfo = False
 
-    def add(self, filename: str, is_metadata: False):
+    def add(self, filename: str):
         """
         Register an installed file in python package
         """
-        self.only_metadata = self.only_metadata and is_metadata
         self.files.add(filename)
 
-    def update_metada(self):
+    def update_metadata(self) -> Set[str]:
         """
         Compute metadata from registered files
         """
+        toplevel = set()
         for filename in self.files:
-            if filename.endswith('.egg-info') \
-               or filename.endswith('.egg-info/PKG-INFO'):
+            if filename.endswith('.egg-info/PKG-INFO'):
+                self.name = _parse_metadata(filename)['Name']
+
+            if filename.endswith('.egg-info'):
+                self.is_single_file_egginfo=True
                 self.name = _parse_metadata(filename)['Name']
 
             if filename.endswith('.egg-info/top_level.txt'):
-                self.toplevel = {d.strip() for d in open(filename).readlines()}
+                toplevel = {d.strip() for d in open(filename).readlines()}
+
+        return toplevel
 
     def merge_pkg(self, pypkg):
         """
@@ -191,7 +196,6 @@ class _PyPkg:
         """
         self.files.update(pypkg.files)
         self.toplevel.update(pypkg.toplevel)
-        self.only_metadata = self.only_metadata and pypkg.only_metadata
         if not self.name:
             self.name = pypkg.name
 
@@ -330,27 +334,30 @@ class MMPackBuildHook(BaseHook):
             try:
                 info = _parse_py3_filename(file)
                 pypkg = pypkgs.setdefault(info.pyname, _PyPkg())
-                pypkg.add(file, info.is_egginfo)
+                pypkg.add(file)
             except FileNotFoundError:
                 pass
 
         # Read python package metadata file and merge together package matching
         # the toplevel field
         for pypkg in pypkgs.copy().values():
-            pypkg.update_metada()
-            for topdir in pypkg.toplevel:
+            toplevel = pypkg.update_metadata()
+
+            # If single file egg-info, this is a metadata common for all python
+            # packages. => merge all them
+            if pypkg.is_single_file_egginfo:
+                for otherpkg in pypkgs.values():
+                    pypkg.merge_pkg(otherpkg)
+                pypkgs = {pypkg.name: pypkg}
+                break
+
+            for topdir in toplevel:
                 try:
                     pypkg.merge_pkg(pypkgs.pop(topdir))
                 except KeyError:
                     pass
 
-        pkglist = list(pypkgs.values())
-        if len([p for p in pkglist if not p.only_metadata]) == 1:
-            for pypkg in pkglist[1:]:
-                pkglist[0].merge_pkg(pypkg)
-            pkglist = [pkglist[0]]
-
-        for pypkg in pkglist:
+        for pypkg in pypkgs.values():
             pkgname = pypkg.mmpack_pkgname()
             pkg = data.assign_to_pkg(pkgname, pypkg.files)
             if pkg.description:
