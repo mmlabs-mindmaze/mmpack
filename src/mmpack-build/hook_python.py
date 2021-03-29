@@ -195,7 +195,10 @@ class _PyPkg:
         """
         Return the name of the mmpack package python package
         """
-        name = self.name if self.name else self.toplevel
+        name = self.name
+        if not name:
+            # If no name, pick the import name of a random file in the file set
+            name = _parse_py3_filename(list(self.files)[0]).pyname
         name = name.lower().replace('_', '-')
         if name.startswith('python-'):
             name = name[len('python-'):]
