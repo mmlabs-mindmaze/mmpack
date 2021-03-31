@@ -204,6 +204,10 @@ class SrcPackage:
         extract_matching_set(r'.*/__pycache__/.*', self.install_files_set)
         extract_matching_set(r'.*\.pyc$', self.install_files_set)
 
+        if self.ghost:
+            extract_matching_set(r'.*/share/doc/.*', self.install_files_set)
+            extract_matching_set(r'.*/lib/debug/.*', self.install_files_set)
+
     def _parse_specfile_general(self, srcdir: str) -> None:
         """
         Parses the mmpack/specs file's general section.
