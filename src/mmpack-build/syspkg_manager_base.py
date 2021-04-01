@@ -83,7 +83,8 @@ class SysPkgManager:
         Get a version usable for a mmpack package from system package version
         """
         # pylint: disable=no-self-use
-        return Version(sys_version)
+        # Remove distribution specific revision number
+        return Version(sys_version.rsplit('-', 1)[0])
 
     def _extract_syspkg(self, pkgfile: str, unpackdir: str) -> List[str]:
         """
