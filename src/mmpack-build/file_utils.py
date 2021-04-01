@@ -19,7 +19,7 @@ from . common import shell, wprint
 # '#!/foo/bar' -> 'bar'
 # '#!/usr/bin/env python3' -> 'python3'
 # '#!/foo/bar python3' -> 'bar'
-_SHEBANG_REGEX = re.compile(r'#!\s*(?:/[^ \n/]+)*/(?:env\s+)?([^\s]+)')
+_SHEBANG_REGEX = re.compile(br'#!\s*(?:/[^ \n/]+)*/(?:env\s+)?([^\s]+)')
 
 
 def filetype(filename):
@@ -45,11 +45,13 @@ def filetype(filename):
             return 'pe'
         if magic[:2] == b'#!':
             # the file contains a shebang. So the complete first line of file
-            # and parse the interpreter
-            shebang_line = open(filename, 'rt').readline()
+            # and parse the interpreter. Search for end of line is peformed in
+            # binary to avoid the UTF-8 decoder encounter invalid UTF-8 char
+            # beyond shebang line (can happen since read is buffered)
+            shebang_line = open(filename, 'rb').readline()
             shebang_match = _SHEBANG_REGEX.match(shebang_line)
             if shebang_match:
-                return shebang_match.groups()[0]
+                return shebang_match.groups()[0].decode()
 
     # return file extension otherwise
     # eg. python, c-header, ...
