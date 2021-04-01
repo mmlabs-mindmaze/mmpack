@@ -335,7 +335,9 @@ class Dpkg(SysPkgManager):
     def _get_mmpack_version(self, sys_version: str) -> Version:
         # remove epoch part if any, ie "epoch:version" and "version" return
         # "version"
-        return Version(sys_version.split(':', 1)[-1])
+        version = sys_version.split(':', 1)[-1]
+        # Remove distribution specific revision number
+        return Version(version.rsplit('-', 1)[0])
 
     def _extract_syspkg(self, pkgfile: str, unpackdir: str) -> List[str]:
         cmdout = shell(['dpkg-deb', '--vextract', pkgfile, unpackdir])
