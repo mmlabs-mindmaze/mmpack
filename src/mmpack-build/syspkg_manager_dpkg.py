@@ -376,6 +376,9 @@ class Dpkg(SysPkgManager):
             # Parse compressed package index for binary package matching source
             for pkg in _list_debpkg_index(open_compressed_file(index)):
                 if pkg.source == srcname:
+                    # Skip debug packages
+                    if pkg.name.endswith('-dbg'):
+                        continue
                     pkg.url = repo_url + '/' + pkg.filename
                     pkg.filename = os.path.basename(pkg.filename)
                     pkg_list.append(pkg)
