@@ -205,7 +205,7 @@ class SrcPackage:
         extract_matching_set(r'.*\.pyc$', self.install_files_set)
 
         if self.ghost:
-            extract_matching_set(r'.*/share/doc/.*', self.install_files_set)
+            extract_matching_set(r'.*/share/doc(-base)?/.*', self.install_files_set)
             extract_matching_set(r'.*/lib/debug/.*', self.install_files_set)
 
     def _parse_specfile_general(self, srcdir: str) -> None:
