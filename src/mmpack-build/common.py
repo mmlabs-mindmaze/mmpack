@@ -20,7 +20,7 @@ import platform
 from hashlib import sha256
 from io import TextIOWrapper
 from subprocess import PIPE, run
-from typing import Union, Dict, Tuple, List, Set
+from typing import Optional, Union, Dict, Tuple, List, Set
 
 import urllib3
 import yaml
@@ -459,22 +459,49 @@ def create_tarball(srcdir: str, dstfile: str, compression: str = '') -> None:
     tar.close()
 
 
-def open_compressed_file(path, mode='rt', **kwargs):
+def open_compressed_file(path: str, mode: str = 'rt',
+                         compression: Optional[str] = None, **kwargs):
     """
     Open a compressed or uncompressed file transparently. The selection of
-    compression is done based on path extension.
+    compression is done based on path extension unless specified in arguments
+
+    Args:
+        path: file to open
+        mode:  optional string that specifies the mode in which the file is
+            opened. It has the same meaning as in open(). defaults to 'rt' if
+            unspecified.
+            compression: option string that specifies the type of compression.
+                Supports 'gz', 'xz', 'bz2' and ''. If unspecified it is guessed
+                from file extension.
+            **kwargs: keyword arguments passed to the opening function.
+
+    Return:
+        A file object.
+
+    Raises:
+        ValueError: compression is not a supported string.
     """
-    if path.endswith('.gz'):
+    if compression is None:
+        # Guess compression from extension
+        compression = path.rsplit('.', 1)[-1].lower()
+        if compression not in ('gz', 'xz', 'bz2'):
+            compression = ''
+
+    if compression == 'gz':
         fileobj = gzip.GzipFile(path, mode.replace('t', ''), mtime=0)
         if 'b' not in mode:
             fileobj = TextIOWrapper(fileobj, **kwargs)
         return fileobj
-    elif path.endswith('.xz'):
+    elif compression == 'xz':
         return lzma.open(path, mode, **kwargs)
-    elif path.endswith('.bz2'):
+    elif compression == 'bz2':
         return bz2.open(path, mode, **kwargs)
+    elif compression == '':
+        return open(path, mode, **kwargs)
 
-    return open(path, mode, **kwargs)
+    # Unsupported compression if we reach here
+    raise ValueError(f'Invalid compression "{compression}" when'
+                     f'opening compressed file {path}')
 
 
 def get_name_version_from_srcdir(srcdir: str) -> Tuple[str, str]:
