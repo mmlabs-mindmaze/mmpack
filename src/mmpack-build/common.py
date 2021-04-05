@@ -19,8 +19,8 @@ import platform
 
 from hashlib import sha256
 from io import TextIOWrapper
-from subprocess import PIPE, run
-from typing import Optional, Union, Dict, Tuple, List, Set
+from subprocess import PIPE, Popen, run
+from typing import AnyStr, Optional, Union, Dict, Tuple, List, Set
 
 import urllib3
 import yaml
@@ -116,6 +116,17 @@ class ShellException(RuntimeError):
     """
     custom exception for shell command error
     """
+
+
+class _WritablePopen(Popen):
+    """
+    Popen class with file like API
+    """
+    def write(self, buff: AnyStr) -> int:
+        """
+        same as Popen.stdout.write()
+        """
+        return self.stdin.write(buff)
 
 
 def shell(cmd, log: bool = True, input_str: str = None,
@@ -472,8 +483,8 @@ def open_compressed_file(path: str, mode: str = 'rt',
             opened. It has the same meaning as in open(). defaults to 'rt' if
             unspecified.
             compression: option string that specifies the type of compression.
-                Supports 'gz', 'xz', 'bz2' and ''. If unspecified it is guessed
-                from file extension.
+                Supports 'gz', 'xz', 'bz2', 'ztd' and ''. If unspecified it is
+                guessed from file extension.
             **kwargs: keyword arguments passed to the opening function.
 
     Return:
@@ -485,7 +496,7 @@ def open_compressed_file(path: str, mode: str = 'rt',
     if compression is None:
         # Guess compression from extension
         compression = path.rsplit('.', 1)[-1].lower()
-        if compression not in ('gz', 'xz', 'bz2'):
+        if compression not in ('gz', 'xz', 'bz2', 'zst'):
             compression = ''
 
     if compression == 'gz':
@@ -497,6 +508,8 @@ def open_compressed_file(path: str, mode: str = 'rt',
         return lzma.open(path, mode, **kwargs)
     elif compression == 'bz2':
         return bz2.open(path, mode, **kwargs)
+    elif compression == 'zst':
+        return _WritablePopen(['zstd', '-9fqo', path], stdin=PIPE)
     elif compression == '':
         return open(path, mode, **kwargs)
 

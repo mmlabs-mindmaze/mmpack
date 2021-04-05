@@ -24,6 +24,8 @@ AS_IF([test $RST2MAN = none], [AC_MSG_ERROR([rst2man is required for doc generat
 AC_CHECK_PROGS(PATCHELF, [patchelf], [none])
 AS_IF([test $PATCHELF = none -a $os_system = posix], [AC_MSG_ERROR([patchelf is required on posix platforms])])
 AC_CHECK_PROGS(PYLINT, [pylint pylint3], [none])
+AC_CHECK_PROGS(ZSTD, [zstd], [none])
+AS_IF([test $ZSTD = none], [AC_MSG_ERROR([ztsd is required for package build])])
 
 AC_PROG_CC_C99
 AM_PROG_CC_C_O
