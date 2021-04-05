@@ -19,6 +19,8 @@ if host_machine.system() == 'windows'
     config.set_quoted('BIN_TO_LIBEXECDIR', r.stdout().strip())
 endif
 
+find_program('zstd', required : true)
+
 # meson modules
 python = import('python').find_installation('python3', required : true)
 
