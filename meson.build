@@ -20,6 +20,7 @@ if host_machine.system() == 'windows'
 endif
 
 find_program('zstd', required : true)
+find_program('tar', required : true)
 
 # meson modules
 python = import('python').find_installation('python3', required : true)

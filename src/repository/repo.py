@@ -11,11 +11,11 @@ with the information given in the manifest.
 from collections import Counter, namedtuple
 from enum import Enum, auto
 from hashlib import sha256
+from subprocess import PIPE, Popen
 import logging
 import logging.handlers
 import os
 import shutil
-import tarfile
 from typing import Union, Callable, Set
 import yaml
 
@@ -114,8 +114,9 @@ def _info_mpk(pkg_path: str) -> dict:
     Args:
         pkg_path: the path through the mkp file to read.
     """
-    with tarfile.open(pkg_path, 'r:*') as mpk:
-        buf = mpk.extractfile('./MMPACK/info').read()
+    cmd = ['tar', '-xOf', pkg_path, './MMPACK/info']
+    with Popen(cmd, stdout=PIPE) as proc:
+        buf = proc.stdout.read()
         return yaml.safe_load(buf)
 
 
