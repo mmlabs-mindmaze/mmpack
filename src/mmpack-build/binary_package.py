@@ -136,7 +136,7 @@ class BinaryPackage:
         mpkfile = "{0}/{1}_{2}_{3}.mpk".format(dstdir, self.name,
                                                self.version, self.arch)
         dprint('[tar] {0} -> {1}'.format(pkgdir, mpkfile))
-        create_tarball(pkgdir, mpkfile, 'xz')
+        create_tarball(pkgdir, mpkfile, 'zst')
 
         return mpkfile
 
