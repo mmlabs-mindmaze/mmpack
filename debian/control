@@ -6,6 +6,7 @@ Build-Depends: debhelper (>= 10), dh-python,
  check,
  python3,
  patchelf,
+ ztsd,
  libarchive-dev, libyaml-dev, libmmlib-dev,
  libcurl4-gnutls-dev | libcurl-dev,
  libdpkg-perl,
@@ -34,7 +35,7 @@ Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: mmpack (= ${binary:Version}),
  ${misc:Depends}, ${python3:Depends},
- git, build-essential, automake, libtool, gnulib, meson, cmake, patchelf
+ git, build-essential, automake, libtool, gnulib, meson, cmake, patchelf, ztd
 Breaks: python3-mmpack-build (<< 0.5.0)
 Replaces: python3-mmpack-build (<< 0.5.0)
 Recommends: mmpack-doc
