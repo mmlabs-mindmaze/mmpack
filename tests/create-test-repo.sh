@@ -132,7 +132,7 @@ gen-mmpack-pkg()
 	gen-sha256sums
 	gen-mmpack-info "$pkgname" "$version" "$depends"
 
-	tar -czf pkgs/${pkgname}_${version}.mpk --directory=tmp .
+	tar --zstd -cf pkgs/${pkgname}_${version}.mpk --directory=tmp .
 	echo "OK"
 
 	manifest=$(gen-manifest $pkgname $version)
