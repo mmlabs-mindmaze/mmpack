@@ -14,6 +14,7 @@ from os import path
 from subprocess import Popen
 from threading import Thread
 from tempfile import mkdtemp
+from typing import Dict, Any
 
 from . workspace import Workspace, get_local_install_dir
 from . binary_package import BinaryPackage
@@ -58,6 +59,13 @@ def _extract_mmpack_source(srctar_path: str) -> str:
     return srcdir
 
 
+def _load_specfile(srcdir) -> Dict[str, Any]:
+    # keep raw dictionary version of the specfile
+    specfile = srcdir + '/mmpack/specs'
+    dprint('loading specfile: ' + specfile)
+    return yaml_load(specfile)
+
+
 class SrcPackage:
     # pylint: disable=too-many-instance-attributes
     """
@@ -90,7 +98,6 @@ class SrcPackage:
         self.install_files_set = set()
         self._metadata_files_list = []
 
-        self._specs = {}
         self._spec_dir = ''
 
         # Extract source tarball to temporary folder if a folder with extracted
@@ -99,7 +106,8 @@ class SrcPackage:
             srcdir = _extract_mmpack_source(srctar)
 
         # Init source package from unpacked dir
-        self._parse_specfile_general(srcdir)
+        self._specs = _load_specfile(srcdir)
+        self._parse_specfile_general()
         self._prepare_pkgbuilddir(srcdir, srctar)
 
         if not self.licenses:
@@ -209,18 +217,11 @@ class SrcPackage:
                                  self.install_files_set)
             extract_matching_set(r'.*/lib/debug/.*', self.install_files_set)
 
-    def _parse_specfile_general(self, srcdir: str) -> None:
+    def _parse_specfile_general(self) -> None:
         """
         Parses the mmpack/specs file's general section.
-        This will:
-            - fill all the main fields of the source package.
-            - prune the ignore files from the install_files_list
+        This will fill all the main fields of the source package.
         """
-        # keep raw dictionary version of the specfile
-        specfile = srcdir + '/mmpack/specs'
-        dprint('loading specfile: ' + specfile)
-        self._specs = yaml_load(specfile)
-
         for key, value in self._specs['general'].items():
             if key == 'name':
                 self.name = value
