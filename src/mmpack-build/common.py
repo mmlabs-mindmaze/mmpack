@@ -20,7 +20,7 @@ import platform
 from hashlib import sha256
 from io import TextIOWrapper
 from subprocess import PIPE, Popen, run
-from typing import AnyStr, Optional, Union, Dict, Tuple, List, Set
+from typing import Any, AnyStr, Optional, Union, Dict, Tuple, List, Set
 
 import urllib3
 import yaml
@@ -518,11 +518,28 @@ def open_compressed_file(path: str, mode: str = 'rt',
                      f'opening compressed file {path}')
 
 
+def specs_load(specfile: str) -> Dict[str, Any]:
+    """
+    Load specs for file and return the dictionary out of it. Upgrade the format
+    if old specfile.
+    """
+    specs = specs_load(specfile)
+
+    # If old specfile format, reorganize it to fit the new format
+    if 'general' in specs:
+        new_specs = specs['general']
+        pkgs = {n: cfg for n, cfg in specs.items() if n != 'general'}
+        new_specs['custom-pkgs'] = pkgs
+        specs = new_specs
+
+    return specs
+
+
 def get_name_version_from_srcdir(srcdir: str) -> Tuple[str, str]:
     """
     Read unpacked source dir and get name and version of a source package
     """
-    specs = yaml_load(srcdir + '/mmpack/specs')
+    specs = specs_load(srcdir + '/mmpack/specs')
     return (specs['name'], specs['version'])
 
 
