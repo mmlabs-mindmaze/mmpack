@@ -63,7 +63,7 @@ def _load_specfile(srcdir) -> Dict[str, Any]:
     # keep raw dictionary version of the specfile
     specfile = srcdir + '/mmpack/specs'
     dprint('loading specfile: ' + specfile)
-    return yaml_load(specfile)
+    return  yaml_load(specfile)
 
 
 class SrcPackage:
@@ -203,9 +203,8 @@ class SrcPackage:
                 binpkg.description += '\n' + description
 
     def _remove_ignored_files(self):
-        if 'ignore' in self._specs['general']:
-            for regex in self._specs['general']['ignore']:
-                extract_matching_set(regex, self.install_files_set)
+        for regex in self._specs.get('ignore', []):
+            extract_matching_set(regex, self.install_files_set)
         # remove files from default ignored patterns
         extract_matching_set(r'.*\.la$', self.install_files_set)
         extract_matching_set(r'.*\.def$', self.install_files_set)
@@ -222,7 +221,7 @@ class SrcPackage:
         Parses the mmpack/specs file's general section.
         This will fill all the main fields of the source package.
         """
-        for key, value in self._specs['general'].items():
+        for key, value in self._specs.items():
             if key == 'name':
                 self.name = value
             elif key == 'version':
@@ -269,7 +268,7 @@ class SrcPackage:
 
         # Get syspkg source name (maybe remapped)
         dist_srcname = self.name
-        srcname_remap = copy(self._specs['general'].get('syspkg-srcnames', {}))
+        srcname_remap = copy(self._specs.get('syspkg-srcnames', {}))
         try:
             dist_srcname = srcname_remap.pop('default')
         except KeyError:
@@ -331,8 +330,7 @@ class SrcPackage:
 
         # append platform-specific mmpack packages
         # eg. one required package is not available on this platform
-        general = self._specs['general']
-        system_builddeps, mmpack_builddeps = general_specs_builddeps(general)
+        system_builddeps, mmpack_builddeps = general_specs_builddeps(self._specs)
         process_dependencies(system_builddeps, mmpack_builddeps,
                              prefix, assumeyes)
 
@@ -417,10 +415,7 @@ class SrcPackage:
         dist = get_host_dist()
 
         # create skeleton for explicit packages
-        for pkgname, pkgspecs in self._specs.items():
-            if pkgname == 'general':
-                continue
-
+        for pkgname, pkgspecs in self._specs.get('custom-pkgs', {}).items():
             pkg = data.assign_to_pkg(pkgname)
             pkg.init_from_specs(pkgspecs, dist, data.unassigned_files)
             self._format_description(pkg)
