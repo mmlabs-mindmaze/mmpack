@@ -6,7 +6,7 @@ Fetch/gather sources of a mmpack package and create source tarball
 import os
 import shutil
 import tarfile
-from subprocess import call, DEVNULL
+from subprocess import call, check_call, DEVNULL
 from typing import Dict, Iterator, NamedTuple
 
 from . common import *
@@ -241,6 +241,7 @@ class SourceTarball:
             return  # There is no source strap, nothing to be done
 
         self._fetch_upstream(specs, srcdir)
+        self._patch_sources(specs.get('patches', []), srcdir)
 
     def get_srcdir(self) -> str:
         """
@@ -282,6 +283,10 @@ class SourceTarball:
         """
         upstream_info = self.trace.get('upstream', {'method': 'in-src-pkg'})
         data = {'packaging': self.trace['pkg'], 'upstream': upstream_info}
+
+        patch_list = self.trace.get('patches')
+        if patch_list:
+            data['patches'] = patch_list
 
         file_path = os.path.join(srcdir, 'mmpack/src_orig_tracing')
         yaml_serialize(data, file_path, use_block_style=True)
@@ -486,3 +491,13 @@ class SourceTarball:
         for elt in dir_content:
             if elt != 'mmpack':
                 shutil.move(os.path.join(upstream_srcdir, elt), srcdir)
+
+    def _patch_sources(self, patches: List[str], srcdir: str):
+        cmd = ['patch', '-d', srcdir, '-p1']
+
+        for patch in patches:
+            dprint(f'Applying {patch}...')
+            with open(patch, 'rb') as patchfile:
+                check_call(cmd, stdin=patchfile)
+
+        self.trace['patches'] = patches
