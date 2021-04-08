@@ -43,15 +43,14 @@ gen-specs()
 mkdir -p $TMP_BUILD/mmpack
 
 cat << EOF > $TMP_BUILD/mmpack/specs
-general:
-  name: hello
-  version: 1.0.0
-  maintainer: maintainer
-  url: url
-  description: mmpack hello
-  build-system : $build_sys
-  licenses: [ dummy ]
-  copyright: "dummy copyright"
+name: hello
+version: 1.0.0
+maintainer: maintainer
+url: url
+description: mmpack hello
+build-system : $build_sys
+licenses: [ dummy ]
+copyright: "dummy copyright"
 EOF
 }
 
@@ -60,12 +59,11 @@ gen-ghost-specs()
 mkdir -p $TMP_BUILD/mmpack
 
 cat << EOF > $TMP_BUILD/mmpack/specs
-general:
-  name: hello
-  version: 1.2.3
-  maintainer: maintainer
-  url: url
-  description: mmpack hello
-  ghost: true
+name: hello
+version: 1.2.3
+maintainer: maintainer
+url: url
+description: mmpack hello
+ghost: true
 EOF
 }

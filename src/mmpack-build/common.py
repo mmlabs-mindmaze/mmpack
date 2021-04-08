@@ -523,7 +523,7 @@ def get_name_version_from_srcdir(srcdir: str) -> Tuple[str, str]:
     Read unpacked source dir and get name and version of a source package
     """
     specs = yaml_load(srcdir + '/mmpack/specs')
-    return (specs['general']['name'], specs['general']['version'])
+    return (specs['name'], specs['version'])
 
 
 def download(url: str, path: str):
