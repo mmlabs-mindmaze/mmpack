@@ -13,20 +13,8 @@ Format
 ------
 
 The specfile follow the `yaml`_ format.
-It is split into two parts: the **general** part, and a **custom** part for
-package specifics.
-
-The **general** part is named **general** and contain data concerning all the
-the project itself, all the packages that can be build from it, and the
-necessary information to build them.
-
-The **custom** part is optional, and made of any number of entries, one for
-each package it wants to customize.
 
 .. _yaml: https://yaml.org/
-
-The general section
-```````````````````
 
 Mandatory fields
 ''''''''''''''''
@@ -122,9 +110,16 @@ Optional fields
    The copyright field and value is entirely optional (unlike the "licenses"
    field).
 
+ :custom-pkgs:
+   This contains a dictionary of packages must be created maybe in addition to
+   automatic packages. If an automatic package should have been created whith
+   the same name of one of the custom packages, the settings in the custom
+   sections serves as overriding of the settings that should have been used for
+   the automatic package.
+
 .. _PCRE: https://www.pcre.org/current/doc/html/pcre2.html
 
-The custom sections
+The custom-pkgs sections
 ```````````````````
 
 The custom sections are used to change the default values of created packages,
@@ -162,33 +157,34 @@ For project XXX, the default packages usually are as follows:
    for it.
 
 
+Examples
+--------
+
 Minimal specfile example
-------------------------
+''''''''''''''''''''''''
 
 .. code-block:: yaml
 
-   general:
-       name: mmpack-hello-world
-       version: 1.0.0
-       maintainer: Gandalf <gandalf@the.grey>
-       url: ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world
-       description: |
-         mmpack hello world
+   name: mmpack-hello-world
+   version: 1.0.0
+   maintainer: Gandalf <gandalf@the.grey>
+   url: ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world
+   description: |
+     mmpack hello world
 
 
 Ghost package specfile example
-------------------------------
+''''''''''''''''''''''''''''''
 
 .. code-block:: yaml
 
-   general:
-       name: mmpack-hello-world
-       version: 1.0.0
-       maintainer: Gandalf <gandalf@the.grey>
-       url: ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world
-       description: |
-         mmpack hello world
-       ghost: true
-       syspkg-srcnames:
-           debian: mmpack-h-w # project source is known as mmpack-h-w in Debian
-           fedora: mmpack-helloworld # project source is known as mmpack-helloworld in fedora
+   name: mmpack-hello-world
+   version: 1.0.0
+   maintainer: Gandalf <gandalf@the.grey>
+   url: ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world
+   description: |
+     mmpack hello world
+   ghost: true
+   syspkg-srcnames:
+       debian: mmpack-h-w # project source is known as mmpack-h-w in Debian
+       fedora: mmpack-helloworld # project source is known as mmpack-helloworld in fedora
