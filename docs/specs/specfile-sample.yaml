@@ -1,86 +1,82 @@
 # sample yaml specfile
 
-#
-# global section
-#
+name: sample
+version: 1.0.0
+maintainer: someone@mindmaze.ch
+url: ssh://git@intranet.mindmaze.ch:7999/~user/sample.git
+description: |
+  This is a dummy description field for the dummy sample mmpack
+  specfile. This is a multiline comment.
+  This describes what sample is all about
 
-general:
-  name: sample
-  version: 1.0.0
-  maintainer: someone@mindmaze.ch
-  url: ssh://git@intranet.mindmaze.ch:7999/~user/sample.git
-  description: |
-    This is a dummy description field for the dummy sample mmpack
-    specfile. This is a multiline comment.
-    This describes what sample is all about
+# build options
+build-options: -D_WITH_DUMMY_DEFINE=1
+build-depends:
+  - libmyotherlib-devel
+  - libsomeotherlib-devel
 
-  # build options
-  build-options: -D_WITH_DUMMY_DEFINE=1
-  build-depends:
-    - libmyotherlib-devel
-    - libsomeotherlib-devel
+ignore: # list of files to be ignored by any package
+  - somefile
 
-  ignore: # list of files to be ignored by any package
-    - somefile
+license:
+  - GPL3
+  - Apache-2.0
+  - path/to/custom/license/file
 
-  license:
-    - GPL3
-    - Apache-2.0
-    - path/to/custom/license/file
-
-  copyright: "Copyright Thorin son of Thráin son of Thrór"  # or path to file
+copyright: "Copyright Thorin son of Thráin son of Thrór"  # or path to file
 
 #
 # default target packages names
 #
 
-sample:
-  depends:  # this is not a build dependency, but a runtime one
-    - util-stuff: any
-    - other-util-stuff: 1.0.0
-  sysdepends-debian:
-    - debian-dep: any
-  sysdepends-msys:
-    - windows-dep: any
-  description: |
-    This will be appended to the general description field
-    This also can be a huge comment.
-  files:
-    # any file can be given here.
-    # below is the list of regex used by default
-    # It also is the default package for all that is not ventilated
-    # otherwise
-    #
-    # All regex are PCRE (to be parsed with: docs.python.org/3/library/re.html)
-    - .*\.1\.0\.0
-    - .*/bin/.*
-    - .*/locale/.*
-    - .*/man/*\.1
+custom-pkgs:
+  sample:
+    depends:  # this is not a build dependency, but a runtime one
+      - util-stuff: any
+      - other-util-stuff: 1.0.0
+    sysdepends-debian:
+      - debian-dep: any
+    sysdepends-msys:
+      - windows-dep: any
+    description: |
+      This will be appended to the general description field
+      This also can be a huge comment.
+    files:
+      # any file can be given here.
+      # below is the list of regex used by default
+      # It also is the default package for all that is not ventilated
+      # otherwise
+      #
+      # All regex are PCRE (to be parsed with: docs.python.org/3/library/re.html)
+      - .*\.1\.0\.0
+      - .*/bin/.*
+      - .*/locale/.*
+      - .*/man/*\.1
 
-sample-devel:
-  depends:
-    - sample  # automatically added
-  description: same
-  files:
-    - .*/man/.*\.(2|3)
-    - .*/include/.*
-    - .*\.so
+  sample-devel:
+    depends:
+      - sample  # automatically added
+    description: same
+    files:
+      - .*/man/.*\.(2|3)
+      - .*/include/.*
+      - .*\.so
 
-sample-doc:
-  depends:
-    - sample  # automatically added
-  description: same
-  files:
-    - .*/man/.*\.[^123]  # all man pages not above
-    - .*/doc/.*
+  sample-doc:
+    depends:
+      - sample  # automatically added
+    description: same
+    files:
+      - .*/man/.*\.[^123]  # all man pages not above
+      - .*/doc/.*
 
-# the debug package should be generated automatically and not explicit
-sample-debug:
-  depends:
-    - sample  # automatically added
-  description: same
-  files:
-    - .*\.debug  
+  # the debug package should be generated automatically and not explicit
+  sample-debug:
+    depends:
+      - sample  # automatically added
+    description: same
+    files:
+      - .*\.debug  
 
 
 # Additionally, packages can be generated around some files.
@@ -97,17 +93,17 @@ sample-debug:
 # explicit custom packages
 #
 
-my-special-package:
-  depends:  # sample is not automatically added
-    - my custom dependency
-  description: |
-    This is a completely custom description.
-    It will not get concatenated with the global description
-  files:
-    - /any/full/path/to/some.file
-    - .*/anything PCRE/.*
+  my-special-package:
+    depends:  # sample is not automatically added
+      - my custom dependency
+    description: |
+      This is a completely custom description.
+      It will not get concatenated with the global description
+    files:
+      - /any/full/path/to/some.file
+      - .*/anything PCRE/.*
 
-any-other-package:
-  description: this is mandatory
-  files:
-    - .*this is also mandatory.*
+  any-other-package:
+    description: this is mandatory
+    files:
+      - .*this is also mandatory.*
