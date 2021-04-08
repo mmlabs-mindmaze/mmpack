@@ -218,7 +218,7 @@ class SrcPackage:
         # keep raw dictionary version of the specfile
         specfile = srcdir + '/mmpack/specs'
         dprint('loading specfile: ' + specfile)
-        self._specs = yaml_load(specfile)
+        self._specs = specs_load(specfile)
 
         for key, value in self._specs.items():
             if key == 'name':

@@ -188,3 +188,12 @@ Ghost package specfile example
    syspkg-srcnames:
        debian: mmpack-h-w # project source is known as mmpack-h-w in Debian
        fedora: mmpack-helloworld # project source is known as mmpack-helloworld in fedora
+
+
+Old specfile format
+-------------------
+
+An outdated specfile format was used in early version of mmpack. It is the same
+Yaml hierarchy, excepting that all settings were put in a `general` section and
+the custom packages were defined (if any) at the same level of the general
+section (consequently, no package named general could be created).
