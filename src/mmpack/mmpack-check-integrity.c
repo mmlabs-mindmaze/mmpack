@@ -23,38 +23,17 @@
 #include "pkg-fs-utils.h"
 #include "utils.h"
 
-struct cb_data {
-	char const * pkg_name;
-	const struct mmpack_ctx* ctx;
-	int found;
-	int error;
-};
-
 
 static
-int binindex_cb(struct mmpkg* pkg, void * void_data)
+int check_pkg_integrity(const struct mmpkg* pkg, struct mmpack_ctx* ctx)
 {
 	int rv;
-	struct cb_data * data = (struct cb_data*) void_data;
 
-	if (pkg->state == MMPACK_PKG_INSTALLED
-	    && (data->pkg_name == NULL
-	        || strcmp(pkg->name, data->pkg_name) == 0)) {
-		info("Checking %s (%s) ... ", pkg->name, pkg->version);
-		data->found = 1;
+	info("Checking %s (%s) ... ", pkg->name, pkg->version);
+	rv = check_installed_pkg(ctx, pkg);
+	info("%s\n", (rv == 0) ? "OK" : "Failed");
 
-		rv = check_installed_pkg(data->ctx, pkg);
-		if (rv == 0) {
-			info("OK\n");
-		} else {
-			info("Failed!\n");
-			data->error = 1;
-			if (data->pkg_name != NULL)
-				return rv;
-		}
-	}
-
-	return 0;
+	return rv;
 }
 
 
@@ -72,12 +51,10 @@ LOCAL_SYMBOL
 int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc,
                            char const* argv[])
 {
-	struct cb_data data = {
-		.pkg_name = (argc < 2) ? NULL : argv[1],
-		.ctx = ctx,
-		.found = 0,
-		.error = 0,
-	};
+	struct inststate_iter iter;
+	const struct mmpkg* pkg;
+	mmstr* name;
+	int rv;
 
 	if (mm_arg_is_completing()) {
 		// Complete only first command argument and if not empty
@@ -100,9 +77,24 @@ int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc,
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	binindex_foreach(&ctx->binindex, binindex_cb, (void*) &data);
-	if (data.pkg_name && !data.found)
-		printf("Package \"%s\" not found\n", data.pkg_name);
+	rv = 0;
+	if (argc == 2) {
+		name = mmstr_malloca_from_cstr(argv[1]);
+		pkg = install_state_get_pkg(&ctx->installed, name);
+		if (pkg) {
+			rv = check_pkg_integrity(pkg, ctx);
+		} else {
+			rv = -1;
+			printf("Package \"%s\" not found\n", name);
+		}
 
-	return data.error;
+		mmstr_freea(name);
+	} else {
+		// Loop over installed packages
+		pkg = inststate_first(&iter, &ctx->installed);
+		for (; pkg != NULL; pkg = inststate_next(&iter))
+			rv = (check_pkg_integrity(pkg, ctx) < 0) ? -1 : rv;
+	}
+
+	return rv;
 }
