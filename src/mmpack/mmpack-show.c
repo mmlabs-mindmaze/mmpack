@@ -20,45 +20,32 @@
 #include "package-utils.h"
 
 
-struct cb_data {
-	const char * pkg_name;
-	int found;
-};
-
 static
-int binindex_cb(struct mmpkg* pkg, void * void_data)
+void show_pkg(const struct mmpkg* pkg, const struct mmpack_ctx* ctx)
 {
-	struct cb_data * data = (struct cb_data*) void_data;
 	struct remote_resource* from;
 
-	if (strcmp(pkg->name, data->pkg_name) == 0) {
-		data->found = 1;
-		printf("%s (%s) %s\n", pkg->name, pkg->version,
-		       pkg->state == MMPACK_PKG_INSTALLED ? "[installed]" : "");
+	printf("%s (%s) %s\n", pkg->name, pkg->version,
+	       mmpack_ctx_is_pkg_installed(ctx, pkg) ? "[installed]" : "");
 
-		printf("SUMSHA256: %s\n", pkg->sumsha);
+	printf("SUMSHA256: %s\n", pkg->sumsha);
 
-		for (from = pkg->remote_res; from != NULL; from = from->next) {
-			printf("Repository: %s\n", from->repo ?
-			       from->repo->name : "unknown");
-			printf("\tPackage file: %s\n", from->filename);
-			printf("\tSHA256: %s\n", from->sha256);
-
-		}
-
-		printf("Source package: %s\n", pkg->source);
-		printf("Ghost: %s\n", mmpkg_is_ghost(pkg) ? "yes" : "no");
-
-		printf("Dependencies:\n");
-		mmpkg_dep_dump(pkg->mpkdeps, "MMPACK");
-		mmpkg_sysdeps_dump(&pkg->sysdeps, "SYSTEM");
-
-		printf("\nDescription:\n");
-		printf("%s\n", pkg->desc ? pkg->desc : "none");
-		return 1;
+	for (from = pkg->remote_res; from != NULL; from = from->next) {
+		printf("Repository: %s\n", from->repo ?
+		       from->repo->name : "unknown");
+		printf("\tPackage file: %s\n", from->filename);
+		printf("\tSHA256: %s\n", from->sha256);
 	}
 
-	return 0;
+	printf("Source package: %s\n", pkg->source);
+	printf("Ghost: %s\n", mmpkg_is_ghost(pkg) ? "yes" : "no");
+
+	printf("Dependencies:\n");
+	mmpkg_dep_dump(pkg->mpkdeps, "MMPACK");
+	mmpkg_sysdeps_dump(&pkg->sysdeps, "SYSTEM");
+
+	printf("\nDescription:\n");
+	printf("%s\n", pkg->desc ? pkg->desc : "none");
 }
 
 
@@ -75,7 +62,9 @@ int binindex_cb(struct mmpkg* pkg, void * void_data)
 LOCAL_SYMBOL
 int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	struct cb_data data;
+	struct pkglist_iter iter;
+	const struct mmpkg* pkg;
+	mmstr* name;
 
 	if (mm_arg_is_completing()) {
 		if (argc != 2)
@@ -92,16 +81,20 @@ int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return argc != 2 ? -1 : 0;
 	}
 
-	data.pkg_name = argv[1];
+	name = mmstr_malloca_from_cstr(argv[1]);
 
 	// Load prefix configuration and caches
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	data.found = 0;
-	binindex_foreach(&ctx->binindex, binindex_cb, &data);
-	if (!data.found)
-		printf("No package found matching: \"%s\"\n", data.pkg_name);
+	// Start iteration of package having the specified name
+	pkg = pkglist_iter_first(&iter, name, &ctx->binindex);
+	if (!pkg)
+		printf("No package found matching: \"%s\"\n", name);
 
+	for (; pkg != NULL; pkg = pkglist_iter_next(&iter))
+		show_pkg(pkg, ctx);
+
+	mmstr_freea(name);
 	return 0;
 }
