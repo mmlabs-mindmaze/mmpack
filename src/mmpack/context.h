@@ -60,4 +60,12 @@ int mmpack_ctx_is_init(struct mmpack_ctx const * ctx)
 	return (ctx != NULL && ctx->prefix != NULL);
 }
 
+
+static inline
+int mmpack_ctx_is_pkg_installed(const struct mmpack_ctx* ctx,
+                                const struct mmpkg* pkg)
+{
+	return install_state_get_pkg(&ctx->installed, pkg->name) == pkg;
+}
+
 #endif /* CONTEXT_H */
