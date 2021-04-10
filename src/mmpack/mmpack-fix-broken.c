@@ -20,13 +20,6 @@ static char fix_broken_doc[] =
 	"state. If no argument is given, try to fix all installed packages.";
 
 
-struct cb_data {
-	struct mmpack_ctx * ctx;
-	int found;
-	int error;
-};
-
-
 /* reinstall a single package */
 static
 int fix_broken_package(struct mmpack_ctx * ctx, mmstr const * pkg_name,
@@ -64,27 +57,31 @@ exit:
 
 
 static
-int binindex_cb(struct mmpkg* pkg, void * void_data)
+int fix_broken_installed_packages(struct mmpack_ctx * ctx)
 {
+	struct inststate_iter iter;
+	const struct mmpkg* pkg;
 	int rv;
-	struct cb_data * data = (struct cb_data*) void_data;
 
-	if (pkg->state == MMPACK_PKG_INSTALLED) {
-		rv = check_installed_pkg(data->ctx, pkg);
-		if (rv != 0) {
-			data->found = 1;
-			info("Trying to fix broken installed package: "
-			     "%s (%s) ... \n", pkg->name, pkg->version);
-			rv = fix_broken_package(data->ctx, pkg->name, 0);
-			if (rv != 0) {
-				data->error = 1;
-				info("Failed!\n");
-				return rv;
-			}
-		}
+	// Loop over installed packages
+	pkg = inststate_first(&iter, &ctx->installed);
+	for (; pkg != NULL && rv == 0; pkg = inststate_next(&iter)) {
+		if (check_installed_pkg(ctx, pkg) == 0)
+			continue;
+
+		info("Trying to fix broken installed package: "
+		     "%s (%s) ... \n", pkg->name, pkg->version);
+		rv = fix_broken_package(ctx, pkg->name, 0);
+		info("%s!\n", rv == 0 ? "Done" : "Failed");
 	}
 
-	return 0;
+	if (rv < 0) {
+		info("Failure! You have held broken packages.\n");
+	} else {
+		info("Success! Fixed all the broken packages.\n");
+	}
+
+	return rv;
 }
 
 
@@ -105,7 +102,6 @@ int mmpack_fix_broken(struct mmpack_ctx * ctx, int argc, const char ** argv)
 	int i, nreq, arg_index, rv = 0;
 	const char** req_args;
 	mmstr * pkg_name;
-	struct cb_data data = {.ctx = ctx};
 	struct mm_arg_parser parser = {
 		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.doc = fix_broken_doc,
@@ -133,17 +129,8 @@ int mmpack_fix_broken(struct mmpack_ctx * ctx, int argc, const char ** argv)
 			break;
 	}
 
-	if (nreq == 0) {
-		binindex_foreach(&ctx->binindex, binindex_cb, (void*) &data);
-		if (data.found) {
-			if (data.error) {
-				info("Failure! You have held broken packages.\n");
-				rv = -1;
-			} else {
-				info("Success! Fixed all the broken packages.\n");
-			}
-		}
-	}
+	if (nreq == 0)
+		rv = fix_broken_installed_packages(ctx);
 
 	return rv;
 }
