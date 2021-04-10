@@ -138,6 +138,38 @@ struct pkglist_iter {
 };
 
 
+struct inststate_iter {
+	struct it_iterator it_iter;
+};
+
+
+static inline
+const struct mmpkg* inststate_first(struct inststate_iter* iter,
+                                    struct install_state* state)
+{
+	struct it_entry* entry;
+
+	entry = it_iter_first(&iter->it_iter, &state->idx);
+	if (!entry)
+		return NULL;
+
+	return entry->value;
+}
+
+
+static inline
+const struct mmpkg* inststate_next(struct inststate_iter* iter)
+{
+	struct it_entry* entry;
+
+	entry = it_iter_next(&iter->it_iter);
+	if (!entry)
+		return NULL;
+
+	return entry->value;
+}
+
+
 /**
  * struct inst_rdeps_iter - data to iterate over installed reverse dependencies
  * @binindex:   binaray index in context which the reverse deps are scanned
