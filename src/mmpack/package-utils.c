@@ -1528,24 +1528,11 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 }
 
 
-static inline
-void mmpkg_append_dependency_rec(struct mmpkg_dep * dep, struct mmpkg_dep * d)
-{
-	if (dep->next != NULL) {
-		mmpkg_append_dependency_rec(dep->next, d);
-		return;
-	}
-
-	dep->next = d;
-}
-
 static
 void mmpkg_add_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep)
 {
-	if (pkg->mpkdeps == NULL)
-		pkg->mpkdeps = dep;
-	else
-		mmpkg_append_dependency_rec(pkg->mpkdeps, dep);
+	dep->next = pkg->mpkdeps;
+	pkg->mpkdeps = dep;
 }
 
 
