@@ -43,12 +43,6 @@ struct pkglist {
 	int id;
 };
 
-struct pkg_iter {
-	struct pkglist* curr_list;
-	struct pkglist* list_ptr_bound;
-	struct pkglist_entry* pkglist_elt;
-};
-
 struct parsing_ctx {
 	yaml_parser_t parser;
 	const struct repo* repo;
@@ -734,7 +728,7 @@ struct mmpkg* pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
  *                                                                        *
  **************************************************************************/
 
-static
+LOCAL_SYMBOL
 struct mmpkg* pkg_iter_next(struct pkg_iter* pkg_iter)
 {
 	struct pkglist* curr_list;
@@ -756,7 +750,7 @@ struct mmpkg* pkg_iter_next(struct pkg_iter* pkg_iter)
 }
 
 
-static
+LOCAL_SYMBOL
 struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
                              const struct binindex* binindex)
 {
