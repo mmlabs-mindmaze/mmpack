@@ -138,6 +138,13 @@ struct pkglist_iter {
 };
 
 
+struct pkg_iter {
+	struct pkglist* curr_list;
+	struct pkglist* list_ptr_bound;
+	struct pkglist_entry* pkglist_elt;
+};
+
+
 struct inststate_iter {
 	struct it_iterator it_iter;
 };
@@ -301,6 +308,9 @@ const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
                                        const mmstr* pkgname,
                                        const struct binindex* binindex);
 const struct mmpkg* pkglist_iter_next(struct pkglist_iter* iter);
+struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
+                             const struct binindex* binindex);
+struct mmpkg* pkg_iter_next(struct pkg_iter* pkg_iter);
 
 
 static inline
