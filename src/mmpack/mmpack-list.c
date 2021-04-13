@@ -29,11 +29,38 @@ struct cb_data {
 static int show_ghost_packages = 0;
 
 
+static
+void print_pkg(const struct mmpkg* pkg, const struct mmpack_ctx* ctx)
+{
+	const char* state;
+	struct remote_resource* res;
+
+	if (mmpack_ctx_is_pkg_installed(ctx, pkg))
+		state = "[installed]";
+	else
+		state = "[available]";
+
+	printf("%s %s (%s) ", state, pkg->name, pkg->version);
+
+	if (pkg->remote_res) {
+		printf("from repositories:");
+		for (res = pkg->remote_res; res != NULL; res = res->next) {
+			mm_check(res->repo != NULL);
+			printf(" %s%c",
+			       res->repo->name,
+			       res->next ? ',' : '\n');
+		}
+	} else {
+		printf("from repositories: unknown\n");
+	}
+}
+
+
 /**
  * print_pkg_if_match() - print package if name match pattern
  * @pkg:        package whose name must be tested
  * @pattern:    pattern to search in name (can be NULL)
- * @settings:   setting of the context
+ * @ctx:        mmpack context
  *
  * Tests whether @pkg has a name which contains the string @pattern if it
  * is not NULL. If @pattern is NULL, the match is considered to be true
@@ -45,7 +72,8 @@ static int show_ghost_packages = 0;
  * Return: 1 in case of match, 0 otherwise.
  */
 static
-int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern)
+int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern,
+                       const struct mmpack_ctx* ctx)
 {
 	// If pattern is provided and the name does not match do nothing
 	if (pattern && (strstr(pkg->name, pattern) == NULL))
@@ -55,21 +83,29 @@ int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern)
 	if (!show_ghost_packages && mmpkg_is_ghost(pkg))
 		return 0;
 
-	mmpkg_print(pkg);
+	print_pkg(pkg, ctx);
 	return 1;
 }
 
 
 static
-int binindex_cb_all(struct mmpkg* pkg, void * void_data)
+int list_binindex_pkgs(struct mmpack_ctx* ctx, int only_available,
+                       const char* pattern)
 {
-	struct cb_data * data = (struct cb_data*) void_data;
+	int i = 0, found = 0;
+	struct mmpkg ** pkgs, * pkg;
 
-	// Exclude package not in repo if only available requested
-	if (data->only_available && !mmpkg_is_available(pkg))
-		return 0;
+	pkgs = binindex_sorted_pkgs(&ctx->binindex);
 
-	data->found |= print_pkg_if_match(pkg, data->pkg_name_pattern);
+	while ((pkg = pkgs[i++])) {
+		// Exclude package not in repo if only available requested
+		if (only_available && !mmpkg_is_available(pkg))
+			continue;
+
+		found |= print_pkg_if_match(pkg, pattern, ctx);
+	}
+
+	free(pkgs);
 	return 0;
 }
 
@@ -77,28 +113,14 @@ int binindex_cb_all(struct mmpkg* pkg, void * void_data)
 static
 int list_all(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	struct cb_data data = {
-		.only_available = 0,
-		.pkg_name_pattern = (argc > 1) ? argv[1] : NULL,
-		.found = 0,
-	};
-
-	binindex_sorted_foreach(&ctx->binindex, binindex_cb_all, &data);
-	return data.found;
+	return list_binindex_pkgs(ctx, 0, (argc > 1) ? argv[1] : NULL);
 }
 
 
 static
 int list_available(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	struct cb_data data = {
-		.only_available = 1,
-		.pkg_name_pattern = (argc > 1) ? argv[1] : NULL,
-		.found = 0,
-	};
-
-	binindex_sorted_foreach(&ctx->binindex, binindex_cb_all, &data);
-	return data.found;
+	return list_binindex_pkgs(ctx, 1, (argc > 1) ? argv[1] : NULL);
 }
 
 
@@ -111,7 +133,7 @@ int list_installed(struct mmpack_ctx* ctx, int argc, const char* argv[])
 
 	pkgs = install_state_sorted_pkgs(&ctx->installed);
 	while ((pkg = pkgs[i++]))
-		found |= print_pkg_if_match(pkg, pattern);
+		found |= print_pkg_if_match(pkg, pattern, ctx);
 
 	free(pkgs);
 
@@ -129,7 +151,7 @@ int list_extras(struct mmpack_ctx* ctx, int argc, const char* argv[])
 	pkgs = install_state_sorted_pkgs(&ctx->installed);
 	while ((pkg = pkgs[i++])) {
 		if (!mmpkg_is_available(pkg))
-			found |= print_pkg_if_match(pkg, pattern);
+			found |= print_pkg_if_match(pkg, pattern, ctx);
 	}
 
 	free(pkgs);
@@ -150,7 +172,7 @@ int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 		if (binindex_is_pkg_upgradeable(&ctx->binindex, pkg)) {
 			latest = binindex_lookup(&ctx->binindex,
 			                         pkg->name, NULL);
-			found |= print_pkg_if_match(latest, pattern);
+			found |= print_pkg_if_match(latest, pattern, ctx);
 		}
 
 	free(pkgs);
