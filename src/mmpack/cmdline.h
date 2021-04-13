@@ -72,8 +72,6 @@ const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
 int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
                  struct pkg_parser * pp);
 struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg);
-struct mmpkg const* find_package_by_sumsha(struct mmpack_ctx * ctx,
-                                           const char* pkg_req);
 int complete_pkgname(struct mmpack_ctx * ctx, const char* arg,
                      enum pkg_comp_type type);
 
