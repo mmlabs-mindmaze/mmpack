@@ -174,14 +174,25 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 
 
 static
-int set_installed(struct mmpkg* pkg, void * data)
+void mmpack_ctx_populate_from_repo(struct mmpack_ctx * ctx,
+                                   const struct repo* repo)
 {
-	struct mmpack_ctx * ctx = data;
+	STATIC_CONST_MMSTR(binpath, REPO_INDEX_RELPATH);
+	STATIC_CONST_MMSTR(srcpath, SRC_INDEX_RELPATH);
+	mmstr* binindex_cache;
+	mmstr* srcindex_cache;
 
-	install_state_add_pkg(&ctx->installed, pkg);
-	pkg->state = MMPACK_PKG_INSTALLED;
-	return 0;
+	binindex_cache = mmpack_repo_cachepath(ctx, repo->name, binpath);
+	srcindex_cache = mmpack_repo_cachepath(ctx, repo->name, srcpath);
+	if (binindex_populate(&ctx->binindex, binindex_cache, repo)
+	    || srcindex_populate(&ctx->srcindex, srcindex_cache, repo))
+		printf("Cache file of repository %s is missing, "
+		       "updating may fix the issue\n", repo->name);
+
+	mmstr_free(binindex_cache);
+	mmstr_free(srcindex_cache);
 }
+
 
 /**
  * mmpack_ctx_init_pkglist() - parse repo cache and installed package list
@@ -195,16 +206,14 @@ int set_installed(struct mmpkg* pkg, void * data)
 LOCAL_SYMBOL
 int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 {
-	STATIC_CONST_MMSTR(binpath, REPO_INDEX_RELPATH);
-	STATIC_CONST_MMSTR(srcpath, SRC_INDEX_RELPATH);
 	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH);
-	mmstr* binindex_cache;
-	mmstr* srcindex_cache;
 	mmstr* installed_index_path;
 	int len;
 	struct repo_iter iter;
 	const struct repo* repo;
 	int rv = -1;
+	struct pkg_iter pkg_iter;
+	struct mmpkg* pkg;
 
 	// Form the path of installed package from prefix
 	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;
@@ -215,26 +224,19 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	if (binindex_populate(&ctx->binindex, installed_index_path, NULL))
 		goto exit;
 
-	binindex_foreach(&ctx->binindex, set_installed, ctx);
+	// Add package added from installed_index to installed_state
+	pkg = pkg_iter_first(&pkg_iter, &ctx->binindex);
+	for (; pkg != NULL; pkg = pkg_iter_next(&pkg_iter)) {
+		install_state_add_pkg(&ctx->installed, pkg);
+		pkg->state = MMPACK_PKG_INSTALLED;
+	}
 
 	// populate the repository cached package list
 	repo = repo_iter_first(&iter, &ctx->settings.repo_list);
 	for (; repo != NULL; repo = repo_iter_next(&iter)) {
 		// discard repositories that are disable
-		if (repo->enabled == 0)
-			continue;
-
-		binindex_cache =
-			mmpack_repo_cachepath(ctx, repo->name, binpath);
-		srcindex_cache =
-			mmpack_repo_cachepath(ctx, repo->name, srcpath);
-		if (binindex_populate(&ctx->binindex, binindex_cache, repo)
-		    || srcindex_populate(&ctx->srcindex, srcindex_cache, repo))
-			printf("Cache file of repository %s is missing, "
-			       "updating may fix the issue\n", repo->name);
-
-		mmstr_free(binindex_cache);
-		mmstr_free(srcindex_cache);
+		if (repo->enabled)
+			mmpack_ctx_populate_from_repo(ctx, repo);
 	}
 
 	binindex_compute_rdepends(&ctx->binindex);
