@@ -329,26 +329,6 @@ exit:
 }
 
 
-struct cb_data {
-	mmstr const * sumsha;
-	struct mmpkg * pkg;
-};
-
-
-static
-int cb_binindex(struct mmpkg * pkg, void * void_data)
-{
-	struct cb_data * data = (struct cb_data*) void_data;
-
-	if (mmstrcmp(pkg->sumsha, data->sumsha) == 0) {
-		data->pkg = pkg;
-		return 0;
-	}
-
-	return -1;
-}
-
-
 /**
  * find_package_by_sumsha() -  find the package associated with the sumsha given
  *                             in argument.
@@ -362,17 +342,26 @@ LOCAL_SYMBOL
 struct mmpkg const* find_package_by_sumsha(struct mmpack_ctx * ctx,
                                            const char* sumsha_req)
 {
-	struct cb_data data;
+	struct pkg_iter iter;
+	const struct mmpkg *pkg, *found_pkg = NULL;
+	mmstr* sumsha;
 
-	data.sumsha = mmstr_malloc_from_cstr(sumsha_req);
-	data.pkg = NULL;
-	binindex_foreach(&ctx->binindex, cb_binindex, &data);
-	mmstr_free(data.sumsha);
+	sumsha = mmstr_malloca_from_cstr(sumsha_req);
 
-	if (data.pkg == NULL)
+	pkg = pkg_iter_first(&iter, &ctx->binindex);
+	for (; pkg != NULL; pkg = pkg_iter_next(&iter)) {
+		if (mmstrequal(pkg->sumsha, sumsha)) {
+			found_pkg = pkg;
+			break;
+		}
+	}
+
+	mmstr_freea(sumsha);
+
+	if (found_pkg == NULL)
 		info("No package with sumsha: %s\n", sumsha_req);
 
-	return data.pkg;
+	return found_pkg;
 }
 
 
