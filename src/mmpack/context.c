@@ -226,10 +226,8 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 
 	// Add package added from installed_index to installed_state
 	pkg = pkg_iter_first(&pkg_iter, &ctx->binindex);
-	for (; pkg != NULL; pkg = pkg_iter_next(&pkg_iter)) {
+	for (; pkg != NULL; pkg = pkg_iter_next(&pkg_iter))
 		install_state_add_pkg(&ctx->installed, pkg);
-		pkg->state = MMPACK_PKG_INSTALLED;
-	}
 
 	// populate the repository cached package list
 	repo = repo_iter_first(&iter, &ctx->settings.repo_list);
