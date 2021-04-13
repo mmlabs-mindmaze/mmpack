@@ -72,24 +72,13 @@ int check_from_repo_fully_set(struct remote_resource* res)
 }
 
 
-static
-int check_pkg_fully_set(struct mmpkg* pkg, void * data)
-{
-	int* count = data;
-
-	(*count)++;
-	ck_assert(pkg->remote_res != NULL);
-	check_from_repo_fully_set(pkg->remote_res);
-	return 0;
-}
-
-
-
 START_TEST(test_deduplicate)
 {
 	int rv;
 	int count;
 	struct repo repo;
+	struct mmpkg* pkg;
+	struct pkg_iter iter;
 
 	repo.url = mmstr_malloc_from_cstr("http://url_simple.com");
 	repo.name = mmstr_malloc_from_cstr("name_simple");
@@ -106,7 +95,11 @@ START_TEST(test_deduplicate)
 	// Check eack package has its repo specific fields set and count the
 	// number of package
 	count = 0;
-	binindex_foreach(&binary_index, check_pkg_fully_set, &count);
+	pkg = pkg_iter_first(&iter, &binary_index);
+	for (; pkg != NULL; pkg = pkg_iter_next(&iter), count++) {
+		ck_assert(pkg->remote_res != NULL);
+		check_from_repo_fully_set(pkg->remote_res);
+	}
 
 	ck_assert_int_eq(count, NUM_PKGS_IN_SIMPLE_YAML);
 
