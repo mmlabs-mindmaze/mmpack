@@ -743,23 +743,6 @@ struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
  *                                                                        *
  **************************************************************************/
 
-LOCAL_SYMBOL
-int binindex_foreach(struct binindex * binindex,
-                     int (* cb)(struct mmpkg*, void*),
-                     void * data)
-{
-	struct pkg_iter iter;
-	struct mmpkg* pkg;
-
-	pkg = pkg_iter_first(&iter, binindex);
-	while (pkg != NULL) {
-		cb(pkg, data);
-		pkg = pkg_iter_next(&iter);
-	}
-
-	return 0;
-}
-
 
 static
 int mmpkg_cmp(const void * v1, const void * v2)
@@ -843,23 +826,6 @@ struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex)
 	pkgs[cnt] = NULL;
 
 	return pkgs;
-}
-
-
-LOCAL_SYMBOL
-int binindex_sorted_foreach(struct binindex * binindex,
-                            int (* cb)(struct mmpkg*, void*),
-                            void * data)
-{
-	struct mmpkg ** pkgs, * pkg;
-	int i = 0;
-
-	pkgs = binindex_sorted_pkgs(binindex);
-	while ((pkg = pkgs[i++]))
-		cb(pkg, data);
-
-	free(pkgs);
-	return 0;
 }
 
 
