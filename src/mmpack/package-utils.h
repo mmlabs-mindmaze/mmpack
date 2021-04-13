@@ -259,6 +259,7 @@ struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
                                       char const * filename);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
                       const struct repo* repo);
+struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex);
 void binindex_dump(struct binindex const * binindex);
 int binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
