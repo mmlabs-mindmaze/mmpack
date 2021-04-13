@@ -239,7 +239,6 @@ int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
                               const struct repo* repo);
 
 void mmpkg_dump(struct mmpkg const * pkg);
-void mmpkg_print(struct mmpkg const * pkg);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
 void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);
 
