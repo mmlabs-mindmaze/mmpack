@@ -12,26 +12,6 @@
 #include "utils.h"
 
 
-/**
- * enum pkg_state - list of possible package state
- * @MMPACK_PKG_ERROR:     error while retrieving package state
- * @MMPACK_PKG_UNSET:     unset package state
- * @MMPACK_PKG_INSTALLED: package has already been installed by mmpack
- * @MMPACK_PKG_STAGED:    package will be installed by mmpack
- * @SYSTEM_PKG_UNSET:     system package in unknown state
- * @SYSTEM_PKG_INSTALLED: package has already been installed by the system
- * @SYSTEM_PKG_REQUIRED:  package is missing from the system
- */
-typedef enum {
-	MMPACK_PKG_ERROR = -1,
-	MMPACK_PKG_UNSET = 0,
-	MMPACK_PKG_INSTALLED,
-	MMPACK_PKG_STAGED,
-	SYSTEM_PKG_UNSET,
-	SYSTEM_PKG_INSTALLED,
-	SYSTEM_PKG_REQUIRED,
-} pkg_state;
-
 int pkg_version_compare(char const * v1, char const * v2);
 
 
@@ -65,7 +45,6 @@ struct mmpkg {
 
 	struct remote_resource* remote_res;
 
-	pkg_state state;
 	int flags;
 
 	struct mmpkg_dep * mpkdeps;
