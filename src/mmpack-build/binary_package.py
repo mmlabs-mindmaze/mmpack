@@ -17,6 +17,32 @@ from . package_info import PackageInfo
 from . workspace import get_staging_dir
 
 
+def _metadata_folder() -> str:
+    folder = 'var/lib/mmpack/metadata/'
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
+
+def _gen_sha256sums(sha256sums_path: str):
+    """
+    assume to be run with pkgdir as current dir
+    """
+    # Compute hashes of all installed files
+    cksums = {}
+    for filename in glob('**', recursive=True):
+        # skip folder and MMPACK/info
+        if isdir(filename) or filename == 'MMPACK/info':
+            continue
+
+        # Add file with checksum
+        cksums[filename] = sha256sum(filename, follow_symlink=False)
+
+    # Write the file sha256sums file
+    with open(sha256sums_path, 'wt', newline='\n') as sums_file:
+        for filename in sorted(cksums):
+            sums_file.write('{}: {}\n'.format(filename, cksums[filename]))
+
+
 class BinaryPackage:
     # pylint: disable=too-many-instance-attributes
     """
@@ -76,10 +102,6 @@ class BinaryPackage:
 
         return specs_provides
 
-    def _sha256sums_file(self) -> str:
-        os.makedirs('var/lib/mmpack/metadata/', exist_ok=True)
-        return 'var/lib/mmpack/metadata/{}.sha256sums'.format(self.name)
-
     def _gen_info(self, pkgdir: str):
         """
         This generate the info file and sha256sums. It must be the last step
@@ -87,20 +109,8 @@ class BinaryPackage:
         """
         pushdir(pkgdir)
 
-        # Compute hashes of all installed files
-        cksums = {}
-        for filename in glob('**', recursive=True):
-            # skip folder and MMPACK/info
-            if isdir(filename) or filename == 'MMPACK/info':
-                continue
-
-            # Add file with checksum
-            cksums[filename] = sha256sum(filename, follow_symlink=False)
-
-        # Write the file sha256sums file
-        with open(self._sha256sums_file(), 'wt', newline='\n') as sums_file:
-            for filename in sorted(cksums):
-                sums_file.write('{}: {}\n'.format(filename, cksums[filename]))
+        sha256sums_path = f'{_metadata_folder()}/{self.name}.sha256sums'
+        _gen_sha256sums(sha256sums_path)
 
         # Create info file
         info = {'version': self.version,
@@ -108,16 +118,14 @@ class BinaryPackage:
                 'description': self.description,
                 'ghost': self.ghost,
                 'srcsha256': self.src_hash,
-                'sumsha256sums': sha256sum(self._sha256sums_file())}
+                'sumsha256sums': sha256sum(sha256sums_path)}
         info.update(self._dependencies)
         yaml_serialize({self.name: info}, 'MMPACK/info')
         popdir()
 
     def _store_provides(self, pkgdir: str):
         pushdir(pkgdir)
-
-        metadata_folder = 'var/lib/mmpack/metadata/'
-        os.makedirs(metadata_folder, exist_ok=True)
+        metadata_folder = _metadata_folder()
 
         pkginfo = self.get_pkginfo()
         for hook in MMPACK_BUILD_HOOKS:
