@@ -1,4 +1,5 @@
 # pylint: disable=logging-format-interpolation
+# pylint: disable=logging-format-interpolation
 """
 Module provinding helpers.
 - It provides a helper to check that all the information required in a manifest
@@ -7,6 +8,8 @@ are present.
 with the information given in the manifest.
 - It provides a helper to replace the files upload with the old files (if any)
 """
+
+from __future__ import annotations
 
 from collections import Counter, namedtuple
 from enum import Enum, auto
@@ -17,7 +20,7 @@ import logging
 import logging.handlers
 import os
 import shutil
-from typing import Union, Callable, Set
+from typing import Any, Dict, Optional, Union, Callable, Set
 import yaml
 
 
@@ -108,18 +111,45 @@ def _init_logger(log_file: str) -> logging.Logger:
     return logger
 
 
-def _info_mpk(pkg_path: str) -> dict:
-    """
-    This function reads a mpk file and returns a dictionary containing the
-    information read.
+class _BinPkg:
+    def __init__(self, name: str = '', data: Optional[Dict[str, Any]] = None):
+        self.name = name
+        self._data = data if data is not None else {}
 
-    Args:
-        pkg_path: the path through the mkp file to read.
-    """
-    cmd = [_TARPROG, '-xOf', pkg_path, './MMPACK/info']
-    with Popen(cmd, stdout=PIPE) as proc:
-        buf = proc.stdout.read()
-        return yaml.safe_load(buf)
+    def __getattr__(self, key: str) -> Any:
+        return self._data[key]
+
+    def update(self, data: Dict[str, Any]):
+        """
+        Update fields from key/val of data
+        """
+        self._data.update(data)
+
+    def yaml_data(self) ->  Dict[str, Any]:
+        """
+        Get yaml data to generate binary-index package entry value
+        """
+        return self._data
+
+    def srcid(self) -> str:
+        """
+        Get a unique identifier of the associated source
+        """
+        return _srcid(self.source, self.srcsha256)
+
+    @staticmethod
+    def load(pkg_path: str) -> _BinPkg:
+        """
+        This function reads a mpk file and returns a _BinPkg describing it
+
+        Args:
+            pkg_path: the path through the mpk file to read.
+        """
+        cmd = [_TARPROG, '-xOf', pkg_path, './MMPACK/info']
+        with Popen(cmd, stdout=PIPE) as proc:
+            buf = proc.stdout.read()
+            name, data = yaml.safe_load(buf).popitem()
+            return _BinPkg(name, data)
 
 
 def file_serialize(index: dict, filename: str):
@@ -225,9 +255,11 @@ class Repo:
     def _reload_indices_from_files(self):
         self.last_update = os.stat(self.binindex_file).st_mtime
 
-        self.binindex = yaml_load(self.binindex_file)
-        if self.binindex is None:
-            self.binindex = dict()
+        binindex_data = yaml_load(self.binindex_file)
+        if binindex_data is None:
+            binindex_data = {}
+
+        self.binindex = {n: _BinPkg(n, d) for n, d in binindex_data.items()}
 
         self.srcindex = file_load(self.srcindex_file)
         if self.srcindex is None:
@@ -237,9 +269,8 @@ class Repo:
         # source packages and the values correspond to the number of binary
         # packages referencing the key.
         self.count_src_refs = Counter()
-        for pkg_info in self.binindex.values():
-            src_id = _srcid(pkg_info['source'], pkg_info['srcsha256'])
-            self.count_src_refs[src_id] += 1
+        for binpkg in self.binindex.values():
+            self.count_src_refs[binpkg.srcid()] += 1
 
     def yaml_serialize(self, obj: Union[list, dict], filename: str) -> None:
         """
@@ -361,7 +392,8 @@ class Repo:
         new_binfile = os.path.join(self.working_dir, RELPATH_BINARY_INDEX)
 
         file_serialize(self.srcindex, new_srcfile)
-        self.yaml_serialize(self.binindex, new_binfile)
+        yaml_binindex = {n: p.yaml_data() for n, p in self.binindex.items()}
+        self.yaml_serialize(yaml_binindex, new_binfile)
 
         to_add.add(RELPATH_SOURCE_INDEX)
         to_add.add(RELPATH_BINARY_INDEX)
@@ -399,14 +431,14 @@ class Repo:
         were the last package referencing a source package, the source package
         will be removed as well.
         """
-        pkginfo = self.binindex.pop(pkg_name, None)
-        if not pkginfo:
+        binpkg = self.binindex.pop(pkg_name, None)
+        if not binpkg:
             if not ignore_missing:
                 raise ValueError(f'package {pkg_name} not present')
             return
 
-        to_remove.add(pkginfo['filename'])
-        src_id = _srcid(pkginfo['source'], pkginfo['srcsha256'])
+        to_remove.add(binpkg.filename)
+        src_id = binpkg.srcdid()
         self.count_src_refs[src_id] -= 1
         # If associated source package has no binary package remove it
         if self.count_src_refs[src_id] == 0:
@@ -416,9 +448,9 @@ class Repo:
         # Remove all binary packages associated to the source package. The
         # associated source package will be removed upon the last binary
         # package removal
-        for pkgname, pkginfo in list(self.binindex.items()):
-            if _srcid(pkginfo['source'], pkginfo['srcsha256']) == src_id:
-                self._remove_binpkg(pkgname, to_remove)
+        for binpkg in list(self.binindex.values()):
+            if binpkg.srcid() == src_id:
+                self._remove_binpkg(binpkg.name, to_remove)
 
     def _prepare_upload(self, manifest: dict, to_remove: set, to_add: set):
         """
@@ -470,12 +502,13 @@ class Repo:
             self._remove_binpkg(pkg_name, to_remove, ignore_missing=True)
 
             # Add new binary package entry
-            buf = _info_mpk(os.path.join(self.working_dir, pkginfo['file']))
-            buf[pkg_name].update({'filename': pkginfo['file'],
-                                  'size': pkginfo['size'],
-                                  'sha256': pkginfo['sha256']})
+            mpk_path = os.path.join(self.working_dir, pkginfo['file'])
+            binpkg = _BinPkg.load(mpk_path)
+            binpkg.update({'filename': pkginfo['file'],
+                           'size': pkginfo['size'],
+                           'sha256': pkginfo['sha256']})
 
-            self.binindex.update(buf)
+            self.binindex[binpkg.name] = binpkg
 
     def stage_upload(self, manifest_file: str,
                      remove_upload: bool = False) -> bool:
