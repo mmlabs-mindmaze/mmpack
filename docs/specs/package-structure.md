@@ -2,18 +2,24 @@
 
 ## file format
 
-tar.xz file with extension .mpk containing:
+tar.zst file with extension .mpk containing:
 
  * files to install
  * MMPACK/info: YAML description of binary package
- * MMPACK/sha256sums: YAML dictionary of SHA256 hash of installed files
- * MMPACK/symbols: YAML description of symbols exported by ABI of a shared
-   lib of in the package (if applicable)
- * MMPACK/pyobjects: YAML description of python objects (function or class)
-   exported by the package (if applicable)
- * MMPACK/post-install: script to execute (if any) after package install
- * MMPACK/pre-uninstall: script to execute (if any) before package removal
- * MMPACK/post-uninstall: script to execute (if any) after package removal
+ * <metadatadir>/<pkgname>.sha256sums: YAML dictionary of SHA256 hash of
+   installed files
+ * <metadatadir>/<pkgname>.symbols.gz: YAML description of symbols exported by
+   ABI of a shared lib of in the package (if applicable)
+ * <metadatadir>/<pkgname>.pyobjects.gz: YAML description of python objects
+   (function or class) exported by the package (if applicable)
+ * <metadatadir>/<pkgname>.post-install: script to execute (if any) after
+   package install
+ * <metadatadir>/<pkgname>.pre-uninstall: script to execute (if any) before
+   package removal
+ * <metadatadir>/<pkgname>.post-uninstall: script to execute (if any) after
+   package removal
+
+metadatadir is var/lib/mmpack/metadata.
 
 Regarding post-install, pre-uninstall and post-uninstall files, currently,
 only POSIX shell script are allowed. If there is a _real_ need in future
@@ -29,15 +35,15 @@ named after the package name with the following fields:
 
  * version: version of the package
  * source: name of the source package
- * sysdepends: list of package specification indicating the
-   system dependencies of this package. This field is optional.
+ * sysdepends: comma separated list of system package specification indicating
+   the system dependencies of this package. The format is of each element is
+   specific to the system package manager. This field is optional.
  * depends: list of package specification indicating the
    dependencies of this package. This field is optional.
  * conflicts: list of package specification that must be
    removed before the package being installed. This field is optional.
  * provides: metapackage that this package provides. This field is optional
  * description: string describing what the package does/provides
- * arch: string of the architecture/OS that this package is built for
  * sumsha256sums: SHA256 hash of list of installed files (MMPACK/sha256sums)
  * srcsha256: SHA256 hash of source package used to build this package
  * ghost: true or false depending the package is a ghost package
@@ -98,6 +104,8 @@ libmmlib.so.0:
 ## Package specification
 
 Each package specification consists of one YAML entry whose key is the name of
-the package and the value is a relation ship (=, >=, <) and a package version
-number. If the specification is not restricted by a particular version number or
-range, the value any must be set.
+the package and the value consisting in list of 2 versions: the minimal version
+and the maximal. If 'any' is specified as minimal or maximal version, no
+constraints as respectively minimal or maximal version. If the minimal version
+is equal to the maximal veersion (and not specified as 'any'), the version of
+the package must be equal to the specified version.
