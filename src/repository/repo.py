@@ -16,11 +16,12 @@ from enum import Enum, auto
 from hashlib import sha256
 from subprocess import PIPE, Popen
 from sysconfig import get_platform
+import gzip
 import logging
 import logging.handlers
 import os
 import shutil
-from typing import Any, Dict, Optional, Union, Callable, Set
+from typing import Any, Dict, List, Optional, Union, Callable, Set, TextIO
 import yaml
 
 
@@ -46,6 +47,7 @@ except ImportError:
 _TARPROG = 'bsdtar' if get_platform() == 'mingw' else 'tar'
 
 RELPATH_BINARY_INDEX = 'binary-index'
+RELPATH_BINARY_INDEX_GZ = 'binary-index.gz'
 RELPATH_SOURCE_INDEX = 'source-index'
 RELPATH_WORKING_DIR = 'working_dir'
 LOG_FILE = 'mmpack-repo.log'
@@ -79,6 +81,76 @@ def sha256sum(filename: str) -> str:
     hexdig = sha.hexdigest()
 
     return hexdig
+
+
+def wrap_str(text: str,
+             maxlen: int = 80,
+             indent: str = '',
+             split_token: str = ' ') -> List[str]:
+    """
+    Wrap a text string
+
+    Args:
+        text: the string to wrap
+        maxlen: the maximum line allowed before wrapping
+        indent: string to insert before each new line after split
+        split_token: the token after each a line may be split
+
+    Return:
+        the wrapped text
+    """
+    lines = []
+
+    while len(text) > maxlen:
+        prefix = text[:maxlen].rsplit(split_token, 1)[0]
+        prefix += split_token
+        text = text[len(prefix):]
+        lines.append(prefix)
+
+    lines.append(text)
+
+    return ('\n' + indent).join(lines)
+
+
+def _write_keyval(stream: TextIO, key: str, value: Any,
+                  split: Optional[str] = None):
+    if not isinstance(value, str):
+        if isinstance(value, bool):
+            value = str(value).lower()
+        else:
+            value = str(value)
+
+    # Skip field with empty value
+    if not value:
+        return
+
+    text = f'{key}: {value}'
+    if split is None:
+        stream.write(text + '\n')
+        return
+
+    for line in text.split('\n'):
+        wrapped_line = wrap_str(line, indent=' ', split_token=split)
+        stream.write(wrapped_line + '\n')
+
+
+def _gen_dep_list(dependencies: Dict[str, List[str]]) -> List[str]:
+    deps = []
+
+    for dep, minmaxver in dependencies.items():
+        minver = minmaxver[0]
+        maxver = minmaxver[1]
+        if minver == maxver:
+            if minver != 'any':
+                dep += f' (= {minver})'
+            deps.append(dep)
+        else:
+            if minver != 'any':
+                deps.append(f'{dep} (>= {minver})')
+            if maxver != 'any':
+                deps.append(f'{dep} (< {maxver})')
+
+    return deps
 
 
 def yaml_load(filename: str):
@@ -117,6 +189,11 @@ class _BinPkg:
         self._data = data if data is not None else {}
 
     def __getattr__(self, key: str) -> Any:
+        if key == 'depends':
+            return self._data.get(key, {})
+        elif key == 'sysdepends':
+            return self._data.get(key, [])
+
         return self._data[key]
 
     def update(self, data: Dict[str, Any]):
@@ -130,6 +207,31 @@ class _BinPkg:
         Get yaml data to generate binary-index package entry value
         """
         return self._data
+
+    def write_keyvals(self, stream: TextIO):
+        """
+        Write list of key/values part for the binary package at hand.
+        """
+        _write_keyval(stream, 'name', self.name)
+
+        for key in ('version', 'source', 'srcsha256',
+                    'ghost', 'sumsha256sums'):
+            _write_keyval(stream, key, self._data.get(key, ''))
+
+        multiline_desc = self.description.replace('\n', '\n .\n ')
+        _write_keyval(stream, 'description', multiline_desc, split=' ')
+
+        deps = ', '.join(_gen_dep_list(self.depends))
+        _write_keyval(stream, 'depends', deps, split=', ')
+
+        sysdeps = ', '.join(self.sysdepends)
+        _write_keyval(stream, 'sysdepends', sysdeps, split=', ')
+
+        # Write at the end the repo specific fields
+        for key in ('filename', 'size', 'sha256'):
+            _write_keyval(stream, key, self._data[key])
+
+        stream.write('\n')
 
     def srcid(self) -> str:
         """
@@ -242,6 +344,12 @@ class Repo:
         self.srcindex = dict()
         self.count_src_refs = Counter()
         self._reload_indices_from_files()
+
+        # Create keyval binary index file from loaded data if not existing
+        keyval_binindex = os.path.join(abs_path_repo, RELPATH_BINARY_INDEX_GZ)
+        if not os.path.isfile(keyval_binindex):
+            self._write_keyvals_binindex(abs_path_repo)
+
         self.last_update = 0
         self.lockfile = None
 
@@ -376,6 +484,13 @@ class Repo:
         self.last_update = os.stat(self.binindex_file).st_mtime
         self._clear_change_data()
 
+    def _write_keyvals_binindex(self, dirpath: str = None):
+        filename = os.path.join(dirpath, RELPATH_BINARY_INDEX_GZ)
+
+        with gzip.open(filename, 'wt', newline='\n') as stream:
+            for pkg in self.binindex.values():
+                pkg.write_keyvals(stream)
+
     def _dump_indexes_working_dir(self, to_add: set):
         """
         Writes the updated binary-index and source-index into the working
@@ -395,8 +510,11 @@ class Repo:
         yaml_binindex = {n: p.yaml_data() for n, p in self.binindex.items()}
         self.yaml_serialize(yaml_binindex, new_binfile)
 
+        self._write_keyvals_binindex(self.working_dir)
+
         to_add.add(RELPATH_SOURCE_INDEX)
         to_add.add(RELPATH_BINARY_INDEX)
+        to_add.add(RELPATH_BINARY_INDEX_GZ)
 
     def _matching_srcids(self, srcname: str = None, version: str = None,
                          srcsha256: str = None) -> Set[str]:
