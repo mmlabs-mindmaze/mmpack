@@ -8,7 +8,7 @@ import os
 
 from glob import glob
 from os.path import isdir
-from typing import List, Dict
+from typing import List, Dict, TextIO
 
 from . common import *
 from . hooks_loader import MMPACK_BUILD_HOOKS
@@ -21,6 +21,14 @@ def _metadata_folder() -> str:
     folder = 'var/lib/mmpack/metadata/'
     os.makedirs(folder, exist_ok=True)
     return folder
+
+
+def _write_pkginfo_keyval(stream: TextIO, key: str, value: str,
+                          splitchar: str = ' '):
+    lines = f'{key}: {value}'.split('\n')
+    for line in lines:
+        wrapped_line = wrap_str(line, indent=' ', splitchar=splitchar)
+        stream.write(wrapped_line + '\n')
 
 
 def _gen_sha256sums(sha256sums_path: str):
@@ -101,6 +109,16 @@ class BinaryPackage:
             pass
 
         return specs_provides
+
+    def _gen_pkginfo(self):
+        pkginfo_path = f'{_metadata_folder()}/{self.name}.pkginfo'
+        with open(pkginfo_path, 'wt', newlines='\n') as stream:
+            _write_pkginfo_keyval(stream, 'name', self.name)
+            _write_pkginfo_keyval(stream, 'version', self.version)
+            _write_pkginfo_keyval(stream, 'source', self.source)
+            _write_pkginfo_keyval(stream, 'srcsha256', self.src_hash)
+            _write_pkginfo_keyval(stream, 'description', self.description)
+            _write_pkginfo_keyval(stream, 'ghost', self.ghost)
 
     def _gen_info(self, pkgdir: str):
         """
