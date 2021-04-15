@@ -5,7 +5,9 @@
 tar.zst file with extension .mpk containing:
 
  * files to install
+ * MMPACK/metadata: basic information concerning the package
  * MMPACK/info: YAML description of binary package
+ * <metadatadir>/<pkgname>.pkginfo: key/values describing the binary package
  * <metadatadir>/<pkgname>.sha256sums: YAML dictionary of SHA256 hash of
    installed files
  * <metadatadir>/<pkgname>.symbols.gz: YAML description of symbols exported by
@@ -25,6 +27,44 @@ Regarding post-install, pre-uninstall and post-uninstall files, currently,
 only POSIX shell script are allowed. If there is a _real_ need in future
 for other type of interpreter, there can be allowed if we add a predepends
 field in info file.
+
+
+## metadata file
+
+key/value file located in the MMPACK folder of the binary package. It it used
+to gather basic information regarding the binary package useful before
+unpacking the whole package data and helps to localized path to richer files in
+the package. It consists of the following fields:
+
+ * metadata-version: version of the format of those metadata (currently 1.0)
+ * name: name of the package
+ * version: version of the package
+ * source: name of the source package
+ * srcsha256: SHA256 hash of source package used to build this package
+ * sumsha256sums: SHA256 hash of list of installed files (sha256sums file)
+ * pkginfo-path: location within package of the richer description (pkginfo file)
+ * sumsha-path: location within package of the sha256sums file
+
+This metadata file is not installed in the package upon package installation
+
+
+## pkginfo file
+
+key/value file located in the metadata dir of mmpack in the prefix named after
+the package name: <metadatadir>/<pkgname>.pkginfo. It describes the package and
+its relationship with the other packages. It contains the follow fields:
+
+ * name: name of the package
+ * version: version of the package
+ * source: name of the source package
+ * srcsha256: SHA256 hash of source package used to build this package
+ * ghost: true or false depending the package is a ghost package
+ * description: string describing what the package does/provides
+ * depends: list of package specification (new format) indicating the
+   dependencies of this package. This field is optional.
+ * sysdepends: comma separated list of system package specification indicating
+   the system dependencies of this package. The format is of each element is
+   specific to the system package manager. This field is optional.
 
 
 ## info file
@@ -102,6 +142,21 @@ libmmlib.so.0:
 
 
 ## Package specification
+
+### New format
+
+Each package specification on one string containing the package name and
+optionally in parenthesis the version constraints. It must respect the
+following format:
+
+.. code-block::
+
+   <PKGNAME>[ (<OP> <VERSION>)]
+
+where `OP` can be '=', '>=' or '<'
+
+
+### Old format
 
 Each package specification consists of one YAML entry whose key is the name of
 the package and the value consisting in list of 2 versions: the minimal version
