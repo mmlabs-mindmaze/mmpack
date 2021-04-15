@@ -663,3 +663,32 @@ def rmtree_force(path: str):
     as well.
     """
     shutil.rmtree(path, onerror=_onerror_handler)
+
+
+def wrap_str(text: str,
+             maxlen: int = 80,
+             indent: str = '',
+             split_token: str = ' ') -> List[str]:
+    """
+    Wrap a text string
+
+    Args:
+        text: the string to wrap
+        maxlen: the maximum line allowed before wrapping
+        indent: string to insert before each new line after split
+        split_token: the token after each a line may be split
+
+    Return:
+        the wrapped text
+    """
+    lines = []
+
+    while len(text) > maxlen:
+        prefix = text[:maxlen].rsplit(split_token, 1)[0]
+        prefix += split_token
+        text = text[len(prefix):]
+        lines.append(prefix)
+
+    lines.append(text)
+
+    return ('\n' + indent).join(lines)
