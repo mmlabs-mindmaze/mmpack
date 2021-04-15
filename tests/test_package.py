@@ -57,7 +57,7 @@ class TestSrcPackageClass(unittest.TestCase):
         self.assertEqual(test_pkg.maintainer, 'mmpack.test@mindmaze.ch')
         self.assertEqual(test_pkg.url, 'ssh://git@intranet.mindmaze.ch:7999/~mmpack.test/full.git')
         self.assertEqual(test_pkg.description,
-                         "This is the fullest mmpack specfile possible.\n")
+                         "This is the fullest mmpack specfile possible.")
         self.assertEqual(test_pkg.src_hash, sha256sum(_TEST_SRCPKG))
 
         self.assertEqual(test_pkg.build_options, '-D_WITH_DUMMY_DEFINE=1')
@@ -99,7 +99,7 @@ class TestSrcPackageClass(unittest.TestCase):
 
         self.assertEqual(len(full._dependencies['depends']), 2)
         self.assertRegex(full.description,
-                         r'This is the fullest mmpack specfile possible.\n\nThis should follow.*')
+                         r'This is the fullest mmpack specfile possible.\nThis should follow.*')
 
         self.assertEqual(len(custom._dependencies['sysdepends']), 2)
         self.assertEqual(len(custom._dependencies['depends']), 2)

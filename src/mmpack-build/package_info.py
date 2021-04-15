@@ -65,7 +65,7 @@ class PackageInfo:
         """
         Init fields from custom package specification.
         """
-        self.description = specs.get('description', '')
+        self.description = specs.get('description', '').strip()
 
         # Load depends
         for dep in specs.get('depends', {}):
