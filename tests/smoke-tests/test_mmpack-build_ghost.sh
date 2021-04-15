@@ -68,10 +68,12 @@ do
 ./
 ./MMPACK/
 ./MMPACK/info
+./MMPACK/metadata
 ./var/
 ./var/lib/
 ./var/lib/mmpack/
 ./var/lib/mmpack/metadata/
+./var/lib/mmpack/metadata/$pkgname.pkginfo
 ./var/lib/mmpack/metadata/$pkgname.sha256sums
 EOF
 
@@ -85,10 +87,12 @@ cmp <(tar -tf $pkgfile) <<EOF
 ./
 ./MMPACK/
 ./MMPACK/info
+./MMPACK/metadata
 ./var/
 ./var/lib/
 ./var/lib/mmpack/
 ./var/lib/mmpack/metadata/
+./var/lib/mmpack/metadata/$pkgname.pkginfo
 ./var/lib/mmpack/metadata/$pkgname.sha256sums
 ./var/lib/mmpack/metadata/$pkgname.symbols.gz
 EOF
