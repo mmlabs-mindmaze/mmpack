@@ -234,6 +234,10 @@ class TestFileList(unittest.TestCase):
         """
         test wrap_str()
         """
+        small_str = 'Hello world!'
+        strtest = wrap_str(small_str, maxlen=70)
+        self.assertEqual(strtest, small_str)
+
         strtest = wrap_str(_LIPSUM, maxlen=70, indent='   ')
         self.assertEqual(strtest, _LIPSUM_REF_70_3INDENT)
 
