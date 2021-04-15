@@ -8,7 +8,7 @@ import os
 
 from glob import glob
 from os.path import isdir
-from typing import List, Dict
+from typing import Any, List, Dict, TextIO
 
 from . common import *
 from . hooks_loader import MMPACK_BUILD_HOOKS
@@ -17,10 +17,54 @@ from . package_info import PackageInfo
 from . workspace import get_staging_dir
 
 
+METADATA_VERSION = '1.0'
+
+
 def _metadata_folder() -> str:
     folder = 'var/lib/mmpack/metadata'
     os.makedirs(folder, exist_ok=True)
     return folder
+
+
+def _write_keyval(stream: TextIO, key: str, value: Any,
+                  split: Optional[str] = None):
+    if not isinstance(value, str):
+        if isinstance(value, bool):
+            value = str(value).lower()
+        else:
+            value = str(value)
+
+    # Skip field with empty value
+    if not value:
+        return
+
+    text = f'{key}: {value}'
+    if split is None:
+        stream.write(text + '\n')
+        return
+
+    for line in text.split('\n'):
+        wrapped_line = wrap_str(line, indent=' ', split_token=split)
+        stream.write(wrapped_line + '\n')
+
+
+def _gen_dep_list(dependencies: Dict[str, List[Version]]) -> List[str]:
+    deps = []
+
+    for dep, minmaxver in dependencies.items():
+        minver = minmaxver[0]
+        maxver = minmaxver[1]
+        if minver == maxver:
+            if minver != Version('any'):
+                dep += f' (= {minver})'
+            deps.append(dep)
+        else:
+            if minver != Version('any'):
+                deps.append(f'{dep} (>= {minver})')
+            if maxver != Version('any'):
+                deps.append(f'{dep} (< {maxver})')
+
+    return deps
 
 
 def _gen_sha256sums(sha256sums_path: str):
@@ -102,6 +146,27 @@ class BinaryPackage:
 
         return specs_provides
 
+    def _write_basic_pkginfo(self, stream: TextIO):
+        _write_keyval(stream, 'name', self.name)
+        _write_keyval(stream, 'version', self.version)
+        _write_keyval(stream, 'source', self.source)
+        _write_keyval(stream, 'srcsha256', self.src_hash)
+
+    def _gen_pkginfo(self, pkginfo_path: str):
+        with open(pkginfo_path, 'wt', newline='\n') as stream:
+            self._write_basic_pkginfo(stream)
+            _write_keyval(stream, 'ghost', self.ghost)
+
+            # preserve end of line in description by inserting ' .' lines
+            multiline_desc = self.description.replace('\n', '\n .\n ')
+            _write_keyval(stream, 'description', multiline_desc, split=' ')
+
+            deps = ', '.join(_gen_dep_list(self._dependencies['depends']))
+            _write_keyval(stream, 'depends', deps, split=', ')
+
+            sysdeps = ', '.join(self._dependencies['sysdepends'])
+            _write_keyval(stream, 'sysdepends', sysdeps, split=', ')
+
     def _gen_info(self, pkgdir: str):
         """
         This generate the info file and sha256sums. It must be the last step
@@ -109,8 +174,21 @@ class BinaryPackage:
         """
         pushdir(pkgdir)
 
-        sha256sums_path = f'{_metadata_folder()}/{self.name}.sha256sums'
+        metadata_folder = _metadata_folder()
+        sha256sums_path = f'{metadata_folder}/{self.name}.sha256sums'
+        pkginfo_path = f'{metadata_folder}/{self.name}.pkginfo'
+
+        self._gen_pkginfo(pkginfo_path)
+
         _gen_sha256sums(sha256sums_path)
+        sumsha256sums = sha256sum(sha256sums_path)
+
+        with open('MMPACK/metadata', 'wt', newline='\n') as stream:
+            _write_keyval(stream, 'metadata-version', METADATA_VERSION)
+            self._write_basic_pkginfo(stream)
+            _write_keyval(stream, 'sumsha-256sums', sumsha256sums)
+            _write_keyval(stream, 'pkginfo-path', './' + pkginfo_path)
+            _write_keyval(stream, 'sumsha-path', './' + sha256sums_path)
 
         # Create info file
         info = {'version': self.version,
@@ -118,7 +196,7 @@ class BinaryPackage:
                 'description': self.description,
                 'ghost': self.ghost,
                 'srcsha256': self.src_hash,
-                'sumsha256sums': sha256sum(sha256sums_path)}
+                'sumsha256sums': sumsha256sums}
         info.update(self._dependencies)
         yaml_serialize({self.name: info}, 'MMPACK/info')
         popdir()
