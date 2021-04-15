@@ -6,7 +6,7 @@ from os.path import dirname, abspath
 from shutil import rmtree
 
 from mmpack_build.common import list_files, parse_soname, shlib_keyname, \
-    str2bool
+    str2bool, wrap_str
 
 
 REF_FILELIST = [
@@ -57,6 +57,73 @@ REF_SONAME_DATA = [
     ('foo.dll', 'foo', '', 'libfoo'),
     ('liba52-0.7.4.so', 'liba52-0.7.4', '', 'liba52-0.7.4'),
 ]
+
+
+_LIPSUM = \
+'''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus.
+Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed,
+dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper
+congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est
+eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu
+massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue.
+Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue.
+Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed
+dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci
+luctus et ultrices posuere cubilia Curae; Aliquam nibh. Mauris ac mauris sed
+pede pellentesque fermentum. Maecenas adipiscing ante non diam sodales
+hendrerit.'''.replace('\n', ' ')
+
+
+_LIPSUM_REF_70_3INDENT = \
+'''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non 
+   risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, 
+   ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula 
+   massa, varius a, semper congue, euismod non, mi. Proin porttitor, 
+   orci nec nonummy molestie, enim est eleifend mi, non fermentum diam 
+   nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, 
+   consequat in, pretium a, enim. Pellentesque congue. Ut in risus 
+   volutpat libero pharetra tempor. Cras vestibulum bibendum augue. 
+   Praesent egestas leo in pede. Praesent blandit odio eu enim. 
+   Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum 
+   primis in faucibus orci luctus et ultrices posuere cubilia Curae; 
+   Aliquam nibh. Mauris ac mauris sed pede pellentesque fermentum. 
+   Maecenas adipiscing ante non diam sodales hendrerit.'''
+
+
+_LIPSUM_REF_40_PIPEINDENT = \
+'''Lorem ipsum dolor sit amet, consectetur 
+|adipiscing elit. Sed non risus. 
+|Suspendisse lectus tortor, dignissim 
+|sit amet, adipiscing nec, ultricies 
+|sed, dolor. Cras elementum ultrices 
+|diam. Maecenas ligula massa, varius a, 
+|semper congue, euismod non, mi. Proin 
+|porttitor, orci nec nonummy molestie, 
+|enim est eleifend mi, non fermentum 
+|diam nisl sit amet erat. Duis semper. 
+|Duis arcu massa, scelerisque vitae, 
+|consequat in, pretium a, enim. 
+|Pellentesque congue. Ut in risus 
+|volutpat libero pharetra tempor. Cras 
+|vestibulum bibendum augue. Praesent 
+|egestas leo in pede. Praesent blandit 
+|odio eu enim. Pellentesque sed dui ut 
+|augue blandit sodales. Vestibulum ante 
+|ipsum primis in faucibus orci luctus et 
+|ultrices posuere cubilia Curae; Aliquam 
+|nibh. Mauris ac mauris sed pede 
+|pellentesque fermentum. Maecenas 
+|adipiscing ante non diam sodales 
+|hendrerit.'''
+
+_DEPLIST_STR = \
+'''dummy (>= 1.2.3-5), foo (= 5.2.3), bar (>= 77.99.3), helloworld,
+fakepkg | not-a-real-package (>= 23), baz'''.replace('\n', ' ')
+
+_WRAPPED_DEPLIST_REF45 = \
+'''dummy (>= 1.2.3-5), foo (= 5.2.3), 
+bar (>= 77.99.3), helloworld, 
+fakepkg | not-a-real-package (>= 23), baz'''
 
 
 class TestFileList(unittest.TestCase):
@@ -162,3 +229,20 @@ class TestFileList(unittest.TestCase):
 
         for value in refdata_exception:
             self.assertRaises(ValueError, str2bool, value)
+
+    def test_wrap_str(self):
+        """
+        test wrap_str()
+        """
+        small_str = 'Hello world!'
+        strtest = wrap_str(small_str, maxlen=70)
+        self.assertEqual(strtest, small_str)
+
+        strtest = wrap_str(_LIPSUM, maxlen=70, indent='   ')
+        self.assertEqual(strtest, _LIPSUM_REF_70_3INDENT)
+
+        strtest = wrap_str(_LIPSUM, maxlen=40, indent='|')
+        self.assertEqual(strtest, _LIPSUM_REF_40_PIPEINDENT)
+
+        strtest = wrap_str(_DEPLIST_STR, maxlen=45, split_token=', ')
+        self.assertEqual(strtest, _WRAPPED_DEPLIST_REF45)
