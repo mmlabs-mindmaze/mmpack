@@ -23,6 +23,16 @@ def _metadata_folder() -> str:
     return folder
 
 
+def _write_pkginfo_keyval(stream: TextIO, key: str, value: str,
+                          splitchar: str=' '):
+    lines = f'{key}: {val}'.split('\n')
+    for line in lines:
+        while line:
+            wrapped_line = line[:80].rsplit(splitchar, 1)[0]
+            line = line.removeprefix(wrapped_line)
+            stream.write(wrapped_line + splitchar + '\n')
+
+
 def _gen_sha256sums(sha256sums_path: str):
     """
     assume to be run with pkgdir as current dir
@@ -101,6 +111,11 @@ class BinaryPackage:
             pass
 
         return specs_provides
+
+    def _gen_pkginfo(self):
+        pkginfo_path = f'{_metadata_folder()}/{self.name}.pkginfo' 
+        with open(pkginfo_path, 'wt', newlines='\n') as stream:
+            stream()
 
     def _gen_info(self, pkgdir: str):
         """
