@@ -230,7 +230,7 @@ class SrcPackage:
             elif key == 'url':
                 self.url = value
             elif key == 'description':
-                self.description = value
+                self.description = value.strip()
             elif key == 'build-options':
                 self.build_options = value
             elif key == 'build-depends':
