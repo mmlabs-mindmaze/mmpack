@@ -81,6 +81,7 @@ MM_CHECK_LIB([mm_thr_create], [mmlib], MMLIB, [], [AC_MSG_ERROR([mmlib library r
 MM_CHECK_LIB([yaml_parser_initialize], [yaml], YAML, [], [AC_MSG_ERROR([yaml library required])])
 MM_CHECK_LIB([curl_easy_init], [curl], CURL, [], [AC_MSG_ERROR([curl library required])])
 PKG_CHECK_MODULES_EXT(LIBARCHIVE, [libarchive], [], [AC_MSG_ERROR([libarchive library required])])
+PKG_CHECK_MODULES_EXT(ZLIB, [zlib], [], [AC_MSG_ERROR([zlib library required])])
 
 AC_DEF_API_EXPORT_ATTRS
 
