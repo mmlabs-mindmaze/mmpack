@@ -52,6 +52,7 @@ add_project_arguments('-DHAVE_CONFIG_H', language : 'c')
 
 libcurl = dependency('libcurl', required : true)
 libarchive = dependency('libarchive', required : true)
+zlib = dependency('zlib', required : true)
 libyaml = cc.find_library('libyaml', required : true)
 libmmlib = cc.find_library('mmlib', required : true)
 
