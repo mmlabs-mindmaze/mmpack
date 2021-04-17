@@ -131,4 +131,12 @@ void* buffer_take_data_ownership(struct buffer* buf);
 int execute_cmd(char* argv[]);
 int execute_cmd_capture_output(char* argv[], struct buffer* output);
 
+
+/**************************************************************************
+ *                                                                        *
+ *                        Compressed file loading                         *
+ *                                                                        *
+ **************************************************************************/
+int load_compressed_file(const char* path, struct buffer* buff);
+
 #endif /* UTILS_H */
