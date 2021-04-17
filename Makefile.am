@@ -14,6 +14,7 @@ AM_CPPFLAGS = \
 	-DBIN_TO_LIBEXECDIR=\"$(bin_to_libexecdir)\" \
 	$(CHECK_CPPFLAGS) \
 	$(LIBARCHIVE_CPPFLAGS) \
+	$(ZLIB_CPPFLAGS) \
 	$(eol)
 
 if OS_TYPE_WIN32
@@ -23,6 +24,7 @@ endif
 AM_CFLAGS = \
 	$(CHECK_CFLAGS) \
 	$(LIBARCHIVE_CFLAGS) \
+	$(ZLIB_CFLAGS) \
 	$(MM_WARNFLAGS) \
 	$(eol)
 
@@ -246,6 +248,7 @@ dist_buildscripts_DATA = \
 mmpack_LDADD = \
 	$(CURL_LIB) \
 	$(LIBARCHIVE_LIBS) \
+	$(ZLIB_LIBS) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
 	$(eol)
@@ -441,6 +444,7 @@ unittests_tap_LDADD = \
 	$(CHECK_LIBS) \
 	$(CURL_LIB) \
 	$(LIBARCHIVE_LIBS) \
+	$(ZLIB_LIBS) \
 	$(MMLIB_LIB) \
 	$(YAML_LIB) \
 	$(eol)
