@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <zlib.h>
 
 #include "buffer.h"
 #include "common.h"
@@ -819,3 +820,63 @@ exit:
 }
 
 
+/**************************************************************************
+ *                                                                        *
+ *                        Compressed file loading                         *
+ *                                                                        *
+ **************************************************************************/
+
+#define BLOCK_SZ        8192
+
+static
+int from_zlib_error(int zlib_errnum)
+{
+	switch (zlib_errnum) {
+	case Z_ERRNO:           return errno;
+	case Z_MEM_ERROR:       return ENOMEM;
+	case Z_STREAM_ERROR:    return EINVAL;
+	default:                return MM_EBADFMT;
+	}
+}
+
+/**
+ * load_compressed_file() - load content of a compressed file in a buffer
+ * @path:       path relative to @prefix of the file to open
+ * @output:     pointer to struct buffer that will hold the file content
+ *
+ * Return: 0 in case if success. Otherwise -1 is returned with error state set
+ * accordingly.
+ */
+LOCAL_SYMBOL
+int load_compressed_file(const char* path, struct buffer* buff)
+{
+	gzFile file;
+	void* block;
+	int rlen, errnum, rv;
+	const char* errmsg;
+
+	file = gzopen(path, "r");
+	if (!file)
+		return mm_raise_from_errno("%s cannot be opened", path);
+
+	rv = 0;
+	do {
+		block = buffer_reserve_data(buff, BLOCK_SZ);
+		rlen = gzread(file, block, BLOCK_SZ);
+		if (rlen < 0) {
+			errmsg = gzerror(file, &errnum);
+			rv = mm_raise_error(from_zlib_error(errnum), errmsg);
+			goto exit;
+		}
+
+		buffer_inc_size(buff, rlen);
+	} while (rlen);
+
+exit:
+	if (gzclose(file) != Z_OK) {
+		errmsg = gzerror(file, &errnum);
+		rv = mm_raise_error(from_zlib_error(errnum), errmsg);
+	}
+
+	return rv;
+}

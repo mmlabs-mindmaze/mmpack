@@ -91,7 +91,7 @@ inc = include_directories('.', '../../')
 libmmpack = static_library('mmpack-static',
         mmpack_lib_sources,
         include_directories : inc,
-        dependencies: [libcurl, libarchive, libyaml, libmmlib],
+        dependencies: [libcurl, libarchive, libyaml, libmmlib, zlib],
 )
 
 mmpack_sources = files('mmpack.c')
@@ -100,7 +100,7 @@ mmpack = executable('mmpack',
         include_directories : inc,
         link_with : libmmpack,
         install : true,
-        dependencies: [libcurl, libarchive, libyaml, libmmlib],
+        dependencies: [libcurl, libarchive, libyaml, libmmlib, zlib],
 )
 
 if host_machine.system() == 'windows'
