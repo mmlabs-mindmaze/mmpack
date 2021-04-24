@@ -47,11 +47,11 @@ static const char * invalid_binindexes[] = {
  **************************************************************************/
 
 static
-int is_dep_fullfil_in_stack(const struct mmpkg_dep* dep,
+int is_dep_fullfil_in_stack(const struct pkgdep* dep,
                             const struct action_stack* stack)
 {
 	int i;
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 
 	for (i = 0; i < stack->index; i++) {
 		pkg = stack->actions[i].pkg;
@@ -76,7 +76,7 @@ static
 int is_stack_consistent(const struct action_stack* stack)
 {
 	int i;
-	const struct mmpkg_dep* dep;
+	const struct pkgdep* dep;
 
 	for (i = 0; i < stack->index; i++) {
 		dep = stack->actions[i].pkg->mpkdeps;
@@ -96,7 +96,7 @@ static
 int does_stack_meet_requests(const struct action_stack* stack,
                              const struct pkg_request* req)
 {
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 	int i;
 
 	while (req != NULL) {

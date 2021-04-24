@@ -55,7 +55,7 @@ struct fschange {
  * pointer must be freed with mmstr_free() when done with it.
  */
 static
-mmstr* sha256sums_path(const struct mmpkg* pkg)
+mmstr* sha256sums_path(const struct binpkg* pkg)
 {
 	int len = sizeof(METADATA_RELPATH "/.sha256sums") + mmstrlen(pkg->name);
 	mmstr* sha256sums = mmstr_malloc(len);
@@ -518,7 +518,7 @@ exit:
 
 static
 int fschange_preinst(struct fschange* fsc,
-                     const struct mmpkg* old, const struct mmpkg* pkg)
+                     const struct binpkg* old, const struct binpkg* pkg)
 {
 	(void) fsc;
 	(void) pkg;
@@ -530,7 +530,7 @@ int fschange_preinst(struct fschange* fsc,
 
 static
 int fschange_postinst(struct fschange* fsc,
-                      const struct mmpkg* old, const struct mmpkg* pkg)
+                      const struct binpkg* old, const struct binpkg* pkg)
 {
 	(void) pkg;
 	(void) old;
@@ -623,7 +623,7 @@ int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
  * Return: 0 in case of success, -1 otherwise with error
  */
 static
-int fschange_list_pkg_rm_files(struct fschange* fsc, const struct mmpkg* pkg)
+int fschange_list_pkg_rm_files(struct fschange* fsc, const struct binpkg* pkg)
 {
 	int rv;
 	mmstr* path;
@@ -784,7 +784,7 @@ void fschange_remove_rmfiles_pycache(struct fschange* fsc)
 
 static
 int fschange_prerm(struct fschange* fsc,
-                   const struct mmpkg* pkg, const struct mmpkg* new)
+                   const struct binpkg* pkg, const struct binpkg* new)
 {
 	(void) pkg;
 	(void) new;
@@ -796,7 +796,7 @@ int fschange_prerm(struct fschange* fsc,
 
 static
 int fschange_postrm(struct fschange* fsc,
-                    const struct mmpkg* pkg, const struct mmpkg* new)
+                    const struct binpkg* pkg, const struct binpkg* new)
 {
 	(void) pkg;
 	(void) new;
@@ -820,7 +820,7 @@ int fschange_postrm(struct fschange* fsc,
  * Return: 0 if no issue has been found, -1 otherwise
  */
 LOCAL_SYMBOL
-int check_installed_pkg(const struct mmpack_ctx* ctx, const struct mmpkg* pkg)
+int check_installed_pkg(const struct mmpack_ctx* ctx, const struct binpkg* pkg)
 {
 	mmstr * filename, * ref_sha, * sumsha_path;
 	struct strlist filelist, hashlist;
@@ -905,7 +905,7 @@ static
 int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 {
 	mmstr* mpkfile = NULL;
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 	struct action* act;
 	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 	int i;
@@ -954,7 +954,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
  */
 static
 int fschange_install_pkg(struct fschange* fsc,
-                         const struct mmpkg* pkg, const mmstr* mpkfile)
+                         const struct binpkg* pkg, const mmstr* mpkfile)
 {
 	struct mmpack_ctx* ctx = fsc->ctx;
 
@@ -990,7 +990,7 @@ int fschange_install_pkg(struct fschange* fsc,
  * Return: 0 in case of success, -1 otherwise
  */
 static
-int fschange_remove_pkg(struct fschange* fsc, const struct mmpkg* pkg)
+int fschange_remove_pkg(struct fschange* fsc, const struct binpkg* pkg)
 {
 	struct mmpack_ctx* ctx = fsc->ctx;
 
@@ -1028,8 +1028,8 @@ int fschange_remove_pkg(struct fschange* fsc, const struct mmpkg* pkg)
  * Return: 0 in case of success, -1 otherwise
  */
 static
-int fschange_upgrade_pkg(struct fschange* fsc, const struct mmpkg* pkg,
-                         const struct mmpkg* oldpkg, const mmstr* mpkfile)
+int fschange_upgrade_pkg(struct fschange* fsc, const struct binpkg* pkg,
+                         const struct binpkg* oldpkg, const mmstr* mpkfile)
 {
 	int rv = 0;
 	struct mmpack_ctx* ctx = fsc->ctx;

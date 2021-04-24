@@ -27,11 +27,11 @@ static const struct mm_arg_opt cmdline_optv[] = {
 
 
 static
-void mark_needed(struct mmpack_ctx * ctx, struct mmpkg const * pkg,
+void mark_needed(struct mmpack_ctx * ctx, struct binpkg const * pkg,
                  int * needed)
 {
-	struct mmpkg_dep * deps;
-	struct mmpkg const * pkg_dep;
+	struct pkgdep * deps;
+	struct binpkg const * pkg_dep;
 
 	if (needed[pkg->name_id])
 		return;
@@ -51,7 +51,7 @@ struct pkg_request* find_to_remove(struct mmpack_ctx * ctx, int * needed)
 {
 	struct it_iterator iter;
 	struct it_entry * entry;
-	struct mmpkg * pkg;
+	struct binpkg * pkg;
 	struct pkg_request * head = NULL;
 	struct pkg_request * elt;
 
@@ -94,7 +94,7 @@ int mmpack_autoremove(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	int * needed;
 	int size;
 	mmstr * curr;
-	struct mmpkg const * pkg;
+	struct binpkg const * pkg;
 	struct strset_iterator iter;
 
 	struct mm_arg_parser parser = {
