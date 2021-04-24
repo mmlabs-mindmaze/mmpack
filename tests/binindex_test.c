@@ -77,7 +77,7 @@ START_TEST(test_deduplicate)
 	int rv;
 	int count;
 	struct repo repo;
-	struct mmpkg* pkg;
+	struct binpkg* pkg;
 	struct pkg_iter iter;
 
 	repo.url = mmstr_malloc_from_cstr("http://url_simple.com");

@@ -41,7 +41,7 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	int arg_index, rv = -1;
 	mmstr * basename = NULL;
-	struct mmpkg const * pkg;
+	struct binpkg const * pkg;
 	struct mm_arg_parser parser = {
 		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.doc = download_doc,
@@ -67,7 +67,7 @@ int mmpack_download(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if ((pkg = parse_pkg(ctx, argv[arg_index])) == NULL)
 		return -1;
 
-	if (mmpkg_is_available(pkg)) {
+	if (binpkg_is_available(pkg)) {
 		basename = mmstr_basename(NULL, pkg->remote_res->filename);
 		rv = download_remote_resource(ctx, pkg->remote_res, basename);
 		mmstr_free(basename);

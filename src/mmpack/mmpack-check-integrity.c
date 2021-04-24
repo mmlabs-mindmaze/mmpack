@@ -25,7 +25,7 @@
 
 
 static
-int check_pkg_integrity(const struct mmpkg* pkg, struct mmpack_ctx* ctx)
+int check_pkg_integrity(const struct binpkg* pkg, struct mmpack_ctx* ctx)
 {
 	int rv;
 
@@ -52,7 +52,7 @@ int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc,
                            char const* argv[])
 {
 	struct inststate_iter iter;
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 	mmstr* name;
 	int rv;
 
