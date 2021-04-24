@@ -31,7 +31,7 @@ struct rdepends {
 };
 
 struct pkglist_entry {
-	struct mmpkg pkg;
+	struct binpkg pkg;
 	struct pkglist_entry* next;
 };
 
@@ -200,7 +200,7 @@ int pkg_version_compare(char const * v1, char const * v2)
 
 
 /**
- * mmpkg_get_or_create_remote_res() - returns or create and returns a remote
+ * binpkg_get_or_create_remote_res() - returns or create and returns a remote
  * @pkg:       a package already registered
  * @repo:      a repository from which the package pkg is provided
  *
@@ -214,8 +214,8 @@ int pkg_version_compare(char const * v1, char const * v2)
  * the package is created with a remote_resource set to NULL.
  */
 static
-struct remote_resource* mmpkg_get_or_create_remote_res(struct mmpkg* pkg,
-                                                       const struct repo* repo)
+struct remote_resource* binpkg_get_or_create_remote_res(struct binpkg* pkg,
+                                                        const struct repo* repo)
 {
 	struct remote_resource* res;
 
@@ -234,15 +234,15 @@ struct remote_resource* mmpkg_get_or_create_remote_res(struct mmpkg* pkg,
 
 
 static
-void mmpkg_init(struct mmpkg* pkg, const mmstr* name)
+void binpkg_init(struct binpkg* pkg, const mmstr* name)
 {
-	*pkg = (struct mmpkg) {.name = name};
+	*pkg = (struct binpkg) {.name = name};
 	strlist_init(&pkg->sysdeps);
 }
 
 
 static
-void mmpkg_deinit(struct mmpkg * pkg)
+void binpkg_deinit(struct binpkg * pkg)
 {
 	mmstr_free(pkg->version);
 	mmstr_free(pkg->source);
@@ -252,16 +252,16 @@ void mmpkg_deinit(struct mmpkg * pkg)
 
 	remote_resource_destroy(pkg->remote_res);
 	pkg->remote_res = NULL;
-	mmpkg_dep_destroy(pkg->mpkdeps);
+	binpkg_dep_destroy(pkg->mpkdeps);
 	strlist_deinit(&pkg->sysdeps);
 	free(pkg->compdep);
 
-	mmpkg_init(pkg, NULL);
+	binpkg_init(pkg, NULL);
 }
 
 
 /**
- * mmpkg_is_provided_by_repo() - indicates whether a package is provided by a
+ * binpkg_is_provided_by_repo() - indicates whether a package is provided by a
  *                              repository or not.
  * @pkg: package searched in the repository
  * @repo: repository in which we search the package
@@ -270,8 +270,8 @@ void mmpkg_deinit(struct mmpkg * pkg)
  * parameter, 0 otherwise.
  */
 LOCAL_SYMBOL
-int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
-                              const struct repo* repo)
+int binpkg_is_provided_by_repo(struct binpkg const * pkg,
+                               const struct repo* repo)
 {
 	if (!repo)
 		return 1;
@@ -281,14 +281,14 @@ int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
 
 
 /**
- * mmpkg_sysdeps_dump() - dump sysdeps
+ * binpkg_sysdeps_dump() - dump sysdeps
  * @sysdeps: system dependencies strlist structure
  * @type: a string which will prefix the output (eg. "SYSTEM")
  *
  * This is intended to use as a debug function
  */
 LOCAL_SYMBOL
-void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type)
+void binpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type)
 {
 	const struct strlist_elt* d = sysdeps->head;
 
@@ -300,24 +300,24 @@ void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type)
 
 
 /**
- * mmpkg_dump() - dump mmpack package (DEBUG)
- * @pkg: mmpkg to dump
+ * binpkg_dump() - dump mmpack package (DEBUG)
+ * @pkg: binpkg to dump
  *
  * This is intended to use as a debug function
  */
 LOCAL_SYMBOL
-void mmpkg_dump(struct mmpkg const * pkg)
+void binpkg_dump(struct binpkg const * pkg)
 {
 	printf("# %s (%s)\n", pkg->name, pkg->version);
 	printf("\tdependencies:\n");
-	mmpkg_dep_dump(pkg->mpkdeps, "MMP");
-	mmpkg_sysdeps_dump(&pkg->sysdeps, "SYS");
+	binpkg_dep_dump(pkg->mpkdeps, "MMP");
+	binpkg_sysdeps_dump(&pkg->sysdeps, "SYS");
 	printf("\n");
 }
 
 
 static
-int from_repo_check_valid(struct mmpkg const * pkg)
+int from_repo_check_valid(struct binpkg const * pkg)
 {
 	struct remote_resource* elt;
 
@@ -335,7 +335,7 @@ int from_repo_check_valid(struct mmpkg const * pkg)
 
 
 static
-int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache)
+int binpkg_check_valid(struct binpkg const * pkg, int in_repo_cache)
 {
 	if (!pkg->version
 	    || !pkg->sumsha
@@ -351,7 +351,7 @@ int mmpkg_check_valid(struct mmpkg const * pkg, int in_repo_cache)
 
 
 LOCAL_SYMBOL
-void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
+void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp)
 {
 	const struct strlist_elt* elt;
 
@@ -362,11 +362,11 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 	        "    sumsha256sums: %s\n"
 	        "    ghost: %s\n",
 	        pkg->name, pkg->version, pkg->source, pkg->srcsha, pkg->sumsha,
-	        mmpkg_is_ghost(pkg) ? "true" : "false");
+	        binpkg_is_ghost(pkg) ? "true" : "false");
 
 
 	fprintf(fp, "    depends:");
-	mmpkg_dep_save_to_index(pkg->mpkdeps, fp, 2 /*indentation level*/);
+	binpkg_dep_save_to_index(pkg->mpkdeps, fp, 2 /*indentation level*/);
 
 	fprintf(fp, "    sysdepends: [");
 	for (elt = pkg->sysdeps.head; elt != NULL; elt = elt->next) {
@@ -381,17 +381,17 @@ void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp)
 
 
 /**
- * mmpkg_dep_create() - create mmpkg_dep
+ * binpkg_dep_create() - create binpkg_dep
  * @name: name of the mmpack package dependency
  *
- * To be destroyed by calling mmpkg_dep_destroy()
+ * To be destroyed by calling binpkg_dep_destroy()
  *
- * Return: an initialized mmpkg_dep structure
+ * Return: an initialized binpkg_dep structure
  */
 LOCAL_SYMBOL
-struct mmpkg_dep* mmpkg_dep_create(char const * name)
+struct binpkg_dep* binpkg_dep_create(char const * name)
 {
-	struct mmpkg_dep * dep = xx_malloc(sizeof(*dep));
+	struct binpkg_dep * dep = xx_malloc(sizeof(*dep));
 	memset(dep, 0, sizeof(*dep));
 	dep->name = mmstr_malloc_from_cstr(name);
 	return dep;
@@ -399,11 +399,11 @@ struct mmpkg_dep* mmpkg_dep_create(char const * name)
 
 
 /**
- * mmpkg_dep_destroy() - destroy mmpkg_dep structure
- * @dep: the mmpkg_dep structure to destroy
+ * binpkg_dep_destroy() - destroy binpkg_dep structure
+ * @dep: the binpkg_dep structure to destroy
  */
 LOCAL_SYMBOL
-void mmpkg_dep_destroy(struct mmpkg_dep * dep)
+void binpkg_dep_destroy(struct binpkg_dep * dep)
 {
 	if (dep == NULL)
 		return;
@@ -413,24 +413,24 @@ void mmpkg_dep_destroy(struct mmpkg_dep * dep)
 	mmstr_free(dep->max_version);
 
 	if (dep->next)
-		mmpkg_dep_destroy(dep->next);
+		binpkg_dep_destroy(dep->next);
 
 	free(dep);
 }
 
 
 /**
- * mmpkg_dep_dump() - dump pkg dep
- * @deps: mmpkg_dep struct to dump
+ * binpkg_dep_dump() - dump pkg dep
+ * @deps: binpkg_dep struct to dump
  * @type: "SYS" if @deps represents system dependencies
  *        any king of string otherwise; will prefix the line
  *
  * This is intended to use as a debug function
  */
 LOCAL_SYMBOL
-void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type)
+void binpkg_dep_dump(struct binpkg_dep const * deps, char const * type)
 {
-	struct mmpkg_dep const * d = deps;
+	struct binpkg_dep const * d = deps;
 
 	while (d != NULL) {
 		if (STR_STARTS_WITH(type, strlen(type), "SYS"))
@@ -445,7 +445,7 @@ void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type)
 
 
 LOCAL_SYMBOL
-void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
+void binpkg_dep_save_to_index(struct binpkg_dep const * dep, FILE* fp, int lvl)
 {
 	if (!dep) {
 		fprintf(fp, " {}\n");
@@ -464,7 +464,7 @@ void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
 
 
 /**
- * mmpkg_dep_match_version() - test if a package meet requirement of dependency
+ * binpkg_dep_match_version() - test if a package meet requirement of dependency
  * @pkg:        pointer to package (may be NULL)
  * @dep:        pointer to dependency
  *
@@ -473,8 +473,8 @@ void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl)
  * Return: 1 if @pkg is not NULL and meet requirement of @dep, 0 otherwise
  */
 static
-int mmpkg_dep_match_version(const struct mmpkg_dep* dep,
-                            const struct mmpkg* pkg)
+int binpkg_dep_match_version(const struct binpkg_dep* dep,
+                            const struct binpkg* pkg)
 {
 	return (pkg != NULL
 	        && pkg_version_compare(pkg->version, dep->max_version) <= 0
@@ -571,7 +571,7 @@ void pkglist_deinit(struct pkglist* list)
 	while (entry) {
 		next = entry->next;
 
-		mmpkg_deinit(&entry->pkg);
+		binpkg_deinit(&entry->pkg);
 		free(entry);
 
 		entry = next;
@@ -583,7 +583,7 @@ void pkglist_deinit(struct pkglist* list)
 
 
 /**
- * mmpkg_add_remote_resource() - add remote resource providing the package
+ * binpkg_add_remote_resource() - add remote resource providing the package
  * @pkg_in:       package already registered
  * @res_added:    list of remote resource through which the package @pkg_in is
  *                provided
@@ -592,12 +592,12 @@ void pkglist_deinit(struct pkglist* list)
  * fields filename and sha256 of the argument list.
  */
 static
-void mmpkg_add_remote_resource(struct mmpkg* pkg_in,
-                               struct remote_resource* res_added)
+void binpkg_add_remote_resource(struct binpkg* pkg_in,
+                                struct remote_resource* res_added)
 {
 	struct remote_resource * src, * dst, * next;
 	for (src = res_added; src != NULL; src = src->next) {
-		dst = mmpkg_get_or_create_remote_res(pkg_in, src->repo);
+		dst = binpkg_get_or_create_remote_res(pkg_in, src->repo);
 		mmstr_free(dst->filename);
 		mmstr_free(dst->sha256);
 
@@ -634,11 +634,11 @@ void mmpkg_add_remote_resource(struct mmpkg* pkg_in,
  * Return: a pointer to new package in list
  */
 static
-struct mmpkg* pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
+struct binpkg* pkglist_add_or_modify(struct pkglist* list, struct binpkg* pkg)
 {
 	struct pkglist_entry* entry;
 	struct pkglist_entry** pnext;
-	struct mmpkg* pkg_in_list;
+	struct binpkg* pkg_in_list;
 	const mmstr* next_version;
 	int vercmp;
 
@@ -652,7 +652,7 @@ struct mmpkg* pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 
 		// Update repo specific fields if repo index is not set
 		pkg_in_list = &entry->pkg;
-		mmpkg_add_remote_resource(pkg_in_list, pkg->remote_res);
+		binpkg_add_remote_resource(pkg_in_list, pkg->remote_res);
 
 		// update srcsha if not provided (might be missing in
 		// installed.yaml produced by old version of mmpack)
@@ -684,7 +684,7 @@ struct mmpkg* pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
 
 	// reset package fields since they have been taken over by the new
 	// entry
-	mmpkg_init(pkg, NULL);
+	binpkg_init(pkg, NULL);
 
 	list->num_pkg++;
 
@@ -698,7 +698,7 @@ struct mmpkg* pkglist_add_or_modify(struct pkglist* list, struct mmpkg* pkg)
  **************************************************************************/
 
 LOCAL_SYMBOL
-struct mmpkg* pkg_iter_next(struct pkg_iter* pkg_iter)
+struct binpkg* pkg_iter_next(struct pkg_iter* pkg_iter)
 {
 	struct pkglist* curr_list;
 	struct pkglist_entry* elt;
@@ -720,7 +720,7 @@ struct mmpkg* pkg_iter_next(struct pkg_iter* pkg_iter)
 
 
 LOCAL_SYMBOL
-struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
+struct binpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
                              const struct binindex* binindex)
 {
 	struct pkglist* first_list;
@@ -745,13 +745,13 @@ struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
 
 
 static
-int mmpkg_cmp(const void * v1, const void * v2)
+int binpkg_cmp(const void * v1, const void * v2)
 {
-	const struct mmpkg * pkg1, * pkg2;
+	const struct binpkg * pkg1, * pkg2;
 	int res;
 
-	pkg1 = *((const struct mmpkg**) v1);
-	pkg2 = *((const struct mmpkg**) v2);
+	pkg1 = *((const struct binpkg**) v1);
+	pkg2 = *((const struct binpkg**) v2);
 
 	res = strcmp(pkg1->name, pkg2->name);
 
@@ -772,11 +772,11 @@ int mmpkg_cmp(const void * v1, const void * v2)
  * Returns: a NULL terminated sorted array of packages
  */
 LOCAL_SYMBOL
-const struct mmpkg** install_state_sorted_pkgs(struct install_state * is)
+const struct binpkg** install_state_sorted_pkgs(struct install_state * is)
 {
 	struct it_iterator iter;
 	struct it_entry* entry;
-	const struct mmpkg ** pkgs;
+	const struct binpkg ** pkgs;
 	int cnt, i = 0;
 
 	cnt = is->pkg_num;
@@ -789,7 +789,7 @@ const struct mmpkg** install_state_sorted_pkgs(struct install_state * is)
 		entry = it_iter_next(&iter);
 	}
 
-	qsort(pkgs, cnt, sizeof(struct mmpkg*), mmpkg_cmp);
+	qsort(pkgs, cnt, sizeof(struct binpkg*), binpkg_cmp);
 	pkgs[cnt] = NULL;
 
 	return pkgs;
@@ -806,10 +806,10 @@ const struct mmpkg** install_state_sorted_pkgs(struct install_state * is)
  * Returns:      A NULL terminated array of packages.
  */
 LOCAL_SYMBOL
-struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex)
+struct binpkg** binindex_sorted_pkgs(struct binindex * binindex)
 {
 	struct pkg_iter iter;
-	struct mmpkg ** pkgs, * pkg;
+	struct binpkg ** pkgs, * pkg;
 	int cnt, i = 0;
 
 	cnt = binindex->pkg_num;
@@ -822,7 +822,7 @@ struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex)
 		pkg = pkg_iter_next(&iter);
 	}
 
-	qsort(pkgs, cnt, sizeof(struct mmpkg*), mmpkg_cmp);
+	qsort(pkgs, cnt, sizeof(struct binpkg*), binpkg_cmp);
 	pkgs[cnt] = NULL;
 
 	return pkgs;
@@ -865,11 +865,11 @@ LOCAL_SYMBOL
 void binindex_dump(struct binindex const * binindex)
 {
 	struct pkg_iter iter;
-	struct mmpkg* pkg;
+	struct binpkg* pkg;
 
 	pkg = pkg_iter_first(&iter, binindex);
 	while (pkg != NULL) {
-		mmpkg_dump(pkg);
+		binpkg_dump(pkg);
 		pkg = pkg_iter_next(&iter);
 	}
 }
@@ -906,11 +906,11 @@ struct pkglist* binindex_get_pkglist(const struct binindex* binindex,
  * Return: NULL on error, a pointer to the found package otherwise
  */
 LOCAL_SYMBOL
-struct mmpkg const* binindex_lookup(struct binindex* binindex,
+struct binpkg const* binindex_lookup(struct binindex* binindex,
                                     mmstr const * name,
                                     struct constraints const * c)
 {
-	struct mmpkg * pkg;
+	struct binpkg * pkg;
 	struct pkglist_entry * pkgentry;
 	struct pkglist * list;
 	char const * version = (c && c->version) ? c->version : "any";
@@ -925,7 +925,7 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
 		if (c && c->sumsha && mmstrcmp(c->sumsha, pkg->sumsha))
 			continue;
 
-		if (c && c->repo && !mmpkg_is_provided_by_repo(pkg, c->repo))
+		if (c && c->repo && !binpkg_is_provided_by_repo(pkg, c->repo))
 			continue;
 
 		if (pkg_version_compare(version, pkg->version))
@@ -948,7 +948,7 @@ struct mmpkg const* binindex_lookup(struct binindex* binindex,
  */
 LOCAL_SYMBOL
 int binindex_is_pkg_upgradeable(struct binindex const * binindex,
-                                struct mmpkg const * pkg)
+                                struct binpkg const * pkg)
 {
 	struct pkglist * list;
 
@@ -1024,7 +1024,7 @@ int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name)
  */
 LOCAL_SYMBOL
 struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
-                                              struct mmpkg* pkg,
+                                              struct binpkg* pkg,
                                               struct buffer* buff)
 {
 	struct pkglist_entry* entry;
@@ -1083,7 +1083,7 @@ struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
  */
 LOCAL_SYMBOL
 struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
-                                          const struct mmpkg_dep* dep,
+                                          const struct binpkg_dep* dep,
                                           struct buffer* buff)
 {
 	struct pkglist_entry* entry;
@@ -1105,7 +1105,7 @@ struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
 	// sharing the same package name.
 	num_pkg = 0;
 	for (entry = list->head; entry != NULL; entry = entry->next) {
-		if (!mmpkg_dep_match_version(dep, &entry->pkg))
+		if (!binpkg_dep_match_version(dep, &entry->pkg))
 			continue;
 
 		compdep->pkgs[num_pkg++] = &entry->pkg;
@@ -1139,7 +1139,7 @@ struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
  */
 LOCAL_SYMBOL
 struct compiled_dep* compile_package(const struct binindex* binindex,
-                                     struct mmpkg const * pkg,
+                                     struct binpkg const * pkg,
                                      struct buffer* buff)
 {
 	size_t size;
@@ -1151,7 +1151,7 @@ struct compiled_dep* compile_package(const struct binindex* binindex,
 
 	size = compiled_dep_size(1);
 	compdep = buffer_reserve_data(buff, size);
-	compdep->pkgs[0] = (struct mmpkg*) pkg;
+	compdep->pkgs[0] = (struct binpkg*) pkg;
 	compdep->pkgname_id = list - binindex->pkgname_table;
 	compdep->num_pkg = 1;
 	compdep->next_entry_delta = size / sizeof(*compdep);
@@ -1188,10 +1188,10 @@ struct compiled_dep* compile_package(const struct binindex* binindex,
  */
 LOCAL_SYMBOL
 struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
-                                              struct mmpkg* pkg,
+                                              struct binpkg* pkg,
                                               int * flag)
 {
-	struct mmpkg_dep* dep;
+	struct binpkg_dep* dep;
 	struct buffer buff;
 	// Init to NULL only to fix an illegitimate warning in gcc with
 	// Wmaybe-uninitialized
@@ -1241,7 +1241,7 @@ const int* binindex_get_potential_rdeps(const struct binindex* binindex,
 
 
 static
-struct mmpkg* binindex_add_pkg(struct binindex* binindex, struct mmpkg* pkg)
+struct binpkg* binindex_add_pkg(struct binindex* binindex, struct binpkg* pkg)
 {
 	struct pkglist* pkglist;
 	int pkgname_id, elem_num;
@@ -1274,9 +1274,9 @@ int binindex_compute_rdepends(struct binindex* binindex)
 {
 	int rv;
 	struct pkg_iter iter;
-	struct mmpkg* pkg;
+	struct binpkg* pkg;
 	struct pkglist* pkglist;
-	struct mmpkg_dep * dep;
+	struct binpkg_dep * dep;
 
 	rv = 0;
 	pkg = pkg_iter_first(&iter, binindex);
@@ -1392,7 +1392,7 @@ enum field_type get_scalar_field_type(const char* key)
 
 
 static
-int mmpkg_set_scalar_field(struct mmpkg * pkg,
+int binpkg_set_scalar_field(struct binpkg * pkg,
                            enum field_type type,
                            const char* value,
                            size_t valuelen,
@@ -1408,12 +1408,12 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 		break;
 
 	case FIELD_FILENAME:
-		res = mmpkg_get_or_create_remote_res(pkg, repo);
+		res = binpkg_get_or_create_remote_res(pkg, repo);
 		field = &res->filename;
 		break;
 
 	case FIELD_SHA:
-		res = mmpkg_get_or_create_remote_res(pkg, repo);
+		res = binpkg_get_or_create_remote_res(pkg, repo);
 		field = &res->sha256;
 		break;
 
@@ -1438,11 +1438,11 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 		if (bval == -1)
 			return -1;
 
-		mmpkg_update_flags(pkg, MMPKG_FLAGS_GHOST, bval);
+		binpkg_update_flags(pkg, MMPKG_FLAGS_GHOST, bval);
 		return 0;
 
 	case FIELD_SIZE:
-		res = mmpkg_get_or_create_remote_res(pkg, repo);
+		res = binpkg_get_or_create_remote_res(pkg, repo);
 		res->size = atoi(value);
 		return 0;
 
@@ -1458,7 +1458,7 @@ int mmpkg_set_scalar_field(struct mmpkg * pkg,
 
 
 static
-void mmpkg_add_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep)
+void binpkg_add_dependency(struct binpkg * pkg, struct binpkg_dep * dep)
 {
 	dep->next = pkg->mpkdeps;
 	pkg->mpkdeps = dep;
@@ -1471,8 +1471,8 @@ void mmpkg_add_dependency(struct mmpkg * pkg, struct mmpkg_dep * dep)
  */
 static
 int mmpack_parse_dependency(struct parsing_ctx* ctx,
-                            struct mmpkg * pkg,
-                            struct mmpkg_dep * dep)
+                            struct binpkg * pkg,
+                            struct binpkg_dep * dep)
 {
 	int exitvalue;
 	yaml_token_t token;
@@ -1518,7 +1518,7 @@ exit:
 	yaml_token_delete(&token);
 
 	if (exitvalue == 0) {
-		mmpkg_add_dependency(pkg, dep);
+		binpkg_add_dependency(pkg, dep);
 	}
 
 	return exitvalue;
@@ -1535,11 +1535,11 @@ exit:
  */
 static
 int mmpack_parse_deplist(struct parsing_ctx* ctx,
-                         struct mmpkg * pkg)
+                         struct binpkg * pkg)
 {
 	int exitvalue, type;
 	yaml_token_t token;
-	struct mmpkg_dep * dep;
+	struct binpkg_dep * dep;
 
 	exitvalue = 0;
 	dep = NULL;
@@ -1586,12 +1586,12 @@ int mmpack_parse_deplist(struct parsing_ctx* ctx,
 				if (dep != NULL)
 					goto exit;
 
-				dep = mmpkg_dep_create(
+				dep = binpkg_dep_create(
 					(char const*)token.data.scalar.value);
 				break;
 
 			default:
-				mmpkg_dep_destroy(dep);
+				binpkg_dep_destroy(dep);
 				dep = NULL;
 				type = -1;
 				break;
@@ -1612,7 +1612,7 @@ error:  /* reach end of file prematurely */
 exit:
 	yaml_token_delete(&token);
 	if (dep != NULL)  /* dep is set to NULL after being used */
-		mmpkg_dep_destroy(dep);
+		binpkg_dep_destroy(dep);
 
 	return exitvalue;
 }
@@ -1627,7 +1627,7 @@ exit:
  */
 static
 int mmpack_parse_sysdeplist(struct parsing_ctx* ctx,
-                            struct mmpkg * pkg)
+                            struct binpkg * pkg)
 {
 	int exitvalue;
 	yaml_token_t token;
@@ -1669,7 +1669,7 @@ exit:
 
 /* parse a single package entry */
 static
-int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
+int mmpack_parse_index_package(struct parsing_ctx* ctx, struct binpkg * pkg)
 {
 	int exitvalue, type;
 	yaml_token_t token;
@@ -1690,7 +1690,7 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 			goto error;
 
 		case YAML_BLOCK_END_TOKEN:
-			if (mmpkg_check_valid(pkg, !ctx->repo ? 0 : 1))
+			if (binpkg_check_valid(pkg, !ctx->repo ? 0 : 1))
 				goto error;
 
 			goto exit;
@@ -1727,7 +1727,7 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct mmpkg * pkg)
 			case YAML_VALUE_TOKEN:
 				if ((scalar_field != FIELD_UNKNOWN) &&
 				    token.data.scalar.length) {
-					if (mmpkg_set_scalar_field(pkg,
+					if (binpkg_set_scalar_field(pkg,
 					                           scalar_field,
 					                           data,
 					                           data_len,
@@ -1778,12 +1778,12 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 {
 	int exitvalue, type;
 	yaml_token_t token;
-	struct mmpkg pkg;
+	struct binpkg pkg;
 	mmstr* name = NULL;
 	const char* valuestr;
 	int valuelen;
 
-	mmpkg_init(&pkg, NULL);
+	binpkg_init(&pkg, NULL);
 	exitvalue = -1;
 	type = -1;
 	while (1) {
@@ -1809,14 +1809,14 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 				name = mmstr_copy_realloc(name,
 				                          valuestr,
 				                          valuelen);
-				mmpkg_init(&pkg, name);
+				binpkg_init(&pkg, name);
 				exitvalue =
 					mmpack_parse_index_package(ctx, &pkg);
 				if (exitvalue != 0)
 					goto exit;
 
 				binindex_add_pkg(binindex, &pkg);
-				mmpkg_deinit(&pkg);
+				binpkg_deinit(&pkg);
 			}
 
 			type = -1;
@@ -1833,7 +1833,7 @@ int mmpack_parse_index(struct parsing_ctx* ctx, struct binindex * binindex)
 
 exit:
 	yaml_token_delete(&token);
-	mmpkg_deinit(&pkg);
+	binpkg_deinit(&pkg);
 	mmstr_free(name);
 
 	return exitvalue;
@@ -1841,7 +1841,7 @@ exit:
 
 
 static
-mmstr const* parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
+mmstr const* parse_package_info(struct binpkg * pkg, struct buffer * buffer)
 {
 	int rv;
 	char const * delim;
@@ -1875,17 +1875,17 @@ mmstr const* parse_package_info(struct mmpkg * pkg, struct buffer * buffer)
  * @binindex: initialized mmpack binindex
  * @filename: path to the mmpack archive
  *
- * Return: a pointer to the mmpkg structure that has been inserted.
+ * Return: a pointer to the binpkg structure that has been inserted.
  * It belongs the the binindex and will be cleansed during mmpack global
  * cleanup.
  */
 LOCAL_SYMBOL
-struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
+struct binpkg* add_pkgfile_to_binindex(struct binindex* binindex,
                                       char const * filename)
 {
 	struct buffer buffer;
-	struct mmpkg * pkg;
-	struct mmpkg tmppkg;
+	struct binpkg * pkg;
+	struct binpkg tmppkg;
 	struct remote_resource* res;
 	mmstr const * name;
 	mmstr* hash;
@@ -1893,8 +1893,8 @@ struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
 	pkg = NULL;
 	name = NULL;
 	buffer_init(&buffer);
-	mmpkg_init(&tmppkg, NULL);
-	res = mmpkg_get_or_create_remote_res(&tmppkg, NULL);
+	binpkg_init(&tmppkg, NULL);
+	res = binpkg_get_or_create_remote_res(&tmppkg, NULL);
 	res->filename = mmstr_malloc_from_cstr(filename);
 	res->sha256 = hash = mmstr_malloc(SHA_HEXSTR_LEN);
 
@@ -1908,7 +1908,7 @@ struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
 
 exit:
 	mmstr_free(name);
-	mmpkg_deinit(&tmppkg);
+	binpkg_deinit(&tmppkg);
 	buffer_deinit(&buffer);
 	return pkg;
 }
@@ -1986,11 +1986,11 @@ void install_state_deinit(struct install_state* state)
  * @state:      install state to query
  * @name:       package name to query
  *
- * Return: a pointer to the struct mmpkg installed if found, NULL if no package
+ * Return: a pointer to the struct binpkg installed if found, NULL if no package
  * with @name is in the install state.
  */
 LOCAL_SYMBOL
-const struct mmpkg* install_state_get_pkg(const struct install_state* state,
+const struct binpkg* install_state_get_pkg(const struct install_state* state,
                                           const mmstr* name)
 {
 	struct it_entry* entry;
@@ -2010,7 +2010,7 @@ const struct mmpkg* install_state_get_pkg(const struct install_state* state,
  */
 LOCAL_SYMBOL
 void install_state_add_pkg(struct install_state* state,
-                           const struct mmpkg* pkg)
+                           const struct binpkg* pkg)
 {
 	struct it_entry* entry;
 
@@ -2039,12 +2039,12 @@ void install_state_save_to_index(struct install_state* state, FILE* fp)
 {
 	struct it_iterator iter;
 	struct it_entry* entry;
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 
 	entry = it_iter_first(&iter, &state->idx);
 	while (entry) {
 		pkg = entry->value;
-		mmpkg_save_to_index(pkg, fp);
+		binpkg_save_to_index(pkg, fp);
 		entry = it_iter_next(&iter);
 	}
 }
@@ -2064,11 +2064,11 @@ void install_state_save_to_index(struct install_state* state, FILE* fp)
 LOCAL_SYMBOL
 void install_state_fill_lookup_table(const struct install_state* state,
                                      struct binindex* binindex,
-                                     struct mmpkg** installed)
+                                     struct binpkg** installed)
 {
 	struct it_iterator iter;
 	struct it_entry* entry;
-	struct mmpkg* pkg;
+	struct binpkg* pkg;
 	int id;
 
 	// Set initially to all uninstalled
@@ -2108,10 +2108,10 @@ void install_state_fill_lookup_table(const struct install_state* state,
  * of @pkg if not empty, NULL otherwise.
  */
 LOCAL_SYMBOL
-const struct mmpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
-                                          const struct mmpkg* pkg,
+const struct binpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
+                                          const struct binpkg* pkg,
                                           const struct binindex* binindex,
-                                          struct mmpkg** inst_lut)
+                                          struct binpkg** inst_lut)
 {
 	const struct pkglist* list;
 
@@ -2149,9 +2149,9 @@ const struct mmpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
  * it is not the last item, NULL otherwise.
  */
 LOCAL_SYMBOL
-const struct mmpkg* inst_rdeps_iter_next(struct inst_rdeps_iter* iter)
+const struct binpkg* inst_rdeps_iter_next(struct inst_rdeps_iter* iter)
 {
-	struct mmpkg* rdep_pkg;
+	struct binpkg* rdep_pkg;
 	struct compiled_dep* dep;
 	int flag, rdep_id;
 
@@ -2186,13 +2186,13 @@ const struct mmpkg* inst_rdeps_iter_next(struct inst_rdeps_iter* iter)
  * Return: 1 if @supposed_dep is a dependency of @pkg, otherwise returns 0.
  */
 static
-int is_dependency(struct mmpkg const * pkg, struct mmpkg const * supposed_dep)
+int is_dependency(struct binpkg const * pkg, struct binpkg const * supposed_dep)
 {
-	struct mmpkg_dep * deps;
+	struct binpkg_dep * deps;
 
 	for (deps = pkg->mpkdeps; deps != NULL; deps = deps->next) {
 		if (mmstrequal(deps->name, supposed_dep->name) &&
-		    mmpkg_dep_match_version(deps, supposed_dep)) {
+		    binpkg_dep_match_version(deps, supposed_dep)) {
 			return 1;
 		}
 	}
@@ -2212,8 +2212,8 @@ int is_dependency(struct mmpkg const * pkg, struct mmpkg const * supposed_dep)
  * of @pkg if not empty, NULL otherwise.
  */
 LOCAL_SYMBOL
-struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
-                               const struct mmpkg* pkg,
+struct binpkg* rdeps_iter_first(struct rdeps_iter* iter,
+                               const struct binpkg* pkg,
                                const struct binindex* binindex)
 {
 	const struct pkglist* list;
@@ -2244,9 +2244,9 @@ struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
  * it is not the last item, NULL otherwise.
  */
 LOCAL_SYMBOL
-struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
+struct binpkg* rdeps_iter_next(struct rdeps_iter* iter)
 {
-	struct mmpkg * ret;
+	struct binpkg * ret;
 	int id_dep;
 
 	while (iter->curr || (iter->rdeps_ids && iter->rdeps_index > 0)) {
@@ -2283,7 +2283,7 @@ struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter)
  * if no package can be found of name @pkgname.
  */
 LOCAL_SYMBOL
-const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
+const struct binpkg* pkglist_iter_first(struct pkglist_iter* iter,
                                        const mmstr* pkgname,
                                        const struct binindex* binindex)
 {
@@ -2306,7 +2306,7 @@ const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
  * if no more package can be found of name @pkgname.
  */
 LOCAL_SYMBOL
-const struct mmpkg* pkglist_iter_next(struct pkglist_iter* iter)
+const struct binpkg* pkglist_iter_next(struct pkglist_iter* iter)
 {
 	struct pkglist_entry* entry = iter->curr->next;
 

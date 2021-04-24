@@ -213,7 +213,7 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	const struct repo* repo;
 	int rv = -1;
 	struct pkg_iter pkg_iter;
-	struct mmpkg* pkg;
+	struct binpkg* pkg;
 
 	// Form the path of installed package from prefix
 	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;

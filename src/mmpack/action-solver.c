@@ -88,7 +88,7 @@ struct planned_op {
 	enum {STAGE, INSTALL, REMOVE, UPGRADE} action;
 	int id;
 	union {
-		struct mmpkg* pkg;
+		struct binpkg* pkg;
 		intptr_t pkg_diff;
 	};
 };
@@ -109,8 +109,8 @@ struct planned_op {
  */
 struct solver {
 	struct binindex* binindex;
-	struct mmpkg** inst_lut;
-	struct mmpkg** stage_lut;
+	struct binpkg** inst_lut;
+	struct binpkg** stage_lut;
 	struct buffer processing_stack;
 	struct buffer decstate_store;
 	size_t last_decstate_sz;
@@ -181,8 +181,8 @@ void mmpack_action_stack_destroy(struct action_stack * stack)
 LOCAL_SYMBOL
 struct action_stack* mmpack_action_stack_push(struct action_stack * stack,
                                               int action,
-                                              struct mmpkg const * pkg,
-                                              struct mmpkg const * oldpkg)
+                                              struct binpkg const * pkg,
+                                              struct binpkg const * oldpkg)
 {
 	/* increase by DEFAULT_STACK_SZ if full */
 	if ((stack->index + 1) == stack->size) {
@@ -304,7 +304,7 @@ void solver_revert_planned_ops(struct solver* solver, size_t prev_size)
 	struct buffer* ops_stack = &solver->ops_stack;
 	struct planned_op op;
 	char * ptr;
-	struct mmpkg * pkg;
+	struct binpkg * pkg;
 
 	while (ops_stack->size > prev_size) {
 		buffer_pop(ops_stack, &op, sizeof(op));
@@ -324,7 +324,7 @@ void solver_revert_planned_ops(struct solver* solver, size_t prev_size)
 
 		case UPGRADE:
 			ptr = (char*) solver->inst_lut[op.id];
-			pkg = (struct mmpkg*) (ptr - op.pkg_diff);
+			pkg = (struct binpkg*) (ptr - op.pkg_diff);
 			solver->inst_lut[op.id] = pkg;
 			break;
 
@@ -346,7 +346,7 @@ void solver_revert_planned_ops(struct solver* solver, size_t prev_size)
  */
 static
 void solver_stage_pkg_install(struct solver* solver, int id,
-                              struct mmpkg* pkg)
+                              struct binpkg* pkg)
 {
 	struct planned_op op = {.action = STAGE, .pkg = pkg, .id = id};
 
@@ -368,8 +368,8 @@ void solver_stage_pkg_install(struct solver* solver, int id,
 static
 void solver_commit_pkg_install(struct solver* solver, int id)
 {
-	struct mmpkg* oldpkg;
-	struct mmpkg* pkg = solver->stage_lut[id];
+	struct binpkg* oldpkg;
+	struct binpkg* pkg = solver->stage_lut[id];
 	struct planned_op op = {.action = INSTALL, .pkg = pkg, .id = id};
 
 	oldpkg = solver->inst_lut[id];
@@ -562,7 +562,7 @@ static
 int solver_step_validation(struct solver* solver, struct proc_frame* frame)
 {
 	int id, is_staged, is_match;
-	struct mmpkg* pkg;
+	struct binpkg* pkg;
 
 	// Get package either installed or planned to be installed
 	id = frame->dep->pkgname_id;
@@ -607,7 +607,7 @@ int solver_step_validation(struct solver* solver, struct proc_frame* frame)
 static
 int solver_step_select_pkg(struct solver* solver, struct proc_frame* frame)
 {
-	struct mmpkg * pkg, * oldpkg;
+	struct binpkg * pkg, * oldpkg;
 	int id = frame->dep->pkgname_id;
 
 	// Check that we are not about reinstall the same package. Since
@@ -648,10 +648,10 @@ int solver_step_select_pkg(struct solver* solver, struct proc_frame* frame)
  */
 static
 int solver_check_upgrade_rdep(struct solver* solver, int rdep_id,
-                              const struct mmpkg* pkg, struct buffer* buff,
+                              const struct binpkg* pkg, struct buffer* buff,
                               struct compiled_dep** last_upgrade_dep)
 {
-	struct mmpkg * rdep;
+	struct binpkg * rdep;
 	struct compiled_dep * dep, * upgrade_dep;
 	struct binindex* binindex = solver->binindex;
 	int is_rdep_staged;
@@ -712,7 +712,7 @@ int solver_step_upgrade_rdeps(struct solver* solver, struct proc_frame* frame)
 	struct binindex* binindex = solver->binindex;
 	int i, num;
 	const int* rdep_ids;
-	struct mmpkg* newpkg;
+	struct binpkg* newpkg;
 	struct compiled_dep * upgrade_deps, * last_upgrade_dep;
 	struct buffer buff;
 
@@ -767,7 +767,7 @@ static
 void solver_step_install_deps(struct solver* solver, struct proc_frame* frame)
 {
 	struct compiled_dep* deps;
-	struct mmpkg* pkg;
+	struct binpkg* pkg;
 
 	pkg = frame->dep->pkgs[frame->ipkg];
 
@@ -836,8 +836,8 @@ static
 void solver_remove_pkgname(struct solver* solver, int pkgname_id)
 {
 	struct inst_rdeps_iter iter;
-	const struct mmpkg* rdep_pkg;
-	struct mmpkg* pkg;
+	const struct binpkg* rdep_pkg;
+	struct binpkg* pkg;
 	struct planned_op op = {.action = REMOVE, .id = pkgname_id};
 
 	// Check this has not already been done
@@ -879,7 +879,7 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
 {
 	struct action_stack* stk;
 	struct planned_op* ops;
-	struct mmpkg * pkg, * oldpkg;
+	struct binpkg * pkg, * oldpkg;
 	int i, num_ops;
 
 	stk = mmpack_action_stack_create();
@@ -908,7 +908,7 @@ struct action_stack* solver_create_action_stack(struct solver* solver)
 		case UPGRADE:
 			pkg = solver->inst_lut[ops[i].id];
 			oldpkg =
-				(struct mmpkg*) ((char*) pkg - ops[i].pkg_diff);
+				(struct binpkg*) ((char*) pkg - ops[i].pkg_diff);
 			stk = mmpack_action_stack_push(stk, UPGRADE_PKG,
 			                               pkg, oldpkg);
 			break;
@@ -943,7 +943,7 @@ struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
                                            struct buffer* buff)
 {
 	STATIC_CONST_MMSTR(any_version, "any");
-	struct mmpkg_dep dep = {0};
+	struct binpkg_dep dep = {0};
 	struct compiled_dep* compdep;
 	const struct pkg_request* req;
 
@@ -1043,10 +1043,10 @@ struct compiled_dep* upgrades_from_reqlist(const struct pkg_request* reqlist,
 	STATIC_CONST_MMSTR(any_version, "any");
 	struct binindex* binindex = solver->binindex;
 	struct compiled_dep* compdep = NULL;
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 	const struct pkg_request* req;
 	int name_id;
-	struct mmpkg_dep dep = {.max_version = any_version};
+	struct binpkg_dep dep = {.max_version = any_version};
 
 	mm_check(reqlist != NULL);
 
@@ -1163,7 +1163,7 @@ void mmpack_action_stack_dump(struct action_stack * stack)
 		else if (stack->actions[i].action == UPGRADE_PKG)
 			printf("UPGRADE: ");
 
-		mmpkg_dump(stack->actions[i].pkg);
+		binpkg_dump(stack->actions[i].pkg);
 	}
 }
 
