@@ -35,13 +35,13 @@ static const struct mm_arg_opt cmdline_optv[] = {
 
 
 struct list_pkgs {
-	struct mmpkg const * pkg;
+	struct binpkg const * pkg;
 	struct list_pkgs * next;
 };
 
 
 static
-void add_elt_list_pkgs(struct list_pkgs ** list, struct mmpkg const * pkg)
+void add_elt_list_pkgs(struct list_pkgs ** list, struct binpkg const * pkg)
 {
 	struct list_pkgs * elt = malloc(sizeof(struct list_pkgs));
 
@@ -53,7 +53,7 @@ void add_elt_list_pkgs(struct list_pkgs ** list, struct mmpkg const * pkg)
 
 
 static
-int search_elt_list_pkgs(struct list_pkgs * list, struct mmpkg const * pkg)
+int search_elt_list_pkgs(struct list_pkgs * list, struct binpkg const * pkg)
 {
 	struct list_pkgs * curr;
 
@@ -93,14 +93,14 @@ void dump_reverse_dependencies(struct list_pkgs * list)
 
 static
 int find_reverse_dependencies(struct binindex binindex,
-                              struct mmpkg const* pkg,
+                              struct binpkg const* pkg,
                               const struct repo* repo,
                               struct list_pkgs** rdep_list)
 {
 	struct rdeps_iter rdep_it;
-	struct mmpkg * rdep;
+	struct binpkg * rdep;
 
-	if (!pkg || !mmpkg_is_provided_by_repo(pkg, repo))
+	if (!pkg || !binpkg_is_provided_by_repo(pkg, repo))
 		return -1;
 
 	// iterate over all the potential reverse dependencies of pkg
@@ -108,7 +108,7 @@ int find_reverse_dependencies(struct binindex binindex,
 	     rdep = rdeps_iter_next(&rdep_it)) {
 		// check that the reverse dependency belongs to the
 		// repository inspected
-		if (!mmpkg_is_provided_by_repo(rdep, repo))
+		if (!binpkg_is_provided_by_repo(rdep, repo))
 			continue;
 
 		//check that the dependency is not already written
@@ -137,7 +137,7 @@ int find_reverse_dependencies(struct binindex binindex,
 LOCAL_SYMBOL
 int mmpack_rdepends(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	struct mmpkg const* pkg;
+	struct binpkg const* pkg;
 	struct pkg_parser pp;
 	struct constraints * cons = &pp.cons;
 	struct repo* repo = NULL;

@@ -35,7 +35,7 @@ int constraints_is_empty(struct constraints * c);
 
 #define MMPKG_FLAGS_GHOST       (1 << 0)
 
-struct mmpkg {
+struct binpkg {
 	int name_id;
 	mmstr const * name;
 	mmstr const * version;
@@ -48,17 +48,17 @@ struct mmpkg {
 
 	int flags;
 
-	struct mmpkg_dep * mpkdeps;
+	struct binpkg_dep * mpkdeps;
 	struct strlist sysdeps;
 	struct compiled_dep* compdep;
 };
 
-struct mmpkg_dep {
+struct binpkg_dep {
 	mmstr const * name;
 	mmstr const * min_version; /* inclusive */
 	mmstr const * max_version; /* exclusive */
 
-	struct mmpkg_dep * next;
+	struct binpkg_dep * next;
 };
 
 
@@ -70,7 +70,7 @@ struct mmpkg_dep {
  *                    to the next compiled_dep in the list.
  * @pkgs: array of package alternatives that amy match the requirement
  *
- * This structure represents a processed version of struct mmpkg_dep in the
+ * This structure represents a processed version of struct binpkg_dep in the
  * context of a particular binary index. It is meant to be serialized in a
  * bigger buffer representing all the dependencies of a particular package.
  */
@@ -78,7 +78,7 @@ struct compiled_dep {
 	int pkgname_id;
 	short num_pkg;
 	short next_entry_delta;
-	struct mmpkg* pkgs[];
+	struct binpkg* pkgs[];
 };
 
 
@@ -124,8 +124,8 @@ struct inststate_iter {
 
 
 static inline
-const struct mmpkg* inststate_first(struct inststate_iter* iter,
-                                    struct install_state* state)
+const struct binpkg* inststate_first(struct inststate_iter* iter,
+                                     struct install_state* state)
 {
 	struct it_entry* entry;
 
@@ -138,7 +138,7 @@ const struct mmpkg* inststate_first(struct inststate_iter* iter,
 
 
 static inline
-const struct mmpkg* inststate_next(struct inststate_iter* iter)
+const struct binpkg* inststate_next(struct inststate_iter* iter)
 {
 	struct it_entry* entry;
 
@@ -159,7 +159,7 @@ const struct mmpkg* inststate_next(struct inststate_iter* iter)
  */
 struct inst_rdeps_iter {
 	const struct binindex* binindex;
-	struct mmpkg** install_lut;
+	struct binpkg** install_lut;
 	const int* rdeps_ids;
 	int rdeps_index;
 	int pkgname_id;
@@ -176,7 +176,7 @@ struct inst_rdeps_iter {
  * @curr:        index of the versions currently processed
  */
 struct rdeps_iter {
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 	const struct binindex* binindex;
 	const int* rdeps_ids;
 	int rdeps_index;
@@ -185,7 +185,7 @@ struct rdeps_iter {
 
 
 static inline
-void mmpkg_update_flags(struct mmpkg* pkg, int mask, int set)
+void binpkg_update_flags(struct binpkg* pkg, int mask, int set)
 {
 	if (set)
 		pkg->flags |= mask;
@@ -195,57 +195,57 @@ void mmpkg_update_flags(struct mmpkg* pkg, int mask, int set)
 
 
 static inline
-int mmpkg_is_ghost(struct mmpkg const * pkg)
+int binpkg_is_ghost(struct binpkg const * pkg)
 {
 	return pkg->flags & MMPKG_FLAGS_GHOST;
 }
 
 
 static inline
-int mmpkg_is_available(struct mmpkg const * pkg)
+int binpkg_is_available(struct binpkg const * pkg)
 {
 	return pkg->remote_res != NULL;
 }
 
 
-int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
-                              const struct repo* repo);
+int binpkg_is_provided_by_repo(struct binpkg const * pkg,
+                               const struct repo* repo);
 
-void mmpkg_dump(struct mmpkg const * pkg);
-void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
-void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);
+void binpkg_dump(struct binpkg const * pkg);
+void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp);
+void binpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);
 
-struct mmpkg_dep* mmpkg_dep_create(char const * name);
-void mmpkg_dep_destroy(struct mmpkg_dep * dep);
-void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
-void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
+struct binpkg_dep* binpkg_dep_create(char const * name);
+void binpkg_dep_destroy(struct binpkg_dep * dep);
+void binpkg_dep_dump(struct binpkg_dep const * deps, char const * type);
+void binpkg_dep_save_to_index(struct binpkg_dep const * dep, FILE* fp, int lvl);
 
-struct mmpkg const* binindex_lookup(struct binindex* binindex,
-                                    mmstr const * name,
-                                    struct constraints const * c);
+struct binpkg const* binindex_lookup(struct binindex* binindex,
+                                     mmstr const * name,
+                                     struct constraints const * c);
 int binindex_is_pkg_upgradeable(struct binindex const * binindex,
-                                struct mmpkg const * pkg);
+                                struct binpkg const * pkg);
 void binindex_init(struct binindex* binindex);
 void binindex_deinit(struct binindex* binindex);
-struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
-                                      char const * filename);
+struct binpkg* add_pkgfile_to_binindex(struct binindex* binindex,
+                                       char const * filename);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
                       const struct repo* repo);
-struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex);
+struct binpkg** binindex_sorted_pkgs(struct binindex * binindex);
 void binindex_dump(struct binindex const * binindex);
 int binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
 struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
-                                              struct mmpkg* pkg,
+                                              struct binpkg* pkg,
                                               struct buffer* buff);
 struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
-                                          const struct mmpkg_dep* dep,
+                                          const struct binpkg_dep* dep,
                                           struct buffer* buff);
 struct compiled_dep* compile_package(const struct binindex* binindex,
-                                     struct mmpkg const * pkg,
+                                     struct binpkg const * pkg,
                                      struct buffer* buff);
 struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
-                                              struct mmpkg* pkg,
+                                              struct binpkg* pkg,
                                               int * flag);
 const int* binindex_get_potential_rdeps(const struct binindex* binindex,
                                         int pkgname_id, int* num_rdeps);
@@ -256,34 +256,34 @@ int install_state_copy(struct install_state* restrict dst,
 void install_state_deinit(struct install_state* state);
 void install_state_fill_lookup_table(const struct install_state* state,
                                      struct binindex* binindex,
-                                     struct mmpkg** installed);
-const struct mmpkg* install_state_get_pkg(const struct install_state* state,
-                                          const mmstr* name);
+                                     struct binpkg** installed);
+const struct binpkg* install_state_get_pkg(const struct install_state* state,
+                                           const mmstr* name);
 void install_state_add_pkg(struct install_state* state,
-                           const struct mmpkg* pkg);
+                           const struct binpkg* pkg);
 void install_state_rm_pkgname(struct install_state* state,
                               const mmstr* pkgname);
 void install_state_save_to_index(struct install_state* state, FILE* fp);
-const struct mmpkg** install_state_sorted_pkgs(struct install_state * is);
+const struct binpkg** install_state_sorted_pkgs(struct install_state * is);
 
-const struct mmpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
-                                          const struct mmpkg* pkg,
-                                          const struct binindex* binindex,
-                                          struct mmpkg** inst_lut);
-const struct mmpkg* inst_rdeps_iter_next(struct inst_rdeps_iter* iter);
+const struct binpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
+                                           const struct binpkg* pkg,
+                                           const struct binindex* binindex,
+                                           struct binpkg** inst_lut);
+const struct binpkg* inst_rdeps_iter_next(struct inst_rdeps_iter* iter);
 
-struct mmpkg* rdeps_iter_first(struct rdeps_iter* iter,
-                               const struct mmpkg* pkg,
-                               const struct binindex* binindex);
-struct mmpkg* rdeps_iter_next(struct rdeps_iter* iter);
+struct binpkg* rdeps_iter_first(struct rdeps_iter* iter,
+                                const struct binpkg* pkg,
+                                const struct binindex* binindex);
+struct binpkg* rdeps_iter_next(struct rdeps_iter* iter);
 
-const struct mmpkg* pkglist_iter_first(struct pkglist_iter* iter,
-                                       const mmstr* pkgname,
-                                       const struct binindex* binindex);
-const struct mmpkg* pkglist_iter_next(struct pkglist_iter* iter);
-struct mmpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
-                             const struct binindex* binindex);
-struct mmpkg* pkg_iter_next(struct pkg_iter* pkg_iter);
+const struct binpkg* pkglist_iter_first(struct pkglist_iter* iter,
+                                        const mmstr* pkgname,
+                                        const struct binindex* binindex);
+const struct binpkg* pkglist_iter_next(struct pkglist_iter* iter);
+struct binpkg* pkg_iter_first(struct pkg_iter* pkg_iter,
+                              const struct binindex* binindex);
+struct binpkg* pkg_iter_next(struct pkg_iter* pkg_iter);
 
 
 static inline
@@ -292,7 +292,7 @@ size_t compiled_dep_size(int num_pkg)
 	size_t size;
 
 	size = sizeof(struct compiled_dep);
-	size += num_pkg * sizeof(struct mmpkg);
+	size += num_pkg * sizeof(struct binpkg);
 
 	return ROUND_UP(size, sizeof(struct compiled_dep));
 }
@@ -311,7 +311,7 @@ struct compiled_dep* compiled_dep_next(struct compiled_dep* compdep)
 
 static inline
 int compiled_dep_pkg_match(const struct compiled_dep* compdep,
-                           const struct mmpkg* pkg)
+                           const struct binpkg* pkg)
 {
 	int i;
 

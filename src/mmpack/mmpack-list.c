@@ -30,7 +30,7 @@ static int show_ghost_packages = 0;
 
 
 static
-void print_pkg(const struct mmpkg* pkg, const struct mmpack_ctx* ctx)
+void print_pkg(const struct binpkg* pkg, const struct mmpack_ctx* ctx)
 {
 	const char* state;
 	struct remote_resource* res;
@@ -72,7 +72,7 @@ void print_pkg(const struct mmpkg* pkg, const struct mmpack_ctx* ctx)
  * Return: 1 in case of match, 0 otherwise.
  */
 static
-int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern,
+int print_pkg_if_match(const struct binpkg* pkg, const char* pattern,
                        const struct mmpack_ctx* ctx)
 {
 	// If pattern is provided and the name does not match do nothing
@@ -80,7 +80,7 @@ int print_pkg_if_match(const struct mmpkg* pkg, const char* pattern,
 		return 0;
 
 	// Skip showing ghost packages if not requested
-	if (!show_ghost_packages && mmpkg_is_ghost(pkg))
+	if (!show_ghost_packages && binpkg_is_ghost(pkg))
 		return 0;
 
 	print_pkg(pkg, ctx);
@@ -93,13 +93,13 @@ int list_binindex_pkgs(struct mmpack_ctx* ctx, int only_available,
                        const char* pattern)
 {
 	int i = 0, found = 0;
-	struct mmpkg ** pkgs, * pkg;
+	struct binpkg ** pkgs, * pkg;
 
 	pkgs = binindex_sorted_pkgs(&ctx->binindex);
 
 	while ((pkg = pkgs[i++])) {
 		// Exclude package not in repo if only available requested
-		if (only_available && !mmpkg_is_available(pkg))
+		if (only_available && !binpkg_is_available(pkg))
 			continue;
 
 		found |= print_pkg_if_match(pkg, pattern, ctx);
@@ -128,7 +128,7 @@ static
 int list_installed(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
 	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct mmpkg ** pkgs, * pkg;
+	const struct binpkg ** pkgs, * pkg;
 	int i = 0, found = 0;
 
 	pkgs = install_state_sorted_pkgs(&ctx->installed);
@@ -145,12 +145,12 @@ static
 int list_extras(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
 	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct mmpkg ** pkgs, * pkg;
+	const struct binpkg ** pkgs, * pkg;
 	int i = 0, found = 0;
 
 	pkgs = install_state_sorted_pkgs(&ctx->installed);
 	while ((pkg = pkgs[i++])) {
-		if (!mmpkg_is_available(pkg))
+		if (!binpkg_is_available(pkg))
 			found |= print_pkg_if_match(pkg, pattern, ctx);
 	}
 
@@ -164,7 +164,7 @@ static
 int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
 	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct mmpkg ** pkgs, * pkg, * latest;
+	const struct binpkg ** pkgs, * pkg, * latest;
 	int i = 0, found = 0;
 
 	pkgs = install_state_sorted_pkgs(&ctx->installed);

@@ -26,7 +26,7 @@ int fix_broken_package(struct mmpack_ctx * ctx, mmstr const * pkg_name,
                        int unattended)
 {
 	int rv = -1;
-	struct mmpkg const * installed_pkg;
+	struct binpkg const * installed_pkg;
 	struct action_stack* stack;
 
 	stack = mmpack_action_stack_create();
@@ -60,7 +60,7 @@ static
 int fix_broken_installed_packages(struct mmpack_ctx * ctx)
 {
 	struct inststate_iter iter;
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 	int rv = 0;
 
 	// Loop over installed packages

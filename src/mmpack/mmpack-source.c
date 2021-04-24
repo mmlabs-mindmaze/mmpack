@@ -25,7 +25,7 @@
 
 
 static
-int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
+int download_pkg_sources(struct mmpack_ctx * ctx, struct binpkg const * pkg)
 {
 	const struct srcpkg* srcpkg;
 	mmstr* dst;
@@ -60,7 +60,7 @@ int download_pkg_sources(struct mmpack_ctx * ctx, struct mmpkg const * pkg)
 LOCAL_SYMBOL
 int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	struct mmpkg const * pkg;
+	struct binpkg const * pkg;
 
 	if (mm_arg_is_completing()) {
 		if (argc != 2)
