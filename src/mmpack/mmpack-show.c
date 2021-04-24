@@ -21,10 +21,10 @@
 
 
 static
-void show_pkg(const struct mmpkg* pkg, const struct mmpack_ctx* ctx)
+void show_pkg(const struct binpkg* pkg, const struct mmpack_ctx* ctx)
 {
 	struct remote_resource* from;
-	const struct mmpkg_dep* dep;
+	const struct binpkg_dep* dep;
 	const struct strlist_elt* sysdep;
 
 	printf("%s (%s) %s\n", pkg->name, pkg->version,
@@ -40,7 +40,7 @@ void show_pkg(const struct mmpkg* pkg, const struct mmpack_ctx* ctx)
 	}
 
 	printf("Source package: %s\n", pkg->source);
-	printf("Ghost: %s\n", mmpkg_is_ghost(pkg) ? "yes" : "no");
+	printf("Ghost: %s\n", binpkg_is_ghost(pkg) ? "yes" : "no");
 
 	printf("Dependencies:\n");
 
@@ -71,7 +71,7 @@ LOCAL_SYMBOL
 int mmpack_show(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
 	struct pkglist_iter iter;
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 	mmstr* name;
 
 	if (mm_arg_is_completing()) {

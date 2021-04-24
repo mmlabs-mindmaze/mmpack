@@ -61,7 +61,7 @@ struct subcmd_parser {
 struct pkg_parser {
 	struct constraints cons;
 	mmstr * name;
-	struct mmpkg * pkg;
+	struct binpkg * pkg;
 };
 
 void pkg_parser_init(struct pkg_parser * pp);
@@ -71,7 +71,7 @@ const struct subcmd* subcmd_parse(const struct subcmd_parser* parser,
                                   int* p_argc, const char*** p_argv);
 int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
                  struct pkg_parser * pp);
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg);
+struct binpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg);
 int complete_pkgname(struct mmpack_ctx * ctx, const char* arg,
                      enum pkg_comp_type type);
 

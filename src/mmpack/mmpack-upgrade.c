@@ -37,7 +37,7 @@ struct pkg_request* get_full_upgradeable_reqlist(struct mmpack_ctx* ctx)
 	struct pkg_request * req, * reqlist;
 	struct it_iterator iter;
 	struct it_entry * entry;
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 
 	reqlist = NULL;
 
@@ -91,7 +91,7 @@ int get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 	int i;
 	struct pkg_request * req;
 	mmstr * pkg_name;
-	const struct mmpkg* pkg;
+	const struct binpkg* pkg;
 
 	*reqlist = NULL;
 

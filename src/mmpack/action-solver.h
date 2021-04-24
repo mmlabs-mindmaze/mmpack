@@ -23,8 +23,8 @@
  */
 struct action {
 	int action;
-	struct mmpkg const * pkg;
-	struct mmpkg const * oldpkg;
+	struct binpkg const * pkg;
+	struct binpkg const * oldpkg;
 	mmstr* pathname;
 };
 
@@ -37,7 +37,7 @@ struct action_stack {
 struct pkg_request {
 	const mmstr* name;
 	const mmstr* version;
-	struct mmpkg const * pkg;
+	struct binpkg const * pkg;
 	struct pkg_request* next;
 };
 
@@ -52,8 +52,8 @@ struct action_stack* mmpack_action_stack_create(void);
 void mmpack_action_stack_destroy(struct action_stack * stack);
 struct action_stack* mmpack_action_stack_push(struct action_stack * stack,
                                               int action,
-                                              struct mmpkg const * pkg,
-                                              struct mmpkg const * oldpkg);
+                                              struct binpkg const * pkg,
+                                              struct binpkg const * oldpkg);
 
 int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack);
 

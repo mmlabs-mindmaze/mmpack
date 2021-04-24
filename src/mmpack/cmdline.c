@@ -254,7 +254,7 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
                  struct pkg_parser * pp)
 {
 	int len;
-	struct mmpkg * pkg;
+	struct binpkg * pkg;
 	mmstr * tmp, * arg_full;
 	char * equal;
 
@@ -303,10 +303,10 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
  * If no such package is found, NULL is returned.
  */
 LOCAL_SYMBOL
-struct mmpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg)
+struct binpkg const* parse_pkg(struct mmpack_ctx * ctx, const char* pkg_arg)
 {
 	struct pkg_parser pp;
-	struct mmpkg const* pkg;
+	struct binpkg const* pkg;
 	struct constraints * cons;
 
 	pkg_parser_init(&pp);
