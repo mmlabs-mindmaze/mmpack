@@ -944,7 +944,7 @@ struct compiled_dep* compdeps_from_reqlist(const struct pkg_request* reqlist,
                                            struct buffer* buff)
 {
 	STATIC_CONST_MMSTR(any_version, "any");
-	struct binpkg_dep dep = {0};
+	struct pkgdep dep = {0};
 	struct compiled_dep* compdep;
 	const struct pkg_request* req;
 
@@ -1047,7 +1047,7 @@ struct compiled_dep* upgrades_from_reqlist(const struct pkg_request* reqlist,
 	const struct binpkg* pkg;
 	const struct pkg_request* req;
 	int name_id;
-	struct binpkg_dep dep = {.max_version = any_version};
+	struct pkgdep dep = {.max_version = any_version};
 
 	mm_check(reqlist != NULL);
 

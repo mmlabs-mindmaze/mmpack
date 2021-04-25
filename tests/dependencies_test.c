@@ -47,7 +47,7 @@ static const char * invalid_binindexes[] = {
  **************************************************************************/
 
 static
-int is_dep_fullfil_in_stack(const struct binpkg_dep* dep,
+int is_dep_fullfil_in_stack(const struct pkgdep* dep,
                             const struct action_stack* stack)
 {
 	int i;
@@ -61,7 +61,7 @@ int is_dep_fullfil_in_stack(const struct binpkg_dep* dep,
 		if (  pkg_version_compare(pkg->version, dep->max_version) > 0
 		   || pkg_version_compare(dep->min_version, pkg->version) > 0) {
 			fprintf(stderr, "dependency not fulfilled!\n");
-			binpkg_dep_dump(dep, "MMPACK");
+			pkgdep_dump(dep, "MMPACK");
 			binpkg_dump(pkg);
 			return 0;
 		}
@@ -78,7 +78,7 @@ static
 int is_stack_consistent(const struct action_stack* stack)
 {
 	int i;
-	const struct binpkg_dep* dep;
+	const struct pkgdep* dep;
 
 	for (i = 0; i < stack->index; i++) {
 		dep = stack->actions[i].pkg->mpkdeps;
