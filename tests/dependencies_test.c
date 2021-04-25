@@ -47,7 +47,7 @@ static const char * invalid_binindexes[] = {
  **************************************************************************/
 
 static
-int is_dep_fullfil_in_stack(const struct binpkg_dep* dep,
+int is_dep_fullfil_in_stack(const struct pkgdep* dep,
                             const struct action_stack* stack)
 {
 	int i;
@@ -76,7 +76,7 @@ static
 int is_stack_consistent(const struct action_stack* stack)
 {
 	int i;
-	const struct binpkg_dep* dep;
+	const struct pkgdep* dep;
 
 	for (i = 0; i < stack->index; i++) {
 		dep = stack->actions[i].pkg->mpkdeps;

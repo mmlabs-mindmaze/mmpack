@@ -24,7 +24,7 @@ static
 void show_pkg(const struct binpkg* pkg, const struct mmpack_ctx* ctx)
 {
 	struct remote_resource* from;
-	const struct binpkg_dep* dep;
+	const struct pkgdep* dep;
 	const struct strlist_elt* sysdep;
 
 	printf("%s (%s) %s\n", pkg->name, pkg->version,
