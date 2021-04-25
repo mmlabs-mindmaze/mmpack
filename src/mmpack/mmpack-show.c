@@ -41,7 +41,7 @@ void show_pkg(const struct binpkg* pkg, const struct mmpack_ctx* ctx)
 	printf("Ghost: %s\n", binpkg_is_ghost(pkg) ? "yes" : "no");
 
 	printf("Dependencies:\n");
-	binpkg_dep_dump(pkg->mpkdeps, "MMPACK");
+	pkgdep_dump(pkg->mpkdeps, "MMPACK");
 	binpkg_sysdeps_dump(&pkg->sysdeps, "SYSTEM");
 
 	printf("\nDescription:\n");

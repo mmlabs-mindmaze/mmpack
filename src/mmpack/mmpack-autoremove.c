@@ -30,7 +30,7 @@ static
 void mark_needed(struct mmpack_ctx * ctx, struct binpkg const * pkg,
                  int * needed)
 {
-	struct binpkg_dep * deps;
+	struct pkgdep * deps;
 	struct binpkg const * pkg_dep;
 
 	if (needed[pkg->name_id])

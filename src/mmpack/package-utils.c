@@ -254,7 +254,7 @@ void binpkg_deinit(struct binpkg * pkg)
 
 	remote_resource_destroy(pkg->remote_res);
 	pkg->remote_res = NULL;
-	binpkg_dep_destroy(pkg->mpkdeps);
+	pkgdep_destroy(pkg->mpkdeps);
 	strlist_deinit(&pkg->sysdeps);
 	free(pkg->compdep);
 
@@ -312,7 +312,7 @@ void binpkg_dump(struct binpkg const * pkg)
 {
 	printf("# %s (%s)\n", pkg->name, pkg->version);
 	printf("\tdependencies:\n");
-	binpkg_dep_dump(pkg->mpkdeps, "MMP");
+	pkgdep_dump(pkg->mpkdeps, "MMP");
 	binpkg_sysdeps_dump(&pkg->sysdeps, "SYS");
 	printf("\n");
 }
@@ -368,7 +368,7 @@ void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp)
 
 
 	fprintf(fp, "    depends:");
-	binpkg_dep_save_to_index(pkg->mpkdeps, fp, 2 /*indentation level*/);
+	pkgdep_save_to_index(pkg->mpkdeps, fp, 2 /*indentation level*/);
 
 	fprintf(fp, "    sysdepends: [");
 	for (elt = pkg->sysdeps.head; elt != NULL; elt = elt->next) {
@@ -383,17 +383,17 @@ void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp)
 
 
 /**
- * binpkg_dep_create() - create binpkg_dep
+ * pkgdep_create() - create pkgdep
  * @name: name of the mmpack package dependency
  *
- * To be destroyed by calling binpkg_dep_destroy()
+ * To be destroyed by calling pkgdep_destroy()
  *
- * Return: an initialized binpkg_dep structure
+ * Return: an initialized pkgdep structure
  */
 LOCAL_SYMBOL
-struct binpkg_dep* binpkg_dep_create(char const * name)
+struct pkgdep* pkgdep_create(char const * name)
 {
-	struct binpkg_dep * dep = xx_malloc(sizeof(*dep));
+	struct pkgdep * dep = xx_malloc(sizeof(*dep));
 	memset(dep, 0, sizeof(*dep));
 	dep->name = mmstr_malloc_from_cstr(name);
 	return dep;
@@ -401,11 +401,11 @@ struct binpkg_dep* binpkg_dep_create(char const * name)
 
 
 /**
- * binpkg_dep_destroy() - destroy binpkg_dep structure
- * @dep: the binpkg_dep structure to destroy
+ * pkgdep_destroy() - destroy pkgdep structure
+ * @dep: the pkgdep structure to destroy
  */
 LOCAL_SYMBOL
-void binpkg_dep_destroy(struct binpkg_dep * dep)
+void pkgdep_destroy(struct pkgdep * dep)
 {
 	if (dep == NULL)
 		return;
@@ -415,24 +415,24 @@ void binpkg_dep_destroy(struct binpkg_dep * dep)
 	mmstr_free(dep->max_version);
 
 	if (dep->next)
-		binpkg_dep_destroy(dep->next);
+		pkgdep_destroy(dep->next);
 
 	free(dep);
 }
 
 
 /**
- * binpkg_dep_dump() - dump pkg dep
- * @deps: binpkg_dep struct to dump
+ * pkgdep_dump() - dump pkg dep
+ * @deps: pkgdep struct to dump
  * @type: "SYS" if @deps represents system dependencies
  *        any king of string otherwise; will prefix the line
  *
  * This is intended to use as a debug function
  */
 LOCAL_SYMBOL
-void binpkg_dep_dump(struct binpkg_dep const * deps, char const * type)
+void pkgdep_dump(struct pkgdep const * deps, char const * type)
 {
-	struct binpkg_dep const * d = deps;
+	struct pkgdep const * d = deps;
 
 	while (d != NULL) {
 		if (STR_STARTS_WITH(type, strlen(type), "SYS"))
@@ -447,7 +447,7 @@ void binpkg_dep_dump(struct binpkg_dep const * deps, char const * type)
 
 
 LOCAL_SYMBOL
-void binpkg_dep_save_to_index(struct binpkg_dep const * dep, FILE* fp, int lvl)
+void pkgdep_save_to_index(struct pkgdep const * dep, FILE* fp, int lvl)
 {
 	if (!dep) {
 		fprintf(fp, " {}\n");
@@ -466,7 +466,7 @@ void binpkg_dep_save_to_index(struct binpkg_dep const * dep, FILE* fp, int lvl)
 
 
 /**
- * binpkg_dep_match_version() - test if a package meet requirement of dependency
+ * pkgdep_match_version() - test if a package meet requirement of dependency
  * @pkg:        pointer to package (may be NULL)
  * @dep:        pointer to dependency
  *
@@ -475,8 +475,8 @@ void binpkg_dep_save_to_index(struct binpkg_dep const * dep, FILE* fp, int lvl)
  * Return: 1 if @pkg is not NULL and meet requirement of @dep, 0 otherwise
  */
 static
-int binpkg_dep_match_version(const struct binpkg_dep* dep,
-                             const struct binpkg* pkg)
+int pkgdep_match_version(const struct pkgdep* dep,
+                         const struct binpkg* pkg)
 {
 	return (pkg != NULL
 	        && pkg_version_compare(pkg->version, dep->max_version) <= 0
@@ -1085,7 +1085,7 @@ struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
  */
 LOCAL_SYMBOL
 struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
-                                          const struct binpkg_dep* dep,
+                                          const struct pkgdep* dep,
                                           struct buffer* buff)
 {
 	struct pkglist_entry* entry;
@@ -1107,7 +1107,7 @@ struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
 	// sharing the same package name.
 	num_pkg = 0;
 	for (entry = list->head; entry != NULL; entry = entry->next) {
-		if (!binpkg_dep_match_version(dep, &entry->pkg))
+		if (!pkgdep_match_version(dep, &entry->pkg))
 			continue;
 
 		compdep->pkgs[num_pkg++] = &entry->pkg;
@@ -1193,7 +1193,7 @@ struct compiled_dep* binindex_compile_pkgdeps(const struct binindex* binindex,
                                               struct binpkg* pkg,
                                               int * flag)
 {
-	struct binpkg_dep* dep;
+	struct pkgdep* dep;
 	struct buffer buff;
 	// Init to NULL only to fix an illegitimate warning in gcc with
 	// Wmaybe-uninitialized
@@ -1278,7 +1278,7 @@ int binindex_compute_rdepends(struct binindex* binindex)
 	struct pkg_iter iter;
 	struct binpkg* pkg;
 	struct pkglist* pkglist;
-	struct binpkg_dep * dep;
+	struct pkgdep * dep;
 
 	rv = 0;
 	pkg = pkg_iter_first(&iter, binindex);
@@ -1460,7 +1460,7 @@ int binpkg_set_scalar_field(struct binpkg * pkg,
 
 
 static
-void binpkg_add_dependency(struct binpkg * pkg, struct binpkg_dep * dep)
+void binpkg_add_dependency(struct binpkg * pkg, struct pkgdep * dep)
 {
 	dep->next = pkg->mpkdeps;
 	pkg->mpkdeps = dep;
@@ -1474,7 +1474,7 @@ void binpkg_add_dependency(struct binpkg * pkg, struct binpkg_dep * dep)
 static
 int mmpack_parse_dependency(struct parsing_ctx* ctx,
                             struct binpkg * pkg,
-                            struct binpkg_dep * dep)
+                            struct pkgdep * dep)
 {
 	int exitvalue;
 	yaml_token_t token;
@@ -1541,7 +1541,7 @@ int mmpack_parse_deplist(struct parsing_ctx* ctx,
 {
 	int exitvalue, type;
 	yaml_token_t token;
-	struct binpkg_dep * dep;
+	struct pkgdep * dep;
 
 	exitvalue = 0;
 	dep = NULL;
@@ -1588,12 +1588,12 @@ int mmpack_parse_deplist(struct parsing_ctx* ctx,
 				if (dep != NULL)
 					goto exit;
 
-				dep = binpkg_dep_create(
+				dep = pkgdep_create(
 					(char const*)token.data.scalar.value);
 				break;
 
 			default:
-				binpkg_dep_destroy(dep);
+				pkgdep_destroy(dep);
 				dep = NULL;
 				type = -1;
 				break;
@@ -1614,7 +1614,7 @@ error:  /* reach end of file prematurely */
 exit:
 	yaml_token_delete(&token);
 	if (dep != NULL)  /* dep is set to NULL after being used */
-		binpkg_dep_destroy(dep);
+		pkgdep_destroy(dep);
 
 	return exitvalue;
 }
@@ -2190,11 +2190,11 @@ const struct binpkg* inst_rdeps_iter_next(struct inst_rdeps_iter* iter)
 static
 int is_dependency(struct binpkg const * pkg, struct binpkg const * supposed_dep)
 {
-	struct binpkg_dep * deps;
+	struct pkgdep * deps;
 
 	for (deps = pkg->mpkdeps; deps != NULL; deps = deps->next) {
 		if (mmstrequal(deps->name, supposed_dep->name) &&
-		    binpkg_dep_match_version(deps, supposed_dep)) {
+		    pkgdep_match_version(deps, supposed_dep)) {
 			return 1;
 		}
 	}

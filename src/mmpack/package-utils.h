@@ -48,17 +48,17 @@ struct binpkg {
 
 	int flags;
 
-	struct binpkg_dep * mpkdeps;
+	struct pkgdep * mpkdeps;
 	struct strlist sysdeps;
 	struct compiled_dep* compdep;
 };
 
-struct binpkg_dep {
+struct pkgdep {
 	mmstr const * name;
 	mmstr const * min_version; /* inclusive */
 	mmstr const * max_version; /* exclusive */
 
-	struct binpkg_dep * next;
+	struct pkgdep * next;
 };
 
 
@@ -70,7 +70,7 @@ struct binpkg_dep {
  *                    to the next compiled_dep in the list.
  * @pkgs: array of package alternatives that amy match the requirement
  *
- * This structure represents a processed version of struct binpkg_dep in the
+ * This structure represents a processed version of struct pkgdep in the
  * context of a particular binary index. It is meant to be serialized in a
  * bigger buffer representing all the dependencies of a particular package.
  */
@@ -215,10 +215,10 @@ void binpkg_dump(struct binpkg const * pkg);
 void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp);
 void binpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);
 
-struct binpkg_dep* binpkg_dep_create(char const * name);
-void binpkg_dep_destroy(struct binpkg_dep * dep);
-void binpkg_dep_dump(struct binpkg_dep const * deps, char const * type);
-void binpkg_dep_save_to_index(struct binpkg_dep const * dep, FILE* fp, int lvl);
+struct pkgdep* pkgdep_create(char const * name);
+void pkgdep_destroy(struct pkgdep * dep);
+void pkgdep_dump(struct pkgdep const * deps, char const * type);
+void pkgdep_save_to_index(struct pkgdep const * dep, FILE* fp, int lvl);
 
 struct binpkg const* binindex_lookup(struct binindex* binindex,
                                      mmstr const * name,
@@ -239,7 +239,7 @@ struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
                                               struct binpkg* pkg,
                                               struct buffer* buff);
 struct compiled_dep* binindex_compile_dep(const struct binindex* binindex,
-                                          const struct binpkg_dep* dep,
+                                          const struct pkgdep* dep,
                                           struct buffer* buff);
 struct compiled_dep* compile_package(const struct binindex* binindex,
                                      struct binpkg const * pkg,
