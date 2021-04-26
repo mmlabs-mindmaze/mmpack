@@ -282,42 +282,6 @@ int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
 }
 
 
-/**
- * mmpkg_sysdeps_dump() - dump sysdeps
- * @sysdeps: system dependencies strlist structure
- * @type: a string which will prefix the output (eg. "SYSTEM")
- *
- * This is intended to use as a debug function
- */
-LOCAL_SYMBOL
-void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type)
-{
-	const struct strlist_elt* d = sysdeps->head;
-
-	while (d != NULL) {
-		printf("\t\t [%s] %s\n", type, d->str.buf);
-		d = d->next;
-	}
-}
-
-
-/**
- * mmpkg_dump() - dump mmpack package (DEBUG)
- * @pkg: mmpkg to dump
- *
- * This is intended to use as a debug function
- */
-LOCAL_SYMBOL
-void mmpkg_dump(struct mmpkg const * pkg)
-{
-	printf("# %s (%s)\n", pkg->name, pkg->version);
-	printf("\tdependencies:\n");
-	mmpkg_dep_dump(pkg->mpkdeps, "MMP");
-	mmpkg_sysdeps_dump(&pkg->sysdeps, "SYS");
-	printf("\n");
-}
-
-
 static
 int from_repo_check_valid(struct mmpkg const * pkg)
 {
@@ -418,31 +382,6 @@ void mmpkg_dep_destroy(struct mmpkg_dep * dep)
 		mmpkg_dep_destroy(dep->next);
 
 	free(dep);
-}
-
-
-/**
- * mmpkg_dep_dump() - dump pkg dep
- * @deps: mmpkg_dep struct to dump
- * @type: "SYS" if @deps represents system dependencies
- *        any king of string otherwise; will prefix the line
- *
- * This is intended to use as a debug function
- */
-LOCAL_SYMBOL
-void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type)
-{
-	struct mmpkg_dep const * d = deps;
-
-	while (d != NULL) {
-		if (STR_STARTS_WITH(type, strlen(type), "SYS"))
-			printf("\t\t [%s] %s\n", type, d->name);
-		else
-			printf("\t\t [%s] %s [%s -> %s]\n", type, d->name,
-			       d->min_version, d->max_version);
-
-		d = d->next;
-	}
 }
 
 
@@ -854,26 +793,6 @@ void binindex_deinit(struct binindex* binindex)
 
 	binindex->num_pkgname = 0;
 	binindex->pkg_num = 0;
-}
-
-
-/**
- * binindex_dump() - dump binindex (DEBUG)
- * @binindex: the binindex to dump
- *
- * This is intended to use as a debug function
- */
-LOCAL_SYMBOL
-void binindex_dump(struct binindex const * binindex)
-{
-	struct pkg_iter iter;
-	struct mmpkg* pkg;
-
-	pkg = pkg_iter_first(&iter, binindex);
-	while (pkg != NULL) {
-		mmpkg_dump(pkg);
-		pkg = pkg_iter_next(&iter);
-	}
 }
 
 

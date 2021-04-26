@@ -1145,30 +1145,6 @@ struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
 }
 
 
-/**
- * mmpack_action_stack_dump() - dump action stack (DEBUG)
- * @stack: the stack to dump
- *
- * This is intended to use as a debug function
- */
-LOCAL_SYMBOL
-void mmpack_action_stack_dump(struct action_stack * stack)
-{
-	int i;
-
-	for (i = 0; i < stack->index; i++) {
-		if (stack->actions[i].action == INSTALL_PKG)
-			printf("INSTALL: ");
-		else if (stack->actions[i].action == REMOVE_PKG)
-			printf("REMOVE: ");
-		else if (stack->actions[i].action == UPGRADE_PKG)
-			printf("UPGRADE: ");
-
-		mmpkg_dump(stack->actions[i].pkg);
-	}
-}
-
-
 LOCAL_SYMBOL
 int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack)
 {
