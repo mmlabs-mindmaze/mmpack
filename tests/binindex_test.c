@@ -48,7 +48,6 @@ START_TEST(test_binindex_parsing)
 
 	rv = binindex_populate(&binary_index, binindexes[_i], &repo);
 	ck_assert(rv == 0);
-	binindex_dump(&binary_index);
 
 	mmstr_free(repo.url);
 	mmstr_free(repo.name);

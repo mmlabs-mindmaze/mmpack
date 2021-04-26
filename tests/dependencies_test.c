@@ -61,8 +61,6 @@ int is_dep_fullfil_in_stack(const struct mmpkg_dep* dep,
 		if (  pkg_version_compare(pkg->version, dep->max_version) > 0
 		   || pkg_version_compare(dep->min_version, pkg->version) > 0) {
 			fprintf(stderr, "dependency not fulfilled!\n");
-			mmpkg_dep_dump(dep, "MMPACK");
-			mmpkg_dump(pkg);
 			return 0;
 		}
 
@@ -209,7 +207,6 @@ START_TEST(test_valid_dependencies)
 	actions = mmpkg_get_install_list(&ctx, &req);
 	ck_assert(actions != NULL);
 
-	mmpack_action_stack_dump(actions);
 	ck_assert(does_stack_meet_requests(actions, &req));
 	ck_assert(is_stack_consistent(actions));
 	ck_assert(are_pkgs_expected_in_stack(actions, valid_mmpack_deps[_i]));
@@ -235,7 +232,6 @@ START_TEST(test_valid_dependencies_multiple_req)
 	actions = mmpkg_get_install_list(&ctx, req);
 	ck_assert(actions != NULL);
 
-	mmpack_action_stack_dump(actions);
 	ck_assert(does_stack_meet_requests(actions, req));
 	ck_assert(is_stack_consistent(actions));
 	ck_assert(are_pkgs_expected_in_stack(actions, valid_mmpack_deps[1]));
