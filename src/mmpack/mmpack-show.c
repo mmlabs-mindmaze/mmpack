@@ -24,6 +24,8 @@ static
 void show_pkg(const struct mmpkg* pkg, const struct mmpack_ctx* ctx)
 {
 	struct remote_resource* from;
+	const struct mmpkg_dep* dep;
+	const struct strlist_elt* sysdep;
 
 	printf("%s (%s) %s\n", pkg->name, pkg->version,
 	       mmpack_ctx_is_pkg_installed(ctx, pkg) ? "[installed]" : "");
@@ -41,8 +43,14 @@ void show_pkg(const struct mmpkg* pkg, const struct mmpack_ctx* ctx)
 	printf("Ghost: %s\n", mmpkg_is_ghost(pkg) ? "yes" : "no");
 
 	printf("Dependencies:\n");
-	mmpkg_dep_dump(pkg->mpkdeps, "MMPACK");
-	mmpkg_sysdeps_dump(&pkg->sysdeps, "SYSTEM");
+
+	for (dep = pkg->mpkdeps; dep != NULL; dep = dep->next) {
+		printf("\t\t [MMPACK] %s [%s -> %s]\n",
+		       dep->name, dep->min_version, dep->max_version);
+	}
+
+	for (sysdep = pkg->sysdeps.head; sysdep != NULL; sysdep = sysdep->next)
+		printf("\t\t [SYSTEM] %s\n", sysdep->str.buf);
 
 	printf("\nDescription:\n");
 	printf("%s\n", pkg->desc ? pkg->desc : "none");
