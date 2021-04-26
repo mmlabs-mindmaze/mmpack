@@ -1,6 +1,10 @@
+/*
+ * @mindmaze_header@
+ */
 #ifndef XX_ALLOC_H
 #define XX_ALLOC_H
 
+#include <mmlib.h>
 #include <mmlog.h>
 #include <stdlib.h>
 
