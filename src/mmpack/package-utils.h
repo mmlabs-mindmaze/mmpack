@@ -211,13 +211,10 @@ int mmpkg_is_available(struct mmpkg const * pkg)
 int mmpkg_is_provided_by_repo(struct mmpkg const * pkg,
                               const struct repo* repo);
 
-void mmpkg_dump(struct mmpkg const * pkg);
 void mmpkg_save_to_index(struct mmpkg const * pkg, FILE* fp);
-void mmpkg_sysdeps_dump(const struct strlist* sysdeps, char const * type);
 
 struct mmpkg_dep* mmpkg_dep_create(char const * name);
 void mmpkg_dep_destroy(struct mmpkg_dep * dep);
-void mmpkg_dep_dump(struct mmpkg_dep const * deps, char const * type);
 void mmpkg_dep_save_to_index(struct mmpkg_dep const * dep, FILE* fp, int lvl);
 
 struct mmpkg const* binindex_lookup(struct binindex* binindex,
@@ -232,7 +229,6 @@ struct mmpkg* add_pkgfile_to_binindex(struct binindex* binindex,
 int binindex_populate(struct binindex* binindex, char const * index_filename,
                       const struct repo* repo);
 struct mmpkg** binindex_sorted_pkgs(struct binindex * binindex);
-void binindex_dump(struct binindex const * binindex);
 int binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
 struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,

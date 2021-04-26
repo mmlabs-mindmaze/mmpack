@@ -50,7 +50,6 @@ struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
 
 struct action_stack* mmpack_action_stack_create(void);
 void mmpack_action_stack_destroy(struct action_stack * stack);
-void mmpack_action_stack_dump(struct action_stack * actions);
 struct action_stack* mmpack_action_stack_push(struct action_stack * stack,
                                               int action,
                                               struct mmpkg const * pkg,
