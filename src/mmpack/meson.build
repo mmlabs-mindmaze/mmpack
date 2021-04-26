@@ -63,6 +63,8 @@ mmpack_lib_sources = files(
 	'srcindex.h',
 	'strchunk.h',
 	'strchunk.c',
+	'strlist.h',
+	'strlist.c',
 	'sysdeps.c',
 	'sysdeps.h',
 	'utils.c',

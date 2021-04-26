@@ -181,6 +181,8 @@ mmpack_lib_sources = \
 	src/mmpack/srcindex.h \
 	src/mmpack/strchunk.h \
 	src/mmpack/strchunk.c \
+	src/mmpack/strlist.h \
+	src/mmpack/strlist.c \
 	src/mmpack/sysdeps.c \
 	src/mmpack/sysdeps.h \
 	src/mmpack/utils.c \

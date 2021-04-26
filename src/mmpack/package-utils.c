@@ -22,6 +22,7 @@
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
 #include "repo.h"
+#include "strlist.h"
 #include "utils.h"
 #include "xx-alloc.h"
 

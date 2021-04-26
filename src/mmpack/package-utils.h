@@ -9,6 +9,7 @@
 #include "indextable.h"
 #include "mmstring.h"
 #include "repo.h"
+#include "strlist.h"
 #include "utils.h"
 
 
