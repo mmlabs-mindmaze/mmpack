@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 
+#include "binpkg.h"
 #include "indextable.h"
 #include "mmstring.h"
 #include "repo.h"
@@ -31,35 +32,6 @@ struct constraints {
 
 void constraints_deinit(struct constraints * c);
 int constraints_is_empty(struct constraints * c);
-
-
-#define MMPKG_FLAGS_GHOST       (1 << 0)
-
-struct binpkg {
-	int name_id;
-	mmstr const * name;
-	mmstr const * version;
-	mmstr const * source;
-	mmstr const * desc;
-	mmstr const * sumsha;
-	mmstr const * srcsha;
-
-	struct remote_resource* remote_res;
-
-	int flags;
-
-	struct pkgdep * mpkdeps;
-	struct strlist sysdeps;
-	struct compiled_dep* compdep;
-};
-
-struct pkgdep {
-	mmstr const * name;
-	mmstr const * min_version; /* inclusive */
-	mmstr const * max_version; /* exclusive */
-
-	struct pkgdep * next;
-};
 
 
 /**
@@ -183,39 +155,6 @@ struct rdeps_iter {
 	struct pkglist_entry* curr;
 };
 
-
-static inline
-void binpkg_update_flags(struct binpkg* pkg, int mask, int set)
-{
-	if (set)
-		pkg->flags |= mask;
-	else
-		pkg->flags &= ~mask;
-}
-
-
-static inline
-int binpkg_is_ghost(struct binpkg const * pkg)
-{
-	return pkg->flags & MMPKG_FLAGS_GHOST;
-}
-
-
-static inline
-int binpkg_is_available(struct binpkg const * pkg)
-{
-	return pkg->remote_res != NULL;
-}
-
-
-int binpkg_is_provided_by_repo(struct binpkg const * pkg,
-                               const struct repo* repo);
-
-void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp);
-
-struct pkgdep* pkgdep_create(char const * name);
-void pkgdep_destroy(struct pkgdep * dep);
-void pkgdep_save_to_index(struct pkgdep const * dep, FILE* fp, int lvl);
 
 struct binpkg const* binindex_lookup(struct binindex* binindex,
                                      mmstr const * name,
