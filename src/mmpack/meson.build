@@ -1,6 +1,8 @@
 mmpack_lib_sources = files(
 	'action-solver.c',
 	'action-solver.h',
+	'buffer.c',
+	'buffer.h',
 	'cmdline.c',
 	'cmdline.h',
 	'common.h',

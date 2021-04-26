@@ -9,6 +9,7 @@
 #include <mmlib.h>
 #include <mmsysio.h>
 
+#include "buffer.h"
 #include "mmstring.h"
 #include "path-win32.h"
 #include "utils.h"

@@ -119,6 +119,8 @@ syntax: pycodestyle pylint
 mmpack_lib_sources = \
 	src/mmpack/action-solver.c \
 	src/mmpack/action-solver.h \
+	src/mmpack/buffer.c \
+	src/mmpack/buffer.h \
 	src/mmpack/cmdline.c \
 	src/mmpack/cmdline.h \
 	src/mmpack/common.h \

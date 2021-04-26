@@ -5,6 +5,7 @@
 #define PKG_FS_UTILS_H
 
 #include "action-solver.h"
+#include "buffer.h"
 #include "context.h"
 #include "mmstring.h"
 

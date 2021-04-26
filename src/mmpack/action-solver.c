@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "action-solver.h"
+#include "buffer.h"
 #include "context.h"
 #include "package-utils.h"
 #include "utils.h"

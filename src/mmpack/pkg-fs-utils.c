@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "buffer.h"
 #include "common.h"
 #include "context.h"
 #include "download.h"

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <mmlib.h>
 
+#include "buffer.h"
 #include "indextable.h"
 #include "mmstring.h"
 #include "sysdeps.h"

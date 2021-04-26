@@ -16,6 +16,7 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 
+#include "buffer.h"
 #include "common.h"
 #include "indextable.h"
 #include "package-utils.h"
