@@ -126,6 +126,7 @@ mmpack_lib_sources = \
 	src/mmpack/cmdline.c \
 	src/mmpack/cmdline.h \
 	src/mmpack/common.h \
+	src/mmpack/constraints.h \
 	src/mmpack/context.c \
 	src/mmpack/context.h \
 	src/mmpack/download.c \

@@ -11,6 +11,7 @@
 #include <mmerrno.h>
 
 #include "cmdline.h"
+#include "constraints.h"
 #include "context.h"
 #include "indextable.h"
 #include "package-utils.h"
