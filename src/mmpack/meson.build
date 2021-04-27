@@ -8,6 +8,7 @@ mmpack_lib_sources = files(
 	'cmdline.c',
 	'cmdline.h',
 	'common.h',
+	'constraints.h',
 	'context.c',
 	'context.h',
 	'download.c',

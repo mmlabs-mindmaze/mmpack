@@ -7,6 +7,7 @@
 
 #include <mmargparse.h>
 
+#include "constraints.h"
 #include "context.h"
 #include "package-utils.h"
 

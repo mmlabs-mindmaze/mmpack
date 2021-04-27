@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "binpkg.h"
+#include "constraints.h"
 #include "indextable.h"
 #include "mmstring.h"
 #include "repo.h"
@@ -15,23 +16,6 @@
 
 
 int pkg_version_compare(char const * v1, char const * v2);
-
-
-/**
- * strcut constraints - structure containing all the possible constraints
- *                      imposed by the user in the command line.
- * @version: package version
- * @repo_name: the repository in which the package should be searched
- * @sumsha: package sumsha
- **/
-struct constraints {
-	mmstr * version;
-	const struct repo* repo;
-	mmstr * sumsha;
-};
-
-void constraints_deinit(struct constraints * c);
-int constraints_is_empty(struct constraints * c);
 
 
 /**
