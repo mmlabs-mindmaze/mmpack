@@ -58,35 +58,6 @@ struct parsing_ctx {
 
 
 /**
- * constraints_deinit  -  deinit a structure struct constraints
- * @c: the structure to deinitialize
- */
-LOCAL_SYMBOL
-void constraints_deinit(struct constraints * c)
-{
-	mmstr_free(c->version);
-	c->version = NULL;
-	mmstr_free(c->sumsha);
-	c->sumsha = NULL;
-}
-
-
-/**
- * constraints_is_empty() - indicates whether a struct constraints is empty or
- *                          not
- * @c: the structure to test
- *
- * Return: 1 if @c is empty, 0 otherwise.
- */
-LOCAL_SYMBOL
-int constraints_is_empty(struct constraints * c)
-{
-	struct constraints empty = {0};
-	return memcmp(&empty, c, sizeof(empty)) == 0;
-}
-
-
-/**
  * pkg_version_compare() - compare package version string
  * @v1: version string
  * @v2: version string
