@@ -87,19 +87,6 @@ int constraints_is_empty(struct constraints * c)
 
 
 /**
- * get_name_pkgname_by_id() - returns the name of the packages located in
- *                      the i-th case of the pkgname_table table.
- * @binindex:   the initialized binindex
- * @id:         the id of the package name
- */
-LOCAL_SYMBOL
-const mmstr* get_name_pkgname_by_id(struct binindex binindex, int i)
-{
-	return binindex.pkgname_table[i].pkg_name;
-}
-
-
-/**
  * pkg_version_compare() - compare package version string
  * @v1: version string
  * @v2: version string
