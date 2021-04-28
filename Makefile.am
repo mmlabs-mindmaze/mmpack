@@ -135,6 +135,8 @@ mmpack_lib_sources = \
 	src/mmpack/download.h \
 	src/mmpack/indextable.c \
 	src/mmpack/indextable.h \
+	src/mmpack/install-state.c \
+	src/mmpack/install-state.h \
 	src/mmpack/mmpack-autoremove.c \
 	src/mmpack/mmpack-autoremove.h \
 	src/mmpack/mmpack-check-integrity.c \
