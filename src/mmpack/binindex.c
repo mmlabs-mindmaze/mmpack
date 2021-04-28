@@ -717,7 +717,7 @@ struct binpkg* binindex_add_pkgfile(struct binindex* binindex,
 	name = NULL;
 	buffer_init(&buffer);
 	binpkg_init(&tmppkg, NULL);
-	res = binpkg_get_or_create_remote_res(&tmppkg, NULL);
+	res = binpkg_get_remote_res(&tmppkg, NULL);
 	res->filename = mmstr_malloc_from_cstr(filename);
 	res->sha256 = hash = mmstr_malloc(SHA_HEXSTR_LEN);
 

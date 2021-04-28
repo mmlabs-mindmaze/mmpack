@@ -50,8 +50,8 @@ void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp);
 int binpkg_check_valid(struct binpkg const * pkg, int in_repo_cache);
 int binpkg_is_provided_by_repo(struct binpkg const * pkg,
                                const struct repo* repo);
-struct remote_resource* binpkg_get_or_create_remote_res(struct binpkg* pkg,
-                                                        const struct repo* repo);
+struct remote_resource* binpkg_get_remote_res(struct binpkg* pkg,
+                                              const struct repo* repo);
 void binpkg_add_remote_resource(struct binpkg* pkg,
                                 struct remote_resource* res_added);
 

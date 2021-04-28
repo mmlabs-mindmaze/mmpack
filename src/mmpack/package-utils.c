@@ -218,12 +218,12 @@ int binpkg_set_scalar_field(struct binpkg * pkg,
 		break;
 
 	case FIELD_FILENAME:
-		res = binpkg_get_or_create_remote_res(pkg, repo);
+		res = binpkg_get_remote_res(pkg, repo);
 		field = &res->filename;
 		break;
 
 	case FIELD_SHA:
-		res = binpkg_get_or_create_remote_res(pkg, repo);
+		res = binpkg_get_remote_res(pkg, repo);
 		field = &res->sha256;
 		break;
 
@@ -252,7 +252,7 @@ int binpkg_set_scalar_field(struct binpkg * pkg,
 		return 0;
 
 	case FIELD_SIZE:
-		res = binpkg_get_or_create_remote_res(pkg, repo);
+		res = binpkg_get_remote_res(pkg, repo);
 		res->size = atoi(value);
 		return 0;
 

@@ -180,7 +180,7 @@ void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp)
 
 
 /**
- * binpkg_get_or_create_remote_res() - returns or create and returns a remote
+ * binpkg_get_remote_res() - returns or create and returns a remote
  * @pkg:       a package already registered
  * @repo:      a repository from which the package pkg is provided
  *
@@ -194,8 +194,8 @@ void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp)
  * the package is created with a remote_resource set to NULL.
  */
 LOCAL_SYMBOL
-struct remote_resource* binpkg_get_or_create_remote_res(struct binpkg* pkg,
-                                                        const struct repo* repo)
+struct remote_resource* binpkg_get_remote_res(struct binpkg* pkg,
+                                              const struct repo* repo)
 {
 	struct remote_resource* res;
 
@@ -228,7 +228,7 @@ void binpkg_add_remote_resource(struct binpkg* pkg,
 {
 	struct remote_resource * src, * dst, * next;
 	for (src = res_added; src != NULL; src = src->next) {
-		dst = binpkg_get_or_create_remote_res(pkg, src->repo);
+		dst = binpkg_get_remote_res(pkg, src->repo);
 		mmstr_free(dst->filename);
 		mmstr_free(dst->sha256);
 
