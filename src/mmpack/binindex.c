@@ -694,7 +694,7 @@ struct binpkg* binindex_add_pkg(struct binindex* binindex, struct binpkg* pkg)
 
 
 /**
- * add_pkgfile_to_binindex() - add local mmpack package file to binindex
+ * binindex_add_pkgfile() - add local mmpack package file to binindex
  * @binindex: initialized mmpack binindex
  * @filename: path to the mmpack archive
  *
@@ -703,8 +703,8 @@ struct binpkg* binindex_add_pkg(struct binindex* binindex, struct binpkg* pkg)
  * cleanup.
  */
 LOCAL_SYMBOL
-struct binpkg* add_pkgfile_to_binindex(struct binindex* binindex,
-                                       char const * filename)
+struct binpkg* binindex_add_pkgfile(struct binindex* binindex,
+                                    char const * filename)
 {
 	struct buffer buffer;
 	struct binpkg * pkg;

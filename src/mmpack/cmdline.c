@@ -266,7 +266,7 @@ int parse_pkgreq(struct mmpack_ctx * ctx, const char* pkg_req,
 		arg_full = mmstr_malloca(len);
 		mmstr_join_path(arg_full, ctx->cwd, tmp);
 
-		pkg = add_pkgfile_to_binindex(&ctx->binindex, arg_full);
+		pkg = binindex_add_pkgfile(&ctx->binindex, arg_full);
 		mmstr_freea(arg_full);
 		if (pkg == NULL) {
 			printf("Package not found or malformed package\n");
