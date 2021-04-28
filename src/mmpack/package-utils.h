@@ -167,7 +167,6 @@ struct binpkg* add_pkgfile_to_binindex(struct binindex* binindex,
                                        char const * filename);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
                       const struct repo* repo);
-struct binpkg** binindex_sorted_pkgs(struct binindex * binindex);
 int binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
 struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
@@ -199,7 +198,6 @@ void install_state_add_pkg(struct install_state* state,
 void install_state_rm_pkgname(struct install_state* state,
                               const mmstr* pkgname);
 void install_state_save_to_index(struct install_state* state, FILE* fp);
-const struct binpkg** install_state_sorted_pkgs(struct install_state * is);
 
 const struct binpkg* inst_rdeps_iter_first(struct inst_rdeps_iter* iter,
                                            const struct binpkg* pkg,
