@@ -6,6 +6,7 @@
 # include <config.h>
 #endif
 
+#include "buffer.h"
 #include "cmdline.h"
 #include "common.h"
 #include "context.h"
@@ -16,13 +17,14 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
+#include <stdlib.h>
 #include <string.h>
 
 
-struct cb_data {
-	const char * pkg_name_pattern;
+struct listing_opts {
+	const char * pattern;
 	int only_available;
-	int found;
+	int only_repoless;
 };
 
 
@@ -56,56 +58,112 @@ void print_pkg(const struct binpkg* pkg, const struct mmpack_ctx* ctx)
 }
 
 
-/**
- * print_pkg_if_match() - print package if name match pattern
- * @pkg:        package whose name must be tested
- * @pattern:    pattern to search in name (can be NULL)
- * @ctx:        mmpack context
- *
- * Tests whether @pkg has a name which contains the string @pattern if it
- * is not NULL. If @pattern is NULL, the match is considered to be true
- * (This allows to use NULL to disable filter on name).
- *
- * If there is a match, the package is printed on standard output along
- * with its status and version.
- *
- * Return: 1 in case of match, 0 otherwise.
- */
 static
-int print_pkg_if_match(const struct binpkg* pkg, const char* pattern,
-                       const struct mmpack_ctx* ctx)
+int binpkg_cmp(const void * v1, const void * v2)
 {
-	// If pattern is provided and the name does not match do nothing
-	if (pattern && (strstr(pkg->name, pattern) == NULL))
-		return 0;
+	const struct binpkg * pkg1, * pkg2;
+	int res;
 
-	// Skip showing ghost packages if not requested
-	if (!show_ghost_packages && binpkg_is_ghost(pkg))
-		return 0;
+	pkg1 = *((const struct binpkg**) v1);
+	pkg2 = *((const struct binpkg**) v2);
 
-	print_pkg(pkg, ctx);
-	return 1;
+	res = strcmp(pkg1->name, pkg2->name);
+
+	if (res == 0)
+		res = pkg_version_compare(pkg1->version, pkg2->version);
+
+	return res;
 }
 
 
 static
-int list_binindex_pkgs(struct mmpack_ctx* ctx, int only_available,
-                       const char* pattern)
+int print_pkgs_in_buffer(struct buffer* buff, struct mmpack_ctx* ctx)
 {
-	int i = 0, found = 0;
-	struct binpkg ** pkgs, * pkg;
+	const struct binpkg** pkgs = buff->base;
+	int num = buff->size / sizeof(*pkgs);
+	int i;
 
-	pkgs = binindex_sorted_pkgs(&ctx->binindex);
+	qsort(pkgs, num, sizeof(*pkgs), binpkg_cmp);
+	for (i = 0; i < num; i++)
+		print_pkg(pkgs[i], ctx);
 
-	while ((pkg = pkgs[i++])) {
-		// Exclude package not in repo if only available requested
-		if (only_available && !binpkg_is_available(pkg))
-			continue;
+	return num != 0;
+}
 
-		found |= print_pkg_if_match(pkg, pattern, ctx);
-	}
 
-	free(pkgs);
+/**
+ * add_pkg_to_buff_if_match() - add package to buffer if options match
+ * @pkg:        package to be tested
+ * @opts:       options restricting the listing
+ * @buff:       mmpack context
+ *
+ * Tests whether @pkg fulfill constraints passed in @opts. If there is a
+ * match, the package is added to a buffer holding the packages to eventually
+ * print.
+ */
+static
+void add_pkg_to_buff_if_match(const struct binpkg* pkg,
+                              const struct listing_opts* opts,
+                              struct buffer* buff)
+{
+	// Exclude package not in repo if only available requested
+	if (opts->only_available && !binpkg_is_available(pkg))
+		return;
+
+	// Exclude package in repo if only pkg without repo
+	if (opts->only_repoless && binpkg_is_available(pkg))
+		return;
+
+	// If pattern is provided and the name does not match do nothing
+	if (opts->pattern && (strstr(pkg->name, opts->pattern) == NULL))
+		return;
+
+	// Skip showing ghost packages if not requested
+	if (!show_ghost_packages && binpkg_is_ghost(pkg))
+		return;
+
+	buffer_push(buff, &pkg, sizeof(pkg));
+}
+
+
+static
+int list_binindex_pkgs(struct mmpack_ctx* ctx,
+                       const struct listing_opts* opts)
+{
+	const struct binpkg* pkg;
+	struct pkg_iter iter;
+	struct buffer buff;
+	int found;
+
+	buffer_init(&buff);
+	pkg = pkg_iter_first(&iter, &ctx->binindex);
+	for (; pkg != NULL; pkg = pkg_iter_next(&iter))
+		add_pkg_to_buff_if_match(pkg, opts, &buff);
+
+	found = print_pkgs_in_buffer(&buff, ctx);
+	buffer_deinit(&buff);
+
+	return found;
+}
+
+
+static
+int list_installed_pkgs(struct mmpack_ctx* ctx,
+                        const struct listing_opts* opts)
+{
+	const struct binpkg* pkg;
+	struct inststate_iter iter;
+	struct buffer buff;
+	int found;
+
+	buffer_init(&buff);
+	pkg = inststate_first(&iter, &ctx->installed);
+	for (; pkg != NULL; pkg = inststate_next(&iter))
+		add_pkg_to_buff_if_match(pkg, opts, &buff);
+
+	found = print_pkgs_in_buffer(&buff, ctx);
+	buffer_deinit(&buff);
+
 	return found;
 }
 
@@ -113,69 +171,66 @@ int list_binindex_pkgs(struct mmpack_ctx* ctx, int only_available,
 static
 int list_all(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	return list_binindex_pkgs(ctx, 0, (argc > 1) ? argv[1] : NULL);
+	struct listing_opts opts = {.pattern = (argc >= 2) ? argv[1] : NULL};
+
+	return list_binindex_pkgs(ctx, &opts);
 }
 
 
 static
 int list_available(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	return list_binindex_pkgs(ctx, 1, (argc > 1) ? argv[1] : NULL);
+	struct listing_opts opts = {
+		.pattern = (argc >= 2) ? argv[1] : NULL,
+		.only_available = 1,
+	};
+
+	return list_binindex_pkgs(ctx, &opts);
 }
 
 
 static
 int list_installed(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct binpkg ** pkgs, * pkg;
-	int i = 0, found = 0;
+	struct listing_opts opts = {.pattern = (argc >= 2) ? argv[1] : NULL};
 
-	pkgs = install_state_sorted_pkgs(&ctx->installed);
-	while ((pkg = pkgs[i++]))
-		found |= print_pkg_if_match(pkg, pattern, ctx);
-
-	free(pkgs);
-
-	return found;
+	return list_installed_pkgs(ctx, &opts);
 }
 
 
 static
 int list_extras(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct binpkg ** pkgs, * pkg;
-	int i = 0, found = 0;
+	struct listing_opts opts = {
+		.pattern = (argc >= 2) ? argv[1] : NULL,
+		.only_repoless = 1,
+	};
 
-	pkgs = install_state_sorted_pkgs(&ctx->installed);
-	while ((pkg = pkgs[i++])) {
-		if (!binpkg_is_available(pkg))
-			found |= print_pkg_if_match(pkg, pattern, ctx);
-	}
-
-	free(pkgs);
-
-	return found;
+	return list_installed_pkgs(ctx, &opts);
 }
 
 
 static
 int list_upgradeable(struct mmpack_ctx* ctx, int argc, const char* argv[])
 {
-	const char* pattern = (argc > 1) ? argv[1] : NULL;
-	const struct binpkg ** pkgs, * pkg, * latest;
-	int i = 0, found = 0;
+	struct listing_opts opts = {.pattern = (argc >= 2) ? argv[1] : NULL};
+	const struct binpkg * pkg, * latest;
+	struct inststate_iter iter;
+	struct buffer buff;
+	int found;
 
-	pkgs = install_state_sorted_pkgs(&ctx->installed);
-	while ((pkg = pkgs[i++]))
+	buffer_init(&buff);
+	pkg = inststate_first(&iter, &ctx->installed);
+	for (; pkg != NULL; pkg = inststate_next(&iter)) {
 		if (binindex_is_pkg_upgradeable(&ctx->binindex, pkg)) {
 			latest = binindex_lookup(&ctx->binindex,
 			                         pkg->name, NULL);
-			found |= print_pkg_if_match(latest, pattern, ctx);
+			add_pkg_to_buff_if_match(latest, &opts, &buff);
 		}
+	}
 
-	free(pkgs);
+	found = print_pkgs_in_buffer(&buff, ctx);
+	buffer_deinit(&buff);
 
 	return found;
 }
