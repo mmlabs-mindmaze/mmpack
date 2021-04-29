@@ -37,11 +37,16 @@ test('mmpack unit tests',
 )
 
 mmpack_build_unit_tests_sources = files(
+    'binary-indexes/circular.gz',
     'binary-indexes/circular.yaml',
+    'binary-indexes/complex-dependency.gz',
     'binary-indexes/complex-dependency.yaml',
     'binary-indexes/installed-simple.yaml',
+    'binary-indexes/simplest.gz',
     'binary-indexes/simplest.yaml',
+    'binary-indexes/simple.gz',
     'binary-indexes/simple.yaml',
+    'binary-indexes/unsolvable-dependencies.gz',
     'binary-indexes/unsolvable-dependencies.yaml',
     'mmpack-config.yaml',
     'pydata/bare.py',
