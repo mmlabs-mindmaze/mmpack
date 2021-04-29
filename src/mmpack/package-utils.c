@@ -120,12 +120,13 @@ int pkg_version_compare(char const * v1, char const * v2)
 
 /**************************************************************************
  *                                                                        *
- *                      YAML parsing of binary index                      *
+ *                          parsing of binary index                       *
  *                                                                        *
  **************************************************************************/
 enum field_type {
 	FIELD_UNKNOWN = -1,
-	FIELD_VERSION = 0,
+	FIELD_NAME = 0,
+	FIELD_VERSION,
 	FIELD_FILENAME,
 	FIELD_SHA,
 	FIELD_SIZE,
@@ -134,10 +135,13 @@ enum field_type {
 	FIELD_SUMSHA,
 	FIELD_GHOST,
 	FIELD_SRCSHA,
+	FIELD_DEPENDS,
+	FIELD_SYSDEPENDS,
 };
 
 static
 const char* const field_names[] = {
+	[FIELD_NAME] = "name",
 	[FIELD_VERSION] = "version",
 	[FIELD_FILENAME] = "filename",
 	[FIELD_SHA] = "sha256",
@@ -147,6 +151,8 @@ const char* const field_names[] = {
 	[FIELD_SUMSHA] = "sumsha256sums",
 	[FIELD_GHOST] = "ghost",
 	[FIELD_SRCSHA] = "srcsha256",
+	[FIELD_DEPENDS] = "depends",
+	[FIELD_SYSDEPENDS] = "sysdepends",
 };
 
 
@@ -206,6 +212,49 @@ int update_mmstr(const mmstr** str, struct strchunk value)
 
 
 static
+int set_binpkg_deps(struct binpkg * pkg, struct strchunk deps)
+{
+	struct strchunk dep;
+	int pos;
+
+	// Empty previous dependency
+	binpkg_clear_deps(pkg);
+
+	while (deps.len) {
+		pos = strchunk_find(deps, ',');
+		dep = strchunk_strip(strchunk_lpart(deps, pos));
+		deps = strchunk_rpart(deps, pos);
+
+		if (binpkg_add_dep(pkg, dep))
+			return -1;
+	}
+
+	return 0;
+}
+
+
+static
+int set_binpkg_sysdeps(struct binpkg * pkg, struct strchunk sysdeps)
+{
+	struct strchunk sysdep;
+	int pos;
+
+	binpkg_clear_sysdeps(pkg);
+
+	// Split supplied list over ',' characters
+	while (sysdeps.len) {
+		pos = strchunk_find(sysdeps, ',');
+		sysdep = strchunk_strip(strchunk_lpart(sysdeps, pos));
+		sysdeps = strchunk_rpart(sysdeps, pos);
+
+		binpkg_add_sysdep(pkg, sysdep);
+	}
+
+	return 0;
+}
+
+
+static
 int set_binpkg_field(struct binpkg * pkg,
                      enum field_type type,
                      struct strchunk value,
@@ -228,6 +277,9 @@ int set_binpkg_field(struct binpkg * pkg,
 
 		binpkg_update_flags(pkg, MMPKG_FLAGS_GHOST, bval);
 		return 0;
+
+	case FIELD_DEPENDS:    return set_binpkg_deps(pkg, value);
+	case FIELD_SYSDEPENDS: return set_binpkg_sysdeps(pkg, value);
 
 	// Ignore unknown field
 	case FIELD_UNKNOWN: return 0;
@@ -256,6 +308,11 @@ void binpkg_add_dependency(struct binpkg * pkg, struct pkgdep * dep)
 }
 
 
+/**************************************************************************
+ *                                                                        *
+ *                      YAML parsing of binary index                      *
+ *                                                                        *
+ **************************************************************************/
 /* parse a single mmpack or system dependency
  * eg:
  *   pkg-b: [0.0.2, any]
@@ -693,4 +750,52 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 exit:
 	yaml_parser_delete(&ctx.parser);
 	return rv;
+}
+
+
+/**************************************************************************
+ *                                                                        *
+ *                    key/value format parsing of binary index            *
+ *                                                                        *
+ **************************************************************************/
+static
+int keyval_parse_binpkg_metadata(struct strchunk* sc,
+                                 struct binpkg* pkg, struct repo* repo)
+{
+	struct strchunk line, key, value, remaining = *sc;
+	enum field_type field;
+	int pos;
+
+	while (1) {
+		line = strchunk_getline(&remaining);
+		if (strchunk_is_whitespace(line))
+			break;
+
+		// Extract key, value
+		pos = strchunk_rfind(line, ':');
+		key = strchunk_rstrip(strchunk_lpart(line, pos));
+		value = strchunk_rpart(line, pos);
+
+		// Add subsequent lines in case of multiline value
+		while (remaining.len && remaining.buf[0] == ' ') {
+			line = strchunk_getline(&remaining);
+			value = strchunk_extent(value, line);
+		}
+
+		field = get_field_type(key);
+		if (set_binpkg_field(pkg, field, value, repo))
+			return -1;
+	}
+
+	// Skip next empty lines
+	while (1) {
+		pos = strchunk_find(line, '\n');
+		line = strchunk_lpart(line, pos);
+		if (strchunk_is_whitespace(line))
+			break;
+
+		remaining = strchunk_rpart(remaining, pos);
+	}
+
+	return 0;
 }
