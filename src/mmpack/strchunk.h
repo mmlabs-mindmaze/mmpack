@@ -170,6 +170,26 @@ struct strchunk strchunk_strip(struct strchunk sc)
 }
 
 
+/**
+ * strchunk_is_whitespace() - test if a chunk if only made of whitespaces
+ * @sc: string chunk to test
+ *
+ * Returns: true if @sc is only composed of whitespaces, false otherwise.
+ */
+static inline
+bool strchunk_is_whitespace(struct strchunk sc)
+{
+	int i;
+
+	for (i = 0; i < sc.len; i++) {
+		if (!is_whitespace(sc.buf[i]))
+			return false;
+	}
+
+	return true;
+}
+
+
 static inline
 bool strchunk_equal(struct strchunk sc, const char* str)
 {
