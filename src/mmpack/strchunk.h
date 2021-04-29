@@ -229,6 +229,34 @@ bool strchunk_equal(struct strchunk sc, const char* str)
 }
 
 
+/**
+ * strchunk_extract() - get the token matching charset
+ * @sc:         the string from which the token is searched
+ * @charset:    string of characters which should be matched
+ *
+ * Returns: the longest string at the beginning @sc that is composed only of
+ * characters in @charset.
+ */
+static inline
+struct strchunk strchunk_extract(struct strchunk sc, const char* charset)
+{
+	int i, len, charset_len;
+
+	charset_len = strlen(charset);
+	for (len = 0; len < sc.len; len++) {
+		for (i = charset_len; i >= 0; i--) {
+			if (charset[i] == sc.buf[len])
+				break;
+		}
+
+		if (i < 0)
+			break;
+	}
+
+	return (struct strchunk) {.buf = sc.buf, .len = len};
+}
+
+
 int strchunk_parse_size(size_t* szval, struct strchunk sc);
 
 
