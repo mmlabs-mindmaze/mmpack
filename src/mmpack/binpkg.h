@@ -49,6 +49,10 @@ void binpkg_init(struct binpkg* pkg, const mmstr* name);
 void binpkg_deinit(struct binpkg * pkg);
 void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp);
 int binpkg_check_valid(struct binpkg const * pkg, int in_repo_cache);
+void binpkg_clear_deps(struct binpkg* pkg);
+void binpkg_clear_sysdeps(struct binpkg* pkg);
+int binpkg_add_dep(struct binpkg* pkg, struct strchunk value);
+void binpkg_add_sysdep(struct binpkg* pkg, struct strchunk value);
 int binpkg_is_provided_by_repo(struct binpkg const * pkg,
                                const struct repo* repo);
 struct remote_resource* binpkg_get_remote_res(struct binpkg* pkg,
