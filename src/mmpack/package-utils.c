@@ -23,6 +23,7 @@
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
 #include "repo.h"
+#include "strchunk.h"
 #include "strlist.h"
 #include "utils.h"
 #include "xx-alloc.h"
@@ -137,18 +138,13 @@ enum field_type {
 };
 
 static
-const char* scalar_field_names[] = {
+const char* const field_names[] = {
 	[FIELD_VERSION] = "version",
 	[FIELD_FILENAME] = "filename",
-	// sha256: hash of the mpk file (useful only to check the download)
 	[FIELD_SHA] = "sha256",
 	[FIELD_SIZE] = "size",
 	[FIELD_SOURCE] = "source",
 	[FIELD_DESC] = "description",
-	// sumsha256sums: hash of the MMPACK/sha256sums which is an
-	// invariant of the unpacked files collectively. This is used to
-	// assess that packages from different source are actually the
-	// same, even in their installed (unpacked) form
 	[FIELD_SUMSHA] = "sumsha256sums",
 	[FIELD_GHOST] = "ghost",
 	[FIELD_SRCSHA] = "srcsha256",
@@ -156,14 +152,14 @@ const char* scalar_field_names[] = {
 
 
 static
-int get_yaml_bool_value(const char* value, size_t valuelen)
+int get_bool_value(struct strchunk value)
 {
 	char tmp[8] = "";
 
-	if (valuelen > sizeof(tmp) - 1)
+	if (value.len > sizeof(tmp) - 1)
 		goto error;
 
-	memcpy(tmp, value, valuelen);
+	memcpy(tmp, value.buf, value.len);
 	if (mm_strcasecmp(tmp, "true") == 0)
 		return 1;
 	else if (mm_strcasecmp(tmp, "false") == 0)
@@ -182,18 +178,18 @@ int get_yaml_bool_value(const char* value, size_t valuelen)
 		return 0;
 
 error:
-	mm_raise_error(EINVAL, "invalid bool value: %.*s", valuelen, value);
+	mm_raise_error(EINVAL, "invalid bool value: %.*s", value.len, value.buf);
 	return -1;
 }
 
 
 static
-enum field_type get_scalar_field_type(const char* key)
+enum field_type get_field_type(struct strchunk key)
 {
 	int i;
 
-	for (i = 0; i < MM_NELEM(scalar_field_names); i++) {
-		if (strcmp(key, scalar_field_names[i]) == 0)
+	for (i = 0; i < MM_NELEM(field_names); i++) {
+		if (strchunk_equal(key, field_names[i]))
 			return i;
 	}
 
@@ -202,11 +198,10 @@ enum field_type get_scalar_field_type(const char* key)
 
 
 static
-int binpkg_set_scalar_field(struct binpkg * pkg,
-                            enum field_type type,
-                            const char* value,
-                            size_t valuelen,
-                            const struct repo* repo)
+int set_binpkg_field(struct binpkg * pkg,
+                     enum field_type type,
+                     struct strchunk value,
+                     const struct repo* repo)
 {
 	const mmstr** field = NULL;
 	struct remote_resource* res;
@@ -244,7 +239,7 @@ int binpkg_set_scalar_field(struct binpkg * pkg,
 		break;
 
 	case FIELD_GHOST:
-		bval = get_yaml_bool_value(value, valuelen);
+		bval = get_bool_value(value);
 		if (bval == -1)
 			return -1;
 
@@ -253,15 +248,14 @@ int binpkg_set_scalar_field(struct binpkg * pkg,
 
 	case FIELD_SIZE:
 		res = binpkg_get_remote_res(pkg, repo);
-		res->size = atoi(value);
-		return 0;
+		return strchunk_parse_size(&res->size, value);
 
 	default:
 		return -1;
 	}
 
 	mmstr_free(*field);
-	*field = mmstr_malloc_copy(value, valuelen);
+	*field = mmstr_malloc_copy(value.buf, value.len);
 
 	return 0;
 }
@@ -483,12 +477,11 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct binpkg * pkg)
 {
 	int exitvalue, type;
 	yaml_token_t token;
-	char const * data;
-	size_t data_len;
+	struct strchunk data;
 	enum field_type scalar_field;
 
 	exitvalue = 0;
-	data = NULL;
+	data = (struct strchunk) {0};
 	type = -1;
 	scalar_field = FIELD_UNKNOWN;
 	do {
@@ -514,21 +507,22 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct binpkg * pkg)
 			break;
 
 		case YAML_SCALAR_TOKEN:
-			data = (char const*) token.data.scalar.value;
-			data_len = token.data.scalar.length;
+			data = (struct strchunk) {
+				.buf = (const char*)token.data.scalar.value,
+				.len = token.data.scalar.length,
+			};
 
 			switch (type) {
 			case YAML_KEY_TOKEN:
-				if (STR_EQUAL(data, data_len, "depends")) {
+				if (strchunk_equal(data, "depends")) {
 					if (mmpack_parse_deplist(ctx, pkg))
 						goto error;
-				} else if (STR_EQUAL(data, data_len,
-				                     "sysdepends")) {
+				} else if (strchunk_equal(data,
+				                          "sysdepends")) {
 					if (mmpack_parse_sysdeplist(ctx, pkg))
 						goto error;
 				} else {
-					scalar_field = get_scalar_field_type(
-						data);
+					scalar_field = get_field_type(data);
 					type = -1;
 				}
 
@@ -537,18 +531,15 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct binpkg * pkg)
 			case YAML_VALUE_TOKEN:
 				if ((scalar_field != FIELD_UNKNOWN) &&
 				    token.data.scalar.length) {
-					if (binpkg_set_scalar_field(pkg,
-					                            scalar_field,
-					                            data,
-					                            data_len,
-					                            ctx->repo))
+					if (set_binpkg_field(pkg, scalar_field,
+					                     data, ctx->repo))
 						goto error;
 				}
 
 			/* fallthrough */
 			default:
 				scalar_field = FIELD_UNKNOWN;
-				data = NULL;
+				data = (struct strchunk) {0};
 				type = -1;
 				break;
 			}
