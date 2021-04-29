@@ -48,11 +48,11 @@ void write_yaml_mmstr_multiline(FILE* fp, int num_indent, const char* str)
  * Return: an initialized pkgdep structure
  */
 LOCAL_SYMBOL
-struct pkgdep* pkgdep_create(char const * name)
+struct pkgdep* pkgdep_create(struct strchunk name)
 {
 	struct pkgdep * dep = xx_malloc(sizeof(*dep));
 	memset(dep, 0, sizeof(*dep));
-	dep->name = mmstr_malloc_from_cstr(name);
+	dep->name = mmstr_malloc_copy(name.buf, name.len);
 	return dep;
 }
 
