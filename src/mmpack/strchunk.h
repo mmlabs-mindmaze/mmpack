@@ -4,7 +4,9 @@
 #ifndef STRCHUNK_H
 #define STRCHUNK_H
 
+#include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "common.h"
 
@@ -165,6 +167,16 @@ static inline
 struct strchunk strchunk_strip(struct strchunk sc)
 {
 	return strchunk_rstrip(strchunk_lstrip(sc));
+}
+
+
+static inline
+bool strchunk_equal(struct strchunk sc, const char* str)
+{
+	if (strlen(str) != (size_t)sc.len)
+		return false;
+
+	return (memcmp(sc.buf, str, sc.len) == 0);
 }
 
 
