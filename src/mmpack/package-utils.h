@@ -18,10 +18,9 @@
 int pkg_version_compare(char const * v1, char const * v2);
 
 
-
-
-mmstr const* parse_package_info(struct binpkg * pkg, struct buffer * buffer);
 int binindex_populate(struct binindex* binindex, char const * index_filename,
                       const struct repo* repo);
+struct binpkg* binindex_add_pkgfile(struct binindex* binindex,
+                                    char const * filename);
 
 #endif /* PACKAGE_UTILS_H */
