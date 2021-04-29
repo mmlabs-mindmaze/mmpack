@@ -694,50 +694,6 @@ struct binpkg* binindex_add_pkg(struct binindex* binindex, struct binpkg* pkg)
 
 
 /**
- * binindex_add_pkgfile() - add local mmpack package file to binindex
- * @binindex: initialized mmpack binindex
- * @filename: path to the mmpack archive
- *
- * Return: a pointer to the binpkg structure that has been inserted.
- * It belongs the the binindex and will be cleansed during mmpack global
- * cleanup.
- */
-LOCAL_SYMBOL
-struct binpkg* binindex_add_pkgfile(struct binindex* binindex,
-                                    char const * filename)
-{
-	struct buffer buffer;
-	struct binpkg * pkg;
-	struct binpkg tmppkg;
-	struct remote_resource* res;
-	mmstr const * name;
-	mmstr* hash;
-
-	pkg = NULL;
-	name = NULL;
-	buffer_init(&buffer);
-	binpkg_init(&tmppkg, NULL);
-	res = binpkg_get_remote_res(&tmppkg, NULL);
-	res->filename = mmstr_malloc_from_cstr(filename);
-	res->sha256 = hash = mmstr_malloc(SHA_HEXSTR_LEN);
-
-	if (pkg_readfile(filename, "./MMPACK/info", &buffer)
-	    || sha_compute(hash, filename, NULL, 1))
-		goto exit;
-
-	name = parse_package_info(&tmppkg, &buffer);
-	if (name != NULL)
-		pkg = binindex_add_pkg(binindex, &tmppkg);
-
-exit:
-	mmstr_free(name);
-	binpkg_deinit(&tmppkg);
-	buffer_deinit(&buffer);
-	return pkg;
-}
-
-
-/**
  * binindex_compute_rdepends() - compute reverse dependencies of binindex
  * @binindex:   binary index to update
  *

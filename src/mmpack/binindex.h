@@ -106,8 +106,6 @@ int binindex_is_pkg_upgradeable(struct binindex const * binindex,
 void binindex_init(struct binindex* binindex);
 void binindex_deinit(struct binindex* binindex);
 struct binpkg* binindex_add_pkg(struct binindex* binindex, struct binpkg* pkg);
-struct binpkg* binindex_add_pkgfile(struct binindex* binindex,
-                                    char const * filename);
 int binindex_compute_rdepends(struct binindex* binindex);
 int binindex_get_pkgname_id(struct binindex* binindex, const mmstr* name);
 struct compiled_dep* binindex_compile_upgrade(const struct binindex* binindex,
