@@ -276,3 +276,88 @@ int binpkg_check_valid(struct binpkg const * pkg, int in_repo_cache)
 
 	return from_repo_check_valid(pkg);
 }
+
+
+/**
+ * binpkg_clear_deps() - empty dependencies previously set
+ * @pkg:        binpkg whose dependencies must be removed
+ */
+LOCAL_SYMBOL
+void binpkg_clear_deps(struct binpkg* pkg)
+{
+	pkgdep_destroy(pkg->mpkdeps);
+	pkg->mpkdeps = NULL;
+}
+
+
+/**
+ * binpkg_clear_sysdeps() - empty system dependencies previously set
+ * @pkg:        binpkg whose system dependencies must be removed
+ */
+LOCAL_SYMBOL
+void binpkg_clear_sysdeps(struct binpkg* pkg)
+{
+	strlist_deinit(&pkg->sysdeps);
+	strlist_init(&pkg->sysdeps);
+}
+
+
+/**
+ * binpkg_add_dep() - add a dependency specification string
+ * @pkg:        binpkg to which the dependency must be added
+ * @value:      dependency specification
+ *
+ * The dependency string must specified as:
+ *   <name> [(<op> <version>)]
+ * where <op> must be >=, = or <
+ *
+ * Returns: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int binpkg_add_dep(struct binpkg* pkg, struct strchunk value)
+{
+	struct pkgdep* dep;
+	struct strchunk name, op, version, cons, minver, maxver;
+	int pos;
+
+	minver = maxver = (struct strchunk) {.buf = "any", .len = 3};
+
+	pos = strchunk_find(value, '(');
+
+	name = strchunk_strip(strchunk_lpart(value, pos));
+
+	cons = strchunk_rpart(value, pos);
+	cons = strchunk_lpart(cons, strchunk_find(cons, ')'));
+	if (cons.len) {
+		cons = strchunk_strip(cons);
+		op = strchunk_extract(cons, "=<>");
+		version = strchunk_lstrip(strchunk_rpart(cons, op.len-1));
+		if (strchunk_equal(op, ">=")) {
+			minver = version;
+		} else if (strchunk_equal(op, "=")) {
+			minver = maxver = version;
+		} else if (strchunk_equal(op, "<")) {
+			maxver = version;
+		} else {
+			mm_raise_error(EINVAL, "invalid dep value: %.*s",
+			               value.len, value.buf);
+			return -1;
+		}
+	}
+
+	dep = pkgdep_create(name);
+	dep->min_version = mmstr_malloc_copy(minver.buf, minver.len);
+	dep->max_version = mmstr_malloc_copy(maxver.buf, maxver.len);
+
+	dep->next = pkg->mpkdeps;
+	pkg->mpkdeps = dep;
+
+	return 0;
+}
+
+
+LOCAL_SYMBOL
+void binpkg_add_sysdep(struct binpkg* pkg, struct strchunk value)
+{
+	strlist_add_strchunk(&pkg->sysdeps, value);
+}
