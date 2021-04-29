@@ -562,19 +562,28 @@ int unpack_entry_into_buffer(struct archive * archive,
 	return -1;
 }
 
+
+/**************************************************************************
+ *                                                                        *
+ *                         Package files extraction                       *
+ *                                                                        *
+ **************************************************************************/
+
 /**
- * pkg_get_mmpack_info() - load MMPACK/info file from package into buffer
+ * pkg_load_file() - read specified file from package into buffer
  * @mpk_filename: mmpack package to read from
+ * @archive_path: path in package of the file to read
  * @buffer: buffer structure to receive the raw data
  *
- * Open, scans for the MMPACK/info file, and load its data into given buffer
+ * Open, scans for the @archive_path file, and load its data into given buffer
  * structure. The buffer will be enlarged as needed, and must be freed by the
  * caller after usage by calling the buffer_deinit() function.
  *
  * Return: 0 on success, -1 on error
  */
 LOCAL_SYMBOL
-int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
+int pkg_load_file(const char* mpk_filename, const char* archive_path,
+                  struct buffer * buffer)
 {
 	int rv;
 	struct archive * a;
@@ -593,7 +602,7 @@ int pkg_get_mmpack_info(char const * mpk_filename, struct buffer * buffer)
 
 	rv = -1;
 	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-		if (!strcmp(archive_entry_pathname(entry), "./MMPACK/info")) {
+		if (!strcmp(archive_entry_pathname(entry), archive_path)) {
 			rv = unpack_entry_into_buffer(a, entry, buffer);
 			break;
 		}
