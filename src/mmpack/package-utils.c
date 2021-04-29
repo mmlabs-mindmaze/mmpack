@@ -721,33 +721,41 @@ exit:
 }
 
 
-LOCAL_SYMBOL
-mmstr const* parse_package_info(struct binpkg * pkg, struct buffer * buffer)
+static
+int pkg_parse_yaml_info(const char* filename, struct binpkg * pkg)
 {
-	int rv;
-	char const * delim;
-	char const * base = buffer->base;
+	int rv = -1;
+	struct buffer buffer;
+	struct strchunk name, buffstr;
 	struct parsing_ctx ctx = {.repo = NULL};
+
+	buffer_init(&buffer);
+	if (pkg_load_file(filename, "./MMPACK/info", &buffer))
+		goto exit;
 
 	if (!yaml_parser_initialize(&ctx.parser)) {
 		mm_raise_error(ENOMEM, "failed to init yaml parse");
-		return NULL;
+		goto exit;
 	}
 
-	yaml_parser_set_input_string(&ctx.parser, (unsigned char const*) base,
-	                             buffer->size);
+	yaml_parser_set_input_string(&ctx.parser,
+	                             (const unsigned char*) buffer.base,
+	                             buffer.size);
 	rv = mmpack_parse_index_package(&ctx, pkg);
 
 	yaml_parser_delete(&ctx.parser);
 	if (rv != 0)
-		return NULL;
+		goto exit;
 
 	/* additionally, load the package name from the buffer */
-	delim = strchr(base, ':');
-	pkg->name = mmstr_malloc_copy(base, delim - base);
-	pkg->remote_res->repo = NULL;
+	buffstr = strchunk_from_buffer(&buffer);
+	name = strchunk_lpart(buffstr, strchunk_find(buffstr, ':'));
+	name = strchunk_strip(name);
+	pkg->name = mmstr_malloc_copy(name.buf, name.len);
 
-	return pkg->name;
+exit:
+	buffer_deinit(&buffer);
+	return rv;
 }
 
 
@@ -866,7 +874,7 @@ int keyval_load_binindex(struct binindex* binindex, const char* filename,
 
 /**************************************************************************
  *                                                                        *
- *                          general parsing binary index                  *
+ *                                 general parsing                        *
  *                                                                        *
  **************************************************************************/
 
@@ -898,4 +906,64 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 		return keyval_load_binindex(binindex, index_filename, repo);
 
 	return yaml_load_binindex(binindex, index_filename, repo);
+}
+
+
+static
+int pkg_parse_pkginfo(char const * filename, struct binpkg* pkg)
+{
+	struct buffer buffer;
+	struct strchunk pkginfo;
+	int rv = -1;
+
+	buffer_init(&buffer);
+
+	if (pkg_load_pkginfo(filename, &buffer))
+		goto exit;
+
+	pkginfo = strchunk_from_buffer(&buffer);
+	rv = keyval_parse_binpkg_metadata(&pkginfo, pkg, NULL);
+
+exit:
+	buffer_deinit(&buffer);
+	return rv;
+}
+
+
+/**
+ * binindex_add_pkgfile() - add local mmpack package file to binindex
+ * @binindex: initialized mmpack binindex
+ * @filename: path to the mmpack archive
+ *
+ * Return: a pointer to the binpkg structure that has been inserted.
+ * It belongs the the binindex and will be cleansed during mmpack global
+ * cleanup.
+ */
+LOCAL_SYMBOL
+struct binpkg* binindex_add_pkgfile(struct binindex* binindex,
+                                    char const * filename)
+{
+	struct binpkg* pkg = NULL;
+	struct binpkg tmppkg;
+	struct remote_resource* res;
+	mmstr* hash;
+
+	binpkg_init(&tmppkg, NULL);
+	res = binpkg_get_remote_res(&tmppkg, NULL);
+	res->filename = mmstr_malloc_from_cstr(filename);
+	res->sha256 = hash = mmstr_malloc(SHA_HEXSTR_LEN);
+
+	if (sha_compute(hash, filename, NULL, 1))
+		goto exit;
+
+	if (pkg_parse_pkginfo(filename, &tmppkg)
+	    && pkg_parse_yaml_info(filename, &tmppkg))
+		goto exit;
+
+	pkg = binindex_add_pkg(binindex, &tmppkg);
+
+exit:
+	mmstr_free(tmppkg.name);
+	binpkg_deinit(&tmppkg);
+	return pkg;
 }
