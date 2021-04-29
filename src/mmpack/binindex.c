@@ -721,7 +721,7 @@ struct binpkg* binindex_add_pkgfile(struct binindex* binindex,
 	res->filename = mmstr_malloc_from_cstr(filename);
 	res->sha256 = hash = mmstr_malloc(SHA_HEXSTR_LEN);
 
-	if (pkg_get_mmpack_info(filename, &buffer)
+	if (pkg_load_file(filename, "./MMPACK/info", &buffer)
 	    || sha_compute(hash, filename, NULL, 1))
 		goto exit;
 
