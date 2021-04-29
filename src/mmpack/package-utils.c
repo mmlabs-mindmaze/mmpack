@@ -7,6 +7,7 @@
 
 #include <curl/curl.h>
 #include <mmsysio.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -120,12 +121,13 @@ int pkg_version_compare(char const * v1, char const * v2)
 
 /**************************************************************************
  *                                                                        *
- *                      YAML parsing of binary index                      *
+ *                          parsing of binary index                       *
  *                                                                        *
  **************************************************************************/
 enum field_type {
 	FIELD_UNKNOWN = -1,
-	FIELD_VERSION = 0,
+	FIELD_NAME = 0,
+	FIELD_VERSION,
 	FIELD_FILENAME,
 	FIELD_SHA,
 	FIELD_SIZE,
@@ -134,10 +136,13 @@ enum field_type {
 	FIELD_SUMSHA,
 	FIELD_GHOST,
 	FIELD_SRCSHA,
+	FIELD_DEPENDS,
+	FIELD_SYSDEPENDS,
 };
 
 static
 const char* const field_names[] = {
+	[FIELD_NAME] = "name",
 	[FIELD_VERSION] = "version",
 	[FIELD_FILENAME] = "filename",
 	[FIELD_SHA] = "sha256",
@@ -147,6 +152,8 @@ const char* const field_names[] = {
 	[FIELD_SUMSHA] = "sumsha256sums",
 	[FIELD_GHOST] = "ghost",
 	[FIELD_SRCSHA] = "srcsha256",
+	[FIELD_DEPENDS] = "depends",
+	[FIELD_SYSDEPENDS] = "sysdepends",
 };
 
 
@@ -197,6 +204,35 @@ enum field_type get_field_type(struct strchunk key)
 
 
 static
+int update_mmstr_unwrap(const mmstr** str, struct strchunk value)
+{
+	mmstr* mmval;
+	struct strchunk line;
+
+	mmstr_free(*str);
+
+	line = strchunk_getline(&value);
+	mmval = mmstr_malloc_copy(line.buf, line.len);
+
+	while (value.len) {
+		line = strchunk_getline(&value);
+		line = strchunk_rpart(line, 0);  // skip leading space
+
+		// Detect seqence for end of line
+		if (strchunk_equal(line, ".")) {
+			mmval = mmstrcat_realloc(mmval, "\n");
+			continue;
+		}
+
+		mmval = mmstr_append_realloc(mmval, line.buf, line.len);
+	}
+
+	*str = mmval;
+	return 0;
+}
+
+
+static
 int update_mmstr(const mmstr** str, struct strchunk value)
 {
 	mmstr_free(*str);
@@ -206,20 +242,69 @@ int update_mmstr(const mmstr** str, struct strchunk value)
 
 
 static
+int set_binpkg_deps(struct binpkg * pkg, struct strchunk deps)
+{
+	struct strchunk dep;
+	int pos;
+
+	// Empty previous dependency
+	binpkg_clear_deps(pkg);
+
+	while (deps.len) {
+		pos = strchunk_find(deps, ',');
+		dep = strchunk_strip(strchunk_lpart(deps, pos));
+		deps = strchunk_rpart(deps, pos);
+
+		if (binpkg_add_dep(pkg, dep))
+			return -1;
+	}
+
+	return 0;
+}
+
+
+static
+int set_binpkg_sysdeps(struct binpkg * pkg, struct strchunk sysdeps)
+{
+	struct strchunk sysdep;
+	int pos;
+
+	binpkg_clear_sysdeps(pkg);
+
+	// Split supplied list over ',' characters
+	while (sysdeps.len) {
+		pos = strchunk_find(sysdeps, ',');
+		sysdep = strchunk_strip(strchunk_lpart(sysdeps, pos));
+		sysdeps = strchunk_rpart(sysdeps, pos);
+
+		binpkg_add_sysdep(pkg, sysdep);
+	}
+
+	return 0;
+}
+
+
+static
 int set_binpkg_field(struct binpkg * pkg,
                      enum field_type type,
                      struct strchunk value,
-                     const struct repo* repo)
+                     const struct repo* repo,
+                     bool unwrap_desc)
 {
 	struct remote_resource* res;
 	int bval;
 
 	switch (type) {
+	case FIELD_NAME:    return update_mmstr(&pkg->name, value);
 	case FIELD_VERSION: return update_mmstr(&pkg->version, value);
 	case FIELD_SOURCE:  return update_mmstr(&pkg->source, value);
 	case FIELD_SUMSHA:  return update_mmstr(&pkg->sumsha, value);
 	case FIELD_SRCSHA:  return update_mmstr(&pkg->srcsha, value);
-	case FIELD_DESC:    return update_mmstr(&pkg->desc, value);
+	case FIELD_DESC:
+		if (unwrap_desc)
+			return update_mmstr_unwrap(&pkg->desc, value);
+		else
+			return update_mmstr(&pkg->desc, value);
 
 	case FIELD_GHOST:
 		bval = get_bool_value(value);
@@ -228,6 +313,9 @@ int set_binpkg_field(struct binpkg * pkg,
 
 		binpkg_update_flags(pkg, MMPKG_FLAGS_GHOST, bval);
 		return 0;
+
+	case FIELD_DEPENDS:    return set_binpkg_deps(pkg, value);
+	case FIELD_SYSDEPENDS: return set_binpkg_sysdeps(pkg, value);
 
 	// Ignore unknown field
 	case FIELD_UNKNOWN: return 0;
@@ -256,6 +344,11 @@ void binpkg_add_dependency(struct binpkg * pkg, struct pkgdep * dep)
 }
 
 
+/**************************************************************************
+ *                                                                        *
+ *                      YAML parsing of binary index                      *
+ *                                                                        *
+ **************************************************************************/
 /* parse a single mmpack or system dependency
  * eg:
  *   pkg-b: [0.0.2, any]
@@ -521,7 +614,7 @@ int mmpack_parse_index_package(struct parsing_ctx* ctx, struct binpkg * pkg)
 
 			case YAML_VALUE_TOKEN:
 				if (set_binpkg_field(pkg, scalar_field,
-				                     data, ctx->repo))
+				                     data, ctx->repo, false))
 					goto error;
 
 			/* fallthrough */
@@ -658,18 +751,9 @@ mmstr const* parse_package_info(struct binpkg * pkg, struct buffer * buffer)
 }
 
 
-/**
- * binindex_populate() - populate package database from package list
- * @binindex:   binary package index to populate
- * @index_filename: repository package list file
- * @repo:       pointer to repository from which the binary index is read (use
- *              NULL if package list is the list of installed package)
- *
- * Return: 0 in case of success, -1 otherwise
- */
-LOCAL_SYMBOL
-int binindex_populate(struct binindex* binindex, char const * index_filename,
-                      const struct repo* repo)
+static
+int yaml_load_binindex(struct binindex* binindex, const char* index_filename,
+                       const struct repo* repo)
 {
 	int rv = -1;
 	FILE * index_fh;
@@ -693,4 +777,125 @@ int binindex_populate(struct binindex* binindex, char const * index_filename,
 exit:
 	yaml_parser_delete(&ctx.parser);
 	return rv;
+}
+
+
+/**************************************************************************
+ *                                                                        *
+ *                    key/value format parsing of binary index            *
+ *                                                                        *
+ **************************************************************************/
+static
+int keyval_parse_binpkg_metadata(struct strchunk* sc, struct binpkg* pkg,
+                                 const struct repo* repo)
+{
+	struct strchunk line, key, value, remaining = *sc;
+	enum field_type field;
+	int pos;
+
+	while (1) {
+		line = strchunk_getline(&remaining);
+		if (strchunk_is_whitespace(line))
+			break;
+
+		// Extract key, value
+		pos = strchunk_rfind(line, ':');
+		key = strchunk_rstrip(strchunk_lpart(line, pos));
+		value = strchunk_lstrip(strchunk_rpart(line, pos));
+
+		// Add subsequent lines in case of multiline value
+		while (remaining.len && remaining.buf[0] == ' ') {
+			line = strchunk_getline(&remaining);
+			value = strchunk_extent(value, line);
+		}
+
+		field = get_field_type(key);
+		if (set_binpkg_field(pkg, field, value, repo, true))
+			return -1;
+	}
+
+	// Skip next empty lines
+	while (remaining.len) {
+		pos = strchunk_find(remaining, '\n');
+		line = strchunk_lpart(remaining, pos);
+		if (!strchunk_is_whitespace(line))
+			break;
+
+		remaining = strchunk_rpart(remaining, pos);
+	}
+
+	*sc = remaining;
+	return 0;
+}
+
+
+static
+int keyval_load_binindex(struct binindex* binindex, const char* filename,
+                         const struct repo* repo)
+{
+	struct buffer file_content;
+	struct strchunk remaining;
+	struct binpkg pkg;
+	int rv = 0;
+
+	buffer_init(&file_content);
+
+	rv = load_compressed_file(filename, &file_content);
+
+	remaining = strchunk_from_buffer(&file_content);
+
+	while (remaining.len && rv == 0) {
+		binpkg_init(&pkg, NULL);
+
+		rv = keyval_parse_binpkg_metadata(&remaining, &pkg, repo);
+		if (rv == 0)
+			binindex_add_pkg(binindex, &pkg);
+
+		// Because binpkg do not own name field (only a reference), it
+		// must be free here
+		mmstr_free(pkg.name);
+
+		binpkg_deinit(&pkg);
+	}
+
+	buffer_deinit(&file_content);
+
+	return rv;
+}
+
+
+/**************************************************************************
+ *                                                                        *
+ *                          general parsing binary index                  *
+ *                                                                        *
+ **************************************************************************/
+
+/**
+ * binindex_populate() - populate package database from package list
+ * @binindex:   binary package index to populate
+ * @index_filename: repository package list file
+ * @repo:       pointer to repository from which the binary index is read (use
+ *              NULL if package list is the list of installed package)
+ *
+ * Return: 0 in case of success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int binindex_populate(struct binindex* binindex, char const * index_filename,
+                      const struct repo* repo)
+{
+	int fd;
+	unsigned char magic[2] = {0};
+
+	fd = mm_open(index_filename, O_RDONLY, 0);
+	if (fd < 0)
+		return -1;
+
+	mm_read(fd, magic, sizeof(magic));
+	mm_close(fd);
+
+	// Test file is gzip
+	if (magic[0] == 0x1f && magic[1] == 0x8b)
+		return keyval_load_binindex(binindex, index_filename, repo);
+
+	return yaml_load_binindex(binindex, index_filename, repo);
 }
