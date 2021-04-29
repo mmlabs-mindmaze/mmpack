@@ -4,6 +4,8 @@
 #ifndef STRCHUNK_H
 #define STRCHUNK_H
 
+#include <stddef.h>
+
 #include "common.h"
 
 
