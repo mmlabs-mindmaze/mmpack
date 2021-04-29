@@ -170,6 +170,55 @@ struct strchunk strchunk_strip(struct strchunk sc)
 }
 
 
+/**
+ * strchunk_is_whitespace() - test if a chunk if only made of whitespaces
+ * @sc: string chunk to test
+ *
+ * Returns: true if @sc is only composed of whitespaces, false otherwise.
+ */
+static inline
+bool strchunk_is_whitespace(struct strchunk sc)
+{
+	int i;
+
+	for (i = 0; i < sc.len; i++) {
+		if (!is_whitespace(sc.buf[i]))
+			return false;
+	}
+
+	return true;
+}
+
+
+/**
+ * strchunk_extent() - get the minimal chunk that contains 2 string chunks
+ * @sc1:        first chunk to merge
+ * @sc2:        second chunk to merge
+ *
+ * Find the smallest region that will contain both @sc1 and @sc2. If the two
+ * are disjoint, the resulting region may contains characters neither
+ * referenced by @sc1 or @sc2.
+ *
+ * Returns: the smallest string chunk that overlaps both @sc1 and @sc2
+ */
+static inline
+struct strchunk strchunk_extent(struct strchunk sc1, struct strchunk sc2)
+{
+	const char *start, *end;
+
+	if (sc2.len == 0)
+		return sc1;
+
+	if (sc1.len == 0)
+		return sc2;
+
+	start = MIN(sc1.buf, sc2.buf);
+	end = MAX(sc1.buf + sc1.len, sc2.buf + sc2.len);
+
+	return (struct strchunk) {.buf = start, .len = end - start};
+}
+
+
 static inline
 bool strchunk_equal(struct strchunk sc, const char* str)
 {
