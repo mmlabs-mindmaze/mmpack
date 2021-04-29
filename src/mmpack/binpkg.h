@@ -6,6 +6,7 @@
 
 #include "mmstring.h"
 #include "repo.h"
+#include "strchunk.h"
 #include "strlist.h"
 
 
@@ -20,7 +21,7 @@ struct pkgdep {
 	struct pkgdep * next;
 };
 
-struct pkgdep* pkgdep_create(char const * name);
+struct pkgdep* pkgdep_create(struct strchunk name);
 void pkgdep_destroy(struct pkgdep * dep);
 
 
