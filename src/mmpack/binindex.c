@@ -223,8 +223,8 @@ struct binpkg* pkglist_add_or_modify(struct pkglist* list, struct binpkg* pkg)
 	entry->pkg.name_id = list->id;
 
 	// reset package fields since they have been taken over by the new
-	// entry
-	binpkg_init(pkg, NULL);
+	// entry (excepting for name field)
+	binpkg_init(pkg, pkg->name);
 
 	list->num_pkg++;
 
