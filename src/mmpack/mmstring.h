@@ -131,6 +131,23 @@ mmstr* mmstr_copy(mmstr* str, const char* restrict data, int len)
 
 
 static inline
+mmstr* mmstr_append(mmstr* str, const char* restrict data, int len)
+{
+	struct mmstring* s;
+
+	if (!str)
+		return NULL;
+
+	s = MMSTR_HDR(str);
+	memcpy(s->buf + s->len, data, len);
+	s->len += len;
+	s->buf[s->len] = '\0';
+
+	return str;
+}
+
+
+static inline
 void mmstr_free(const mmstr* str)
 {
 	if (str != NULL)
@@ -291,6 +308,14 @@ mmstr* mmstrcat_realloc(mmstr* restrict dst, const mmstr* restrict src)
 {
 	dst = mmstr_realloc(dst, mmstrlen(dst) + mmstrlen(src));
 	return mmstrcat(dst, src);
+}
+
+
+static inline NONNULL_ARGS(2)
+mmstr* mmstr_append_realloc(mmstr* str, const char* restrict data, int len)
+{
+	str = mmstr_realloc(str, mmstrlen(str) + len);
+	return mmstr_append(str, data, len);
 }
 
 
