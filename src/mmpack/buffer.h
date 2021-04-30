@@ -6,6 +6,8 @@
 
 #include <stddef.h>
 
+#include "strchunk.h"
+
 struct buffer {
 	void* base;
 	size_t size;
@@ -21,5 +23,16 @@ void* buffer_dec_size(struct buffer* buf, size_t sz);
 void buffer_push(struct buffer* buf, const void* data, size_t sz);
 void buffer_pop(struct buffer* buf, void* data, size_t sz);
 void* buffer_take_data_ownership(struct buffer* buf);
+
+
+static inline
+struct strchunk strchunk_from_buffer(const struct buffer* buffer)
+{
+	return (struct strchunk) {
+		       .buf = buffer->base,
+		       .len = buffer->size,
+	};
+}
+
 
 #endif /* BUFFER_H */
