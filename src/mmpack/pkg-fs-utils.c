@@ -570,6 +570,43 @@ int unpack_entry_into_buffer(struct archive * archive,
  **************************************************************************/
 
 /**
+ * metadata_read_value() - extract value from metadata file in buffer
+ * @metadata_buffer:    buffer holding content of metadata file
+ * @key:                string holding the key to search
+ * @out:                pointer to mmstring receiving the result
+ *
+ * Returns: 0 in case of success, -1 otherwise with error state set
+ */
+static
+int metadata_read_value(const struct buffer* metadata_buffer, const char* key,
+                        mmstr** out)
+{
+	int pos;
+	struct strchunk line, lkey, lval;
+	struct strchunk remaining = {
+		.buf = metadata_buffer->base,
+		.len = (int)metadata_buffer->size,
+	};
+
+	while (1) {
+		line = strchunk_getline(&remaining);
+
+		// Extract key, value
+		pos = strchunk_rfind(line, ':');
+		lkey = strchunk_strip(strchunk_lpart(line, pos));
+		if (strchunk_equal(lkey, key)) {
+			lval = strchunk_strip(strchunk_rpart(line, pos));
+			*out = mmstr_copy_realloc(*out, lval.buf, lval.len);
+			return 0;
+		}
+	}
+
+	mm_raise_error(MM_EBADFMT, "Could not find key %s", key);
+	return -1;
+}
+
+
+/**
  * pkg_load_file() - read specified file from package into buffer
  * @mpk_filename: mmpack package to read from
  * @archive_path: path in package of the file to read
@@ -615,6 +652,41 @@ int pkg_load_file(const char* mpk_filename, const char* archive_path,
 
 	return rv;
 }
+
+
+/**
+ * pkg_load_pkginfo() - read pkginfo from package into buffer
+ * @mpk_filename: mmpack package to read from
+ * @buffer: buffer structure to receive the raw data
+ *
+ * Open, scans for the metadata and then for pkginfo file, and load its data
+ * into given buffer structure. The buffer will be enlarged as needed, and must
+ * be freed by the caller after usage by calling the buffer_deinit() function.
+ *
+ * Return: 0 on success, -1 on error
+ */
+LOCAL_SYMBOL
+int pkg_load_pkginfo(const char* mpk_filename, struct buffer * buffer)
+{
+	struct buffer metadata;
+	mmstr* pkginfo_path = NULL;
+	int rv = 0;
+
+	buffer_init(&metadata);
+
+	if (pkg_load_file(mpk_filename, "./MMPACK/metadata", &metadata)
+	    || metadata_read_value(&metadata, "pkginfo-path", &pkginfo_path)
+	    || pkg_load_file(mpk_filename, pkginfo_path, buffer)) {
+		rv = -1;
+		goto exit;
+	}
+
+exit:
+	mmstr_free(pkginfo_path);
+	buffer_deinit(&metadata);
+	return rv;
+}
+
 
 /**************************************************************************
  *                                                                        *
