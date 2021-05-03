@@ -556,7 +556,7 @@ class Repo:
             return
 
         to_remove.add(binpkg.filename)
-        src_id = binpkg.srcdid()
+        src_id = binpkg.srcid()
         self.count_src_refs[src_id] -= 1
         # If associated source package has no binary package remove it
         if self.count_src_refs[src_id] == 0:
