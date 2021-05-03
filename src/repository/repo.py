@@ -194,7 +194,10 @@ class _BinPkg:
         elif key == 'sysdepends':
             return self._data.get(key, [])
 
-        return self._data[key]
+        try:
+            return self._data[key]
+        except KeyError as error:
+            raise AttributeError(f'unknown attribute {key}') from error
 
     def update(self, data: Dict[str, Any]):
         """
