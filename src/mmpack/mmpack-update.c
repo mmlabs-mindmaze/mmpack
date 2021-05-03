@@ -19,7 +19,8 @@
 static
 int download_repo_index(struct mmpack_ctx * ctx, const struct repo* repo)
 {
-	STATIC_CONST_MMSTR(pkglist, "binary-index");
+	STATIC_CONST_MMSTR(pkglist, "binary-index.gz");
+	STATIC_CONST_MMSTR(oldpkglist, "binary-index");
 	STATIC_CONST_MMSTR(srclist, "source-index");
 	STATIC_CONST_MMSTR(binpath, REPO_INDEX_RELPATH);
 	STATIC_CONST_MMSTR(srcpath, SRC_INDEX_RELPATH);
@@ -29,7 +30,9 @@ int download_repo_index(struct mmpack_ctx * ctx, const struct repo* repo)
 
 	// download binary index of repo
 	binindex_path = mmpack_repo_cachepath(ctx, repo->name, binpath);
-	if (download_from_repo(ctx, repo->url, pkglist, NULL, binindex_path)) {
+	if (download_from_repo(ctx, repo->url, pkglist, NULL, binindex_path)
+	    && download_from_repo(ctx, repo->url,
+	                          oldpkglist, NULL, binindex_path)) {
 		error("Failed to download package list from %s (%s)\n",
 		      repo->name, repo->url);
 
