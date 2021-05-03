@@ -37,11 +37,11 @@ int is_path_separator(char c)
 #define UNPACK_CACHEDIR_RELPATH "var/cache/mmpack/unpack"
 
 #define INSTALLED_INDEX_RELPATH \
-	MMPACK_STATEDIR_RELPATH "/installed.yaml"
+	MMPACK_STATEDIR_RELPATH "/installed"
 #define MANUALLY_INST_RELPATH \
 	MMPACK_STATEDIR_RELPATH "/manually-installed.txt"
 #define REPO_INDEX_RELPATH \
-	MMPACK_STATEDIR_RELPATH "/binindex.yaml"
+	MMPACK_STATEDIR_RELPATH "/binindex"
 #define SRC_INDEX_RELPATH \
 	MMPACK_STATEDIR_RELPATH "/srcindex"
 #define METADATA_RELPATH \
