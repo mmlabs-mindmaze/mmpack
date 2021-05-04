@@ -953,7 +953,6 @@ static
 void action_set_pathname_into_dir(struct action* act, const mmstr* dir)
 {
 	mmstr* pkgbase;
-	int len;
 	const struct remote_resource* res = act->pkg->remote_res;
 
 	pkgbase = mmstr_malloca(mmstrlen(res->filename));
@@ -962,9 +961,7 @@ void action_set_pathname_into_dir(struct action* act, const mmstr* dir)
 	mmstr_basename(pkgbase, res->filename);
 
 	// Store the joined cachedir and base filename in act->pathname
-	len = mmstrlen(pkgbase) + mmstrlen(dir) + 1;
-	act->pathname = mmstr_malloc(len);
-	mmstr_join_path(act->pathname, dir, pkgbase);
+	act->pathname = mmstr_join_path_realloc(act->pathname, dir, pkgbase);
 
 	mmstr_freea(pkgbase);
 }
