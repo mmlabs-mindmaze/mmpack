@@ -30,7 +30,7 @@ struct mmpack_opts {
  *                 by the user
  * @prefix:     path to the root of folder to use for prefix
  * @cwd:        path to where mmpack was invoked
- * @pkgcachedir: path to dowloaded package cache folder
+ * @pkgcachedir: path to downloaded package cache folder
  */
 struct mmpack_ctx {
 	CURL * curl;
