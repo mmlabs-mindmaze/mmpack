@@ -187,6 +187,37 @@ mmstr* mmstr_join_path(mmstr* restrict dst,
 }
 
 
+/**
+ * mmstr_join_path() - Join 2 path components and realloc destination if needed
+ * @dst:        mmstr receiving the result
+ * @p1:         first path component
+ * @p2:         second path component
+ *
+ * This function concatenate @p1 and @p2 with exactly one directory separator
+ * (platform specific) between the 2 components.
+ *
+ * Return: the pointer to @dst.
+ */
+mmstr* mmstr_join_path_realloc(mmstr* restrict dst,
+                               const mmstr* restrict p1,
+                               const mmstr* restrict p2)
+{
+	if (is_absolute_path(p2))
+		return mmstrcpy_realloc(dst, p2);
+
+	dst = mmstr_realloc(dst, mmstrlen(p1) + mmstrlen(p2) + 1);
+
+	mmstrcpy(dst, p1);
+
+	/* if p1 does not end with a '/', add it */
+	if (!is_path_separator(p1[mmstrlen(p1)-1])) {
+		mmstrcat_cstr(dst, "/");
+	}
+
+	return mmstrcat(dst, p2);
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                    File manipulation in prefix                         *
