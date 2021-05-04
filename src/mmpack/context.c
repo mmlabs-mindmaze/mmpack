@@ -441,8 +441,8 @@ const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
  * Return: the path of the file @relpath in the repository @repo_name.
  */
 LOCAL_SYMBOL
-mmstr* mmpack_repo_cachepath(struct mmpack_ctx * ctx, char * repo_name,
-                             char const * relpath)
+mmstr* mmpack_repo_cachepath(struct mmpack_ctx* ctx, const char* repo_name,
+                             const char* relpath)
 {
 	int len;
 	mmstr * path;
