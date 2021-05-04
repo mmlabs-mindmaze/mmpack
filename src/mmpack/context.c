@@ -420,16 +420,14 @@ LOCAL_SYMBOL
 const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 {
 	STATIC_CONST_MMSTR(pkgcache_relpath, PKGS_CACHEDIR_RELPATH);
-	int len;
+	mmstr* cachedir = ctx->pkgcachedir;
 
 	// If already computed, return it
-	if (ctx->pkgcachedir)
-		return ctx->pkgcachedir;
+	if (cachedir)
+		return cachedir;
 
-	len = mmstrlen(ctx->prefix) + mmstrlen(pkgcache_relpath) + 1;
-	ctx->pkgcachedir = mmstr_malloc(len);
-	mmstr_join_path(ctx->pkgcachedir, ctx->prefix, pkgcache_relpath);
-
+	ctx->pkgcachedir = mmstr_join_path_realloc(cachedir, ctx->prefix,
+	                                           pkgcache_relpath);
 	return ctx->pkgcachedir;
 }
 
