@@ -76,20 +76,11 @@ int repo_list(struct mmpack_ctx* ctx, int argc, char const ** argv)
 
 
 static
-int remove_one_index_file(const mmstr* prefix, const mmstr * index,
+int remove_one_index_file(struct mmpack_ctx* ctx, const mmstr * index,
                           char const * name)
 {
-	mmstr * avllist_relpath;
+	mmstr * avllist_relpath = mmpack_repo_cachepath(ctx, index, name);
 	int rv = 0;
-	int len;
-
-	len = mmstrlen(prefix) + mmstrlen(index) + strlen(name) + 2;
-	avllist_relpath = mmstr_malloc(len);
-
-	mmstr_join_path(avllist_relpath, prefix, index);
-
-	// Append the name of the repo
-	mmstrcat_cstr(mmstrcat_cstr(avllist_relpath, "."), name);
 
 	if (mm_unlink(avllist_relpath) != 0) {
 		rv = -1;
@@ -101,10 +92,10 @@ int remove_one_index_file(const mmstr* prefix, const mmstr * index,
 
 
 static
-int remove_index_files(const mmstr * prefix, char const * name)
+int remove_index_files(struct mmpack_ctx* ctx, char const * name)
 {
-	if (remove_one_index_file(prefix, repo_relpath, name)
-	    || remove_one_index_file(prefix, srcindex_relpath, name))
+	if (remove_one_index_file(ctx, repo_relpath, name)
+	    || remove_one_index_file(ctx, srcindex_relpath, name))
 		return -1;
 
 	return 0;
@@ -124,7 +115,7 @@ int repo_remove(struct mmpack_ctx* ctx, int argc, char const ** argv)
 		return -1;
 	}
 
-	remove_index_files(ctx->prefix, argv[0]);
+	remove_index_files(ctx, argv[0]);
 
 	return settings_serialize(ctx->prefix, &ctx->settings, 1);
 }
