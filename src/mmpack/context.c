@@ -194,6 +194,60 @@ void mmpack_ctx_populate_from_repo(struct mmpack_ctx * ctx,
 }
 
 
+
+/**
+ * mmpack_ctx_move_old_pkg_index_files() - update index file location
+ * @ctx: mmpack context
+ *
+ * Update the index file location of prefix created in earlier version of
+ * mmpack (using .yaml extension). This does nothing if the prefix is
+ * already using the new index file locations.
+ *
+ * NOTE: this function is used to provide backward compatibility with old
+ * version. It is meant to be removed in future once we can expect commonly
+ * used prefixes have migrated to the new filenames.
+ */
+static
+void mmpack_ctx_move_old_pkg_index_files(struct mmpack_ctx * ctx)
+{
+	STATIC_CONST_MMSTR(inst, INSTALLED_INDEX_RELPATH);
+	STATIC_CONST_MMSTR(oldinst, MMPACK_STATEDIR_RELPATH "/installed.yaml");
+	struct repo_iter iter;
+	const struct repo* repo;
+	mmstr* old = NULL;
+	mmstr* new = NULL;
+
+	new = mmstr_join_path_realloc(new, ctx->prefix, inst);
+
+	// If the installed index file can be found, index location do not have
+	// to be updated
+	if (mm_check_access(new, F_OK) == 0)
+		goto exit;
+
+	// Update installed package index filename
+	old = mmstr_join_path_realloc(old, ctx->prefix, oldinst);
+	if (mm_rename(old, new))
+		goto exit;
+
+	// Update binary index cache filename for each repo
+	repo = repo_iter_first(&iter, &ctx->settings.repo_list);
+	for (; repo != NULL; repo = repo_iter_next(&iter)) {
+		mmstr_free(old);
+		mmstr_free(new);
+		new = mmpack_repo_cachepath(ctx, repo->name,
+		                            REPO_INDEX_RELPATH);
+		old = mmpack_repo_cachepath(ctx, repo->name,
+		                            MMPACK_STATEDIR_RELPATH \
+		                            "/binindex.yaml");
+		mm_rename(old, new);
+	}
+
+exit:
+	mmstr_free(old);
+	mmstr_free(new);
+}
+
+
 /**
  * mmpack_ctx_init_pkglist() - parse repo cache and installed package list
  * @ctx:        initialized mmpack-context
@@ -214,6 +268,8 @@ int mmpack_ctx_init_pkglist(struct mmpack_ctx * ctx)
 	int rv = -1;
 	struct pkg_iter pkg_iter;
 	struct binpkg* pkg;
+
+	mmpack_ctx_move_old_pkg_index_files(ctx);
 
 	// Form the path of installed package from prefix
 	len = mmstrlen(ctx->prefix) + mmstrlen(inst_relpath) + 1;
