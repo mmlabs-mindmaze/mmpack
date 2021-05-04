@@ -1228,7 +1228,7 @@ int check_new_sysdeps(struct action_stack* stack)
 
 /**
  * apply_action_stack() - execute the action listed in the stack
- * @ctx:        mmpack contect to use
+ * @ctx:        mmpack context to use
  * @stack:      action stack to apply
  *
  * Return: 0 in case of success, -1 otherwise

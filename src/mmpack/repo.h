@@ -67,7 +67,7 @@ struct repo* repo_iter_first(struct repo_iter* iter, struct repolist* list)
  * struct remote_resource - data available in remote server
  * @filename:   path to resource in repository @repo relative to its url
  * @sha256:     hash of the file to download
- * @size:       size of the file to dowload
+ * @size:       size of the file to download
  * @repo:       pointer to repository from which the file must be downloaded
  * @next:       pointer to the next resource element (same resource provided by
  *              another repository)

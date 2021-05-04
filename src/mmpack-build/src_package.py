@@ -182,7 +182,7 @@ class SrcPackage:
         """
         Format BinaryPackage's description.
         If the package is a default target, concat the global project
-        description with the additional spcific one. Otherwise, only
+        description with the additional specific one. Otherwise, only
         use the specific description.
         Raises:
             ValueError: the description is empty for custom packages
