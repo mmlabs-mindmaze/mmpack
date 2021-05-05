@@ -93,9 +93,10 @@ int execute_cmd_capture_output(char* argv[], struct buffer* output);
 
 /**************************************************************************
  *                                                                        *
- *                        Compressed file loading                         *
+ *                        Compressed file handling                        *
  *                                                                        *
  **************************************************************************/
 int load_compressed_file(const char* path, struct buffer* buff);
+int save_compressed_file(const char* path, const struct buffer* buff);
 
 #endif /* UTILS_H */

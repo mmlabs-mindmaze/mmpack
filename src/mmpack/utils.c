@@ -853,7 +853,7 @@ exit:
 
 /**************************************************************************
  *                                                                        *
- *                        Compressed file loading                         *
+ *                        Compressed file handling                        *
  *                                                                        *
  **************************************************************************/
 
@@ -902,6 +902,42 @@ int load_compressed_file(const char* path, struct buffer* buff)
 
 		buffer_inc_size(buff, rlen);
 	} while (rlen);
+
+exit:
+	if (gzclose(file) != Z_OK) {
+		errmsg = gzerror(file, &errnum);
+		rv = mm_raise_error(from_zlib_error(errnum), errmsg);
+	}
+
+	return rv;
+}
+
+
+LOCAL_SYMBOL
+int save_compressed_file(const char* path, const struct buffer* buff)
+{
+	gzFile file;
+	int errnum, rv, rlen;
+	const char* errmsg;
+	const char* data = buff->base;
+	int remaining = buff->size;
+
+	file = gzopen(path, "w");
+	if (!file)
+		return mm_raise_from_errno("%s cannot be opened", path);
+
+	rv = 0;
+	while (remaining) {
+		rlen = gzwrite(file, data, remaining);
+		if (rlen <= 0) {
+			errmsg = gzerror(file, &errnum);
+			rv = mm_raise_error(from_zlib_error(errnum), errmsg);
+			goto exit;
+		}
+
+		remaining -= rlen;
+		data += rlen;
+	}
 
 exit:
 	if (gzclose(file) != Z_OK) {
