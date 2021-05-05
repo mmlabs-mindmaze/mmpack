@@ -8,10 +8,12 @@
 #include <mmerrno.h>
 
 #include "binpkg.h"
+#include "buffer.h"
+#include "strchunk.h"
 
 
 static
-void write_yaml_mmstr_multiline(FILE* fp, int num_indent, const char* str)
+void write_wrapped_str(struct buffer, struct strchunk sc)
 {
 	const char * line, * next;
 	int linelen;
@@ -31,6 +33,18 @@ void write_yaml_mmstr_multiline(FILE* fp, int num_indent, const char* str)
 		fprintf(fp, "%*s%.*s\n", num_indent, " ", linelen, line);
 		line = next;
 	}
+}
+
+
+static
+void push_dep_elt(struct buffer, const mmstr* name,
+                  const char* op, const mmstr* version)
+{
+	buffer_push(buff, name, mmstrlen(name));
+	buffer_push(buff, " (", 2);
+	buffer_push(buff, op, strlen(op));
+	buffer_push(buff, version, mmstrlen(version));
+	buffer_push(buff, ")", 1);
 }
 
 
@@ -79,20 +93,48 @@ void pkgdep_destroy(struct pkgdep * dep)
 
 
 static
-void pkgdep_save_to_index(struct pkgdep const * dep, FILE* fp, int lvl)
+void pkgdep_write_element(const struct pkgdep* dep, struct buffer* buff)
 {
-	if (!dep) {
-		fprintf(fp, " {}\n");
+	const mmstr* any = mmstr_alloca("any")
+	const char* op;
+	char* str;
+	bool is_minver_any = mmstr_equal(dep->min_version, any);
+	bool is_maxver_any = mmstr_equal(dep->max_version, any);
+
+	if (mmstr_equal(dep->min_version, dep->max_version)) {
+		if (is_minver_any)
+			buffer_push(buff, dep->name, mmstrlen(dep->name));
+		else
+			push_dep_elt(buff, dep->name, "= ", dep->min_version);
 		return;
 	}
 
-	fprintf(fp, "\n");
+	if (!is_minver_any) {
+		push_dep_elt(buff, dep->name, ">= ", dep->min_version);
+		if (!is_maxver_any)
+			buffer_push(buff, ", ", 2);
+	}
+
+	if (!is_maxver_any)
+		push_dep_elt(buff, dep->name, "< ", dep->max_version);
+}
+
+
+static
+void pkgdep_save_to_keyval(const struct pkgdep* dep, struct buffer* buff)
+{
+	const char key[] = "depends: ";
+
+	if (!dep)
+		return;
+
+	buffer_push(buff, key, sizeof(key));
+
 	while (dep) {
-		// Print name , minver and maxver at lvl indentation level
-		// (ie 4*lvl spaces are inserted before)
-		fprintf(fp, "%*s%s: [%s, %s]\n", lvl*4, " ",
-		        dep->name, dep->min_version, dep->max_version);
+		pkgdep_write_element(dep, buff);
 		dep = dep->next;
+		if (dep)
+			buffer_push(buff, ",\n ", 3);
 	}
 }
 
@@ -150,7 +192,7 @@ int binpkg_is_provided_by_repo(struct binpkg const * pkg,
 
 
 LOCAL_SYMBOL
-void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp)
+void binpkg_save_to_keyval(const struct binpkg* pkg, struct buffer* buff)
 {
 	const struct strlist_elt* elt;
 
