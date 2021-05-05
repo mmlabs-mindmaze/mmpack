@@ -6,10 +6,10 @@
 #endif
 
 #include <string.h>
-#include <stdio.h>
 
 #include "binindex.h"
 #include "binpkg.h"
+#include "buffer.h"
 #include "indextable.h"
 #include "install-state.h"
 #include "mmstring.h"
@@ -91,8 +91,14 @@ void install_state_rm_pkgname(struct install_state* state,
 }
 
 
+/**
+ * install_state_save_to_buffer() - write state's pkgs in keyval to buffer
+ * @state:      install state to save
+ * @buffer:     buffer to which the data of packages must be written
+ */
 LOCAL_SYMBOL
-void install_state_save_to_index(struct install_state* state, FILE* fp)
+void install_state_save_to_buffer(const struct install_state* state,
+                                  struct buffer* buff)
 {
 	struct it_iterator iter;
 	struct it_entry* entry;
@@ -101,8 +107,11 @@ void install_state_save_to_index(struct install_state* state, FILE* fp)
 	entry = it_iter_first(&iter, &state->idx);
 	while (entry) {
 		pkg = entry->value;
-		binpkg_save_to_index(pkg, fp);
+		binpkg_save_to_buffer(pkg, buff);
 		entry = it_iter_next(&iter);
+
+		if (entry)
+			buffer_push(buff, "\n", 1);
 	}
 }
 
