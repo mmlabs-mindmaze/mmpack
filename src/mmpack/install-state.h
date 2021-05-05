@@ -4,10 +4,9 @@
 #ifndef INSTALL_STATE_H
 #define INSTALL_STATE_H
 
-#include <stdio.h>
-
 #include "binindex.h"
 #include "binpkg.h"
+#include "buffer.h"
 #include "indextable.h"
 #include "mmstring.h"
 
@@ -63,7 +62,8 @@ void install_state_add_pkg(struct install_state* state,
                            const struct binpkg* pkg);
 void install_state_rm_pkgname(struct install_state* state,
                               const mmstr* pkgname);
-void install_state_save_to_index(struct install_state* state, FILE* fp);
+void install_state_save_to_buffer(const struct install_state* state,
+                                  struct buffer* buff);
 
 
 #endif /* INSTALL_STATE_H */
