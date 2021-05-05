@@ -386,8 +386,8 @@ int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 {
 	STATIC_CONST_MMSTR(inst_relpath, INSTALLED_INDEX_RELPATH);
 	mmstr* installed_index_path;
-	int len;
-	FILE* fp;
+	struct buffer buff = {0};
+	int len, rv;
 
 	if (save_manually_installed(ctx->prefix, &ctx->manually_inst))
 		return -1;
@@ -397,15 +397,13 @@ int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 	installed_index_path = mmstr_malloca(len);
 	mmstr_join_path(installed_index_path, ctx->prefix, inst_relpath);
 
-	fp = fopen(installed_index_path, "wb");
+	install_state_save_to_buffer(&ctx->installed, &buff);
+	rv = save_compressed_file(installed_index_path, &buff);
+	buffer_deinit(&buff);
+
 	mmstr_freea(installed_index_path);
 
-	if (!fp)
-		return -1;
-
-	install_state_save_to_index(&ctx->installed, fp);
-	fclose(fp);
-	return 0;
+	return rv;
 }
 
 
