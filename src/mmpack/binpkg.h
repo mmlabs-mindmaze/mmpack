@@ -4,6 +4,7 @@
 #ifndef BINPKG_H
 #define BINPKG_H
 
+#include "buffer.h"
 #include "mmstring.h"
 #include "repo.h"
 #include "strchunk.h"
@@ -47,7 +48,7 @@ struct binpkg {
 
 void binpkg_init(struct binpkg* pkg, const mmstr* name);
 void binpkg_deinit(struct binpkg * pkg);
-void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp);
+void binpkg_save_to_buffer(const struct binpkg* pkg, struct buffer* buff);
 int binpkg_check_valid(struct binpkg const * pkg, int in_repo_cache);
 void binpkg_clear_deps(struct binpkg* pkg);
 void binpkg_clear_sysdeps(struct binpkg* pkg);

@@ -8,29 +8,30 @@
 #include <mmerrno.h>
 
 #include "binpkg.h"
+#include "buffer.h"
+#include "strchunk.h"
+#include "utils.h"
 
 
 static
-void write_yaml_mmstr_multiline(FILE* fp, int num_indent, const char* str)
+void push_dep_elt(struct buffer* buff, const mmstr* name,
+                  const char* op, const mmstr* version)
 {
-	const char * line, * next;
-	int linelen;
+	buffer_push(buff, name, mmstrlen(name));
+	buffer_push(buff, " (", 2);
+	buffer_push(buff, op, strlen(op));
+	buffer_push(buff, version, mmstrlen(version));
+	buffer_push(buff, ")", 1);
+}
 
-	fprintf(fp, "|\n");
 
-	line = str;
-	while (line != NULL) {
-		next = strchr(line, '\n');
-		if (next) {
-			linelen = next - line;
-			next++;
-		} else {
-			linelen = strlen(line);
-		}
-
-		fprintf(fp, "%*s%.*s\n", num_indent, " ", linelen, line);
-		line = next;
-	}
+static
+void write_keyval(struct buffer* buff, const char* key, const mmstr* value)
+{
+	buffer_push(buff, key, strlen(key));
+	buffer_push(buff, ": ", 2);
+	buffer_push(buff, value, mmstrlen(value));
+	buffer_push(buff, "\n", 1);
 }
 
 
@@ -79,20 +80,46 @@ void pkgdep_destroy(struct pkgdep * dep)
 
 
 static
-void pkgdep_save_to_index(struct pkgdep const * dep, FILE* fp, int lvl)
+void pkgdep_write_element(const struct pkgdep* dep, struct buffer* buff)
 {
-	if (!dep) {
-		fprintf(fp, " {}\n");
+	const mmstr* any = mmstr_alloca_from_cstr("any");
+	bool is_minver_any = mmstrequal(dep->min_version, any);
+	bool is_maxver_any = mmstrequal(dep->max_version, any);
+
+	if (mmstrequal(dep->min_version, dep->max_version)) {
+		if (is_minver_any)
+			buffer_push(buff, dep->name, mmstrlen(dep->name));
+		else
+			push_dep_elt(buff, dep->name, "= ", dep->min_version);
 		return;
 	}
 
-	fprintf(fp, "\n");
+	if (!is_minver_any) {
+		push_dep_elt(buff, dep->name, ">= ", dep->min_version);
+		if (!is_maxver_any)
+			buffer_push(buff, ", ", 2);
+	}
+
+	if (!is_maxver_any)
+		push_dep_elt(buff, dep->name, "< ", dep->max_version);
+}
+
+
+static
+void pkgdep_save_to_keyval(const struct pkgdep* dep, struct buffer* buff)
+{
+	const char key[] = "depends: ";
+
+	if (!dep)
+		return;
+
+	buffer_push(buff, key, strlen(key));
+
 	while (dep) {
-		// Print name , minver and maxver at lvl indentation level
-		// (ie 4*lvl spaces are inserted before)
-		fprintf(fp, "%*s%s: [%s, %s]\n", lvl*4, " ",
-		        dep->name, dep->min_version, dep->max_version);
+		pkgdep_write_element(dep, buff);
 		dep = dep->next;
+		if (dep)
+			buffer_push(buff, ",\n ", 3);
 	}
 }
 
@@ -149,33 +176,61 @@ int binpkg_is_provided_by_repo(struct binpkg const * pkg,
 }
 
 
-LOCAL_SYMBOL
-void binpkg_save_to_index(struct binpkg const * pkg, FILE* fp)
+static
+void binpkg_sysdeps_to_keyval(const struct binpkg* pkg, struct buffer* buff)
 {
 	const struct strlist_elt* elt;
+	const char sysdeps_field[] = "sysdepends: ";
+	const mmstr* sysdep;
 
-	fprintf(fp, "%s:\n"
-	        "    version: %s\n"
-	        "    source: %s\n"
-	        "    srcsha256: %s\n"
-	        "    sumsha256sums: %s\n"
-	        "    ghost: %s\n",
-	        pkg->name, pkg->version, pkg->source, pkg->srcsha, pkg->sumsha,
-	        binpkg_is_ghost(pkg) ? "true" : "false");
+	if (!pkg->sysdeps.head)
+		return;
 
+	buffer_push(buff, sysdeps_field, strlen(sysdeps_field));
 
-	fprintf(fp, "    depends:");
-	pkgdep_save_to_index(pkg->mpkdeps, fp, 2 /*indentation level*/);
-
-	fprintf(fp, "    sysdepends: [");
 	for (elt = pkg->sysdeps.head; elt != NULL; elt = elt->next) {
-		fprintf(fp, "'%s'%s", elt->str.buf, elt->next ? ", " : "");
+		sysdep = elt->str.buf;
+		buffer_push(buff, sysdep, mmstrlen(sysdep));
+
+		if (elt->next)
+			buffer_push(buff, ",\n ", 3);
 	}
+}
 
-	fprintf(fp, "]\n");
 
-	fprintf(fp, "    description: ");
-	write_yaml_mmstr_multiline(fp, 8, pkg->desc);
+static
+void binpkg_desc_to_keyval(const struct binpkg* pkg, struct buffer* buff)
+{
+	const char desc_field[] = "description: ";
+	struct strchunk desc = {.buf = pkg->desc, .len = mmstrlen(pkg->desc)};
+	mmstr* wrapped;
+
+	buffer_push(buff, desc_field, strlen(desc_field));
+
+	wrapped = mmstr_malloc(128);
+	wrapped = textwrap_string(wrapped, desc, 80, " ", "\n .");
+	buffer_push(buff, wrapped, mmstrlen(wrapped));
+	mmstr_free(wrapped);
+
+	buffer_push(buff, "\n", 1);
+}
+
+
+LOCAL_SYMBOL
+void binpkg_save_to_buffer(const struct binpkg* pkg, struct buffer* buff)
+{
+	const char* ghost_val = binpkg_is_ghost(pkg) ? "true" : "false";
+
+	write_keyval(buff, "name", pkg->name);
+	write_keyval(buff, "version", pkg->version);
+	write_keyval(buff, "source", pkg->source);
+	write_keyval(buff, "srcsha256", pkg->srcsha);
+	write_keyval(buff, "sumsha256ums", pkg->sumsha);
+	write_keyval(buff, "ghost", mmstr_alloca_from_cstr(ghost_val));
+
+	pkgdep_save_to_keyval(pkg->mpkdeps, buff);
+	binpkg_sysdeps_to_keyval(pkg, buff);
+	binpkg_desc_to_keyval(pkg, buff);
 }
 
 
