@@ -653,6 +653,9 @@ class Repo:
             self._mv_files_working_dir(manifest_file, manifest, mv_op)
             self._check_hash(manifest['source'])
 
+            if self.arch not in manifest['binpkgs']:
+                raise ValueError('Missing arch {self.arch} in {manifest_file}')
+
             # Remove previous source and binary package if matching source name
             # and version exist: this means that a rebuild is buing uploaded,
             # hence we need to remove the previous build
