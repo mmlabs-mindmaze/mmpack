@@ -665,7 +665,8 @@ class Repo:
             # packages and upload binary packages and remove the binary
             # packages that are not needed anymore
             self._prepare_upload(manifest, self.to_remove, self.to_add)
-        except (KeyError, IOError, ValueError):
+        except (KeyError, IOError, ValueError) as error:
+            self.logger.error(error)
             return False
 
         self._dump_indexes_working_dir(self.to_add)
