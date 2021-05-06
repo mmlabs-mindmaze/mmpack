@@ -79,8 +79,17 @@ void report_user_and_log(int mm_log_level, const char* fmt, ...);
 
 int prompt_user_confirm(void);
 
+/**************************************************************************
+ *                                                                        *
+ *                            String helpers                              *
+ *                                                                        *
+ **************************************************************************/
 char* strchr_or_end(const char * s, int c);
 
+mmstr* linewrap_string(mmstr* restrict out, struct strchunk in,
+                       int len, const char* indent_str);
+mmstr* textwrap_string(mmstr* restrict out, struct strchunk in,
+                       int len, const char* indent_str, const char* nl_seq);
 
 /**************************************************************************
  *                                                                        *
