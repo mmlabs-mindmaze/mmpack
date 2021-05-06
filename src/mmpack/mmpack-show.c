@@ -21,6 +21,18 @@
 
 
 static
+void print_wrapped_str(const char* str)
+{
+	struct strchunk in = {.buf = str, .len = strlen(str)};
+	mmstr* wrapped = mmstr_malloc(128);
+
+	wrapped = textwrap_string(wrapped, in, 76, "    ", "\n");
+	printf("    %s\n", wrapped);
+	mmstr_free(wrapped);
+}
+
+
+static
 void show_pkg(const struct binpkg* pkg, const struct mmpack_ctx* ctx)
 {
 	struct remote_resource* from;
@@ -53,7 +65,7 @@ void show_pkg(const struct binpkg* pkg, const struct mmpack_ctx* ctx)
 		printf("\t\t [SYSTEM] %s\n", sysdep->str.buf);
 
 	printf("\nDescription:\n");
-	printf("%s\n", pkg->desc ? pkg->desc : "none");
+	print_wrapped_str(pkg->desc ? pkg->desc : "none");
 }
 
 
