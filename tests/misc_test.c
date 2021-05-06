@@ -6,7 +6,9 @@
 #endif
 
 #include <check.h>
+#include <mmpredefs.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "mmstring.h"
 #include "testcases.h"
@@ -107,6 +109,148 @@ START_TEST(next_pow2)
 }
 END_TEST
 
+
+/**************************************************************************
+ *                                                                        *
+ *                        string helpers tests                            *
+ *                                                                        *
+ **************************************************************************/
+
+static const char lipsum[] =
+"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. "
+"Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, "
+"dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper "
+"congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est "
+"eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu "
+"massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. "
+"Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. "
+"Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed "
+"dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci "
+"luctus et ultrices posuere cubilia Curae; Aliquam nibh. Mauris ac mauris sed "
+"pede pellentesque fermentum. Maecenas adipiscing ante non diam sodales "
+"hendrerit.";
+
+
+static const char lipsum_ref_70_3indent[] =
+"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non \n"
+"   risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, \n"
+"   ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula \n"
+"   massa, varius a, semper congue, euismod non, mi. Proin porttitor, \n"
+"   orci nec nonummy molestie, enim est eleifend mi, non fermentum diam \n"
+"   nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, \n"
+"   consequat in, pretium a, enim. Pellentesque congue. Ut in risus \n"
+"   volutpat libero pharetra tempor. Cras vestibulum bibendum augue. \n"
+"   Praesent egestas leo in pede. Praesent blandit odio eu enim. \n"
+"   Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum \n"
+"   primis in faucibus orci luctus et ultrices posuere cubilia Curae; \n"
+"   Aliquam nibh. Mauris ac mauris sed pede pellentesque fermentum. \n"
+"   Maecenas adipiscing ante non diam sodales hendrerit.";
+
+
+static const char lipsum_ref_40_pipeindent[] =
+"Lorem ipsum dolor sit amet, consectetur \n"
+"|adipiscing elit. Sed non risus. \n"
+"|Suspendisse lectus tortor, dignissim \n"
+"|sit amet, adipiscing nec, ultricies \n"
+"|sed, dolor. Cras elementum ultrices \n"
+"|diam. Maecenas ligula massa, varius a, \n"
+"|semper congue, euismod non, mi. Proin \n"
+"|porttitor, orci nec nonummy molestie, \n"
+"|enim est eleifend mi, non fermentum \n"
+"|diam nisl sit amet erat. Duis semper. \n"
+"|Duis arcu massa, scelerisque vitae, \n"
+"|consequat in, pretium a, enim. \n"
+"|Pellentesque congue. Ut in risus \n"
+"|volutpat libero pharetra tempor. Cras \n"
+"|vestibulum bibendum augue. Praesent \n"
+"|egestas leo in pede. Praesent blandit \n"
+"|odio eu enim. Pellentesque sed dui ut \n"
+"|augue blandit sodales. Vestibulum ante \n"
+"|ipsum primis in faucibus orci luctus et \n"
+"|ultrices posuere cubilia Curae; Aliquam \n"
+"|nibh. Mauris ac mauris sed pede \n"
+"|pellentesque fermentum. Maecenas \n"
+"|adipiscing ante non diam sodales \n"
+"|hendrerit.";
+
+static const
+struct {
+	const char* input;
+	const char* indent;
+	int len;
+	const char* ref;
+} wrap_cases[] = {
+	{.input = lipsum, .indent="   ", .len = 70,
+	  .ref = lipsum_ref_70_3indent},
+	{.input = lipsum, .indent="|", .len = 40,
+	  .ref = lipsum_ref_40_pipeindent},
+};
+
+
+START_TEST(str_wrapping)
+{
+	mmstr* wrapped = mmstr_malloc(128);
+	struct strchunk input = {
+		.buf = wrap_cases[_i].input,
+		.len = strlen(wrap_cases[_i].input),
+	};
+	const char* ref = wrap_cases[_i].ref;
+
+	wrapped = linewrap_string(wrapped, input,
+	                          wrap_cases[_i].len,
+	                          wrap_cases[_i].indent);
+
+	ck_assert_str_eq(ref, wrapped);
+	mmstr_free(wrapped);
+}
+END_TEST
+
+
+static
+const char input_wrap_nl[] =
+"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. "
+"Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, "
+"dolor. Cras elementum ultrices diam.\n"
+"Maecenas ligula massa, varius a, semper congue, euismod non, mi. Proin "
+"porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam "
+"nisl sit amet erat.\n"
+"\n"
+"Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. "
+"Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras "
+"vestibulum bibendum augue.";
+
+static
+const char ref_wrap_nl[] =
+"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non \n"
+"    risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, \n"
+"    ultricies sed, dolor. Cras elementum ultrices diam.\n"
+"    .\n"
+"    Maecenas ligula massa, varius a, semper congue, euismod non, mi. \n"
+"    Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non \n"
+"    fermentum diam nisl sit amet erat.\n"
+"    .\n"
+"    .\n"
+"    Duis semper. Duis arcu massa, scelerisque vitae, consequat in, \n"
+"    pretium a, enim. Pellentesque congue. Ut in risus volutpat libero \n"
+"    pharetra tempor. Cras vestibulum bibendum augue.";
+
+
+START_TEST(str_wrapping_nl)
+{
+	mmstr* wrapped = mmstr_malloc(128);
+	struct strchunk input = {
+		.buf = input_wrap_nl,
+		.len = strlen(input_wrap_nl),
+	};
+
+	wrapped = textwrap_string(wrapped, input, 70, "    ", "\n    .");
+
+	ck_assert_str_eq(ref_wrap_nl, wrapped);
+	mmstr_free(wrapped);
+}
+END_TEST
+
+
 /**************************************************************************
  *                                                                        *
  *                          Test suite setup                              *
@@ -120,6 +264,8 @@ TCase* create_misc_tcase(void)
 	tcase_add_test(tc, parse_dirname);
 	tcase_add_test(tc, parse_basename);
 	tcase_add_test(tc, next_pow2);
+	tcase_add_loop_test(tc, str_wrapping, 0, MM_NELEM(wrap_cases));
+	tcase_add_test(tc, str_wrapping_nl);
 
 	return tc;
 }
