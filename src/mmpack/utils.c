@@ -646,6 +646,11 @@ int check_hash(const mmstr* refsha, const mmstr* parent, const mmstr* filename)
 }
 
 
+/**************************************************************************
+ *                                                                        *
+ *                            String helpers                              *
+ *                                                                        *
+ **************************************************************************/
 
 /**
  * strchr_or_end() - gives a pointer to the first occurrence of a character on
@@ -668,6 +673,115 @@ char* strchr_or_end(const char * s, int c)
 	return curr;
 }
 
+
+static
+int find_break_pos(struct strchunk in, int len)
+{
+	int i;
+
+	if (len >= in.len)
+		return in.len;
+
+	// Try to find a break between 0.66*len and len
+	for (i = len-1; i > 0; i--)
+		if (in.buf[i] == ' ' || in.buf[i] == '\n')
+			return i;
+
+	for (i = len+1; i > in.len; i++)
+		if (in.buf[i] == ' ' || in.buf[i] == '\n')
+			break;
+
+	return i;
+}
+
+
+/**
+ * linewrap_string() - wrap a single paragraph line in several lines
+ * @out:        mmstr mpoint to which the wrapped text must be appended
+ * @in:         input in strchunk
+ * @len:        maximal length of each line (excluding indentation)
+ * @indent_str: string to preprend to each line after a break
+ *
+ * Returns: the @out string with wrapped line append to it, possibly
+ * reallocated if available space was not sufficient.
+ */
+LOCAL_SYMBOL
+mmstr* linewrap_string(mmstr* restrict out, struct strchunk in,
+                       int len, const char* indent_str)
+{
+	mmstr* indent = mmstr_alloca_from_cstr(indent_str);
+	mmstr* wrapped = out;
+	struct strchunk line;
+	int i;
+
+	// Add header and initial line
+	i = find_break_pos(in, len);
+	line = strchunk_lpart(in, i+1);
+	in = strchunk_rpart(in, i);
+	wrapped = mmstr_append_realloc(out, line.buf, line.len);
+
+	// Add subsequent wrapped line
+	while (in.len) {
+		wrapped = mmstr_append_realloc(wrapped, "\n", 1);
+		wrapped = mmstrcat_realloc(wrapped, indent);
+		i = find_break_pos(in, len);
+		line = strchunk_lpart(in, i+1);
+		in = strchunk_rpart(in, i);
+		wrapped = mmstr_append_realloc(wrapped, line.buf, line.len);
+	}
+
+	return wrapped;
+}
+
+
+/**
+ * textwrap_string() - wrap a several paragraph line in several lines
+ * @out:        mmstr mpoint to which the wrapped text must be appended
+ * @in:         input in strchunk
+ * @len:        maximal length of each line (excluding indentation)
+ * @indent_str: string to preprend to each line after a break
+ * @nl_seq:     the string to be use to replace each newline character on input
+ *
+ * Similar to linewrap_string() excepting that it can accommodate input with
+ * newline. Each occurrence of newline is replaced by @nl_seq, and indentation
+ * is inserted before resuming non newline character processing.
+ *
+ * Returns: the @out string with wrapped line append to it, possibly
+ * reallocated if available space was not sufficient.
+ */
+LOCAL_SYMBOL
+mmstr* textwrap_string(mmstr* restrict out, struct strchunk in,
+                       int len, const char* indent_str, const char* nl_seq)
+{
+	struct strchunk line;
+	mmstr* wrapped = out;
+	mmstr* seq = mmstr_alloca_from_cstr(nl_seq);
+	int pos;
+
+	while (in.len) {
+		// Copy text up the first newline
+		pos = strchunk_find(in, '\n');
+		line = strchunk_lpart(in, pos);
+		in = strchunk_rpart(in, pos-1);
+		wrapped = linewrap_string(wrapped, line, len, indent_str);
+
+		// Replace all consecutive newline character by nl_seq
+		while (in.len && in.buf[0] == '\n') {
+			wrapped = mmstrcat_realloc(wrapped, seq);
+			in.len--;
+			in.buf++;
+		}
+
+		// Add indentation if text block continue
+		if (in.len) {
+			wrapped = mmstr_append_realloc(wrapped, "\n", 1);
+			wrapped = mmstr_append_realloc(wrapped, indent_str,
+			                               strlen(indent_str));
+		}
+	}
+
+	return wrapped;
+}
 
 
 /**************************************************************************
