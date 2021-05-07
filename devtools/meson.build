@@ -24,6 +24,7 @@ if codespell.found()
     run_target('codespell',
         command : [
             codespell,
+            '-x', files('codespell-ignore'),
             all_sources,
         ]
     )
