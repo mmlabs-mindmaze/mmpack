@@ -1,9 +1,25 @@
-mmpack (0.5.2) UNRELEASED; urgency=medium
+mmpack (0.6.0) unstable; urgency=medium
 
   * Rename manapages using <cmd>_<subcmd> schema
   * Add zlib1g-dev as build depends
+  * Get python package name from dist-info or egg-info
+  * symbol files are now compressed (gzip). mmpack-build can load both
+    compressed and uncompressed files.
+  * support various tags in provides files: regex, optional
+  * binary package are now created using Zstandard compression
+  * support for new organisation of specs files: general section content is
+    now root of the spec file, custom packages are declared in a dictionary in
+    a field of this.
+  * support patch list to apply to upstream in mmpack/sources_strap file
+  * reorganization of mmpack source code (mostly split of package-utils.c)
+  * binary package includes pkginfo file representing the package metadata
+    (name, version, description, dependencies...) formatted in key/value
+    format. This format is meant to replace in future the yaml info in package
+    and binary-index of repository.
+  * mmpack support key/values package information format and fallback to YAML
+    if it could not be found (in repo or in package).
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Fri, 08 Jan 2021 11:04:57 +0100
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Fri, 07 May 2021 15:49:17 +0200
 
 mmpack (0.5.1) unstable; urgency=medium
 
