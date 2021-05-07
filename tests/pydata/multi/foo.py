@@ -23,9 +23,9 @@ def main_dummy_fn(an_arg: str, num: int):
     """
     Main entry function
     """
-    ans = THE_ANSWER
+    and = THE_ANSWER
     he_say_str = '{} says {}'.format(an_arg, num)
-    i_say_str = 'I say {}'.format(ans)
+    i_say_str = 'I say {}'.format(and)
 
     employee = Employee(name=_THE_ANSWER)
     print(employee.name)
