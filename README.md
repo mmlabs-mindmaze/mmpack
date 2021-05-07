@@ -17,7 +17,7 @@ hence fully cross-platform. Currently supported systems are GNU/Linux and
 Windows.
 
 For questions, requests, issues, pull-requests, etc., drop an email:
-`gabriel.ganne@mindmaze.com`
+`nicolas.bourdaud@gmail.com`
 
 ## Main features
 
@@ -150,15 +150,15 @@ use the environment variable $MMPACK_PREFIX; the following commands have hence
 the same effect as the above ones:
 
 ``` bash
-export $MMPACK_PREFIX=<prefix_name>
+export $MMPACK_PREFIX=<prefix_path>
 
-# update package list from the repository url(s) of prefix <prefix_name>
+# update package list from the repository url(s) of prefix <prefix_path>
 mmpack update
 
-# search for available package in the prefix <prefix_name>
+# search for available package in the prefix <prefix_path>
 mmpack search <package-name>
 
-# install <package-name> in the prefix <prefix_name>
+# install <package-name> in the prefix <prefix_path>
 mmpack install <package-name>
 ```
 
@@ -174,8 +174,8 @@ Referring to the example for software A:
 
 ``` bash
 A #  runs the system-wide installed version
-mmpack run --prefix=j A #  runs A from prefix j
-mmpack run --prefix=k A #  runs A from prefix k, which loads patched B
+mmpack --prefix=j run A #  runs A from prefix j
+mmpack --prefix=k run A #  runs A from prefix k, which loads patched B
 ```
 
 If no command is provided, the default $SHELL is launched.  Inside this shell
@@ -186,7 +186,7 @@ to the root filesystem).
 Again, wrt the above example,
 
 ``` bash
-mmpack run --prefix=j #  enters prefix j environment
+mmpack --prefix=j run #  enters prefix j environment
 A #  runs A from prefix j
 ```
 
@@ -195,7 +195,7 @@ variable has been introduced; so the following two invocations have the same
 effect;
 
 ``` bash
-mmpack run --prefix=j A #  runs A from prefix j
+mmpack --prefix=j run A #  runs A from prefix j
 
 export MMPACK_PREFIX=j
 mmpack run A #  runs A from prefix j
@@ -215,7 +215,7 @@ general:
     version: 1.0.0
     maintainer: Gandalf <gandalf@the.grey>
     url: ssh://<your git url>
-    description: |
+    description: >
       mmpack hello world
 ```
 

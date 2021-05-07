@@ -59,7 +59,7 @@ How do I ...
    set the ``MMPACK_PREFIX`` environment variable when working in you shell.
 
 ... find out what went wrong ?
-   - for **mmpack** commands, see ``/var/log/mmpack.log`` within the mmpack
+   - for **mmpack** commands, see ``var/log/mmpack.log`` within the mmpack
      prefix.
    - for **mmpack-build** see mmpack log file (``~/.local/share/mmpack.log``)
      the file can be configured to be elsewhere depending on your

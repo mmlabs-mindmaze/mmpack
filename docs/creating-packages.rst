@@ -72,13 +72,9 @@ You can test is as follows:
    # create a mmpack prefix
    mmpack mkprefix --url=$MMPACK_REPOSITORY $MMPACK_PREFIX
 
-   # clean the mmpack-build workspace, temporary files, and previously
-   # generated packages
-   mmpack-build clean --wipe
-
    # build mmpack-hello-world directly from git, using the top of the master
    # branch.
-   mmpack-build pkg-create --git-url ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world --tag master
+   mmpack-build pkg-create ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world --tag master
 
    # You can also clone and do the same from the project's folder:
    git clone "ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world"

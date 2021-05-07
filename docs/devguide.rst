@@ -33,6 +33,7 @@ mmpack
  * libyaml
  * libcurl
  * libarchive
+ * zlib
 
 mmpack-build
 ````````````
@@ -73,15 +74,21 @@ needed to build.
 mmpack
 ``````
 
- * mmlib (https://intranet.mindmaze.ch/mmlabs/gerrit/admin/repos/mmlib)
+ * mmlib (https://github.com/mmlabs-mindmaze/mmlib.git)
  * libyaml development files
  * libcurl development files
  * libarchive development files
+ * zlib development files
 
 mmpack-build
 ````````````
+python packages:
 
-None.
+ * astroid
+ * perfile
+ * pyelftools
+ * urllib3
+ * pyyaml
 
 Tests
 `````
@@ -100,19 +107,6 @@ To generate the user documentation :
 Additional requirement to generate the internal development documentation:
 
  * linuxdoc (https://github.com/GabrielGanne/linuxdoc)
-
-Test tools
-==========
-
-The first test tool is the "make check" target, which is the one that will be
-called by the CI
-
-There are two main development scripts in the **devtools** folder:
-
- - **test-shell.sh**, spawns a shell with a local-installation of mmpack
-   and a clean mmpack prefix.
- - **pkg-create-tests.sh**, creates several mmpack packages.
-   Call with the SMOKE variable set to only build and test mmpack-hello-world.
 
 Memcheck suppression file
 =========================

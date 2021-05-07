@@ -16,7 +16,7 @@ set up repositories to pull from, and install some packages.
 
    # Find a mmpack repository filling you needs.
    # Then, create a working mmpack prefix
-   mmpack mkprefix --url=http://repository/url $MMPACK_PREFIX
+   mmpack mkprefix --url=http://repository/url
 
    # update your local list of available packages
    mmpack update
