@@ -54,7 +54,7 @@ my $deps = deps_parse($ARGV[0], reduce_restrictions => 1,
 error('error occurred while parsing dependencies')
 	unless defined $deps;
 
-# See it the parsed dependency list is fullfilled
+# See it the parsed dependency list is fulfilled
 my $facts = parse_status("$admindir/status");
 my @unmet = test_depends($deps, $facts);
 if (@unmet) {
