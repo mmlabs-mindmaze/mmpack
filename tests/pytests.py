@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     loader = unittest.TestLoader()
 
-    # python unittest dicover modifies sys.path
+    # python unittest discover modifies sys.path
     # (See: https://bugs.python.org/issue24247)
     # to prevent path mixup between the package being tested and an eventual
     # installed package, prevent any such change

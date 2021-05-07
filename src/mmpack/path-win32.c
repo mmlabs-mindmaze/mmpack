@@ -54,7 +54,7 @@ exit:
 
 /**
  * conv_env_pathlist_win32_to_posix() - posixify env var path list
- * @envname:    name of environement variable to posixify
+ * @envname:    name of environment variable to posixify
  *
  * Convert a environment variable named @envname whose value is assumed to be a
  * list of windows paths separated by semicolons  into a POSIX format, ie POSIX
