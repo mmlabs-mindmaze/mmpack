@@ -60,7 +60,7 @@ IndicesStates = namedtuple('IndicesStates',
 # The functions sha256sum, yaml_serialize, and yaml_load
 # are functions that are extracted from mmpack-build/common.py. There are
 # copied in this file in order to avoid the import of the module common and
-# therefore in order to avoid to have a dependance.
+# therefore in order to avoid to have a dependence.
 
 CONFIG = {'debug': True, 'verbose': True}
 TMP_LOG_STRLIST = []
@@ -259,7 +259,7 @@ class _BinPkg:
 
 def file_serialize(index: dict, filename: str):
     """
-    This function serializes a dictionnary into a flat structure in a file.
+    This function serializes a dictionary into a flat structure in a file.
 
     Args:
         index: dictionary to serialize.
@@ -497,14 +497,14 @@ class Repo:
     def _dump_indexes_working_dir(self, to_add: set):
         """
         Writes the updated binary-index and source-index into the working
-        directory. If no problem occurs while writting these files, then this
+        directory. If no problem occurs while writing these files, then this
         function updates the dictionaries of the repository (referencing the
         data of the binary-index and of the source-index) and moves the
         binary-index and source-index previously written into the repository.
 
         Args:
             to_add: set to fill with packages that MUST be removed once we are
-                    sure that the upload will be a sucess.
+                    sure that the upload will be a success.
         """
         new_srcfile = os.path.join(self.working_dir, RELPATH_SOURCE_INDEX)
         new_binfile = os.path.join(self.working_dir, RELPATH_BINARY_INDEX)
@@ -599,7 +599,7 @@ class Repo:
             to_remove: set to fill with packages that MUST be removed once we
                        are sure that the upload will be a success.
             to_add: set to fill with packages that MUST be removed once we are
-                    sure that the upload will be a sucess.
+                    sure that the upload will be a success.
         """
         # add src entry
         # source id is name_srcsha256
