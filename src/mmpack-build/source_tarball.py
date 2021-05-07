@@ -6,6 +6,7 @@ Fetch/gather sources of a mmpack package and create source tarball
 import os
 import shutil
 import tarfile
+from os.path import basename, exists, join as join_path
 from subprocess import call, check_call, DEVNULL
 from typing import Dict, Iterator, NamedTuple
 
@@ -163,6 +164,7 @@ class SourceTarball:
         self._path_url = path_url
         self._kwargs = kwargs
         self._builddir = Workspace().tmpdir()
+        self._downloaded_file = None
         self._srcdir = None
         self._vcsdir = None
         self._outdir = outdir if outdir else Workspace().outdir()
@@ -189,6 +191,30 @@ class SourceTarball:
         # instance destruction
         dprint('Destroying temporary source build dir ' + self._builddir)
         rmtree_force(self._builddir)
+
+    def _get_path_or_url_file(self) -> str:
+        """
+        Get path to file pointed to path_or_url. If not local file/path,
+        the function will attempt to download the resource and return the path
+        to downloaded_file if succeed
+        """
+        if self._downloaded_file:
+            return self._downloaded_file
+
+        if exists(self._path_url):
+            dprint(f'{self._path_url} is a local file/dir')
+            self._downloaded_file = self._path_url
+            return self._downloaded_file
+
+        path = join_path(self._builddir, basename(self._path_url))
+        download(self._path_url, path)
+
+        # If download fails, we will not reach here, hence _download_file will
+        # not be set (as intended)
+        dprint(f'remote {self._path_url} has been downloaded at {path}')
+        self._downloaded_file = path
+
+        return path
 
     def _gen_project_sources(self, subdir: str = '') -> ProjectSource:
         srcdir = self._srcdir
@@ -338,9 +364,11 @@ class SourceTarball:
     def _create_srcdir_from_tar(self):
         """
         Create a source package folder from tarball, not necessarily named
-        following mmpack src tarball convention.
+        following mmpack src tarball convention. If tarball is not local,
+        download it.
         """
-        tar = tarfile.open(self._path_url, 'r:*')
+        path = self._get_path_or_url_file()
+        tar = tarfile.open(path, 'r:*')
         tar.extractall(path=self._srcdir)
 
         # Get tag name if not set yet
@@ -348,7 +376,7 @@ class SourceTarball:
             self.tag = 'from_tar'
 
         self.trace['pkg'].update({'filename': self._path_url,
-                                  'sha256': sha256sum(self._path_url)})
+                                  'sha256': sha256sum(path)})
 
     def _create_srcdir_from_path(self):
         """
