@@ -11,7 +11,7 @@ class TestFileUtils(unittest.TestCase):
 
     def test_filetype_shebang(self):
         """
-        test that filetype return the right intepreter
+        test that filetype return the right interpreter
         """
         cases = [
             ('#!/bin/bash', 'bash'),
