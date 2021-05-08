@@ -25,36 +25,15 @@ class ProjectSource(NamedTuple):
 
 
 def _is_git_dir(path: str) -> bool:
+    if not os.path.isdir(path):
+        return False
+
     if os.path.isdir(path + '/.git'):
         return True
 
     retcode = call(['git', '--git-dir='+path, 'rev-parse', '--git-dir'],
                    stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
     return retcode == 0
-
-
-def _is_tarball_file(path: str) -> bool:
-    try:
-        with tarfile.open(path, 'r') as tar:
-            return 'mmpack/specs' in tar.getnames()
-    # pylint: disable=broad-except
-    except Exception:
-        return False
-
-
-def _guess_method(path_or_url: str) -> str:
-    if _is_git_dir(path_or_url):
-        return 'git'
-    elif os.path.isdir(path_or_url):
-        return 'path'
-    elif _is_tarball_file(path_or_url):
-        if path_or_url.endswith('_src.tar.xz'):
-            return 'srcpkg'
-        else:
-            return 'tar'
-
-    # If nothing has worked before, lets assume this is a git remote url
-    return 'git'
 
 
 def _git_subcmd(subcmd: List[str], gitdir: str = None, worktree: str = None,
@@ -154,13 +133,10 @@ class SourceTarball:
             if not path_url:
                 raise ValueError('did not find project to package')
 
-        if not method or method == 'guess':
-            method = _guess_method(path_url)
-
         # declare class instance attributes
         self.srctar = None
         self.tag = tag
-        self._method = method
+        self._method = method if method else 'guess'
         self._path_url = path_url
         self._kwargs = kwargs
         self._builddir = Workspace().tmpdir()
@@ -172,11 +148,15 @@ class SourceTarball:
         self.trace = dict()
         self._update_version = kwargs.get('version_from_vcs', False)
 
+        if self._method == 'guess':
+            self._method = self._guess_method()
+            dprint(f'Guessed method = {self._method}')
+
         # Fetch sources following the specified method and move them to the
         # temporary source build folder
         dprint('extracting sources in the temporary directory: {}'
                .format(self._builddir))
-        self._create_srcdir(method)
+        self._create_srcdir(self._method)
 
         # Try generate the source from the root folder of project
         prj = self._gen_project_sources()
@@ -215,6 +195,26 @@ class SourceTarball:
         self._downloaded_file = path
 
         return path
+
+    def _guess_method(self) -> str:
+        if _is_git_dir(self._path_url) or self._path_url.endswith('.git'):
+            return 'git'
+        elif os.path.isdir(self._path_url):
+            return 'path'
+
+        try:
+            path = self._get_path_or_url_file()
+            with tarfile.open(path, 'r:*') as tar:
+                if 'mmpack/src_orig_tracing' in tar.getnames():
+                    return 'srcpkg'
+                else:
+                    return 'tar'
+        # RuntimeError if download failed
+        except (RuntimeError, tarfile.ReadError):
+            pass
+
+        # If nothing has worked before, lets assume this is a git remote url
+        return 'git'
 
     def _gen_project_sources(self, subdir: str = '') -> ProjectSource:
         srcdir = self._srcdir
