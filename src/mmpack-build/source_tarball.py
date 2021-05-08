@@ -290,6 +290,7 @@ class SourceTarball:
             prjlist_path = self._srcdir + '/projects.mmpack'
             subdirs = [l.strip() for l in open(prjlist_path, 'rt')]
         except FileNotFoundError:
+            iprint(f'No mmpack source found in {self._srcdir}')
             return
 
         # Filter subdirs if requested in named argument build_only_modified
