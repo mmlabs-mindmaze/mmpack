@@ -5,9 +5,10 @@ Fetch/gather sources of a mmpack package and create source tarball
 
 import os
 import shutil
-import tarfile
+from copy import copy
 from os.path import basename, exists, join as join_path
 from subprocess import call, check_call, DEVNULL
+from tarfile import open as taropen, TarFile, TarInfo
 from typing import Dict, Iterator, NamedTuple
 
 from . common import *
@@ -22,6 +23,17 @@ class ProjectSource(NamedTuple):
     version: str
     tarball: str
     srcdir: str
+
+
+def _strip_leading_comp_tar_iter(tar: TarFile) -> Iterator[TarInfo]:
+    for info in tar.getmembers():
+        info = copy(info)
+
+        # Strip leading directory component
+        path = info.name
+        info.name = path[path.find('/'):]
+
+        yield info
 
 
 def _is_git_dir(path: str) -> bool:
@@ -204,7 +216,7 @@ class SourceTarball:
 
         try:
             path = self._get_path_or_url_file()
-            with tarfile.open(path, 'r:*') as tar:
+            with taropen(path, 'r:*') as tar:
                 if 'mmpack/src_orig_tracing' in tar.getnames():
                     return 'srcpkg'
                 else:
@@ -369,8 +381,15 @@ class SourceTarball:
         download it.
         """
         path = self._get_path_or_url_file()
-        tar = tarfile.open(path, 'r:*')
-        tar.extractall(path=self._srcdir)
+
+        with taropen(path, 'r:*') as tar:
+            if ('mmpack/specs' in tar.getnames()
+                    or 'mmpack.projects' in tar.getnames()):
+                members = None
+            else:
+                members = _strip_leading_comp_tar_iter(tar)
+
+            tar.extractall(path=self._srcdir, members=members)
 
         # Get tag name if not set yet
         if not self.tag:
@@ -468,7 +487,7 @@ class SourceTarball:
         self.trace['upstream'].update({'url': url, 'sha256': file_hash})
 
         # Extract downloaded_file in upstreamdir
-        with tarfile.open(downloaded_file, 'r:*') as tar:
+        with taropen(downloaded_file, 'r:*') as tar:
             tar.extractall(path=self._get_unpacked_upstream_dir())
 
     def _fetch_upstream(self, specs: Dict[str, str], srcdir: str):
