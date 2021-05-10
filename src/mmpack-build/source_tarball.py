@@ -388,6 +388,7 @@ class SourceTarball:
             else:
                 members = _strip_leading_comp_tar_iter(tar)
 
+            dprint(f'Extracting tar to {self._srcdir} (members={members})')
             tar.extractall(path=self._srcdir, members=members)
 
         # Get tag name if not set yet
