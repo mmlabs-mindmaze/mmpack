@@ -216,7 +216,7 @@ class SourceTarball:
         try:
             path = self._get_path_or_url_file()
             with taropen(path, 'r:*') as tar:
-                if 'mmpack/src_orig_tracing' in tar.getnames():
+                if './mmpack/src_orig_tracing' in tar.getnames():
                     return 'srcpkg'
                 else:
                     return 'tar'
