@@ -30,8 +30,7 @@ def _strip_leading_comp_tar_iter(tar: TarFile) -> Iterator[TarInfo]:
         info = copy(info)
 
         # Strip leading directory component
-        path = info.name
-        info.name = path[path.find('/'):]
+        info.name = info.name.split('/', maxsplit=1)[-1]
 
         yield info
 
