@@ -58,10 +58,11 @@ def msys2_find_pypkg(pypkg: str) -> str:
         if not os.path.isfile(instfiles_filename):
             continue
 
-        for line in open(instfiles_filename, 'rt').readlines():
+        for line in open(instfiles_filename, 'rt', encoding='utf-8').readlines():
             if file_regex.match(line):
                 desc_filename = os.path.join(pacman_pkgdir, mingw_pkg, 'desc')
-                return open(desc_filename, 'rt').readlines()[1].strip()
+                return open(desc_filename, 'rt',
+                            encoding='utf-8').readlines()[1].strip()
 
     return None
 
@@ -139,7 +140,8 @@ def _parse_pkgindex_comp(repo_url, component: str, builddir: str,
     with tarfile.open(pkgindex, 'r') as tar:
         for fileinfo in tar.getmembers():
             if os.path.basename(fileinfo.name) == 'desc':
-                pkg = PacmanPkg(TextIOWrapper(tar.extractfile(fileinfo)))
+                pkg = PacmanPkg(TextIOWrapper(tar.extractfile(fileinfo),
+                                              encoding='utf-8'))
                 if pkg.source == source:
                     pkg.url = pkg_baseurl + pkg.filename
                     pkg_list.append(pkg)

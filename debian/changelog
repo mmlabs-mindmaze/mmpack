@@ -1,6 +1,7 @@
 mmpack (0.6.2) UNRELEASED; urgency=medium
 
   * Ensure that manifests advertise source package version
+  * Force utf-8 when reading msys2 repo files.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Tue, 11 May 2021 08:30:38 +0200
 
