@@ -69,6 +69,7 @@ class SrcPackage:
         self.name = ''
         self.tag = buildtag
         self.version = Version(None)
+        self.srcversion = self.version
         self.url = ''
         self.maintainer = ''
         self.ghost = False
@@ -225,6 +226,7 @@ class SrcPackage:
                 self.name = value
             elif key == 'version':
                 self.version = Version(value)
+                self.srcversion = self.version
             elif key == 'maintainer':
                 self.maintainer = value
             elif key == 'url':
@@ -602,7 +604,7 @@ class SrcPackage:
         # Generate the whole manifest data
         arch = get_host_arch_dist()
         data = {'name': self.name,
-                'version': self.version,
+                'version': self.srcversion,
                 'binpkgs': {arch: pkgs},
                 'source': {'file': path.basename(self.src_tarball),
                            'size': path.getsize(self.src_tarball),
