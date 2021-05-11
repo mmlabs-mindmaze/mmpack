@@ -1,7 +1,7 @@
 # @mindmaze_header@
 
 # Setup autoconf
-AC_INIT(mmpack,[0.6.1],[nicolas.bourdaud@gmail.com])
+AC_INIT(mmpack,[0.6.2],[nicolas.bourdaud@gmail.com])
 AC_CONFIG_SRCDIR([src/mmpack/mmpack-update.c])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
