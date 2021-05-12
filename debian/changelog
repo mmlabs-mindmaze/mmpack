@@ -3,6 +3,7 @@ mmpack (0.6.3) UNRELEASED; urgency=medium
   * default prefixes and packages dir are now in XDG_CACHE_HOME/mmpack/prefix
     and XDG_CACHE_HOME/mmpack/packages.
   * Fix dependency constraints generation when writing pkginfo file. 
+  * Mark with '*' the ghost packages in confirmation lists.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 12 May 2021 11:17:21 +0200
 
