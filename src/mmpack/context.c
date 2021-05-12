@@ -22,7 +22,7 @@
 #include "repo.h"
 #include "settings.h"
 
-#define ALIAS_PREFIX_FOLDER "mmpack-prefix"
+#define ALIAS_PREFIX_FOLDER "mmpack/prefix"
 
 static
 int load_user_config(struct mmpack_ctx* ctx)

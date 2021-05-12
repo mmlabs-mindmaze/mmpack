@@ -1,3 +1,10 @@
+mmpack (0.6.3) UNRELEASED; urgency=medium
+
+  * default prefixes and packages dir are now in XDG_CACHE_HOME/mmpack/prefix
+    and XDG_CACHE_HOME/mmpack/packages.
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 12 May 2021 11:17:21 +0200
+
 mmpack (0.6.2) unstable; urgency=medium
 
   * Ensure that manifests advertise source package version

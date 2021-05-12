@@ -45,7 +45,7 @@ class Workspace:
         self._build = os.environ.get('MMPACK_BUILD_BUILDDIR',
                                      XDG_CACHE_HOME + '/mmpack/build')
         self._packages = os.environ.get('MMPACK_BUILD_OUTDIR',
-                                        XDG_DATA_HOME + '/mmpack-packages')
+                                        XDG_DATA_HOME + '/mmpack/packages')
         self._cache = os.environ.get('MMPACK_BUILD_CACHEDIR',
                                      XDG_CACHE_HOME + '/mmpack/cache')
         self._cygpath_root = None
