@@ -13,9 +13,18 @@ from . mmpack_mksource import add_mksource_parser_argument
 from . src_package import SrcPackage
 from . workspace import Workspace
 from . source_tarball import SourceTarball
+from . xdg import XDG_DATA_HOME
 
 
 CMD = 'pkg-create'
+
+
+def _get_prefix_abspath(prefix) -> str:
+    if not ((os.sep in prefix)
+            or (os.altsep is not None and os.altsep in prefix)):
+        return XDG_DATA_HOME + '/mmpack/prefix/' + prefix
+
+    return os.path.abspath(prefix)
 
 
 def parse_options(argv):
@@ -47,7 +56,7 @@ def parse_options(argv):
         except KeyError:
             pass
     if args.prefix:
-        Workspace().prefix = os.path.abspath(args.prefix)
+        Workspace().prefix = _get_prefix_abspath(args.prefix)
 
     return args
 
