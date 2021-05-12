@@ -20,6 +20,7 @@ import gzip
 import logging
 import logging.handlers
 import os
+import re
 import shutil
 from typing import Any, Dict, List, Optional, Union, Callable, Set, TextIO
 import yaml
@@ -83,6 +84,23 @@ def sha256sum(filename: str) -> str:
     return hexdig
 
 
+def _escape_newline(text: str) -> str:
+    escaped = ''
+
+    pos = 0
+    for occurence in re.finditer(r'\n+', text):
+        start, end = occurence.span(0)
+        escaped += text[pos:start]
+        escaped += text[start:end].replace('\n', '\n.')
+        if end != len(text):
+            escaped += '\n'
+
+        pos = end
+
+    escaped += text[pos:]
+    return escaped
+
+
 def wrap_str(text: str,
              maxlen: int = 80,
              indent: str = '',
@@ -129,9 +147,12 @@ def _write_keyval(stream: TextIO, key: str, value: Any,
         stream.write(text + '\n')
         return
 
+    first = True
     for line in text.split('\n'):
-        wrapped_line = wrap_str(line, indent=' ', split_token=split)
+        wrapped_line = wrap_str(line if first else ' ' + line,
+                                indent=' ', split_token=split)
         stream.write(wrapped_line + '\n')
+        first = False
 
 
 def _gen_dep_list(dependencies: Dict[str, List[str]]) -> List[str]:
@@ -221,7 +242,7 @@ class _BinPkg:
                     'ghost', 'sumsha256sums'):
             _write_keyval(stream, key, self._data.get(key, ''))
 
-        multiline_desc = self.description.replace('\n', '\n .\n ')
+        multiline_desc = _escape_newline(self.description)
         _write_keyval(stream, 'description', multiline_desc, split=' ')
 
         deps = ', '.join(_gen_dep_list(self.depends))
