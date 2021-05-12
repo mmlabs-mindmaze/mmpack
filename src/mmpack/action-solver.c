@@ -1149,7 +1149,7 @@ struct action_stack* mmpkg_get_remove_list(struct mmpack_ctx * ctx,
 LOCAL_SYMBOL
 int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack)
 {
-	int i, rv;
+	int i, rv, is_ghost;
 	const char* operation;
 	const mmstr * old_version, * new_version;
 
@@ -1182,8 +1182,10 @@ int confirm_action_stack_if_needed(int nreq, struct action_stack const * stack)
 
 		if (stack->actions[i].oldpkg) {
 		} else {
-			printf("%s (%s)\n", stack->actions[i].pkg->name,
-			       stack->actions[i].pkg->version);
+			is_ghost = binpkg_is_ghost(stack->actions[i].pkg);
+			printf("%s (%s)%s\n", stack->actions[i].pkg->name,
+			       stack->actions[i].pkg->version,
+			       is_ghost ? "*": "");
 		}
 	}
 
