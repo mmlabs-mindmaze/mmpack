@@ -54,14 +54,14 @@ def _gen_dep_list(dependencies: Dict[str, List[Version]]) -> List[str]:
     for dep, minmaxver in dependencies.items():
         minver = minmaxver[0]
         maxver = minmaxver[1]
-        if minver == maxver:
-            if minver != Version('any'):
+        if str(minver) == str(maxver):
+            if not minver.is_any():
                 dep += f' (= {minver})'
             deps.append(dep)
         else:
-            if minver != Version('any'):
+            if not minver.is_any():
                 deps.append(f'{dep} (>= {minver})')
-            if maxver != Version('any'):
+            if not maxver.is_any():
                 deps.append(f'{dep} (< {maxver})')
 
     return deps
