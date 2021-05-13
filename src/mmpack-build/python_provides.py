@@ -139,8 +139,15 @@ class PkgData:
         if qname in self.syms:
             return
 
-        # Add all public symbols of the namespace
-        self.syms[qname] = set(mod.public_names())
+        # Add all public symbols of the namespace, only if the module has its
+        # path well identified
+        if qname != mod.file:
+            self.syms[qname] = set(mod.public_names())
+
+            # Loop over class definition and add those with a public name
+            for cldef in mod.nodes_of_class(ClassDef):
+                if _is_public_sym(cldef.name):
+                    self._add_class_public_symbols(cldef)
 
         # Loop over import statement definition and process imported modules
         for imp in mod.nodes_of_class(Import):
@@ -150,11 +157,6 @@ class PkgData:
         # modules
         for impfrom in mod.nodes_of_class(ImportFrom):
             self._add_importfrom(impfrom)
-
-        # Loop over class definition and add those with a public name
-        for cldef in mod.nodes_of_class(ClassDef):
-            if _is_public_sym(cldef.name):
-                self._add_class_public_symbols(cldef)
 
     def add_namespace_symbol(self, namespace: str, symbol: str):
         """
