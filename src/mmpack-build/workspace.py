@@ -151,11 +151,14 @@ class Workspace:
 
         Return: True if the a cached version has been copied, False otherwise
         """
-        cache_file = os.path.join(self._cache, os.path.basename(path))
+        if expected_sha256:
+            cache_file = os.path.join(self._cache, expected_sha256)
+        else:
+            cache_file = os.path.join(self._cache, os.path.basename(path))
+
         try:
-            if not expected_sha256 or expected_sha256 == sha256sum(cache_file):
-                shutil.copyfile(cache_file, path)
-                return True
+            shutil.copyfile(cache_file, path)
+            return True
         except FileNotFoundError:
             pass
 
@@ -168,6 +171,9 @@ class Workspace:
         os.makedirs(self._cache, exist_ok=True)
         cache_file = os.path.join(self._cache, os.path.basename(path))
         shutil.copyfile(path, cache_file)
+
+        # Hard link a version named after the sha256 hash value of the cached file
+        os.link(cache_file, os.path.join(self._cache, sha256sum(cache_file)))
 
 
 def get_local_install_dir(builddir: str):
