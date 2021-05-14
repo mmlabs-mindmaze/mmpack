@@ -666,20 +666,27 @@ LOCAL_SYMBOL
 int pkg_load_pkginfo(const char* mpk_filename, struct buffer * buffer)
 {
 	struct buffer metadata;
-	mmstr* pkginfo_path = NULL;
+	mmstr* value = NULL;
 	int rv = 0;
+	char* line;
 
 	buffer_init(&metadata);
 
 	if (pkg_load_file(mpk_filename, "./MMPACK/metadata", &metadata)
-	    || metadata_read_value(&metadata, "pkginfo-path", &pkginfo_path)
-	    || pkg_load_file(mpk_filename, pkginfo_path, buffer)) {
+	    || metadata_read_value(&metadata, "pkginfo-path", &value)
+	    || pkg_load_file(mpk_filename, value, buffer)
+	    || metadata_read_value(&metadata, "sumsha256sums", &value)) {
 		rv = -1;
 		goto exit;
 	}
 
+	// Append sumsha256sums field to buffer
+	const char line_fmt[] = "sumsha256sums: %s\n";
+	line = buffer_reserve_data(buffer, sizeof(line_fmt) + mmstrlen(value));
+	buffer_inc_size(buffer, sprintf(line, line_fmt, value));
+
 exit:
-	mmstr_free(pkginfo_path);
+	mmstr_free(value);
 	buffer_deinit(&metadata);
 	return rv;
 }
