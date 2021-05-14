@@ -6,6 +6,7 @@ mmpack (0.6.3) UNRELEASED; urgency=medium
   * Mark with '*' the ghost packages in confirmation lists.
   * Do not list python symbols in .pyobjects files if they belong to a module
     whose path from root package has not been well identified.
+  * mmpack-build adds static libraries in -devel package.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 12 May 2021 11:17:21 +0200
 

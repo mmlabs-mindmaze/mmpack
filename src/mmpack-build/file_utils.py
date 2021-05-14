@@ -34,7 +34,7 @@ def filetype(filename):
     if not islink(filename):
         try:
             # Open file and read magic number (binary)
-            magic = open(filename, 'rb', buffering=0).read(4)
+            magic = open(filename, 'rb', buffering=0).read(8)
         except IsADirectoryError:
             return 'directory'
 
@@ -43,6 +43,8 @@ def filetype(filename):
             return 'elf'
         if magic[:2] == b'MZ':
             return 'pe'
+        if magic[:7] == b'!<arch>':
+            return 'ar'
         if magic[:2] == b'#!':
             # the file contains a shebang. So the complete first line of file
             # and parse the interpreter. Search for end of line is performed in
@@ -243,6 +245,13 @@ def is_importlib(filename: str) -> bool:
     return filename.endswith('.dll.a') or filename.endswith('.lib')
 
 
+def is_staticlib(filename: str) -> bool:
+    """
+    returns whether a file is import library of a dll
+    """
+    return filetype(filename) == 'ar' and not filename.endswith('.dll.a')
+
+
 def is_pkgconfig(filename: str) -> bool:
     """
     returns whether a file a pkgconfig file
@@ -262,6 +271,7 @@ def is_devel(path: str) -> bool:
     returns whether a file is development files
     """
     return (is_libdevel(path)
+            or is_staticlib(path)
             or is_importlib(path)
             or is_include(path)
             or is_devel_manpage(path)
