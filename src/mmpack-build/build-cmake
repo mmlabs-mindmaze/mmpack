@@ -24,8 +24,16 @@ $BUILDER
 
 
 if [ "$SKIP_TESTS" != "True" ] ; then
-	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-	LD_LIBRARY_PATH=$ld_lib_path $BUILDER test
+	has_test_target=1
+	case $BUILDER in
+	make)	make -q test > /dev/null 2> /dev/null || has_test_target=0 ;;
+	ninja)	grep -q "build test:" build.ninja || has_test_target=0 ;;
+	esac
+
+	if [ $has_test_target -eq 1 ] ; then
+		ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+		LD_LIBRARY_PATH=$ld_lib_path $BUILDER test
+	fi
 fi
 
 DESTDIR=$DESTDIR $BUILDER install
