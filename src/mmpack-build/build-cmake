@@ -6,11 +6,26 @@ initial_opts='-DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TR
 
 cd $BUILDDIR
 eval cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $initial_opts $OPTS
-make
+
+# Determine which generator has been used (supports only make and ninja)
+if [ -n "$BUILDER" ]; then
+	BUILDER=$BUILDER
+elif [ -e build.ninja ]; then
+	BUILDER=ninja
+elif [ -e Makefile ]; then
+	BUILDER=make
+else
+	echo "Could not find builder program" 1>&2
+	exit 1
+fi
+
+# Execute build
+$BUILDER
+
 
 if [ "$SKIP_TESTS" != "True" ] ; then
 	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-	LD_LIBRARY_PATH=$ld_lib_path make test
+	LD_LIBRARY_PATH=$ld_lib_path $BUILDER test
 fi
 
-make install DESTDIR=$DESTDIR
+DESTDIR=$DESTDIR $BUILDER install
