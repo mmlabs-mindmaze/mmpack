@@ -9,7 +9,7 @@ from glob import glob
 from typing import Set, Dict, List
 
 from . base_hook import BaseHook
-from . common import shlib_keyname, Assert
+from . common import shlib_keyname, wprint, Assert
 from . file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
 from . package_info import PackageInfo, DispatchData
@@ -193,4 +193,4 @@ class MMPackBuildHook(BaseHook):
                      .format(pkg.name)
             errmsg += 'Remaining symbols:\n\t'
             errmsg += '\n\t'.join(symbols)
-            raise Assert(errmsg)
+            wprint(errmsg)
