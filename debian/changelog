@@ -1,3 +1,10 @@
+mmpack (0.6.4) UNRELEASED; urgency=medium
+
+  * Only warn (instead of failure) if used shared library symbols could not be
+    found in any libraries (likely a plugin on ELF platform).
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 17 May 2021 21:56:26 +0200
+
 mmpack (0.6.3) unstable; urgency=medium
 
   * default prefixes and packages dir are now in XDG_CACHE_HOME/mmpack/prefix
