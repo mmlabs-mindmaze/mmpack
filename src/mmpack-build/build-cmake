@@ -5,7 +5,7 @@ set -e
 initial_opts='-DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE -G"Ninja" -Wno-dev'
 
 cd $BUILDDIR
-eval cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX $initial_opts $OPTS
+eval cmake $SRCDIR -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX -DCMAKE_PREFIX_PATH="$PREFIX" $initial_opts $OPTS
 
 # Determine which generator has been used (supports only make and ninja)
 if [ -n "$BUILDER" ]; then
