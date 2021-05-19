@@ -124,7 +124,7 @@ static
 void sha_setup(void)
 {
 	int i;
-	char filename[sizeof(HASHFILE_DIR) + 64];
+	char filename[sizeof(HASHFILE_DIR) + 64 + 2];
 	char hash[SHA_HEXSTR_LEN+1];
 
 	// Create the test folder that will contains the files generated for the test
@@ -133,7 +133,8 @@ void sha_setup(void)
 	// For each case, generate the filename from the test folder,
 	// create the file and compute the reference hash
 	for (i = 0; i < NUM_HASH_CASES; i++) {
-		sprintf(filename, "%s/%s", HASHFILE_DIR, sha_cases[i].name);
+		strcpy(filename, HASHFILE_DIR "/");
+		strcat(filename, sha_cases[i].name);
 		create_rand_file(filename, sha_cases[i].len);
 		gen_ref_hash(sha_cases[i].refhash, filename);
 	}
@@ -144,7 +145,8 @@ void sha_setup(void)
 	mm_mkdir(HASHFILE_DIR"/links/some dir", 0755, MM_RECURSIVE);
 
 	for (i = 0; i < NUM_SYMLINK_CASES; i++) {
-		sprintf(filename, "%s/%s", HASHFILE_DIR, symlink_cases[i].name);
+		strcpy(filename, HASHFILE_DIR "/");
+		strcat(filename, symlink_cases[i].name);
 		mm_symlink(symlink_cases[i].target, filename);
 
 		if (!symlink_cases[i].is_reg_target)
