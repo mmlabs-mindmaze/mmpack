@@ -575,18 +575,26 @@ def get_name_version_from_srcdir(srcdir: str) -> Tuple[str, str]:
     return (specs['name'], specs['version'])
 
 
-def download(url: str, path: str):
+def get_http_req(url: str) -> urllib3.response.HTTPResponse:
     """
-    Download file from url to the specified path
+    Get urllib3 http response to request of remote resource
     """
-    iprint('Downloading {} ... '.format(url))
-
     request = urllib3.PoolManager().request('GET', url)
     if request.status != 200:
         eprint('Failed ' + request.reason)
         raise RuntimeError('Failed to download {}: {}'
                            .format(url, request.reason))
 
+    return request
+
+
+def download(url: str, path: str):
+    """
+    Download file from url to the specified path
+    """
+    iprint('Downloading {} ... '.format(url))
+
+    request = get_http_req(url)
     with open(path, 'wb') as outfile:
         outfile.write(request.data)
 
