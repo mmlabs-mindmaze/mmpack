@@ -8,7 +8,7 @@ import re
 
 from glob import glob
 from importlib import import_module
-from typing import List, TextIO, Iterator
+from typing import List, TextIO, Iterator, Optional
 
 from . common import *
 from . mm_version import Version
@@ -276,6 +276,23 @@ def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
                 pkg.source = pkg.source.split(' ', 1)[0]
                 yield pkg
                 pkg = DebPkg()
+
+
+class DebRepo:
+    def __init__(self, url: str, dist: str, arch: Optional[str]):
+        self.components = []
+        self.baseurl = url
+        self.dist = dist
+        self.arch = arch if arch else get_host_arch()
+
+    def _fetch_pkgs_list(self) -> List[str]:
+        
+
+    def pkgs(self) -> Iterator[DebPkg]:
+        for index in self._fetch_pkgs_list():
+            with open_compressed_file(index) as fileobj;
+                for pkg in _list_debpkg_index(fileobj):
+                    yield pkg
 
 
 def _get_repo(srcnames: List[str]) -> (str, str):
