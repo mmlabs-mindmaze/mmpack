@@ -471,6 +471,38 @@ def create_tarball(srcdir: str, dstfile: str, compression: str = '') -> None:
         tar.close()
 
 
+def _compression_from_filename(path: str) -> str:
+    # Guess compression from extension
+    compression = path.rsplit('.', 1)[-1].lower()
+    if compression not in ('gz', 'xz', 'bz2', 'zst'):
+        compression = ''
+
+    return compression
+
+
+def _compression_from_magic_number(path: str) -> str:
+    try:
+        with open(path, 'rb', buffering=0) as fileobj:
+            magic = fileobj.read(6)
+    except FileNotFoundError:
+        return _compression_from_filename(path)
+
+    if not magic == 0:
+        compression = _compression_from_filename(path)
+    elif magic[:2] == b'\x1f\x8b':
+        compression = 'gz'
+    elif magic[:6] == b'\xfd\x37\x7a\x58\x5a\x00':
+        compression = 'xz'
+    elif magic[:3] == b'\x42\x5a\x68':
+        compression = 'bz2'
+    elif magic[:4] == b'\x28\xb5\x2f\xfd':
+        compression = 'zst'
+    else:
+        compression = ''
+
+    return compression
+
+
 def open_compressed_file(path: str, mode: str = 'rt',
                          compression: Optional[str] = None, **kwargs):
     """
@@ -484,7 +516,7 @@ def open_compressed_file(path: str, mode: str = 'rt',
             unspecified.
             compression: option string that specifies the type of compression.
                 Supports 'gz', 'xz', 'bz2', 'ztd' and ''. If unspecified it is
-                guessed from file extension.
+                guessed from file magic number or filename.
             **kwargs: keyword arguments passed to the opening function.
 
     Return:
@@ -494,10 +526,10 @@ def open_compressed_file(path: str, mode: str = 'rt',
         ValueError: compression is not a supported string.
     """
     if compression is None:
-        # Guess compression from extension
-        compression = path.rsplit('.', 1)[-1].lower()
-        if compression not in ('gz', 'xz', 'bz2', 'zst'):
-            compression = ''
+        if 'w' not in mode:
+            compression = _compression_from_magic_number(path)
+        else:
+            compression = _compression_from_filename(path)
 
     if compression == 'gz':
         fileobj = gzip.GzipFile(path, mode.replace('t', ''), mtime=0)
