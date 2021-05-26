@@ -6,9 +6,10 @@ helper module containing dpkg files parsing functions
 import os
 import re
 
+from email import message_from_bytes
 from glob import glob
 from importlib import import_module
-from typing import List, TextIO, Iterator
+from typing import List, TextIO, Iterator, Optional
 
 from . common import *
 from . mm_version import Version
@@ -278,6 +279,54 @@ def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
                 pkg = DebPkg()
 
 
+class DebRepo:
+    """
+    Wrapper of Debian repository
+    """
+    def __init__(self, url: str, dist: str, builddir: str,
+                 arch: Optional[str] = None):
+        self.components = []
+        self.baseurl = url
+        self.dist = dist
+        self.arch = arch if arch else get_host_arch()
+        self.pkgs_index_list = []
+
+        self._update_pkgs_index_list(builddir)
+
+    def _update_pkgs_index_list(self, builddir: str):
+        dist_url = f'{self.baseurl}/dists/{self.dist}/Release'
+        release = message_from_bytes(get_http_req(dist_url).data)
+        archs = release['Architectures'].split()
+        components = release['Components'].split()
+        shalist = {c[2]: (c[0], c[1]) for c in
+                   [l.strip().split()
+                    for l in release['SHA256'].strip().split('\n')]}
+
+        if self.arch not in archs:
+            raise RuntimeError(f'No dist for {self.arch} in {dist_url}')
+
+        for comp in components:
+            for ext in ('.gz', '.xz', ''):
+                comp_res = f'{comp}/binary-{self.arch}/Packages{ext}'
+                if comp_res in shalist:
+                    comp_url = f'{self.baseurl}/dists/{self.dist}/{comp_res}'
+                    filename = os.path.join(builddir,
+                                            comp_res.replace('/', '_'))
+                    cached_download(comp_url, filename,
+                                    expected_sha256=shalist[comp_res][0])
+                    self.pkgs_index_list.append(filename)
+                    return
+
+    def pkgs(self) -> Iterator[DebPkg]:
+        """
+        Iterator of package in the distribution
+        """
+        for index in self.pkgs_index_list:
+            with open_compressed_file(index) as fileobj:
+                for pkg in _list_debpkg_index(fileobj):
+                    yield pkg
+
+
 def _get_repo(srcnames: List[str]) -> (str, str):
     repo_str = os.getenv('MMPACK_BUILD_DPKG_REPO')
     if repo_str:
@@ -296,7 +345,8 @@ def _get_repo(srcnames: List[str]) -> (str, str):
         if not line.endswith(' Sources'):
             continue
         debrepo = line.split('|')[-1].strip()
-        base_url, dist, _ = debrepo.split()
+        base_url, distcomp, _ = debrepo.split()
+        dist = distcomp.rsplit('/', maxsplit=1)[0]
         return (base_url, dist)
 
     # If we reach here, there was no source package called srcname
@@ -360,21 +410,17 @@ class Dpkg(SysPkgManager):
 
     def _parse_pkgindex(self, builddir: str,
                         srcnames: List[str]) -> List[SysPkg]:
-        pkg_list = []
-
         # Try to get the repo that provide the specified source package
         try:
             repo_url, dist = _get_repo(srcnames)
         except ValueError:
-            return pkg_list
+            return []
 
-        arch = get_host_arch()
-        index = _download_debpkg_index(repo_url, dist, arch, builddir)
-
+        repo = DebRepo(repo_url, dist, builddir)
         pkg_list = []
         for srcname in srcnames:
             # Parse compressed package index for binary package matching source
-            for pkg in _list_debpkg_index(open_compressed_file(index)):
+            for pkg in repo.pkgs():
                 if pkg.source == srcname:
                     # Skip debug packages
                     if pkg.name.endswith('-dbg'):
@@ -388,5 +434,4 @@ class Dpkg(SysPkgManager):
             if pkg_list:
                 return pkg_list
 
-        raise RuntimeError('Could not find {} or any compressed version!'
-                           .format(index))
+        raise RuntimeError(f'Could not find {srcnames} in {repo_url}, {dist}')
