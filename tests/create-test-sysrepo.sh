@@ -30,14 +30,33 @@ build_debian_repo() {
 	pooldir=$REPO_DIR/debian/pool
 	distdir=$REPO_DIR/debian/dists/testdata
 	mkdir -p $pooldir
-	mkdir -p $distdir/binary-amd64
+	mkdir -p $distdir/main/binary-amd64
+	pkgfile=$distdir/main/binary-amd64/Packages.gz
 	for debfile in $deb_builddir/*.deb
 	do
 		dpkg-deb -f $debfile dpkg-deb -f $debfile Package Source Version Architecture Maintainer Installed-Size Depends Section Description
 		cp $debfile $pooldir
 		echo "Filename: pool/$(basename $debfile)"
 		echo ""
-	done | gzip > $distdir/binary-amd64/Packages.gz
+	done | gzip > $pkgfile
+
+	pkgfile_sz=$(stat -c "%s" $pkgfile)
+	pkgfile_sha256=($(sha256sum $pkgfile))
+	cat > $distdir/Release <<RELEASE
+Origin: MMpack
+Label: Test
+Suite: test
+Version: 42
+Codename: testdata
+Changelogs: None
+Date: Sat, 27 Mar 2021 09:55:13 UTC
+Acquire-By-Hash: yes
+Architectures: amd64
+Components: main
+Description: MMPack dummy debian repo for test
+SHA256:
+ $pkgfile_sha256   $pkgfile_sz main/binary-amd64/Packages.gz
+RELEASE
 
 	# Cleanup temporary package build dirs
 	rm -rf $deb_builddir
