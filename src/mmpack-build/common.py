@@ -20,7 +20,8 @@ import platform
 from hashlib import sha256
 from io import TextIOWrapper
 from subprocess import PIPE, Popen, run
-from typing import Any, AnyStr, Optional, Union, Dict, Tuple, List, Set
+from typing import Any, AnyStr, BinaryIO, Optional, \
+    Union, Dict, Tuple, List, Set
 
 import urllib3
 import yaml
@@ -575,18 +576,26 @@ def get_name_version_from_srcdir(srcdir: str) -> Tuple[str, str]:
     return (specs['name'], specs['version'])
 
 
-def download(url: str, path: str):
+def get_url_io(url: str) -> BinaryIO:
     """
-    Download file from url to the specified path
+    Get stream to remote ressource
     """
-    iprint('Downloading {} ... '.format(url))
-
     request = urllib3.PoolManager().request('GET', url)
     if request.status != 200:
         eprint('Failed ' + request.reason)
         raise RuntimeError('Failed to download {}: {}'
                            .format(url, request.reason))
 
+    return request
+
+
+def download(url: str, path: str):
+    """
+    Download file from url to the specified path
+    """
+    iprint('Downloading {} ... '.format(url))
+
+    request = get_url_io(url)
     with open(path, 'wb') as outfile:
         outfile.write(request.data)
 
