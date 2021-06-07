@@ -122,7 +122,7 @@ class Provide:
         self.symbols = dict()
 
     def _get_decorated_symbols(self) -> List[ProvidedSymbol]:
-        return [ProvidedSymbol(s) for s in self.symbols.key()]
+        return [ProvidedSymbol(s) for s in self.symbols.keys()]
 
     def add_symbols(self, symbols: Set[str],
                     version: Version = Version('any')) -> None:
