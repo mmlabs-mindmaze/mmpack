@@ -9,7 +9,7 @@ from copy import copy
 from os.path import basename, exists, join as join_path
 from subprocess import call, check_call, DEVNULL
 from tarfile import open as taropen, TarFile, TarInfo
-from typing import Dict, Iterator, NamedTuple
+from typing import Dict, Iterator, List, NamedTuple
 
 from . common import *
 from . workspace import Workspace, cached_download, find_project_root_folder
@@ -280,11 +280,29 @@ class SourceTarball:
         self._fetch_upstream(specs, srcdir)
         self._patch_sources(specs.get('patches', []), srcdir)
 
+        # Run source strapped_hook
+        env = {'SRCDIR': srcdir}
+        self._run_hook('source_strapped_hook', specs['method'], env)
+
     def get_srcdir(self) -> str:
         """
         get directory of extracted source
         """
         return self._srcdir
+
+    def _run_hook(self, hook_script: str, method: str, env: Dict[str, str]):
+        # Run create_srcdir_hook if existing
+        script = join_path(self._srcdir, 'mmpack', hook_script)
+        if not exists(script):
+            return
+
+        hook_env = os.environ.copy()
+        hook_env.update({
+            'BUILDIR': self._builddir,
+        })
+        hook_env.update(env)
+
+        shell(['sh', script] + args, env=hook_env)
 
     def iter_mmpack_srcs(self) -> Iterator[ProjectSource]:
         """
@@ -441,6 +459,17 @@ class SourceTarball:
         self.trace['pkg'] = {'method': method}
         create_srcdir_callable()
 
+        if method == 'srcpkg':
+            return
+
+        env = {
+            'PATH_URL': self._path_url,
+            'SRCDIR': self._srcdir,
+        }
+        if self._vcsdir:
+            env['VCSDIR'] = self._vcsdir
+        self._run_hook('create_srcdir_hook', [method], env)
+
     def _fetch_upstream_from_git(self, specs: Dict[str, str]):
         """
         Fetch upstream sources from git clone
@@ -461,8 +490,6 @@ class SourceTarball:
 
         gitref = _git_subcmd(['rev-parse', 'HEAD'], gitdir=gitdir)
         self.trace['upstream'].update({'url': url, 'ref': gitref})
-
-        rmtree_force(gitdir)
 
     def _fetch_upstream_from_tar(self, specs: Dict[str, str]):
         """
@@ -534,8 +561,17 @@ class SourceTarball:
             upstream_srcdir = elt
             dir_content = os.listdir(upstream_srcdir)
 
+        # Run fetch_upstream_hook
+        env = {
+            'URL': specs['url'],
+            'SRCDIR': upstream_srcdir,
+        }
+        if method == 'git':
+            env['VCSDIR'] = self._builddir + '/upstream.git'
+        self._run_hook('fetch_upstream_hook', [method], env)
+
         # Move extracted upstream sources except mmpack packaging
-        for elt in dir_content:
+        for elt in os.listdir(upstream_srcdir):
             if elt != 'mmpack':
                 shutil.move(os.path.join(upstream_srcdir, elt), srcdir)
 
