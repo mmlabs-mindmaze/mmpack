@@ -10,6 +10,7 @@ from typing import Set, Dict, Tuple, List, NamedTuple, Iterator, Optional
 
 from . common import wprint, yaml_serialize, yaml_load
 from . mm_version import Version
+from . package_info import PackageInfo
 from . workspace import Workspace
 
 
@@ -131,7 +132,7 @@ class Provide:
         """
         self.symbols.update(dict.fromkeys(symbols, version))
 
-    def update_from_specs(self, pkg_specs: dict) -> None:
+    def update_from_specs(self, pkg_specs: dict, pkg: PackageInfo) -> None:
         """
         Update minimal version associated with each symbol. This is
         typically used to integrate the data in package provide files.
@@ -145,6 +146,7 @@ class Provide:
                 that must be pulled. Both keys ('depends' and 'symbols') are
                 optional, but if is present, it must follow the described
                 structure.
+            pkg: binary package being built.
 
         Returns:
             None
@@ -174,10 +176,13 @@ class Provide:
                 sym = lut_syms.get(specsym.name)
                 matchsyms = [sym] if sym else []
 
-            # No match, report only in symbol in spec is not optional
+            # No match, report only in symbol in spec is not optional or more
+            # recent than package being built (may append with ghost)
             if not matchsyms:
                 if 'optional' not in specsym.tags:
-                    specs_symbols.mark_removed(specsym)
+                    version = specsym.version
+                    if version == 'CURRENT' or Version(version) <= pkg.version:
+                        specs_symbols.mark_removed(specsym)
                 continue
 
             for provsym in matchsyms:
@@ -244,7 +249,8 @@ class ProvideList:
                                for sym, version in sodata['symbols'].items()}
             self.add(provide)
 
-    def update_from_specs(self, pkg_spec_provide: Dict, pkgname: str) -> None:
+    def update_from_specs(self, pkg_spec_provide: Dict,
+                          pkg: PackageInfo) -> None:
         """
         Update the ProvideList symbols dictionary based on content of
         specs. specs should be the result of loading the yaml contained in
@@ -252,7 +258,7 @@ class ProvideList:
 
         Args:
             pkg_spec_provide: dict representing <pkgname>.provide content.
-            pkgname: name of the binary package being built.
+            pkg: binary package being built.
 
         Returns:
             None
@@ -271,7 +277,7 @@ class ProvideList:
         if num_provides == 0:
             raise ValueError('provides specified for type {} in '
                              'package {} but no such symbols are '
-                             'provided'.format(self.type, pkgname))
+                             'provided'.format(self.type, pkg.name))
 
         # If there is only one provide of the type, it is allowed that
         # the provide in specs list directly the exported symbols. In
@@ -287,7 +293,7 @@ class ProvideList:
                 specs = {key: {'symbols': specs}}
 
         for provide in self._provides.values():
-            provide.update_from_specs(specs.get(provide.name, dict()))
+            provide.update_from_specs(specs.get(provide.name, dict()), pkg)
 
     def _get_dep_minversion(self, soname: str,
                             symbols: Set[str]) -> Tuple[str, Version]:

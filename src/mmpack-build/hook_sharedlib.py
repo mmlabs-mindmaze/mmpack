@@ -151,7 +151,7 @@ class MMPackBuildHook(BaseHook):
             shlib_provides.add(provide)
 
         # update symbol information from .provides file if any
-        shlib_provides.update_from_specs(specs_provides, pkg.name)
+        shlib_provides.update_from_specs(specs_provides, pkg)
 
         pkg.provides['sharedlib'] = shlib_provides
 
