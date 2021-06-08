@@ -5,6 +5,7 @@ mmpack (0.6.4) UNRELEASED; urgency=medium
   * Name mmpack package of python pkg after the import name in python. If
     needed split python package over each its top dir.
   * python -nspkg.pth considered as python package metadata.
+  * Add support for mmpack-build mksource hooks.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 17 May 2021 21:56:26 +0200
 
