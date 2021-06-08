@@ -162,32 +162,32 @@ class _PyPkg:
     def __init__(self):
         self.files = set()
         self.name = None
-        self.toplevel = set()
+        self.import_names = set()
         self.is_single_file_egginfo = False
+        self.meta_top = set()
 
-    def add(self, filename: str):
+    def add(self, filename: str, info: PyNameInfo):
         """
         Register an installed file in python package
         """
-        self.files.add(filename)
+        if not info.is_egginfo:
+            self.import_names.update(info.pyname)
 
-    def update_metadata(self) -> Set[str]:
-        """
-        Compute metadata from registered files
-        """
-        toplevel = set()
-        for filename in self.files:
-            if filename.endswith('.egg-info/PKG-INFO'):
-                self.name = _parse_metadata(filename)['Name']
+        if filename.endswith('.egg-info/PKG-INFO'):
+            self.name = _parse_metadata(filename)['Name']
 
-            if filename.endswith('.egg-info'):
+        if filename.endswith('.egg-info'):
+            if not self.files:
                 self.is_single_file_egginfo = True
-                self.name = _parse_metadata(filename)['Name']
+            self.name = _parse_metadata(filename)['Name']
+        else:
+            self.is_single_file_egginfo = False
 
-            if filename.endswith('.egg-info/top_level.txt'):
-                toplevel = {d.strip() for d in open(filename).readlines()}
+        if filename.endswith('.egg-info/top_level.txt'):
+            dirs = {d.strip() for d in open(filename).readlines()}
+            self.meta_top.update(dirs)
 
-        return toplevel
+        self.files.add(filename)
 
     def merge_pkg(self, pypkg):
         """
@@ -195,7 +195,8 @@ class _PyPkg:
         accordingly
         """
         self.files.update(pypkg.files)
-        self.toplevel.update(pypkg.toplevel)
+        self.import_names.update(pypkg.import_names)
+        self.meta_top.update(pypkg.meta_top)
         if not self.name:
             self.name = pypkg.name
 
@@ -212,6 +213,35 @@ class _PyPkg:
             name = name[len('python-'):]
         return 'python3-' + name
 
+
+def _assign_privname_to_pypkg(priv_name, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
+    # Pick package that has same name as private name excepting for leading '_'
+    pypkg = pypkgs.get(priv_name[1:])
+    if pypkg:
+        return pypkg
+
+    # Pick the package that has metadata whose topdir list private name
+    for pypkg in {p for p in pypkgs.values() if p.meta_top}:
+        if priv_name in pypkg.meta_top:
+            return pypkg
+
+    # Pick the first that is not a private package
+    return list({p for n, p in pypkg.items() if not n.startswith('_')})[0]
+
+
+def _assign_metadata(metapkg, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
+    public_pkgs = {n: p for n, p in pypkgs.items() if pypkgs.import_names}
+
+    pypkg = public_pkgs.get(metapkg.name)
+    if pypkg:
+        return pypkg
+
+    for pyname, pypkg in public_pkgs.items():
+        if pyname.startswith(metapkg.name):
+            return pypkg
+
+    return list({public_pkgs.values()})[0]
+        
 
 #####################################################################
 # Python hook for mmpack-build
@@ -334,28 +364,29 @@ class MMPackBuildHook(BaseHook):
             try:
                 info = _parse_py3_filename(file)
                 pypkg = pypkgs.setdefault(info.pyname, _PyPkg())
-                pypkg.add(file)
+                pypkg.add(file, info=info)
             except FileNotFoundError:
                 pass
 
-        # Read python package metadata file and merge together package matching
-        # the toplevel field
-        for pypkg in pypkgs.copy().values():
-            toplevel = pypkg.update_metadata()
-
-            # If single file egg-info, this is a metadata common for all python
-            # packages. => merge all them
+        # If single file egg-info, this is a metadata common for all python
+        # packages. => merge all them
+        for pypkg in pypkgs.values():
             if pypkg.is_single_file_egginfo:
                 for otherpkg in pypkgs.values():
                     pypkg.merge_pkg(otherpkg)
                 pypkgs = {pypkg.name: pypkg}
                 break
 
-            for topdir in toplevel:
-                try:
-                    pypkg.merge_pkg(pypkgs.pop(topdir))
-                except KeyError:
-                    pass
+        # Merge python packages with a private import name into one of the
+        # other packages
+        for name in {n for n in pypkgs.keys() if n.startswith('_')}:
+            pypkg = _assign_privname_to_pypkg(name, pypkgs)
+            pypkg.merge_pkg(pypkgs.pop(name))
+
+        # Merge package that is only metadata to compatible one
+        for metapkg in {p for p in pypkg.values() if not p.import_names}:
+            pypkg = _assign_metadata(metapkg, pypkgs)
+            pypkg.merge_pkg(pypkgs.pop(name))
 
         for pypkg in pypkgs.values():
             pkgname = pypkg.mmpack_pkgname()
