@@ -201,9 +201,9 @@ class _PyPkg:
         """
         names = {n for n in self.import_names if not n.startswith('_')}
         if self.name:
-            pyname = self.name.lower().replace('_', '-')
-            if pyname.startswith('python-'):
-                pyname = pyname[len('python-'):]
+            pyname = self.name.lower().replace('-', '_')
+            if pyname.startswith('python_'):
+                pyname = pyname[len('python_'):]
 
             if not names:
                 names = {pyname}
@@ -214,7 +214,7 @@ class _PyPkg:
 
         # Pick one name if more than one candidate
         name = list(names)[0]
-        return 'python3-' + name
+        return 'python3-' + name.replace('_', '-')
 
 
 def _assign_privname_to_pypkg(priv_name, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
