@@ -56,7 +56,7 @@ class PyNameInfo(NamedTuple):
     """
     pyname: str
     sitedir: str
-    is_egginfo: bool
+    is_metadata: bool
 
 
 def _parse_metadata(filename: str) -> dict:
@@ -87,8 +87,8 @@ def _parse_py3_filename(filename: str) -> PyNameInfo:
     name = grps[1]
     ext = grps[2]
 
-    is_egg = ext.endswith('.egg-info')
-    return PyNameInfo(pyname=name, sitedir=sitedir, is_egginfo=is_egg)
+    is_metadata = ext.endswith('.egg-info') or ext.endswith('-nspkg.pth')
+    return PyNameInfo(pyname=name, sitedir=sitedir, is_metadata=is_metadata)
 
 
 def _gen_pysymbols(pkgfiles: Set[str], sitedirs: List[str]) -> Set[str]:
@@ -170,7 +170,7 @@ class _PyPkg:
         """
         Register an installed file in python package
         """
-        if not info.is_egginfo:
+        if not info.is_metadata:
             self.import_names.update({info.pyname})
 
         if not self.name and (filename.endswith('.egg-info/PKG-INFO')
