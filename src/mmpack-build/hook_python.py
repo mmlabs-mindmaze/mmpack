@@ -409,7 +409,7 @@ class MMPackBuildHook(BaseHook):
         # Add public python package
         public_sitedirs = _get_packaged_public_sitedirs(pkg)
         py3_provides = _gen_py_provides(pkg, public_sitedirs)
-        py3_provides.update_from_specs(specs_provides, pkg.name)
+        py3_provides.update_from_specs(specs_provides, pkg)
         pkg.provides['python'] = py3_provides
 
         # Register private python package for cobuilded package dependency
