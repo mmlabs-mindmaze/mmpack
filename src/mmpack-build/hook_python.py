@@ -243,7 +243,7 @@ def _assign_metadata(metapkg, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
         if pyname.startswith(metapkg.name):
             return pypkg
 
-    return list({public_pkgs.values()})[0]
+    return list(public_pkgs.values())[0]
 
 
 #####################################################################
