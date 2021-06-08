@@ -151,12 +151,20 @@ class PkgData:
 
         # Loop over import statement definition and process imported modules
         for imp in mod.nodes_of_class(Import):
-            self._add_import(imp)
+            try:
+                self._add_import(imp)
+            except RecursionError:
+                print('Recursion error, maybe astroid bug...'
+                      'Skipping provides processing', file=sys.stderr)
 
         # Loop over 'from ... import ...' definition and process imported
         # modules
         for impfrom in mod.nodes_of_class(ImportFrom):
-            self._add_importfrom(impfrom)
+            try:
+                self._add_importfrom(impfrom)
+            except RecursionError:
+                print('Recursion error, maybe astroid bug...'
+                      'Skipping provides processing', file=sys.stderr)
 
     def add_namespace_symbol(self, namespace: str, symbol: str):
         """
