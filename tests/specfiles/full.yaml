@@ -36,6 +36,8 @@ custom-pkgs:
     depends:
     - custom-dep: any
     - other-custom-dep: 2.0.0
+    - somedep (>= 1.2)
+    - another
     sysdepends-debian:
     - debian-dep
     - other-debian-dep
