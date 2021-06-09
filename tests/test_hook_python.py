@@ -206,6 +206,8 @@ class TestPythonHook(unittest.TestCase):
         pkgfiles = ['pkg_imported/__init__.py']
         refimports = {
             'multi.somefunc',
+            'multi.bar.Employee',
+            'multi.bar.Employee2',
             'simple.main_dummy_fn',
             'simple.MainData',
             'simple.MainData.__init__',
