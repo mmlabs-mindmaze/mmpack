@@ -1,4 +1,4 @@
-mmpack (0.6.4) UNRELEASED; urgency=medium
+mmpack (0.6.4) unstable; urgency=medium
 
   * Only warn (instead of failure) if used shared library symbols could not be
     found in any libraries (likely a plugin on ELF platform).
@@ -7,7 +7,7 @@ mmpack (0.6.4) UNRELEASED; urgency=medium
   * python -nspkg.pth considered as python package metadata.
   * Add support for mmpack-build mksource hooks.
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 17 May 2021 21:56:26 +0200
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 09 Jun 2021 08:19:36 +0200
 
 mmpack (0.6.3) unstable; urgency=medium
 
