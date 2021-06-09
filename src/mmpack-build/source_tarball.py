@@ -66,8 +66,7 @@ def _git_subcmd(subcmd: List[str], gitdir: str = None, worktree: str = None,
 
 # pylint: disable=too-many-arguments
 def _git_clone(url: str, worktree: str, gitdir: str = None,
-               refspec: str = None, git_ssh_cmd: str = None,
-               fetch_only_commit: bool = True):
+               refspec: str = None, git_ssh_cmd: str = None):
     """
     create a shallow clone of a git repo
 
@@ -77,8 +76,6 @@ def _git_clone(url: str, worktree: str, gitdir: str = None,
         gitdir: optional folder that will hold the git repository.
         refspec: tag, branch, commit hash to check out
         git_ssh_cmd: optional, ssh cmd to use when cloning git repo through ssh
-        fetch_only_commit: if true, limit fetching to the commit specified by
-            refspec, otherwise, fetch whole git history
     """
     if os.path.isdir(url):
         url = 'file://' + os.path.abspath(url)
@@ -94,10 +91,8 @@ def _git_clone(url: str, worktree: str, gitdir: str = None,
     # Create and init git repository
     _git_subcmd(['init', '--quiet'], gitdir)
 
-    # Fetch git refspec (or whole history)
-    fetch_args = ['fetch', '--quiet']
-    fetch_args += ['--depth=2'] if fetch_only_commit else ['--tags']
-    fetch_args += [url, refspec]
+    # Fetch git refspec
+    fetch_args = ['fetch', '--quiet', '--tags', url, refspec]
     _git_subcmd(fetch_args, gitdir, worktree, git_ssh_cmd)
 
     # Checkout the specified refspec
@@ -359,8 +354,7 @@ class SourceTarball:
                    worktree=self._srcdir,
                    gitdir=self._vcsdir,
                    refspec=self.tag,
-                   git_ssh_cmd=git_ssh_cmd,
-                   fetch_only_commit=not self._update_version)
+                   git_ssh_cmd=git_ssh_cmd)
 
         # Get tag name if not set yet (use current branch)
         if not self.tag:
