@@ -130,7 +130,7 @@ considered a custom packages.
 List of fields to specify a package:
 
  :depends:
-    A package **runtime mmpack** dependency
+    A list of package **runtime mmpack** dependencies
  :sysdepends-platform:
     Where **platform** is to be replace by the platform name
     (e.g. sysdepends-debian) is a platform **runtime** dependency
