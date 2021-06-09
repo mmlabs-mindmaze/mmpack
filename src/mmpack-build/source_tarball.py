@@ -94,10 +94,8 @@ def _git_clone(url: str, worktree: str, gitdir: str = None,
     # Create and init git repository
     _git_subcmd(['init', '--quiet'], gitdir)
 
-    # Fetch git refspec (or whole history)
-    fetch_args = ['fetch', '--quiet']
-    fetch_args += ['--depth=2'] if fetch_only_commit else ['--tags']
-    fetch_args += [url, refspec]
+    # Fetch git refspec
+    fetch_args = ['fetch', '--quiet', '--tags', url, refspec]
     _git_subcmd(fetch_args, gitdir, worktree, git_ssh_cmd)
 
     # Checkout the specified refspec
