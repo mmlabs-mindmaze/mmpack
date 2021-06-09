@@ -102,6 +102,6 @@ class TestSrcPackageClass(unittest.TestCase):
                          r'This is the fullest mmpack specfile possible.\nThis should follow.*')
 
         self.assertEqual(len(custom._dependencies['sysdepends']), 2)
-        self.assertEqual(len(custom._dependencies['depends']), 2)
+        self.assertEqual(len(custom._dependencies['depends']), 4)
         self.assertRegexpMatches(custom.description,
                                  r'This should overload .*')

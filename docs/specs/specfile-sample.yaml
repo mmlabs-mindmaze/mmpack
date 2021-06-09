@@ -32,8 +32,8 @@ copyright: "Copyright Thorin son of Thráin son of Thrór"  # or path to file
 custom-pkgs:
   sample:
     depends:  # this is not a build dependency, but a runtime one
-      - util-stuff: any
-      - other-util-stuff: 1.0.0
+      - util-stuff
+      - other-util-stuff (>= 1.0.0)
     sysdepends-debian:
       - debian-dep: any
     sysdepends-msys:
