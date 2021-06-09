@@ -60,7 +60,7 @@ class PyNameInfo(NamedTuple):
 
 
 def _parse_metadata(filename: str) -> dict:
-    return dict(Parser().parse(open(filename)))
+    return dict(Parser().parse(open(filename, encoding='utf-8')))
 
 
 def _parse_py3_filename(filename: str) -> PyNameInfo:
