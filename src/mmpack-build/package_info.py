@@ -3,13 +3,17 @@
 interexchange data for package definition
 """
 
-from typing import Set
+import re
+from typing import Set, Tuple
 
 from . common import extract_matching_set
 from . mm_version import Version
 
 
-def _unpack_deps_version(item):
+_DEP_RE = re.compile(r'([a-zA-Z0-9-]+)\s*(?:\(\s*([<>=]+)\s*([^) ]+)\s*\))?')
+
+
+def _unpack_deps_version(dep) -> Tuple[str, Version, Version]:
     """
     helper to allow simpler mmpack dependency syntax
 
@@ -20,14 +24,21 @@ def _unpack_deps_version(item):
         <name>: min_version
         <name>: any
     """
-    try:
-        name, minv, maxv = item
-        return (name, Version(minv), Version(maxv))
-    except ValueError:
-        name, minv = item  # if that fails, let the exception be raised
-        minv = Version(minv)
-        maxv = Version('any')
-        return (name, minv, maxv)
+    match = _DEP_RE.fullmatch(dep.strip())
+    if match:
+        name, operator, version = match.groups()
+
+        if not operator:
+            return (name, Version('any'), Version('any'))
+        elif operator == '=':
+            return (name, Version(version), Version(version))
+        elif operator == '>=':
+            return (name, Version(version), Version('any'))
+        elif operator == '<':
+            return (name, Version('any'), Version(version))
+
+    raise ValueError(f'Invalid dependency: "{dep}".'
+                     ' It respect the format "depname [(>=|<|= version)]"')
 
 
 class PackageInfo:
@@ -68,10 +79,8 @@ class PackageInfo:
         self.description = specs.get('description', '').strip()
 
         # Load depends
-        for dep in specs.get('depends', {}):
-            item = list(dep.items())[0]
-            name, minv, maxv = _unpack_deps_version(item)
-            self.deplist.append((name, minv, maxv))
+        for dep in specs.get('depends', []):
+            self.deplist.append(_unpack_deps_version(dep))
 
         # Load host distribution specific system depends
         sysdeps_key = 'sysdepends-' + host_dist
