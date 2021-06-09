@@ -142,17 +142,22 @@ class DependsInspector:
         """
         real_name = impfrom.real_name(name)
         module = impfrom.do_import_module(impfrom.modname)
-        node = next(module.igetattr(real_name))
+        for node in module.getattr(real_name):
+            if not node or node is impfrom:
+                continue
 
-        # If the pointed node does not belong to package, just report the
-        # public name as it is known now
-        if not self._is_local_module(module):
-            return (impfrom.modname + '.' + real_name, node)
+            # If the pointed node does not belong to package, just report the
+            # public name as it is known now
+            if not self._is_local_module(module):
+                return (impfrom.modname + '.' + real_name, node)
 
-        # Module defining the name is in the package so check the name is not
-        # generated from an import done in this module
-        attrname, name = self._follow_name_origin(node, real_name)
-        return (impfrom.modname + '.' + attrname, node)
+            # Module defining the name is in the package so check the name is not
+            # generated from an import done in this module
+            attrname, name = self._follow_name_origin(node, real_name)
+            return (impfrom.modname + '.' + attrname, node)
+
+        raise AttributeInferenceError
+
 
     def _follow_name_origin(self, node: NodeNG,
                             name: str) -> Tuple[str, NodeNG]:
@@ -213,11 +218,7 @@ class DependsInspector:
         for node in nodelist:
             symbol_name, node_def = self._follow_name_origin(node, name)
             if self._is_external_pkg(node_def):
-                # skip base whose origin could not be found (mostly likely to
-                # astroid transform that has dropped the module of the original
-                # node)
-                if not node_def.qname().startswith('.'):
-                    self.used_symbols.add(symbol_name)
+                self.used_symbols.add(symbol_name)
 
     def _inspect_node_call(self, call: Call):
         """
