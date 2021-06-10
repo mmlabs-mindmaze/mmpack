@@ -12,17 +12,12 @@ from . mm_version import Version
 
 _DEP_RE = re.compile(r'([a-zA-Z0-9-]+)\s*(?:\(\s*([<>=]+)\s*([^) ]+)\s*\))?')
 
-
-def _unpack_deps_version(dep) -> Tuple[str, Version, Version]:
+def _unpack_dep_string(dep: str) -> Tuple[str, Version, Version]:
     """
-    helper to allow simpler mmpack dependency syntax
-
-    expected full mmpack dependency syntax is:
-        <name>: [min_version, max_version]
-
-    this allows the additional with implicit 'any' as maximum:
-        <name>: min_version
-        <name>: any
+    expected ependency syntax is:
+        <name>
+    or
+        <name> (operator version)
     """
     match = _DEP_RE.fullmatch(dep.strip())
     if match:
@@ -37,8 +32,61 @@ def _unpack_deps_version(dep) -> Tuple[str, Version, Version]:
         elif operator == '<':
             return (name, Version('any'), Version(version))
 
-    raise ValueError(f'Invalid dependency: "{dep}".'
-                     ' It respect the format "depname [(>=|<|= version)]"')
+    raise ValueError(f'Invalid dependency: "{dep}". It must respect the '
+                     'format "depname [(>=|<|= version)]"')
+
+
+def _unpack_dep_dict(dep: dict) -> Tuple[str, Version, Version]:
+    """
+    expected full mmpack dependency syntax is:
+        <name>: [min_version, max_version]
+        <name>: min_version
+        <name>: any
+    """
+    if len(dep) > 1:
+        raise ValueError(f'invalid dependency "{dep}"')
+
+    name, val = dep.popitem()
+    if isinstance(val, str):
+        minv = val
+        maxv = 'any'
+    elif isinstance(val, (list, tuple)):
+        minv = val[0]
+        maxv = val[1]
+    else:
+        raise ValueError(f'invalid dependency "{dep}"')
+
+    return (name, Version(minv), Version(maxv))
+
+
+def _unpack_dep(dep) -> Tuple[str, Version, Version]:
+    """
+    helper to allow simpler mmpack dependency syntax
+
+    expected full mmpack dependency syntax is:
+        <name>
+    or
+        <name> (operator version)
+    or
+        <name>: [min_version, max_version]
+        <name>: min_version
+        <name>: any
+    """
+    if isinstance(dep, str):
+        return _unpack_dep_string(dep)
+    elif isinstance(dep, dict):
+        return _unpack_dep_dict(dep)
+
+    raise ValueError(f'Invalid dependency: "{dep}". It must respect '
+                     '''the one of the following format:
+                            <name>
+                        or
+                            <name> (operator version)
+                        or
+                            <name>: [min_version, max_version]
+                            <name>: min_version
+                            <name>: any
+                     ''')
 
 
 class PackageInfo:
@@ -80,7 +128,7 @@ class PackageInfo:
 
         # Load depends
         for dep in specs.get('depends', []):
-            self.deplist.append(_unpack_deps_version(dep))
+            self.deplist.append(_unpack_dep(dep))
 
         # Load host distribution specific system depends
         sysdeps_key = 'sysdepends-' + host_dist
