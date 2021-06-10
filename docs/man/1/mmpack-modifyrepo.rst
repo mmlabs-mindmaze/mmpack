@@ -16,6 +16,8 @@ SYNOPSIS
 
 **mmpack-modifyrepo** [*options*] **add** *manifest_file*
 
+**mmpack-modifyrepo** [*options*] **remove-src** [--name *name*] [--version *version*] [--srcsha *srcsha*]
+
 **mmpack-modifyrepo** [*options*] **batch**
 
 **mmpack-modifyrepo** -h|--help
@@ -50,6 +52,11 @@ package will be added to the repository along with the binary package matching
 its architecture. The source and binary indices are updated and the command
 returns afterward. The success of the operation is reported in the exit code of
 the command.
+
+remove-src subcommand
+---------------------
+Remove the source package specified by option **--name**, **--version** and/or
+**--srcsha**. The associated binary package are removed
 
 batch subcommand
 ----------------
