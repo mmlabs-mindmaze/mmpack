@@ -142,7 +142,7 @@ def batch_updates(repo: Repo, initial_change: bool):
         success = True
         if cmd == 'ADD':
             success, errmsg = batch_cmd_add(repo, args)
-        if cmd == 'REMOVE_MATCHING_SRC':
+        elif cmd == 'REMOVE_MATCHING_SRC':
             success, errmsg = batch_cmd_remove_src(repo, args)
         elif cmd == 'COMMIT':
             repo.commit_changes()
