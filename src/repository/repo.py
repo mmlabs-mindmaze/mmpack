@@ -700,6 +700,38 @@ class Repo:
 
         return True
 
+    def stage_remove_matching_src(self, name: Optional[str] = None,
+                                  version: Optional[str] = None,
+                                  srcsha: Optional[str] = None) -> bool:
+        """
+        This function modifies the stagged changes to reflect a source package
+        removal. When a source package is removed, all of its associated Binary
+        Package are removed as well.
+
+        Args:
+            name: source package name
+            version: version of source package
+            srcsha: srcsha256 of source package
+
+        Returns:
+            True if the modifications to the repository have been successfully
+            stagged to the upcoming change. Otherwise false is returned.
+        """
+        try:
+            if not name and not version and not srcsha:
+                raise ValueError('At least one option must be supplied')
+
+            for src_id in self._matching_srcids(srcname=name,
+                                                version=version,
+                                                srcsha256=srcsha):
+                self._remove_src_and_bin_pkgs(src_id, self.to_remove)
+        except (KeyError, IOError, ValueError) as error:
+            self.logger.error(error)
+            return False
+
+        self._dump_indexes_working_dir(self.to_add)
+        return True
+
     def _mv_files_working_dir(self, manifest_file: str, manifest: dict,
                               mv_op: Callable[[str, str], None]):
         """
