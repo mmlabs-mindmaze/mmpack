@@ -62,6 +62,13 @@ The standard input is read line by line. In each line a command can be issued
       add** were called. However changes are not yet visible in the repository
       folder.
 
+   REMOVE_MATCHING_SRC
+      Stage removal the source package matching the comma separated list of
+      constraints. The binary packages mathching the source package will be
+      staged for removal as well. The constraints must be all or some of the
+      followings: **name**, **version**, **srcsha**. Example of argument:
+      `name=foo, version=1.3.2`
+
    BEGIN_CHANGES
       start staging changes that will be applied to repository
 
