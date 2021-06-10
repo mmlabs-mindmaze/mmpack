@@ -96,6 +96,29 @@ def batch_cmd_add(repo: Repo, manifest: str) -> Tuple[bool, str]:
     return (success, '')
 
 
+def batch_cmd_remove_src(repo: Repo, argument: str) -> Tuple[bool, str]:
+    """
+    Remove source and associated binary package
+    """
+    valid_args = {'name', 'version', 'srcsha'}
+
+    if not argument:
+        return (False, 'missing argument')
+
+    args = {n[0].strip(): n[1].strip()
+            for n in arg.split('=')
+            for arg in argument.split(',')}
+
+    if not set(args).issubset(valid_args):
+        return (False, 'Invalid options: {set(args).difference(valid_args)}')
+
+    success = repo.stage_remove_matching_src(manifest, **args)
+    if not success:
+        return (False, 'remove source failed')
+
+    return (success, '')
+
+
 def batch_updates(repo: Repo, initial_change: bool):
     """
     Read stdin and perform repository update specified in each line
@@ -119,6 +142,8 @@ def batch_updates(repo: Repo, initial_change: bool):
         success = True
         if cmd == 'ADD':
             success, errmsg = batch_cmd_add(repo, args)
+        if cmd == 'REMOVE_MATCHING_SRC':
+            success, errmsg = batch_cmd_remove_src(repo, args)
         elif cmd == 'COMMIT':
             repo.commit_changes()
             repo.begin_changes()

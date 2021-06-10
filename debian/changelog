@@ -3,6 +3,7 @@ mmpack (0.6.5) UNRELEASED; urgency=medium
   * Improve python depends.
   * Supports 'name (>= version)' format in specs of dependencies of custom
     packages.
+  * mmpack-modifyrepo support REMOVE_MATCHING_SRC batch command.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 09 Jun 2021 23:07:31 +0200
 
