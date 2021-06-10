@@ -165,6 +165,20 @@ def batch_updates(repo: Repo, initial_change: bool):
     repo.rollback_changes()
 
 
+def _remove_src(repo: Repo, cmd_opts):
+    repo.begin_changes()
+    success = repo.stage_remove_matching_src(name=cmd_opts.name,
+                                             version=cmd_opts.version,
+                                             srcsha=cmd_opts.srcsha)
+    if success:
+        repo.commit_changes()
+    else:
+        repo.rollback_changes()
+
+    print('Removal succes' if success else 'removal failed')
+    return success
+
+
 def load_repository(opts) -> Repo:
     """
     Load repository according to command line options
@@ -234,6 +248,12 @@ def parse_options():
     update_subparser = subparsers.add_parser('add')
     update_subparser.add_argument('manifest', help='manifest file')
 
+    # update command parser
+    update_subparser = subparsers.add_parser('remove-src')
+    update_subparser.add_argument('--name', help='source package name')
+    update_subparser.add_argument('--version', help='source package version')
+    update_subparser.add_argument('--srcsha', help='source package sha256')
+
     # batch command parser
     batch_subparser = subparsers.add_parser('batch')
     batch_subparser.add_argument('--initial-change', dest='initial_change',
@@ -257,6 +277,8 @@ def main() -> int:
     elif opts.cmd == 'add':
         success = repo.try_handle_upload(opts.manifest, remove_upload=False)
         print('manifest added' if success else 'update failed')
+    elif opts.cmd == 'remove-src':
+        success = _remove_src(repo, opts)
     elif opts.cmd == 'batch':
         batch_updates(repo, opts.initial_change)
 
