@@ -1,5 +1,5 @@
 name: mmpack
-version: 0.6.5
+version: 0.6.6
 maintainer: nicolas.bourdaud@gmail.com
 url: https://github.com/mmlabs-mindmaze/mmpack
 licenses: [ GPL-3 ]
