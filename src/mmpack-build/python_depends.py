@@ -20,8 +20,8 @@ import pkg_resources
 from astroid import MANAGER as astroid_manager
 from astroid import Uninferable, Module, Instance, ClassDef, \
     Import, ImportFrom, Call, Attribute, Name
-from astroid.exceptions import InferenceError, NameInferenceError, \
-    AttributeInferenceError, AstroidImportError
+from astroid.exceptions import AttributeInferenceError, AstroidImportError, \
+    InconsistentMroError, InferenceError, NameInferenceError
 from astroid.modutils import is_standard_module, modpath_from_file
 from astroid.node_classes import NodeNG
 from astroid.objects import Super
@@ -285,8 +285,8 @@ class DependsInspector:
         """
         try:
             tree = astroid_manager.ast_from_file(filename)
-        except SyntaxError:
-            print('{} failed to be parsed'.format(filename), file=sys.stderr)
+        except (SyntaxError, InconsistentMroError) as error:
+            print(f'{filename} failed to be parsed: {error}', file=sys.stderr)
             return
 
         # If not public module, add directory to simulate calling the script

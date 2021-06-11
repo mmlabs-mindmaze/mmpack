@@ -1,3 +1,9 @@
+mmpack (0.6.6) UNRELEASED; urgency=medium
+
+  * Workaround python-astroid bug of inconsistent mro error.
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Fri, 11 Jun 2021 15:40:29 +0200
+
 mmpack (0.6.5) unstable; urgency=medium
 
   * Improve python depends.

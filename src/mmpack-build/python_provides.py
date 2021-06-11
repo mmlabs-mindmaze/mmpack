@@ -23,6 +23,7 @@ from os.path import abspath, basename, dirname
 from typing import Set, Union
 
 from astroid import AstroidImportError, AstroidSyntaxError, MANAGER
+from astroid import InconsistentMroError
 from astroid.nodes import Import, ImportFrom, AssignName, ClassDef, Module
 
 
@@ -199,7 +200,7 @@ class PkgData:
         for pyfile in processing_list:
             try:
                 mod = MANAGER.ast_from_file(pyfile)
-            except AstroidSyntaxError as error:
+            except (AstroidSyntaxError, InconsistentMroError) as error:
                 print(f'Warning: {pyfile} has raised a syntax error:\n'
                       f' {error}\n'
                       ' => Skipping its processing for provides',
