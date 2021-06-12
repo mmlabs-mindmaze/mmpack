@@ -231,7 +231,8 @@ def yaml_serialize(obj: Union[list, dict], filename: str,
     if use_block_style:
         default_flow_style = False
 
-    with open_compressed_file(filename, 'w', newline='\n') as outfile:
+    with open_compressed_file(filename, 'w',
+                              newline='\n', encoding='utf-8') as outfile:
         yaml.dump(obj, outfile,
                   default_flow_style=default_flow_style,
                   default_style='',

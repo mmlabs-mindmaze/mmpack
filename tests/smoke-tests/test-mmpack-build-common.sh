@@ -47,7 +47,7 @@ name: hello
 version: 1.0.0
 maintainer: maintainer
 url: url
-description: mmpack hello
+description: mmpack hello. 你好世界. This package is a test
 build-system : $build_sys
 licenses: [ dummy ]
 copyright: "dummy copyright"
