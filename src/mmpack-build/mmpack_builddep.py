@@ -11,7 +11,7 @@ missing will be proposed for install within the current prefix.
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from subprocess import run
 
-from . common import get_host_dist, yaml_load, dprint
+from . common import get_host_dist, yaml_load, dprint, shell
 from . workspace import find_project_root_folder, Workspace
 
 
@@ -75,33 +75,30 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
 
     1/ check sysdeps for presence
     2/ install mmpack deps if missing
+
+    raises:
+        ShellException: one of the command failed
     """
     mmpack_bin = Workspace().mmpack_bin()
 
     # check sysdeps first
     if system_builddeps:
-        sysdep_cmd = [mmpack_bin, 'check-sysdep'] + system_builddeps
-        ret = run(sysdep_cmd, check=False)
-        if ret.returncode:
-            return ret.returncode
+        shell([mmpack_bin, 'check-sysdep'] + system_builddeps)
 
     if not mmpack_builddeps:
         return 0
 
     # install missing mmpack packages
     # forward options to mmpack install
-    cmd = mmpack_bin
+    cmd = [mmpack_bin]
     if prefix:
-        cmd += ' --prefix=' + prefix
-    cmd += ' install '
+        cmd.append('--prefix=' + prefix)
+    cmd.append('install')
     if assumeyes:
-        cmd += '-y '
+        cmd.append('-y')
 
-    cmd += ' '.join(mmpack_builddeps)
-    dprint('[shell] {0}'.format(cmd))
-    ret = run(cmd, shell=True, check=False)
-
-    return ret.returncode
+    cmd += mmpack_builddeps
+    shell(cmd)
 
 
 def main(argv):
@@ -113,5 +110,8 @@ def main(argv):
 
     system_builddeps, mmpack_builddeps = general_specs_builddeps(specs)
 
-    return process_dependencies(system_builddeps, mmpack_builddeps,
-                                options.prefix, options.assumeyes)
+    try:
+        process_dependencies(system_builddeps, mmpack_builddeps,
+                             options.prefix, options.assumeyes)
+    except ShellException:
+        return 1
