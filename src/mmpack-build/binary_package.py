@@ -153,7 +153,7 @@ class BinaryPackage:
         _write_keyval(stream, 'srcsha256', self.src_hash)
 
     def _gen_pkginfo(self, pkginfo_path: str):
-        with open(pkginfo_path, 'wt', newline='\n') as stream:
+        with open(pkginfo_path, 'wt', newline='\n', encoding='utf-8') as stream:
             self._write_basic_pkginfo(stream)
             _write_keyval(stream, 'ghost', self.ghost)
 
@@ -183,7 +183,8 @@ class BinaryPackage:
         _gen_sha256sums(sha256sums_path)
         sumsha256sums = sha256sum(sha256sums_path)
 
-        with open('MMPACK/metadata', 'wt', newline='\n') as stream:
+        with open('MMPACK/metadata', 'wt',
+                  newline='\n', encoding='utf-8') as stream:
             _write_keyval(stream, 'metadata-version', METADATA_VERSION)
             self._write_basic_pkginfo(stream)
             _write_keyval(stream, 'sumsha256sums', sumsha256sums)
