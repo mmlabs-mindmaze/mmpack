@@ -12,6 +12,7 @@ from importlib import import_module
 from typing import List, TextIO, Iterator, Optional
 
 from . common import *
+from . errors import MMPackBuildError
 from . mm_version import Version
 from . settings import DPKG_METADATA_PREFIX
 from . syspkg_manager_base import SysPkgManager, SysPkg
@@ -303,7 +304,7 @@ class DebRepo:
                     for l in release['SHA256'].strip().split('\n')]}
 
         if self.arch not in archs:
-            raise RuntimeError(f'No dist for {self.arch} in {dist_url}')
+            raise MMPackBuildError(f'No dist for {self.arch} in {dist_url}')
 
         for comp in components:
             for ext in ('.gz', '.xz', ''):
@@ -415,4 +416,4 @@ class Dpkg(SysPkgManager):
             if pkg_list:
                 return pkg_list
 
-        raise RuntimeError(f'Could not find {srcnames} in {repo_url}, {dist}')
+        raise MMPackBuildError(f'Could not find {srcnames} in {repo_url}, {dist}')
