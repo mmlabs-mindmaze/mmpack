@@ -77,5 +77,5 @@ class TestVersionClass(unittest.TestCase):
         """
         test that underscores are rejected by the version class
         """
-        with self.assertRaises(SyntaxError):
+        with self.assertRaises(ValueError):
             Version('1_2.3')
