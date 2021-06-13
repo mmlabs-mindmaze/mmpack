@@ -353,25 +353,6 @@ def _get_repo(srcnames: List[str]) -> (str, str):
     raise ValueError
 
 
-def _download_debpkg_index(repo_url: str, dist: str, arch: str,
-                           builddir: str) -> str:
-    suffix = dist.replace('/', '_')
-
-    for ext in ('.gz', '.xz', ''):
-        index = os.path.join(builddir, 'Packages_{}{}'.format(suffix, ext))
-        pkgindex_url = '{}/dists/{}/binary-{}/Packages{}'\
-                       .format(repo_url, dist, arch, ext)
-
-        # download compressed index
-        try:
-            cached_download(pkgindex_url, index)
-            return index
-        except RuntimeError:
-            pass
-
-    raise RuntimeError(f'Could not find debpkg index for {repo_url} {arch}')
-
-
 class Dpkg(SysPkgManager):
     """
     Class to interact with Debian package database
