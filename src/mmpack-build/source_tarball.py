@@ -12,6 +12,7 @@ from tarfile import open as taropen, TarFile, TarInfo
 from typing import Dict, Iterator, List, NamedTuple, Optional
 
 from . common import *
+from . errors import ShellException
 from . workspace import Workspace, cached_download, find_project_root_folder
 
 
