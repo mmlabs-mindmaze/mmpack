@@ -25,7 +25,7 @@ from typing import Any, AnyStr, Optional, Union, Dict, Tuple, List, Set
 import urllib3
 import yaml
 
-from .errors import ShellException
+from .errors import ShellException, DownloadError
 from .yaml_dumper import MMPackDumper
 
 CONFIG = {'debug': True, 'verbose': True}
@@ -578,8 +578,7 @@ def get_http_req(url: str) -> urllib3.response.HTTPResponse:
     request = urllib3.PoolManager().request('GET', url)
     if request.status != 200:
         eprint('Failed ' + request.reason)
-        raise RuntimeError('Failed to download {}: {}'
-                           .format(url, request.reason))
+        raise DownloadError(request.reason, url)
 
     return request
 

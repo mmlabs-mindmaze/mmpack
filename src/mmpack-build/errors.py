@@ -13,3 +13,12 @@ class MMPackBuildError(Exception):
 
 class ShellException(MMPackBuildError):
     """Custom exception for shell command error."""
+
+
+class DownloadError(MMPackBuildError):
+    """Exception for download failure."""
+
+    def __init__(self, reason: str, url: str):
+        super().__init__(f'Failed to download {url}: {reason}')
+        self.url = url
+        self.reason = reason
