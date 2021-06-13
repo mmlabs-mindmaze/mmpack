@@ -19,6 +19,7 @@ from . workspace import Workspace, get_local_install_dir
 from . binary_package import BinaryPackage
 from . common import *
 from . file_utils import *
+from . errors import MMPackBuildError, ShellException
 from . hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from . mm_version import Version
 from . package_info import DispatchData, PackageInfo
@@ -161,7 +162,7 @@ class SrcPackage:
         helper: guesses the project build system
 
         Raises:
-            RuntimeError: could not guess project build system
+            MMPackBuildError: could not guess project build system
         """
         pushdir(self.unpack_path())
         if path.exists('configure.ac'):
@@ -175,7 +176,7 @@ class SrcPackage:
         elif path.exists('meson.build'):
             self.build_system = 'meson'
         else:
-            raise RuntimeError('could not guess project build system')
+            raise MMPackBuildError('could not guess project build system')
 
         popdir()
 
@@ -216,35 +217,40 @@ class SrcPackage:
             - fill all the main fields of the source package.
             - prune the ignore files from the install_files_list
         """
+        # pylint: disable=too-many-branches
+
         # keep raw dictionary version of the specfile
         specfile = srcdir + '/mmpack/specs'
         dprint('loading specfile: ' + specfile)
         self._specs = specs_load(specfile)
 
-        for key, value in self._specs.items():
-            if key == 'name':
-                self.name = value
-            elif key == 'version':
-                self.version = Version(value)
-                self.srcversion = self.version
-            elif key == 'maintainer':
-                self.maintainer = value
-            elif key == 'url':
-                self.url = value
-            elif key == 'description':
-                self.description = value.strip()
-            elif key == 'build-options':
-                self.build_options = value
-            elif key == 'build-depends':
-                self.build_depends = value
-            elif key == 'build-system':
-                self.build_system = value
-            elif key == 'licenses':
-                self.licenses = value
-            elif key == 'copyright':
-                self.copyright = value
-            elif key == 'ghost':
-                self.ghost = str2bool(value)
+        try:
+            for key, value in self._specs.items():
+                if key == 'name':
+                    self.name = value
+                elif key == 'version':
+                    self.version = Version(value)
+                    self.srcversion = self.version
+                elif key == 'maintainer':
+                    self.maintainer = value
+                elif key == 'url':
+                    self.url = value
+                elif key == 'description':
+                    self.description = value.strip()
+                elif key == 'build-options':
+                    self.build_options = value
+                elif key == 'build-depends':
+                    self.build_depends = value
+                elif key == 'build-system':
+                    self.build_system = value
+                elif key == 'licenses':
+                    self.licenses = value
+                elif key == 'copyright':
+                    self.copyright = value
+                elif key == 'ghost':
+                    self.ghost = str2bool(value)
+        except ValueError as err:
+            raise MMPackBuildError(f'Invalid spec file: {err}') from err
 
     def _default_license(self) -> None:
         if self.ghost:
@@ -253,7 +259,7 @@ class SrcPackage:
         license_file = find_license(self.unpack_path())
         if not license_file:
             errmsg = '"licenses" field unspecified and no license file found'
-            raise ValueError(errmsg)
+            raise MMPackBuildError(errmsg)
 
         self.licenses = [license_file]
         dprint('Using file: "{}" as license by default'.format(license_file))
@@ -349,9 +355,6 @@ class SrcPackage:
 
         if not self.build_system:
             self._guess_build_system()
-        if not self.build_system:
-            errmsg = 'Unknown build system: ' + self.build_system
-            raise NotImplementedError(errmsg)
 
         # Use build script provided in mmpack installed data folder unless
         # it is custom build system. The script is then obtained from
@@ -385,7 +388,7 @@ class SrcPackage:
             errmsg = 'Failed to build ' + self.name + '\n'
             errmsg += 'See {}/mmpack.log file for what went wrong\n' \
                       .format(self.pkgbuild_path())
-            raise RuntimeError(errmsg)
+            raise ShellException(errmsg)
 
         popdir()  # unpack directory
 
@@ -425,7 +428,7 @@ class SrcPackage:
             # Note: meta-packages are empty and accepted
             if not pkg.files and 'files' in pkgspecs:
                 errmsg = 'Custom package {0} is empty !'.format(pkgname)
-                raise FileNotFoundError(errmsg)
+                raise MMPackBuildError(errmsg)
 
     def _get_fallback_pkgname(self, pkg_names: Set[str]) -> str:
         """
@@ -462,7 +465,8 @@ class SrcPackage:
 
         licenses_path = set()
         if not self.licenses:
-            raise RuntimeError('FATAL: license key is mandatory')
+            raise MMPackBuildError('License could not be guessed... '
+                                   'It then must be supplied in specs')
 
         for entry in self.licenses:
             tmp = os.path.join(PKGDATADIR, 'common-licenses', entry)
@@ -475,7 +479,7 @@ class SrcPackage:
                 tmp = os.path.join(self.unpack_path(), entry)
                 if not os.path.isfile(tmp):
                     errmsg = 'No such file, or unknown license: ' + entry
-                    raise ValueError(errmsg)
+                    raise MMPackBuildError(errmsg)
                 shutil.copy(tmp, binpkg.licenses_dir())
 
             licenses_path.add(os.path.join(binpkg.licenses_dir(),
@@ -519,8 +523,8 @@ class SrcPackage:
 
             binpkg.description = pkginfo.description
             if not binpkg.description:
-                raise ValueError('Package {0} has no description'
-                                 .format(binpkg.name))
+                raise MMPackBuildError('Package {0} has no description'
+                                       .format(binpkg.name))
 
             self._attach_copyright(binpkg)
             self._packages[binpkg.name] = binpkg
