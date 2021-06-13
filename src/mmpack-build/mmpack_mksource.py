@@ -4,8 +4,10 @@ Create mmpack package source specified in argument. If no argument is provided,
 look through the tree for a mmpack folder, and use the containing folder as
 root directory.
 """
+import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
+from . errors import MMPackBuildError
 from . source_tarball import SourceTarball
 
 
@@ -61,8 +63,14 @@ def main(argv):
     entry point to create a mmpack package
     """
     args = parse_options(argv[1:])
-    srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
-                               build_only_modified=args.only_modified,
-                               version_from_vcs=args.update_version_from_vcs)
-    for prj in srctarball.iter_mmpack_srcs():
-        print('{} {} {}'.format(prj.name, prj.version, prj.tarball))
+    try:
+        srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
+                                   build_only_modified=args.only_modified,
+                                   version_from_vcs=args.update_version_from_vcs)
+        for prj in srctarball.iter_mmpack_srcs():
+            print('{} {} {}'.format(prj.name, prj.version, prj.tarball))
+    except MMPackBuildError as error:
+        print(f'Source tarball generation failed: {error}', file=sys.stderr)
+        return 1
+
+    return 0
