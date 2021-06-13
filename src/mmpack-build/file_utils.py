@@ -8,6 +8,7 @@ import sysconfig
 from os.path import islink, basename, splitext
 
 from . common import shell, wprint
+from . errors import MMPackBuildError
 
 
 # Match the interpreter of a shebang line (interpreter will be set in the first
@@ -87,9 +88,9 @@ def get_linked_dll(import_lib):
 
     # Check we have no more than one dll
     if len(dll_names) > 1:
-        raise RuntimeError('Only one imported dll should be'
-                           'found in {}. dlls found: {}'
-                           .format(import_lib, dll_names))
+        raise MMPackBuildError('Only one imported dll should be'
+                               'found in {}. dlls found: {}'
+                               .format(import_lib, dll_names))
 
     # Get the only element of dll_names set
     return dll_names.pop()

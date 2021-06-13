@@ -12,7 +12,7 @@ from tarfile import open as taropen, TarFile, TarInfo
 from typing import Dict, Iterator, List, NamedTuple, Optional
 
 from . common import *
-from . errors import DownloadError, ShellException
+from . errors import DownloadError, MMPackBuildError, ShellException
 from . workspace import Workspace, cached_download, find_project_root_folder
 
 
@@ -138,7 +138,7 @@ class SourceTarball:
         if not path_url:
             path_url = find_project_root_folder(find_multiproj=True)
             if not path_url:
-                raise ValueError('did not find project to package')
+                raise MMPackBuildError('did not find project to package')
 
         # declare class instance attributes
         self.srctar = None
