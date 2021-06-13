@@ -6,9 +6,11 @@ directory.
 """
 
 import os
+import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . common import set_log_file
+from . errors import MMPackBuildError
 from . mmpack_mksource import add_mksource_parser_argument
 from . src_package import SrcPackage
 from . workspace import Workspace
@@ -78,10 +80,17 @@ def main(argv):
     """
     entry point to create a mmpack package
     """
+    retcode = 0
     args = parse_options(argv[1:])
     srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
                                build_only_modified=args.only_modified,
                                version_from_vcs=args.update_version_from_vcs)
     for prj_src in srctarball.iter_mmpack_srcs():
-        _build_mmpack_packages(prj_src.tarball, srctarball.tag,
-                               prj_src.srcdir, args)
+        try:
+            _build_mmpack_packages(prj_src.tarball, srctarball.tag,
+                                   prj_src.srcdir, args)
+        except MMPackBuildError as err:
+            print(f'Build of {prj_src.name} failed: {err}', file=sys.stderr)
+            retcode = 1
+
+    return retcode
