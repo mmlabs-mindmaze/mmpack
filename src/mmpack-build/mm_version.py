@@ -34,8 +34,7 @@ class Version(LooseVersion):  # pylint: disable=too-few-public-methods
         if not string:
             string = 'any'
         elif '_' in string:
-            errmsg = '''Underscores ('_') are prohibited in version strings'''
-            raise SyntaxError(errmsg)
+            raise ValueError(f'invalid version {string}')
 
         super().__init__(string)
 
