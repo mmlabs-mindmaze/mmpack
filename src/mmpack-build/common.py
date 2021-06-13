@@ -25,6 +25,7 @@ from typing import Any, AnyStr, Optional, Union, Dict, Tuple, List, Set
 import urllib3
 import yaml
 
+from .errors import ShellException
 from .yaml_dumper import MMPackDumper
 
 CONFIG = {'debug': True, 'verbose': True}
@@ -110,12 +111,6 @@ def dprint(*args, **kwargs):
     _log_or_store(logging.DEBUG, *args, **kwargs)
     if CONFIG['debug']:
         print(*args, file=sys.stderr, **kwargs)
-
-
-class ShellException(RuntimeError):
-    """
-    custom exception for shell command error
-    """
 
 
 class _WritablePopen(Popen):

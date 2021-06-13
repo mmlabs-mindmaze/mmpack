@@ -7,8 +7,9 @@ import os
 import shutil
 from tempfile import mkdtemp
 
-from . common import shell, dprint, ShellException, download, sha256sum, iprint
+from . common import shell, dprint, download, sha256sum, iprint
 from . decorators import singleton
+from . errors import ShellException
 from . settings import BINDIR, EXEEXT
 from . xdg import XDG_CACHE_HOME, XDG_DATA_HOME
 

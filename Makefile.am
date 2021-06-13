@@ -63,6 +63,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/common.py \
 	src/mmpack-build/decorators.py \
 	src/mmpack-build/elf_utils.py \
+	src/mmpack-build/errors.py \
 	src/mmpack-build/file_utils.py \
 	src/mmpack-build/hook_locales.py \
 	src/mmpack-build/hook_python.py \

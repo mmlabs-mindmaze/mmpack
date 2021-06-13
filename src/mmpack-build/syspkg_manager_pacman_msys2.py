@@ -11,6 +11,7 @@ from io import TextIOWrapper
 from typing import Set, List, TextIO
 
 from . common import *
+from . errors import ShellException
 from . pe_utils import get_dll_from_soname, symbols_set
 from . settings import PACMAN_PREFIX
 from . syspkg_manager_base import SysPkgManager, SysPkg

@@ -11,6 +11,7 @@ mmpack_build_sources = files(
         'common.py',
         'decorators.py',
         'elf_utils.py',
+        'errors.py',
         'file_utils.py',
         'hook_locales.py',
         'hook_python.py',
