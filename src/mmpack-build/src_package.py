@@ -658,8 +658,13 @@ class SrcPackage:
                 # Assign actual system package dependency of ghost package
                 dprint('Files associated to package {}:'.format(binpkg.name))
                 for filename in sorted(binpkg.install_files):
-                    sysdep = self.files_sysdep[filename]
-                    binpkg.add_sysdepend(self.files_sysdep[filename])
+                    sysdep = self.files_sysdep.get(filename)
+                    # local_install_script are allowed to remove and add files
+                    # to local-install. It is thus possible to encounter a file
+                    # not provided by any syspkg.
+                    if not sysdep:
+                        continue
+                    binpkg.add_sysdepend(sysdep)
                     dprint('    {}  \t[{}]'.format(filename, sysdep))
 
                 # Remove install files from ghost package to avoid to copy them
