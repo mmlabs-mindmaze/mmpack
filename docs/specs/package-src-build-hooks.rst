@@ -27,7 +27,9 @@ variables are set:
 
 BUILDDIR: directory used to build the package
 PATH_URL: origin of the source
-VCSDIR: location of the VCS files (only if method is git, subdir of BUILDDIR)
+GIT_DIR: absolute path of the VCS files (only if method is git, subdir of BUILDDIR)
+GIT_WORK_TREE: absolute path of the checked out files, same as execution dir (only if method is git)
+VCSDIR: same as GIT_DIR
 
 execution dir
 `````````````
@@ -53,7 +55,9 @@ variables are set:
 
 BUILDDIR: directory used to build the package
 URL: origin of the upstream
-VCSDIR: location of the VCS files of unpacked upstream (only if is git, subdir of BUILDDIR)
+GIT_DIR: location of the VCS files of unpacked upstream (only if is git, subdir of BUILDDIR)
+GIT_WORK_TREE: absolute path of the checked out files, same as execution dir (only if method is git)
+VCSDIR: same as GIT_DIR
 
 execution dir
 `````````````

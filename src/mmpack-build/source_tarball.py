@@ -451,8 +451,11 @@ class SourceTarball:
             return
 
         env = {'PATH_URL': self._path_url}
-        if self._vcsdir:
-            env['VCSDIR'] = abspath(self._vcsdir)
+        if method == 'git':
+            env['GIT_DIR'] = abspath(self._vcsdir)
+            env['GIT_WORK_TREE'] = abspath(self._srcdir)
+            env['VCSDIR'] = env['GIT_DIR']
+
         self._run_hook('create_srcdir_hook', method, self._srcdir, env)
 
     def _fetch_upstream_from_git(self, specs: Dict[str, str]):
@@ -546,10 +549,12 @@ class SourceTarball:
             upstream_srcdir = elt
             dir_content = os.listdir(upstream_srcdir)
 
-        # Run fetch_upstream_hook
         env = {'URL': specs['url']}
         if method == 'git':
-            env['VCSDIR'] = abspath(self._builddir + '/upstream.git')
+            env['GIT_DIR'] = abspath(self._builddir + '/upstream.git')
+            env['GIT_WORK_TREE'] = abspath(upstream_srcdir)
+            env['VCSDIR'] = env['GIT_DIR']
+
         self._run_hook('fetch_upstream_hook', method, upstream_srcdir, env)
 
         # Move extracted upstream sources except mmpack packaging
