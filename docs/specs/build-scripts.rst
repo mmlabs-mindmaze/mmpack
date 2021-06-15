@@ -90,3 +90,32 @@ BUILDDIR: directory used to build the package
 execution dir
 `````````````
 location where the source have been preprared (subdir of BUILDDIR)
+
+
+Binary package build scripts
+============================
+
+local_install
+-------------
+
+condition
+`````````
+The build script has been called (files are installed locally). The
+post_local_install methods of the hooks have not been called yet.
+
+Arguments
+`````````
+None
+
+environment
+```````````
+The script execution inherit the environment of the build. In addition, the
+following variables are set:
+
+BUILDDIR: directory used to build the project
+SPECDIR: location of mmpack spec files
+
+execution dir
+`````````````
+location of the installed files (subdir of BUILDDIR)
+
