@@ -1,11 +1,18 @@
-Package source build hooks
-==========================
+*************
+Build scripts
+*************
 
-When building the source package, it is possible to called several hooks to
-implement non standard behavior. Those hooks are located within the folder
-**mmpack** along with other package related material and get executed when the associated condition or step is reached.
+When building the source package or the binary package from a source package,
+it is possible to call several scripts to implement non standard behavior.
+Those scripts are located within the folder **mmpack** along with other package
+related material and get executed when the associated condition or step is
+reached and if the according script exists.
 
-Currently those scripts can only be POSIX shell script.
+Currently they can only be POSIX shell script.
+
+
+Package source build scripts
+============================
 
 
 create_srcdir_hook
@@ -22,8 +29,8 @@ the method used for getting the source: git, path, tar
 
 environment
 ```````````
-The hook inherit the environment of the build. In addition, the following
-variables are set:
+The script execution inherit the environment of the build. In addition, the
+following variables are set:
 
 BUILDDIR: directory used to build the package
 PATH_URL: origin of the source
@@ -48,8 +55,8 @@ the method used for getting the upstream: git, tar
 
 environment
 ```````````
-The hook inherit the environment of the build. In addition, the following
-variables are set:
+The script execution inherit the environment of the build. In addition, the
+following variables are set:
 
 BUILDDIR: directory used to build the package
 URL: origin of the upstream
