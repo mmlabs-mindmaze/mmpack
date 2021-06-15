@@ -403,7 +403,11 @@ class SrcPackage:
         else:
             self._build_project(skip_tests)
 
-        pushdir(self._local_install_path(True))
+        instdir = self._local_install_path(True)
+        run_hook('local_install_hook', execdir=instdir, specdir=self._spec_dir,
+                 env={'SPECDIR': path.abspath(self._spec_dir)})
+
+        pushdir(instdir)
         if not self.ghost:
             for hook in MMPACK_BUILD_HOOKS:
                 hook.post_local_install()
