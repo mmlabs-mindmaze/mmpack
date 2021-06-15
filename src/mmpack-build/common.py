@@ -179,7 +179,7 @@ def shell(cmd, log: bool = True, input_str: str = None,
         raise ShellException('failed to exec command')
 
 
-def run_cmd(cmd: List[str], log: bool = True):
+def run_cmd(cmd: List[str], log: bool = True, env: Dict[str, str] = None):
     """Execute command.
 
     The called command is assumed to report failure reason (if applicable) on
@@ -188,6 +188,8 @@ def run_cmd(cmd: List[str], log: bool = True):
     Args:
         cmd: list of argument forming cmd to run
         log: log command string on debug output if True
+        env: full environment with which the process must be executed. If None,
+            the environment is inherited from the current process
 
     raises:
         ShellException: the command return a failure code
@@ -196,7 +198,7 @@ def run_cmd(cmd: List[str], log: bool = True):
         dprint('[run_cmd] {0}'.format(' '.join(cmd)))
 
     try:
-        run(cmd, capture_output=True, encoding='utf-8', check=True)
+        run(cmd, capture_output=True, encoding='utf-8', check=True, env=env)
     except CalledProcessError as err:
         if err.stdout or err.stderr:
             errmsg = err.stdout + err.stderr
