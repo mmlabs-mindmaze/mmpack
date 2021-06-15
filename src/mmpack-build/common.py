@@ -19,7 +19,7 @@ import platform
 
 from hashlib import sha256
 from io import TextIOWrapper
-from subprocess import PIPE, Popen, run
+from subprocess import PIPE, CalledProcessError, Popen, run
 from typing import Any, AnyStr, Optional, Union, Dict, Tuple, List, Set
 
 import urllib3
@@ -177,6 +177,33 @@ def shell(cmd, log: bool = True, input_str: str = None,
         raise ShellException(errmsg)
     except FileNotFoundError:
         raise ShellException('failed to exec command')
+
+
+def run_cmd(cmd: List[str], log: bool = True):
+    """Execute command.
+
+    The called command is assumed to report failure reason (if applicable) on
+    standard error or standard output.
+
+    Args:
+        cmd: list of argument forming cmd to run
+        log: log command string on debug output if True
+
+    raises:
+        ShellException: the command return a failure code
+    """
+    if log:
+        dprint('[run_cmd] {0}'.format(' '.join(cmd)))
+
+    try:
+        run(cmd, capture_output=True, encoding='utf-8', check=True)
+    except CalledProcessError as err:
+        if err.stdout or err.stderr:
+            errmsg = err.stdout + err.stderr
+        else:
+            errmsg = str(err)
+
+        raise ShellException(errmsg) from err
 
 
 # initialise a directory stack
