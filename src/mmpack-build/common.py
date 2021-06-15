@@ -19,6 +19,7 @@ import platform
 
 from hashlib import sha256
 from io import TextIOWrapper
+from pathlib import Path
 from subprocess import PIPE, CalledProcessError, Popen, run
 from typing import Any, AnyStr, Optional, Union, Dict, Tuple, List, Set
 
@@ -204,6 +205,32 @@ def run_cmd(cmd: List[str], log: bool = True):
             errmsg = str(err)
 
         raise ShellException(errmsg) from err
+
+
+def run_hook(hook_script: str, execdir: str, specdir: str,
+             args: List[str] = None,
+             env: Optional[Dict[str, str]] = None):
+    """
+    Execute hook from spec dir
+
+    Args:
+        hook_script: name of file script to execute
+        args: list of argument passed to script if not None
+        execdir: path where the hook must be executed
+        specdir: path where spec files should be found
+        env: environ variables to add in addition to the inherited env
+    """
+    # Run hook only if existing
+    script = Path(specdir) / hook_script
+    if not script.exists():
+        return
+
+    hook_env = os.environ.copy()
+    hook_env.update(env if env else {})
+
+    pushdir(Path(execdir).resolve())
+    run_cmd(['sh', script.resolve()] + args if args else [], env=hook_env)
+    popdir()
 
 
 # initialise a directory stack
