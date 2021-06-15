@@ -276,7 +276,7 @@ class SourceTarball:
         self._patch_sources(specs.get('patches', []), srcdir)
 
         # Run source strapped_hook
-        self._run_hook('source_strapped_hook', specs['method'], srcdir)
+        self._run_build_script('source_strapped', specs['method'], srcdir)
 
     def get_srcdir(self) -> str:
         """
@@ -284,12 +284,14 @@ class SourceTarball:
         """
         return self._srcdir
 
-    def _run_hook(self, hook_script: str, method: str,
-                  execdir: str, env: Optional[Dict[str, str]] = None):
-        # Run create_srcdir_hook if existing
-        script = join_path(self._srcdir, 'mmpack', hook_script)
+    def _run_build_script(self, name: str, method: str,
+                          execdir: str, env: Optional[Dict[str, str]] = None):
+        # Run script if existing (or with _hook prefixed)
+        script = join_path(self._srcdir, 'mmpack', name + '_script')
         if not exists(script):
-            return
+            script = join_path(self._srcdir, 'mmpack', name + '_hook')
+            if not exists(script):
+                return
 
         hook_env = os.environ.copy()
         hook_env['BUILDIR'] = abspath(self._builddir)
@@ -459,7 +461,7 @@ class SourceTarball:
         env = {'PATH_URL': self._path_url}
         if self._vcsdir:
             env['VCSDIR'] = abspath(self._vcsdir)
-        self._run_hook('create_srcdir_hook', method, self._srcdir, env)
+        self._run_build_script('create_srcdir', method, self._srcdir, env)
 
     def _fetch_upstream_from_git(self, specs: Dict[str, str]):
         """
@@ -556,7 +558,7 @@ class SourceTarball:
         env = {'URL': specs['url']}
         if method == 'git':
             env['VCSDIR'] = abspath(self._builddir + '/upstream.git')
-        self._run_hook('fetch_upstream_hook', method, upstream_srcdir, env)
+        self._run_build_script('fetch_upstream', method, upstream_srcdir, env)
 
         # Move extracted upstream sources except mmpack packaging
         for elt in os.listdir(upstream_srcdir):
