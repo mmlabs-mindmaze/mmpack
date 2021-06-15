@@ -286,18 +286,12 @@ class SourceTarball:
 
     def _run_hook(self, hook_script: str, method: str,
                   execdir: str, env: Optional[Dict[str, str]] = None):
-        # Run create_srcdir_hook if existing
-        script = join_path(self._srcdir, 'mmpack', hook_script)
-        if not exists(script):
-            return
+        if env is None:
+            env = {}
+        env['BUILDIR'] = abspath(self._builddir)
 
-        hook_env = os.environ.copy()
-        hook_env['BUILDIR'] = abspath(self._builddir)
-        hook_env.update(env if env else {})
-
-        pushdir(execdir)
-        shell(['sh', script, method], env=hook_env)
-        popdir()
+        specdir = join_path(self._srcdir, 'mmpack')
+        run_hook(hook_script, execdir, specdir, [method], env)
 
     def iter_mmpack_srcs(self) -> Iterator[ProjectSource]:
         """
