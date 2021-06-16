@@ -71,7 +71,7 @@ def general_specs_builddeps(general):
 
 
 def process_dependencies(system_builddeps, mmpack_builddeps,
-                         prefix: str, assumeyes: bool):
+                         prefix: str):
     """
     process given dependencies
 
@@ -96,8 +96,7 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
     if prefix:
         cmd.append('--prefix=' + prefix)
     cmd.append('install')
-    if assumeyes:
-        cmd.append('-y')
+    cmd.append('-y')
 
     cmd += mmpack_builddeps
     run_cmd(cmd)
@@ -114,7 +113,7 @@ def main(argv):
 
     try:
         process_dependencies(system_builddeps, mmpack_builddeps,
-                             options.prefix, options.assumeyes)
+                             options.prefix)
     except MMPackBuildError as err:
         print(str(err), file=sys.stderr)
         return 1

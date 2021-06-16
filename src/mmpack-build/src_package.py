@@ -325,7 +325,7 @@ class SrcPackage:
                                        log=False).strip()
         return build_env
 
-    def install_builddeps(self, prefix: str, assumeyes: bool):
+    def install_builddeps(self, prefix: str):
         """
         install mmpack build-deps within given prefix
 
@@ -338,7 +338,7 @@ class SrcPackage:
         # append platform-specific mmpack packages
         # eg. one required package is not available on this platform
         sys_builddeps, builddeps = general_specs_builddeps(self._specs)
-        process_dependencies(sys_builddeps, builddeps, prefix, assumeyes)
+        process_dependencies(sys_builddeps, builddeps, prefix)
 
     def _build_project(self, skip_tests: bool) -> None:
         """
