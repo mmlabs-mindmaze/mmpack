@@ -1,10 +1,11 @@
 mmpack (0.6.7) UNRELEASED; urgency=medium
 
   * Support specs in utf-8 on windows.
-  * Build scripts filename have the suffix "_hook" dropped. The version wih
+  * Build scripts filename have the suffix "_hook" dropped. The version with
     suffix is still usable but deprecated.
   * Support for local_install build script.
-  * MMPACK_BUILD_KEEP_TMPDIR env allow to keep temporary source build folder.
+  * MMPACK_BUILD_KEEP_TMPDIR env allow one to keep temporary source build
+    folder.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Sat, 12 Jun 2021 07:22:23 +0200
 
