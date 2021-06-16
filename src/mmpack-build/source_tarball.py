@@ -152,6 +152,7 @@ class SourceTarball:
         self._vcsdir = None
         self._outdir = outdir if outdir else Workspace().outdir()
         self._prj_src = None
+        self._curr_subdir = ''
         self.trace = dict()
         self._update_version = kwargs.get('version_from_vcs', False)
 
@@ -231,9 +232,12 @@ class SourceTarball:
 
     def _gen_project_sources(self, subdir: str = '') -> ProjectSource:
         srcdir = self._srcdir
+        self._curr_subdir = subdir
         if subdir:
             self.trace['pkg']['subdir'] = subdir
             srcdir += '/' + subdir
+
+        os.makedirs(self._get_prj_builddir(), exist_ok=True)
 
         # extract minimal metadata from package
         try:
@@ -265,12 +269,18 @@ class SourceTarball:
                              tarball=srctar,
                              srcdir=srcdir)
 
+    def _get_prj_builddir(self):
+        return os.path.join(self._builddir, self._curr_subdir)
+
     def _get_unpacked_upstream_dir(self):
         """
         Get location when upstream source code is expected to be extracted if
         fetched. This does not created the folder.
         """
-        return os.path.join(self._builddir, 'upstream')
+        return os.path.join(self._get_prj_builddir(), 'upstream')
+
+    def _get_upstream_gitdir(self):
+        return os.path.join(self._get_prj_builddir(), 'upstream.git')
 
     def _process_source_strap(self, srcdir):
         source_strap = os.path.join(srcdir, 'mmpack/sources-strap')
@@ -289,9 +299,9 @@ class SourceTarball:
                           execdir: str, env: Optional[Dict[str, str]] = None):
         if env is None:
             env = {}
-        env['BUILDDIR'] = abspath(self._builddir)
+        env['BUILDDIR'] = abspath(self._get_prj_builddir())
 
-        specdir = join_path(self._srcdir, 'mmpack')
+        specdir = join_path(self._srcdir, self._curr_subdir, 'mmpack')
         run_build_script(name, execdir, specdir, [method], env)
 
     def iter_mmpack_srcs(self) -> Iterator[ProjectSource]:
@@ -464,10 +474,10 @@ class SourceTarball:
             specs: dict of settings put in source-strap file
         """
         srcdir = self._get_unpacked_upstream_dir()
-        gitdir = self._builddir + '/upstream.git'
+        gitdir = self._get_upstream_gitdir()
         url = specs['url']
 
-        os.mkdir(srcdir)
+        os.makedirs(srcdir, exist_ok=True)
 
         _git_clone(url=url,
                    worktree=srcdir,
@@ -486,7 +496,7 @@ class SourceTarball:
         """
         url = specs['url']
         filename = os.path.basename(url)
-        downloaded_file = os.path.join(self._builddir, filename)
+        downloaded_file = os.path.join(self._get_prj_builddir(), filename)
         expected_sha256 = specs.get('sha256')
 
         cached_download(url, downloaded_file, expected_sha256)
@@ -514,12 +524,7 @@ class SourceTarball:
             'tar': self._fetch_upstream_from_tar,
         }
 
-        # Remove left over of upstream of other projects. Use if exists over
-        # rmtree(ignore_errors=True) to avoid hiding error different from
-        # inexisting folder.
         upstream_srcdir = self._get_unpacked_upstream_dir()
-        if os.path.exists(upstream_srcdir):
-            rmtree_force(upstream_srcdir)
 
         # check that mandatory keys are present in sources-strap file
         missings_keys = {'method', 'url'}.difference(specs)
@@ -550,7 +555,7 @@ class SourceTarball:
         # Run fetch_upstream_hook
         env = {'URL': specs['url']}
         if method == 'git':
-            env['VCSDIR'] = abspath(self._builddir + '/upstream.git')
+            env['VCSDIR'] = abspath(self._get_upstream_gitdir())
         self._run_build_script('fetch_upstream', method, upstream_srcdir, env)
 
         # Move extracted upstream sources except mmpack packaging
