@@ -142,19 +142,23 @@ class DependsInspector:
         """
         real_name = impfrom.real_name(name)
         module = impfrom.do_import_module(impfrom.modname)
-        for node in module.getattr(real_name):
-            if not node or node is impfrom:
-                continue
+        try:
+            for node in module.getattr(real_name):
+                if not node or node is impfrom:
+                    continue
 
-            # If the pointed node does not belong to package, just report the
-            # public name as it is known now
-            if not self._is_local_module(module):
-                return (impfrom.modname + '.' + real_name, node)
+                # If the pointed node does not belong to package, just report the
+                # public name as it is known now
+                if not self._is_local_module(module):
+                    return (impfrom.modname + '.' + real_name, node)
 
-            attrname, name = self._follow_name_origin(node, real_name)
-            return (impfrom.modname + '.' + attrname, node)
+                attrname, name = self._follow_name_origin(node, real_name)
+                return (impfrom.modname + '.' + attrname, node)
 
-        raise AttributeInferenceError
+        except AttributeInferenceError:
+            pass
+
+        return (impfrom.modname + '.' + real_name, module)
 
     def _follow_name_origin(self, node: NodeNG,
                             name: str) -> Tuple[str, NodeNG]:
