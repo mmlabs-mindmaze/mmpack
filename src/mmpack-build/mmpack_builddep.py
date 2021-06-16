@@ -32,9 +32,10 @@ def parse_option(argv):
 
     # XXX: assume-yes is True even if not set if there is only one package
     # staged for install
-    parser.add_argument('-y', '--yes',
+    parser.add_argument('-y', '--assume-yes',
                         action='store_true', dest='assumeyes',
-                        help='indicate that build tests must not be run')
+                        help='Assume yes as answer to all prompts and run'
+                             ' non-interactively.')
     parser.add_argument('-p', '--prefix',
                         action='store', dest='prefix', type=str,
                         help='prefix within which to work')
