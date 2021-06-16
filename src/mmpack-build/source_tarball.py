@@ -174,6 +174,13 @@ class SourceTarball:
         self.srctar = self._prj_src.tarball
 
     def __del__(self):
+        # Skip removal if MMPACK_BUILD_KEEP_TMPDIR env is set to true
+        try:
+            if str2bool(os.environ.get('MMPACK_BUILD_KEEP_TMPDIR', 'false')):
+                return
+        except ValueError:
+            pass
+
         # If source build dir has been created and not detach, remove it at
         # instance destruction
         dprint('Destroying temporary source build dir ' + self._builddir)
