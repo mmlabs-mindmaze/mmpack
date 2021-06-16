@@ -142,7 +142,13 @@ class DependsInspector:
         """
         real_name = impfrom.real_name(name)
         module = impfrom.do_import_module(impfrom.modname)
-        for node in module.getattr(real_name):
+
+        try:
+            nodelist = module.getattr(real_name)
+        except AttributeInferenceError:
+            _, nodelist = module.lookup(real_name)
+
+        for node in nodelist:
             if not node or node is impfrom:
                 continue
 
@@ -154,7 +160,10 @@ class DependsInspector:
             attrname, name = self._follow_name_origin(node, real_name)
             return (impfrom.modname + '.' + attrname, node)
 
-        raise AttributeInferenceError
+        # If getattr or lookup fails, just report the resolved module as
+        # defining node. This is sufficient to identify whether a symbol is
+        # local or external
+        return (impfrom.modname + '.' + real_name, module)
 
     def _follow_name_origin(self, node: NodeNG,
                             name: str) -> Tuple[str, NodeNG]:
