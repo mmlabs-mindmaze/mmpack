@@ -96,8 +96,7 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
     if prefix:
         cmd.append('--prefix=' + prefix)
     cmd.append('install')
-    if assumeyes:
-        cmd.append('-y')
+    cmd.append('-y')
 
     cmd += mmpack_builddeps
     run_cmd(cmd)
