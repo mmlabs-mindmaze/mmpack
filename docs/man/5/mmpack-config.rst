@@ -1,3 +1,15 @@
+=============
+mmpack-config
+=============
+
+-------------------------
+mmpack configuration file
+-------------------------
+
+:Author: Nicolas Bourdaud <nicolas.bourdaud@gmail.com>
+:Date: 2021-06-16
+:Manual section: 5
+
 Configuration
 =============
 

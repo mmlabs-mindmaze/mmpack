@@ -36,7 +36,7 @@ changes to take effect. It supports the following subccommands:
 
    add
       adds a repository named *name* pointing to the repository at *url*. The
-      comand will fail to add a repository with a name that already exists.
+      command will fail to add a repository with a name that already exists.
 
    list
       shows a list of existing repositories. This is the default command.
