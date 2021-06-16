@@ -11,7 +11,7 @@ missing will be proposed for install within the current prefix.
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from . common import get_host_dist, run_cmd, yaml_load
+from . common import get_host_dist, run_cmd, specs_load
 from . errors import MMPackBuildError
 from . workspace import find_project_root_folder, Workspace
 
@@ -107,7 +107,7 @@ def main(argv):
     main function
     """
     options = parse_option(argv[1:])
-    specs = yaml_load(options.specfile)['general']
+    specs = specs_load(options.specfile)
 
     system_builddeps, mmpack_builddeps = general_specs_builddeps(specs)
 
