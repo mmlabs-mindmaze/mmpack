@@ -7,7 +7,7 @@ import os
 import shutil
 from copy import copy
 from os.path import abspath, basename, exists, join as join_path
-from subprocess import call, check_call, DEVNULL
+from subprocess import call, DEVNULL
 from tarfile import open as taropen, TarFile, TarInfo
 from typing import Dict, Iterator, List, NamedTuple, Optional
 
@@ -567,6 +567,6 @@ class SourceTarball:
         for patch in patches:
             iprint(f'Applying {patch}...')
             with open(os.path.join(srcdir, patch), 'rb') as patchfile:
-                check_call(['patch', '-d', srcdir, '-p1'], stdin=patchfile)
+                run_cmd(['patch', '-d', srcdir, '-p1'], stdin=patchfile)
 
         self.trace['patches'] = patches
