@@ -20,7 +20,8 @@ import platform
 from hashlib import sha256
 from io import TextIOWrapper
 from subprocess import PIPE, CalledProcessError, Popen, run
-from typing import Any, AnyStr, Optional, Union, Dict, Tuple, List, Set
+from typing import (Any, AnyStr, BinaryIO, Optional, Union, Dict, Tuple, List,
+                    Set)
 
 import urllib3
 import yaml
@@ -179,7 +180,8 @@ def shell(cmd, log: bool = True, input_str: str = None,
         raise ShellException('failed to exec command')
 
 
-def run_cmd(cmd: List[str], log: bool = True, env: Dict[str, str] = None):
+def run_cmd(cmd: List[str], log: bool = True, env: Dict[str, str] = None,
+            stdin: Optional[BinaryIO] = None):
     """Execute command.
 
     The called command is assumed to report failure reason (if applicable) on
@@ -190,6 +192,7 @@ def run_cmd(cmd: List[str], log: bool = True, env: Dict[str, str] = None):
         log: log command string on debug output if True
         env: full environment with which the process must be executed. If None,
             the environment is inherited from the current process
+        stdin: Optional stream opened for reading in binary.
 
     raises:
         ShellException: the command return a failure code
@@ -198,7 +201,8 @@ def run_cmd(cmd: List[str], log: bool = True, env: Dict[str, str] = None):
         dprint('[run_cmd] {0}'.format(' '.join(cmd)))
 
     try:
-        run(cmd, capture_output=True, encoding='utf-8', check=True, env=env)
+        run(cmd, capture_output=True, encoding='utf-8',
+            check=True, env=env, stdin=stdin)
     except CalledProcessError as err:
         if err.stdout or err.stderr:
             errmsg = err.stdout + err.stderr
