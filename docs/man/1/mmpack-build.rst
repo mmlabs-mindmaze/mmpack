@@ -103,6 +103,10 @@ MMPACK_BUILD_CACHEDIR
   **~/.cache/mmpack/cache** if **XDG_CACHE_HOME** environment variable is not
   set.
 
+MMPACK_BUILD_KEEP_TMPDIR
+  if set to true, the temporary folder used to build the source package is
+  preserved, ie, not removed when command exits.
+
 SEE ALSO
 ========
 **mmpack**\(1),
