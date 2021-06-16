@@ -295,7 +295,7 @@ class SourceTarball:
                           execdir: str, env: Optional[Dict[str, str]] = None):
         if env is None:
             env = {}
-        env['BUILDIR'] = abspath(self._builddir)
+        env['BUILDDIR'] = abspath(self._builddir)
 
         specdir = join_path(self._srcdir, 'mmpack')
         run_build_script(name, execdir, specdir, [method], env)
