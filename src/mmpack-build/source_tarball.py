@@ -285,12 +285,6 @@ class SourceTarball:
         # Run source strapped_hook
         self._run_build_script('source_strapped', specs['method'], srcdir)
 
-    def get_srcdir(self) -> str:
-        """
-        get directory of extracted source
-        """
-        return self._srcdir
-
     def _run_build_script(self, name: str, method: str,
                           execdir: str, env: Optional[Dict[str, str]] = None):
         if env is None:
