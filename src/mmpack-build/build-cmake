@@ -36,4 +36,13 @@ if [ "$SKIP_TESTS" != "True" ] ; then
 	fi
 fi
 
+
+# DESTDIR is supported on Windows and works by stripping the drive letter from
+# the "real" path. See logic.
+# https://gitlab.kitware.com/cmake/cmake/blob/v3.10.2/Source/cmFileCommand.cxx#L1981-1988.
+# The follow workaround work because $PREFIX is assumed to be only one drive on windows
+if [ -n "$MSYSTEM" -a -z "$MSYSTEM_OVERRIDE" ] ; then
+	DESTDIR=$DESTDIR/$(cygpath -u $PREFIX)
+fi
+
 DESTDIR=$DESTDIR $BUILDER install
