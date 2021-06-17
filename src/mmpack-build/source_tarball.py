@@ -367,7 +367,7 @@ class SourceTarball:
                 specs = stream.read()
 
             pat = re.compile(r'(\s*version\s*:\s*)[^\s,}]+')
-            updated_specs = pat.sub(lambda m: m.group(0) + version, specs)
+            updated_specs = pat.sub(lambda m: m.groups()[0] + version, specs)
 
             # Overwrite the spec file with updated specs
             with open(specs_path, 'w', encoding='utf-8') as stream:
