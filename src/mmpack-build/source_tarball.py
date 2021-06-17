@@ -4,6 +4,7 @@ Fetch/gather sources of a mmpack package and create source tarball
 """
 
 import os
+import re
 import shutil
 from copy import copy
 from os.path import abspath, basename, exists, join as join_path
@@ -358,11 +359,19 @@ class SourceTarball:
         # project, this will fail. Just return in that case.
         try:
             specs_path = os.path.join(self._srcdir, 'mmpack/specs')
-            specs = specs_load(specs_path)
-            tag = specs['version']
+            tag = specs_load(specs_path)['version']
             version = _git_subcmd(['describe', '--match', tag], self._vcsdir)
-            specs['version'] = version
-            yaml_serialize(specs, specs_path, use_block_style=True)
+
+            # read specs as binary blob
+            with open(specs_path, 'r', encoding='utf-8') as stream:
+                specs = stream.read()
+
+            pat = re.compile(r'(\s*version\s*:\s*)[^\s,}]+')
+            updated_specs = pat.sub(lambda m: m.group(0) + version, specs)
+
+            # Overwrite the spec file with updated specs
+            with open(specs_path, 'w', encoding='utf-8') as stream:
+                stream.write(updated_specs)
         except (FileNotFoundError, ShellException):
             pass
 
