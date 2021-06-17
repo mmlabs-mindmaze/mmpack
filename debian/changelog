@@ -1,4 +1,4 @@
-mmpack (0.6.7) UNRELEASED; urgency=medium
+mmpack (0.6.7) unstable; urgency=medium
 
   * Support specs in utf-8 on windows.
   * Build scripts filename have the suffix "_hook" dropped. The version with
@@ -6,8 +6,9 @@ mmpack (0.6.7) UNRELEASED; urgency=medium
   * Support for local_install build script.
   * MMPACK_BUILD_KEEP_TMPDIR env allow one to keep temporary source build
     folder.
+  * Various improvements of error reporting of mmpack-build.
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Sat, 12 Jun 2021 07:22:23 +0200
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 17 Jun 2021 08:12:20 +0200
 
 mmpack (0.6.6) unstable; urgency=medium
 
