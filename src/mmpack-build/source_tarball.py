@@ -358,10 +358,10 @@ class SourceTarball:
         # project, this will fail. Just return in that case.
         try:
             specs_path = os.path.join(self._srcdir, 'mmpack/specs')
-            specs = yaml_load(specs_path)
-            tag = specs['general']['version']
+            specs = specs_load(specs_path)
+            tag = specs['version']
             version = _git_subcmd(['describe', '--match', tag], self._vcsdir)
-            specs['general']['version'] = version
+            specs['version'] = version
             yaml_serialize(specs, specs_path, use_block_style=True)
         except (FileNotFoundError, ShellException):
             pass
