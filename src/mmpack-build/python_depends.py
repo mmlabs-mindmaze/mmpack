@@ -111,7 +111,14 @@ class DependsInspector:
         mmpack package.
         """
         try:
-            return mod.path and mod.path[0] in self.pkgfiles
+            if not mod.path:
+                return False
+            if isinstance(mod.path, list):
+                return mod.path[0] in self.pkgfiles
+            elif isinstance(mod.path, str):
+                return mod.path in self.pkgfiles
+            else:
+                return False
         except AttributeError:
             return False
 
