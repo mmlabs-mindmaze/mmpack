@@ -304,6 +304,8 @@ class DependsInspector:
         except (SyntaxError, InconsistentMroError) as error:
             print(f'{filename} failed to be parsed: {error}', file=sys.stderr)
             return
+        except AstroidImportError:
+            return
 
         # If not public module, add directory to simulate calling the script
         # directly
@@ -360,6 +362,8 @@ def main():
         add_to_pkg_resources(sys.path[0])
 
     pkgfiles = [abspath(f.strip()) for f in options.infiles]
+
+    astroid_manager.always_load_extensions = True
 
     inspector = DependsInspector(pkgfiles)
     for filename in pkgfiles:
