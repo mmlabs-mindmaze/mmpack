@@ -199,7 +199,7 @@ class _PyPkg:
         """
         Return the name of the mmpack package python package
         """
-        names = {n for n in self.import_names if not n.startswith('_')}
+        names = {n.lower() for n in self.import_names if not n.startswith('_')}
         if self.name:
             pyname = self.name.lower().replace('-', '_')
             if pyname.startswith('python_'):
@@ -366,7 +366,7 @@ class MMPackBuildHook(BaseHook):
         for file in data.unassigned_files.copy():
             try:
                 info = _parse_py3_filename(file)
-                pypkg = pypkgs.setdefault(info.pyname, _PyPkg())
+                pypkg = pypkgs.setdefault(info.pyname.lower(), _PyPkg())
                 pypkg.add(file, info=info)
             except FileNotFoundError:
                 pass
