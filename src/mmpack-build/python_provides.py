@@ -243,6 +243,8 @@ def main():
     for sitedir in options.site_paths:
         sys.path.insert(0, abspath(sitedir))
 
+    MANAGER.always_load_extensions = True
+
     # Load list of files in package from stdin
     pkgdata = PkgData({abspath(f.strip()) for f in options.infiles})
     pkgdata.gen_pypkg_symbols()

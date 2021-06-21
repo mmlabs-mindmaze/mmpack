@@ -12,7 +12,7 @@ from typing import Set, Dict, List, Iterable, NamedTuple
 
 from . base_hook import BaseHook
 from . common import shell, Assert, iprint, rmtree_force
-from . file_utils import is_python_script
+from . file_utils import filetype
 from . package_info import PackageInfo, DispatchData
 from . provide import Provide, ProvideList, load_mmpack_provides
 from . syspkg_manager import get_syspkg_mgr
@@ -42,6 +42,8 @@ _PKG_REGEX = re.compile(
     r'((?:usr/|mingw64/)?lib/python3(?:\.\d)?/(?:dist|site)-packages)'
     r'/([\w-]+)([^/]*)'
 )
+
+_PYEXT_REGEX = re.compile(r'.*\.cpython-.*\.(?:so|dll|pyd)')
 
 
 # location relative to the prefix dir where the files of public python packages
@@ -91,12 +93,20 @@ def _parse_py3_filename(filename: str) -> PyNameInfo:
     return PyNameInfo(pyname=name, sitedir=sitedir, is_metadata=is_metadata)
 
 
+def _is_py_file(filename: str) -> bool:
+    ftype = filetype(filename)
+    if ftype in ('py', 'python', 'python3'):
+        return True
+
+    return bool(_PYEXT_REGEX.fullmatch(filename))
+
+
 def _gen_pysymbols(pkgfiles: Set[str], sitedirs: List[str]) -> Set[str]:
     # Filter out files that are not python script nor subpath of any sitedirs
     sites_files = set()
     for sitedir in sitedirs:
         sites_files.update({f for f in pkgfiles
-                            if is_python_script(f)
+                            if _is_py_file(f)
                             and os.path.commonpath([f, sitedir]) == sitedir})
 
     # Skip processing if there are no python package in sitedirs
@@ -131,7 +141,7 @@ def _gen_pydepends(pkg: PackageInfo, sitedirs: List[str]) -> Set[str]:
     script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
     cmd = ['python3', script]
     cmd += ['--site-path='+path for path in sitedirs]
-    cmd += [f for f in pkg.files if is_python_script(f)]
+    cmd += [f for f in pkg.files if _is_py_file(f)]
 
     # run in prefix if one is being used, this allows to establish dependency
     # against installed mmpack packages
@@ -313,7 +323,7 @@ class MMPackBuildHook(BaseHook):
             # Search for python files in potential private sitedir
             sitedir = 'share/' + name
             for path in iglob(sitedir + '/**', recursive=True):
-                if os.path.isfile(path) and is_python_script(path):
+                if os.path.isfile(path) and _is_py_file(path):
                     iprint(f'{sitedir} could be a private python sitedir')
                     self._private_sitedirs.append(sitedir)
                     break
@@ -425,7 +435,7 @@ class MMPackBuildHook(BaseHook):
         if pkg.ghost:
             return
 
-        py_scripts = [f for f in pkg.files if is_python_script(f)]
+        py_scripts = [f for f in pkg.files if _is_py_file(f)]
         if not py_scripts:
             return
 
