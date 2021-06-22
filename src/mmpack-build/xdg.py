@@ -21,7 +21,7 @@ from os.path import expanduser, join as path_join
 
 
 # XDG default values
-_HOME = expanduser('~')
+_HOME = env.get('HOME', expanduser('~'))
 _XDG_DATA_HOME_DEFAULT = path_join(_HOME, '.local', 'share')
 _XDG_DATA_DIRS_DEFAULT = '/usr/local/share:/usr/share'
 _XDG_CONFIG_HOME_DEFAULT = path_join(_HOME, '.config')
