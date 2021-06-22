@@ -77,7 +77,7 @@ def log_info(*args, **kwargs):
     """
     write only to log as info
     """
-    _log_or_store(logging.ERROR, *args, **kwargs)
+    _log_or_store(logging.INFO, *args, **kwargs)
 
 
 def eprint(*args, **kwargs):
