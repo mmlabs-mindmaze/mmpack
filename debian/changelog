@@ -3,6 +3,7 @@ mmpack (0.6.8) UNRELEASED; urgency=medium
   * Use regex to update version from git.
   * python compiled extension are used to enrich provides and list in the
     local files for dependency search.
+  * Update PKG_CONFIG_PATH when running mmpack run.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 17 Jun 2021 10:53:50 +0200
 
