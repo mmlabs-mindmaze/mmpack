@@ -147,6 +147,9 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if (mm_setenv("PATH", MOUNT_TARGET "/bin", MM_ENV_PREPEND)
 	    || mm_setenv("CPATH", MOUNT_TARGET "/include", MM_ENV_PREPEND)
 	    || mm_setenv("LIBRARY_PATH", MOUNT_TARGET "/lib", MM_ENV_PREPEND)
+	    || mm_setenv("PKG_CONFIG_PATH",
+	                 MOUNT_TARGET "/lib/pkgconfig",
+	                 MM_ENV_PREPEND)
 	    || mm_setenv("MANPATH", MOUNT_TARGET "/share/man", MM_ENV_PREPEND)
 	    || mm_setenv("MMPACK_PREFIX", full_prefix, MM_ENV_OVERWRITE)
 	    || mm_setenv("MMPACK_ACTIVE_PREFIX", full_prefix, MM_ENV_OVERWRITE)
@@ -163,6 +166,7 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// MSYS2 or Cygwin)
 	conv_env_pathlist_win32_to_posix("CPATH");
 	conv_env_pathlist_win32_to_posix("LIBRARY_PATH");
+	conv_env_pathlist_win32_to_posix("PKG_CONFIG_PATH");
 	conv_env_pathlist_win32_to_posix("MANPATH");
 	conv_env_pathlist_win32_to_posix("ACLOCAL_PATH");
 #endif
