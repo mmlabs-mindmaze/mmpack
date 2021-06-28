@@ -171,6 +171,10 @@ class Workspace:
         """
         os.makedirs(self._cache, exist_ok=True)
         cache_file = os.path.join(self._cache, os.path.basename(path))
+        try:
+            os.unlink(cache_file)
+        except FileNotFoundError:
+            pass
         shutil.copyfile(path, cache_file)
 
         # Hard link a version named after the sha256 value of the cached file
