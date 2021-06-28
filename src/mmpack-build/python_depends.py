@@ -187,12 +187,15 @@ class DependsInspector:
 
         Returns: the couple of public symbol name and node definition
         """
-        if isinstance(node, Import):
-            imp = node
-            name = imp.real_name(name)
-            node = imp.do_import_module(name)
-        elif isinstance(node, ImportFrom):
-            return self._get_module_namefrom(node, name)
+        try:
+            if isinstance(node, Import):
+                imp = node
+                name = imp.real_name(name)
+                node = imp.do_import_module(name)
+            elif isinstance(node, ImportFrom):
+                return self._get_module_namefrom(node, name)
+        except RecursionError:
+            pass
 
         return (name, node)
 
