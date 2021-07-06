@@ -43,11 +43,33 @@ static const struct mm_arg_opt cmdline_optv[] = {
 };
 
 
+static char site_py_content[] =
+	"from os.path import abspath, join\n"
+	"from sys import platform\n"
+	"\n"
+	"_prefix_bindir = abspath(join(__file__, '../../../../bin')\n"
+	"\n"
+	"if platform == 'linux':\n"
+	"    from os import environ\n"
+	"    name = 'LD_LIBRARY_PATH'\n"
+	"    environ[name] = ':'.join(environ.get(name, [])\n"
+	"                             + [_prefix_bindir])\n"
+	"elif platform == 'win32':\n"
+	"    try:\n"
+	"        from os import add_dll_directory\n"
+	"        _MMPACK_DLL_DIR = add_dll_directory())\n"
+	"    except ImportError:\n"
+	"        pass\n"
+;
+
+
 static
 int create_initial_empty_files(const mmstr* prefix, int force_create)
 {
 	int fd, oflag;
+	ssize_t rsz;
 	const mmstr * instlist_relpath, * log_relpath, * manually_inst_relpath;
+	STATIC_CONST_MMSTR(py3_site_relpath, PY3_SITE_RELPATH "/site.py");
 
 	instlist_relpath = mmstr_alloca_from_cstr(INSTALLED_INDEX_RELPATH);
 	log_relpath = mmstr_alloca_from_cstr(LOG_RELPATH);
@@ -69,13 +91,22 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 
 	// Create initial empty manually installed packages set
 	fd = open_file_in_prefix(prefix, manually_inst_relpath, oflag);
+	mm_close(fd);
 	if (fd < 0)
 		return -1;
 
+	// Create site.py in prefix python site package folder
+	fd = open_file_in_prefix(prefix, py3_site_relpath, oflag);
+	if (fd < 0)
+		return -1;
+
+	rsz = mm_write(fd, site_py_content, sizeof(site_py_content));
 	mm_close(fd);
 
-	return 0;
+	return (rsz >= 0) ? 0 : -1;
 }
+
+
 
 
 /**

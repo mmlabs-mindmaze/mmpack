@@ -15,6 +15,7 @@ diff_tree()
 	then
 		diff - <(find $PREFIX_TEST -type f | sort) <<EOF
 $PREFIX_TEST/etc/mmpack-config.yaml
+$PREFIX_TEST/lib/python3/site-packages/site.py
 $1
 $PREFIX_TEST/var/lib/mmpack/installed
 $PREFIX_TEST/var/lib/mmpack/manually-installed.txt
@@ -24,6 +25,7 @@ EOF
 	else
 		diff - <(find $PREFIX_TEST -type f | sort) <<EOF
 $PREFIX_TEST/etc/mmpack-config.yaml
+$PREFIX_TEST/lib/python3/site-packages/site.py
 $PREFIX_TEST/var/lib/mmpack/installed
 $PREFIX_TEST/var/lib/mmpack/manually-installed.txt
 $PREFIX_TEST/var/log/mmpack.log

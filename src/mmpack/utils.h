@@ -36,6 +36,7 @@ int copy_file(const char* dst, const char* src);
 #define LOG_RELPATH "var/log/mmpack.log"
 #define PKGS_CACHEDIR_RELPATH "var/cache/mmpack/pkgs"
 #define UNPACK_CACHEDIR_RELPATH "var/cache/mmpack/unpack"
+#define PY3_SITE_RELPATH "lib/python3/site-packages"
 
 #define INSTALLED_INDEX_RELPATH \
 	MMPACK_STATEDIR_RELPATH "/installed"
