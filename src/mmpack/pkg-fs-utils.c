@@ -499,7 +499,7 @@ void fschange_compile_pyscripts(struct fschange* fsc)
 		goto exit;
 
 	i = 0;
-	argv = xx_malloca((num_scripts + 5) * sizeof(*argv));
+	argv = xx_malloca((num_scripts + 6) * sizeof(*argv));
 	argv[i++] = "python3";
 	argv[i++] = "-m";
 	argv[i++] = "compileall";
@@ -507,6 +507,7 @@ void fschange_compile_pyscripts(struct fschange* fsc)
 	for (elt = pyscripts.head; elt != NULL; elt = elt->next)
 		argv[i++] = elt->str.buf;
 
+	argv[i++] = PY3_SITE_RELPATH;
 	argv[i++] = NULL;
 	execute_cmd(argv);
 	mm_freea(argv);
