@@ -29,6 +29,7 @@ int is_path_separator(char c)
 #endif
 }
 
+int copy_file(const char* dst, const char* src);
 
 #define MMPACK_STATEDIR_RELPATH "var/lib/mmpack"
 #define CFG_RELPATH "etc/mmpack-config.yaml"

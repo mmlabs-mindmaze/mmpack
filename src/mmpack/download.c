@@ -191,44 +191,6 @@ exit:
 }
 
 
-#define XFER_SIZE       4096
-static
-int copy_file(const char* dst, const char* src)
-{
-	int fd_src, fd_dst;
-	char* buff;
-	ssize_t rsz;
-	int rv = -1;
-
-	buff = xx_malloc(XFER_SIZE);
-	fd_src = mm_open(src, O_RDONLY, 0);
-	fd_dst = open_file_in_prefix(NULL, dst, O_WRONLY|O_CREAT|O_TRUNC);
-	if (fd_src == -1 || fd_dst == -1)
-		goto exit;
-
-	while (1) {
-		rsz = mm_read(fd_src, buff, XFER_SIZE);
-		if (rsz < 0)
-			goto exit;
-
-		if (rsz == 0)
-			break;
-
-		rsz = mm_write(fd_dst, buff, rsz);
-		if (rsz < 0)
-			goto exit;
-	}
-
-	rv = 0;
-
-exit:
-	mm_close(fd_dst);
-	mm_close(fd_src);
-	free(buff);
-	return rv;
-}
-
-
 /**
  * download_remote_resource() - get a remote resource
  * @ctx:        mmpack context used (used to get curl handle)
