@@ -6,6 +6,7 @@ bin_to_libexecdir=`realpath -m --relative-to=$(bindir) $(libexecdir)`
 
 AM_CPPFLAGS = \
 	-I$(srcdir)/src/mmpack \
+	-Isrc/mmpack \
 	-DSRCDIR=\"$(srcdir)\" \
 	-DBUILDDIR=\"$(builddir)\" \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
@@ -99,8 +100,8 @@ nodist_mmpackbuild_PYTHON =\
 	src/mmpack-build/settings.py \
 	$(eol)
 
-BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON)
-CLEANFILES += $(nodist_mmpackbuild_PYTHON)
+BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON) src/mmpack/site.py.inc
+CLEANFILES += $(nodist_mmpackbuild_PYTHON) src/mmpack/site.py.inc
 
 
 .PHONY: pycodestyle
@@ -120,6 +121,7 @@ syntax: pycodestyle pylint
 	@echo "Use \"pycodestyle\" and \"pylint\" instead."
 
 mmpack_lib_sources = \
+	src/mmpack/site.py.inc \
 	src/mmpack/action-solver.c \
 	src/mmpack/action-solver.h \
 	src/mmpack/binindex.c \

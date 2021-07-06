@@ -19,6 +19,9 @@
 
 #include "mmpack-mkprefix.h"
 
+#define PREFIX_SITE_PY "lib/python3/site-packages/site.py"
+
+
 static int force_mkprefix = 0;
 static const char* repo_url = NULL;
 static const char* repo_name = NULL;
@@ -41,6 +44,41 @@ static const struct mm_arg_opt cmdline_optv[] = {
 	{"name", MM_OPT_NEEDSTR, NULL, {.sptr = &repo_name},
 	 "Specify @NAME as a nickname for the url specified"},
 };
+
+
+static const char site_py_content[] = {
+#include "site.py.inc"
+};
+
+
+static
+int copy_site_py(const mmstr* prefix, int force_create)
+{
+	STATIC_CONST_MMSTR(site_py_relpath, PREFIX_SITE_PY);
+	ssize_t rsz;
+	int fd, oflag;
+	mmstr* site_py_path = NULL;
+
+	oflag = O_WRONLY|O_CREAT| (force_create ? O_TRUNC : O_EXCL);
+
+	// Create site.py in prefix python site package folder
+	fd = open_file_in_prefix(prefix, site_py_relpath, oflag);
+	if (fd < 0)
+		return -1;
+
+	rsz = mm_write(fd, site_py_content, sizeof(site_py_content));
+	mm_close(fd);
+	if (rsz < 0)
+		return -1;
+
+	// Generate site.py bytecode
+	site_py_path = mmstr_join_path_realloc(NULL, prefix, site_py_relpath);
+	char* argv[] = {"python3", "-m", "compileall", "-q", site_py_path, NULL};
+	execute_cmd(argv);
+	mmstr_free(site_py_path);
+
+	return 0;
+}
 
 
 static
@@ -69,13 +107,14 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 
 	// Create initial empty manually installed packages set
 	fd = open_file_in_prefix(prefix, manually_inst_relpath, oflag);
+	mm_close(fd);
 	if (fd < 0)
 		return -1;
 
-	mm_close(fd);
-
-	return 0;
+	return copy_site_py(prefix, force_create);
 }
+
+
 
 
 /**
