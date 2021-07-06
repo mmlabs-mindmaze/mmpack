@@ -44,6 +44,25 @@ static const struct mm_arg_opt cmdline_optv[] = {
 
 
 static
+int copy_python_site_script(const mmstr* prefix)
+{
+	STATIC_CONST_MMSTR(prefix_site_relpath, PY3_SITE_RELPATH "/site.py");
+	char site_ref[] = PKGDATADIR "/site.py";
+	mmstr* dst = NULL;
+	int rv = 0;
+
+	dst = mmstr_join_path_realloc(dst, prefix, prefix_site_relpath);
+
+	if (mm_mkdir(PY3_SITE_RELPATH, 0777, MM_RECURSIVE)
+	    || copy_file(dst, site_ref))
+		rv = -1;
+
+	mmstr_free(dst);
+	return rv;
+}
+
+
+static
 int create_initial_empty_files(const mmstr* prefix, int force_create)
 {
 	int fd, oflag;
@@ -69,13 +88,14 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 
 	// Create initial empty manually installed packages set
 	fd = open_file_in_prefix(prefix, manually_inst_relpath, oflag);
+	mm_close(fd);
 	if (fd < 0)
 		return -1;
 
-	mm_close(fd);
-
-	return 0;
+	return copy_python_site_script(prefix);
 }
+
+
 
 
 /**

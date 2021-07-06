@@ -42,6 +42,7 @@ bin_SCRIPTS = \
 
 dist_pkgdata_SCRIPTS = \
 	src/mmpack/check-dpkg-installed \
+	src/mmpack/site.py \
 	$(eol)
 pkgdata_DATA = \
 	src/repository/repo.py \

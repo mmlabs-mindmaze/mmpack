@@ -132,6 +132,6 @@ install_data(files('prompt.bash'),
         install_dir : get_option('datadir') / 'mmpack',
 )
 
-install_data(files('check-dpkg-installed'),
+install_data(files('check-dpkg-installed', 'site.py'),
         install_dir : get_option('datadir') / 'mmpack',
 )
