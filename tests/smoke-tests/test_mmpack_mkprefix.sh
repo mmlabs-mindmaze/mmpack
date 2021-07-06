@@ -13,8 +13,9 @@ diff_tree()
 {
 	if [ $# -eq 2 ]
 	then
-		diff - <(find $PREFIX_TEST -type f | sort) <<EOF
+		diff - <(find $PREFIX_TEST -type f | grep -v __pycache__ | sort) <<EOF
 $PREFIX_TEST/etc/mmpack-config.yaml
+$PREFIX_TEST/lib/python3/site-packages/site.py
 $1
 $PREFIX_TEST/var/lib/mmpack/installed
 $PREFIX_TEST/var/lib/mmpack/manually-installed.txt
@@ -22,8 +23,9 @@ $2
 $PREFIX_TEST/var/log/mmpack.log
 EOF
 	else
-		diff - <(find $PREFIX_TEST -type f | sort) <<EOF
+		diff - <(find $PREFIX_TEST -type f | grep -v __pycache__ | sort) <<EOF
 $PREFIX_TEST/etc/mmpack-config.yaml
+$PREFIX_TEST/lib/python3/site-packages/site.py
 $PREFIX_TEST/var/lib/mmpack/installed
 $PREFIX_TEST/var/lib/mmpack/manually-installed.txt
 $PREFIX_TEST/var/log/mmpack.log
