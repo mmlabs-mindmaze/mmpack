@@ -6,6 +6,7 @@ bin_to_libexecdir=`realpath -m --relative-to=$(bindir) $(libexecdir)`
 
 AM_CPPFLAGS = \
 	-I$(srcdir)/src/mmpack \
+	-Isrc/mmpack \
 	-DSRCDIR=\"$(srcdir)\" \
 	-DBUILDDIR=\"$(builddir)\" \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
@@ -99,8 +100,8 @@ nodist_mmpackbuild_PYTHON =\
 	src/mmpack-build/settings.py \
 	$(eol)
 
-BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON)
-CLEANFILES += $(nodist_mmpackbuild_PYTHON)
+BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON) src/mmpack/site.py.inc
+CLEANFILES += $(nodist_mmpackbuild_PYTHON) src/mmpack/site.py.inc
 
 
 .PHONY: pycodestyle
@@ -120,6 +121,7 @@ syntax: pycodestyle pylint
 	@echo "Use \"pycodestyle\" and \"pylint\" instead."
 
 mmpack_lib_sources = \
+	src/mmpack/site.py.inc \
 	src/mmpack/action-solver.c \
 	src/mmpack/action-solver.h \
 	src/mmpack/binindex.c \
@@ -296,7 +298,7 @@ src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
 
 user_doc_sources =
 .PHONY: spelling
-spelling: $(mmpackbuild_PYTHON) $(mmpack_lib_sources) $(RST_MAN_PAGES) \
+spelling: $(mmpackbuild_PYTHON) $(filter-out %.inc,$(mmpack_lib_sources)) $(RST_MAN_PAGES) \
 		$(user_doc_sources) $(mmpack_db_service)
 	$(AM_V_at) codespell $^
 
@@ -333,7 +335,7 @@ EXTRA_DIST += devtools/uncrustify.cfg
 .PHONY: fix-c-style
 fix-c-style: devtools/uncrustify.cfg
 	cd $(srcdir) && uncrustify -c devtools/uncrustify.cfg -l C --replace --no-backup \
-		$(mmpack_SOURCES) \
+		$(filter-out %.inc,$(mmpack_SOURCES)) \
 		$(mount_mmpack_prefix_SOURCES)
 
 # check all the source files for correct coding style

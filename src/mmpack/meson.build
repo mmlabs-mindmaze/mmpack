@@ -88,8 +88,11 @@ endif
 # include top dir for config.h header
 inc = include_directories('.', '../../')
 
+gen_site_py = cstrgen.process('site.py')
+
 libmmpack = static_library('mmpack-static',
         mmpack_lib_sources,
+        gen_site_py,
         include_directories : inc,
         dependencies: [libcurl, libarchive, libyaml, libmmlib, zlib],
 )
