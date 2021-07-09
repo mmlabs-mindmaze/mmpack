@@ -100,8 +100,8 @@ nodist_mmpackbuild_PYTHON =\
 	src/mmpack-build/settings.py \
 	$(eol)
 
-BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON)
-CLEANFILES += $(nodist_mmpackbuild_PYTHON)
+BUILT_SOURCES = $(nodist_mmpackbuild_PYTHON) site.py.hex
+CLEANFILES += $(nodist_mmpackbuild_PYTHON) site.py.hex
 
 
 .PHONY: pycodestyle
@@ -286,6 +286,10 @@ src/repository/mmpack-modifyrepo: src/repository/mmpack-modifyrepo.py.in Makefil
 src/mmpack-build/mmpack-build: src/mmpack-build/mmpack-build.in
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
 	$(AM_V_GEN)$(SED) -e 's,@bindir_to_pkgdatadir[@],$(shell realpath -m --relative-to=$(bindir) $(pkgdatadir)),g' < $< > $@
+
+
+site.py.hex: src/mmpack/site.py
+	$(AM_V_GEN)xxd
 
 #
 # DEVEL TARGETS
