@@ -56,6 +56,17 @@ zlib = dependency('zlib', required : true)
 libyaml = cc.find_library('libyaml', required : true)
 libmmlib = cc.find_library('mmlib', required : true)
 
+cstrgen = generator(
+    python,
+    output : ['@PLAINNAME@.inc'],
+    arguments : [
+	meson.current_source_dir() / 'devtools/convert-to-cstr.py',
+	'-o', '@OUTPUT@',
+	'@INPUT@'
+    ]
+)
+
+
 subdir('common-licenses')
 subdir('src/mmpack')
 subdir('src/mmpack-build')

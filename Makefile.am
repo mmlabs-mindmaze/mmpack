@@ -276,6 +276,9 @@ endif
 		-e 's,@package_version[@],$(PACKAGE_VERSION),g' \
 		-e 's,@exeext[@],$(EXEEXT),g' < $< > $@
 
+%.inc : % Makefile
+	$(AM_V_GEN)python3 $(srcdir)/devtools/convert-to-cstr.py -o $@ $<
+
 src/repository/mmpack-modifyrepo: src/repository/mmpack-modifyrepo.py.in Makefile
 	$(AM_V_at)$(MKDIR_P) $(dir $@)
 	$(AM_V_GEN)$(SED) -e 's,@pkgdatadir[@],$(pkgdatadir),g' \
