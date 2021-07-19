@@ -23,6 +23,7 @@
 
 
 static int force_mkprefix = 0;
+static int do_upgrade = 0;
 static const char* repo_url = NULL;
 static const char* repo_name = NULL;
 
@@ -39,6 +40,8 @@ static char mkprefix_doc[] =
 static const struct mm_arg_opt cmdline_optv[] = {
 	{"f|force", MM_OPT_NOVAL|MM_OPT_INT, "1", {.iptr = &force_mkprefix},
 	 "Force setting up prefix folder even if it was already setup"},
+	{"u|upgrade", MM_OPT_NOVAL|MM_OPT_INT, "1", {.iptr = &do_upgrade},
+	 "Upgrade prefix files instead setting up a new prefix"},
 	{"url", MM_OPT_NEEDSTR, NULL, {.sptr = &repo_url},
 	 "Specify @URL as the address of package repository"},
 	{"name", MM_OPT_NEEDSTR, NULL, {.sptr = &repo_name},
@@ -115,6 +118,15 @@ int create_initial_empty_files(const mmstr* prefix, int force_create)
 }
 
 
+static
+int upgrade_prefix(const mmstr* prefix)
+{
+	if (copy_site_py(prefix, 1))
+		return -1;
+
+	printf("Upgraded mmpack prefix: %s\n", prefix);
+	return 0;
+}
 
 
 /**
@@ -181,6 +193,9 @@ int mmpack_mkprefix(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		repo->url = mmstr_malloc_from_cstr(repo_url);
 		repo->enabled = 1;
 	}
+
+	if (do_upgrade)
+		return upgrade_prefix(prefix);
 
 	if (create_initial_empty_files(prefix, force_mkprefix)
 	    || create_initial_index_files(prefix, repo_list)
