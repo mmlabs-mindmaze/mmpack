@@ -16,14 +16,17 @@ SYNOPSIS
 
 **mmpack mkprefix** -h|--help
 
-**mmpack mkprefix** [-f|--force] [--url= *repo_url*] [--name= *name*] [*prefix-path*]
+**mmpack mkprefix** [-f|--force] [-u|--upgrade] [--url= *repo_url*] [--name= *name*] [*prefix-path*]
 
 DESCRIPTION
 ===========
 **mmpack mkprefix** allows you to create a new prefix in folder specified by
-*prefix-path* which will pull packages from *repo_url* vwhose URL is
+*prefix-path* which will pull packages from *repo_url* whose URL is
 optionally set by **--url** and whose short name is given optionally by
 **--name**.
+
+If **--upgrade** option is provided, the existing prefix settings will be kept.
+Only the files will be upgraded.
 
 If *prefix-path* is omitted, the argument of --prefix of mmpack and the
 environment variable MMPACK_PREFIX are considered for determine the prefix
@@ -35,6 +38,9 @@ that has been already setup.
 
 OPTIONS
 =======
+--upgrade, -u
+  Upgrade the prefix files.
+
 --force, -f
   Force setting up prefix folder even if it was already setup.
 
