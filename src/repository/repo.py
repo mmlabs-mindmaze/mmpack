@@ -45,7 +45,10 @@ try:
 except ImportError:
     pass
 
-_TARPROG = 'bsdtar' if get_platform() == 'mingw' else 'tar'
+# Use bsdtar on msys2 because it is not linked with msys2-0.dll... This avoids
+# to mess the arguments
+_TARPROG = 'bsdtar' if get_platform().startswith('mingw') else 'tar'
+
 
 RELPATH_BINARY_INDEX = 'binary-index'
 RELPATH_BINARY_INDEX_GZ = 'binary-index.gz'
