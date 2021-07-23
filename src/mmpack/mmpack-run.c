@@ -166,7 +166,6 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// MSYS2 or Cygwin)
 	conv_env_pathlist_win32_to_posix("CPATH");
 	conv_env_pathlist_win32_to_posix("LIBRARY_PATH");
-	conv_env_pathlist_win32_to_posix("PKG_CONFIG_PATH");
 	conv_env_pathlist_win32_to_posix("MANPATH");
 	conv_env_pathlist_win32_to_posix("ACLOCAL_PATH");
 #endif
