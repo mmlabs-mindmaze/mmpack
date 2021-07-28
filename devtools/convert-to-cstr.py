@@ -3,6 +3,8 @@
 
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from functools import partial
+from os import makedirs
+from os.path import dirname
 import sys
 
 
@@ -22,6 +24,7 @@ def main():
     if opts.output == '-':
         outfile = sys.stdout
     else:
+        makedirs(dirname(opts.output))
         outfile = open(opts.output, 'w', newline='\n')
 
     with open(opts.input, 'rb') as infile:
