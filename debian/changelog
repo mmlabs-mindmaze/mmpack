@@ -1,3 +1,13 @@
+mmpack (0.6.9) UNRELEASED; urgency=medium
+
+  * PKG_CONFIG_PATH is no longer posixified with run cmd on Windows.
+  * Install a site.py in prefix python site-packages upon prefix creation.
+  * prefix site.py ensures that libraries installed in prefix are used when
+    using python packages (with mmpack run).
+  * Add --upgrade subcommand in mkprefix.
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 28 Jul 2021 10:54:30 +0200
+
 mmpack (0.6.8) unstable; urgency=medium
 
   * Use regex to update version from git.
