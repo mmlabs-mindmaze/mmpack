@@ -1,4 +1,4 @@
-mmpack (0.6.9) UNRELEASED; urgency=medium
+mmpack (0.6.9) unstable; urgency=medium
 
   * PKG_CONFIG_PATH is no longer posixified with run cmd on Windows.
   * Install a site.py in prefix python site-packages upon prefix creation.
@@ -6,7 +6,7 @@ mmpack (0.6.9) UNRELEASED; urgency=medium
     using python packages (with mmpack run).
   * Add --upgrade subcommand in mkprefix.
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 28 Jul 2021 10:54:30 +0200
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 28 Jul 2021 11:43:20 +0200
 
 mmpack (0.6.8) unstable; urgency=medium
 
