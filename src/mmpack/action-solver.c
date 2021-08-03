@@ -188,7 +188,7 @@ struct action_stack* mmpack_action_stack_push(struct action_stack * stack,
 	/* increase by DEFAULT_STACK_SZ if full */
 	if ((stack->index + 1) == stack->size) {
 		size_t stack_size = sizeof(*stack) +
-		                    (stack->size + DEFAULT_STACK_SZ) *
+		                    (stack->size += DEFAULT_STACK_SZ) *
 		                    sizeof(*stack->actions);
 		stack = xx_realloc(stack, stack_size);
 	}
