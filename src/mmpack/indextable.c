@@ -614,7 +614,7 @@ int indextable_remove(struct indextable* table, const mmstr* key)
 
 	// Move the last entry of the bucket to the place of the one that
 	// has been removed
-	lastelt_index = last->num_entries--;
+	lastelt_index = --(last->num_entries);
 	bucket->entries[index] = last->entries[lastelt_index];
 	bucket->hash[index] = last->hash[lastelt_index];
 
