@@ -249,40 +249,41 @@ START_TEST(table_noduplicate_lookup_create)
 END_TEST
 
 
+static const int remove_cases[] = {
+	1, 10, 2*KEY_NMAX/3, KEY_NMAX-10, KEY_NMAX-1, KEY_NMAX
+};
+
 START_TEST(walk_and_remove)
 {
 	struct indextable idx;
 	struct it_iterator iter;
-	struct it_entry* entry;
-	mmstr* keys[3];
-	int vals[3] = {5, 7, 11};
-	mmstr* key_to_remove;
-	int* ptr;
-	int i;
+	int num_remove = remove_cases[_i];
+	const mmstr* key;
+	int i, j;
+	struct it_entry* e;
+	int perms[KEY_NMAX];
 
-	keys[0] = mmstr_alloca_from_cstr("first key");
-	keys[1] = mmstr_alloca_from_cstr("another key");
-	keys[2] = mmstr_alloca_from_cstr("this is the last");
+	randperm(perms, KEY_NMAX);
+	table_init_populate(&idx, KEY_NMAX, -1);
 
-	// Init and populate table
-	ck_assert(indextable_init(&idx, -1, -1) != -1);
-	for (i = 0; i < MM_NELEM(keys); i++)
-		indextable_insert(&idx, keys[i])->value = &vals[i];
+	// mark lval of all of keyvals as the same as its position in array
+	for (i = 0; i < KEY_NMAX; i++)
+		keyvals[i].lval = i;
 
-	key_to_remove = mmstr_alloca_from_cstr("another key");
-	indextable_remove(&idx, key_to_remove);
-
-	// Multiply by 3 pointed value of all entries remaining in table
-	entry= it_iter_first(&iter, &idx);
-	while (entry != NULL) {
-		ptr = entry->value;
-		*ptr *= 3;
-		entry = it_iter_next(&iter);
+	// Remove num_remove elements from table (indices from perms table)
+	for (i = 0; i < num_remove; i++) {
+		key = keyvals[perms[i]].key;
+		ck_assert(indextable_remove(&idx, key) == 0);
 	}
 
-	ck_assert_int_eq(vals[0], 5*3);
-	ck_assert_int_eq(vals[1], 7);
-	ck_assert_int_eq(vals[2], 11*3);
+	// mark lval of all element still in table as -1
+	for (e = it_iter_first(&iter, &idx); e; e = it_iter_next(&iter))
+		*((long*)e->value) = -1;
+
+	for (i = 0; i < KEY_NMAX; i++) {
+		j = perms[i];
+		ck_assert_int_eq(keyvals[j].lval, i < num_remove ? j : -1);
+	}
 
 	indextable_deinit(&idx);
 }
@@ -305,7 +306,7 @@ TCase* create_indextable_tcase(void)
 	tcase_add_loop_test(tc, populate_table, 0, NUM_HASHTABLE_CASES);
 	tcase_add_loop_test(tc, table_noduplicate_lookup_create,
 	                    0, NUM_HASHTABLE_CASES);
-	tcase_add_test(tc, walk_and_remove);
+	tcase_add_loop_test(tc, walk_and_remove, 0, MM_NELEM(remove_cases));
 
 	return tc;
 }
