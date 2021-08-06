@@ -164,7 +164,7 @@ void table_init_populate(struct indextable* table,
 		ck_assert(entry != NULL);
 		ck_assert(entry->value == NULL);
 
-		entry->value = keyvals[i].ptr;
+		entry->value = &keyvals[i].lval;
 	}
 }
 
@@ -205,7 +205,7 @@ START_TEST(populate_table)
 	for (i = 0; i < num_entries; i++) {
 		j = perms[i];
 		key = keyvals[j].key;
-		exp_val = keyvals[j].ptr;
+		exp_val = &keyvals[j].lval;
 
 		entry = indextable_lookup(&table, key);
 		ck_assert_msg(entry != NULL,
@@ -240,7 +240,7 @@ START_TEST(table_noduplicate_lookup_create)
 		ck_assert_msg(entry != NULL, "entry not found for key %s", key);
 		ck_assert_str_eq(entry->key, key);
 		ck_assert_ptr_ne(entry->key, key);
-		ck_assert_ptr_eq(entry->value, keyvals[j].ptr);
+		ck_assert_ptr_eq(entry->value, &keyvals[j].lval);
 	}
 
 	mmstr_free(key);
