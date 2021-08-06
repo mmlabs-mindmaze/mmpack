@@ -150,6 +150,25 @@ struct {
 #define NUM_HASHTABLE_CASES     MM_NELEM(indextable_cases)
 
 
+static
+void table_init_populate(struct indextable* table,
+                         int num_entries, int num_buckets)
+{
+	struct it_entry* entry;
+	int i;
+
+	ck_assert(indextable_init(table, num_buckets, -1) != -1);
+
+	for (i = 0; i < num_entries; i++) {
+		entry = indextable_lookup_create(table, keyvals[i].key);
+		ck_assert(entry != NULL);
+		ck_assert(entry->value == NULL);
+
+		entry->value = keyvals[i].ptr;
+	}
+}
+
+
 START_TEST(empty_table)
 {
 	struct indextable table;
@@ -181,18 +200,7 @@ START_TEST(populate_table)
 	int perms[KEY_NMAX];
 
 	randperm(perms, num_entries);
-	ck_assert(indextable_init(&table, num_buckets, -1) != -1);
-
-	for (i = 0; i < num_entries; i++) {
-		key = keyvals[i].key;
-		exp_val = keyvals[i].ptr;
-
-		entry = indextable_lookup_create(&table, key);
-		ck_assert(entry != NULL);
-		ck_assert(entry->value == NULL);
-
-		entry->value = exp_val;
-	}
+	table_init_populate(&table, num_entries, num_buckets);
 
 	for (i = 0; i < num_entries; i++) {
 		j = perms[i];
@@ -206,6 +214,36 @@ START_TEST(populate_table)
 		              "values mismatch for %i (perms[%i])", j, i);
 	}
 
+	indextable_deinit(&table);
+}
+END_TEST
+
+
+START_TEST(table_noduplicate_lookup_create)
+{
+	struct indextable table;
+	int num_buckets = indextable_cases[_i].num_buckets;
+	int num_entries = indextable_cases[_i].num_entries;
+	int i, j;
+	mmstr* key = NULL;
+	struct it_entry* entry;
+	int perms[KEY_NMAX];
+
+	randperm(perms, num_entries);
+	table_init_populate(&table, num_entries, num_buckets);
+
+	for (i = 0; i < num_entries; i++) {
+		j = perms[i];
+		key = mmstrcpy_realloc(key, keyvals[j].key);
+
+		entry = indextable_lookup_create(&table, key);
+		ck_assert_msg(entry != NULL, "entry not found for key %s", key);
+		ck_assert_str_eq(entry->key, key);
+		ck_assert_ptr_ne(entry->key, key);
+		ck_assert_ptr_eq(entry->value, keyvals[j].ptr);
+	}
+
+	mmstr_free(key);
 	indextable_deinit(&table);
 }
 END_TEST
@@ -265,6 +303,8 @@ TCase* create_indextable_tcase(void)
 
 	tcase_add_loop_test(tc, empty_table, 0, NUM_HASHTABLE_CASES);
 	tcase_add_loop_test(tc, populate_table, 0, NUM_HASHTABLE_CASES);
+	tcase_add_loop_test(tc, table_noduplicate_lookup_create,
+	                    0, NUM_HASHTABLE_CASES);
 	tcase_add_test(tc, walk_and_remove);
 
 	return tc;
