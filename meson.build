@@ -1,5 +1,5 @@
 project('mmpack', 'c',
-        version: '0.6.10',
+        version: run_command(find_program('read_version.py')).stdout().strip(),
         license: 'GPL3',
         meson_version: '>= 0.49',
 )
