@@ -242,7 +242,7 @@ def dpkg_find_pypkg(pypkg: str) -> str:
     # dpkg -S accept a glob-like pattern
     pattern = '/usr/lib/python3/dist-packages/{}[/|.py|.*.so]*'.format(pypkg)
     cmd_output = shell(['dpkg', '--search', pattern])
-    debpkg_list = list({l.split(':')[0] for l in cmd_output.splitlines()})
+    debpkg_list = list({r.split(':')[0] for r in cmd_output.splitlines()})
     return debpkg_list[0] if debpkg_list else None
 
 
@@ -300,8 +300,8 @@ class DebRepo:
         archs = release['Architectures'].split()
         components = release['Components'].split()
         shalist = {c[2]: (c[0], c[1]) for c in
-                   [l.strip().split()
-                    for l in release['SHA256'].strip().split('\n')]}
+                   [f.strip().split()
+                    for f in release['SHA256'].strip().split('\n')]}
 
         if self.arch not in archs:
             raise MMPackBuildError(f'No dist for {self.arch} in {dist_url}')
