@@ -35,7 +35,6 @@ XDG_CONFIG_HOME = env.get('XDG_CONFIG_HOME', _XDG_CONFIG_HOME_DEFAULT)
 XDG_CACHE_HOME = env.get('XDG_CACHE_HOME', _XDG_CACHE_HOME_DEFAULT)
 
 # XDG path list variables
-# pylint: disable=bad-continuation
 XDG_DATA_DIRS = ':'.join({XDG_DATA_HOME,  # noqa
         env.get('XDG_DATA_DIRS', _XDG_DATA_DIRS_DEFAULT)})
 XDG_CONFIG_DIRS = ':'.join({XDG_CONFIG_HOME,  # noqa
