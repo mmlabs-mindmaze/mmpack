@@ -48,6 +48,5 @@ def init_mmpack_build_hooks(srcname: str, host_archdist: str,
             MMPACK_BUILD_HOOKS.append(hook)
             dprint('hook plugin loaded: {}'.format(hook.__module__))
 
-        except AttributeError:
-            raise ImportError('invalid mmpack-build hook module: {}'
-                              .format(name))
+        except AttributeError as error:
+            raise ImportError('invalid hook module: ' + name) from error

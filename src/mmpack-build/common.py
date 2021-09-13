@@ -176,8 +176,8 @@ def shell(cmd, log: bool = True, input_str: str = None,
                  .format(logmsg, '...' if len(logmsg) > 50 else '',
                          ret.returncode)
         raise ShellException(errmsg)
-    except FileNotFoundError:
-        raise ShellException('failed to exec command')
+    except FileNotFoundError as error:
+        raise ShellException('failed to exec command') from error
 
 
 def run_cmd(cmd: List[str], log: bool = True, env: Dict[str, str] = None,

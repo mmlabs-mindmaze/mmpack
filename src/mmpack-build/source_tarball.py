@@ -328,7 +328,7 @@ class SourceTarball:
         if only_modified and self._method == 'git':
             files = _git_modified_files(self._vcsdir)
             subdirs = [d for d in subdirs
-                       if any([f.startswith(d + '/') for f in files])]
+                       if any(map(lambda f, d=d: f.startswith(d + '/'), files))]
 
         # iterate over project subdirs and generate the source package
         for subdir in subdirs:
