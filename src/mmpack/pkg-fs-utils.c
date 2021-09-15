@@ -847,7 +847,7 @@ void fschange_remove_rmfiles_pycache(struct fschange* fsc)
 		while ((f = mm_readdir(d, NULL))) {
 			// skip if file in cache path is not cache of the
 			// python source script
-			if (!strncmp(base.buf, f->name, base.len))
+			if (strncmp(base.buf, f->name, base.len))
 				continue;
 
 			// Set basename of the found cache file to cache string
