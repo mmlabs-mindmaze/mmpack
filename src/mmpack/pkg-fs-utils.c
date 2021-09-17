@@ -33,6 +33,7 @@
  * inst_files:  list of files being installed
  * rm_files:    list of files being removed
  * rm_dirs:     set of folders to try to remove at the end of stack application
+ * py_scripts:  set of installed pyscripts
  *
  * This structure holds data that needs to be shared over the installation,
  * removal or upgrade of the different packages when applying the actions
@@ -43,6 +44,7 @@ struct fschange {
 	struct strlist inst_files;
 	struct strlist rm_files;
 	struct strset rm_dirs;
+	struct strset py_scripts;
 };
 
 
@@ -470,49 +472,65 @@ int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
 
 
 static
-void fschange_compile_pyscripts(struct fschange* fsc)
+void fschange_check_installed_pyscripts(struct fschange* fsc)
 {
-	struct strlist pyscripts;
 	struct strlist_elt* elt;
 	struct strchunk base, ext;
 	const mmstr* path;
-	int i, num_scripts;
-	char** argv = NULL;
 
-	strlist_init(&pyscripts);
-
-	// Scan all files listed for installation
-	num_scripts = 0;
 	for (elt = fsc->inst_files.head; elt != NULL; elt = elt->next) {
 		path = elt->str.buf;
 
-		// Extract path component and skip if not .py file
+		// Extract path component and test for .py file
 		split_path(path, &base, &ext);
-		if (strncmp(ext.buf, "py", ext.len) != 0)
-			continue;
+		if (strncmp(ext.buf, "py", ext.len) == 0) {
+			strset_add(&fsc->py_scripts, elt->str.buf);
+		}
+	}
+}
 
-		strlist_add(&pyscripts, path);
-		num_scripts++;
+
+static
+void fschange_compile_pyscripts(struct fschange* fsc)
+{
+	struct mm_remap_fd fdmap;
+	int pipe_fds[2];
+	mm_pid_t pid;
+	mmstr* script;
+	struct strset_iterator it;
+	int num_item = fsc->py_scripts.num_item;
+	char* argv[] = {
+		"python3",
+		"-m", "compileall",
+		"-l",
+		"-q",
+		"-i", "-",
+		NULL
+	};
+
+	if (!num_item)
+		return;
+
+	// Execute external command with STDIN connected to a pipe
+	mm_pipe(pipe_fds);
+	fdmap.parent_fd = pipe_fds[0];
+	fdmap.child_fd = STDIN_FILENO;
+	if (mm_spawn(&pid, argv[0], 1, &fdmap, 0, argv, NULL)) {
+		mm_close(pipe_fds[0]);
+		mm_close(pipe_fds[1]);
+		return;
 	}
 
-	if (!num_scripts)
-		goto exit;
+	// Push each python scripts to pipe for being compiled
+	script = strset_iter_first(&it, &fsc->py_scripts);
+	for (; script != NULL; script = strset_iter_next(&it)) {
+		mm_write(pipe_fds[1], script, mmstrlen(script));
+		mm_write(pipe_fds[1], "\n", 1);
+	}
 
-	i = 0;
-	argv = xx_malloca((num_scripts + 5) * sizeof(*argv));
-	argv[i++] = "python3";
-	argv[i++] = "-m";
-	argv[i++] = "compileall";
-	argv[i++] = "-q";
-	for (elt = pyscripts.head; elt != NULL; elt = elt->next)
-		argv[i++] = elt->str.buf;
-
-	argv[i++] = NULL;
-	execute_cmd(argv);
-	mm_freea(argv);
-
-exit:
-	strlist_deinit(&pyscripts);
+	mm_close(pipe_fds[0]);
+	mm_close(pipe_fds[1]);
+	mm_wait_process(pid, NULL);
 }
 
 
@@ -535,7 +553,7 @@ int fschange_postinst(struct fschange* fsc,
 	(void) pkg;
 	(void) old;
 
-	fschange_compile_pyscripts(fsc);
+	fschange_check_installed_pyscripts(fsc);
 	return 0;
 }
 
@@ -1190,14 +1208,17 @@ void fschange_init(struct fschange* fsc, struct mmpack_ctx* ctx)
 	*fsc = (struct fschange) {.ctx = ctx};
 
 	strset_init(&fsc->rm_dirs, STRSET_HANDLE_STRINGS_MEM);
+	strset_init(&fsc->py_scripts, STRSET_HANDLE_STRINGS_MEM);
 }
 
 
 static
 void fschange_deinit(struct fschange* fsc)
 {
+	fschange_compile_pyscripts(fsc);
 	fschange_apply_rm_dirs(fsc);
 	strset_deinit(&fsc->rm_dirs);
+	strset_deinit(&fsc->py_scripts);
 }
 
 
