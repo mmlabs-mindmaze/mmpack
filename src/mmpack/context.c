@@ -33,7 +33,7 @@ int load_user_config(struct mmpack_ctx* ctx)
 	// Reset any previously loaded configuration
 	settings_reset(&ctx->settings);
 
-	filename = get_config_filename();
+	filename = get_xdg_subpath(MM_CONFIG_HOME, "mmpack-config.yaml");
 	rv = settings_load(&ctx->settings, filename);
 	mmstr_free(filename);
 

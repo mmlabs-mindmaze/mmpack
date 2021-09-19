@@ -377,32 +377,24 @@ os_id get_os_id(void)
  *                               Default paths                            *
  *                                                                        *
  **************************************************************************/
-static
-mmstr* get_default_path(enum mm_known_dir dirtype,
-                        char const * default_filename)
+LOCAL_SYMBOL
+mmstr* get_xdg_subpath(enum mm_known_dir dirtype, const char* subdir)
 {
 	mmstr* filename;
 	size_t filename_len;
 
-	char const * xdg_home = mm_get_basedir(dirtype);
-	if (xdg_home == NULL)
+	char const * xdg_dir = mm_get_basedir(dirtype);
+	if (xdg_dir == NULL)
 		return NULL;
 
-	filename_len = strlen(xdg_home) + strlen(default_filename) + 1;
+	filename_len = strlen(xdg_dir) + strlen(subdir) + 1;
 	filename = mmstr_malloc(filename_len);
 
-	mmstrcat_cstr(filename, xdg_home);
+	mmstrcat_cstr(filename, xdg_dir);
 	mmstrcat_cstr(filename, "/");
-	mmstrcat_cstr(filename, default_filename);
+	mmstrcat_cstr(filename, subdir);
 
 	return filename;
-}
-
-
-LOCAL_SYMBOL
-mmstr* get_config_filename(void)
-{
-	return get_default_path(MM_CONFIG_HOME, "mmpack-config.yaml");
 }
 
 
