@@ -417,15 +417,13 @@ int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 LOCAL_SYMBOL
 const mmstr* mmpack_ctx_get_pkgcachedir(struct mmpack_ctx * ctx)
 {
-	STATIC_CONST_MMSTR(pkgcache_relpath, PKGS_CACHEDIR_RELPATH);
 	mmstr* cachedir = ctx->pkgcachedir;
 
 	// If already computed, return it
 	if (cachedir)
 		return cachedir;
 
-	ctx->pkgcachedir = mmstr_join_path_realloc(cachedir, ctx->prefix,
-	                                           pkgcache_relpath);
+	ctx->pkgcachedir = get_xdg_subpath(MM_CACHE_HOME, "mmpack/pkgs");
 	return ctx->pkgcachedir;
 }
 
