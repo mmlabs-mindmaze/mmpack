@@ -981,18 +981,10 @@ exit:
 static
 void action_set_pathname_into_dir(struct action* act, const mmstr* dir)
 {
-	mmstr* pkgbase;
-	const struct remote_resource* res = act->pkg->remote_res;
-
-	pkgbase = mmstr_malloca(mmstrlen(res->filename));
-
-	// Get base filename of downloaded package
-	mmstr_basename(pkgbase, res->filename);
+	const mmstr* sha256 = act->pkg->remote_res->sha256;
 
 	// Store the joined cachedir and base filename in act->pathname
-	act->pathname = mmstr_join_path_realloc(act->pathname, dir, pkgbase);
-
-	mmstr_freea(pkgbase);
+	act->pathname = mmstr_join_path_realloc(act->pathname, dir, sha256);
 }
 
 
