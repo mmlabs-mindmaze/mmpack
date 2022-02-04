@@ -297,6 +297,8 @@ class SrcPackage:
         wrk = Workspace()
 
         build_env = os.environ.copy()
+        build_env['SRCNAME'] = self.name
+        build_env['SRCVERSION'] = str(self.srcversion)
         build_env['SRCDIR'] = self.unpack_path()
         build_env['BUILDDIR'] = mkdtemp(dir=self.unpack_path(),
                                         prefix='build-')

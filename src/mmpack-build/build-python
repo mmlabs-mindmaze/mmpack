@@ -31,3 +31,19 @@ if [ "$SKIP_TESTS" != "True" ] ; then
 	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 	PYTHONPATH=$DESTDIR$sitedir LD_LIBRARY_PATH=$ld_lib_path python3 $SRCDIR/setup.py --no-user-cfg check
 fi
+
+# Try to find sphinxconfig if not set yet
+if [ -z "$sphinxconf" ]; then
+	if [ -f conf.py ]; then
+		sphinxconf=conf.py
+	else
+		sphinxconf=$(find doc docs -name conf.py -print 2> /dev/null | head -n 1)
+	fi
+fi
+
+if [ -f $sphinxconf ]; then
+	# Try to build sphinx documentation but ignore failure
+	sphinx_srcdir=$(dirname $sphinxconf)
+	pyprj=$(python3 setup.py --name)
+	PYTHONPATH=$SRCDIR sphinx-build -Dversion=$SRCVERSION -b html -d $BUILDDIR/doctrees $sphinx_srcdir $DESTDIR$PREFIX/share/doc/$SRCNAME/html || true
+fi
