@@ -12,6 +12,9 @@ sitedir=$PREFIX/lib/python3/site-packages
 # ignoring those two variables allow the concatenation to work.
 export MSYS2_ARG_CONV_EXCL="--prefix=;--install-lib="
 
+# pass variable or command from package specs
+eval $OPTS
+
 # Install python package
 #
 # python distutils options:
