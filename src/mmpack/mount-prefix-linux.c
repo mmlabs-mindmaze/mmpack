@@ -54,7 +54,8 @@ int main(int argc, char* argv[])
 	const char* prefix_path;
 
 	if (argc < 3) {
-		fprintf(stderr, "usage %s <prefix> <command>\n", argv[0]);
+		fprintf(stderr, "usage %s <prefix> <command>\n",
+		        argc > 0 ? argv[0] : "mount-mmpack-prefix");
 		return EXIT_FAILURE;
 	}
 
