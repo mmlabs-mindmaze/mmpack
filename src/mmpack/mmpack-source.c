@@ -25,23 +25,38 @@
 
 
 static
-int download_pkg_sources(struct mmpack_ctx * ctx, struct binpkg const * pkg)
+mmstr* get_source_dir(struct mmpack_ctx * ctx, const struct srcpkg* srcpkg)
+{
+	mmstr* srcdir;
+}
+
+
+static
+int install_pkg_sources(struct mmpack_ctx * ctx, struct binpkg const * pkg)
 {
 	const struct srcpkg* srcpkg;
-	mmstr* dst;
+	const mmstr* cachedir;
+	mmstr *basepath, *srctar, *srcdir;
 	int rv;
 
 	srcpkg = srcindex_lookup(&ctx->srcindex,
 	                         pkg->source, pkg->version, pkg->srcsha);
 	if (!srcpkg) {
-		printf("Cannot source of package %s %s (%s)\n",
+		printf("Cannot find source of package %s %s (%s)\n",
 		       pkg->source, pkg->version, pkg->srcsha);
 		return -1;
 	}
 
-	dst = mmstr_basename(NULL, srcpkg->remote_res->filename);
-	rv = download_remote_resource(ctx, srcpkg->remote_res, dst);
-	mmstr_free(dst);
+	cachedir = mmpack_ctx_get_pkgcachedir(ctx);
+	basepath = mmstr_basename(NULL, srcpkg->remote_res->filename);
+	srctar = mmstr_join_path_realloc(NULL, cachedir, basepath);
+
+
+	rv = download_remote_resource(ctx, srcpkg->remote_res, srctar);
+
+	mmstr_free(srctar);
+	mmstr_free(basepath);
+	mmstr_free(srcdir);
 
 	return rv;
 }
@@ -84,5 +99,5 @@ int mmpack_source(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	if ((pkg = parse_pkg(ctx, argv[1])) == NULL)
 		return -1;
 
-	return download_pkg_sources(ctx, pkg);
+	return install_pkg_sources(ctx, pkg);
 }
