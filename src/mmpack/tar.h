@@ -29,5 +29,6 @@ int tarstream_extract(struct tarstream* tar, const char* path);
 
 int tar_load_file(const char* filename, const char* archive_path,
                   struct buffer* buffer);
+int tar_extract_all(const char* filename, const char* target_dir);
 
 #endif  /* TAR_H */
