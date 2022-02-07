@@ -17,5 +17,6 @@ int pkg_load_file(const char* mpk_filename, const char* archive_path,
 int pkg_load_pkginfo(const char* mpk_filename, struct buffer * buffer);
 int download_package(struct mmpack_ctx * ctx, struct binpkg const * pkg,
                      mmstr const * pathname);
+int extract_tarball(const mmstr* target_dir, const char* tarfilename);
 
 #endif /* ifndef PKG_FS_UTILS_H */
