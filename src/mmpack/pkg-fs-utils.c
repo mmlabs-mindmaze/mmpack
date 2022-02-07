@@ -569,6 +569,63 @@ int unpack_entry_into_buffer(struct archive * archive,
 }
 
 
+LOCAL_SYMBOL
+int extract_tarball(const mmstr* target_dir, const char* filename)
+{
+	const char* path;
+	struct archive_entry * entry;
+	struct archive * a;
+	int r, type, rv;
+
+	// Initialize an archive stream
+	a = archive_read_new();
+	archive_read_support_filter_all(a);
+	archive_read_support_format_all(a);
+
+	// Open binary package in the archive stream
+	if (archive_read_open_filename(a, filename, READ_ARCHIVE_BLOCK)) {
+		mm_raise_error(archive_errno(a), "opening mpk %s failed: %s",
+		               filename, archive_error_string(a));
+		archive_read_free(a);
+		return -1;
+	}
+
+	// Loop over each entry in the archive and process them
+	rv = 0;
+	while (rv == 0) {
+		r = archive_read_next_header(a, &entry);
+		if (r == ARCHIVE_EOF) {
+			rv = READ_ARCHIVE_EOF;
+			break;
+		}
+
+		if (r != ARCHIVE_OK) {
+			rv = mm_raise_error(archive_errno(a),
+			                    "reading %s failed: %s",
+			                    filename, archive_error_string(a));
+			break;
+		}
+
+		path = archive_entry_pathname_utf8(entry);
+		type = archive_entry_filetype(entry);
+		switch (type) {
+		case AE_IFDIR: rv = mm_mkdir(path, 0777, MM_RECURSIVE); break;
+		case AE_IFREG: rv = pkg_unpack_regfile(entry, path, a); break;
+		case AE_IFLNK: rv = pkg_unpack_symlink(entry, path); break;
+		default:
+			rv = mm_raise_error(MM_EBADFMT,
+			                    "unexpected file type of %s", path);
+		}
+	}
+
+	// Cleanup
+	archive_read_close(a);
+	archive_read_free(a);
+
+	return rv;
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                         Package files extraction                       *
