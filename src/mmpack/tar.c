@@ -284,3 +284,51 @@ int tar_load_file(const char* filename, const char* path_in_archive,
 }
 
 
+/**
+ * tar_extract_all() - extracts all files from an archive to a directory
+ * @filename:   path to archive
+ * @target_dir: directory where file are extracted, it must exists
+ *
+ * Return: 0 on success, -1 otherwise.
+ */
+LOCAL_SYMBOL
+int tar_extract_all(const char* filename, const char* target_dir)
+{
+	struct tarstream tar;
+	char* prev_cwd = NULL;
+	int rv;
+
+	if (tarstream_open(&tar, filename))
+		return -1;
+
+	// Change current directory to target_dir (and store previous one)
+	if ((prev_cwd = mm_getcwd(NULL, 0)) == NULL
+	    || mm_chdir(target_dir)) {
+		rv = -1;
+		goto exit;
+	}
+
+	// Loop over each entry in the archive and process them
+	while ((rv = tarstream_read_next(&tar)) == 0) {
+		rv = tarstream_extract(&tar, tar.entry_path);
+		if (rv == -1)
+			break;
+	}
+
+	if (rv == READ_ARCHIVE_EOF)
+		rv = 0;
+
+exit:
+	// restore previous current directory
+	if (prev_cwd) {
+		if (mm_chdir(prev_cwd))
+			rv = -1;
+
+		free(prev_cwd);
+	}
+
+	tarstream_close(&tar);
+	return rv;
+}
+
+
