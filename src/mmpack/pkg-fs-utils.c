@@ -367,6 +367,28 @@ int fschange_postinst(struct fschange* fsc,
 }
 
 
+LOCAL_SYMBOL
+int extract_tarball(const mmstr* target_dir, const char* filename)
+{
+	struct tar_unpack tar;
+	int rv;
+
+	if (tar_unpack_open(&tar, filename))
+		return -1;
+
+	// Loop over each entry in the archive and process them
+	rv = 0;
+	while ((rv = tar_unpack_read_next(&tar)) == 0) {
+		rv = tar_unpack_extract(&tar, tar.entry_path);
+		if (rv == -1)
+			break;
+	}
+
+	tar_unpack_close(&tar);
+	return rv;
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                         Package files extraction                       *
