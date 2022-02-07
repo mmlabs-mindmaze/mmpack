@@ -13,4 +13,4 @@ mmpack repo add repo-1 $REPO_URL/1
 mmpack update
 
 mmpack source hello-data
-ls hello-data_2.0.0_src.tar.gz
+ls $PREFIX_TEST/src/hello-data-2.0.0-*
