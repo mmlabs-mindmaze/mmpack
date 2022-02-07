@@ -255,3 +255,25 @@ int tar_load_file(const char* filename, const char* path_in_archive,
 }
 
 
+LOCAL_SYMBOL
+int tar_extract_all(const char* filename, const char* target_dir)
+{
+	struct tarstream tar;
+	int rv;
+
+	if (tarstream_open(&tar, filename))
+		return -1;
+
+	// Loop over each entry in the archive and process them
+	rv = 0;
+	while ((rv = tarstream_read_next(&tar)) == 0) {
+		rv = tarstream_extract(&tar, tar.entry_path);
+		if (rv == -1)
+			break;
+	}
+
+	tarstream_close(&tar);
+	return rv;
+}
+
+
