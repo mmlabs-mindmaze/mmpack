@@ -26,12 +26,6 @@ eval $OPTS
 #       --install-lib: installation directory for all module distributions
 python3 setup.py --no-user-cfg install --root=$DESTDIR --prefix=$PREFIX --no-compile --install-lib=$sitedir
 
-# Run test on installed package (in build dir)
-if [ "$SKIP_TESTS" != "True" ] ; then
-	ld_lib_path=$PREFIX/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-	PYTHONPATH=$DESTDIR$sitedir LD_LIBRARY_PATH=$ld_lib_path python3 $SRCDIR/setup.py --no-user-cfg check
-fi
-
 # Try to find sphinxconfig if not set yet
 if [ -z "$sphinxconf" ]; then
 	if [ -f conf.py ]; then
