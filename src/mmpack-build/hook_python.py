@@ -8,6 +8,7 @@ import os
 import re
 from email.parser import Parser
 from glob import glob, iglob
+from os.path import basename
 from typing import Set, Dict, List, Iterable, NamedTuple
 
 from . base_hook import BaseHook
@@ -44,6 +45,14 @@ _PKG_REGEX = re.compile(
 )
 
 _PYEXT_REGEX = re.compile(r'.*\.cpython-.*\.(?:so|dll|pyd)')
+_IGNORE_METADATA = [
+    'direct_url.json',
+    'LICENSE',
+    'INSTALLER',
+    'RECORD',
+    'REQUESTED',
+    'WHEEL',
+]
 
 
 # location relative to the prefix dir where the files of public python packages
@@ -380,7 +389,10 @@ class MMPackBuildHook(BaseHook):
             try:
                 info = _parse_py3_filename(file)
                 pypkg = pypkgs.setdefault(info.pyname.lower(), _PyPkg())
-                pypkg.add(file, info=info)
+                if info.is_metadata and basename(file) in _IGNORE_METADATA:
+                    data.unassigned_files.discard(file)
+                else:
+                    pypkg.add(file, info=info)
             except FileNotFoundError:
                 pass
 
