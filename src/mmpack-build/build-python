@@ -9,22 +9,14 @@ sitedir=$PREFIX/lib/python3/site-packages
 # PREFIX: on POSIX systems, there is no volume prefixing the path, and so it is
 # possible to have <destdir>/<prefix>, but on windows, this would end up with
 # C:<destdir>/C:<prefix> and would not work.
-# ignoring those two variables allow the concatenation to work.
-export MSYS2_ARG_CONV_EXCL="--prefix=;--install-lib="
+# ignoring those variables allow the concatenation to work.
+export MSYS2_ARG_CONV_EXCL="--prefix="
 
 # pass variable or command from package specs
 eval $OPTS
 
 # Install python package
-#
-# python distutils options:
-# --no-user-cfg : ignore pydistutils.cfg in your home directory
-# install : install everything from build directory (build if not done yet). install command options:
-#       --root : install everything relative to this alternate root directory
-#       --prefix : installation prefix
-#       --no-compile: don't compile .py files
-#       --install-lib: installation directory for all module distributions
-python3 setup.py --no-user-cfg install --root=$DESTDIR --prefix=$PREFIX --no-compile --install-lib=$sitedir
+python3 -m pip --cache-dir=$BUILDDIR install --no-build-isolation --no-deps --root=$DESTDIR --prefix=$PREFIX --no-compile .
 
 # Try to find sphinxconfig if not set yet
 if [ -z "$sphinxconf" ]; then
