@@ -730,7 +730,7 @@ int pkg_parse_yaml_info(const char* filename, struct binpkg * pkg)
 	struct parsing_ctx ctx = {.repo = NULL};
 
 	buffer_init(&buffer);
-	if (pkg_load_file(filename, "./MMPACK/info", &buffer))
+	if (tar_load_file(filename, "./MMPACK/info", &buffer))
 		goto exit;
 
 	if (!yaml_parser_initialize(&ctx.parser)) {
