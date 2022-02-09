@@ -166,6 +166,35 @@ struct strchunk split_path(const mmstr* path,
 #define READ_ARCHIVE_BLOCK 10240
 #define READ_ARCHIVE_EOF 1
 
+
+struct unpack_entry {
+	struct archive* a;
+	struct archive_entry* aentry;
+	int type;
+};
+
+
+
+static
+int unpack_read_next_entry(struct archive* a, struct unpack_entry* entry)
+{
+	int r;
+
+	r = archive_read_next_header(a, &entry->aentry);
+	if (r == ARCHIVE_EOF)
+		return READ_ARCHIVE_EOF;
+
+	if (r != ARCHIVE_OK) {
+		return -1;
+	}
+
+	entry->a = a;
+	entry->type = archive_entry_filetype(entry->aentry);
+	entry->path = archive_entry_pathname_utf8(entry->aentry);
+	return 0;
+}
+
+
 /**
  * fullwrite() - write fully data buffer to a file
  * @fd:         file descriptor where to write data
@@ -387,9 +416,9 @@ static
 int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
 {
 	const char* entry_path;
-	struct archive_entry * entry;
+	struct unpack_entry entry;
 	struct archive * a;
-	int r, rv;
+	int rv;
 	mmstr* path = NULL;
 	int cpt = 0;
 
@@ -409,30 +438,17 @@ int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
 	// Loop over each entry in the archive and process them
 	rv = 0;
 	while (rv == 0) {
-		r = archive_read_next_header(a, &entry);
-		if (r == ARCHIVE_EOF) {
-			rv = READ_ARCHIVE_EOF;
+		rv = unpack_read_next_entry(a, &entry);
+		if (rv != 0)
 			break;
-		}
-
-		if (r != ARCHIVE_OK) {
-			mm_raise_error(archive_errno(a),
-			               "reading mpk %s failed: %s",
-			               mpk_filename,
-			               archive_error_string(a));
-			rv = -1;
-			break;
-		}
 
 		// Obtain the pathname (with leading "./" stripped) of the
 		// file being extracted and skip metadata (MMPACK/*)
-		entry_path = archive_entry_pathname_utf8(entry);
-		path = mmstrcpy_cstr_realloc(path, entry_path+2);
+		path = mmstrcpy_cstr_realloc(path, entry.path+2);
 		if (!mmstrlen(path) || is_mmpack_metadata(path))
 			continue;
 
 		rv = pkg_unpack_entry(a, entry, path, cpt);
-
 		if (rv == 1) {
 			strlist_add(&fsc->inst_files, path);
 			cpt++;
@@ -442,11 +458,16 @@ int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
 		strlist_remove(&fsc->rm_files, path);
 	}
 
-	mmstr_free(path);
+	if (rv == -1)
+		mm_raise_error(archive_errno(a),
+		               "reading mpk %s failed: %s",
+		               mpk_filename,
+		               archive_error_string(a));
 
 	// Cleanup
 	archive_read_close(a);
 	archive_read_free(a);
+	mmstr_free(path);
 
 	if (rv != -1) {
 		// proceed to the rename of the files that have been unpacked in
