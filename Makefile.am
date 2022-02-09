@@ -199,6 +199,8 @@ mmpack_lib_sources = \
 	src/mmpack/strlist.c \
 	src/mmpack/sysdeps.c \
 	src/mmpack/sysdeps.h \
+	src/mmpack/tar.c \
+	src/mmpack/tar.h \
 	src/mmpack/utils.c \
 	src/mmpack/utils.h \
 	src/mmpack/xx-alloc.h \

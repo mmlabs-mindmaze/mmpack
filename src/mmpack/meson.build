@@ -74,6 +74,8 @@ mmpack_lib_sources = files(
 	'strlist.c',
 	'sysdeps.c',
 	'sysdeps.h',
+	'tar.c',
+	'tar.h',
 	'utils.c',
 	'utils.h',
 	'xx-alloc.h',
