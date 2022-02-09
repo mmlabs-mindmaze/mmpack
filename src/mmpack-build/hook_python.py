@@ -89,7 +89,9 @@ def _parse_py3_filename(filename: str) -> PyNameInfo:
     name = grps[1]
     ext = grps[2]
 
-    is_metadata = ext.endswith('.egg-info') or ext.endswith('-nspkg.pth')
+    is_metadata = (ext.endswith('.egg-info')
+                   or ext.endswith('.dist-info')
+                   or ext.endswith('-nspkg.pth'))
     return PyNameInfo(pyname=name, sitedir=sitedir, is_metadata=is_metadata)
 
 
@@ -184,12 +186,13 @@ class _PyPkg:
             self.import_names.update({info.pyname})
 
         if not self.name and (filename.endswith('.egg-info/PKG-INFO')
+                              or filename.endswith('.dist-info/METADATA')
                               or filename.endswith('.egg-info')):
             self.name = _parse_metadata(filename)['Name']
 
         self.single_egginfo = filename.endswith('.egg-info') and not self.files
 
-        if filename.endswith('.egg-info/top_level.txt'):
+        if info.is_metadata and filename.endswith('/top_level.txt'):
             dirs = {d.strip() for d in open(filename).readlines()}
             self.meta_top.update(dirs)
 
