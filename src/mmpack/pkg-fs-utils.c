@@ -209,12 +209,6 @@ int pkg_unpack_regfile(struct archive_entry * entry, const char* path,
 	size_t size;
 	int64_t offset;
 
-	// If previous file exists, remove it first
-	if (mm_check_access(path, F_OK) != ENOENT) {
-		if (mm_unlink(path))
-			return -1;
-	}
-
 	// Create the new file. This step should not fail because the caller
 	// must have created parent dir
 	mode = archive_entry_perm(entry);
@@ -262,12 +256,6 @@ int pkg_unpack_symlink(struct archive_entry * entry, const char* path)
 {
 	const char* target;
 	int rv;
-
-	// If previous file exists, remove it first
-	if (mm_check_access(path, F_OK) != ENOENT) {
-		if (mm_unlink(path))
-			return -1;
-	}
 
 	// Create a symlink (path -> target)
 	target = archive_entry_symlink_utf8(entry);
