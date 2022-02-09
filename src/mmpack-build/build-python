@@ -41,9 +41,9 @@ if [ -z "$sphinxconf" ]; then
 	fi
 fi
 
-if [ -f $sphinxconf ]; then
+if [ -f "$sphinxconf" ]; then
 	# Try to build sphinx documentation but ignore failure
-	sphinx_srcdir=$(dirname $sphinxconf)
+	sphinx_srcdir=$(dirname "$sphinxconf")
 	pyprj=$(python3 setup.py --name)
-	PYTHONPATH=$SRCDIR sphinx-build -Dversion=$SRCVERSION -b html -d $BUILDDIR/doctrees $sphinx_srcdir $DESTDIR$PREFIX/share/doc/$SRCNAME/html || true
+	PYTHONPATH=$SRCDIR sphinx-build -Dversion=$SRCVERSION -b html -d $BUILDDIR/doctrees "$sphinx_srcdir" $DESTDIR$PREFIX/share/doc/$SRCNAME/html || true
 fi
