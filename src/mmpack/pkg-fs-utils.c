@@ -7,8 +7,6 @@
 #endif
 
 #include <assert.h>
-#include <archive.h>
-#include <archive_entry.h>
 #include <mmsysio.h>
 #include <mmlib.h>
 #include <mmerrno.h>
@@ -25,6 +23,7 @@
 #include "strlist.h"
 #include "utils.h"
 #include "sysdeps.h"
+#include "tar.h"
 
 
 /**
@@ -163,160 +162,6 @@ struct strchunk split_path(const mmstr* path,
  *                      Packages files unpacking                          *
  *                                                                        *
  **************************************************************************/
-#define READ_ARCHIVE_BLOCK 10240
-#define READ_ARCHIVE_EOF 1
-
-/**
- * fullwrite() - write fully data buffer to a file
- * @fd:         file descriptor where to write data
- * @data:       data buffer to write
- * @size:       size of @data
- *
- * Return: 0 if @data has been fully written to @fd, -1 otherwise
- */
-static
-int fullwrite(int fd, const char* data, size_t size)
-{
-	ssize_t rsz;
-
-	do {
-		rsz = mm_write(fd, data, size);
-		if (rsz < 0)
-			return -1;
-
-		size -= rsz;
-		data += rsz;
-	} while (size > 0);
-
-	return 0;
-}
-
-
-/**
- * pkg_unpack_regfile() - extract a regular file from archive
- * @entry:      entry header of the file being extracted
- * @path:       path to which the file must be extracted
- * @a:          archive stream from which to read the file content
- *
- * Return: 0 in case of success, -1 otherwise
- */
-static
-int pkg_unpack_regfile(struct archive_entry * entry, const char* path,
-                       struct archive * a)
-{
-	int r, rv, fd, mode;
-	const void * buff;
-	size_t size;
-	int64_t offset;
-
-	// Create the new file. This step should not fail because the caller
-	// must have created parent dir
-	mode = archive_entry_perm(entry);
-	fd = mm_open(path, O_CREAT|O_EXCL|O_WRONLY, mode);
-	if (fd < 0)
-		return -1;
-
-	// Resize file as reported by archive. If no file size is actually
-	// set in archive, 0 will be reported which is harmless
-	mm_ftruncate(fd, archive_entry_size(entry));
-
-	rv = 0;
-	while (rv == 0) {
-		r = archive_read_data_block(a, &buff, &size, &offset);
-		if (r == ARCHIVE_EOF)
-			break;
-
-		if (r != ARCHIVE_OK) {
-			rv = mm_raise_from_errno("Unpacking %s failed", path);
-			break;
-		}
-
-		if (mm_seek(fd, offset, SEEK_SET) == -1) {
-			rv = -1;
-			break;
-		}
-
-		rv = fullwrite(fd, buff, size);
-	}
-
-	mm_close(fd);
-	return rv;
-}
-
-
-/**
- * pkg_unpack_symlink() - extract a symbolic link from archive
- * @entry:      entry header of the symlink being extracted
- * @path:       path to which the symlink must be extracted
- *
- * Return: 0 in case of success, -1 otherwise
- */
-static
-int pkg_unpack_symlink(struct archive_entry * entry, const char* path)
-{
-	const char* target;
-	int rv;
-
-	// Create a symlink (path -> target)
-	target = archive_entry_symlink_utf8(entry);
-	rv = mm_symlink(target, path);
-
-	return rv;
-}
-
-
-/**
- * pkg_unpack_entry() - extract archive entry
- * @a:          archive stream from which to read the entry and file content
- * @entry:      archive entry to read
- * @path:       filename of package file being unpacked (it may be
- *              different from the one advertised in entry)
- * @cpt:        counter permitting to create the name of the file in which
- *              regular and symlink files are extracted to
- *
- * Return: 0 or 1 on success, a negative value otherwise. If 1 is returned, this
- * implies that a file has been unpacked in a temporary directory and should be
- * renamed later.
- */
-static
-int pkg_unpack_entry(struct archive * a, struct archive_entry* entry,
-                     const mmstr* path, int cpt)
-{
-	int type, rv;
-	mmstr* file;
-	int len;
-
-	type = archive_entry_filetype(entry);
-	switch (type) {
-	case AE_IFDIR:
-		rv = mm_mkdir(path, 0777, MM_RECURSIVE);
-		break;
-
-	case AE_IFREG:
-	case AE_IFLNK:
-		len = sizeof(UNPACK_CACHEDIR_RELPATH) + 10;
-		file = mmstr_malloc(len);
-		sprintf(file, "%s/%d", UNPACK_CACHEDIR_RELPATH, cpt);
-
-		if (type == AE_IFREG)
-			rv = pkg_unpack_regfile(entry, file, a);
-		else
-			rv = pkg_unpack_symlink(entry, file);
-
-		if (rv == 0)
-			rv = 1;
-
-		mmstr_free(file);
-		break;
-
-	default:
-		rv = mm_raise_error(MM_EBADFMT,
-		                    "unexpected file type of %s", path);
-		break;
-	}
-
-	return rv;
-}
 
 
 /**
@@ -370,6 +215,8 @@ int rename_all(struct strlist* to_rename)
 }
 
 
+#define CACHE_FILENAME_MAXLEN (sizeof(UNPACK_CACHEDIR_RELPATH "/XXXXXX"))
+
 /**
  * fschange_pkg_unpack() - extract files of a given package
  * @fsc:        file system change data
@@ -386,67 +233,41 @@ int rename_all(struct strlist* to_rename)
 static
 int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
 {
-	const char* entry_path;
-	struct archive_entry * entry;
-	struct archive * a;
-	int r, rv;
+	struct tarstream tar;
 	mmstr* path = NULL;
+	int rv = 0;
 	int cpt = 0;
 
-	// Initialize an archive stream
-	a = archive_read_new();
-	archive_read_support_filter_all(a);
-	archive_read_support_format_all(a);
-
-	// Open binary package in the archive stream
-	if (archive_read_open_filename(a, mpk_filename, READ_ARCHIVE_BLOCK)) {
-		mm_raise_error(archive_errno(a), "opening mpk %s failed: %s",
-		               mpk_filename, archive_error_string(a));
-		archive_read_free(a);
+	if (tarstream_open(&tar, mpk_filename))
 		return -1;
-	}
 
 	// Loop over each entry in the archive and process them
-	rv = 0;
-	while (rv == 0) {
-		r = archive_read_next_header(a, &entry);
-		if (r == ARCHIVE_EOF) {
-			rv = READ_ARCHIVE_EOF;
-			break;
-		}
-
-		if (r != ARCHIVE_OK) {
-			mm_raise_error(archive_errno(a),
-			               "reading mpk %s failed: %s",
-			               mpk_filename,
-			               archive_error_string(a));
-			rv = -1;
-			break;
-		}
+	path = mmstr_malloc(sizeof(UNPACK_CACHEDIR_RELPATH "/XXXXXX"));
+	while (!rv && ((rv = tarstream_read_next(&tar)) == 0)) {
 
 		// Obtain the pathname (with leading "./" stripped) of the
 		// file being extracted and skip metadata (MMPACK/*)
-		entry_path = archive_entry_pathname_utf8(entry);
-		path = mmstrcpy_cstr_realloc(path, entry_path+2);
+		path = mmstrcpy_cstr_realloc(path, tar.entry_path+2);
 		if (!mmstrlen(path) || is_mmpack_metadata(path))
 			continue;
 
-		rv = pkg_unpack_entry(a, entry, path, cpt);
+		strlist_remove(&fsc->rm_files, path);
 
-		if (rv == 1) {
+		// If not a directory, copy extracted files in a temporary
+		// folder. They will be moved to final destination once the
+		// whole package has been extracted.
+		if (tar.entry_type != AE_IFDIR) {
 			strlist_add(&fsc->inst_files, path);
-			cpt++;
-			rv = 0;
+			sprintf(path, UNPACK_CACHEDIR_RELPATH "/%d", cpt++);
+			mmstr_update_len_from_buffer(path);
 		}
 
-		strlist_remove(&fsc->rm_files, path);
+		rv = tarstream_extract(&tar, path);
 	}
 
-	mmstr_free(path);
-
 	// Cleanup
-	archive_read_close(a);
-	archive_read_free(a);
+	tarstream_close(&tar);
+	mmstr_free(path);
 
 	if (rv != -1) {
 		// proceed to the rename of the files that have been unpacked in
@@ -546,29 +367,6 @@ int fschange_postinst(struct fschange* fsc,
 }
 
 
-/* same as archive_read_data_into_fd(), but into a buffer */
-static
-int unpack_entry_into_buffer(struct archive * archive,
-                             struct archive_entry * entry,
-                             struct buffer * buffer)
-{
-	ssize_t r;
-	int64_t info_size = archive_entry_size(entry);
-
-	if (info_size == 0)
-		return -1;
-
-	buffer_reserve_data(buffer, info_size);
-	buffer_inc_size(buffer, info_size);
-
-	r = archive_read_data(archive, buffer->base, buffer->size);
-	if (r >= ARCHIVE_OK && (size_t) r == buffer->size)
-		return 0;
-
-	return -1;
-}
-
-
 /**************************************************************************
  *                                                                        *
  *                         Package files extraction                       *
@@ -610,54 +408,6 @@ int metadata_read_value(const struct buffer* metadata_buffer, const char* key,
 
 
 /**
- * pkg_load_file() - read specified file from package into buffer
- * @mpk_filename: mmpack package to read from
- * @archive_path: path in package of the file to read
- * @buffer: buffer structure to receive the raw data
- *
- * Open, scans for the @archive_path file, and load its data into given buffer
- * structure. The buffer will be enlarged as needed, and must be freed by the
- * caller after usage by calling the buffer_deinit() function.
- *
- * Return: 0 on success, -1 on error
- */
-LOCAL_SYMBOL
-int pkg_load_file(const char* mpk_filename, const char* archive_path,
-                  struct buffer * buffer)
-{
-	int rv;
-	struct archive * a;
-	struct archive_entry * entry;
-
-	a = archive_read_new();
-	archive_read_support_filter_all(a);
-	archive_read_support_format_all(a);
-
-	if (archive_read_open_filename(a, mpk_filename, READ_ARCHIVE_BLOCK)) {
-		mm_raise_error(archive_errno(a), "opening mpk %s failed: %s",
-		               mpk_filename, archive_error_string(a));
-		archive_read_free(a);
-		return -1;
-	}
-
-	rv = -1;
-	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-		if (!strcmp(archive_entry_pathname(entry), archive_path)) {
-			rv = unpack_entry_into_buffer(a, entry, buffer);
-			break;
-		}
-
-		archive_read_data_skip(a);
-	}
-
-	archive_read_close(a);
-	archive_read_free(a);
-
-	return rv;
-}
-
-
-/**
  * pkg_load_pkginfo() - read pkginfo from package into buffer
  * @mpk_filename: mmpack package to read from
  * @buffer: buffer structure to receive the raw data
@@ -678,9 +428,9 @@ int pkg_load_pkginfo(const char* mpk_filename, struct buffer * buffer)
 
 	buffer_init(&metadata);
 
-	if (pkg_load_file(mpk_filename, "./MMPACK/metadata", &metadata)
+	if (tar_load_file(mpk_filename, "./MMPACK/metadata", &metadata)
 	    || metadata_read_value(&metadata, "pkginfo-path", &value)
-	    || pkg_load_file(mpk_filename, value, buffer)
+	    || tar_load_file(mpk_filename, value, buffer)
 	    || metadata_read_value(&metadata, "sumsha256sums", &value)) {
 		rv = -1;
 		goto exit;
