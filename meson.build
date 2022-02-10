@@ -77,7 +77,7 @@ deployment_dir = meson.build_root() + '/deployment-test'
 install_manifest = custom_target('install-manifest',
         output : 'install-manifest',
         capture : true,
-        command : [ 'meson', 'introspect', '--install' ],
+        command : [ 'meson', 'introspect', '--installed' ],
         build_by_default : true,
 )
 
