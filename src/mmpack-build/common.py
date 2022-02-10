@@ -547,7 +547,7 @@ def _compression_from_magic_number(path: str) -> str:
     except FileNotFoundError:
         return _compression_from_filename(path)
 
-    if not magic == 0:
+    if not magic:
         compression = _compression_from_filename(path)
     elif magic[:2] == b'\x1f\x8b':
         compression = 'gz'
