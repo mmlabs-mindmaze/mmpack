@@ -114,7 +114,7 @@ def dprint(*args, **kwargs):
         print(*args, file=sys.stderr, **kwargs)
 
 
-class _WritablePopen(Popen):
+class _RWPopen(Popen):
     """
     Popen class with file like API
     """
@@ -123,6 +123,12 @@ class _WritablePopen(Popen):
         same as Popen.stdout.write()
         """
         return self.stdin.write(buff)
+
+    def read(self, size: int = -1) -> bytes:
+        """
+        same as Popen.stdout.write()
+        """
+        return self.stdout.read(size)
 
 
 def shell(cmd, log: bool = True, input_str: str = None,
@@ -601,7 +607,10 @@ def open_compressed_file(path: str, mode: str = 'rt',
     elif compression == 'bz2':
         return bz2.open(path, mode, **kwargs)
     elif compression == 'zst':
-        return _WritablePopen(['zstd', '-9fqo', path], stdin=PIPE)
+        if 'w' in mode:
+            return _RWPopen(['zstd', '-9fqo', path], stdin=PIPE)
+        else:
+            return _RWPopen(['zstd', '-dqc', path], stdout=PIPE)
     elif compression == '':
         return open(path, mode, **kwargs)
 
