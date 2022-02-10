@@ -7,6 +7,7 @@ import os
 import re
 import tarfile
 
+from contextlib import contextmanager
 from io import TextIOWrapper
 from typing import Set, List, TextIO
 
@@ -124,6 +125,14 @@ def _get_repo_cpu(arch):
     return val
 
 
+@contextmanager
+def _open_db_tarball(filename: str):
+    with open_compressed_file(filename, 'rb') as zstdfile:
+        tar = tarfile.open(fileobj=zstdfile, mode='r|')
+        yield tar
+        tar.close()
+
+
 def _parse_pkgindex_comp(repo_url, component: str, builddir: str,
                          source: str) -> List[PacmanPkg]:
     pkg_list = []
@@ -139,7 +148,7 @@ def _parse_pkgindex_comp(repo_url, component: str, builddir: str,
     cached_download(pkgindex_url, pkgindex)
 
     # Parse actual index
-    with tarfile.open(pkgindex, 'r') as tar:
+    with _open_db_tarball(pkgindex) as tar:
         for fileinfo in tar.getmembers():
             if os.path.basename(fileinfo.name) == 'desc':
                 pkg = PacmanPkg(TextIOWrapper(tar.extractfile(fileinfo),
