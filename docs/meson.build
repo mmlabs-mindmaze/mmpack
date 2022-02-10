@@ -44,7 +44,7 @@ foreach rstfile : man_pages_sources
     custom_target(rstfile.underscorify(),
         command : [rst2man, files(rstfile)],
         output : '@BASENAME@.' + man_section,
-        capture : '@BASENAME@.' + man_section,
+        capture : true,
         input : rstfile,
         build_by_default : true,
         install : true,
