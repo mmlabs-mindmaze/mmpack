@@ -16,7 +16,8 @@ export MSYS2_ARG_CONV_EXCL="--prefix="
 eval $OPTS
 
 # Install python package
-python3 -m pip --cache-dir=$BUILDDIR install --no-build-isolation --no-deps --root=$DESTDIR --prefix=$PREFIX --no-compile .
+python3 -m pip --cache-dir=$BUILDDIR install --no-build-isolation --no-deps \
+  --no-warn-script-location --root=$DESTDIR --prefix=$PREFIX --no-compile .
 
 # Try to find sphinxconfig if not set yet
 if [ -z "$sphinxconf" ]; then
