@@ -46,7 +46,6 @@ def launch_subcommand(command, args):
     """
     # pylint: disable=broad-except
     ret = 127  # command not found error
-    args = [command] + args
     if command == 'list-commands':
         _list_commands()
     else:
@@ -74,13 +73,8 @@ def main():
     redirecting to the various mmpack-bulid commands
     """
     ret = 0
-    cmd_choices = ['list-commands'] + [subcmd.CMD for subcmd in ALL_CMDS]
-    parser = ArgumentParser(prog='mmpack-build', add_help=False,
+    parser = ArgumentParser(prog='mmpack-build',
                             formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('command', nargs='?', choices=cmd_choices,
-                        help='execute sub-command')
-    parser.add_argument("-h", "--help", help="show this help message and exit",
-                        action="store_true", default=False)
     parser.add_argument("-v", "--version", help="show version and exit",
                         action="store_true", default=False)
     parser.add_argument("-q", "--quiet", help="silence output",
@@ -93,8 +87,12 @@ def main():
                         action="store", dest='builddir', nargs='?')
     parser.add_argument("--cachedir", help="cache folder",
                         action="store", dest='cachedir', nargs='?')
+    subparsers = parser.add_subparsers(dest='command')
+    for mod in ALL_CMDS:
+        subparser = subparsers.add_parser(mod.CMD)
+        mod.add_parser_args(subparser)
 
-    args, subargs = parser.parse_known_args()
+    args = parser.parse_args()
     common.CONFIG['verbose'] = not args.quiet
     common.CONFIG['debug'] = args.debug
 
@@ -106,20 +104,11 @@ def main():
     if args.cachedir:
         wrk.set_cachedir(args.cachedir)
 
-    if args.help or args.version:  # handle flags
-        if args.command:
-            # sub-command flags in common with this script must be re-added
-            ret = launch_subcommand(args.command, ['--help'] + subargs)
-        elif args.help:
-            parser.print_help()
-        else:  # args.version
-            print('mmpack-build', PACKAGE_VERSION)
-    else:  # launch sub-command
-        if not args.command:
-            args.command = 'pkg-create'  # default sub-command
-        ret = launch_subcommand(args.command, subargs)
+    if args.version:
+        print('mmpack-build', PACKAGE_VERSION)
+        return 0
 
-    return ret
+    return launch_subcommand(args.command, args)
 
 
 if __name__ == "__main__":

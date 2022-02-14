@@ -14,7 +14,7 @@ from . source_tarball import SourceTarball
 CMD = 'mksource'
 
 
-def add_parser_argument(parser: ArgumentParser):
+def add_parser_args(parser: ArgumentParser):
     """
     make parser given in argument understand mksource subcommand option and
     arguments
