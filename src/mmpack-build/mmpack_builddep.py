@@ -16,9 +16,6 @@ from . errors import MMPackBuildError
 from . workspace import find_project_root_folder, Workspace
 
 
-CMD = 'builddep'
-
-
 def add_parser_args(parser: ArgumentParser):
     """Enrich supplied argument parser with builddeps related arguments"""
     parser.add_argument('specfile', type=str, nargs='?',
@@ -34,17 +31,6 @@ def add_parser_args(parser: ArgumentParser):
     parser.add_argument('-p', '--prefix',
                         action='store', dest='prefix', type=str,
                         help='prefix within which to work')
-
-
-def parse_option(argv):
-    """
-    parse options
-    """
-    parser = ArgumentParser(description=__doc__,
-                            prog='mmpack-build ' + CMD,
-                            formatter_class=RawDescriptionHelpFormatter)
-    add_parser_args(parser)
-    return parser.parse_args(argv)
 
 
 def general_specs_builddeps(general):
@@ -107,11 +93,10 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
     run_cmd(cmd)
 
 
-def main(argv):
+def main(options):
     """
     main function
     """
-    options = parse_option(argv[1:])
     specs = specs_load(options.specfile)
 
     system_builddeps, mmpack_builddeps = general_specs_builddeps(specs)

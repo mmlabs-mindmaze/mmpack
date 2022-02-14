@@ -24,7 +24,6 @@ from . common import find_license, shell
 from . errors import ShellException
 
 
-CMD = 'guess'
 UNKNOWN = 'unknown'  # default return value if guessing failed
 
 
@@ -158,7 +157,7 @@ def guess_licenses() -> List[str]:
     return [license_file] if license_file else [UNKNOWN]
 
 
-def main(argv):  # pylint: disable=unused-argument
+def main(options):  # pylint: disable=unused-argument
     """
     guess mmpack specs and print to stdout
     """

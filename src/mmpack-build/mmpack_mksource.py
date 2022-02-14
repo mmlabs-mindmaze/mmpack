@@ -11,9 +11,6 @@ from . errors import MMPackBuildError
 from . source_tarball import SourceTarball
 
 
-CMD = 'mksource'
-
-
 def add_parser_args(parser: ArgumentParser):
     """
     make parser given in argument understand mksource subcommand option and
@@ -47,22 +44,10 @@ def add_parser_args(parser: ArgumentParser):
                         help='update version from commits since version tag')
 
 
-def parse_options(argv):
-    """
-    parse and check options
-    """
-    parser = ArgumentParser(description=__doc__,
-                            prog='mmpack-build ' + CMD,
-                            formatter_class=RawDescriptionHelpFormatter)
-    add_parser_args(parser)
-    return parser.parse_args(argv)
-
-
-def main(argv):
+def main(args):
     """
     entry point to create a mmpack package
     """
-    args = parse_options(argv[1:])
     kwargs = {
         'build_only_modified': args.only_modified,
         'version_from_vcs': args.update_version_from_vcs,

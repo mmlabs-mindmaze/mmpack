@@ -18,9 +18,6 @@ from . source_tarball import SourceTarball
 from . xdg import XDG_DATA_HOME
 
 
-CMD = 'pkg-create'
-
-
 def _get_prefix_abspath(prefix) -> str:
     if not ((os.sep in prefix)
             or (os.altsep is not None and os.altsep in prefix)):
@@ -46,16 +43,10 @@ def add_parser_args(parser: ArgumentParser):
                         help='always assume yes to any prompted question')
 
 
-def parse_options(argv):
+def check_options(args):
     """
-    parse and check options
+    check options
     """
-    parser = ArgumentParser(description=__doc__,
-                            prog='mmpack-build ' + CMD,
-                            formatter_class=RawDescriptionHelpFormatter)
-    add_parser_args(parser)
-    args = parser.parse_args(argv)
-
     # set workspace prefix
     if not args.prefix:
         try:
@@ -81,12 +72,12 @@ def _build_mmpack_packages(srctar: str, tag: str, srcdir: str, args):
     package.generate_binary_packages()
 
 
-def main(argv):
+def main(args):
     """
     entry point to create a mmpack package
     """
     retcode = 0
-    args = parse_options(argv[1:])
+    args = check_options(args)
     srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
                                build_only_modified=args.only_modified,
                                version_from_vcs=args.update_version_from_vcs)
