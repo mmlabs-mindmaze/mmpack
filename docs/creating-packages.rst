@@ -74,7 +74,7 @@ You can test is as follows:
 
    # build mmpack-hello-world directly from git, using the top of the master
    # branch.
-   mmpack-build pkg-create ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world --tag master
+   mmpack-build pkg-create --url=ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world --tag master
 
    # You can also clone and do the same from the project's folder:
    git clone "ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world"
@@ -86,7 +86,7 @@ You can test is as follows:
    # assuming you did not change your config, install from the created package
    # file within your home folder.
    # (on debian/x86, the * wildcard would expand into amd64-debian)
-   mmpack install ~/.local/share/mmpack-packages/mmpack-hello-world_1.0.0_*.mpk
+   mmpack install ~/.local/share/mmpack/packages/mmpack-hello-world_1.0.0_*.mpk
 
    # you can test the package by running
    hello-world
@@ -107,7 +107,7 @@ How to create a local repository using the package I created ?
    REPO="$HOME/mmpack-repo"
    ARCH=amd64-debian # amd64-windows for windows
 
-   for manifest in *.mmpack-manifest
+   for manifest in $PKG_FOLDER/*.mmpack-manifest
    do
       mmpack-modifyrepo --path=$REPO --arch=$ARCH add $manifest
    done
@@ -121,6 +121,14 @@ How to create a local repository using the package I created ?
         url: file:///home/gandalf/mmpack-repo
         enabled: 1
    EOF
+
+
+Alternatively you may create or update a repository by watching changes in a folder and
+add the mmpack packages that fall in this folder:
+
+.. code-block:: sh
+
+   mmpack-modifyrepo --path=$REPO --arch=$ARCH watch $PKG_FOLDER
 
 
 Managing repositories
