@@ -15,7 +15,7 @@ The **mmpack** install binary depends on the mmlib, the libyaml, the
 libarchive, and the libcurl.
 
 Installation instruction for the mmlib:
-https://intranet.mindmaze.ch/mmlabs/gerrit/admin/repos/mmlib
+https://github.com/mmlabs-mindmaze/mmlib
 
 
 The **mmpack-build** tool are written in **python3** and depends on the
