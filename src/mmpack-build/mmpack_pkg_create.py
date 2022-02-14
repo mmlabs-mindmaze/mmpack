@@ -11,7 +11,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . common import set_log_file
 from . errors import MMPackBuildError
-from . mmpack_mksource import add_mksource_parser_argument
+from . mmpack_mksource import add_parser_args as add_mksource_parser_argument
 from . src_package import SrcPackage
 from . workspace import Workspace
 from . source_tarball import SourceTarball
@@ -29,13 +29,7 @@ def _get_prefix_abspath(prefix) -> str:
     return os.path.abspath(prefix)
 
 
-def parse_options(argv):
-    """
-    parse and check options
-    """
-    parser = ArgumentParser(description=__doc__,
-                            prog='mmpack-build ' + CMD,
-                            formatter_class=RawDescriptionHelpFormatter)
+def add_parser_args(parser: ArgumentParser):
     add_mksource_parser_argument(parser)
     parser.add_argument('-p', '--prefix',
                         action='store', dest='prefix', type=str,
@@ -49,6 +43,16 @@ def parse_options(argv):
     parser.add_argument('-y', '--yes',
                         action='store_true', dest='assumeyes',
                         help='always assume yes to any prompted question')
+
+
+def parse_options(argv):
+    """
+    parse and check options
+    """
+    parser = ArgumentParser(description=__doc__,
+                            prog='mmpack-build ' + CMD,
+                            formatter_class=RawDescriptionHelpFormatter)
+    add_parser_args(parser)
     args = parser.parse_args(argv)
 
     # set workspace prefix
