@@ -23,48 +23,46 @@ from . workspace import Workspace
 #  - CMD: the subcommand command name (string)
 #  - main: the subcommand main entry point (function)
 ALL_CMDS = {
-    mmpack_builddep,
-    mmpack_clean,
-    mmpack_guess,
-    mmpack_mksource,
-    mmpack_pkg_create,
+    'builddep': mmpack_builddep,
+    'clean': mmpack_clean,
+    'guess': mmpack_guess,
+    'mksource': mmpack_mksource,
+    'pkg-create': mmpack_pkg_create,
 }
 
 
 def _list_commands():
     for subcmd in ALL_CMDS:
-        print('\t' + subcmd.CMD)
+        print('\t' + subcmd)
     print('\tlist-commands')
+    return 0
 
 
-def launch_subcommand(command, args):
+def launch_subcommand(args):
     """
     wrapper for calling the sub-commands which handles the special case of
     'list-commands' subcommand.
     The wrapper also masks Exceptions, hiding the backtrace when debug mode is
     disabled.
     """
-    # pylint: disable=broad-except
-    ret = 127  # command not found error
-    args = [command] + args
-    if command == 'list-commands':
-        _list_commands()
+    if args.command == 'list-commands':
+        return _list_commands()
+
+    mod = ALL_CMDS[args.command]
+    if common.CONFIG['debug']:
+        return mod.main(args)
     else:
-        for subcmd in ALL_CMDS:
-            if command == subcmd.CMD:
-                if common.CONFIG['debug']:
-                    ret = subcmd.main(args)
-                else:
-                    try:
-                        ret = subcmd.main(args)
-                    except KeyboardInterrupt:
-                        ret = 130
-                    except SystemExit as sysexit:
-                        # pylint: disable=using-constant-test
-                        ret = sysexit.code if sysexit.code else 0
-                    except Exception as inst:
-                        print('Exception: ', inst)
-                        ret = 1
+        try:
+            ret = mod.main(args)
+        except KeyboardInterrupt:
+            ret = 130
+        except SystemExit as sysexit:
+            # pylint: disable=using-constant-test
+            ret = sysexit.code if sysexit.code else 0
+        except Exception as inst:
+            print('Exception: ', inst)
+            ret = 1
+
     return ret
 
 
@@ -74,15 +72,10 @@ def main():
     redirecting to the various mmpack-bulid commands
     """
     ret = 0
-    cmd_choices = ['list-commands'] + [subcmd.CMD for subcmd in ALL_CMDS]
-    parser = ArgumentParser(prog='mmpack-build', add_help=False,
+    parser = ArgumentParser(prog='mmpack-build',
                             formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('command', nargs='?', choices=cmd_choices,
-                        help='execute sub-command')
-    parser.add_argument("-h", "--help", help="show this help message and exit",
-                        action="store_true", default=False)
     parser.add_argument("-v", "--version", help="show version and exit",
-                        action="store_true", default=False)
+                        action="version", version=PACKAGE_VERSION)
     parser.add_argument("-q", "--quiet", help="silence output",
                         action="store_true", default=False)
     parser.add_argument("-d", "--debug", help="toggle debug mode",
@@ -94,7 +87,12 @@ def main():
     parser.add_argument("--cachedir", help="cache folder",
                         action="store", dest='cachedir', nargs='?')
 
-    args, subargs = parser.parse_known_args()
+    subparsers = parser.add_subparsers(dest='command', required=True)
+    subparsers.add_parser('list-commands')
+    for subcmd, mod in ALL_CMDS.items():
+        mod.add_parser_args(subparsers.add_parser(subcmd, help=mod.__doc__))
+
+    args = parser.parse_args()
     common.CONFIG['verbose'] = not args.quiet
     common.CONFIG['debug'] = args.debug
 
@@ -106,20 +104,7 @@ def main():
     if args.cachedir:
         wrk.set_cachedir(args.cachedir)
 
-    if args.help or args.version:  # handle flags
-        if args.command:
-            # sub-command flags in common with this script must be re-added
-            ret = launch_subcommand(args.command, ['--help'] + subargs)
-        elif args.help:
-            parser.print_help()
-        else:  # args.version
-            print('mmpack-build', PACKAGE_VERSION)
-    else:  # launch sub-command
-        if not args.command:
-            args.command = 'pkg-create'  # default sub-command
-        ret = launch_subcommand(args.command, subargs)
-
-    return ret
+    return launch_subcommand(args)
 
 
 if __name__ == "__main__":
