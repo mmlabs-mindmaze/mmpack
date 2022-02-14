@@ -58,26 +58,20 @@ It is an autotools-based hello-world project with simple commands.
 It also is used as part of the mmpack continuous testing.
 Feel free to fork it, and play around with it.
 
-[1] https://intranet.mindmaze.ch/mmlabs/gerrit/admin/repos/mmlabs/mmpack-hello-world
+[1] https://github.com/mmlabs-mindmaze/mmpack-hello-world
+
 
 
 You can test is as follows:
 
 .. code-block:: sh
 
-   # prepare to work on a tmp prefix
-   MMPACK_REPOSITORY=http://mm-v008/mmpack/stable/debian/
-   export MMPACK_PREFIX=/tmp/mmpack-hello-world-prefix
-
-   # create a mmpack prefix
-   mmpack mkprefix --url=$MMPACK_REPOSITORY $MMPACK_PREFIX
-
    # build mmpack-hello-world directly from git, using the top of the master
    # branch.
-   mmpack-build pkg-create ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world --tag master
+   mmpack-build pkg-create --tag master https://github.com/mmlabs-mindmaze/mmpack-hello-world
 
    # You can also clone and do the same from the project's folder:
-   git clone "ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world"
+   git clone "https://github.com/mmlabs-mindmaze/mmpack-hello-world"
    cd mmpack-hello-world
    mmpack-build pkg-create
    # This should end with telling you: "generated package: mmpack-hello-world"
@@ -86,7 +80,7 @@ You can test is as follows:
    # assuming you did not change your config, install from the created package
    # file within your home folder.
    # (on debian/x86, the * wildcard would expand into amd64-debian)
-   mmpack install ~/.local/share/mmpack-packages/mmpack-hello-world_1.0.0_*.mpk
+   mmpack install ~/.local/share/mmpack/packages/mmpack-hello-world_1.0.0_*.mpk
 
    # you can test the package by running
    hello-world
@@ -107,7 +101,7 @@ How to create a local repository using the package I created ?
    REPO="$HOME/mmpack-repo"
    ARCH=amd64-debian # amd64-windows for windows
 
-   for manifest in *.mmpack-manifest
+   for manifest in $PKG_FOLDER/*.mmpack-manifest
    do
       mmpack-modifyrepo --path=$REPO --arch=$ARCH add $manifest
    done
@@ -121,6 +115,14 @@ How to create a local repository using the package I created ?
         url: file:///home/gandalf/mmpack-repo
         enabled: 1
    EOF
+
+
+Alternatively you may create or update a repository by watching changes in a folder and
+add the mmpack packages that fall in this folder:
+
+.. code-block:: sh
+
+   mmpack-modifyrepo --path=$REPO --arch=$ARCH watch $PKG_FOLDER
 
 
 Managing repositories

@@ -210,13 +210,11 @@ mmpack-build just needs the so-called _mmpack/spec_-file; a simple example is
 given by
 
 ``` yaml
-general:
-    name: mmpack-hello-world
-    version: 1.0.0
-    maintainer: Gandalf <gandalf@the.grey>
-    url: ssh://<your git url>
-    description: >
-      mmpack hello world
+name: mmpack-hello-world
+version: 1.0.0
+maintainer: Gandalf <gandalf@the.grey>
+url: ssh://<your git url>
+description: mmpack hello world
 ```
 
 The build-system to use can be specified; if it is not, mmpack will guess it

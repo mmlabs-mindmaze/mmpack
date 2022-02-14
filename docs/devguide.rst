@@ -3,10 +3,10 @@ Developer’s Guide
 
 This section is about contributing to mmpack.
 
-We use gerrit (https://intranet.mindmaze.ch/mmlabs/gerrit/) as code review
-tool. If you do not know gerrit, there is a standard debian package called
-**git-review** which helps you interacting with gerrit (basically
-just call "git review" once you are ready to send a commit for review).
+We use gerrit provided by gerrithub (https://review.gerrithub.io/) as code
+review tool. If you do not know gerrit, there is a standard debian package
+called **git-review** which helps you interacting with gerrit (basically just
+call "git review" once you are ready to send a commit for review).
 
 The master branch is ... the *master* branch. We fork to create releases, and
 currently only maintain the last *major* release while working on a new one.
