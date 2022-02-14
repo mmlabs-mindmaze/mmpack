@@ -168,7 +168,7 @@ Minimal specfile example
    name: mmpack-hello-world
    version: 1.0.0
    maintainer: Gandalf <gandalf@the.grey>
-   url: ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world
+   url: https://github.com/mmlabs-mindmaze/mmpack-hello-world
    description: |
      mmpack hello world
 
@@ -181,7 +181,7 @@ Ghost package specfile example
    name: mmpack-hello-world
    version: 1.0.0
    maintainer: Gandalf <gandalf@the.grey>
-   url: ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world
+   url: https://github.com/mmlabs-mindmaze/mmpack-hello-world
    description: |
      mmpack hello world
    ghost: true

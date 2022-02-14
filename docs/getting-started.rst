@@ -60,13 +60,12 @@ Here is an example specfile:
 
 .. code-block:: yaml
 
-   general:
-       name: mmpack-hello-world
-       version: 1.0.0
-       maintainer: Gandalf <gandalf@the.grey>
-       url: ssh://intranet.mindmaze.ch:29418/mmlabs/mmpack-hello-world
-       description: |
-         mmpack hello world
+   name: hello-world-project
+   version: 1.0.0
+   maintainer: Gandalf <gandalf@the.grey>
+   url: https://github.com/the-grey/hello-world-project
+   description: >
+     This is a fake project named hello world.
 
 
 mmpack-build will detect your build system, build the package, scan through the
@@ -88,6 +87,6 @@ Here are some examples on how to call mmpack-build:
    mmpack-build pkg-create --url=/path/to/sources --tag=feature --skip-build-tests
 
    # create arbitrary project on tag v1.2.3 from git server
-   mmpack-build pkg-create --url=ssh://git@intranet.mindmaze.ch:7999/project.git --tag=v1.2.3
+   mmpack-build pkg-create --url=https://github.com/the-grey/hello-world-project.git --tag=v1.2.3
 
 
