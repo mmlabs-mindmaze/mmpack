@@ -14,7 +14,7 @@ build mmpack packages
 SYNOPSIS
 ========
 
-**mmpack-build** [*options*] [*command*] [*command options*]
+**mmpack-build** [*options*] *command* [*command options*]
 
 **mmpack-build** --version
 
@@ -47,8 +47,6 @@ COMMANDS
 
   list-commands
     list the accepted subcommands
-
-If no command is explicit, default to **pkg-create**.
 
 OPTIONS
 =======
