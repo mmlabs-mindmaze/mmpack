@@ -15,6 +15,7 @@ stdout.
 import glob
 import os
 import re
+from argparse import ArgumentParser
 from typing import List
 import yaml
 
@@ -29,6 +30,10 @@ UNKNOWN = 'unknown'  # default return value if guessing failed
 
 # disable for the whole module
 # pylint: disable=broad-except
+
+
+def add_parser_args(parser: ArgumentParser):
+    pass
 
 
 def _sshell(cmd) -> str:
