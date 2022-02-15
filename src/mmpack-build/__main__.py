@@ -31,6 +31,31 @@ ALL_CMDS = {
 }
 
 
+def cmdline_parser() -> ArgumentParser:
+    """Create cmdline parser of mmpack-build and subcmds"""
+    parser = ArgumentParser(prog='mmpack-build',
+                            formatter_class=RawDescriptionHelpFormatter)
+    parser.add_argument("-v", "--version", help="show version and exit",
+                        action="version", version=PACKAGE_VERSION)
+    parser.add_argument("-q", "--quiet", help="silence output",
+                        action="store_true", default=False)
+    parser.add_argument("-d", "--debug", help="toggle debug mode",
+                        action="store_true", default=False)
+    parser.add_argument("-o", "--outdir", help="output folder",
+                        action="store", dest='outdir', nargs='?')
+    parser.add_argument("--builddir", help="build folder",
+                        action="store", dest='builddir', nargs='?')
+    parser.add_argument("--cachedir", help="cache folder",
+                        action="store", dest='cachedir', nargs='?')
+
+    subparsers = parser.add_subparsers(dest='command', required=True)
+    subparsers.add_parser('list-commands')
+    for subcmd, mod in ALL_CMDS.items():
+        mod.add_parser_args(subparsers.add_parser(subcmd, help=mod.__doc__))
+
+    return parser
+
+
 def _list_commands():
     for subcmd in ALL_CMDS:
         print('\t' + subcmd)
@@ -71,27 +96,7 @@ def main():
     main entry point for all mmpack-build commands, and only a stub
     redirecting to the various mmpack-bulid commands
     """
-    parser = ArgumentParser(prog='mmpack-build',
-                            formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument("-v", "--version", help="show version and exit",
-                        action="version", version=PACKAGE_VERSION)
-    parser.add_argument("-q", "--quiet", help="silence output",
-                        action="store_true", default=False)
-    parser.add_argument("-d", "--debug", help="toggle debug mode",
-                        action="store_true", default=False)
-    parser.add_argument("-o", "--outdir", help="output folder",
-                        action="store", dest='outdir', nargs='?')
-    parser.add_argument("--builddir", help="build folder",
-                        action="store", dest='builddir', nargs='?')
-    parser.add_argument("--cachedir", help="cache folder",
-                        action="store", dest='cachedir', nargs='?')
-
-    subparsers = parser.add_subparsers(dest='command', required=True)
-    subparsers.add_parser('list-commands')
-    for subcmd, mod in ALL_CMDS.items():
-        mod.add_parser_args(subparsers.add_parser(subcmd, help=mod.__doc__))
-
-    args = parser.parse_args()
+    args = cmdline_parser().parse_args()
     common.CONFIG['verbose'] = not args.quiet
     common.CONFIG['debug'] = args.debug
 
