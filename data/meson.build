@@ -1,7 +1,14 @@
+mmpack_build_completion = configure_file(
+    output : 'mmpack-build',
+    input : 'shell-completions/bash/mmpack-build.in',
+    configuration : config,
+)
+
 install_data(
     files(
         'shell-completions/bash/mmpack',
-        'shell-completions/bash/mmpack-build',
-    ),
+    ) + [
+        mmpack_build_completion
+    ],
     install_dir : get_option('datadir') / 'bash-completion' / 'completions',
 )

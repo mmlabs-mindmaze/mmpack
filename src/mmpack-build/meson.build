@@ -6,6 +6,7 @@ endif
 mmpack_build_sources = files(
         '__init__.py',
         '__main__.py',
+	'_argcomplete.py',
         'base_hook.py',
         'binary_package.py',
         'common.py',
