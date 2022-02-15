@@ -9,6 +9,8 @@ For a list of all mmpack-build commands
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
+from argcomplete import autocomplete
+
 from . import mmpack_builddep
 from . import mmpack_clean
 from . import mmpack_create
@@ -98,7 +100,9 @@ def main():
     main entry point for all mmpack-build commands, and only a stub
     redirecting to the various mmpack-bulid commands
     """
-    args = cmdline_parser().parse_args()
+    parser = cmdline_parser()
+    autocomplete(parser)
+    args = parser.parse_args()
     common.CONFIG['verbose'] = not args.quiet
     common.CONFIG['debug'] = args.debug
 
