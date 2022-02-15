@@ -6,6 +6,7 @@ python package that imports other packages
 from multi import *
 from multi.bar import Employee, Employee2
 from simple import main_dummy_fn, MainData as main
+from nspace.pkg_a import NSpacePkgAData as _PkgData
 
 
 def _print_answer():
@@ -25,6 +26,9 @@ def argh(val: int) -> None:
         return
 
     print('are same')
+
+    d = _PkgData(val, 64)
+    d.show()
 
 
 class FooBar(main):
