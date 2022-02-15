@@ -21,6 +21,9 @@ urllib3
 # pacman: mingw-w64-x86_64-python3-astroid
 astroid
 
+# debian: python3-argcomplete
+argcomplete
+
 [mmpack-db]
 # debian: python3-watchdog
 watchdog
