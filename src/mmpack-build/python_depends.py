@@ -22,7 +22,7 @@ from astroid import Uninferable, Module, Instance, ClassDef, \
     Import, ImportFrom, Call, Attribute, Name
 from astroid.exceptions import AttributeInferenceError, AstroidImportError, \
     InconsistentMroError, InferenceError, NameInferenceError
-from astroid.modutils import is_standard_module, modpath_from_file
+from astroid.modutils import is_standard_module, is_namespace, modpath_from_file, file_info_from_modpath
 from astroid.node_classes import NodeNG
 from astroid.objects import Super
 
@@ -95,6 +95,14 @@ def _infer_node_def(node: NodeNG) -> Iterator[NodeNG]:
             yield nodedef
 
 
+def _is_namespace_pkg(mod):
+    if mod.name:
+        par_name = [mod.name.split('.')[0]]
+        spec = file_info_from_modpath(par_name)
+        return is_namespace(spec)
+    return False
+
+
 class DependsInspector:
     # pylint: disable=too-few-public-methods
     """
@@ -131,7 +139,7 @@ class DependsInspector:
         if not isinstance(mod, Module):
             return False
 
-        return not (is_standard_module(mod.name) or self._is_local_module(mod))
+        return _is_namespace_pkg(mod) or not (is_standard_module(mod.name) or self._is_local_module(mod))
 
     def _get_module_namefrom(self, impfrom: ImportFrom,
                              name: str) -> Tuple[str, NodeNG]:
