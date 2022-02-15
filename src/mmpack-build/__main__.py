@@ -9,6 +9,13 @@ For a list of all mmpack-build commands
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
+try:
+    from argcomplete import autocomplete
+except ImportError:
+    # pylint: disable=missing-function-docstring,unused-argument
+    def autocomplete(parser: ArgumentParser):
+        pass
+
 from . import mmpack_builddep
 from . import mmpack_clean
 from . import mmpack_create
@@ -20,9 +27,7 @@ from . settings import PACKAGE_VERSION
 from . workspace import Workspace
 
 
-# all subcommand MUST expose:
-#  - CMD: the subcommand command name (string)
-#  - main: the subcommand main entry point (function)
+# all subcommand MUST expose a main function, the subcommand main entry point
 ALL_CMDS = {
     'builddep': mmpack_builddep,
     'create': mmpack_create,
@@ -98,7 +103,9 @@ def main():
     main entry point for all mmpack-build commands, and only a stub
     redirecting to the various mmpack-bulid commands
     """
-    args = cmdline_parser().parse_args()
+    parser = cmdline_parser()
+    autocomplete(parser)
+    args = parser.parse_args()
     common.CONFIG['verbose'] = not args.quiet
     common.CONFIG['debug'] = args.debug
 
