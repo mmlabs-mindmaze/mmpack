@@ -19,7 +19,6 @@ from . workspace import find_project_root_folder, Workspace
 def add_parser_args(parser: ArgumentParser):
     """Enrich supplied argument parser with builddeps related arguments"""
     parser.add_argument('specfile', type=str, nargs='?',
-                        default=find_project_root_folder() + '/mmpack/specs',
                         help='path to the specfile')
 
     # XXX: assume-yes is True even if not set if there is only one package
@@ -97,7 +96,14 @@ def main(options):
     """
     main function
     """
-    specs = specs_load(options.specfile)
+    if options.specfile is not None:
+        specfile = options.specfile
+    else:
+        prj_root = find_project_root_folder()
+        if not prj_root:
+            raise MMPackBuildError('did not find project to package')
+        specfile += '/mmpack/specs'
+    specs = specs_load(specfile)
 
     system_builddeps, mmpack_builddeps = general_specs_builddeps(specs)
 
