@@ -212,6 +212,8 @@ class TestPythonHook(unittest.TestCase):
             'simple.MainData',
             'simple.MainData.__init__',
             'simple.MainData.disclose_private',
+            'nspace.pkg_a.NSpacePkgAData',
+            'nspace.pkg_a.NSpacePkgAData.show',
         }
         imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)
