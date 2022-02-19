@@ -4,6 +4,7 @@ plugin tracking containing python file handling functions
 """
 
 import filecmp
+import json
 import os
 import re
 from email.parser import Parser
@@ -112,7 +113,8 @@ def _is_py_file(filename: str) -> bool:
     return bool(_PYEXT_REGEX.fullmatch(filename))
 
 
-def _gen_pysymbols(pkgfiles: Set[str], sitedirs: List[str]) -> Set[str]:
+def _gen_pysymbols(pkgfiles: Set[str],
+                   sitedirs: List[str]) -> Dict[str, Set[str]]:
     # Filter out files that are not python script nor subpath of any sitedirs
     sites_files = set()
     for sitedir in sitedirs:
@@ -122,7 +124,7 @@ def _gen_pysymbols(pkgfiles: Set[str], sitedirs: List[str]) -> Set[str]:
 
     # Skip processing if there are no python package in sitedirs
     if not sites_files:
-        return set()
+        return {}
 
     script = os.path.join(os.path.dirname(__file__), 'python_provides.py')
     cmd = ['python3', script]
@@ -130,7 +132,7 @@ def _gen_pysymbols(pkgfiles: Set[str], sitedirs: List[str]) -> Set[str]:
     cmd += list(sites_files)
 
     cmd_output = shell(cmd)
-    return set(cmd_output.split())
+    return {k: set(v) for k, v in json.loads(cmd_output).items()}
 
 
 def _gen_py_provides(pkg: PackageInfo, sitedirs: List[str]) -> ProvideList:
@@ -138,8 +140,7 @@ def _gen_py_provides(pkg: PackageInfo, sitedirs: List[str]) -> ProvideList:
     symbols = _gen_pysymbols(pkg.files, sitedirs)
 
     # Group provided symbols by python package names (import name)
-    for pyname in {s.split('.', maxsplit=1)[0] for s in symbols}:
-        pyname_syms = {s for s in symbols if s.startswith(pyname + '.')}
+    for pyname, pyname_syms in symbols.items():
         provide = Provide(pyname)
         provide.pkgdepends = pkg.name
         provide.add_symbols(pyname_syms, pkg.version)
