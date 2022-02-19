@@ -185,7 +185,7 @@ class TestPythonHook(unittest.TestCase):
     def test_depends_import_simple(self):
         """test dependent imports with simple package with no import"""
         pkgfiles = ['simple/__init__.py']
-        refimports = set()
+        refimports = {}
         imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)
 
@@ -197,7 +197,7 @@ class TestPythonHook(unittest.TestCase):
             'multi/foo.py',
             'multi/bar.py',
         ]
-        refimports = set()
+        refimports = {}
         imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)
 
@@ -205,15 +205,21 @@ class TestPythonHook(unittest.TestCase):
         """test dependent import with pkg importing another package"""
         pkgfiles = ['pkg_imported/__init__.py']
         refimports = {
-            'multi.somefunc',
-            'multi.bar.Employee',
-            'multi.bar.Employee2',
-            'simple.main_dummy_fn',
-            'simple.MainData',
-            'simple.MainData.__init__',
-            'simple.MainData.disclose_private',
-            'nspace.pkg_a.NSpacePkgAData',
-            'nspace.pkg_a.NSpacePkgAData.show',
+            'multi': {
+                'multi.somefunc',
+                'multi.bar.Employee',
+                'multi.bar.Employee2',
+            },
+            'simple': {
+                'simple.main_dummy_fn',
+                'simple.MainData',
+                'simple.MainData.__init__',
+                'simple.MainData.disclose_private',
+            },
+            'nspace': {
+                'nspace.pkg_a.NSpacePkgAData',
+                'nspace.pkg_a.NSpacePkgAData.show',
+            }
         }
         imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)
@@ -222,8 +228,8 @@ class TestPythonHook(unittest.TestCase):
         """test dependent imports with simple package with no import"""
         pkgfiles = ['launcher']
         refimports = {
-            'multi.__main__.main',
-            'pkg_resources.load_entry_point',
+            'multi': {'multi.__main__.main'},
+            'pkg_resources': {'pkg_resources.load_entry_point'},
         }
         imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)
