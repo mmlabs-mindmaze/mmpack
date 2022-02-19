@@ -9,6 +9,7 @@ import os
 import re
 from email.parser import Parser
 from glob import glob, iglob
+from itertools import chain
 from os.path import basename
 from typing import Set, Dict, List, Iterable, NamedTuple
 
@@ -149,7 +150,8 @@ def _gen_py_provides(pkg: PackageInfo, sitedirs: List[str]) -> ProvideList:
     return providelist
 
 
-def _gen_pydepends(pkg: PackageInfo, sitedirs: List[str]) -> Set[str]:
+def _gen_pydepends(pkg: PackageInfo,
+                   sitedirs: List[str]) -> Dict[str, Set[str]]:
     script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
     cmd = ['python3', script]
     cmd += ['--site-path='+path for path in sitedirs]
@@ -162,7 +164,7 @@ def _gen_pydepends(pkg: PackageInfo, sitedirs: List[str]) -> Set[str]:
         cmd = [wrk.mmpack_bin(), '--prefix='+wrk.prefix, 'run'] + cmd
 
     cmd_output = shell(cmd)
-    return set(cmd_output.split())
+    return {k: set(v) for k, v in json.loads(cmd_output).items()}
 
 
 def _get_packaged_public_sitedirs(pkg: PackageInfo) -> Set[str]:
@@ -293,7 +295,7 @@ class MMPackBuildHook(BaseHook):
                                                             'python')
         return self._mmpack_py_provides
 
-    def _gen_py_deps(self, currpkg: PackageInfo, used_symbols: Set[str],
+    def _gen_py_deps(self, currpkg: PackageInfo, usedpkgs: Dict[str, Set[str]],
                      others_pkgs: List[PackageInfo]):
         """
         For each key (imported package name) in `imports` determine the mmpack
@@ -302,10 +304,11 @@ class MMPackBuildHook(BaseHook):
 
         Args:
             currpkg: package whose dependencies are computed (and added)
-            used_symbols: py symbols used in currpkg
+            used_symbols: dict of import name -> symbols used in currpkg
             others_pkgs: list of packages cobuilded (may include currpkg)
         """
-        imports = {s.split('.', maxsplit=1)[0] for s in used_symbols}
+        imports = usedpkgs.keys()
+        used_symbols = set(chain(usedpkgs.values()))
 
         # provided in the same package or a package being generated
         for pkg in others_pkgs:
