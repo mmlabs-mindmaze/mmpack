@@ -30,7 +30,7 @@ class TestPythonHook(unittest.TestCase):
     def test_provides_bare_module(self):
         """test provides module without package folder"""
         pkgfiles = ['bare.py']
-        refsymbols = {
+        refsymbols = {'bare': {
             'bare.A_CLASS',
             'bare.EXPORTED_LIST',
             'bare.THE_ANSWER',
@@ -41,14 +41,14 @@ class TestPythonHook(unittest.TestCase):
             'bare.MainData.data1',
             'bare.MainData.fullname',
             'bare.MainData.disclose_private',
-        }
+        }}
         syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
     def test_provides_simple(self):
         """test provides no import"""
         pkgfiles = ['simple/__init__.py']
-        refsymbols = {
+        refsymbols = {'simple': {
             'simple.A_CLASS',
             'simple.EXPORTED_LIST',
             'simple.THE_ANSWER',
@@ -59,7 +59,7 @@ class TestPythonHook(unittest.TestCase):
             'simple.MainData.data1',
             'simple.MainData.fullname',
             'simple.MainData.disclose_private',
-        }
+        }}
         syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
@@ -71,7 +71,7 @@ class TestPythonHook(unittest.TestCase):
             'multi/foo.py',
             'multi/bar.py',
         ]
-        refsymbols = {
+        refsymbols = {'multi': {
             'multi.foo.DummyData.a_number',
             'multi.foo.DummyData.an_attr',
             'multi.foo.DummyData.v1',
@@ -112,7 +112,7 @@ class TestPythonHook(unittest.TestCase):
             'multi.somefunc',
             'multi.__main__',
             'multi.__main__.print_hello',
-        }
+        }}
         syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
@@ -124,7 +124,7 @@ class TestPythonHook(unittest.TestCase):
             'multi2/foo.py',
             'multi2/bar.py',
         ]
-        refsymbols = {
+        refsymbols = {'multi2': {
             'multi2.foo.DummyData.a_number',
             'multi2.foo.DummyData.an_attr',
             'multi2.foo.DummyData.v1',
@@ -157,14 +157,14 @@ class TestPythonHook(unittest.TestCase):
             'multi2.somefunc',
             'multi2.__main__',
             'multi2.__main__.print_hello',
-        }
+        }}
         syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
     def test_provides_pkg_imported(self):
         """test provides pkg importing another package"""
         pkgfiles = ['pkg_imported/__init__.py']
-        refsymbols = {
+        refsymbols = {'pkg_imported': {
             'pkg_imported.argh',
             'pkg_imported.bar',
             'pkg_imported.main',
@@ -178,7 +178,7 @@ class TestPythonHook(unittest.TestCase):
             'pkg_imported.FooBar.fullname',
             'pkg_imported.FooBar.hello',
             'pkg_imported.MainData',
-        }
+        }}
         syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
