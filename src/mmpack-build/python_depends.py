@@ -10,6 +10,7 @@ the mmpack package.
 It will print on standard output the qualified name of the public symbols used.
 """
 
+import json
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, dirname
@@ -347,6 +348,18 @@ class DependsInspector:
         if not is_public_submodule:
             sys.path.pop(0)
 
+    def used_pkgs(self) -> Iterator[Tuple[str, Set[str]]]:
+        reported_pkgs = set()
+        for modname in self.used_symbols:
+            pypkg = modname.split('.')[0]
+            if pypkg in reported_pkgs:
+                continue
+
+            syms = {s for s in self.used_symbols.values()
+                    if s.startswith(pypkg+'.')}
+            yield (pypkg, syms)
+            reported_pkgs.add(pypkg)
+
 
 def add_to_pkg_resources(entry):
     """
@@ -396,9 +409,9 @@ def main():
     for filename in pkgfiles:
         inspector.gather_pyfile_depends(filename)
 
-    # Return sorted results on stdout
-    for sym in sorted(inspector.used_symbols):
-        print(sym)
+    # Return results as JSON dict on stdout
+    json.dump({k: list(sorted(v)) for k, v in inspector.used_pkgs()},
+              fp=sys.stdout, indent='\t', separators=(',\n', ': '))
 
     if inspector.failed_imports:
         print('Warning: Following modules failed to be imported. They may be '
