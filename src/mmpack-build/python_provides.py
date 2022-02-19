@@ -9,6 +9,10 @@ defined in it. The program will try to show only what is public. Anything that
 is exposed in submodules and not exposed in the __init__.py file is assumed
 to be internal implementation detail.
 
+The results are provided on standard output as a JSON dict of public package
+name mapped to the list of fully qualified names of the public symbols exposed
+by it.
+
 This script is meant to be called by an external process, not within the
 process that run the mmpack-build scripts. The main reason is to be able to
 handle project that would need a version of python superior to the one running
@@ -17,10 +21,11 @@ separated process allows to list the new python version as build depends of the
 package and use this one to run the script.
 """
 
+import json
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, basename, dirname
-from typing import Set, Union
+from typing import Dict, Set, Union
 
 from astroid import AstroidImportError, AstroidSyntaxError, MANAGER
 from astroid import InconsistentMroError
@@ -216,6 +221,16 @@ class PkgData:
                 pkg_namespace = mod.qname().rsplit('.', 1)[0]
                 self.add_namespace_symbol(pkg_namespace, '__main__')
 
+    def get_provided(self) -> Dict[str, Set[str]]:
+        """Get dictionary of root package and its public symbols"""
+        provided = {}
+        for namespace, syms in self.syms.items():
+            pypkg_name = namespace.split('.')[0]
+            pypkg_syms = provided.setdefault(pypkg_name, set())
+            pypkg_syms.update({namespace + '.' + s for s in syms})
+
+        return provided
+
 
 def parse_options():
     """
@@ -249,10 +264,9 @@ def main():
     pkgdata = PkgData({abspath(f.strip()) for f in options.infiles})
     pkgdata.gen_pypkg_symbols()
 
-    # Return result on stdout
-    for namespace in sorted(pkgdata.syms):
-        for sym in sorted(pkgdata.syms[namespace]):
-            print(namespace + '.' + sym)
+    # Return result on stdout as JSON
+    json.dump({k: list(sorted(v)) for k, v in pkgdata.get_provided().items()},
+              fp=sys.stdout, indent='\t', separators=(',\n', ': '))
 
 
 if __name__ == '__main__':
