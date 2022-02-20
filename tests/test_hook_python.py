@@ -182,6 +182,19 @@ class TestPythonHook(unittest.TestCase):
         syms = _load_py_symbols(pkgfiles)
         self.assertEqual(syms, refsymbols)
 
+    def test_provides_ns_pkg(self):
+        """test provides namespace package"""
+        pkgfiles = ['nspace/pkg_a/__init__.py']
+        refsymbols = {'nspace': {
+            'nspace.pkg_a.NSpacePkgAData',
+            'nspace.pkg_a.NSpacePkgAData.__init__',
+            'nspace.pkg_a.NSpacePkgAData.public',
+            'nspace.pkg_a.NSpacePkgAData.show',
+            'nspace.pkg_a.nspace_pkga_func',
+        }}
+        syms = _load_py_symbols(pkgfiles)
+        self.assertEqual(syms, refsymbols)
+
     def test_depends_import_simple(self):
         """test dependent imports with simple package with no import"""
         pkgfiles = ['simple/__init__.py']
