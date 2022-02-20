@@ -30,6 +30,7 @@ from typing import Dict, Set, Union
 from astroid import AstroidImportError, AstroidSyntaxError, MANAGER
 from astroid import InconsistentMroError
 from astroid.nodes import Import, ImportFrom, AssignName, ClassDef, Module
+from astroid.modutils import modpath_from_file_with_callback
 
 
 def _is_public_sym(name: str) -> bool:
@@ -204,7 +205,9 @@ class PkgData:
 
         for pyfile in processing_list:
             try:
-                mod = MANAGER.ast_from_file(pyfile)
+                modpath = modpath_from_file_with_callback(pyfile, None,
+                                                          lambda x, y: True)
+                mod = MANAGER.ast_from_file(pyfile, '.'.join(modpath))
             except (AstroidSyntaxError, InconsistentMroError) as error:
                 print(f'Warning: {pyfile} has raised a syntax error:\n'
                       f' {error}\n'
