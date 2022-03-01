@@ -2,11 +2,13 @@
 """
 common classes to specify provided symbols to other packages
 """
+from __future__ import annotations
 
 import re
 from os import listdir
 from os.path import exists
-from typing import Set, Dict, Tuple, List, NamedTuple, Iterator, Optional
+from typing import (Set, Dict, Tuple, List, NamedTuple, Iterable, Iterator,
+                    Optional)
 
 from . common import wprint, yaml_serialize, yaml_load
 from . mm_version import Version
@@ -331,29 +333,31 @@ class ProvideList:
 
         return (provide.pkgdepends, min_version)
 
-    def gen_deps(self, sonames: Set[str],
-                 symbols: Set[str]) -> List[Tuple[str, Version]]:
+    def resolve_deps(self, currpkg: PackageInfo,
+                     sonames: Set[str], symbols: Set[str],
+                     same_srcpkg: bool = False):
         """
         For each soname used try to find the dependency to use in the
         provide list. For each found, the soname and its associated symbols
         are discarded from the soanames and symbols set given in input
 
         Args:
+            currpkg: PackageInfo to which the dependency must be added
             sonames: list of sonanme that must be searched in ProvideList
             symbols: set of used symbols to update if any soname is found
-
-        Returns:
-            list of tuple of package and min version to be added to the
-            dependencies.
+            same_srcpkg: if true, assumes the dependency found is built along
+                with currpkg.
         """
-        dep_list = []
         for soname in list(sonames):
             pkg, version = self._get_dep_minversion(soname, symbols)
             if pkg:
-                dep_list.append((pkg, version))
-                sonames.remove(soname)
+                if same_srcpkg:
+                    versions = [currpkg.version, currpkg.version]
+                else:
+                    versions = [version, None]
 
-        return dep_list
+                currpkg.add_to_deplist(pkg, *versions)
+                sonames.remove(soname)
 
 
 def load_mmpack_provides(extension: str, symtype) -> ProvideList:
@@ -383,3 +387,23 @@ def load_mmpack_provides(extension: str, symtype) -> ProvideList:
             provides.add_from_file(metadatadir + symfile)
 
     return provides
+
+
+def pkgs_provides(pkgs: Iterable[PackageInfo], ptype: str) -> ProvideList:
+    """Create union of Provides of each iterated package
+
+    Args:
+        pkgs: iterator of package
+        ptype: provide type to select
+
+    Return:
+        A ProvideList merging all package provides
+    """
+    res = ProvideList('')
+    for pkg in pkgs:
+        providelist = pkg.provides[ptype]
+        res.type = providelist.type
+        # pylint: disable=protected-access
+        res._provides.update(providelist._provides)
+
+    return res

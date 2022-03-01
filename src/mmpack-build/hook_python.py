@@ -17,7 +17,7 @@ from . base_hook import BaseHook
 from . common import shell, Assert, iprint, rmtree_force
 from . file_utils import filetype
 from . package_info import PackageInfo, DispatchData
-from . provide import Provide, ProvideList, load_mmpack_provides
+from . provide import Provide, ProvideList, load_mmpack_provides, pkgs_provides
 from . syspkg_manager import get_syspkg_mgr
 from . workspace import Workspace
 
@@ -308,19 +308,15 @@ class MMPackBuildHook(BaseHook):
             others_pkgs: list of packages cobuilded (may include currpkg)
         """
         imports = usedpkgs.keys()
-        used_symbols = set(chain(usedpkgs.values()))
+        symbols = set(chain(usedpkgs.values()))
 
         # provided in the same package or a package being generated
-        for pkg in others_pkgs:
-            dep_list = pkg.provides['python'].gen_deps(imports, used_symbols)
-            dep_list += pkg.provides['pypriv'].gen_deps(imports, used_symbols)
-            for pkgname, _ in dep_list:
-                currpkg.add_to_deplist(pkgname, pkg.version, pkg.version)
+        for ptype in ('python', 'pypriv'):
+            provides = pkgs_provides(others_pkgs, ptype)
+            provides.resolve_deps(currpkg, imports, symbols, True)
 
         # provided by another mmpack package present in the prefix
-        dep_list = self._get_mmpack_provides().gen_deps(imports, used_symbols)
-        for pkgname, version in dep_list:
-            currpkg.add_to_deplist(pkgname, version)
+        self._get_mmpack_provides().resolve_deps(currpkg, imports, symbols)
 
         # provided by the host system
         syspkg_mgr = get_syspkg_mgr()
