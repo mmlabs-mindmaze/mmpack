@@ -13,7 +13,7 @@ from . common import shlib_keyname, wprint, Assert
 from . file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
 from . package_info import PackageInfo, DispatchData
-from . provide import ProvideList, load_mmpack_provides
+from . provide import ProvideList, load_mmpack_provides, pkgs_provides
 from . syspkg_manager import get_syspkg_mgr
 
 
@@ -79,16 +79,12 @@ class MMPackBuildHook(BaseHook):
             Assert: a used soname is not provided by any mmpack or
                 system package.
         """
-        # provided in the same package or a package being generated
-        for pkg in others_pkgs:
-            dep_list = pkg.provides['sharedlib'].gen_deps(sonames, symbol_set)
-            for pkgname, _ in dep_list:
-                currpkg.add_to_deplist(pkgname, pkg.version, pkg.version)
+        # Find dependencies among cobuilded binary packages
+        others_provides = pkgs_provides(others_pkgs, 'sharedlib')
+        others_provides.resolve_deps(currpkg, sonames, symbol_set, True)
 
-        # provided by another mmpack package present in the prefix
-        dep_list = self._get_mmpack_provides().gen_deps(sonames, symbol_set)
-        for pkgname, version in dep_list:
-            currpkg.add_to_deplist(pkgname, version)
+        # Find dependencies in installed mmpack packages
+        self._get_mmpack_provides().resolve_deps(currpkg, sonames, symbol_set)
 
         # provided by the host system
         syspkg_mgr = get_syspkg_mgr()
