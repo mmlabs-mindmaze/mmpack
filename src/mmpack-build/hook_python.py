@@ -150,6 +150,22 @@ def _gen_py_provides(pkg: PackageInfo, sitedirs: List[str]) -> ProvideList:
     return providelist
 
 
+def _resolve_ns_deps(pkg: PackageInfo, modname: str, symbols: Set[str]) -> bool:
+    while '.' in modname:
+        # Get parent package module name
+        modname, _ = modname.rsplit('.')[0]
+
+        # Try to resolve dependencies with only the parent package as import
+        imports = {modname}
+        provides.resolve_deps(currpkg, imports, symbols)
+
+        # If imports is empty, the parent import has been found
+        if not imports:
+            return True
+
+    return False
+
+
 def _gen_pydepends(pkg: PackageInfo,
                    sitedirs: List[str]) -> Dict[str, Set[str]]:
     script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
@@ -316,7 +332,11 @@ class MMPackBuildHook(BaseHook):
             provides.resolve_deps(currpkg, imports, symbols, True)
 
         # provided by another mmpack package present in the prefix
-        self._get_mmpack_provides().resolve_deps(currpkg, imports, symbols)
+        provides = self._get_mmpack_provides()
+        provides.resolve_deps(currpkg, imports, symbols)
+        for modname in [imp for imp in imports if '.' in imp]:
+            if _resolve_ns_deps(currpkg, modname, modname, symbols):
+                imports.pop(modname)
 
         # provided by the host system
         syspkg_mgr = get_syspkg_mgr()
