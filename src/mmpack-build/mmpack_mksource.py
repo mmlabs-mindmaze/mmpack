@@ -5,10 +5,12 @@ look through the tree for a mmpack folder, and use the containing folder as
 root directory.
 """
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+from typing import Iterator
 
 from . errors import MMPackBuildError
 from . source_tarball import SourceTarball
+from . src_package import SrcPackage
 
 
 def add_parser_args(parser: ArgumentParser):
@@ -63,3 +65,19 @@ def main(args):
         return 1
 
     return 0
+
+
+def src_pkgs_in_prj_repo(args: Namespace) -> Iterator[SrcPackage]:
+    """Iterate over all source package meant to be built
+
+    Args:
+        args: the parsed options of the mksource arguments.
+
+    Return:
+        A iterator of source package
+    """
+    srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
+                               build_only_modified=args.only_modified,
+                               version_from_vcs=args.update_version_from_vcs)
+    for prj in srctarball.iter_mmpack_srcs():
+        yield SrcPackage(prj.tarball, srctarball.tag, prj.srcdir)
