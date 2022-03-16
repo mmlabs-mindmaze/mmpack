@@ -6,14 +6,12 @@ directory.
 """
 
 import os
-import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 
-from . errors import MMPackBuildError
-from . mmpack_mksource import add_parser_args as add_mksource_parser_argument
+from . mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
+                               call_foreach_srcpkg)
 from . src_package import SrcPackage
 from . workspace import Workspace
-from . source_tarball import SourceTarball
 from . xdg import XDG_DATA_HOME
 
 
@@ -42,25 +40,7 @@ def add_parser_args(parser: ArgumentParser):
                         help='always assume yes to any prompted question')
 
 
-def check_options(args):
-    """
-    check options
-    """
-    # set workspace prefix
-    if not args.prefix:
-        try:
-            args.prefix = os.environ['MMPACK_PREFIX']
-        except KeyError:
-            pass
-    if args.prefix:
-        Workspace().prefix = _get_prefix_abspath(args.prefix)
-
-    return args
-
-
-def _build_mmpack_packages(srctar: str, tag: str, srcdir: str, args):
-    package = SrcPackage(srctar, tag, srcdir)
-
+def _pkg_create_build(package: SrcPackage, args: Namespace):
     if args.build_deps:
         package.install_builddeps()
 
@@ -71,17 +51,13 @@ def main(args):
     """
     entry point to create a mmpack package
     """
-    retcode = 0
-    args = check_options(args)
-    srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
-                               build_only_modified=args.only_modified,
-                               version_from_vcs=args.update_version_from_vcs)
-    for prj_src in srctarball.iter_mmpack_srcs():
+    # set workspace prefix
+    if not args.prefix:
         try:
-            _build_mmpack_packages(prj_src.tarball, srctarball.tag,
-                                   prj_src.srcdir, args)
-        except MMPackBuildError as err:
-            print(f'Build of {prj_src.name} failed: {err}', file=sys.stderr)
-            retcode = 1
+            args.prefix = os.environ['MMPACK_PREFIX']
+        except KeyError:
+            pass
+    if args.prefix:
+        Workspace().prefix = _get_prefix_abspath(args.prefix)
 
-    return retcode
+    return call_foreach_srcpkg(_pkg_create_build, args)

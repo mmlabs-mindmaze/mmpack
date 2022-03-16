@@ -5,10 +5,12 @@ look through the tree for a mmpack folder, and use the containing folder as
 root directory.
 """
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+from typing import Callable
 
 from . errors import MMPackBuildError
 from . source_tarball import SourceTarball
+from . src_package import SrcPackage
 
 
 def add_parser_args(parser: ArgumentParser):
@@ -63,3 +65,30 @@ def main(args):
         return 1
 
     return 0
+
+
+def call_foreach_srcpkg(func: Callable[[SrcPackage, Namespace], None],
+                        args: Namespace) -> int:
+    """Call supplied function for each source package meant to be built
+
+    Args:
+        func: function to be called for each src package found.
+        args: the parsed options of the mksource arguments.
+
+    Return:
+        0 if all function calls have terminated normally with raising a
+        MMPackBuildError exception. 1 otherwise.
+    """
+    retcode = 0
+    srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
+                               build_only_modified=args.only_modified,
+                               version_from_vcs=args.update_version_from_vcs)
+    for prj in srctarball.iter_mmpack_srcs():
+        try:
+            pkg = SrcPackage(prj.tarball, srctarball.tag, prj.srcdir)
+            func(pkg, args)
+        except MMPackBuildError as err:
+            print(f'Build of {prj.name} failed: {err}', file=sys.stderr)
+            retcode = 1
+
+    return retcode
