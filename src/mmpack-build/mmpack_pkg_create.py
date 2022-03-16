@@ -59,19 +59,6 @@ def check_options(args):
     return args
 
 
-def _build_mmpack_packages(srctar: str, tag: str, srcdir: str, args):
-    package = SrcPackage(srctar, tag, srcdir)
-
-    if args.build_deps:
-        package.install_builddeps()
-
-    set_log_file(package.pkgbuild_path() + '/mmpack.log')
-
-    package.local_install(args.skip_tests)
-    package.ventilate()
-    package.generate_binary_packages()
-
-
 def main(args):
     """
     entry point to create a mmpack package
@@ -81,10 +68,12 @@ def main(args):
     srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
                                build_only_modified=args.only_modified,
                                version_from_vcs=args.update_version_from_vcs)
-    for prj_src in srctarball.iter_mmpack_srcs():
+    for prj in srctarball.iter_mmpack_srcs():
         try:
-            _build_mmpack_packages(prj_src.tarball, srctarball.tag,
-                                   prj_src.srcdir, args)
+            srcpkg = SrcPackage(prj.tarball, srctarball.tag, prj.srcdir)
+            if args.build_deps:
+                srcpkg.install_builddeps()
+            srcpkg.build_binpkgs(args.skip_tests)
         except MMPackBuildError as err:
             print(f'Build of {prj_src.name} failed: {err}', file=sys.stderr)
             retcode = 1
