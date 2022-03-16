@@ -684,5 +684,13 @@ class SrcPackage:
 
         popdir()  # local install path
 
+    def build_binpkgs(self, skip_tests: bool = False):
+        """Build and create binary packages."""
+        set_log_file(self.pkgbuild_path() + '/mmpack.log')
+
+        self.local_install(skip_tests)
+        self.ventilate()
+        self.generate_binary_packages()
+
     def __repr__(self):
         return u'{}'.format(self.__dict__)
