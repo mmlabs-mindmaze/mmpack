@@ -325,14 +325,14 @@ class SrcPackage:
                                        log=False).strip()
         return build_env
 
-    def install_builddeps(self, prefix: str):
+    def install_builddeps(self):
         """
         install mmpack build-deps within given prefix
 
         !!! Requires a prefix already set up !!!
         """
         wrk = Workspace()
-        cmd = '{} --prefix={} update'.format(wrk.mmpack_bin(), prefix)
+        cmd = '{} --prefix={} update'.format(wrk.mmpack_bin(), wrk.prefix)
         shell(cmd)
 
         # append platform-specific mmpack packages

@@ -63,7 +63,7 @@ def _build_mmpack_packages(srctar: str, tag: str, srcdir: str, args):
     package = SrcPackage(srctar, tag, srcdir)
 
     if args.build_deps:
-        package.install_builddeps(prefix=args.prefix)
+        package.install_builddeps()
 
     set_log_file(package.pkgbuild_path() + '/mmpack.log')
 
