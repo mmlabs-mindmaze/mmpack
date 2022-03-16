@@ -65,11 +65,7 @@ def _build_mmpack_packages(srctar: str, tag: str, srcdir: str, args):
     if args.build_deps:
         package.install_builddeps()
 
-    set_log_file(package.pkgbuild_path() + '/mmpack.log')
-
-    package.local_install(args.skip_tests)
-    package.ventilate()
-    package.generate_binary_packages()
+    package.build_binpkgs(args.skip_tests)
 
 
 def main(args):
