@@ -9,7 +9,6 @@ import os
 import sys
 from argparse import ArgumentParser
 
-from . common import set_log_file
 from . errors import MMPackBuildError
 from . mmpack_mksource import add_parser_args as add_mksource_parser_argument
 from . src_package import SrcPackage
@@ -65,11 +64,7 @@ def _build_mmpack_packages(srctar: str, tag: str, srcdir: str, args):
     if args.build_deps:
         package.install_builddeps()
 
-    set_log_file(package.pkgbuild_path() + '/mmpack.log')
-
-    package.local_install(args.skip_tests)
-    package.ventilate()
-    package.generate_binary_packages()
+    package.build_binpkgs(args.skip_tests)
 
 
 def main(args):
