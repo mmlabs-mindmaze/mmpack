@@ -22,6 +22,7 @@ mmpack_build_sources = files(
         'mmpack_guess.py',
         'mmpack_mksource.py',
         'mmpack_pkg_create.py',
+        'mmpack_create_with_repos.py',
         'package_info.py',
         'pe_utils.py',
         'provide.py',
