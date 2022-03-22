@@ -72,6 +72,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/hooks_loader.py \
 	src/mmpack-build/mmpack_builddep.py \
 	src/mmpack-build/mmpack_clean.py \
+	src/mmpack-build/mmpack_create_with_repos.py \
 	src/mmpack-build/mmpack_guess.py \
 	src/mmpack-build/mmpack_mksource.py \
 	src/mmpack-build/mmpack_pkg_create.py \

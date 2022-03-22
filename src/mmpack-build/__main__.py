@@ -11,6 +11,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from . import mmpack_builddep
 from . import mmpack_clean
+from . import mmpack_create_with_repos
 from . import mmpack_guess
 from . import mmpack_mksource
 from . import mmpack_pkg_create
@@ -24,6 +25,7 @@ from . workspace import Workspace
 #  - main: the subcommand main entry point (function)
 ALL_CMDS = {
     'builddep': mmpack_builddep,
+    'create-with-repos': mmpack_create_with_repos,
     'clean': mmpack_clean,
     'guess': mmpack_guess,
     'mksource': mmpack_mksource,
