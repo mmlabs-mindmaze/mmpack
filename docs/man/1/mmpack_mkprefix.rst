@@ -16,7 +16,7 @@ SYNOPSIS
 
 **mmpack mkprefix** -h|--help
 
-**mmpack mkprefix** [-f|--force] [-u|--upgrade] [--url= *repo_url*] [--name= *name*] [*prefix-path*]
+**mmpack mkprefix** [-f|--force] [-c|--clean-repolist] [-u|--upgrade] [--url= *repo_url*] [--name= *name*] [*prefix-path*]
 
 DESCRIPTION
 ===========
@@ -24,6 +24,11 @@ DESCRIPTION
 *prefix-path* which will pull packages from *repo_url* whose URL is
 optionally set by **--url** and whose short name is given optionally by
 **--name**.
+
+If **--clean-repolist** is provided, the list repositories imported from global
+configuration file is discard. This list is used to normally initialize the
+list of repository of the new prefix. If this option is provided, the new
+prefix start with an empty list of repositories.
 
 If **--upgrade** option is provided, the existing prefix settings will be kept.
 Only the files will be upgraded.
