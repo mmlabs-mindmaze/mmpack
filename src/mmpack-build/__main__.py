@@ -1,9 +1,6 @@
 # @mindmaze_header@
 """
 mmpack-build is a stub for all the tools required to create mmpack packages.
-
-For a list of all mmpack-build commands
->>> mmpack-build list-commands
 """
 
 import sys
@@ -63,13 +60,6 @@ def cmdline_parser() -> ArgumentParser:
     return parser
 
 
-def _list_commands():
-    for subcmd in ALL_CMDS:
-        print('\t' + subcmd)
-    print('\tlist-commands')
-    return 0
-
-
 def launch_subcommand(args):
     """
     wrapper for calling the sub-commands which handles the special case of
@@ -77,9 +67,6 @@ def launch_subcommand(args):
     The wrapper also masks Exceptions, hiding the backtrace when debug mode is
     disabled.
     """
-    if args.command == 'list-commands':
-        return _list_commands()
-
     mod = ALL_CMDS[args.command]
     if common.CONFIG['debug']:
         return mod.main(args)
