@@ -21,6 +21,7 @@ def add_parser_args(parser: ArgumentParser):
                         action='store_true', dest='skip_tests',
                         help='indicate that build tests must not be run')
     parser.add_argument('-r', '--repo-url', dest='repo_url', action='append',
+                        default=[],
                         help='URL of the repository to fetch dependencies '
                              'from. Can be supplied multiple times to use '
                              'several repositories.')
