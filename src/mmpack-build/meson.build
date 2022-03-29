@@ -65,6 +65,7 @@ config_data = configuration_data({
     'bindir_to_pkgdatadir' : bindir_to_pkgdatadir,
     'package_version' : meson.project_version(),
     'exeext' : exeext,
+    'python_path' : python.path(),
 })
 
 settings_py = configure_file(
