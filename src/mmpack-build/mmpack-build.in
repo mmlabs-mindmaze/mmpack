@@ -1,8 +1,11 @@
-#!/bin/sh
+#!@python_path@
 
-PYTHON=${PYTHON:-python3}
-DIR=$(dirname $(realpath $0))
-MMPACKBUILD_PYTHONPATH=$(realpath -e $DIR/@bindir_to_pkgdatadir@)
-export PYTHONPATH=$MMPACKBUILD_PYTHONPATH${PYTHONPATH:+":$PYTHONPATH"}
+import sys
+from os.path import abspath, dirname, join as joinpath
 
-exec $PYTHON -m mmpack_build $@
+pkgdir = abspath(joinpath(dirname(__file__), r'@bindir_to_pkgdatadir@'))
+sys.path.insert(0, pkgdir)
+
+from mmpack_build.__main__ import main
+
+sys.exit(main())
