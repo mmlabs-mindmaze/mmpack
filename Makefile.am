@@ -462,6 +462,7 @@ completiondir = $(datadir)/bash-completion/completions
 dist_completion_DATA = \
 	data/shell-completions/bash/mmpack \
 	data/shell-completions/bash/mmpack-build \
+	data/shell-completions/bash/mmpack-modifyrepo \
 	$(eol)
 
 #
