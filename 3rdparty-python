@@ -6,6 +6,9 @@
 # pacman: mingw-w64-x86_64-python3-yaml
 PyYAML
 
+# debian: python3-argcomplete
+argcomplete
+
 [mmpack-build]
 # debian: python3-pyelftools
 pyelftools
@@ -20,9 +23,6 @@ urllib3
 # debian: python3-astroid
 # pacman: mingw-w64-x86_64-python3-astroid
 astroid
-
-# debian: python3-argcomplete
-argcomplete
 
 [mmpack-db]
 # debian: python3-watchdog
