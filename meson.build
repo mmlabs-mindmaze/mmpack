@@ -104,6 +104,7 @@ do_test_repo = custom_target('test-repo',
                    files('tests/create-test-repo.sh'),
                    deployment_dir,
                    repo_dir,
+                   get_option('prefix') / get_option('bindir'),
         ],
         depends : do_deployment_test,
 )

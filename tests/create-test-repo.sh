@@ -4,14 +4,13 @@ set -e
 
 DEPLOYMENT_DIR=$1
 REPO_DIR=$2
+BINDIR=$3
 pkg_builddir=$REPO_DIR/build
 arch=unknown
 
-# locate the mmpack-modifyrepo script from the test deployment dir
-modifyrepo=$(find $DEPLOYMENT_DIR -type f -follow -name mmpack-modifyrepo)
-
 
 if [ -n "$(which cygpath)" ] ; then
+	BINDIR=$(cygpath -u $BINDIR)
 	DEPLOYMENT_DIR=$(cygpath -u $DEPLOYMENT_DIR)
 	REPO_DIR=$(cygpath -u $REPO_DIR)
 
@@ -20,6 +19,9 @@ if [ -n "$(which cygpath)" ] ; then
 else
 	sysdep="libc6 (>= 2.15)"
 fi
+
+# locate the mmpack-modifyrepo script from the test deployment dir
+modifyrepo=$DEPLOYMENT_DIR$BINDIR"/mmpack-modifyrepo"
 
 
 cleanup()

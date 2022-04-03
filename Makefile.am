@@ -365,7 +365,7 @@ deployment-test-clean:
 	@$(RM) -rvf deployment-test
 
 test-repo.timestamp: tests/create-test-repo.sh deployment-test
-	$(AM_V_GEN)$< $(builddir)/deployment-test $(builddir)/test-repo
+	$(AM_V_GEN)$< $(builddir)/deployment-test $(builddir)/test-repo $(bindir)
 	@touch $@
 
 test-sysrepo.timestamp: tests/create-test-sysrepo.sh tests/test-packages
@@ -462,6 +462,7 @@ completiondir = $(datadir)/bash-completion/completions
 dist_completion_DATA = \
 	data/shell-completions/bash/mmpack \
 	data/shell-completions/bash/mmpack-build \
+	data/shell-completions/bash/mmpack-modifyrepo \
 	$(eol)
 
 #
