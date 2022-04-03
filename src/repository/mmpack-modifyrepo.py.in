@@ -17,6 +17,14 @@ import yaml
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
+try:
+    from argcomplete import autocomplete
+except ImportError:
+    # pylint: disable=missing-function-docstring,unused-argument
+    def autocomplete(parser: ArgumentParser):
+        pass
+
+
 # pylint: disable=line-too-long
 PRIVATE_SCRIPT_DIR = os.path.relpath(r'@pkgdatadir@', r'@bindir@')  # noqa
 CURR_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -261,6 +269,7 @@ def parse_options():
                                  action='store', type=str2bool,
                                  help='begin changes after command startup')
 
+    autocomplete(parser)
     return parser.parse_args()
 
 
