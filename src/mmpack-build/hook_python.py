@@ -288,6 +288,20 @@ def _assign_metadata(metapkg, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
     return list(public_pkgs.values())[0]
 
 
+def _split_ns_pkg(pypkgs: Dict[str, _PyPkg]):
+    for pypkg in pypkgs.copy():
+        # pick a random file and guess sitedir
+        file_in_pkg = next(iter(pypkg.files))
+        sitedir = _parse_py3_filename(file_in_pkg).sitedir
+        for imp in pypkg.import_names:
+            imp_dir = f'{sitedir}/{imp}'
+            imp_init = f'{pypkgdir}/__init__.py'
+            if os.isdir(imp_dir) and imp_init not in pypkg.files:
+                
+                
+
+
+
 #####################################################################
 # Python hook for mmpack-build
 #####################################################################
