@@ -10,7 +10,7 @@ import re
 from email.parser import Parser
 from glob import glob, iglob
 from itertools import chain
-from os.path import basename
+from os.path import basename, commonpath
 from typing import Set, Dict, List, Iterable, NamedTuple
 
 from . base_hook import BaseHook
@@ -286,6 +286,12 @@ def _assign_metadata(metapkg, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
             return pypkg
 
     return list(public_pkgs.values())[0]
+
+
+def _split_ns_pkg(pkg: _PyPkg):
+    pyfiles = [f for f in pkg.files if _is_py_file(f)]
+    import_name, sitedir, _ = _parse_py3_filename(pyfiles[0])
+    prefixdir = commonpath(pyfiles)
 
 
 #####################################################################
