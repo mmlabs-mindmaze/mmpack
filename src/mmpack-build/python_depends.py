@@ -356,7 +356,12 @@ class DependsInspector:
         """
         reported_pkgs = set()
         for modname in self.used_symbols:
-            pypkg = modname.split('.')[0]
+            # Find the first parent package that is not a namespace
+            modpath = modname.split('.')
+            pypkg = modpath.pop(0)
+            while self._is_namespace.get(pypkg, False):
+                pypkg += '.' + modpath.pop(0)
+
             if pypkg in reported_pkgs:
                 continue
 
