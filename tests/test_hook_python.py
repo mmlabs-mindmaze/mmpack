@@ -229,7 +229,7 @@ class TestPythonHook(unittest.TestCase):
                 'simple.MainData.__init__',
                 'simple.MainData.disclose_private',
             },
-            'nspace': {
+            'nspace.pkg_a': {
                 'nspace.pkg_a.NSpacePkgAData',
                 'nspace.pkg_a.NSpacePkgAData.show',
             }
