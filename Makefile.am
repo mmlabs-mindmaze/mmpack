@@ -80,6 +80,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/pe_utils.py \
 	src/mmpack-build/provide.py \
 	src/mmpack-build/python_depends.py \
+	src/mmpack-build/python_dispatch.py \
 	src/mmpack-build/python_provides.py \
 	src/mmpack-build/source_tarball.py \
 	src/mmpack-build/src_package.py \
