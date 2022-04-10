@@ -6,23 +6,31 @@ from os.path import dirname, abspath, join
 from typing import Set
 
 from mmpack_build.package_info import PackageInfo
-from mmpack_build.hook_python import _gen_pysymbols, _gen_pydepends
+from mmpack_build.hook_python import (_gen_py_importname, _gen_pysymbols,
+                                      _gen_pydepends)
 
 
 _testdir = dirname(abspath(__file__))
 _sitedir = join(_testdir, 'pydata')
 
 
+def _prefix_sitedir(files: Set[str]) -> Set[str]:
+    return {_sitedir + '/' + f for f in files}
+
+
 def _load_py_symbols(pkgfiles: Set[str]) -> Set[str]:
-    files = {join(_sitedir, f) for f in pkgfiles}
-    return _gen_pysymbols(files, [_sitedir])
+    return _gen_pysymbols(_prefix_sitedir(pkgfiles), [_sitedir])
 
 
 def _get_py_depends(pkgfiles: Set[str]) -> Set[str]:
     pkg = PackageInfo('test_pkg')
-    pkg.files = {join(_sitedir, f) for f in pkgfiles}
+    pkg.files = _prefix_sitedir(pkgfiles)
     used_symbols = _gen_pydepends(pkg, [_sitedir])
     return used_symbols
+
+
+def _get_py_dispatch(pkgfiles: Set[str]) -> Set[str]:
+    return _gen_py_importname(_prefix_sitedir(pkgfiles), [_sitedir])
 
 
 class TestPythonHook(unittest.TestCase):
@@ -246,3 +254,78 @@ class TestPythonHook(unittest.TestCase):
         }
         imports = _get_py_depends(pkgfiles)
         self.assertEqual(imports, refimports)
+
+    def test_dispatch_bare(self):
+        pkgfiles = [
+            'bare.py',
+        ]
+        refdispatch = {
+            'bare': _prefix_sitedir({
+                'bare.py',
+            }),
+        }
+        dispatch = _get_py_dispatch(pkgfiles)
+        self.assertEqual(dispatch, refdispatch)
+
+    def test_dispatch_pkg_imported(self):
+        pkgfiles = [
+            'pkg_imported/__init__.py',
+        ]
+        refdispatch = {
+            'pkg_imported': _prefix_sitedir({
+                'pkg_imported/__init__.py',
+            }),
+        }
+        dispatch = _get_py_dispatch(pkgfiles)
+        self.assertEqual(dispatch, refdispatch)
+
+    def test_dispatch_multi(self):
+        pkgfiles = [
+            'multi/__main__.py',
+            'multi/__init__.py',
+            'multi/foo.py',
+            'multi/bar.py',
+        ]
+        refdispatch = {
+            'multi': _prefix_sitedir({
+                'multi/__main__.py',
+                'multi/__init__.py',
+                'multi/foo.py',
+                'multi/bar.py',
+            }),
+        }
+        dispatch = _get_py_dispatch(pkgfiles)
+        self.assertEqual(dispatch, refdispatch)
+
+    def test_dispatch_combined(self):
+        pkgfiles = [
+            'bare.py',
+            'multi/__main__.py',
+            'multi/__init__.py',
+            'multi/foo.py',
+            'multi/bar.py',
+        ]
+        refdispatch = {
+            'multi': _prefix_sitedir({
+                'multi/__main__.py',
+                'multi/__init__.py',
+                'multi/foo.py',
+                'multi/bar.py',
+            }),
+            'bare': _prefix_sitedir({
+                'bare.py',
+            }),
+        }
+        dispatch = _get_py_dispatch(pkgfiles)
+        self.assertEqual(dispatch, refdispatch)
+
+    def test_dispatch_ns_pkg(self):
+        """test provides namespace package"""
+        pkgfiles = ['nspace/pkg_a/__init__.py']
+        refdispatch = {
+            'nspace.pkg_a': _prefix_sitedir({
+                'nspace/pkg_a/__init__.py',
+            }),
+        }
+        dispatch = _get_py_dispatch(pkgfiles)
+        self.assertEqual(dispatch, refdispatch)
