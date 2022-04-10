@@ -11,7 +11,7 @@ from email.parser import Parser
 from glob import glob, iglob
 from itertools import chain
 from os.path import basename
-from typing import Set, Dict, List, Iterable, NamedTuple
+from typing import Set, Dict, List, Iterable, NamedTuple, Optional
 
 from . base_hook import BaseHook
 from . common import shell, Assert, iprint, rmtree_force
@@ -114,6 +114,21 @@ def _is_py_file(filename: str) -> bool:
     return bool(_PYEXT_REGEX.fullmatch(filename))
 
 
+def _gen_py_importname(pyfiles: Iterable[str],
+                       sitedirs: List[str]) -> Dict[str, Set[str]]:
+    cmdfiles = [f for f in pyfiles if _is_py_file(f)]
+    if not cmdfiles:
+        return {}
+
+    script = os.path.join(os.path.dirname(__file__), 'python_dispatch.py')
+    cmd = ['python3', script]
+    cmd += ['--site-path='+path for path in sitedirs]
+    cmd += cmdfiles
+
+    cmd_output = shell(cmd)
+    return {k: set(v) for k, v in json.loads(cmd_output).items()}
+
+
 def _gen_pysymbols(pkgfiles: Set[str],
                    sitedirs: List[str]) -> Dict[str, Set[str]]:
     # Filter out files that are not python script nor subpath of any sitedirs
@@ -200,29 +215,28 @@ def _get_packaged_public_sitedirs(pkg: PackageInfo) -> Set[str]:
 
 
 class _PyPkg:
-    def __init__(self):
-        self.files = set()
+    def __init__(self, import_name: Optional[str] = None,
+                 files: Optional[Set[str]] = None):
+        self.files = files if files else set()
         self.name = None
-        self.import_names = set()
+        self.import_names = {import_name} if import_name else set()
         self.meta_top = set()
 
-    def add(self, filename: str, info: PyNameInfo):
+    def add_metadata_files(self, files: Set[str]):
         """
-        Register an installed file in python package
+        Register installed metadata files in python package
         """
-        if not info.is_metadata:
-            self.import_names.update({info.pyname})
+        for filename in files:
+            if not self.name and (filename.endswith('.egg-info/PKG-INFO')
+                                  or filename.endswith('.dist-info/METADATA')
+                                  or filename.endswith('.egg-info')):
+                self.name = _parse_metadata(filename)['Name']
 
-        if not self.name and (filename.endswith('.egg-info/PKG-INFO')
-                              or filename.endswith('.dist-info/METADATA')
-                              or filename.endswith('.egg-info')):
-            self.name = _parse_metadata(filename)['Name']
+            if filename.endswith('/top_level.txt'):
+                dirs = {d.strip() for d in open(filename).readlines()}
+                self.meta_top.update(dirs)
 
-        if info.is_metadata and filename.endswith('/top_level.txt'):
-            dirs = {d.strip() for d in open(filename).readlines()}
-            self.meta_top.update(dirs)
-
-        self.files.add(filename)
+        self.files.update(files)
 
     def merge_pkg(self, pypkg):
         """
@@ -253,12 +267,15 @@ class _PyPkg:
 
         # Pick one name if more than one candidate
         name = list(names)[0]
-        return 'python3-' + name.replace('_', '-')
+        name = name.translate({ord('_'): '-', ord('.'): '-'})
+        return 'python3-' + name
 
 
 def _assign_privname_to_pypkg(priv_name, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
     # Pick package that has same name as private name excepting for leading '_'
-    pypkg = pypkgs.get(priv_name[1:])
+    # of last component in modpath
+    modpath = priv_name.split('.')
+    pypkg = pypkgs.get('.'.join(modpath[:-1] + [modpath[-1][1:]]))
     if pypkg:
         return pypkg
 
@@ -271,18 +288,16 @@ def _assign_privname_to_pypkg(priv_name, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
     return list({p for n, p in pypkg.items() if not n.startswith('_')})[0]
 
 
-def _assign_metadata(metapkg, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
-    public_pkgs = {n: p for n, p in pypkgs.items() if p.import_names}
-
-    pypkg = public_pkgs.get(metapkg.name)
+def _assign_metadata(metaname, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
+    pypkg = pypkgs.get(metaname)
     if pypkg:
         return pypkg
 
-    for pyname, pypkg in public_pkgs.items():
-        if pyname.startswith(metapkg.name):
+    for pyname, pypkg in pypkgs.items():
+        if pyname.startswith(metaname):
             return pypkg
 
-    return list(public_pkgs.values())[0]
+    return list(pypkgs.values())[0]
 
 
 #####################################################################
@@ -402,30 +417,39 @@ class MMPackBuildHook(BaseHook):
                 os.rename(eggdir, match.group(1) + '.egg-info')
 
     def dispatch(self, data: DispatchData):
-        pypkgs = {}
+        pypkgs: Dict[str, _PyPkg] = {}
+        sitedirs = set()
+        pyfiles = set()
+        metafiles = {}
         for file in data.unassigned_files.copy():
             try:
                 info = _parse_py3_filename(file)
-                pypkg = pypkgs.setdefault(info.pyname.lower(), _PyPkg())
-                if info.is_metadata and basename(file) in _IGNORE_METADATA:
-                    data.unassigned_files.discard(file)
+                if info.is_metadata:
+                    if basename(file) in _IGNORE_METADATA:
+                        data.unassigned_files.discard(file)
+                    else:
+                        metafiles.setdefault(info.pyname, set()).add(file)
                 else:
-                    pypkg.add(file, info=info)
+                    sitedirs.add(info.sitedir)
+                    pyfiles.add(file)
             except FileNotFoundError:
                 pass
 
+        # Create python packages based on python import names
+        for mod, files in _gen_py_importname(pyfiles, list(sitedirs)).items():
+            pypkgs[mod] = _PyPkg(import_name=mod, files=files)
+
+        # Assign metadata to splitted python packages
+        for name, files in metafiles.items():
+            _assign_metadata(name, pypkgs).add_metadata_files(files)
+
         # Merge python packages with a private import name into one of the
         # other packages
-        for name in {n for n in pypkgs if n.startswith('_')}:
+        for name in {n for n in pypkgs if n.split('.')[-1].startswith('_')}:
             pypkg = _assign_privname_to_pypkg(name, pypkgs)
             pypkg.merge_pkg(pypkgs.pop(name))
 
-        # Merge package that is only metadata to compatible one
-        metapkgs = {n: p for n, p in pypkgs.items() if not p.import_names}
-        for name, metapkg in metapkgs.items():
-            pypkg = _assign_metadata(metapkg, pypkgs)
-            pypkg.merge_pkg(pypkgs.pop(name))
-
+        # Assign python package to dispatched package (maybe create them)
         for name, pypkg in pypkgs.items():
             pkgname = pypkg.mmpack_pkgname()
             pkg = data.assign_to_pkg(pkgname, pypkg.files)
