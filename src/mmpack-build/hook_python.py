@@ -204,7 +204,6 @@ class _PyPkg:
         self.files = set()
         self.name = None
         self.import_names = set()
-        self.single_egginfo = False
         self.meta_top = set()
 
     def add(self, filename: str, info: PyNameInfo):
@@ -218,8 +217,6 @@ class _PyPkg:
                               or filename.endswith('.dist-info/METADATA')
                               or filename.endswith('.egg-info')):
             self.name = _parse_metadata(filename)['Name']
-
-        self.single_egginfo = filename.endswith('.egg-info') and not self.files
 
         if info.is_metadata and filename.endswith('/top_level.txt'):
             dirs = {d.strip() for d in open(filename).readlines()}
@@ -416,15 +413,6 @@ class MMPackBuildHook(BaseHook):
                     pypkg.add(file, info=info)
             except FileNotFoundError:
                 pass
-
-        # If single file egg-info, this is a metadata common for all python
-        # packages. => merge all them
-        for pypkg in pypkgs.values():
-            if pypkg.single_egginfo:
-                for otherpkg in pypkgs.values():
-                    pypkg.merge_pkg(otherpkg)
-                pypkgs = {pypkg.name: pypkg}
-                break
 
         # Merge python packages with a private import name into one of the
         # other packages
