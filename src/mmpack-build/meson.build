@@ -27,6 +27,7 @@ mmpack_build_sources = files(
         'pe_utils.py',
         'provide.py',
         'python_depends.py',
+        'python_dispatch.py',
         'python_provides.py',
         'source_tarball.py',
         'src_package.py',
