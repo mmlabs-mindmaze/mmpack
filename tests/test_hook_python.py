@@ -193,7 +193,7 @@ class TestPythonHook(unittest.TestCase):
     def test_provides_ns_pkg(self):
         """test provides namespace package"""
         pkgfiles = ['nspace/pkg_a/__init__.py']
-        refsymbols = {'nspace': {
+        refsymbols = {'nspace.pkg_a': {
             'nspace.pkg_a.NSpacePkgAData',
             'nspace.pkg_a.NSpacePkgAData.__init__',
             'nspace.pkg_a.NSpacePkgAData.public',

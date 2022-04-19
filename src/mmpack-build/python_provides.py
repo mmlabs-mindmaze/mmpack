@@ -25,12 +25,44 @@ import json
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, basename, dirname
-from typing import Dict, Set, Union
+from typing import Dict, List, Set, Union
 
 from astroid import AstroidImportError, AstroidSyntaxError, MANAGER
 from astroid import InconsistentMroError
 from astroid.nodes import Import, ImportFrom, AssignName, ClassDef, Module
-from astroid.modutils import modpath_from_file_with_callback
+from astroid.modutils import (file_info_from_modpath, is_namespace,
+                              modpath_from_file_with_callback)
+
+
+IS_NS: Dict[str, bool] = {}
+
+
+def is_namespace_mod(modpath: List[str]) -> bool:
+    """reports true if modpath is a PEP420 namespace package"""
+    modname = '.'.join(modpath)
+    is_ns = IS_NS.get(modname)
+    if is_ns is not None:
+        return is_ns
+
+    try:
+        is_ns = is_namespace(file_info_from_modpath(modpath))
+    except ImportError:
+        is_ns = False
+    IS_NS[modname] = is_ns
+    return is_ns
+
+
+def get_pkg(modname: str) -> str:
+    """Get the deepest regular package"""
+    modpath = modname.split('.')
+
+    # Find first parent package that is not a namespace
+    for depth in range(1, len(modpath)+1):
+        root_modpath = modpath[:depth]
+        if not is_namespace_mod(root_modpath):
+            break
+
+    return '.'.join(root_modpath)
 
 
 def _is_public_sym(name: str) -> bool:
@@ -227,10 +259,10 @@ class PkgData:
     def get_provided(self) -> Dict[str, Set[str]]:
         """Get dictionary of root package and its public symbols"""
         provided = {}
-        for namespace, syms in self.syms.items():
-            pypkg_name = namespace.split('.')[0]
+        for modname, syms in self.syms.items():
+            pypkg_name = get_pkg(modname)
             pypkg_syms = provided.setdefault(pypkg_name, set())
-            pypkg_syms.update({namespace + '.' + s for s in syms})
+            pypkg_syms.update({modname + '.' + s for s in syms})
 
         return provided
 
