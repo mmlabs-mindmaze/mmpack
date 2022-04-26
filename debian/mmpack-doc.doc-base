@@ -1,0 +1,12 @@
+Document: mmpack
+Title: MMPack Manual
+Author: Nicolas Bourdaud
+Abstract: This manual describes what mmpack is and its associated tools:
+ mmpack, mmpack-build and mmpack-modifyrepo. It describes how it can be used to
+ install, upgrade and remove mmpack package. It also describes how to build
+ mmpack package and create a repository out of them.
+Section: System/Package Management
+
+Format: HTML
+Index: /usr/share/doc/mmpack/html/index.html
+Files: /usr/share/doc/mmpack/html/*.html
