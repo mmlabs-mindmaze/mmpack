@@ -17,7 +17,7 @@ Build-Depends: debhelper-compat (= 13), dh-python,
  python3-yaml, python3-watchdog, python3-argcomplete
 Standards-Version: 4.5.1
 Vcs-Git: https://review.gerrithub.io/mmlabs-mindmaze/mmpack
-Vcs-browser: https://review.gerrithub.io/plugins/gitiles/mmlabs-mindmaze/mmpack/
+Vcs-Browser: https://review.gerrithub.io/plugins/gitiles/mmlabs-mindmaze/mmpack/
 
 Package: mmpack
 Architecture: any
