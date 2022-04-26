@@ -3,7 +3,7 @@ mmpack (0.6.11) UNRELEASED; urgency=medium
   * mmpack-build use pip to build from python source packages.
   * mmpack-build use python3 pkg argcomplete for shell completion.
   * mmpack-modifyrepo gets shell completion
-  * debhelper compat level set to 14
+  * debhelper compat level set to 13
   * build debian package using meson
   * Build package using bindnow
 
