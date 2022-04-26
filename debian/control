@@ -2,6 +2,7 @@ Source: mmpack
 Section: utils
 Priority: optional
 Maintainer: Nicolas Bourdaud <nicolas.bourdaud@gmail.com>
+Rules-Requires-Root: no
 Build-Depends: debhelper-compat (= 13), dh-python,
  check,
  python3,
