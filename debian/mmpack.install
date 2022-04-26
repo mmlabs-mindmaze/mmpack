@@ -1,5 +1,5 @@
 /usr/bin/mmpack
-/usr/lib/*/mmpack/mount-mmpack-prefix
+/usr/libexec/mmpack/mount-mmpack-prefix
 /usr/share/mmpack/check-dpkg-installed
 /usr/share/mmpack/prompt.bash
 /usr/share/bash-completion/completions/mmpack
