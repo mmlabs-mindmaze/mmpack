@@ -1,0 +1,17 @@
+spare-manual-page usr/share/man/man1/mmpack_autoremove.1.gz
+spare-manual-page usr/share/man/man1/mmpack_check-integrity.1.gz
+spare-manual-page usr/share/man/man1/mmpack_download.1.gz
+spare-manual-page usr/share/man/man1/mmpack_fix-broken.1.gz
+spare-manual-page usr/share/man/man1/mmpack_install.1.gz
+spare-manual-page usr/share/man/man1/mmpack_list.1.gz
+spare-manual-page usr/share/man/man1/mmpack_mkprefix.1.gz
+spare-manual-page usr/share/man/man1/mmpack_provides.1.gz
+spare-manual-page usr/share/man/man1/mmpack_rdepends.1.gz
+spare-manual-page usr/share/man/man1/mmpack_remove.1.gz
+spare-manual-page usr/share/man/man1/mmpack_repo.1.gz
+spare-manual-page usr/share/man/man1/mmpack_run.1.gz
+spare-manual-page usr/share/man/man1/mmpack_search.1.gz
+spare-manual-page usr/share/man/man1/mmpack_show.1.gz
+spare-manual-page usr/share/man/man1/mmpack_source.1.gz
+spare-manual-page usr/share/man/man1/mmpack_update.1.gz
+spare-manual-page usr/share/man/man1/mmpack_upgrade.1.gz
