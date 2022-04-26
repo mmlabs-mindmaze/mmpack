@@ -52,8 +52,7 @@ def cmdline_parser() -> ArgumentParser:
     parser.add_argument("--cachedir", help="cache folder",
                         action="store", dest='cachedir', nargs='?')
 
-    subparsers = parser.add_subparsers(dest='command', required=True)
-    subparsers.add_parser('list-commands')
+    subparsers = parser.add_subparsers(dest='command', required=False)
     for subcmd, mod in ALL_CMDS.items():
         mod.add_parser_args(subparsers.add_parser(subcmd, help=mod.__doc__))
 
@@ -62,8 +61,7 @@ def cmdline_parser() -> ArgumentParser:
 
 def launch_subcommand(args):
     """
-    wrapper for calling the sub-commands which handles the special case of
-    'list-commands' subcommand.
+    wrapper for calling the sub-commands.
     The wrapper also masks Exceptions, hiding the backtrace when debug mode is
     disabled.
     """
