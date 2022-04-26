@@ -4,6 +4,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+export DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow
+
 ifeq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	export DEB_CFLAGS_MAINT_APPEND=-O3 -flto -g3
 endif
