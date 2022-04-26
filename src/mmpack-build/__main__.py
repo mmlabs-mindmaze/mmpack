@@ -91,6 +91,12 @@ def main():
     parser = cmdline_parser()
     autocomplete(parser)
     args = parser.parse_args()
+
+    # fake default command set to pkg-create. For some obscure reason,
+    # parser.set_defaults() does not work for subparsers.
+    if args.command is None:
+        args = parser.parse_args(['pkg-create'], args)
+
     common.CONFIG['verbose'] = not args.quiet
     common.CONFIG['debug'] = args.debug
 
