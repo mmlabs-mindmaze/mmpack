@@ -80,7 +80,7 @@ mmpack (0.6.3) unstable; urgency=medium
 
   * default prefixes and packages dir are now in XDG_CACHE_HOME/mmpack/prefix
     and XDG_CACHE_HOME/mmpack/packages.
-  * Fix dependency constraints generation when writing pkginfo file. 
+  * Fix dependency constraints generation when writing pkginfo file.
   * Mark with '*' the ghost packages in confirmation lists.
   * Do not list python symbols in .pyobjects files if they belong to a module
     whose path from root package has not been well identified.
@@ -164,7 +164,7 @@ mmpack (0.4.0) unstable; urgency=medium
     from git
   * Add support for multi mmpack projects in one repository
   * mmpack-build allow to specify from cmdline output, build and cache dir
-  * mmpack source now makes use of source-index of repo 
+  * mmpack source now makes use of source-index of repo
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 13 Aug 2020 10:09:59 +0200
 
