@@ -778,6 +778,42 @@ mmstr* textwrap_string(mmstr* restrict out, struct strchunk in,
 }
 
 
+/**
+ * mmstr_asprintf() - formatted output to string
+ * @dst:        destination string (may be NULL)
+ * @fmt:        printf-like format specifier
+ *
+ * This implements sprintf function targetting mmstr.
+ *
+ * NOTE: the performance of the function is not high, don't use it in the
+ * hotpath of the codebase.
+ *
+ * Returns: @dst or reallocated @dst to accommodate the data.
+ */
+LOCAL_SYMBOL
+mmstr* mmstr_asprintf(mmstr* restrict dst, const char* restrict fmt, ...)
+{
+	va_list args;
+	int len;
+
+	// Compute needed size
+	va_start(args, fmt);
+	len = snprintf(NULL, 0, fmt, args);
+	va_end(args);
+
+	dst = mmstr_realloc(dst, len);
+
+	// Actual string formatting
+	va_start(args, fmt);
+	len = snprintf(dst, len+1, fmt, args);
+	va_end(args);
+
+	mmstr_setlen(dst, len);
+
+	return dst;
+}
+
+
 /**************************************************************************
  *                                                                        *
  *                            user/log interaction                        *
