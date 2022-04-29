@@ -251,6 +251,25 @@ START_TEST(str_wrapping_nl)
 END_TEST
 
 
+START_TEST(mmstr_formatted)
+{
+	int len;
+	char ref[256];
+	char data[] = "Hello world!";
+	mmstr* formatted = mmstr_malloc(12);
+
+	len = sprintf(ref, "%s/fd/%i", data, 42);
+	formatted = mmstr_asprintf(formatted, "%s/fd/%i", data, 42);
+
+	ck_assert_int_eq(mmstr_maxlen(formatted), len);
+	ck_assert_int_eq(mmstrlen(formatted), len);
+	ck_assert_str_eq(formatted, ref);
+
+	mmstr_free(formatted);
+}
+END_TEST
+
+
 /**************************************************************************
  *                                                                        *
  *                          Test suite setup                              *
@@ -266,6 +285,7 @@ TCase* create_misc_tcase(void)
 	tcase_add_test(tc, next_pow2);
 	tcase_add_loop_test(tc, str_wrapping, 0, MM_NELEM(wrap_cases));
 	tcase_add_test(tc, str_wrapping_nl);
+	tcase_add_test(tc, mmstr_formatted);
 
 	return tc;
 }
