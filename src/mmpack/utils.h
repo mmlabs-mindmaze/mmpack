@@ -91,6 +91,8 @@ mmstr* linewrap_string(mmstr* restrict out, struct strchunk in,
 mmstr* textwrap_string(mmstr* restrict out, struct strchunk in,
                        int len, const char* indent_str, const char* nl_seq);
 
+mmstr* mmstr_asprintf(mmstr* restrict dst, const char* restrict fmt, ...);
+
 /**************************************************************************
  *                                                                        *
  *                        External cmd execution                          *
