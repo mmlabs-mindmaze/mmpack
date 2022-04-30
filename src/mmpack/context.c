@@ -97,9 +97,8 @@ LOCAL_SYMBOL
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 {
 	const char* prefix;
-	char * prefix_path = NULL;
 	mmstr * cwd;
-	int len = 512, dir_strlen;
+	int len = 512;
 
 	memset(ctx, 0, sizeof(*ctx));
 	settings_init(&ctx->settings);
@@ -114,25 +113,18 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 
 	prefix = opts->prefix;
 	if (!prefix)
-		prefix =
-			mm_getenv("MMPACK_PREFIX",
-			          ctx->settings.default_prefix);
+		prefix = mm_getenv("MMPACK_PREFIX",
+			           ctx->settings.default_prefix);
 
+	// Store actual prefix path in context if prefix set.
 	if (prefix && prefix_is_alias(prefix)) {
-		dir_strlen = strlen(mm_get_basedir(MM_DATA_HOME));
-		dir_strlen += strlen(ALIAS_PREFIX_FOLDER) + 2;
-		dir_strlen += strlen(prefix) + 1;
-		prefix_path = mm_malloca(sizeof(char)*(dir_strlen));
-		sprintf(prefix_path, "%s/%s/%s",
-		        mm_get_basedir(MM_DATA_HOME), ALIAS_PREFIX_FOLDER,
-		        prefix);
-		prefix = prefix_path;
-	}
-
-	if (prefix)
+		ctx->prefix = mmstr_asprintf(NULL,
+		                             "%s/"ALIAS_PREFIX_FOLDER"/%s",
+		                              mm_get_basedir(MM_DATA_HOME),
+					      prefix);
+	} else if (prefix) {
 		ctx->prefix = mmstr_malloc_from_cstr(prefix);
-
-	mm_freea(prefix_path);
+	}
 
 	cwd = mmstr_malloc(len);
 	while (!mm_getcwd(cwd, len)) {
