@@ -19,10 +19,6 @@
 static struct binindex binary_index;
 
 static const char * binindexes[] = {
-	TEST_BININDEX_DIR"/simplest.yaml",
-	TEST_BININDEX_DIR"/simple.yaml",
-	TEST_BININDEX_DIR"/circular.yaml",
-	TEST_BININDEX_DIR"/complex-dependency.yaml",
 	TEST_BININDEX_DIR"/simplest.gz",
 	TEST_BININDEX_DIR"/simple.gz",
 	TEST_BININDEX_DIR"/circular.gz",
