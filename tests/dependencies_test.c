@@ -232,7 +232,7 @@ START_TEST(test_valid_dependencies_multiple_req)
 	struct pkg_request req[2];
 	struct repo* repo = &ctx.settings.repo_list.head->repo;
 
-	rv = binindex_populate(&ctx.binindex, TEST_BININDEX_DIR"/simple.yaml",
+	rv = binindex_populate(&ctx.binindex, TEST_BININDEX_DIR"/simple.gz",
 	                       repo);
 	ck_assert(rv == 0);
 
