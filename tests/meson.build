@@ -41,6 +41,7 @@ mmpack_build_unit_tests_sources = files(
     'binary-indexes/circular.yaml',
     'binary-indexes/complex-dependency.gz',
     'binary-indexes/complex-dependency.yaml',
+    'binary-indexes/installed-simple.gz',
     'binary-indexes/installed-simple.yaml',
     'binary-indexes/simplest.gz',
     'binary-indexes/simplest.yaml',
