@@ -26,6 +26,7 @@ static const char * binindexes[] = {
 	TEST_BININDEX_DIR"/simplest.gz",
 	TEST_BININDEX_DIR"/simple.gz",
 	TEST_BININDEX_DIR"/circular.gz",
+	TEST_BININDEX_DIR"/complex-dependency.gz",
 };
 #define NUM_BININDEXES MM_NELEM(binindexes)
 
@@ -86,11 +87,11 @@ START_TEST(test_deduplicate)
 	repo.name = mmstr_malloc_from_cstr("name_simple");
 
 	rv = binindex_populate(&binary_index,
-	                       TEST_BININDEX_DIR"/installed-simple.yaml", NULL);
+	                       TEST_BININDEX_DIR"/installed-simple.gz", NULL);
 	ck_assert_msg(rv == 0, "Installed list loading failed");
 
 
-	rv = binindex_populate(&binary_index, TEST_BININDEX_DIR"/simple.yaml",
+	rv = binindex_populate(&binary_index, TEST_BININDEX_DIR"/simple.gz",
 	                       &repo);
 	ck_assert_msg(rv == 0, "repository list loading failed");
 
