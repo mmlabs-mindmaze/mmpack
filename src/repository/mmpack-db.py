@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# @mindmaze_header@
 # pylint: disable=invalid-name
 # pylint: disable=logging-format-interpolation
 """

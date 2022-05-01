@@ -1,4 +1,4 @@
-# pylint: disable=logging-format-interpolation
+# @mindmaze_header@
 # pylint: disable=logging-format-interpolation
 """
 Module provinding helpers.

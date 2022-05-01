@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# @mindmaze_header@
 """
 Tool handling the upload of packages to a repository
 """
