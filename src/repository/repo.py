@@ -12,6 +12,7 @@ with the information given in the manifest.
 from __future__ import annotations
 
 from collections import Counter, namedtuple
+from email.parser import Parser
 from enum import Enum, auto
 from hashlib import sha256
 from subprocess import PIPE, Popen
@@ -50,8 +51,7 @@ except ImportError:
 _TARPROG = 'bsdtar' if get_platform().startswith('mingw') else 'tar'
 
 
-RELPATH_BINARY_INDEX = 'binary-index'
-RELPATH_BINARY_INDEX_GZ = 'binary-index.gz'
+RELPATH_BINARY_INDEX = 'binary-index.gz'
 RELPATH_SOURCE_INDEX = 'source-index'
 RELPATH_WORKING_DIR = 'working_dir'
 LOG_FILE = 'mmpack-repo.log'
@@ -158,25 +158,6 @@ def _write_keyval(stream: TextIO, key: str, value: Any,
         first = False
 
 
-def _gen_dep_list(dependencies: Dict[str, List[str]]) -> List[str]:
-    deps = []
-
-    for dep, minmaxver in dependencies.items():
-        minver = minmaxver[0]
-        maxver = minmaxver[1]
-        if minver == maxver:
-            if minver != 'any':
-                dep += f' (= {minver})'
-            deps.append(dep)
-        else:
-            if minver != 'any':
-                deps.append(f'{dep} (>= {minver})')
-            if maxver != 'any':
-                deps.append(f'{dep} (< {maxver})')
-
-    return deps
-
-
 def yaml_load(filename: str):
     """
     helper: load yaml file with BasicLoader
@@ -213,11 +194,6 @@ class _BinPkg:
         self._data = data if data is not None else {}
 
     def __getattr__(self, key: str) -> Any:
-        if key == 'depends':
-            return self._data.get(key, {})
-        elif key == 'sysdepends':
-            return self._data.get(key, [])
-
         try:
             return self._data[key]
         except KeyError as error:
@@ -229,12 +205,6 @@ class _BinPkg:
         """
         self._data.update(data)
 
-    def yaml_data(self) -> Dict[str, Any]:
-        """
-        Get yaml data to generate binary-index package entry value
-        """
-        return self._data
-
     def write_keyvals(self, stream: TextIO):
         """
         Write list of key/values part for the binary package at hand.
@@ -242,17 +212,11 @@ class _BinPkg:
         _write_keyval(stream, 'name', self.name)
 
         for key in ('version', 'source', 'srcsha256',
-                    'ghost', 'sumsha256sums'):
+                    'ghost', 'sumsha256sums', 'depends', 'sysdepends'):
             _write_keyval(stream, key, self._data.get(key, ''))
 
         multiline_desc = _escape_newline(self.description)
         _write_keyval(stream, 'description', multiline_desc, split=' ')
-
-        deps = ', '.join(_gen_dep_list(self.depends))
-        _write_keyval(stream, 'depends', deps, split=', ')
-
-        sysdeps = ', '.join(self.sysdepends)
-        _write_keyval(stream, 'sysdepends', sysdeps, split=', ')
 
         # Write at the end the repo specific fields
         for key in ('filename', 'size', 'sha256'):
@@ -274,11 +238,20 @@ class _BinPkg:
         Args:
             pkg_path: the path through the mpk file to read.
         """
-        cmd = [_TARPROG, '-xOf', pkg_path, './MMPACK/info']
-        with Popen(cmd, stdout=PIPE) as proc:
-            buf = proc.stdout.read()
-            name, data = yaml.safe_load(buf).popitem()
-            return _BinPkg(name, data)
+        parser = Parser()
+
+        cmd = [_TARPROG, '-xOf', pkg_path, './MMPACK/metadata']
+        with Popen(cmd, stdout=PIPE, text=True, encoding='utf-8') as proc:
+            metadata = parser.parse(proc.stdout)
+
+        cmd = [_TARPROG, '-xOf', pkg_path, metadata['pkginfo-path']]
+        with Popen(cmd, stdout=PIPE, text=True, encoding='utf-8') as proc:
+            pkginfo = parser.parse(proc.stdout)
+
+        name = metadata['name']
+        data = {k: v for k, v in pkginfo.items()}
+        data['sumsha256sums'] = metadata['sumsha256sums']
+        return _BinPkg(name, data)
 
 
 def file_serialize(index: dict, filename: str):
@@ -372,11 +345,6 @@ class Repo:
         self.count_src_refs = Counter()
         self._reload_indices_from_files()
 
-        # Create keyval binary index file from loaded data if not existing
-        keyval_binindex = os.path.join(abs_path_repo, RELPATH_BINARY_INDEX_GZ)
-        if not os.path.isfile(keyval_binindex):
-            self._write_keyvals_binindex(abs_path_repo)
-
         self.last_update = 0
         self.lockfile = None
 
@@ -390,11 +358,18 @@ class Repo:
     def _reload_indices_from_files(self):
         self.last_update = os.stat(self.binindex_file).st_mtime
 
-        binindex_data = yaml_load(self.binindex_file)
-        if binindex_data is None:
-            binindex_data = {}
+        with gzip.open(self.binindex_file, 'rt') as fp:
+            binindex_data = fp.read()
 
-        self.binindex = {n: _BinPkg(n, d) for n, d in binindex_data.items()}
+        self.binindex = {}
+        parser = Parser()
+        for pkgdesc in re.split('\n\n+', binindex_data):
+            pkgdata = {k: v for k, v in parser.parsestr(pkgdesc).items()}
+            if not pkgdata:
+                continue
+
+            name = pkgdata.pop('name')
+            self.binindex[name] = _BinPkg(name, pkgdata)
 
         self.srcindex = file_load(self.srcindex_file)
         if self.srcindex is None:
@@ -406,17 +381,6 @@ class Repo:
         self.count_src_refs = Counter()
         for binpkg in self.binindex.values():
             self.count_src_refs[binpkg.srcid()] += 1
-
-    def yaml_serialize(self, obj: Union[list, dict], filename: str) -> None:
-        """
-        Save object as yaml file of given name
-        """
-        with open(filename, 'w+', newline='\n') as outfile:
-            yaml.dump(obj, outfile,
-                      default_flow_style=None,
-                      allow_unicode=True,
-                      indent=4)
-        self.logger.info('wrote {0}'.format(filename))
 
     def _check_hash(self, package: dict):
         """
@@ -512,7 +476,7 @@ class Repo:
         self._clear_change_data()
 
     def _write_keyvals_binindex(self, dirpath: str = None):
-        filename = os.path.join(dirpath, RELPATH_BINARY_INDEX_GZ)
+        filename = os.path.join(dirpath, RELPATH_BINARY_INDEX)
 
         with gzip.open(filename, 'wt', newline='\n') as stream:
             for pkg in self.binindex.values():
@@ -534,14 +498,10 @@ class Repo:
         new_binfile = os.path.join(self.working_dir, RELPATH_BINARY_INDEX)
 
         file_serialize(self.srcindex, new_srcfile)
-        yaml_binindex = {n: p.yaml_data() for n, p in self.binindex.items()}
-        self.yaml_serialize(yaml_binindex, new_binfile)
-
         self._write_keyvals_binindex(self.working_dir)
 
         to_add.add(RELPATH_SOURCE_INDEX)
         to_add.add(RELPATH_BINARY_INDEX)
-        to_add.add(RELPATH_BINARY_INDEX_GZ)
 
     def _matching_srcids(self, srcname: str = None, version: str = None,
                          srcsha256: str = None) -> Set[str]:
