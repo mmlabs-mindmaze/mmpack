@@ -20,10 +20,6 @@
 static struct mmpack_ctx ctx;
 
 static const char * valid_binindexes[] = {
-	TEST_BININDEX_DIR"/simplest.yaml",
-	TEST_BININDEX_DIR"/simple.yaml",
-	TEST_BININDEX_DIR"/circular.yaml",
-	TEST_BININDEX_DIR"/complex-dependency.yaml",
 	TEST_BININDEX_DIR"/simplest.gz",
 	TEST_BININDEX_DIR"/simple.gz",
 	TEST_BININDEX_DIR"/circular.gz",
@@ -43,7 +39,6 @@ static const char * valid_mmpack_deps[][7] = {
 };
 
 static const char * invalid_binindexes[] = {
-	TEST_BININDEX_DIR"/unsolvable-dependencies.yaml",
 	TEST_BININDEX_DIR"/unsolvable-dependencies.gz",
 };
 #define NUM_INVALID_BININDEXES MM_NELEM(invalid_binindexes)
