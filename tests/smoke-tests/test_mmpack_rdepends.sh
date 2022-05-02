@@ -45,11 +45,11 @@ expected="call-hello (1.0.0)
 hello (1.0.0)"
 [ "$output" == "$expected" ]
 
-output="$(mmpack rdepends hello-data=hash:8dc8f06e9277b4404661045a43d31dbc0f85bebd5f26e29a801a0efb12d064b6 | $dos2unix)"
+output="$(mmpack rdepends hello-data=hash:b16048f2b5fc84b47f892ba0171b69b12d48a2699fb78882f8e95523e96c0b7c | $dos2unix)"
 expected="hello (1.0.0)"
 [ "$output" == "$expected" ]
 
-output="$(mmpack rdepends --recursive hello-data=hash:8dc8f06e9277b4404661045a43d31dbc0f85bebd5f26e29a801a0efb12d064b6 | $dos2unix)"
+output="$(mmpack rdepends --recursive hello-data=hash:b16048f2b5fc84b47f892ba0171b69b12d48a2699fb78882f8e95523e96c0b7c | $dos2unix)"
 expected="call-hello (1.0.0)
 hello (1.0.0)"
 [ "$output" == "$expected" ]
