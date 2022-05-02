@@ -46,7 +46,7 @@ gen-src-archive()
 	local pkgname=$1
 	local version="$2"
 
-	tar -czf pkgs/${pkgname}_${version}_src.tar.gz --directory=tmp .
+	tar --mtime='1970-01-01' --numeric-owner --owner=0 --group=0 -czf pkgs/${pkgname}_${version}_src.tar.gz --directory=tmp .
 }
 
 sha256()
@@ -54,9 +54,42 @@ sha256()
 	sha256sum $1 | cut -d$' ' -f1
 }
 
+gen-mmpack-pkginfo()
+{
+	local pkgname="$1"
+	local version="$2"
+	shift 2
+	local depends="$@"
+
+	local depends=""
+	for dep in "$@"; do
+		[ -z "$dep" ] && continue
+		depname=$(echo $dep | cut -f1 -d' ')
+		depop=$(echo $dep | cut -f2 -d' ')
+		depversion=$(echo $dep | cut -f3 -d' ')
+
+		currdepend="$depname ($depop $depversion)"
+		if [ -z "$depends" ]; then
+			depends=$currdepend
+		else
+			depends="$depends, $currdepend"
+		fi
+	done
+
+cat > tmp/var/lib/mmpack/metadata/$pkgname.pkginfo <<EOF
+name: $pkgname
+version: $version
+description: '$pkgname package description'
+source: $pkgname
+srcsha256: $(sha256 pkgs/${pkgname}_${version}_src.tar.gz)
+depends: $depends
+sysdepends:
+EOF
+}
+
 gen-sha256sums()
 {
-	for f in $(find tmp -type f -follow -print) ; do
+	for f in $(find tmp -type f -follow -print | sort) ; do
 		echo "${f#"tmp/"}: reg-$(sha256 $f)"
 	done > tmp_sha256sums
 
@@ -76,7 +109,14 @@ gen-mmpack-info()
 	else
 		echo "    depends:" >> tmp/MMPACK/info
 		for dep in "$depends" ; do
-			echo "        $dep" >> tmp/MMPACK/info
+			depname=$(echo $dep | cut -f1 -d' ')
+			depop=$(echo $dep | cut -f2 -d' ')
+			depversion=$(echo $dep | cut -f3 -d' ')
+			if [ "$depop" = "=" ]; then
+				echo "        $depname: ['$depversion', '$depversion']" >> tmp/MMPACK/info
+			else
+				echo "        $depname: ['$depversion', any]" >> tmp/MMPACK/info
+			fi
 		done
 	fi
 
@@ -88,6 +128,23 @@ cat << EOF >> tmp/MMPACK/info
     sysdepends: [$sysdep]
     version: '$version'
     licenses: [dummy]
+EOF
+}
+
+gen-mmpack-metadata()
+{
+       local pkgname="$1"
+       local version="$2"
+
+cat > tmp/MMPACK/metadata <<EOF
+metadata-version: 1.0
+name: $pkgname
+version: $version
+source: $pkgname
+srcsha256: $(sha256 pkgs/${pkgname}_${version}_src.tar.gz)
+sumsha256sums: $(sha256 tmp/var/lib/mmpack/metadata/$pkgname.sha256sums)
+pkginfo-path: ./var/lib/mmpack/metadata/$pkgname.pkginfo
+sumsha-path: ./var/lib/mmpack/metadata/$pkgname.sha256sums
 EOF
 }
 
@@ -131,8 +188,10 @@ gen-mmpack-pkg()
 	echo -n "Creating dummy package: $pkgname ($version) ... "
 
 	gen-src-archive "$pkgname" "$version"
+	gen-mmpack-pkginfo "$pkgname" "$version" "$depends"
 	gen-sha256sums
 	gen-mmpack-info "$pkgname" "$version" "$depends"
+	gen-mmpack-metadata "$pkgname" "$version"
 
 	tar --zstd -cf pkgs/${pkgname}_${version}.mpk --directory=tmp .
 	echo "OK"
@@ -192,7 +251,7 @@ cat \$(dirname \$0)/dummy-file
 EOF
 chmod a+x $pkg_builddir/tmp/bin/hello-world
 
-gen-mmpack-pkg $REPO_DIR/0 "hello" "1.0.0" "hello-data: ['1.0.0', any]"
+gen-mmpack-pkg $REPO_DIR/0 "hello" "1.0.0" "hello-data >= 1.0.0"
 
 # PACKAGE: call-hello
 prepare
@@ -202,7 +261,7 @@ cat << EOF > $pkg_builddir/tmp/bin/call-hello.sh
 EOF
 chmod a+x $pkg_builddir/tmp/bin/call-hello.sh
 
-gen-mmpack-pkg $REPO_DIR/0 call-hello "1.0.0" "hello: ['1.0.0', any]"
+gen-mmpack-pkg $REPO_DIR/0 call-hello "1.0.0" "hello >= 1.0.0"
 
 # final cleanup
 cleanup
