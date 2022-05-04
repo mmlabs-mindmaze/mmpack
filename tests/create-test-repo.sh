@@ -13,11 +13,6 @@ if [ -n "$(which cygpath)" ] ; then
 	BINDIR=$(cygpath -u $BINDIR)
 	DEPLOYMENT_DIR=$(cygpath -u $DEPLOYMENT_DIR)
 	REPO_DIR=$(cygpath -u $REPO_DIR)
-
-	# minimal system dependency that we expect to always be here
-	sysdep="mingw-w64-x86_64-gcc-libs"
-else
-	sysdep="libc6 (>= 2.15)"
 fi
 
 # locate the mmpack-modifyrepo script from the test deployment dir
@@ -46,7 +41,7 @@ gen-src-archive()
 	local pkgname=$1
 	local version="$2"
 
-	tar -czf pkgs/${pkgname}_${version}_src.tar.gz --directory=tmp .
+	tar --mtime='1970-01-01' --owner=0 --group=0 --numeric-owner --sort=name -cJf pkgs/${pkgname}_${version}_src.tar.xz --directory=tmp .
 }
 
 sha256()
@@ -56,7 +51,7 @@ sha256()
 
 gen-sha256sums()
 {
-	for f in $(find tmp -type f -follow -print) ; do
+	for f in $(find tmp -type f -follow -print | LC_ALL=C sort) ; do
 		echo "${f#"tmp/"}: reg-$(sha256 $f)"
 	done > tmp_sha256sums
 
@@ -83,9 +78,9 @@ gen-mmpack-info()
 cat << EOF >> tmp/MMPACK/info
     description: '$pkgname package description'
     source: $pkgname
-    srcsha256: $(sha256 pkgs/${pkgname}_${version}_src.tar.gz)
+    srcsha256: $(sha256 pkgs/${pkgname}_${version}_src.tar.xz)
     sumsha256sums: $(sha256 tmp/var/lib/mmpack/metadata/$pkgname.sha256sums)
-    sysdepends: [$sysdep]
+    sysdepends: []
     version: '$version'
     licenses: [dummy]
 EOF
@@ -97,7 +92,7 @@ gen-manifest()
 	local version="$2"
 
 	local manifest=pkgs/${pkgname}_${version}.mmpack-manifest
-	local srcpkg=pkgs/${pkgname}_${version}_src.tar.gz
+	local srcpkg=pkgs/${pkgname}_${version}_src.tar.xz
 	local binpkg=pkgs/${pkgname}_${version}.mpk
 
 	cat << EOF > $manifest
@@ -134,7 +129,7 @@ gen-mmpack-pkg()
 	gen-sha256sums
 	gen-mmpack-info "$pkgname" "$version" "$depends"
 
-	tar --zstd -cf pkgs/${pkgname}_${version}.mpk --directory=tmp .
+	tar --zstd --sort=name -cf pkgs/${pkgname}_${version}.mpk --directory=tmp .
 	echo "OK"
 
 	manifest=$(gen-manifest $pkgname $version)
