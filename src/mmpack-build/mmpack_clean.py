@@ -5,7 +5,7 @@ Small helper used to ensure a clean state of mmpack-build work folders
 
 from argparse import ArgumentParser
 
-from . workspace import Workspace
+from .workspace import Workspace
 
 
 def add_parser_args(parser: ArgumentParser):

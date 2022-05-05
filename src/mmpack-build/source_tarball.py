@@ -12,9 +12,9 @@ from subprocess import call, DEVNULL
 from tarfile import open as taropen, TarFile, TarInfo
 from typing import Dict, Iterator, List, NamedTuple, Optional
 
-from . common import *
-from . errors import DownloadError, MMPackBuildError, ShellException
-from . workspace import Workspace, cached_download, find_project_root_folder
+from .common import *
+from .errors import DownloadError, MMPackBuildError, ShellException
+from .workspace import Workspace, cached_download, find_project_root_folder
 
 
 class ProjectSource(NamedTuple):

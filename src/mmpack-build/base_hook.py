@@ -5,7 +5,7 @@ template to create mmpack-build hook
 
 from typing import Dict, List
 
-from . package_info import PackageInfo, DispatchData
+from .package_info import PackageInfo, DispatchData
 
 
 class BaseHook:

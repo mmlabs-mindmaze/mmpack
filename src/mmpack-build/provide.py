@@ -10,10 +10,10 @@ from os.path import exists
 from typing import (Set, Dict, Tuple, List, NamedTuple, Iterable, Iterator,
                     Optional)
 
-from . common import wprint, yaml_serialize, yaml_load
-from . mm_version import Version
-from . package_info import PackageInfo
-from . workspace import Workspace
+from .common import wprint, yaml_serialize, yaml_load
+from .mm_version import Version
+from .package_info import PackageInfo
+from .workspace import Workspace
 
 
 # pylint: disable=too-few-public-methods

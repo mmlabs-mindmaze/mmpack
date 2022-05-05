@@ -6,8 +6,8 @@ Base class abstracting system package manager
 import os
 from typing import List, Dict
 
-from . workspace import cached_download
-from . mm_version import Version
+from .workspace import cached_download
+from .mm_version import Version
 
 
 class SysPkg:

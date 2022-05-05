@@ -6,8 +6,8 @@ interexchange data for package definition
 import re
 from typing import Set, Tuple
 
-from . common import extract_matching_set
-from . mm_version import Version
+from .common import extract_matching_set
+from .mm_version import Version
 
 
 _DEP_RE = re.compile(r'([a-zA-Z0-9-]+)\s*(?:\(\s*([<>=]+)\s*([^) ]+)\s*\))?')

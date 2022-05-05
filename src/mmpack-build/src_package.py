@@ -15,17 +15,17 @@ from subprocess import Popen
 from threading import Thread
 from tempfile import mkdtemp
 
-from . workspace import Workspace, get_local_install_dir
-from . binary_package import BinaryPackage
-from . common import *
-from . file_utils import *
-from . errors import MMPackBuildError, ShellException
-from . hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
-from . mm_version import Version
-from . package_info import DispatchData, PackageInfo
-from . settings import PKGDATADIR
-from . syspkg_manager import get_syspkg_mgr
-from . mmpack_builddep import process_dependencies, general_specs_builddeps
+from .workspace import Workspace, get_local_install_dir
+from .binary_package import BinaryPackage
+from .common import *
+from .file_utils import *
+from .errors import MMPackBuildError, ShellException
+from .hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
+from .mm_version import Version
+from .package_info import DispatchData, PackageInfo
+from .settings import PKGDATADIR
+from .syspkg_manager import get_syspkg_mgr
+from .mmpack_builddep import process_dependencies, general_specs_builddeps
 
 
 class _FileConsumer(Thread):

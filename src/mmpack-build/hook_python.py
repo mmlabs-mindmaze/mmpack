@@ -13,13 +13,13 @@ from itertools import chain
 from os.path import basename
 from typing import Set, Dict, List, Iterable, NamedTuple, Optional
 
-from . base_hook import BaseHook
-from . common import shell, Assert, iprint, rmtree_force
-from . file_utils import filetype
-from . package_info import PackageInfo, DispatchData
-from . provide import Provide, ProvideList, load_mmpack_provides, pkgs_provides
-from . syspkg_manager import get_syspkg_mgr
-from . workspace import Workspace
+from .base_hook import BaseHook
+from .common import shell, Assert, iprint, rmtree_force
+from .file_utils import filetype
+from .package_info import PackageInfo, DispatchData
+from .provide import Provide, ProvideList, load_mmpack_provides, pkgs_provides
+from .syspkg_manager import get_syspkg_mgr
+from .workspace import Workspace
 
 
 # example of matches:

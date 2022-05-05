@@ -10,8 +10,8 @@ from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
 from elftools.elf.dynamic import DynamicSection
 
-from . common import shell, wprint
-from . provide import Provide, ProvidedSymbol
+from .common import shell, wprint
+from .provide import Provide, ProvidedSymbol
 
 
 def _subpath_in_prefix(prefix: str, path: str) -> str:

@@ -7,10 +7,10 @@ import re
 from struct import iter_unpack, unpack
 from typing import Dict, List, Set
 
-from . base_hook import BaseHook
-from . common import shell, Assert
-from . file_utils import filetype
-from . package_info import DispatchData, PackageInfo
+from .base_hook import BaseHook
+from .common import shell, Assert
+from .file_utils import filetype
+from .package_info import DispatchData, PackageInfo
 
 
 def _extract_msgids_from_gnu_mo(filename: str) -> Set[str]:

@@ -8,13 +8,13 @@ from glob import glob
 
 import pefile
 
-from . common import shell
-from . decorators import singleton
-from . workspace import Workspace
+from .common import shell
+from .decorators import singleton
+from .workspace import Workspace
 
 # pylint: disable=unused-import
 # PE module does not need to change anything from the base Provide class
-from . provide import Provide as ShlibProvide
+from .provide import Provide as ShlibProvide
 
 
 def soname(filename: str) -> str:

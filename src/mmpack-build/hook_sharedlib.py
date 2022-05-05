@@ -8,13 +8,13 @@ import os
 from glob import glob
 from typing import Set, Dict, List
 
-from . base_hook import BaseHook
-from . common import shlib_keyname, wprint, Assert
-from . file_utils import is_dynamic_library, get_exec_fileformat, \
+from .base_hook import BaseHook
+from .common import shlib_keyname, wprint, Assert
+from .file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
-from . package_info import PackageInfo, DispatchData
-from . provide import ProvideList, load_mmpack_provides, pkgs_provides
-from . syspkg_manager import get_syspkg_mgr
+from .package_info import PackageInfo, DispatchData
+from .provide import ProvideList, load_mmpack_provides, pkgs_provides
+from .syspkg_manager import get_syspkg_mgr
 
 
 def _add_dll_dep_to_pkginfo(currpkg: PackageInfo, import_lib: str,

@@ -20,8 +20,8 @@ from . import mmpack_guess
 from . import mmpack_mksource
 from . import mmpack_pkg_create
 from . import common
-from . settings import PACKAGE_VERSION
-from . workspace import Workspace
+from .settings import PACKAGE_VERSION
+from .workspace import Workspace
 
 
 # all subcommand MUST expose a main function, the subcommand main entry point

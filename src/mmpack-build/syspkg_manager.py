@@ -3,10 +3,10 @@
 Helpers to interact with system package manager
 """
 
-from . common import get_host_dist
-from . syspkg_manager_base import SysPkgManager
-from . syspkg_manager_dpkg import Dpkg
-from . syspkg_manager_pacman_msys2 import PacmanMsys2
+from .common import get_host_dist
+from .syspkg_manager_base import SysPkgManager
+from .syspkg_manager_dpkg import Dpkg
+from .syspkg_manager_pacman_msys2 import PacmanMsys2
 
 
 _SYSPKG_MGR = None

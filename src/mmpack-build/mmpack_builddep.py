@@ -11,9 +11,9 @@ missing will be proposed for install within the current prefix.
 import sys
 from argparse import ArgumentParser
 
-from . common import get_host_dist, run_cmd, specs_load
-from . errors import MMPackBuildError
-from . workspace import find_project_root_folder, Workspace
+from .common import get_host_dist, run_cmd, specs_load
+from .errors import MMPackBuildError
+from .workspace import find_project_root_folder, Workspace
 
 
 def add_parser_args(parser: ArgumentParser):

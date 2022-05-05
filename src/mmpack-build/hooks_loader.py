@@ -11,7 +11,7 @@ import importlib
 import pkgutil
 from os.path import dirname
 
-from . common import dprint
+from .common import dprint
 
 
 MMPACK_BUILD_HOOKS = []

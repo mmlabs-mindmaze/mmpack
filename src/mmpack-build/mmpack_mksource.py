@@ -8,9 +8,9 @@ import sys
 from argparse import ArgumentParser, Namespace
 from typing import Callable
 
-from . errors import MMPackBuildError
-from . source_tarball import SourceTarball
-from . src_package import SrcPackage
+from .errors import MMPackBuildError
+from .source_tarball import SourceTarball
+from .src_package import SrcPackage
 
 
 def add_parser_args(parser: ArgumentParser):

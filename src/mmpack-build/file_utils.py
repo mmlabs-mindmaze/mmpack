@@ -7,8 +7,8 @@ import re
 import sysconfig
 from os.path import islink, basename, splitext
 
-from . common import shell, wprint
-from . errors import MMPackBuildError
+from .common import shell, wprint
+from .errors import MMPackBuildError
 
 
 # Match the interpreter of a shebang line (interpreter will be set in the first

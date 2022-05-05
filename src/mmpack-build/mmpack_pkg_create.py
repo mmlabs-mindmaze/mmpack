@@ -8,11 +8,11 @@ directory.
 import os
 from argparse import ArgumentParser, Namespace
 
-from . mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
-                               call_foreach_srcpkg)
-from . src_package import SrcPackage
-from . workspace import Workspace
-from . xdg import XDG_DATA_HOME
+from .mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
+                              call_foreach_srcpkg)
+from .src_package import SrcPackage
+from .workspace import Workspace
+from .xdg import XDG_DATA_HOME
 
 
 def _get_prefix_abspath(prefix) -> str:

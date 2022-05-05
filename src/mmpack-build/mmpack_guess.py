@@ -20,8 +20,8 @@ from typing import List
 import yaml
 
 
-from . common import find_license, shell
-from . errors import ShellException
+from .common import find_license, shell
+from .errors import ShellException
 
 
 UNKNOWN = 'unknown'  # default return value if guessing failed

@@ -7,11 +7,11 @@ directory.
 
 from argparse import ArgumentParser, Namespace
 
-from . common import shell
-from . mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
-                               call_foreach_srcpkg)
-from . src_package import SrcPackage
-from . workspace import Workspace
+from .common import shell
+from .mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
+                              call_foreach_srcpkg)
+from .src_package import SrcPackage
+from .workspace import Workspace
 
 
 def add_parser_args(parser: ArgumentParser):
