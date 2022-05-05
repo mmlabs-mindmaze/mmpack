@@ -120,7 +120,7 @@ Optional fields
 .. _PCRE: https://www.pcre.org/current/doc/html/pcre2.html
 
 The custom-pkgs sections
-```````````````````
+````````````````````````
 
 The custom sections are used to change the default values of created packages,
 or to create a custom specific package.

@@ -21,7 +21,7 @@ The format follows the `yaml`_ format.
 .. _yaml: https://yaml.org/
 
 Mandatory fields
-```````````````````
+````````````````
 
  :method:
    The method how to fetch the sources. It should be currently 'tar' or 'git'.
@@ -31,7 +31,7 @@ Mandatory fields
    With 'git' method, this url is the same as the argument for ``git clone``.
 
 Optional fields
-```````````````````
+```````````````
 
  :branch:
    (for git only) The commit hash, tag or branch that must be extracted
