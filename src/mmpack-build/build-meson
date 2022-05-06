@@ -2,7 +2,8 @@
 
 set -e
 
-export CFLAGS=""
+REL_BUILD_SRCDIR=$(realpath --relative-to=$BUILDDIR $SRCDIR)
+export CFLAGS="-ffile-prefix-map=${REL_BUILD_SRCDIR}=${INSTALLED_SRCDIR}"
 export CXXFLAGS="${CFLAGS}"
 export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
 initial_opts='-Dbuildtype=release -Db_lto=true'
