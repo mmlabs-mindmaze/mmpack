@@ -2,7 +2,7 @@
 
 set -e
 
-export CFLAGS=""
+export CFLAGS="-ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
 export CXXFLAGS="${CFLAGS}"
 initial_opts='-DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE -G"Ninja" -Wno-dev'
 
