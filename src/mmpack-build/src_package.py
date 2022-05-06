@@ -157,6 +157,13 @@ class SrcPackage:
         os.makedirs(installdir, exist_ok=True)
         return installdir
 
+    def _installed_srcdir(self):
+        prefix = _get_install_prefix()
+        name = self.name
+        version = self.srcversion
+        hash_suffix = self.src_hash[:4]
+        return f'{prefix}/src/{name}-{version}-{hash_suffix}'
+
     def _guess_build_system(self):
         """
         helper: guesses the project build system
@@ -304,6 +311,7 @@ class SrcPackage:
                                         prefix='build-')
         build_env['DESTDIR'] = self._local_install_path()
         build_env['PREFIX'] = _get_install_prefix()
+        build_env['INSTALLED_SRCDIR'] = self._installed_srcdir()
         build_env['SKIP_TESTS'] = str(skip_tests)
         if self.build_options:
             build_env['OPTS'] = self.build_options

@@ -2,7 +2,8 @@
 
 set -e
 
-initial_opts='-Dbuildtype=release -Db_lto=true'
+COMPFLAGS="-flto -O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
+initial_opts='-Dbuildtype=release -Db_lto=true -Dc_args="${COMPFLAGS}"'
 
 eval meson --prefix=$PREFIX --libdir=lib $initial_opts $OPTS $BUILDDIR $SRCDIR
 
