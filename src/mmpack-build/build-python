@@ -2,7 +2,7 @@
 
 set -e
 
-COMPFLAGS="-O2"
+COMPFLAGS="-O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
 
 export CFLAGS="${COMPFLAGS}"
 sitedir=$PREFIX/lib/python3/site-packages

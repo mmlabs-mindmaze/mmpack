@@ -8,7 +8,7 @@ has_check_target=$(($? == 1))
 
 set -e
 
-COMPFLAGS="-flto -O2"
+COMPFLAGS="-flto -O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
 initial_opts='CFLAGS="${COMPFLAGS}" LDFLAGS="$LDFLAGS -flto"'
 
 cd $SRCDIR
