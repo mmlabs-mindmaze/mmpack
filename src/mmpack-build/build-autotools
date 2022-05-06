@@ -2,7 +2,8 @@
 
 set -e
 
-initial_opts='--disable-dependency-tracking CFLAGS="-flto -O2"'
+COMPFLAGS="-flto -O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
+initial_opts='--disable-dependency-tracking CFLAGS="${COMPFLAGS}"'
 
 cd $SRCDIR
 if [ -x configure ] ; then

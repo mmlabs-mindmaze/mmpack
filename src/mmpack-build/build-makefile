@@ -8,7 +8,8 @@ has_check_target=$(($? == 1))
 
 set -e
 
-initial_opts='CFLAGS="-flto -O2" LDFLAGS="$LDFLAGS -flto"'
+COMPFLAGS="-flto -O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
+initial_opts='CFLAGS="${COMPFLAGS}" LDFLAGS="$LDFLAGS -flto"'
 
 cd $SRCDIR
 eval make $initial_opts $OPTS PREFIX=$PREFIX
