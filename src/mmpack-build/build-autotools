@@ -2,8 +2,9 @@
 
 set -e
 
+export CFLAGS="-flto -O2"
 export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
-initial_opts='--disable-dependency-tracking CFLAGS="-flto -O2"'
+initial_opts='--disable-dependency-tracking'
 
 cd $SRCDIR
 if [ -x configure ] ; then

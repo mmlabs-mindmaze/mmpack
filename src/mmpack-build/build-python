@@ -2,6 +2,7 @@
 
 set -e
 
+export CFLAGS=""
 export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
 sitedir=$PREFIX/lib/python3/site-packages
 
