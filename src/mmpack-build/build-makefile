@@ -9,6 +9,7 @@ has_check_target=$(($? == 1))
 set -e
 
 export CFLAGS="-flto -O2"
+export CXXFLAGS="${CFLAGS}"
 initial_opts='LDFLAGS="$LDFLAGS -flto"'
 
 cd $SRCDIR
