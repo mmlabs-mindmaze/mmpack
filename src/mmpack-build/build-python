@@ -2,6 +2,9 @@
 
 set -e
 
+COMPFLAGS=""
+
+export CFLAGS="${COMPFLAGS}"
 sitedir=$PREFIX/lib/python3/site-packages
 
 # On mingw, prevent cygpath to interfere with the variables passed as argument
