@@ -2,7 +2,8 @@
 
 set -e
 
-initial_opts='--disable-dependency-tracking CFLAGS="-flto -O2"'
+export CFLAGS="-flto -O2"
+initial_opts='--disable-dependency-tracking'
 
 cd $SRCDIR
 if [ -x configure ] ; then
