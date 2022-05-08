@@ -3,6 +3,7 @@
 set -e
 
 export CFLAGS=""
+export CXXFLAGS="${CFLAGS}"
 initial_opts='-Dbuildtype=release -Db_lto=true'
 
 eval meson --prefix=$PREFIX --libdir=lib $initial_opts $OPTS $BUILDDIR $SRCDIR
