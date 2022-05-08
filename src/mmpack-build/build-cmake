@@ -3,6 +3,7 @@
 set -e
 
 export CFLAGS=""
+export CXXFLAGS="${CFLAGS}"
 export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
 initial_opts='-DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE -G"Ninja" -Wno-dev'
 
