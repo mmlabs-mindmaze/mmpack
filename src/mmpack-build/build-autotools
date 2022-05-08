@@ -3,6 +3,7 @@
 set -e
 
 export CFLAGS="-flto -O2"
+export CXXFLAGS="${CFLAGS}"
 initial_opts='--disable-dependency-tracking'
 
 cd $SRCDIR
