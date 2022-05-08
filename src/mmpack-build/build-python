@@ -2,7 +2,7 @@
 
 set -e
 
-COMPFLAGS=""
+COMPFLAGS="-O2"
 
 export CFLAGS="${COMPFLAGS}"
 sitedir=$PREFIX/lib/python3/site-packages
