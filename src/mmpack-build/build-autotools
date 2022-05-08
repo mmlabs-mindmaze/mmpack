@@ -2,7 +2,7 @@
 
 set -e
 
-COMPFLAGS="-flto -O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
+COMPFLAGS="-flto -g -gno-record-gcc-switches -O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
 initial_opts='--disable-dependency-tracking CFLAGS="${COMPFLAGS}"'
 
 cd $SRCDIR
