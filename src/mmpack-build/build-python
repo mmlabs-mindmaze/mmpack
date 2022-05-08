@@ -2,7 +2,7 @@
 
 set -e
 
-export CFLAGS="-O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
+export CFLAGS="-g -gno-record-gcc-switches -O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
 export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
 sitedir=$PREFIX/lib/python3/site-packages
 
