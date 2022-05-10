@@ -6,10 +6,10 @@ plugin tracking the exported symbol and dependencies of shared libraries
 import importlib
 import os
 from glob import glob
-from typing import Set, Dict, List
+from typing import Set, Dict, List, Optional
 
 from .base_hook import BaseHook
-from .common import shlib_keyname, wprint, Assert
+from .common import run_cmd, shlib_keyname, wprint, Assert
 from .file_utils import is_dynamic_library, get_exec_fileformat, \
     filetype, is_importlib, get_linked_dll
 from .package_info import PackageInfo, DispatchData
@@ -31,6 +31,13 @@ def _add_dll_dep_to_pkginfo(currpkg: PackageInfo, import_lib: str,
             if pkg.name != currpkg.name:
                 currpkg.add_to_deplist(pkg.name, pkg.version, pkg.version)
             return
+
+
+def _extract_debugsym(filename: str, build_id: Optional[str]):
+    debug_file = f'lib/debug/.build-id/{build_id[:2]}/{build_id[2:]}.debug'
+    os.makedirs(os.path.dirname(debug_file), exist_ok=True)
+    run_cmd(['objcopy', '--only-keep-debug', filename, debug_file])
+    run_cmd(['strip', '--strip-unneeded', filename])
 
 
 class MMPackBuildHook(BaseHook):
@@ -107,8 +114,13 @@ class MMPackBuildHook(BaseHook):
             return
 
         for filename in glob('**', recursive=True):
-            if filetype(filename) == 'elf':
+            file_type = filetype(filename)
+            if file_type == 'elf':
                 self._module.adjust_runpath(filename)
+
+            if file_type == self._execfmt:
+                build_id = self._module.build_id(filename)
+                _extract_debugsym(filename, build_id)
 
     def dispatch(self, data: DispatchData):
         for file in data.unassigned_files.copy():
@@ -172,7 +184,7 @@ class MMPackBuildHook(BaseHook):
             # file and the set of used symbols external to the file. This
             # will be use to determine the dependencies
             file_type = filetype(inst_file)
-            if file_type == self._execfmt:
+            if file_type == self._execfmt and not inst_file.endswith('.debug'):
                 symbols.update(self._module.undefined_symbols(inst_file))
                 deps.update(self._module.soname_deps(inst_file))
 
