@@ -45,6 +45,14 @@ class SystemLibs(set):
                 self.add(dllname.lower())
 
 
+def build_id(filename: str) -> Optional[str]:
+    """
+    return build id note. Returns None if not found.
+    """
+    pe_file = pefile.PE(filename)
+    return getattr(pe_file, '.buildid', None)
+
+
 def soname_deps(filename):
     """
     Parse given pe file and return its dependency soname list
