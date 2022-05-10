@@ -5,6 +5,7 @@ helper module containing pe parsing functions
 
 import os
 from glob import glob
+from typing import Optional
 
 import pefile
 
@@ -43,6 +44,30 @@ class SystemLibs(set):
                 # then add '.dll' and convert to lowercase
                 dllname = lib[(len(libdir) + 4):-2] + '.dll'
                 self.add(dllname.lower())
+
+
+def build_id(filename: str) -> Optional[str]:
+    """
+    return build id note. Returns None if not found.
+    """
+    pe_file = pefile.PE(filename)
+    try:
+        for dbgsec in pf.DIRECTORY_ENTRY_DEBUG:
+            try:
+                entry = dbgsrc.entry
+                if entry.Structure != 'CV_INFO_PDB70':
+                    continue
+            except AttributeError:
+                continue
+
+            return b''.join((e.Signature_Data1.to_bytes(4, 'big'),
+                                e.Signature_Data2.to_bytes(2, 'big'),
+                                e.Signature_Data3.to_bytes(2, 'big'),
+                                e.Signature_Data4)).hex()
+    except AttributeError:
+        pass
+
+    return None
 
 
 def soname_deps(filename):
