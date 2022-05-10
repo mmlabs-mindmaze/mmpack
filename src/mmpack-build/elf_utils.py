@@ -4,11 +4,12 @@ helper module containing elf parsing functions
 """
 
 import os
-from typing import List
+from typing import List, Optional
 
 from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
 from elftools.elf.dynamic import DynamicSection
+from elftools.elf.sections import NoteSection
 
 from .common import shell, wprint
 from .provide import Provide, ProvidedSymbol
@@ -68,6 +69,21 @@ def _get_runpath_list(filename) -> List[str]:
                     return tag.runpath.split(':')
 
     return []
+
+
+def build_id(filename: str) -> Optional[str]:
+    """
+    return build id note. Returns None if not found.
+    """
+    with open(filename, 'rb') as fileobj:
+        elffile = ELFFile(fileobj)
+        for section in elffile.iter_sections():
+            if isinstance(section, NoteSection):
+                for note in section.iter_notes():
+                    if note.n_type == 'NT_GNU_BUILD_ID':
+                        return note.n_desc
+
+    return None
 
 
 def _has_dynamic_section(filename) -> bool:
