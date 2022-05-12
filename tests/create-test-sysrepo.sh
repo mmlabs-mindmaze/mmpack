@@ -11,6 +11,11 @@ if ! [ "$LONG_TESTS" = "true" ]; then
 	exit 0
 fi
 
+if [ -n "$(which cygpath)" ] ; then
+    SRC_DIR=$(cygpath -u $SRC_DIR)
+    REPO_DIR=$(cygpath -u $REPO_DIR)
+    ACLOCAL_PATH=$(cygpath -u $ACLOCAL_PATH)
+fi
 
 rm -rf $REPO_DIR
 mkdir -p $REPO_DIR
