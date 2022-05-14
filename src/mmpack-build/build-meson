@@ -5,7 +5,7 @@ set -e
 REL_BUILD_SRCDIR=$(realpath --relative-to=$BUILDDIR $SRCDIR)
 export CFLAGS="-ffile-prefix-map=${REL_BUILD_SRCDIR}=${INSTALLED_SRCDIR}"
 export CXXFLAGS="${CFLAGS}"
-export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
+export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib -Wl,--build-id"
 initial_opts='-Dbuildtype=custom -Ddebug=true -Doptimization=3 -Db_lto=true'
 
 eval meson --prefix=$PREFIX --libdir=lib $initial_opts $OPTS $BUILDDIR $SRCDIR

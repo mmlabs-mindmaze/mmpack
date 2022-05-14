@@ -4,7 +4,7 @@ set -e
 
 export CFLAGS="-flto -g -gno-record-gcc-switches -O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
 export CXXFLAGS="${CFLAGS}"
-export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
+export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib -Wl,--build-id"
 initial_opts='--disable-dependency-tracking'
 
 cd $SRCDIR
