@@ -28,6 +28,14 @@ from .syspkg_manager import get_syspkg_mgr
 from .mmpack_builddep import process_dependencies, general_specs_builddeps
 
 
+_PREVENTED_BUILDENV_KEYS = (
+    'CPATH', 'C_INCLUDE_PATH', 'CPLUS_INCLUDE_PATH', 'OBJC_INCLUDE_PATH',
+    'LIBRARY_PATH', 'COMPILER_PATH', 'GCC_EXEC_PREFIX',
+    'PKG_CONFIG_PATH',
+    'CFLAGS', 'CXXFLAGS', 'LDFLAGS',
+)
+
+
 class _FileConsumer(Thread):
     """
     Read in a thread from file input and duplicate onto the file output and
@@ -297,6 +305,12 @@ class SrcPackage:
         wrk = Workspace()
 
         build_env = os.environ.copy()
+
+        # Prevents the build environment variable specified in build host to
+        # influence package build
+        for key in _PREVENTED_BUILDENV_KEYS:
+            build_env.pop(key, None)
+
         build_env['SRCNAME'] = self.name
         build_env['SRCVERSION'] = str(self.srcversion)
         build_env['SRCDIR'] = self.unpack_path()
@@ -311,9 +325,7 @@ class SrcPackage:
         # enrich the env with the necessary variables to build using
         # the headers and libraries of the prefix
         if wrk.prefix:
-            tmp = os.environ.get('LDFLAGS', '')
             build_env['LDFLAGS'] = '-Wl,-rpath-link={}/lib '.format(wrk.prefix)
-            build_env['LDFLAGS'] += tmp
 
         if get_host_dist() == 'windows':
             build_env['MSYSTEM'] = 'MINGW64'
