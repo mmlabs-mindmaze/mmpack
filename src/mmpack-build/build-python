@@ -2,6 +2,7 @@
 
 set -e
 
+export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
 sitedir=$PREFIX/lib/python3/site-packages
 
 # On mingw, prevent cygpath to interfere with the variables passed as argument

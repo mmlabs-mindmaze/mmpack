@@ -302,8 +302,6 @@ class SrcPackage:
         self.files_sysdep = sysdeps
 
     def _build_env(self, skip_tests: bool):
-        wrk = Workspace()
-
         build_env = os.environ.copy()
 
         # Prevents the build environment variable specified in build host to
@@ -321,11 +319,6 @@ class SrcPackage:
         build_env['SKIP_TESTS'] = str(skip_tests)
         if self.build_options:
             build_env['OPTS'] = self.build_options
-
-        # enrich the env with the necessary variables to build using
-        # the headers and libraries of the prefix
-        if wrk.prefix:
-            build_env['LDFLAGS'] = '-Wl,-rpath-link={}/lib '.format(wrk.prefix)
 
         if get_host_dist() == 'windows':
             build_env['MSYSTEM'] = 'MINGW64'
