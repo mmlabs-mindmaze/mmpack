@@ -322,10 +322,8 @@ class SrcPackage:
         if self.build_options:
             build_env['OPTS'] = self.build_options
 
-        # enrich the env with the necessary variables to build using
-        # the headers and libraries of the prefix
-        if wrk.prefix:
-            build_env['LDFLAGS'] = '-Wl,-rpath-link={}/lib '.format(wrk.prefix)
+        # Ensure built executable uses prefix libraries
+        build_env['LDFLAGS'] = f'-Wl,-rpath-link={_get_install_prefix()}/lib '
 
         if get_host_dist() == 'windows':
             build_env['MSYSTEM'] = 'MINGW64'
