@@ -3,7 +3,7 @@
 set -e
 
 export CFLAGS="-g -gno-record-gcc-switches -O2 -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
-export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
+export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib -Wl,--build-id"
 sitedir=$PREFIX/lib/python3/site-packages
 
 # On mingw, prevent cygpath to interfere with the variables passed as argument

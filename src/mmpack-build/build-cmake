@@ -4,7 +4,7 @@ set -e
 
 export CFLAGS="-g -gno-record-gcc-switches -ffile-prefix-map=${SRCDIR}=${INSTALLED_SRCDIR}"
 export CXXFLAGS="${CFLAGS}"
-export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib"
+export LDFLAGS="-Wl,-rpath-link=$PREFIX/lib -Wl,--build-id"
 initial_opts='-DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE -G"Ninja" -Wno-dev'
 
 cd $BUILDDIR
