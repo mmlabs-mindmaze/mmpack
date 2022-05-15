@@ -7,8 +7,8 @@ source packages
 ----------------
 
 :Author: Gabriel Ganne <gabriel.ganne@mindmaze.ch>,
-         Nicolas Bourdaud <nicolas.bourdaud@mindmaze.ch>
-:Date: 2018-10-25
+         Nicolas Bourdaud <nicolas.bourdaud@gmail.com>
+:Date: 2022-05-15
 :Manual section: 1
 
 SYNOPSIS
@@ -18,7 +18,8 @@ SYNOPSIS
 
 DESCRIPTION
 ===========
-**mmpack source** download given package sources into current directory.
+**mmpack source** downloads given package sources into the **src** subfolder of
+the active prefix.
 
 OPTIONS
 =======
