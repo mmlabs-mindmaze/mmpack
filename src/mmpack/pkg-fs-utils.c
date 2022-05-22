@@ -614,9 +614,6 @@ void fschange_remove_rmfiles_pycache(struct fschange* fsc)
 			mmstr_setlen(cache, cachedirlen);
 			cache = mmstr_realloc(cache, cachedirlen + f->reclen);
 			mmstrcat_cstr(cache, f->name);
-
-			// Remove cache file
-			mm_unlink(cache);
 		}
 
 		mm_closedir(d);
