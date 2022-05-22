@@ -10,6 +10,7 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
+#include <mmtime.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +24,7 @@
 #include "settings.h"
 
 #define ALIAS_PREFIX_FOLDER "mmpack/prefix"
+#define CACHE_KEEP_TIME_SEC (7*24*60*60)        // 7 days
 
 static
 int load_user_config(struct mmpack_ctx* ctx)
@@ -81,6 +83,45 @@ int prefix_is_alias(const char * prefix)
 	}
 
 	return alias;
+}
+
+
+/**
+ * cleanup_cachedir() - remove unused files from cache dir
+ * @cachedir:   path to cache directory
+ * @keep_time_sec: time after which a file is considered unused
+ */
+static
+void cleanup_cachedir(const mmstr* cachedir, int keep_time_sec)
+{
+	MM_DIR* dir;
+	const struct mm_dirent* entry;
+	struct mm_stat buf;
+	struct mm_timespec now;
+	char* prev_cwd = NULL;
+
+	mm_gettime(MM_CLK_REALTIME, &now);
+
+	// Change current directory to target_dir (and store previous one)
+	if ((prev_cwd = mm_getcwd(NULL, 0)) == NULL
+	    || mm_chdir(cachedir)) {
+		free(prev_cwd);
+		return;
+	}
+
+	// Loop in cachedir and remove unused files
+	dir = mm_opendir(".");
+	while ((entry = mm_readdir(dir, NULL))) {
+		if (entry->type != MM_DT_REG
+		    || mm_stat(entry->name, &buf, MM_NOFOLLOW)
+		    || (now.tv_sec - buf.atime) > keep_time_sec
+		    || mm_unlink(entry->name))
+			continue;
+	}
+	mm_closedir(dir);
+
+	mm_chdir(prev_cwd);
+	free(prev_cwd);
 }
 
 
@@ -150,7 +191,11 @@ void mmpack_ctx_deinit(struct mmpack_ctx * ctx)
 {
 	mmstr_free(ctx->prefix);
 	mmstr_free(ctx->cwd);
-	mmstr_free(ctx->pkgcachedir);
+
+	if (ctx->pkgcachedir) {
+		cleanup_cachedir(ctx->pkgcachedir, CACHE_KEEP_TIME_SEC);
+		mmstr_free(ctx->pkgcachedir);
+	}
 
 	if (ctx->curl != NULL) {
 		curl_easy_cleanup(ctx->curl);
