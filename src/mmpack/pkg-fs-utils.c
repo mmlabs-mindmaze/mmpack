@@ -702,28 +702,6 @@ exit:
 
 
 /**
- * action_set_pathname_into_dir() - construct path of cached package file
- * @act:        action struct whose pathname field is to be set
- * @from_repo:  repository from which the package was downloaded
- * @dir:        folder in which the cached downloaded packages must reside
- *
- * This function set @act->pathname to point to a file whose basename is
- * the name of the binary package file associed with @act->pkg and whose
- * folder is specified by @dir. This is typically used to set the name of
- * the downloaded file in the local folder of cached packages (specified by
- * @dir).
- */
-static
-void action_set_pathname_into_dir(struct action* act, const mmstr* dir)
-{
-	const mmstr* sha256 = act->pkg->remote_res->sha256;
-
-	// Store the joined cachedir and base filename in act->pathname
-	act->pathname = mmstr_join_path_realloc(act->pathname, dir, sha256);
-}
-
-
-/**
  * fetch_pkgs() - download packages that are going to be installed
  * @ctx:       initialized mmpack context
  * @act_stk:   action stack to be applied
@@ -735,10 +713,8 @@ void action_set_pathname_into_dir(struct action* act, const mmstr* dir)
 static
 int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 {
-	mmstr* mpkfile = NULL;
 	const struct binpkg* pkg;
 	struct action* act;
-	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 	int i;
 
 	for (i = 0; i < act_stk->index; i++) {
@@ -747,11 +723,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
 			continue;
 
-		// Set downloaded file path in cachedir
-		action_set_pathname_into_dir(act, cachedir);
-		mpkfile = act->pathname;
-
-		if (download_remote_resource(ctx, pkg->remote_res, mpkfile)) {
+		if (download_remote_resource(ctx, pkg->remote_res,
+		                             &act->pathname)) {
 			printf("Failed to fetch %s (%s): %s\n",
 			       pkg->name, pkg->version,
 			       mm_get_lasterror_desc());
