@@ -242,9 +242,15 @@ int download_remote_resource(struct mmpack_ctx * ctx,
 	int previous;
 	int done = 0;
 	int rv = -1;
+	struct mm_timespec ts[2] = {
+		{.tv_sec = UTIME_NOW},
+		{.tv_sec = UTIME_OMIT}
+	};
 
-	if (is_resource_in_cache(ctx, res, downloaded_file))
+	if (is_resource_in_cache(ctx, res, downloaded_file)) {
+		mm_utimens(*downloaded_file, ts, 0);
 		return 0;
+	}
 
 	// Stop logging error (still error are reported in state)
 	previous = mm_error_set_flags(MM_ERROR_SET, MM_ERROR_NOLOG);
