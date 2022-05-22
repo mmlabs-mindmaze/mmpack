@@ -29,8 +29,8 @@ static
 int install_pkg_sources(struct mmpack_ctx * ctx, struct binpkg const * pkg)
 {
 	const struct srcpkg* srcpkg;
-	const mmstr* cachedir;
-	mmstr *basepath, *srctar, *srcdir;
+	mmstr* srctar = NULL;
+	mmstr *basepath, *srcdir;
 	int rv = 0;
 
 	srcpkg = srcindex_lookup(&ctx->srcindex,
@@ -41,13 +41,11 @@ int install_pkg_sources(struct mmpack_ctx * ctx, struct binpkg const * pkg)
 		return -1;
 	}
 
-	cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 	basepath = mmstr_basename(NULL, srcpkg->remote_res->filename);
-	srctar = mmstr_join_path_realloc(NULL, cachedir, basepath);
 	srcdir = mmstr_asprintf(NULL, "%s/src/%s-%s-%.4s", ctx->prefix,
 	                        srcpkg->name, srcpkg->version, srcpkg->sha256);
 
-	if (download_remote_resource(ctx, srcpkg->remote_res, srctar)
+	if (download_remote_resource(ctx, srcpkg->remote_res, &srctar)
 	    || mm_mkdir(srcdir, 0777, MM_RECURSIVE)
 	    || tar_extract_all(srctar, srcdir)) {
 		printf("Failed to install sources: %s\n", mm_get_lasterror_desc());
