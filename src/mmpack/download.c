@@ -191,41 +191,31 @@ exit:
 }
 
 
-#define XFER_SIZE       4096
 static
-int copy_file(const char* dst, const char* src)
+int is_resource_in_cache(struct mmpack_ctx * ctx,
+                         const struct remote_resource* res,
+                         mmstr** downloaded_file)
 {
-	int fd_src, fd_dst;
-	char* buff;
-	ssize_t rsz;
-	int rv = -1;
+	const struct remote_resource* from;
+	int previous;
+	int available = 0;
+	mmstr* filename = *downloaded_file;
+	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 
-	buff = xx_malloc(XFER_SIZE);
-	fd_src = mm_open(src, O_RDONLY, 0);
-	fd_dst = open_file_in_prefix(NULL, dst, O_WRONLY|O_CREAT|O_TRUNC);
-	if (fd_src == -1 || fd_dst == -1)
-		goto exit;
-
-	while (1) {
-		rsz = mm_read(fd_src, buff, XFER_SIZE);
-		if (rsz < 0)
-			goto exit;
-
-		if (rsz == 0)
+	// Set available if a valid package already is available in cache
+	previous = mm_error_set_flags(MM_ERROR_SET, MM_ERROR_IGNORE);
+	for (from = res; from != NULL && !available; from = from->next) {
+		filename = mmstr_join_path_realloc(filename,
+		                                   cachedir, from->sha256);
+		if (check_hash(from->sha256, NULL, filename) == 0) {
+			available = 1;
 			break;
-
-		rsz = mm_write(fd_dst, buff, rsz);
-		if (rsz < 0)
-			goto exit;
+		}
 	}
+	mm_error_set_flags(previous, MM_ERROR_IGNORE);
 
-	rv = 0;
-
-exit:
-	mm_close(fd_dst);
-	mm_close(fd_src);
-	free(buff);
-	return rv;
+	*downloaded_file = filename;
+	return available;
 }
 
 
@@ -233,7 +223,7 @@ exit:
  * download_remote_resource() - get a remote resource
  * @ctx:        mmpack context used (used to get curl handle)
  * @res:        remote resource to fetch
- * @filename:   path which the downloaded file must be written to
+ * @downloaded_file: pointer to mmstr that will receive the path to cached file
  *
  * This functions tries alternatively all remote repository and settle once
  * remote file has been successfully downloaded.
@@ -243,43 +233,37 @@ exit:
 LOCAL_SYMBOL
 int download_remote_resource(struct mmpack_ctx * ctx,
                              const struct remote_resource* res,
-                             const mmstr* filename)
+                             mmstr** downloaded_file)
 {
 	const struct remote_resource* from;
 	const struct repo* repo;
+	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
+	mmstr* filename = *downloaded_file;
 	int previous;
 	int done = 0;
 	int rv = -1;
 
+	if (is_resource_in_cache(ctx, res, downloaded_file))
+		return 0;
+
 	// Stop logging error (still error are reported in state)
 	previous = mm_error_set_flags(MM_ERROR_SET, MM_ERROR_NOLOG);
 
-	// Skip if there is a valid package already downloaded
-	if (mm_check_access(filename, F_OK) == 0) {
-		mm_error_set_flags(MM_ERROR_SET, MM_ERROR_IGNORE);
-		for (from = res; from != NULL && !done; from = from->next) {
-			if (check_hash(from->sha256, NULL, filename) == 0) {
-				done = 1;
-				break;
-			}
-		}
-
-		mm_error_set_flags(previous, MM_ERROR_IGNORE);
-	}
-
-	// Download file from one of the repo.
+	// Download file from one of the repo in the cache
 	for (from = res; from != NULL && !done; from = from->next) {
 		repo = res->repo;
-		if (repo) {
-			printf("try download %s from %s... ",
-			       from->filename, repo->url);
-			rv = download_from_repo(ctx, repo->url, from->filename,
-			                        NULL, filename);
-			printf("%s\n", rv ? "failed" : "ok");
-		} else {
+		if (!repo) {
 			// Package has been provided on command line
-			rv = copy_file(filename, from->filename);
+			filename = mmstrcpy_realloc(filename, from->filename);
+			done = 1;
+			break;
 		}
+		printf("download %s from %s... ", from->filename, repo->url);
+		filename = mmstr_join_path_realloc(filename,
+			                           cachedir, from->sha256);
+		rv = download_from_repo(ctx, repo->url, from->filename,
+		                        NULL, filename);
+		printf("%s\n", rv ? "failed" : "ok");
 
 		// Check previous download operation result and hash. If both
 		// are success, then we are done here
@@ -290,5 +274,6 @@ int download_remote_resource(struct mmpack_ctx * ctx,
 	// Restore error logging behavior
 	mm_error_set_flags(previous, MM_ERROR_NOLOG);
 
+	*downloaded_file = filename;
 	return done ? 0 : -1;
 }
