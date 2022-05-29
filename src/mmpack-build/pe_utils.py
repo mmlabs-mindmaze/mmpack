@@ -5,6 +5,7 @@ helper module containing pe parsing functions
 
 import os
 from glob import glob
+from os.path import join as joinpath
 from typing import Optional
 
 import pefile
@@ -34,16 +35,15 @@ class SystemLibs(set):
     def __init__(self):
         # pylint: disable=super-init-not-called
 
-        wrk = Workspace()
-        # give linux paths in linux format, and mingw paths in windows format
-        # glob will return an empty list if the path does not exist
-        for libdir in ('/usr/x86_64-w64-mingw32/lib',
-                       wrk.cygroot() + '\\mingw64\\x86_64-w64-mingw32\\lib'):
-            for lib in glob(libdir + '/lib*.a'):
-                # strip path,  'lib', and '.a'
-                # then add '.dll' and convert to lowercase
-                dllname = lib[(len(libdir) + 4):-2] + '.dll'
-                self.add(dllname.lower())
+        winroot = os.getenv('SYSTEMROOT')
+        sysdirs = (
+            winroot,
+            joinpath(winroot, 'system32'),
+        )
+
+        for path in sysdirs:
+            self.update({f.lower() for f in os.listdir(path)
+                         if f.endswith(('.dll', '.DLL'))})
 
 
 def build_id(filename: str) -> Optional[str]:
