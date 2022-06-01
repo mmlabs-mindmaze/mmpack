@@ -16,6 +16,9 @@ from .decorators import singleton
 # PE module does not need to change anything from the base Provide class
 from .provide import Provide as ShlibProvide
 
+# Monkey patch pefile to accept function name that contains '.'
+pefile.allowed_function_name += b'.'
+
 
 def soname(filename: str) -> str:
     """
