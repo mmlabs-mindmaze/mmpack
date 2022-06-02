@@ -219,6 +219,17 @@ int is_resource_in_cache(struct mmpack_ctx * ctx,
 }
 
 
+static
+void update_access_time(const char* filename)
+{
+	struct mm_timespec ts[2] = {
+		{.tv_nsec = UTIME_NOW},
+		{.tv_nsec = UTIME_OMIT}
+	};
+	mm_utimens(filename, ts, 0);
+}
+
+
 /**
  * download_remote_resource() - get a remote resource
  * @ctx:        mmpack context used (used to get curl handle)
@@ -276,6 +287,9 @@ int download_remote_resource(struct mmpack_ctx * ctx,
 	mm_error_set_flags(previous, MM_ERROR_NOLOG);
 
 exit:
+	if (done)
+		update_access_time(filename);
+
 	*downloaded_file = filename;
 	return done ? 0 : -1;
 }
