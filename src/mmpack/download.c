@@ -242,6 +242,10 @@ int download_remote_resource(struct mmpack_ctx * ctx,
 	int previous;
 	int done = 0;
 	int rv = -1;
+	struct mm_timespec ts[2] = {
+		{.tv_sec = UTIME_NOW},
+		{.tv_sec = UTIME_OMIT}
+	};
 
 	done = is_resource_in_cache(ctx, res, &filename);
 	if (done)
@@ -276,6 +280,9 @@ int download_remote_resource(struct mmpack_ctx * ctx,
 	mm_error_set_flags(previous, MM_ERROR_NOLOG);
 
 exit:
+	if (done)
+		mm_utimens(filename, ts, 0);
+
 	*downloaded_file = filename;
 	return done ? 0 : -1;
 }
