@@ -67,6 +67,24 @@
       "message": "`tv_nsec` instead of `tv_sec`",
       "revId": "824f5c26f671223b9929c1fe1e625c20af2b585e",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d7f40588_376fa7dc",
+        "filename": "src/mmpack/download.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1017133
+      },
+      "writtenOn": "2022-06-03T07:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "326d3b49_43c24013",
+      "revId": "824f5c26f671223b9929c1fe1e625c20af2b585e",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
