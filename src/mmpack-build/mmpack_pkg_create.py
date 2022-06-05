@@ -35,9 +35,6 @@ def add_parser_args(parser: ArgumentParser):
     parser.add_argument('--build-deps',
                         action='store_true', dest='build_deps',
                         help='check and install build dependencies')
-    parser.add_argument('-y', '--yes',
-                        action='store_true', dest='assumeyes',
-                        help='always assume yes to any prompted question')
 
 
 def _pkg_create_build(package: SrcPackage, args: Namespace):

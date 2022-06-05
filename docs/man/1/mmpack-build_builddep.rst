@@ -40,9 +40,6 @@ OPTIONS
   Use *path* as install prefix.
   Can also be given through ``MMPACK_PREFIX`` environment variable
 
---assume-yes, -y
-  Assume yes as answer to all prompts and run non-interactively.
-
 ENVIRONMENT
 ===========
 
