@@ -17,6 +17,7 @@ from .base_hook import BaseHook
 from .common import shell, Assert, iprint, rmtree_force
 from .file_utils import filetype
 from .package_info import PackageInfo, DispatchData
+from .prefix import cmd_in_optional_prefix
 from .provide import Provide, ProvideList, load_mmpack_provides, pkgs_provides
 from .syspkg_manager import get_syspkg_mgr
 from .workspace import Workspace
@@ -191,11 +192,7 @@ def _gen_pydepends(pkg: PackageInfo,
 
     # run in prefix if one is being used, this allows to establish dependency
     # against installed mmpack packages
-    wrk = Workspace()
-    if wrk.prefix:
-        cmd = [wrk.mmpack_bin(), '--prefix='+wrk.prefix, 'run'] + cmd
-
-    cmd_output = shell(cmd)
+    cmd_output = shell(cmd_in_optional_prefix(cmd))
     return {k: set(v) for k, v in json.loads(cmd_output).items()}
 
 
