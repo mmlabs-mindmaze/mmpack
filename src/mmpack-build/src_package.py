@@ -23,6 +23,7 @@ from .errors import MMPackBuildError, ShellException
 from .hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from .mm_version import Version
 from .package_info import DispatchData, PackageInfo
+from .prefix import cmd_in_optional_prefix
 from .settings import PKGDATADIR
 from .syspkg_manager import get_syspkg_mgr
 from .mmpack_builddep import process_dependencies, general_specs_builddeps
@@ -344,16 +345,10 @@ class SrcPackage:
 
         !!! Requires a prefix already set up !!!
         """
-        wrk = Workspace()
-        prefix = wrk.prefix
-
-        cmd = '{} --prefix={} update'.format(wrk.mmpack_bin(), prefix)
-        shell(cmd)
-
         # append platform-specific mmpack packages
         # eg. one required package is not available on this platform
         sys_builddeps, builddeps = general_specs_builddeps(self._specs)
-        process_dependencies(sys_builddeps, builddeps, prefix)
+        process_dependencies(sys_builddeps, builddeps)
 
     def _build_project(self, skip_tests: bool) -> None:
         """
@@ -379,11 +374,7 @@ class SrcPackage:
         if self.build_system == 'custom':
             build_script = 'mmpack/build'
 
-        build_cmd = ['sh', build_script]
-        if wrk.prefix:
-            run_prefix = [wrk.mmpack_bin(), '--prefix='+wrk.prefix, 'run']
-            build_cmd = run_prefix + build_cmd
-
+        build_cmd = cmd_in_optional_prefix(['sh', build_script])
         dprint('[shell] {0}'.format(' '.join(build_cmd)))
 
         # Execute command and transfer output to log
