@@ -7,9 +7,9 @@ directory.
 
 from argparse import ArgumentParser, Namespace
 
-from .common import shell
 from .mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
                               call_foreach_srcpkg)
+from .prefix import prefix_create
 from .src_package import SrcPackage
 from .workspace import Workspace
 
@@ -28,18 +28,11 @@ def add_parser_args(parser: ArgumentParser):
 
 
 def _pkg_build(package: SrcPackage, args: Namespace):
-    wrk = Workspace()
-
     # Set mmpack prefix location for the rest of package build
-    wrk.prefix = package.pkgbuild_path() + '/deps_prefix'
+    Workspace().prefix = package.pkgbuild_path() + '/deps_prefix'
 
     # Create mmpack prefix
-    mmpack_bin = wrk.mmpack_bin()
-    prefix_arg = '--prefix=' + wrk.prefix
-    shell([mmpack_bin, prefix_arg, 'mkprefix', '--clean-repolist'])
-    for idx, url in enumerate(args.repo_url):
-        shell([mmpack_bin, prefix_arg, 'repo', 'add', f'repo{idx}', url])
-    shell([mmpack_bin, prefix_arg, 'update'])
+    prefix_create(args.repo_url)
 
     # Install build dependencies in the newly created prefix
     package.install_builddeps()

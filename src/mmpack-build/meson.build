@@ -25,6 +25,7 @@ mmpack_build_sources = files(
         'mmpack_create.py',
         'package_info.py',
         'pe_utils.py',
+        'prefix.py',
         'provide.py',
         'python_depends.py',
         'python_dispatch.py',
