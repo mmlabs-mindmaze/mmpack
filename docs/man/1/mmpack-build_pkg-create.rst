@@ -34,9 +34,6 @@ the following:
 --prefix=path, -p path
   Use *path* as install prefix if needed.
 
---assumes-yes, -y
-  Assume yes as answer to all prompts and run non-interactively.
-
 --build-deps
   Check for build dependencies:
 
