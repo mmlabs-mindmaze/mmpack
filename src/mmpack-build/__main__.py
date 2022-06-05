@@ -51,6 +51,11 @@ def cmdline_parser() -> ArgumentParser:
                         action="store", dest='builddir', nargs='?')
     parser.add_argument("--cachedir", help="cache folder",
                         action="store", dest='cachedir', nargs='?')
+    parser.add_argument('-r', '--repo-url', dest='repo_url', action='append',
+                        default=[],
+                        help='URL of the repository to fetch dependencies '
+                             'from. Can be supplied multiple times to use '
+                             'several repositories.')
 
     subparsers = parser.add_subparsers(dest='command', required=False)
     for subcmd, mod in ALL_CMDS.items():
