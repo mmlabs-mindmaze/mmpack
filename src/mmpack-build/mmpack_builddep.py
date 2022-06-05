@@ -13,6 +13,7 @@ from argparse import ArgumentParser
 
 from .common import get_host_dist, run_cmd, specs_load
 from .errors import MMPackBuildError
+from .prefix import prefix_install
 from .workspace import find_project_root_folder, Workspace
 
 
@@ -54,8 +55,7 @@ def general_specs_builddeps(general):
     return system_builddeps, mmpack_builddeps
 
 
-def process_dependencies(system_builddeps, mmpack_builddeps,
-                         prefix: str):
+def process_dependencies(system_builddeps, mmpack_builddeps):
     """
     process given dependencies
 
@@ -65,25 +65,16 @@ def process_dependencies(system_builddeps, mmpack_builddeps,
     Raises:
         ShellException: the called program returned failure code
     """
-    mmpack_bin = Workspace().mmpack_bin()
-
     # check sysdeps first
     if system_builddeps:
-        run_cmd([mmpack_bin, 'check-sysdep'] + system_builddeps)
+        run_cmd([Workspace().mmpack_bin(), 'check-sysdep'] + system_builddeps)
 
     if not mmpack_builddeps:
         return
 
     # install missing mmpack packages
     # forward options to mmpack install
-    cmd = [mmpack_bin]
-    if prefix:
-        cmd.append('--prefix=' + prefix)
-    cmd.append('install')
-    cmd.append('-y')
-
-    cmd += mmpack_builddeps
-    run_cmd(cmd)
+    prefix_install(mmpack_builddeps)
 
 
 def main(options):
@@ -102,8 +93,8 @@ def main(options):
     system_builddeps, mmpack_builddeps = general_specs_builddeps(specs)
 
     try:
-        process_dependencies(system_builddeps, mmpack_builddeps,
-                             options.prefix)
+        Workspace().prefix = options.prefix
+        process_dependencies(system_builddeps, mmpack_builddeps)
     except MMPackBuildError as err:
         print(str(err), file=sys.stderr)
         return 1

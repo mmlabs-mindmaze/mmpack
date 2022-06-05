@@ -78,6 +78,7 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/mmpack_pkg_create.py \
 	src/mmpack-build/package_info.py \
 	src/mmpack-build/pe_utils.py \
+	src/mmpack-build/prefix.py \
 	src/mmpack-build/provide.py \
 	src/mmpack-build/python_depends.py \
 	src/mmpack-build/python_dispatch.py \
