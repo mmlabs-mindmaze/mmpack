@@ -3,6 +3,7 @@
 Utils to use mmpack prefix in mmpack-build
 """
 
+from contextlib import contextmanager
 from typing import Iterable, List
 
 from .common import run_cmd
@@ -38,3 +39,17 @@ def cmd_in_optional_prefix(args: List[str]) -> List[str]:
         return _mmpack_cmd() + ['run'] + args
 
     return args
+
+
+@contextmanager
+def new_prefix(path: str):
+    """
+    Configure workspace to use temporarily specified prefix when building
+    """
+    wrk = Workspace()
+    previous_prefix = wrk.prefix
+    wrk.set_prefix(prefix)
+    try:
+        yield
+    finally:
+        wrk.prefix = previous_prefix

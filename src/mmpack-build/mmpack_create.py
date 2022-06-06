@@ -9,9 +9,8 @@ from argparse import ArgumentParser, Namespace
 
 from .mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
                               call_foreach_srcpkg)
-from .prefix import prefix_create
+from .prefix import new_prefix, prefix_create
 from .src_package import SrcPackage
-from .workspace import Workspace
 
 
 def add_parser_args(parser: ArgumentParser):
@@ -29,16 +28,16 @@ def add_parser_args(parser: ArgumentParser):
 
 def _pkg_build(package: SrcPackage, args: Namespace):
     # Set mmpack prefix location for the rest of package build
-    Workspace().prefix = package.pkgbuild_path() + '/deps_prefix'
+    with new_prefix(package.pkgbuild_path() + '/deps_prefix'):
 
-    # Create mmpack prefix
-    prefix_create(args.repo_url)
+        # Create mmpack prefix
+        prefix_create(args.repo_url)
 
-    # Install build dependencies in the newly created prefix
-    package.install_builddeps()
+        # Install build dependencies in the newly created prefix
+        package.install_builddeps()
 
-    # Build packages
-    package.build_binpkgs(args.skip_tests)
+        # Build packages
+        package.build_binpkgs(args.skip_tests)
 
 
 def main(args):
