@@ -93,7 +93,6 @@ def main(options):
     system_builddeps, mmpack_builddeps = general_specs_builddeps(specs)
 
     try:
-        Workspace().prefix = options.prefix
         process_dependencies(system_builddeps, mmpack_builddeps)
     except MMPackBuildError as err:
         print(str(err), file=sys.stderr)

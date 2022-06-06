@@ -53,6 +53,10 @@ class Workspace:
         self._mmpack_bin = None
         self.prefix = ''
 
+        prefix = os.environ.get('MMPACK_PREFIX')
+        if prefix:
+            self.use_build_prefix(prefix)
+
     def cygroot(self) -> str:
         """
         under msys, returns stripped output of: cygpath -w '/'
@@ -179,6 +183,16 @@ class Workspace:
 
         # Hard link a version named after the sha256 value of the cached file
         os.link(cache_file, os.path.join(self._cache, sha256sum(cache_file)))
+
+    def use_build_prefix(self, prefix: str):
+        """
+        Configure workspace to use specified prefix when building
+        """
+        if not ((os.sep in prefix)
+                or (os.altsep is not None and os.altsep in prefix)):
+            self.prefix = XDG_DATA_HOME + '/mmpack/prefix/' + prefix
+
+        self.prefix = os.path.abspath(prefix)
 
 
 def get_local_install_dir(builddir: str):
