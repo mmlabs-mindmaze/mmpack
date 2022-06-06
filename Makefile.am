@@ -72,7 +72,6 @@ mmpackbuild_PYTHON =\
 	src/mmpack-build/hooks_loader.py \
 	src/mmpack-build/mmpack_builddep.py \
 	src/mmpack-build/mmpack_clean.py \
-	src/mmpack-build/mmpack_create.py \
 	src/mmpack-build/mmpack_guess.py \
 	src/mmpack-build/mmpack_mksource.py \
 	src/mmpack-build/mmpack_pkg_create.py \
@@ -479,7 +478,6 @@ RST_MAN1_PAGES = \
 	docs/man/1/mmpack-build.rst \
 	docs/man/1/mmpack-build_builddep.rst \
 	docs/man/1/mmpack-build_clean.rst \
-	docs/man/1/mmpack-build_create.rst \
 	docs/man/1/mmpack-build_guess.rst \
 	docs/man/1/mmpack-build_mksource.rst \
 	docs/man/1/mmpack-build_pkg-create.rst \

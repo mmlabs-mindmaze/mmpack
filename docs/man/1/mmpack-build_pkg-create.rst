@@ -68,6 +68,9 @@ EXAMPLE
   # create packages from source tarball
   mmpack-build pkg-create --tar https://my.proj.com/project_1.2.3.tar.gz
 
+  # create arbitrary project on tag v1.2.3 from git server installing build dependencies from http://repo.url.com/subrepo
+  mmpack-build pkg-create --repo-url=http://repo.url.com/subrepo --git --tag=v1.2.3 https://github.com/user/project
+
   # create package from the current HEAD of local git project
   cd path/to/project
   mmpack-build

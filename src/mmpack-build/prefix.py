@@ -3,6 +3,7 @@
 Utils to use mmpack prefix in mmpack-build
 """
 
+from contextlib import contextmanager
 from typing import Iterable, List
 
 from .common import run_cmd
@@ -47,3 +48,30 @@ def set_repo_url(repo_url: List[str]):
     """Store repo url list"""
     global _REPO_URL_LIST  # pylint: disable=global-statement
     _REPO_URL_LIST = repo_url
+
+
+@contextmanager
+def new_mmpack_prefix_context(path: str):
+    """execute the block in a new mmpack prefix context.
+
+    The meaning of the new context depends on the options passed to the
+    mmpack-build command.
+        - If the repository url list has been set, a new mmpack prefix is
+          created in the directory `path`.
+        - Otherwise, if Workspace().prefix has been previously set, it will be
+          kept.
+
+    Args:
+        path: location of the mmpack prefix if it must be created
+    """
+    wrk = Workspace()
+    previous_prefix = wrk.prefix
+
+    if _REPO_URL_LIST:
+        wrk.set_prefix(path)
+        prefix_create(_REPO_URL_LIST)
+
+    try:
+        yield
+    finally:
+        wrk.prefix = previous_prefix
