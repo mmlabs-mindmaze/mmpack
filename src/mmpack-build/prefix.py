@@ -9,6 +9,9 @@ from .common import run_cmd
 from .workspace import Workspace
 
 
+_REPO_URL_LIST: List[str] = []
+
+
 def _mmpack_cmd() -> List[str]:
     wrk = Workspace()
     return [wrk.mmpack_bin(), '--prefix=' + wrk.prefix]
@@ -38,3 +41,9 @@ def cmd_in_optional_prefix(args: List[str]) -> List[str]:
         return _mmpack_cmd() + ['run'] + args
 
     return args
+
+
+def set_repo_url(repo_url: List[str]):
+    """Store repo url list"""
+    global _REPO_URL_LIST  # pylint: disable=global-statement
+    _REPO_URL_LIST = repo_url

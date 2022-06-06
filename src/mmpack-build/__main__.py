@@ -20,6 +20,7 @@ from . import mmpack_guess
 from . import mmpack_mksource
 from . import mmpack_pkg_create
 from . import common
+from .prefix import set_repo_url
 from .settings import PACKAGE_VERSION
 from .workspace import Workspace
 
@@ -54,6 +55,11 @@ def cmdline_parser() -> ArgumentParser:
     parser.add_argument('-p', '--prefix',
                         action='store', dest='prefix', type=str,
                         help='prefix within which to work')
+    parser.add_argument('-r', '--repo-url', dest='repo_url',
+                        action='append', default=[],
+                        help='URL of the repository to fetch dependencies '
+                             'from. Can be supplied multiple times to use '
+                             'several repositories.')
 
     subparsers = parser.add_subparsers(dest='command', required=False)
     for subcmd, mod in ALL_CMDS.items():
@@ -112,6 +118,7 @@ def main():
         wrk.set_cachedir(args.cachedir)
     if args.prefix:
         wrk.set_prefix(args.prefix)
+    set_repo_url(args.repo_url)
 
     return launch_subcommand(args)
 
