@@ -35,6 +35,14 @@ def find_project_root_folder(find_multiproj: bool = False) -> str:
     return path
 
 
+def _get_prefix_abspath(prefix: str):
+    if not ((os.sep in prefix)
+            or (os.altsep is not None and os.altsep in prefix)):
+        return XDG_DATA_HOME + '/mmpack/prefix/' + prefix
+
+    return os.path.abspath(prefix)
+
+
 @singleton
 class Workspace:
     # pylint: disable=too-many-instance-attributes
@@ -52,6 +60,10 @@ class Workspace:
         self._cygpath_root = None
         self._mmpack_bin = None
         self.prefix = ''
+
+        prefix = os.environ.get('MMPACK_PREFIX')
+        if prefix:
+            self.prefix = _get_prefix_abspath(prefix)
 
     def cygroot(self) -> str:
         """
@@ -179,6 +191,12 @@ class Workspace:
 
         # Hard link a version named after the sha256 value of the cached file
         os.link(cache_file, os.path.join(self._cache, sha256sum(cache_file)))
+
+    def set_prefix(self, prefix: str):
+        """
+        Configure workspace to use specified prefix when building
+        """
+        self.prefix = _get_prefix_abspath(prefix)
 
 
 def get_local_install_dir(builddir: str):
