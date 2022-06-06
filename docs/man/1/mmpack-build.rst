@@ -63,6 +63,9 @@ OPTIONS
   location will be derived from environment variables **MMPACK_BUILD_CACHEDIR**
   or **XDG_CACHE_HOME**.
 
+--prefix=path, -p path
+  Use *path* as install prefix if needed.
+
 --version
   Display **mmpack-build** version
 
@@ -75,7 +78,8 @@ ENVIRONMENT
 MMPACK_PREFIX
   If set, **mmpack-build** will parse the given prefix tree when looking for
   package dependencies. If unset, **mmpack-build** will only use the system
-  tree.
+  tree. If **--prefix** option is supplied, this environment variable is
+  ignored.
 
 MMPACK_BUILD_OUTDIR
   default folder where generated source and binary package are placed.

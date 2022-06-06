@@ -5,22 +5,11 @@ through the tree for a mmpack folder, and use the containing folder as root
 directory.
 """
 
-import os
 from argparse import ArgumentParser, Namespace
 
 from .mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
                               call_foreach_srcpkg)
 from .src_package import SrcPackage
-from .workspace import Workspace
-from .xdg import XDG_DATA_HOME
-
-
-def _get_prefix_abspath(prefix) -> str:
-    if not ((os.sep in prefix)
-            or (os.altsep is not None and os.altsep in prefix)):
-        return XDG_DATA_HOME + '/mmpack/prefix/' + prefix
-
-    return os.path.abspath(prefix)
 
 
 def add_parser_args(parser: ArgumentParser):
@@ -48,13 +37,4 @@ def main(args):
     """
     entry point to create a mmpack package
     """
-    # set workspace prefix
-    if not args.prefix:
-        try:
-            args.prefix = os.environ['MMPACK_PREFIX']
-        except KeyError:
-            pass
-    if args.prefix:
-        Workspace().prefix = _get_prefix_abspath(args.prefix)
-
     return call_foreach_srcpkg(_pkg_create_build, args)

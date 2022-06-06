@@ -51,6 +51,9 @@ def cmdline_parser() -> ArgumentParser:
                         action="store", dest='builddir', nargs='?')
     parser.add_argument("--cachedir", help="cache folder",
                         action="store", dest='cachedir', nargs='?')
+    parser.add_argument('-p', '--prefix',
+                        action='store', dest='prefix', type=str,
+                        help='prefix within which to work')
 
     subparsers = parser.add_subparsers(dest='command', required=False)
     for subcmd, mod in ALL_CMDS.items():
@@ -107,6 +110,8 @@ def main():
         wrk.set_builddir(args.builddir)
     if args.cachedir:
         wrk.set_cachedir(args.cachedir)
+    if args.prefix:
+        wrk.set_prefix(args.prefix)
 
     return launch_subcommand(args)
 
