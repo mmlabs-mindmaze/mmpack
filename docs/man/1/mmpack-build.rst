@@ -66,6 +66,10 @@ OPTIONS
 --prefix=path, -p path
   Use *path* as install prefix if needed.
 
+--repo-url=url, -r url
+  Add the repository *url* to the prefix created for the build. This option can
+  be supplied multiple times to add several repositories.
+
 --version
   Display **mmpack-build** version
 

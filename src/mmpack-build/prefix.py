@@ -10,12 +10,15 @@ from .common import run_cmd
 from .workspace import Workspace
 
 
+_REPO_URL_LIST: List[str] = []
+
+
 def _mmpack_cmd() -> List[str]:
     wrk = Workspace()
     return [wrk.mmpack_bin(), '--prefix=' + wrk.prefix]
 
 
-def prefix_create(repo_url: Iterable[str]):
+def _prefix_create(repo_url: Iterable[str]):
     """Create mmpack prefix with supplied repositories"""
     cmd = _mmpack_cmd()
     run_cmd(cmd + ['mkprefix', '--clean-repolist'])
@@ -41,6 +44,11 @@ def cmd_in_optional_prefix(args: List[str]) -> List[str]:
     return args
 
 
+def set_repo_url(repo_url: List[str]):
+    """Store repo url list"""
+    _REPO_URL_LIST = repo_url
+
+
 @contextmanager
 def new_prefix(path: str):
     """
@@ -48,7 +56,10 @@ def new_prefix(path: str):
     """
     wrk = Workspace()
     previous_prefix = wrk.prefix
+
     wrk.set_prefix(prefix)
+    _prefix_create(_REPO_URL_LIST)
+
     try:
         yield
     finally:

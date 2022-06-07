@@ -54,6 +54,11 @@ def cmdline_parser() -> ArgumentParser:
     parser.add_argument('-p', '--prefix',
                         action='store', dest='prefix', type=str,
                         help='prefix within which to work')
+    parser.add_argument('-r', '--repo-url', dest='repo_url',
+                        action='append', default=[],
+                        help='URL of the repository to fetch dependencies '
+                             'from. Can be supplied multiple times to use '
+                             'several repositories.')
 
     subparsers = parser.add_subparsers(dest='command', required=False)
     for subcmd, mod in ALL_CMDS.items():
