@@ -33,6 +33,7 @@ the following:
 
 --prefix=path, -p path
   Use *path* as install prefix if needed.
+  (DEPRECATED, use **mmpack-build --prefix** option instead)
 
 --build-deps
   Check for build dependencies:
