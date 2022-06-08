@@ -15,7 +15,6 @@ except ImportError:
 
 from . import mmpack_builddep
 from . import mmpack_clean
-from . import mmpack_create
 from . import mmpack_guess
 from . import mmpack_mksource
 from . import mmpack_pkg_create
@@ -27,7 +26,6 @@ from .workspace import Workspace
 # all subcommand MUST expose a main function, the subcommand main entry point
 ALL_CMDS = {
     'builddep': mmpack_builddep,
-    'create': mmpack_create,
     'clean': mmpack_clean,
     'guess': mmpack_guess,
     'mksource': mmpack_mksource,

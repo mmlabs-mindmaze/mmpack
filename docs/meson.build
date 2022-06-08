@@ -4,7 +4,6 @@ man_pages_sources = [
     'man/1/mmpack-build.rst',
     'man/1/mmpack-build_builddep.rst',
     'man/1/mmpack-build_clean.rst',
-    'man/1/mmpack-build_create.rst',
     'man/1/mmpack-build_guess.rst',
     'man/1/mmpack-build_mksource.rst',
     'man/1/mmpack-build_pkg-create.rst',
