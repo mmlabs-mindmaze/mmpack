@@ -27,14 +27,24 @@ def add_parser_args(parser: ArgumentParser):
 
 
 def _pkg_create_build(package: SrcPackage, args: Namespace):
-    if args.build_deps:
+    if args.build_deps or args.repo_url:
         package.install_builddeps()
 
     package.build_binpkgs(args.skip_tests)
+
+
+def _single_build(package: SrcPackage, args: Namespace):
+    if not args.repo_url:
+        _pkg_create_build(package, args)
+        return
+
+    # Set mmpack prefix location for the rest of package build
+    with new_prefix(package.pkgbuild_path() + '/deps_prefix'):
+        _pkg_create_build(package, args)
 
 
 def main(args):
     """
     entry point to create a mmpack package
     """
-    return call_foreach_srcpkg(_pkg_create_build, args)
+    return call_foreach_srcpkg(_single_build, args)
