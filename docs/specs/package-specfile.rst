@@ -65,15 +65,7 @@ Optional fields
    See build-plugin-specs.md on how to write such a thing.
 
  :build-depends:
-   A list of packages required to build the project.
-   This is a key split into several sub-keys.
-   Used alone, it can only contain *mmpack* packages.
-   It can then be customized by platform
-
-    - build-depends-debian-mmpack
-        list of *mmpack* packages that are needed only when building on debian
-    - build-depends-debian-system
-        list of *debian* packages that are needed to build
+   A list of packages required to build the project. It can only contain *mmpack* packages.
 
  :ghost:
    True if the packaging specs refers to a ghost of system packages.
