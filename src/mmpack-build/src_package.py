@@ -93,7 +93,6 @@ class SrcPackage:
 
         self.build_options = None
         self.build_system = None
-        self.build_depends = []
 
         # dict of (name, BinaryPackage) generated from the source package
         self._packages = {}
@@ -254,8 +253,6 @@ class SrcPackage:
                     self.description = value.strip()
                 elif key == 'build-options':
                     self.build_options = value
-                elif key == 'build-depends':
-                    self.build_depends = value
                 elif key == 'build-system':
                     self.build_system = value
                 elif key == 'licenses':
