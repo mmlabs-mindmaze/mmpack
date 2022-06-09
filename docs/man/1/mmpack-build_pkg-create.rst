@@ -35,6 +35,9 @@ the following:
   Use *path* as install prefix if needed.
   (DEPRECATED, use **mmpack-build --prefix** option instead)
 
+--assumes-yes, -y
+  Assume yes as answer to all prompts and run non-interactively.
+
 --build-deps
   Check for build dependencies:
 
