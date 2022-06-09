@@ -40,6 +40,9 @@ OPTIONS
   Use *path* as install prefix.
   (DEPRECATED, use **mmpack-build --prefix** option instead)
 
+--assume-yes, -y
+  Assume yes as answer to all prompts and run non-interactively.
+
 ENVIRONMENT
 ===========
 

@@ -22,6 +22,12 @@ def add_parser_args(parser: ArgumentParser):
     parser.add_argument('specfile', type=str, nargs='?',
                         help='path to the specfile')
 
+    # XXX: assume-yes is True even if not set if there is only one package
+    # staged for install
+    parser.add_argument('-y', '--assume-yes',
+                        action='store_true', dest='assumeyes',
+                        help='Assume yes as answer to all prompts and run'
+                             ' non-interactively.')
     parser.add_argument('-p', '--prefix',
                         action=DeprecatedStoreAction, dest='prefix', type=str,
                         help='prefix within which to work (DEPRECATED)')
