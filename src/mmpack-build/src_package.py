@@ -23,10 +23,9 @@ from .errors import MMPackBuildError, ShellException
 from .hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from .mm_version import Version
 from .package_info import DispatchData, PackageInfo
-from .prefix import cmd_in_optional_prefix
+from .prefix import cmd_in_optional_prefix, prefix_install
 from .settings import PKGDATADIR
 from .syspkg_manager import get_syspkg_mgr
-from .mmpack_builddep import process_dependencies, general_specs_builddeps
 
 
 _PREVENTED_BUILDENV_KEYS = (
@@ -345,10 +344,8 @@ class SrcPackage:
 
         !!! Requires a prefix already set up !!!
         """
-        # append platform-specific mmpack packages
-        # eg. one required package is not available on this platform
-        sys_builddeps, builddeps = general_specs_builddeps(self._specs)
-        process_dependencies(sys_builddeps, builddeps)
+        builddeps = self._specs.get('build-depends', [])
+        prefix_install(builddeps)
 
     def _build_project(self, skip_tests: bool) -> None:
         """
