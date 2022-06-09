@@ -69,11 +69,7 @@ def process_dependencies(system_builddeps, mmpack_builddeps):
     if system_builddeps:
         run_cmd([Workspace().mmpack_bin(), 'check-sysdep'] + system_builddeps)
 
-    if not mmpack_builddeps:
-        return
-
     # install missing mmpack packages
-    # forward options to mmpack install
     prefix_install(mmpack_builddeps)
 
 

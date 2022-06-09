@@ -28,9 +28,13 @@ def prefix_create(repo_url: Iterable[str]):
 
 def prefix_install(pkgs: Iterable[str]):
     """install packages in mmpack prefix"""
+    install_list = list(pkgs)
+    if not install_list:
+        return
+
     cmd = _mmpack_cmd()
     run_cmd(cmd + ['update'])
-    run_cmd(cmd + ['install', '-y'] + list(pkgs))
+    run_cmd(cmd + ['install', '-y'] + install_list)
 
 
 def cmd_in_optional_prefix(args: List[str]) -> List[str]:
