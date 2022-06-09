@@ -5,20 +5,13 @@ through the tree for a mmpack folder, and use the containing folder as root
 directory.
 """
 
-from argparse import Action, ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace
 
-from .common import wprint
+from .common import DeprecatedStoreAction
 from .mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
                               call_foreach_srcpkg)
 from .prefix import new_mmpack_prefix_context
 from .src_package import SrcPackage
-
-
-class DeprecatedStoreAction(Action):
-    """Action that warns as deprecated option when used"""
-    def __call__(self, parser, namespace, values, option_string=None):
-        wprint(f'Option {option_string} of {parser.prog} is deprecated')
-        setattr(namespace, self.dest, values)
 
 
 def add_parser_args(parser: ArgumentParser):
