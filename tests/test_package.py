@@ -60,10 +60,11 @@ class TestSrcPackageClass(unittest.TestCase):
                          "This is the fullest mmpack specfile possible.")
         self.assertEqual(test_pkg.src_hash, sha256sum(_TEST_SRCPKG))
 
+        build_depends = test_pkg._specs.get('build_depends', [])
         self.assertEqual(test_pkg.build_options, '-D_WITH_DUMMY_DEFINE=1')
-        self.assertEqual(len(test_pkg.build_depends), 2)
+        self.assertEqual(len(build_depends), 2)
         ref_build_depends = ['libmyotherlib-devel', 'libsomeotherlib-devel']
-        self.assertEqual(sorted(test_pkg.build_depends), sorted(ref_build_depends))
+        self.assertEqual(sorted(build_depends), sorted(ref_build_depends))
 
         test_pkg.install_files_set = {
             '/full-binary-package-file-1',
