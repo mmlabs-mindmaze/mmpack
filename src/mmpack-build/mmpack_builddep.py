@@ -11,7 +11,7 @@ missing will be proposed for install within the current prefix.
 import sys
 from argparse import ArgumentParser
 
-from .common import specs_load
+from .common import DeprecatedStoreAction, specs_load
 from .errors import MMPackBuildError
 from .prefix import prefix_install
 from .workspace import find_project_root_folder
@@ -23,8 +23,8 @@ def add_parser_args(parser: ArgumentParser):
                         help='path to the specfile')
 
     parser.add_argument('-p', '--prefix',
-                        action='store', dest='prefix', type=str,
-                        help='prefix within which to work')
+                        action=DeprecatedStoreAction, dest='prefix', type=str,
+                        help='prefix within which to work (DEPRECATED)')
 
 
 def main(options):

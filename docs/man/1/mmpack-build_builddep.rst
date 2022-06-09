@@ -38,7 +38,7 @@ OPTIONS
 
 --prefix=path, -p path
   Use *path* as install prefix.
-  Can also be given through ``MMPACK_PREFIX`` environment variable
+  (DEPRECATED, use **mmpack-build --prefix** option instead)
 
 ENVIRONMENT
 ===========
