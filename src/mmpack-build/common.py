@@ -17,6 +17,7 @@ import tarfile
 
 import platform
 
+from argparse import Action
 from hashlib import sha256
 from io import TextIOWrapper
 from subprocess import PIPE, CalledProcessError, Popen, run
@@ -800,3 +801,10 @@ def wrap_str(text: str,
     lines.append(text)
 
     return ('\n' + indent).join(lines)
+
+
+class DeprecatedStoreAction(Action):
+    """Action that warns as deprecated option when used"""
+    def __call__(self, parser, namespace, values, option_string=None):
+        wprint(f'Option {option_string} of {parser.prog} is deprecated')
+        setattr(namespace, self.dest, values)
