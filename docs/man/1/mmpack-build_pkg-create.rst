@@ -61,19 +61,19 @@ EXAMPLE
 .. code-block:: sh
 
   # create mmpack package from local sources during development on a branch named *feature*
-  mmpack-build pkg-create --git --tag=feature /path/to/sources
+  mmpack-build pkg-create --tag=feature /path/to/sources
 
   # same but also skipping the tests
-  mmpack-build pkg-create --git --tag=feature --skip-build-tests /path/to/sources
+  mmpack-build pkg-create --tag=feature --skip-build-tests /path/to/sources
 
   # create arbitrary project on tag v1.2.3 from git server
-  mmpack-build pkg-create --git --tag=v1.2.3 https://github.com/user/project
+  mmpack-build pkg-create --tag=v1.2.3 https://github.com/user/project
 
   # create packages from source tarball
   mmpack-build pkg-create --tar https://my.proj.com/project_1.2.3.tar.gz
 
   # create arbitrary project on tag v1.2.3 from git server installing build dependencies from http://repo.url.com/subrepo
-  mmpack-build pkg-create --repo-url=http://repo.url.com/subrepo --git --tag=v1.2.3 https://github.com/user/project
+  mmpack-build --repo-url=http://repo.url.com/subrepo pkg-create --tag=v1.2.3 https://github.com/user/project
 
   # create package from the current HEAD of local git project
   cd path/to/project

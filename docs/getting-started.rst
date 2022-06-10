@@ -81,12 +81,12 @@ Here are some examples on how to call mmpack-build:
 
    # create mmpack package from local sources during development
    # on a branch named *feature*
-   mmpack-build pkg-create --url=/path/to/sources --tag=feature
+   mmpack-build pkg-create --tag=feature /path/to/sources
 
    # same but also skipping the tests
-   mmpack-build pkg-create --url=/path/to/sources --tag=feature --skip-build-tests
+   mmpack-build pkg-create --tag=feature --skip-build-tests /path/to/sources
 
    # create arbitrary project on tag v1.2.3 from git server
-   mmpack-build pkg-create --url=https://github.com/the-grey/hello-world-project.git --tag=v1.2.3
+   mmpack-build pkg-create --tag=v1.2.3 https://github.com/the-grey/hello-world-project.git
 
 
