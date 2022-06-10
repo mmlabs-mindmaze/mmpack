@@ -19,7 +19,7 @@ from . import mmpack_guess
 from . import mmpack_mksource
 from . import mmpack_pkg_create
 from . import common
-from .prefix import set_repo_url
+from .prefix import update_prefix_handling_from_opts
 from .settings import PACKAGE_VERSION
 from .workspace import Workspace
 
@@ -116,7 +116,7 @@ def main():
         wrk.set_cachedir(args.cachedir)
     if args.prefix:
         wrk.set_prefix(args.prefix)
-    set_repo_url(args.repo_url)
+    update_prefix_handling_from_opts(args)
 
     return launch_subcommand(args)
 
