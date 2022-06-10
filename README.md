@@ -1,10 +1,11 @@
-# **mmpack** - a user-space package manager
+# **mmpack** - a user package manager
 
-**mmpack** is a user-space, cross-platform, multi-versioning package manager.
-It leverages the container namespace virtualisation technique to isolate
-package installations which allows separate, non-conflicting ecosystems.
+**mmpack** is a cross-platform, multi-versioning user package manager (as
+opposed to system package manager). It leverages the container namespace
+virtualisation technique to isolate package installations which allows separate,
+non-conflicting ecosystems.
 
-In the mmpack jargon, these ecosystems are called _prefixes_ and reassemble the
+In the mmpack jargon, these ecosystems are called _prefixes_ and ressemble the
 equivalent Python virtualenvs or Ruby gemsets.  However, mmpack packages are
 not targeting any specific language, instead, they aim to bundle any meaningful
 set of files (including binaries, data and documentation).
@@ -41,7 +42,7 @@ $> meson build && cd build
 $> meson install
 ```
 
-In GNU/Linux system also the _ninja setcap_ command is required (with root
+In GNU/Linux system also the _setcap_ command is required (with root
 permission);
 
 ``` bash
@@ -87,7 +88,7 @@ Server = https://opensource.mindmaze.com/mingw
 Then run:
 
 ``` bash
-pacman -Syy
+pacman -Sy
 pacman -S mmpack
 ```
 
@@ -183,7 +184,7 @@ all the programs installed in the current prefix are added to the $PATH.
 (Hence, typing _mmpack run_ is to some extent similar to mounting an extension
 to the root filesystem).
 
-Again, wrt the above example,
+Again, with respect to the above example,
 
 ``` bash
 mmpack --prefix=j run #  enters prefix j environment
