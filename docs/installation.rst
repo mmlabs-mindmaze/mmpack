@@ -18,8 +18,12 @@ Installation instruction for the mmlib:
 https://github.com/mmlabs-mindmaze/mmlib
 
 
-The **mmpack-build** tool are written in **python3** and depends on the
-following python3 modules: elftools, pefile, yaml.
+The **mmpack-build** tool is written in **python3** and depends on the
+following python3 modules: argcomplete, astroid, elftools, pefile, urllib3,
+yaml.
+
+The **mmpack-modifyrepo** tool is written in **python3** and depends on the
+following python3 modules: watchdog, yaml.
 
 See the developer's guide for a full breakdown of runtime, build-time, and
 other dependencies.

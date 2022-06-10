@@ -38,7 +38,10 @@ mmpack
 mmpack-build
 ````````````
 
+ * mmpack
  * python3
+ * python3 `argcomplete` module
+ * python3 `astroid` module
  * python3 `elftools` module
  * python3 `pefile` module
  * python3 `yaml` module
@@ -68,8 +71,8 @@ Build dependencies
 You will need the usual (essential) build tools like ``make``, ``gcc``,
 ``perl`` ...
 
-The mmpack project uses the **autotools** build system, which is therefore
-needed to build.
+The mmpack project uses the **meson** build system, which is therefore needed
+to build.
 
 mmpack
 ``````
@@ -103,10 +106,6 @@ To generate the user documentation :
 
  * sphinx
  * sphinx-rtd-theme
-
-Additional requirement to generate the internal development documentation:
-
- * linuxdoc (https://github.com/GabrielGanne/linuxdoc)
 
 Memcheck suppression file
 =========================

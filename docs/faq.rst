@@ -61,15 +61,15 @@ How do I ...
 ... find out what went wrong ?
    - for **mmpack** commands, see ``var/log/mmpack.log`` within the mmpack
      prefix.
-   - for **mmpack-build** see mmpack log file (``~/.local/share/mmpack.log``)
-     the file can be configured to be elsewhere depending on your
-     ``XDG_DATA_HOME`` environment variable.
+   - for **mmpack-build** see mmpack log file (``mmpack.log``) in the build
+     folder of the project.
 
 ... ask for help, or report an issue ?
    If your issue is about a specific package, contact the package maintainer
    directly.
 
-   If your issue is about mmpack itself, contact the *MindMaze mmlabs team*.
+   If your issue is about mmpack itself, contact the
+   *nicolas.bourdaud@gmail.com*.
 
 ... know what dependency mmpack will see and use ?
    When **mmpack** installs package X depending on package Y, if package Y is
