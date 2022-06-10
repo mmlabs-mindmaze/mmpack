@@ -3,14 +3,28 @@
 Utils to use mmpack prefix in mmpack-build
 """
 
+from argparse import Namespace
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 from typing import Iterable, List
 
 from .common import run_cmd
 from .workspace import Workspace
 
 
-_REPO_URL_LIST: List[str] = []
+@dataclass
+class PrefixHandlingOptions:
+    """Settings of how to use mmpack prefix"""
+    repo_urls: List[str] = field(default_factory=list)
+    install_deps: bool = False
+
+    def update_from_opts(self, opts: Namespace):
+        """Update settings from cmgline options"""
+        self.repo_urls = opts.repo_url
+        self.install_deps = (opts.repo_url and opts.build_deps)
+
+
+_PREFIX_OPTIONS = PrefixHandlingOptions()
 
 
 def _mmpack_cmd() -> List[str]:
@@ -29,7 +43,7 @@ def prefix_create(repo_url: Iterable[str]):
 def prefix_install(pkgs: Iterable[str]):
     """install packages in mmpack prefix"""
     install_list = list(pkgs)
-    if not install_list:
+    if not (install_list and _PREFIX_OPTIONS.install_deps):
         return
 
     cmd = _mmpack_cmd()
@@ -48,10 +62,9 @@ def cmd_in_optional_prefix(args: List[str]) -> List[str]:
     return args
 
 
-def set_repo_url(repo_url: List[str]):
-    """Store repo url list"""
-    global _REPO_URL_LIST  # pylint: disable=global-statement
-    _REPO_URL_LIST = repo_url
+def configure_prefix_handling(opts: Namespace):
+    """Update prefix options"""
+    _PREFIX_OPTIONS.update_from_opts(opts)
 
 
 @contextmanager
@@ -71,9 +84,9 @@ def new_mmpack_prefix_context(path: str):
     wrk = Workspace()
     previous_prefix = wrk.prefix
 
-    if _REPO_URL_LIST:
+    if _PREFIX_OPTIONS.repo_urls:
         wrk.set_prefix(path)
-        prefix_create(_REPO_URL_LIST)
+        prefix_create(_PREFIX_OPTIONS.repo_urls)
 
     try:
         yield
