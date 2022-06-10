@@ -33,9 +33,7 @@ def add_parser_args(parser: ArgumentParser):
 
 def _pkg_create_build(package: SrcPackage, args: Namespace):
     with new_mmpack_prefix_context(package.pkgbuild_path() + '/deps_prefix'):
-        if args.build_deps or args.repo_url:
-            package.install_builddeps()
-
+        package.install_builddeps()
         package.build_binpkgs(args.skip_tests)
 
 
