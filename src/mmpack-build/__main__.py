@@ -19,7 +19,7 @@ from . import mmpack_guess
 from . import mmpack_mksource
 from . import mmpack_pkg_create
 from . import common
-from .prefix import configure_prefix_handling
+from .prefix import BuildPrefix, configure_prefix_handling
 from .settings import PACKAGE_VERSION
 from .workspace import Workspace
 
@@ -58,6 +58,9 @@ def cmdline_parser() -> ArgumentParser:
                         help='URL of the repository to fetch dependencies '
                              'from. Can be supplied multiple times to use '
                              'several repositories.')
+    parser.add_argument('--use-build-prefix', dest='build_prefix',
+                        choices=[e.value for e in BuildPrefix],
+                        help='prefix to use during build')
 
     subparsers = parser.add_subparsers(dest='command', required=False)
     for subcmd, mod in ALL_CMDS.items():
