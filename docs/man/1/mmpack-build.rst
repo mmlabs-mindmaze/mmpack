@@ -73,6 +73,13 @@ OPTIONS
 --use-build-prefix=value
   *value* can be **none**, **supplied**, **create**
 
+--install-deps
+  If a prefix has been passed as options, the mmpack packages will be installed
+  within. If called within a mmpack prefix and no prefix option has been
+  explicit, use it to install packages. If no prefix is explicit, and if
+  **mmpack-build** is called outside any prefix, the default user global prefix
+  will be used.
+
 --version
   Display **mmpack-build** version
 
