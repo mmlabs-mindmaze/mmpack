@@ -39,16 +39,12 @@ the following:
   Assume yes as answer to all prompts and run non-interactively.
 
 --build-deps
-  Check for build dependencies:
-
-    * abort on missing system ones.
-    * install mmpack missing ones.
-
   If a prefix has been passed as options, the mmpack packages will be installed
   within. If called within a mmpack prefix and no prefix option has been
   explicit, use it to install packages. If no prefix is explicit, and if
   **mmpack-build** is called outside any prefix, the default user global prefix
   will be used.
+  (DEPRECATED, use **mmpack-build --install-deps** option instead)
 
   Whichever prefix is used, it needs to be correctly configured for this command
   to work.
