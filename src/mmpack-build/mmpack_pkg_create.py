@@ -24,7 +24,7 @@ def add_parser_args(parser: ArgumentParser):
                         action='store_true', dest='skip_tests',
                         help='indicate that build tests must not be run')
     parser.add_argument('--build-deps',
-                        action='store_true', dest='build_deps',
+                        action='store_true', dest='install_deps',
                         help='check and install build dependencies')
     parser.add_argument('-y', '--yes',
                         action='store_true', dest='assumeyes',
