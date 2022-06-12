@@ -86,6 +86,13 @@ OPTIONS
         A dedicated prefix is created in the build directory. This is the
         default value if **--repo-url** is not used.
 
+--install-deps, --no-install-deps
+  Install the mmpack packages listed as build dependencies in the configured
+  build prefix. The default behavior is to install dependencies if
+  **--use-build-prefix** is set to **create** (or implied). Use the negative
+  form to prevent from dependencies being installed if it is the default
+  behavior.
+
 --version
   Display **mmpack-build** version
 
