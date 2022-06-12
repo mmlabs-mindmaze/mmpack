@@ -30,7 +30,6 @@ class PrefixHandlingOptions:
     def update_from_opts(self, opts: Namespace):
         """Update settings from cmgline options"""
         self.repo_urls = opts.repo_url
-        self.install_deps = (opts.repo_url and opts.build_deps)
 
         # setup default value of use_build_prefix depending on other options
         if self.repo_urls:
@@ -42,6 +41,14 @@ class PrefixHandlingOptions:
 
         if opts.build_prefix is not None:
             self.use_build_prefix = BuildPrefix(opts.build_prefix)
+
+        # setup default value of install deps
+        self.install_deps = False
+        if self.use_build_prefix is BuildPrefix.CREATE:
+            self.install_deps = True
+
+        if opts.install_deps is not None:
+            self.install_deps = opts.install_deps
 
 
 _PREFIX_OPTIONS = PrefixHandlingOptions()
