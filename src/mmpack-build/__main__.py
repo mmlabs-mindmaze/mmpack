@@ -58,6 +58,9 @@ def cmdline_parser() -> ArgumentParser:
                         help='URL of the repository to fetch dependencies '
                              'from. Can be supplied multiple times to use '
                              'several repositories.')
+    parser.add_argument('--install-deps',
+                        action='store', dest='install_deps', type=str,
+                        help='install dependencies necessary for the build')
     parser.add_argument('--use-build-prefix', dest='build_prefix',
                         choices=[e.value for e in BuildPrefix],
                         help='prefix to use during build')
