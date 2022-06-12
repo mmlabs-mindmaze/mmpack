@@ -70,6 +70,9 @@ OPTIONS
   Add the repository *url* to the prefix created for the build. This option can
   be supplied multiple times to add several repositories.
 
+--use-build-prefix=value
+  *value* can be **none**, **supplied**, **create**
+
 --version
   Display **mmpack-build** version
 
