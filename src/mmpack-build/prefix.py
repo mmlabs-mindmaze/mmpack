@@ -6,20 +6,39 @@ Utils to use mmpack prefix in mmpack-build
 from argparse import Namespace
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Iterable, List
 
 from .common import run_cmd
 from .workspace import Workspace
 
 
+class BuildPrefix(Enum):
+    NONE = 'none'
+    CREATE = 'create'
+    SUPPLIED = 'supplied'
+
+
 @dataclass
 class PrefixHandlingOptions:
     repo_urls: List[str] = field(default_factory=list)
+    use_build_prefix = BuildPrefix.NONE
     install_deps: bool = False
 
     def update_from_opts(self, opts: Namespace):
         self.repo_urls = opts.repo_url
         self.install_deps = (opts.repo_url and opts.build_deps)
+
+        # setup default value of use_build_prefix depending on other options
+        if self.repo_urls:
+            self.use_build_prefix = BuildPrefix.CREATE
+        elif opts.prefix is not None:
+            self.use_build_prefix = BuildPrefix.SUPPLIED
+        else:
+            self.use_build_prefix = BuildPrefix.NONE
+
+        if opts.build_prefix is not None:
+            self.use_build_prefix = opts.build_prefix
 
 
 _PREFIX_OPTIONS = PrefixHandlingOptions()
@@ -54,7 +73,7 @@ def cmd_in_optional_prefix(args: List[str]) -> List[str]:
     Return list of args to run command in mmpack prefix if prefix set,
     otherwise directly.
     """
-    if Workspace().prefix:
+    if _PREFIX_OPTIONS.use_build_prefix is not BuildPrefix.NONE:
         return _mmpack_cmd() + ['run'] + args
 
     return args
@@ -82,7 +101,7 @@ def new_mmpack_prefix_context(path: str):
     wrk = Workspace()
     previous_prefix = wrk.prefix
 
-    if _PREFIX_OPTIONS.repo_urls:
+    if _PREFIX_OPTIONS.use_build_prefix is BuildPrefix.CREATE:
         wrk.set_prefix(path)
         prefix_create(_PREFIX_OPTIONS.repo_urls)
 

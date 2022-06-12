@@ -70,6 +70,22 @@ OPTIONS
   Add the repository *url* to the prefix created for the build. This option can
   be supplied multiple times to add several repositories.
 
+--use-build-prefix=value
+  Control which mmpack prefix is used for building environment. *value* must be
+  one of the following value:
+
+  none
+        No mmpack prefix is used.
+
+  supplied
+        The prefix supplied by **--prefix** options or **MMPACK_PREFIX**
+        environment is used. This is the default value if **--prefix** is used
+        and **--repo-url** is not used.
+
+  create
+        A dedicated prefix is created in the build directory. This is the
+        default value if **--repo-url** is not used.
+
 --version
   Display **mmpack-build** version
 
