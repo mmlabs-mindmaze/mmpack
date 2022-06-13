@@ -149,5 +149,5 @@ def run_build_script(name: str, execdir: str, specdir: str,
     cmd += args if args else []
 
     pushdir(os.path.abspath(execdir))
-    run_cmd(cmd, env=hook_env)
+    run_cmd(cmd_in_optional_prefix(cmd), env=hook_env)
     popdir()
