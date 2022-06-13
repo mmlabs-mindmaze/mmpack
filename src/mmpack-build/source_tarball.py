@@ -14,6 +14,7 @@ from typing import Dict, Iterator, List, NamedTuple, Optional
 
 from .common import *
 from .errors import DownloadError, MMPackBuildError, ShellException
+from .prefix import new_mmpack_prefix_context, run_build_script
 from .workspace import Workspace, cached_download, find_project_root_folder
 
 
@@ -159,11 +160,12 @@ class SourceTarball:
             self._method = self._guess_method()
             dprint(f'Guessed method = {self._method}')
 
-        # Fetch sources following the specified method and move them to the
-        # temporary source build folder
-        dprint('extracting sources in the temporary directory: {}'
-               .format(self._builddir))
-        self._create_srcdir(self._method)
+        with new_mmpack_prefix_context(self._tmp_prefix()):
+            # Fetch sources following the specified method and move them to the
+            # temporary source build folder
+            dprint('extracting sources in the temporary directory: {}'
+                   .format(self._builddir))
+            self._create_srcdir(self._method)
 
     def __del__(self):
         # Skip removal if MMPACK_BUILD_KEEP_TMPDIR env is set to true
@@ -201,6 +203,13 @@ class SourceTarball:
         self._downloaded_file = path
 
         return path
+
+    def _tmp_prefix(self, subdir: Optional[str] = None) -> str:
+        prefix_dir = self._builddir
+        if subdir is not None:
+            prefix_dir += '/' + subdir
+        prefix_dir += '/tmp-prefix'
+        return prefix_dir
 
     def _guess_method(self) -> str:
         if _is_git_dir(self._path_url) or self._path_url.endswith('.git'):
@@ -335,7 +344,8 @@ class SourceTarball:
 
         # iterate over project subdirs and generate the source package
         for subdir in subdirs:
-            yield self._gen_project_sources(subdir)
+            with new_mmpack_prefix_context(self._tmp_prefix(subdir)):
+                yield self._gen_project_sources(subdir)
 
     def _store_src_orig_tracing(self, srcdir: str):
         """
