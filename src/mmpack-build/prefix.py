@@ -3,13 +3,14 @@
 Utils to use mmpack prefix in mmpack-build
 """
 
+import os
 from argparse import Namespace
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Iterable, List
+from typing import Dict, Iterable, List, Optional
 
-from .common import run_cmd
+from .common import popdir, pushdir, run_cmd
 from .workspace import Workspace
 
 
@@ -87,6 +88,37 @@ def cmd_in_optional_prefix(args: List[str]) -> List[str]:
         return _mmpack_cmd() + ['run'] + args
 
     return args
+
+
+def run_build_script(name: str, execdir: str, specdir: str,
+                     args: List[str] = None,
+                     env: Optional[Dict[str, str]] = None):
+    """
+    Execute build script from spec dir
+
+    Args:
+        name: name of file script to execute
+        execdir: path where the hook must be executed
+        specdir: path where spec files should be found
+        args: list of argument passed to script if not None
+        env: environ variables to add in addition to the inherited env
+    """
+    # Run hook only if existing (try _hook suffix before giving up)
+    script = os.path.join(specdir, name + '_script')
+    if not os.path.exists(script):
+        script = os.path.join(specdir, name + '_hook')
+        if not os.path.exists(script):
+            return
+
+    hook_env = os.environ.copy()
+    hook_env.update(env if env else {})
+
+    cmd = ['sh', os.path.abspath(script)]
+    cmd += args if args else []
+
+    pushdir(os.path.abspath(execdir))
+    run_cmd(cmd_in_optional_prefix(cmd), env=hook_env)
+    popdir()
 
 
 def configure_prefix_handling(opts: Namespace):
