@@ -34,6 +34,9 @@ others.
    the project. With 'git' method, this url is the same as the argument for
    ``git clone``.
 
+ :depends:
+   list of mmpack dependencies needed to create the source package.
+
  :branch:
    (for git only) The commit hash, tag or branch that must be extracted
    by git clone
