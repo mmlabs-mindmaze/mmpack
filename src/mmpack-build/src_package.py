@@ -23,7 +23,7 @@ from .errors import MMPackBuildError, ShellException
 from .hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from .mm_version import Version
 from .package_info import DispatchData, PackageInfo
-from .prefix import cmd_in_optional_prefix, prefix_install
+from .prefix import cmd_in_optional_prefix, prefix_install, run_build_script
 from .settings import PKGDATADIR
 from .syspkg_manager import get_syspkg_mgr
 
