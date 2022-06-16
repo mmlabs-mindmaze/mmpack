@@ -219,37 +219,6 @@ def run_cmd(cmd: List[str], log: bool = True, env: Dict[str, str] = None,
         raise ShellException(errmsg) from err
 
 
-def run_build_script(name: str, execdir: str, specdir: str,
-                     args: List[str] = None,
-                     env: Optional[Dict[str, str]] = None):
-    """
-    Execute build script from spec dir
-
-    Args:
-        name: name of file script to execute
-        execdir: path where the hook must be executed
-        specdir: path where spec files should be found
-        args: list of argument passed to script if not None
-        env: environ variables to add in addition to the inherited env
-    """
-    # Run hook only if existing (try _hook suffix before giving up)
-    script = os.path.join(specdir, name + '_script')
-    if not os.path.exists(script):
-        script = os.path.join(specdir, name + '_hook')
-        if not os.path.exists(script):
-            return
-
-    hook_env = os.environ.copy()
-    hook_env.update(env if env else {})
-
-    cmd = ['sh', os.path.abspath(script)]
-    cmd += args if args else []
-
-    pushdir(os.path.abspath(execdir))
-    run_cmd(cmd, env=hook_env)
-    popdir()
-
-
 # initialise a directory stack
 PUSHSTACK = []
 

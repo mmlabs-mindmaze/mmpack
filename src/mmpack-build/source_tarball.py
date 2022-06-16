@@ -14,6 +14,7 @@ from typing import Dict, Iterator, List, NamedTuple, Optional
 
 from .common import *
 from .errors import DownloadError, MMPackBuildError, ShellException
+from .prefix import run_build_script
 from .workspace import Workspace, cached_download, find_project_root_folder
 
 
