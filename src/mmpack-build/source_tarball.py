@@ -276,6 +276,12 @@ class SourceTarball:
         except FileNotFoundError:
             return  # There is no source strap, nothing to be done
 
+        # Execute create_srcdir build script if any
+        env = {'PATH_URL': self._path_url}
+        if self._vcsdir:
+            env['VCSDIR'] = abspath(self._vcsdir)
+        self._run_build_script('create_srcdir', method, srcdir, env)
+
         self._fetch_upstream(specs, srcdir)
         self._patch_sources(specs.get('patches', []), srcdir)
 
@@ -452,14 +458,6 @@ class SourceTarball:
 
         self.trace['pkg'] = {'method': method}
         create_srcdir_callable()
-
-        if method == 'srcpkg':
-            return
-
-        env = {'PATH_URL': self._path_url}
-        if self._vcsdir:
-            env['VCSDIR'] = abspath(self._vcsdir)
-        self._run_build_script('create_srcdir', method, self._srcdir, env)
 
     def _fetch_upstream_from_git(self, specs: Dict[str, str]):
         """
