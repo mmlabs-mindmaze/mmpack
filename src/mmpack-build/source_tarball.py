@@ -14,7 +14,7 @@ from typing import Dict, Iterator, List, NamedTuple, Optional
 
 from .common import *
 from .errors import DownloadError, MMPackBuildError, ShellException
-from .prefix import new_mmpack_prefix_context, run_build_script
+from .prefix import new_mmpack_prefix_context, prefix_install, run_build_script
 from .workspace import Workspace, cached_download, find_project_root_folder
 
 
@@ -275,6 +275,9 @@ class SourceTarball:
             specs = yaml_load(join_path(srcdir, 'mmpack/sources-strap'))
         except FileNotFoundError:
             specs = {}
+
+        # Install dependencies for source package build
+        prefix_install(specs.get('depends', []))
 
         # Execute create_srcdir build script if any
         env = {'PATH_URL': self._path_url}
