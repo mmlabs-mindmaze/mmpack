@@ -221,6 +221,17 @@ class SourceTarball:
         # If nothing has worked before, lets assume this is a git remote url
         return 'git'
 
+    def _run_create_srcdir_script(self, srcdir: str):
+        method = self._method
+        if method == 'srcpkg':
+            return
+
+        env = {'PATH_URL': self._path_url}
+        if self._vcsdir:
+            env['VCSDIR'] = abspath(self._vcsdir)
+        self._run_build_script('create_srcdir', method, srcdir, env)
+
+
     def _gen_project_sources(self, subdir: str = '') -> ProjectSource:
         srcdir = self._srcdir
         self._curr_subdir = subdir
@@ -229,6 +240,8 @@ class SourceTarball:
             srcdir += '/' + subdir
 
         os.makedirs(self._get_prj_builddir(), exist_ok=True)
+
+        self._run_create_srcdir_script(srcdir)
 
         # extract minimal metadata from package
         try:
@@ -459,11 +472,6 @@ class SourceTarball:
 
         if method == 'srcpkg':
             return
-
-        env = {'PATH_URL': self._path_url}
-        if self._vcsdir:
-            env['VCSDIR'] = abspath(self._vcsdir)
-        self._run_build_script('create_srcdir', method, self._srcdir, env)
 
     def _fetch_upstream_from_git(self, specs: Dict[str, str]):
         """
