@@ -14,7 +14,7 @@ from typing import Dict, Iterator, List, NamedTuple, Optional
 
 from .common import *
 from .errors import DownloadError, MMPackBuildError, ShellException
-from .prefix import new_mmpack_prefix_context, run_build_script
+from .prefix import new_mmpack_prefix_context, prefix_install, run_build_script
 from .workspace import Workspace, cached_download, find_project_root_folder
 
 
@@ -37,6 +37,7 @@ class SourceStrapSpecs:
         except FileNotFoundError:
             specs = {}
 
+        self.depends: List[str] = specs.pop('depends', [])
         self.upstream_method: Optional[str] = specs.pop('method', None)
         self.upstream_url: Optional[str] = specs.pop('url', None)
         self.patches: List[str] = specs.pop('patches', [])
@@ -301,6 +302,9 @@ class SourceTarball:
 
     def _process_source_strap(self, srcdir):
         specs = SourceStrapSpecs(srcdir)
+
+        # Install dependencies for source package build
+        prefix_install(specs.depends)
 
         # Execute create_srcdir build script if any
         env = {'PATH_URL': self._path_url}
