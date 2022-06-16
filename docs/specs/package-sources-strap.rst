@@ -32,6 +32,9 @@ Mandatory fields
 
 Optional fields
 ```````````````
+ :dependencies:
+   comma separated list of mmpack dependencies needed to create the source
+   package.
 
  :branch:
    (for git only) The commit hash, tag or branch that must be extracted

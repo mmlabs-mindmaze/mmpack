@@ -277,6 +277,10 @@ class SourceTarball:
         except FileNotFoundError:
             return  # There is no source strap, nothing to be done
 
+        # Install dependencies for source package build
+        deps = [d.strip() for d in specs.get('dependencies', '').split(',')]
+        prefix_install(list(filter(deps, bool)))
+
         # Execute create_srcdir build script if any
         env = {'PATH_URL': self._path_url}
         if self._vcsdir:
