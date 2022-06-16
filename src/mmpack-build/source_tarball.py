@@ -142,7 +142,6 @@ class SourceTarball:
                 raise MMPackBuildError('did not find project to package')
 
         # declare class instance attributes
-        self.srctar = None
         self.tag = tag
         self._method = method if method else 'guess'
         self._path_url = path_url
@@ -152,7 +151,6 @@ class SourceTarball:
         self._srcdir = None
         self._vcsdir = None
         self._outdir = outdir if outdir else Workspace().outdir()
-        self._prj_src = None
         self._curr_subdir = ''
         self.trace = dict()
         self._update_version = kwargs.get('version_from_vcs', False)
@@ -166,14 +164,6 @@ class SourceTarball:
         dprint('extracting sources in the temporary directory: {}'
                .format(self._builddir))
         self._create_srcdir(self._method)
-
-        # Try generate the source from the root folder of project
-        prj = self._gen_project_sources()
-        if not prj:  # None if srcdir lack mmpack specs
-            return
-
-        self._prj_src = prj
-        self.srctar = self._prj_src.tarball
 
     def __del__(self):
         # Skip removal if MMPACK_BUILD_KEEP_TMPDIR env is set to true
@@ -241,10 +231,7 @@ class SourceTarball:
         os.makedirs(self._get_prj_builddir(), exist_ok=True)
 
         # extract minimal metadata from package
-        try:
-            name, version = get_name_version_from_srcdir(srcdir)
-        except FileNotFoundError:
-            return None
+        name, version = get_name_version_from_srcdir(srcdir)
         srctar = '{0}/{1}_{2}_src.tar.xz'.format(self._outdir, name, version)
 
         # If the input was a mmpack source package, nothing to do besides copy
@@ -309,28 +296,26 @@ class SourceTarball:
         """
         Get an iterator of sources of all project referenced in the repository
         """
-        # If the extracted/cloned data contains a mmpack packaging at the root
-        # folder, this is the only project to return
-        if self._prj_src:
-            yield self._prj_src
-            return
+        prjlist_path = self._srcdir + '/projects.mmpack'
 
-        # List subdirs listed in projects.mmpack if any
-        try:
-            prjlist_path = self._srcdir + '/projects.mmpack'
-            subdirs = [p.strip() for p in open(prjlist_path, 'rt')]
-        except FileNotFoundError:
+        if exists(self._srcdir + '/mmpack/specs'):
+            subdirs = ['']
+        elif exists(prjlist_path):
+            # List subdirs listed in projects.mmpack if any
+            with open(prjlist_path, 'rt') as list_fp:
+                subdirs = [p.strip() for p in list_fp]
+
+            # Filter subdirs if requested in named argument build_only_modified
+            only_modified = self._kwargs.get('build_only_modified', False)
+            if only_modified and self._method == 'git':
+                files = _git_modified_files(self._vcsdir)
+                subdirs = [
+                    d for d in subdirs
+                    if any(map(lambda f, d=d: f.startswith(d + '/'), files))
+                ]
+        else:
             iprint(f'No mmpack source found in {self._srcdir}')
             return
-
-        # Filter subdirs if requested in named argument build_only_modified
-        only_modified = self._kwargs.get('build_only_modified', False)
-        if only_modified and self._method == 'git':
-            files = _git_modified_files(self._vcsdir)
-            subdirs = [
-                d for d in subdirs
-                if any(map(lambda f, d=d: f.startswith(d + '/'), files))
-            ]
 
         # iterate over project subdirs and generate the source package
         for subdir in subdirs:
