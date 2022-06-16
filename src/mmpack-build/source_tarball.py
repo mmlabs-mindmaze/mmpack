@@ -14,7 +14,7 @@ from typing import Dict, Iterator, List, NamedTuple, Optional
 
 from .common import *
 from .errors import DownloadError, MMPackBuildError, ShellException
-from .prefix import run_build_script
+from .prefix import new_mmpack_prefix_context, run_build_script
 from .workspace import Workspace, cached_download, find_project_root_folder
 
 
@@ -350,8 +350,9 @@ class SourceTarball:
             return
 
         # iterate over project subdirs and generate the source package
-        for subdir in subdirs:
-            yield self._gen_project_sources(subdir)
+        with new_mmpack_prefix_context(self._builddir + '/tmp-prefix'):
+            for subdir in subdirs:
+                yield self._gen_project_sources(subdir)
 
     def _store_src_orig_tracing(self, srcdir: str):
         """
