@@ -230,28 +230,27 @@ class SourceTarball:
 
         os.makedirs(self._get_prj_builddir(), exist_ok=True)
 
-        # extract minimal metadata from package
-        name, version = get_name_version_from_srcdir(srcdir)
-        srctar = '{0}/{1}_{2}_src.tar.xz'.format(self._outdir, name, version)
-
         # If the input was a mmpack source package, nothing to do besides copy
         # to output folder
         if self._method == 'srcpkg':
+            srctar = f'{self._outdir}/{basename(self._path_url)}'
+            name, version = get_name_version_from_srcdir(srcdir)
             try:
                 shutil.copy(self._path_url, srctar)
             except shutil.SameFileError:
                 pass
-            return ProjectSource(name=name,
-                                 version=version,
-                                 tarball=srctar,
-                                 srcdir=srcdir)
+        else:
+            self._process_source_strap(srcdir)
+            self._store_src_orig_tracing(srcdir)
 
-        self._process_source_strap(srcdir)
-        self._store_src_orig_tracing(srcdir)
+            # extract minimal metadata from package
+            name, version = get_name_version_from_srcdir(srcdir)
+            srctar = f'{self._outdir}/{name}_{version}_src.tar.xz'
 
-        # Create source package tarball
-        dprint('Building source tarball ' + srctar)
-        create_tarball(srcdir, srctar, 'xz')
+            # Create source package tarball
+            dprint('Building source tarball ' + srctar)
+            create_tarball(srcdir, srctar, 'xz')
+
         return ProjectSource(name=name,
                              version=version,
                              tarball=srctar,
