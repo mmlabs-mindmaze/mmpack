@@ -27,6 +27,35 @@ class ProjectSource(NamedTuple):
     srcdir: str
 
 
+class SourceStrapSpecs:
+    """source-strap config"""
+
+    def __init__(self, srcdir: str):
+        try:
+            specs = yaml_load(join_path(srcdir, 'mmpack/sources-strap'))
+        except FileNotFoundError:
+            specs = {}
+
+        self.upstream_method: Optional[str] = specs.pop('method', None)
+        self.upstream_url: Optional[str] = specs.pop('url', None)
+        self.patches: List[str] = specs.pop('patches', [])
+        self._opts: Dict[str, str] = specs
+
+        self._validate()
+
+    def get(self, *args) -> Any:
+        """Get optional value"""
+        return self._opts.get(*args)
+
+    def _validate(self):
+        if self.upstream_method:
+            if self.upstream_method not in ('git', 'tar'):
+                raise Assert('Invalid method ' + self.upstream_method)
+
+            if 'url' not in self._opts:
+                raise Assert('upstream method specified but url missing')
+
+
 def _strip_leading_comp_tar_iter(tar: TarFile) -> Iterator[TarInfo]:
     for info in tar.getmembers():
         info = copy(info)
@@ -270,17 +299,16 @@ class SourceTarball:
         return os.path.join(self._get_prj_builddir(), 'upstream.git')
 
     def _process_source_strap(self, srcdir):
-        source_strap = os.path.join(srcdir, 'mmpack/sources-strap')
-        try:
-            specs = yaml_load(source_strap)
-        except FileNotFoundError:
-            return  # There is no source strap, nothing to be done
+        specs = SourceStrapSpecs(srcdir)
+        if not specs.upstream_method:
+            return
 
         self._fetch_upstream(specs, srcdir)
-        self._patch_sources(specs.get('patches', []), srcdir)
+        self._patch_sources(specs.patches, srcdir)
 
         # Run source strapped_hook
-        self._run_build_script('source_strapped', specs['method'], srcdir)
+        self._run_build_script('source_strapped',
+                               specs.upstream_method, srcdir)
 
     def _run_build_script(self, name: str, method: str,
                           execdir: str, env: Optional[Dict[str, str]] = None):
@@ -461,16 +489,13 @@ class SourceTarball:
             env['VCSDIR'] = abspath(self._vcsdir)
         self._run_build_script('create_srcdir', method, self._srcdir, env)
 
-    def _fetch_upstream_from_git(self, specs: Dict[str, str]):
+    def _fetch_upstream_from_git(self, specs: SourceStrapSpecs):
         """
         Fetch upstream sources from git clone
-
-        Args:
-            specs: dict of settings put in source-strap file
         """
         srcdir = self._get_unpacked_upstream_dir()
         gitdir = self._get_upstream_gitdir()
-        url = specs['url']
+        url = specs.upstream_url
 
         os.makedirs(srcdir, exist_ok=True)
 
@@ -482,14 +507,11 @@ class SourceTarball:
         gitref = _git_subcmd(['rev-parse', 'HEAD'], gitdir=gitdir)
         self.trace['upstream'].update({'url': url, 'ref': gitref})
 
-    def _fetch_upstream_from_tar(self, specs: Dict[str, str]):
+    def _fetch_upstream_from_tar(self, specs: SourceStrapSpecs):
         """
         Fetch upstream sources from remote tar
-
-        Args:
-            specs: dict of settings put in source-strap file
         """
-        url = specs['url']
+        url = specs.upstream_url
         filename = os.path.basename(url)
         downloaded_file = os.path.join(self._get_prj_builddir(), filename)
         expected_sha256 = specs.get('sha256')
@@ -507,35 +529,21 @@ class SourceTarball:
         with taropen(downloaded_file, 'r:*') as tar:
             tar.extractall(path=self._get_unpacked_upstream_dir())
 
-    def _fetch_upstream(self, specs: Dict[str, str], srcdir: str):
+    def _fetch_upstream(self, specs: SourceStrapSpecs, srcdir: str):
         """
         Fetch upstream sources using specified method and extract it to src dir
-
-        Args:
-            specs: dict of settings put in source-strap file
         """
         method_mapping = {
             'git': self._fetch_upstream_from_git,
             'tar': self._fetch_upstream_from_tar,
         }
 
+        method = specs.upstream_method
         upstream_srcdir = self._get_unpacked_upstream_dir()
 
-        # check that mandatory keys are present in sources-strap file
-        missings_keys = {'method', 'url'}.difference(specs)
-        if missings_keys:
-            raise Assert('missing mandatory keys in source-strap: {}'
-                         .format(', '.join(missings_keys)))
-
         # Select proper _fetch_upstream_* function according to method entry
-        method = specs['method']
-        fetch_upstream_callable = method_mapping.get(method)
-        if not fetch_upstream_callable:
-            raise Assert("Invalid method " + method)
-
-        # execute selected method
         self.trace['upstream'] = {'method': method}
-        fetch_upstream_callable(specs)
+        method_mapping[method](specs)
 
         # Determine in which subfolder of extracted upstream dir the source are
         # actually located
@@ -548,7 +556,7 @@ class SourceTarball:
             dir_content = os.listdir(upstream_srcdir)
 
         # Run fetch_upstream_hook
-        env = {'URL': specs['url']}
+        env = {'URL': specs.upstream_url}
         if method == 'git':
             env['VCSDIR'] = abspath(self._get_upstream_gitdir())
         self._run_build_script('fetch_upstream', method, upstream_srcdir, env)
