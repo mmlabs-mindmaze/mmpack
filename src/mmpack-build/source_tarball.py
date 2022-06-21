@@ -300,15 +300,13 @@ class SourceTarball:
 
     def _process_source_strap(self, srcdir):
         specs = SourceStrapSpecs(srcdir)
-        if not specs.upstream_method:
-            return
 
         self._fetch_upstream(specs, srcdir)
         self._patch_sources(specs.patches, srcdir)
 
         # Run source strapped_hook
         self._run_build_script('source_strapped',
-                               specs.upstream_method, srcdir)
+                               specs.upstream_method or 'none', srcdir)
 
     def _run_build_script(self, name: str, method: str,
                           execdir: str, env: Optional[Dict[str, str]] = None):
@@ -539,6 +537,9 @@ class SourceTarball:
         }
 
         method = specs.upstream_method
+        if not method:
+            return
+
         upstream_srcdir = self._get_unpacked_upstream_dir()
 
         # Select proper _fetch_upstream_* function according to method entry
