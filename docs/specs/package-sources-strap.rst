@@ -20,18 +20,19 @@ The format follows the `yaml`_ format.
 
 .. _yaml: https://yaml.org/
 
-Mandatory fields
-````````````````
+Fields
+``````
+
+All fields are optional. However some might become mandatory in presence of
+others.
 
  :method:
-   The method how to fetch the sources. It should be currently 'tar' or 'git'.
+   The method how to fetch the upstream sources. It should be 'tar' or 'git'.
 
  :url:
-   The url used to recover the upstream sources of the project.
-   With 'git' method, this url is the same as the argument for ``git clone``.
-
-Optional fields
-```````````````
+   (mandatory if method set) The url used to recover the upstream sources of
+   the project. With 'git' method, this url is the same as the argument for
+   ``git clone``.
 
  :branch:
    (for git only) The commit hash, tag or branch that must be extracted
