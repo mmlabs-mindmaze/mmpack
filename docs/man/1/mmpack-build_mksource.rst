@@ -68,10 +68,11 @@ OPTIONS
   For the other type of build, *tag* will be the string which will be used to
   identify a package build in the cache folder.
 
---multiproject-only-modified
+--multiproject-only-modified[= *commit*]
   If specified, in case of mmpack multi projects, the command will generate the
   mmpack source package of only subfolders modified by the git commit being
-  checked out.
+  checked out. If optional value *commit* is provided, projects whose
+  subprojects have been modified since *commit* will be build.
 
 --update-version-from-vcs
   update version stored in the generated source package as update since tag
