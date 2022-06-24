@@ -6,7 +6,7 @@ root directory.
 """
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import Callable
+from typing import Any, Callable, Dict
 
 from .errors import MMPackBuildError
 from .source_tarball import SourceTarball
@@ -38,7 +38,8 @@ def add_parser_args(parser: ArgumentParser):
     parser.add_argument('path_or_url', nargs='?',
                         help='path or url to project providing mmpack package')
     parser.add_argument('--multiproject-only-modified',
-                        action='store_true', dest='only_modified',
+                        default=False, const=None, nargs='?',
+                        action='store', dest='only_modified',
                         help='indicate that the only projects to build are '
                              'those modified by the git commit')
     parser.add_argument('--update-version-from-vcs',
@@ -46,18 +47,22 @@ def add_parser_args(parser: ArgumentParser):
                         help='update version from commits since version tag')
 
 
+def _source_tarball_kwargs(args: Namespace) -> Dict[str, Any]:
+    kwargs = {'version_from_vcs': args.update_version_from_vcs}
+
+    if args.only_modified is not False:
+        kwargs['build_only_modified'] = args.only_modified
+
+    return kwargs
+
+
 def main(args):
     """
     entry point to create a mmpack package
     """
-    kwargs = {
-        'build_only_modified': args.only_modified,
-        'version_from_vcs': args.update_version_from_vcs,
-    }
-
     try:
         srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
-                                   **kwargs)
+                                   **_source_tarball_kwargs(args))
         for prj in srctarball.iter_mmpack_srcs():
             print('{} {} {}'.format(prj.name, prj.version, prj.tarball))
     except MMPackBuildError as error:
@@ -81,8 +86,7 @@ def call_foreach_srcpkg(func: Callable[[SrcPackage, Namespace], None],
     """
     retcode = 0
     srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
-                               build_only_modified=args.only_modified,
-                               version_from_vcs=args.update_version_from_vcs)
+                               **_source_tarball_kwargs(args))
     for prj in srctarball.iter_mmpack_srcs():
         try:
             pkg = SrcPackage(prj.tarball, srctarball.tag, prj.srcdir)

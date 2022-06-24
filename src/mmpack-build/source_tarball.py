@@ -133,11 +133,17 @@ def _git_clone(url: str, worktree: str, gitdir: str = None,
                 gitdir, worktree)
 
 
-def _git_modified_files(gitdir: str, commit: str = 'HEAD') -> List[str]:
+def _git_modified_files(gitdir: str, since: Optional[str]) -> List[str]:
     """
     get list of file modified by check
+
+    Args:
+        gitdir: path to git base directory
+        since: If not None, changes reported are those introduced by commits
+            from `since` to `HEAD`. Else it will be those introduced by `HEAD`.
     """
-    args = ['diff-tree', '--no-commit-id', '--name-only', '-r', commit]
+    commits = ['HEAD'] if since is None else [since, 'HEAD']
+    args = ['diff-tree', '--no-commit-id', '--name-only', '-r', *commits]
     return _git_subcmd(args, gitdir).splitlines()
 
 
@@ -342,9 +348,9 @@ class SourceTarball:
                 subdirs = [p.strip() for p in list_fp]
 
             # Filter subdirs if requested in named argument build_only_modified
-            only_modified = self._kwargs.get('build_only_modified', False)
-            if only_modified and self._method == 'git':
-                files = _git_modified_files(self._vcsdir)
+            if 'build_only_modified' in self._kwargs and self._method == 'git':
+                since: Optional[str] = self._kwargs['build_only_modified']
+                files = _git_modified_files(self._vcsdir, since)
                 subdirs = [
                     d for d in subdirs
                     if any(map(lambda f, d=d: f.startswith(d + '/'), files))
