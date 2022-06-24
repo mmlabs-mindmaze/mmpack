@@ -38,7 +38,8 @@ def add_parser_args(parser: ArgumentParser):
     parser.add_argument('path_or_url', nargs='?',
                         help='path or url to project providing mmpack package')
     parser.add_argument('--multiproject-only-modified',
-                        action='store_true', dest='only_modified',
+                        default=False, const=None,
+                        action='store', dest='only_modified',
                         help='indicate that the only projects to build are '
                              'those modified by the git commit')
     parser.add_argument('--update-version-from-vcs',
@@ -51,9 +52,10 @@ def main(args):
     entry point to create a mmpack package
     """
     kwargs = {
-        'build_only_modified': args.only_modified,
         'version_from_vcs': args.update_version_from_vcs,
     }
+    if args.only_modified is not False:
+        kwargs['build_only_modified'] = args.only_modified
 
     try:
         srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
