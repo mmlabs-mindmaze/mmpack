@@ -88,7 +88,7 @@ class _SpecsSymbols:
         diff = provided_symbols - self.used
         if diff:
             wprint('The following symbols were found but not specified:\n\t'
-                   + '\n\t'.join(diff))
+                   + '\n\t'.join(sorted(diff)))
             wprint('They will all be considered as introduced in the current'
                    ' project version.')
 
@@ -101,7 +101,7 @@ class _SpecsSymbols:
 
         oldsyms = [f'{s.name}' for s in self._older]
         wprint('The following symbols have been introduced before expected:'
-               '\n\t' + '\n\t'.join(oldsyms))
+               '\n\t' + '\n\t'.join(sorted(oldsyms)))
 
     def report_removed_symbols(self):
         """
@@ -109,7 +109,7 @@ class _SpecsSymbols:
         """
         if self._removed:
             wprint('The following symbols appear to have been removed:\n\t'
-                   + '\n\t'.join(self._removed))
+                   + '\n\t'.join(sorted(self._removed)))
 
 
 class Provide:
