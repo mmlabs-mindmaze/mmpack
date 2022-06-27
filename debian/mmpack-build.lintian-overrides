@@ -1,6 +1,5 @@
 spare-manual-page usr/share/man/man1/mmpack-build_builddep.1.gz
 spare-manual-page usr/share/man/man1/mmpack-build_clean.1.gz
-spare-manual-page usr/share/man/man1/mmpack-build_create.1.gz
 spare-manual-page usr/share/man/man1/mmpack-build_guess.1.gz
 spare-manual-page usr/share/man/man1/mmpack-build_mksource.1.gz
 spare-manual-page usr/share/man/man1/mmpack-build_pkg-create.1.gz
