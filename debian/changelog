@@ -8,6 +8,10 @@ mmpack (0.6.11) UNRELEASED; urgency=medium
   * Build package using bindnow
   * Specify Rules-Requires-Root as no
   * Provides common licenses as symlinks to /usr/share/common-licenses
+  * extract debug symbol and package them separately.
+  * execute build scripts under mmpack prefix.
+  * improve shell completion of mmpack-build.
+  * mmpack-build allow to specify mmpack repo to resolve build depends. 
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 09 Feb 2022 12:27:57 +0100
 
