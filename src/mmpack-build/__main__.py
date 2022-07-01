@@ -127,7 +127,10 @@ def main():
         wrk.set_prefix(args.prefix)
     configure_prefix_handling(args)
 
-    return launch_subcommand(args)
+    retval = launch_subcommand(args)
+
+    wrk.cleanup_cache()
+    return retval
 
 
 if __name__ == "__main__":
