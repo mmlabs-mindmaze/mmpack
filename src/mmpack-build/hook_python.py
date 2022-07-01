@@ -42,7 +42,7 @@ from .syspkg_manager import get_syspkg_mgr
 # 'lib/python2/site-packages/foo.so'
 #               => None
 _PKG_REGEX = re.compile(
-    r'((?:usr/|mingw64/)?lib/python3(?:\.\d)?/(?:dist|site)-packages)'
+    r'((?:usr/|mingw64/)?lib/python3(?:\.\d+)?/(?:dist|site)-packages)'
     r'/([\w-]+)([^/]*)'
 )
 
