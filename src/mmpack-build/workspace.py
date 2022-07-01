@@ -6,6 +6,7 @@ os helpers to manipulate the paths and environments
 import os
 import shutil
 from tempfile import mkdtemp
+from time import time_ns
 
 from .common import shell, dprint, download, sha256sum, iprint
 from .decorators import singleton
@@ -192,6 +193,10 @@ class Workspace:
         # Hard link a version named after the sha256 value of the cached file
         os.link(cache_file, os.path.join(self._cache, sha256sum(cache_file)))
 
+    def cleanup_cache(self):
+        curtime = time_ns()
+        
+
     def set_prefix(self, prefix: str):
         """
         Configure workspace to use specified prefix when building
@@ -224,6 +229,12 @@ def is_valid_prefix(prefix: str) -> bool:
     return os.path.exists(prefix + '/var/lib/mmpack/')
 
 
+def _update_access_time(path: str):
+    mtime_ns = os.stat().st_mtime_ns
+    curtime_ns = time_ns()
+    os.utime(path, ns=(curtime_ns, mtime_ns))
+
+
 def cached_download(url: str, path: str, expected_sha256: str = None):
     """
     Download file from url or copy from cache available to the specified path.
@@ -239,6 +250,7 @@ def cached_download(url: str, path: str, expected_sha256: str = None):
 
     if wrk.cache_get(path, expected_sha256):
         iprint('Skip download {}. Using cached file'.format(url))
+        _update_access_time(path)
         return
 
     download(url, path)
