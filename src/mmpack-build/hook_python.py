@@ -7,11 +7,13 @@ import filecmp
 import json
 import os
 import re
+from configparser import ConfigParser
 from email.parser import Parser
 from glob import glob, iglob
 from itertools import chain
 from os.path import basename
-from typing import Set, Dict, List, Iterable, NamedTuple, Optional
+from typing import (Set, Dict, List, Iterable, Iterator, NamedTuple, Optional,
+                    Tuple)
 
 from .base_hook import BaseHook
 from .common import shell, Assert, iprint, rmtree_force
@@ -112,6 +114,58 @@ def _is_py_file(filename: str) -> bool:
         return True
 
     return bool(_PYEXT_REGEX.fullmatch(filename))
+
+
+class EntryPointsParser(ConfigParser):
+    """Parser for dist-info/entry_points.txt"""
+    def __init__(self):
+        super().__init__(delimiters=('=',))
+        # make parser case insensitive
+        self.optionxform = str
+
+    def iter_section(self, name) -> Iterator[Tuple[str, str]]:
+        """
+        Get iterator of section content, without failing if absent
+        """
+        try:
+            for keyval in self[name].items():
+                yield keyval
+        except KeyError:
+            pass
+
+
+def _create_launcher(launcher: str, settings: str):
+    # ignore extras
+    if '[' in settings:
+        return
+
+    script_name = f'bin/{launcher}'
+    modname, sep, target = settings.partition(':')
+
+    with open(script_name, newline='\n') as launcher_file:
+        launcher_file.write(f'''#!/usr/bin/env python3
+                            import sys
+                            from {modname} import {target}
+                            sys.exit({target()}
+                            ''')
+
+    # make script executable (respecting umask)
+    mode = os.stat(script_name).st_mode
+    mode |= (mode & 0o444) >> 2    # copy R bits to X
+    os.chmod(script_name, mode)
+
+
+def _add_launchers(entry_file: str):
+    parser = EntryPointsParser()
+    parser.read(entry_file)
+
+    os.makedirs('bin', exist_ok=True)
+
+    for launcher, settings in parser.iter_section('console_scripts'):
+        _create_launcher(launcher, settings)
+    
+    for launcher, settings in parser.iter_section('gui_scripts'):
+        _create_launcher(launcher, settings)
 
 
 def _gen_py_importname(pyfiles: Iterable[str],
@@ -411,6 +465,10 @@ class MMPackBuildHook(BaseHook):
             match = egginfo_re.fullmatch(eggdir)
             if match:
                 os.rename(eggdir, match.group(1) + '.egg-info')
+
+        # Create launcher for entry points
+        for entry_file in glob('lib/python3/site-packages/*/entry_points.txt'):
+            _add_launchers(entry_file)
 
     def dispatch(self, data: DispatchData):
         pypkgs: Dict[str, _PyPkg] = {}
