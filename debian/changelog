@@ -1,19 +1,19 @@
-mmpack (0.6.11) UNRELEASED; urgency=medium
+mmpack (0.7.0) unstable; urgency=medium
 
   * mmpack-build use pip to build from python source packages.
   * mmpack-build use python3 pkg argcomplete for shell completion.
-  * mmpack-modifyrepo gets shell completion
-  * debhelper compat level set to 13
-  * build debian package using meson
-  * Build package using bindnow
-  * Specify Rules-Requires-Root as no
-  * Provides common licenses as symlinks to /usr/share/common-licenses
+  * mmpack-modifyrepo gets shell completion.
+  * debhelper compat level set to 13.
+  * build debian package using meson.
+  * Build package using bindnow.
+  * Specify Rules-Requires-Root as no.
+  * Provides common licenses as symlinks to /usr/share/common-licenses.
   * extract debug symbol and package them separately.
   * execute build scripts under mmpack prefix.
   * improve shell completion of mmpack-build.
-  * mmpack-build allow to specify mmpack repo to resolve build depends. 
+  * mmpack-build allow one to specify mmpack repo to resolve build depends.
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 09 Feb 2022 12:27:57 +0100
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 04 Jul 2022 16:43:59 +0200
 
 mmpack (0.6.10) unstable; urgency=medium
 
