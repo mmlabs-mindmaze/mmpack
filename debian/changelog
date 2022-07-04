@@ -1,8 +1,8 @@
-mmpack (0.7.1) UNRELEASED; urgency=medium
+mmpack (0.7.1) unstable; urgency=medium
 
   * fix mmpack.postinst for compat level 13.
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 04 Jul 2022 20:47:10 +0200
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 04 Jul 2022 20:48:32 +0200
 
 mmpack (0.7.0) unstable; urgency=medium
 
