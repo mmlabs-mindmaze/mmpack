@@ -1,4 +1,4 @@
-mmpack (0.6.11) UNRELEASED; urgency=medium
+mmpack (0.7.0) unstable; urgency=medium
 
   * mmpack-build use pip to build from python source packages.
   * mmpack-build use python3 pkg argcomplete for shell completion.
@@ -13,7 +13,7 @@ mmpack (0.6.11) UNRELEASED; urgency=medium
   * improve shell completion of mmpack-build.
   * mmpack-build allow one to specify mmpack repo to resolve build depends.
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 09 Feb 2022 12:27:57 +0100
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 04 Jul 2022 16:43:59 +0200
 
 mmpack (0.6.10) unstable; urgency=medium
 
