@@ -37,7 +37,6 @@ Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: mmpack (= ${binary:Version}),
  ${misc:Depends}, ${python3:Depends},
- python3-pip,
  git, build-essential, automake, libtool, gnulib, meson, cmake, patchelf, zstd
 Breaks: python3-mmpack-build (<< 0.5.0)
 Replaces: python3-mmpack-build (<< 0.5.0)

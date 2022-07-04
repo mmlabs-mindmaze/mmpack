@@ -7,6 +7,7 @@
 PyYAML
 
 # debian: python3-argcomplete
+# pacman: mingw-w64-x86_64-python-argcomplete
 argcomplete
 
 [mmpack-build]
@@ -14,15 +15,24 @@ argcomplete
 pyelftools
 
 # debian: python3-pefile
+# pacman: mingw-w64-x86_64-python-pefile
 pefile
 
 # debian: python3-urllib3
-# pacman: mingw-w64-x86_64-python3-urllib3
+# pacman: mingw-w64-x86_64-python-urllib3
 urllib3
 
 # debian: python3-astroid
-# pacman: mingw-w64-x86_64-python3-astroid
+# pacman: mingw-w64-x86_64-python-astroid
 astroid
+
+# debian: python3-pip
+# pacman: mingw-w64-x86_64-python-pip
+pip
+
+# debian: python3-pkg-resources
+# pacman: mingw-w64-x86_64-python-setuptools
+setuptools
 
 [mmpack-db]
 # debian: python3-watchdog
@@ -30,4 +40,5 @@ watchdog
 
 [mmpack-repo]
 # debian: python3-watchdog
+# pacman: mingw-w64-x86_64-python-watchdog
 watchdog
