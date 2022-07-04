@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from tempfile import mkdtemp
 from time import time_ns
 
-from .common import shell, dprint, download, sha256sum, iprint
+from .common import shell, dprint, download, sha256sum, iprint, rmfile
 from .decorators import singleton
 from .errors import ShellException
 from .settings import BINDIR, EXEEXT
@@ -185,10 +185,7 @@ class Workspace:
         """
         os.makedirs(self._cache, exist_ok=True)
         cache_file = os.path.join(self._cache, os.path.basename(path))
-        try:
-            os.unlink(cache_file)
-        except FileNotFoundError:
-            pass
+        rmfile(cache_file)
         shutil.copyfile(path, cache_file)
 
         # Hard link a version named after the sha256 value of the cached file
@@ -208,10 +205,7 @@ class Workspace:
             return
 
         for path in rmlist:
-            try:
-                os.remove(path)
-            except FileNotFoundError:
-                pass
+            rmfile(path)
 
     def set_prefix(self, prefix: str):
         """

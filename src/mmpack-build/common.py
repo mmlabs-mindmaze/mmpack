@@ -743,6 +743,16 @@ def rmtree_force(path: str):
     shutil.rmtree(path, onerror=_onerror_handler)
 
 
+def rmfile(path: str):
+    """
+    remove file, ignore if path does not exist
+    """
+    try:
+        os.unlink(path)
+    except FileNotFoundError:
+        pass
+
+
 def wrap_str(text: str,
              maxlen: int = 80,
              indent: str = '',
