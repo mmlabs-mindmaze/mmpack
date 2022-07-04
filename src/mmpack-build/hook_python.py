@@ -17,7 +17,7 @@ from typing import (Set, Dict, List, Iterable, Iterator, NamedTuple, Optional,
                     Tuple)
 
 from .base_hook import BaseHook
-from .common import shell, Assert, iprint, rmtree_force
+from .common import shell, Assert, iprint, rmfile, rmtree_force
 from .file_utils import filetype
 from .package_info import PackageInfo, DispatchData
 from .prefix import cmd_in_optional_prefix
@@ -144,6 +144,9 @@ def _create_launcher(launcher: str, settings: str):
     script = f'bin/{launcher}'
     modname, _, target = settings.partition(':')
     impname = target.split('.')[0]
+
+    # remove previous windows launcher if any
+    rmfile(script + '.exe')
 
     with open(script, 'w', newline='\n', encoding='utf-8') as launcher_file:
         launcher_file.write(dedent(f'''\

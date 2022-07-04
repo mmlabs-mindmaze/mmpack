@@ -23,9 +23,6 @@ eval $OPTS
 python3 -m pip --cache-dir=$BUILDDIR install --no-build-isolation --no-deps \
   --no-warn-script-location --root=$DESTDIR --prefix=$PREFIX --no-compile .
 
-# Remove launcher scripts created by pip install
-rm -rf $DESTDIR$PREFIX/bin
-
 # Try to find sphinxconfig if not set yet
 if [ -z "$sphinxconf" ]; then
 	if [ -f conf.py ]; then
