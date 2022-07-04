@@ -2,6 +2,6 @@
 set -e
 
 # Provides capability to mount helper to create mount namespace
-setcap cap_dac_override,cap_sys_admin+ep /usr/lib/*/mmpack/mount-mmpack-prefix
+setcap cap_dac_override,cap_sys_admin+ep /usr/libexec/mmpack/mount-mmpack-prefix
 
 #DEBHELPER#
