@@ -13,7 +13,6 @@
 
 #define _GNU_SOURCE
 #include <errno.h>
-#include <glob.h>
 #include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +20,7 @@
 #include <unistd.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
+#include <mmpredefs.h>
 
 #include "common.h"
 
@@ -28,22 +28,27 @@ static
 void try_run_packaged_tool(char* argv[])
 {
 	int saved_error;
-	glob_t res;
 	size_t i;
+
+	const char* const possible_targets[] = {
+		"/usr/libexec/mmpack/mount-mmpack-prefix",
+#if defined(__x86_64__)
+		"/usr/lib64/mmpack/mount-mmpack-prefix",
+		"/usr/lib/x86_64-linux-gnu/mmpack/mount-mmpack-prefix",
+#endif
+#if defined(__i386__)
+		"/usr/lib32/mmpack/mount-mmpack-prefix",
+		"/usr/lib/i386-linux-gnu/mmpack/mount-mmpack-prefix",
+#endif
+		"/usr/lib/mmpack/mount-mmpack-prefix",
+	};
 
 	saved_error = errno;
 
-	if (glob("/usr/lib/*/mmpack/mount-mmpack-prefix", 0, NULL, &res)) {
-		errno = saved_error;
-		return;
-	}
-
-	for (i = 0; i < res.gl_pathc; i++) {
-		argv[0] = res.gl_pathv[i];
+	for (i = 0; i < MM_NELEM(possible_targets); i++) {
+		argv[0] = (char*)possible_targets[i];
 		execvp(argv[0], argv);
 	}
-
-	globfree(&res);
 
 	errno = saved_error;
 }
