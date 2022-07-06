@@ -43,7 +43,7 @@ def main(options):
         prj_root = find_project_root_folder()
         if not prj_root:
             raise MMPackBuildError('did not find project to package')
-        specfile += '/mmpack/specs'
+        specfile = prj_root + '/mmpack/specs'
     specs = specs_load(specfile)
 
     mmpack_builddeps = specs.get('build-depends', [])
