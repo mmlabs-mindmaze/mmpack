@@ -44,7 +44,7 @@ class PrefixHandlingOptions:
             self.use_build_prefix = BuildPrefix(opts.build_prefix)
 
         # setup default value of install deps
-        self.install_deps = False
+        self.install_deps = (opts.command == 'builddep')
         if self.use_build_prefix is BuildPrefix.CREATE:
             self.install_deps = True
 
