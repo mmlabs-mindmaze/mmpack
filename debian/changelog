@@ -1,3 +1,10 @@
+mmpack (0.7.2) unstable; urgency=medium
+
+  * Fix mmpack-build builddep.
+  * Fix use of packaged mount prefix on Linux.
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Wed, 06 Jul 2022 11:54:40 +0200
+
 mmpack (0.7.1) unstable; urgency=medium
 
   * fix mmpack.postinst for compat level 13.
