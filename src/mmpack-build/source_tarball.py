@@ -122,6 +122,9 @@ def _git_clone(url: str, repodir: str,
     # Checkout the specified refspec
     _git_subcmd(['checkout', '--quiet', '--detach', 'FETCH_HEAD'], repodir)
 
+    # fetch and checkout the submodules (if any)
+    _git_subcmd(['submodule', 'update', '--init'], repodir)
+
 
 def _git_modified_files(gitdir: str, since: Optional[str]) -> List[str]:
     """
