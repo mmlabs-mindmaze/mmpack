@@ -80,33 +80,28 @@ def _is_git_dir(path: str) -> bool:
     return retcode == 0
 
 
-def _git_subcmd(subcmd: List[str], gitdir: str = None, worktree: str = None,
+def _git_subcmd(subcmd: List[str], repodir: str,
                 git_ssh_cmd: str = None) -> str:
     env = None
-    if gitdir or worktree or git_ssh_cmd:
+    if git_ssh_cmd:
         env = os.environ.copy()
-        if gitdir:
-            env['GIT_DIR'] = gitdir
-        if worktree:
-            env['GIT_WORK_TREE'] = worktree
         if git_ssh_cmd:
             env['GIT_SSH_COMMAND'] = git_ssh_cmd
 
     args = subcmd.copy()
-    args.insert(0, 'git')
+    args.insert(0, 'git', '-C', repodir)
     return shell(args, env=env).strip()
 
 
 # pylint: disable=too-many-arguments
-def _git_clone(url: str, worktree: str, gitdir: str = None,
+def _git_clone(url: str, repodir: str,
                refspec: str = None, git_ssh_cmd: str = None):
     """
     create a shallow clone of a git repo
 
     Args:
         url: url of git repository
-        worktree: folder where the repo must be checked out into
-        gitdir: optional folder that will hold the git repository.
+        repodir: folder where the repo must be checked out into
         refspec: tag, branch, commit hash to check out
         git_ssh_cmd: optional, ssh cmd to use when cloning git repo through ssh
     """
@@ -116,21 +111,17 @@ def _git_clone(url: str, worktree: str, gitdir: str = None,
     if not refspec:
         refspec = 'HEAD'
 
-    if not gitdir and worktree:
-        gitdir = worktree + '/.git'
-
-    iprint('cloning {} ({}) into tmp dir {}'.format(url, refspec, worktree))
+    iprint(f'cloning {url} ({refspec}) into tmp dir {repodir}')
 
     # Create and init git repository
-    _git_subcmd(['init', '--quiet'], gitdir)
+    _git_subcmd(['init', '--quiet'], repodir)
 
     # Fetch git refspec
     fetch_args = ['fetch', '--quiet', '--tags', url, refspec]
-    _git_subcmd(fetch_args, gitdir, worktree, git_ssh_cmd)
+    _git_subcmd(fetch_args, repodir, git_ssh_cmd)
 
     # Checkout the specified refspec
-    _git_subcmd(['checkout', '--quiet', '--detach', 'FETCH_HEAD'],
-                gitdir, worktree)
+    _git_subcmd(['checkout', '--quiet', '--detach', 'FETCH_HEAD'], repodir)
 
 
 def _git_modified_files(gitdir: str, since: Optional[str]) -> List[str]:
@@ -138,7 +129,7 @@ def _git_modified_files(gitdir: str, since: Optional[str]) -> List[str]:
     get list of file modified by check
 
     Args:
-        gitdir: path to git base directory
+        repodir: path to git base directory
         since: If not None, changes reported are those introduced by commits
             from `since` to `HEAD`. Else it will be those introduced by `HEAD`.
     """
@@ -186,7 +177,6 @@ class SourceTarball:
         self._builddir = Workspace().tmpdir()
         self._downloaded_file = None
         self._srcdir = None
-        self._vcsdir = None
         self._outdir = outdir if outdir else Workspace().outdir()
         self._curr_subdir = ''
         self.trace = dict()
@@ -303,9 +293,6 @@ class SourceTarball:
         """
         return os.path.join(self._get_prj_builddir(), 'upstream')
 
-    def _get_upstream_gitdir(self):
-        return os.path.join(self._get_prj_builddir(), 'upstream.git')
-
     def _process_source_strap(self, srcdir):
         specs = SourceStrapSpecs(srcdir)
 
@@ -314,8 +301,8 @@ class SourceTarball:
 
         # Execute create_srcdir build script if any
         env = {'PATH_URL': self._path_url}
-        if self._vcsdir:
-            env['VCSDIR'] = abspath(self._vcsdir)
+        if self._method == 'git':
+            env['VCSDIR'] = abspath(self._srcdir)
         self._run_build_script('create_srcdir', self._method, srcdir, env)
 
         self._fetch_upstream(specs, srcdir)
@@ -350,7 +337,7 @@ class SourceTarball:
             # Filter subdirs if requested in named argument build_only_modified
             if 'build_only_modified' in self._kwargs and self._method == 'git':
                 since: Optional[str] = self._kwargs['build_only_modified']
-                files = _git_modified_files(self._vcsdir, since)
+                files = _git_modified_files(self._srcdir, since)
                 subdirs = [
                     d for d in subdirs
                     if any(map(lambda f, d=d: f.startswith(d + '/'), files))
@@ -390,7 +377,7 @@ class SourceTarball:
         try:
             specs_path = os.path.join(self._srcdir, 'mmpack/specs')
             tag = specs_load(specs_path)['version']
-            version = _git_subcmd(['describe', '--match', tag], self._vcsdir)
+            version = _git_subcmd(['describe', '--match', tag], self._srcdir)
 
             # read specs as binary blob
             with open(specs_path, 'r', encoding='utf-8') as stream:
@@ -409,24 +396,22 @@ class SourceTarball:
         """
         Create a source package folder from git clone
         """
-        self._vcsdir = self._builddir + '/vcsdir.git'
         git_ssh_cmd = self._kwargs.get('git_ssh_cmd')
 
         _git_clone(url=self._path_url,
-                   worktree=self._srcdir,
-                   gitdir=self._vcsdir,
+                   repodir=self._srcdir,
                    refspec=self.tag,
                    git_ssh_cmd=git_ssh_cmd)
 
         # Get tag name if not set yet (use current branch)
         if not self.tag:
             self.tag = _git_subcmd(['rev-parse', '--abbrev-ref', 'HEAD'],
-                                   self._vcsdir)
+                                   self._srcdir)
 
         if self._update_version:
             self._update_version_from_git()
 
-        commit_ref = _git_subcmd(['rev-parse', 'HEAD'], self._vcsdir)
+        commit_ref = _git_subcmd(['rev-parse', 'HEAD'], self._srcdir)
         self.trace['pkg'].update({'url': self._path_url, 'ref': commit_ref})
 
     def _create_srcdir_from_tar(self):
@@ -502,17 +487,15 @@ class SourceTarball:
         Fetch upstream sources from git clone
         """
         srcdir = self._get_unpacked_upstream_dir()
-        gitdir = self._get_upstream_gitdir()
         url = specs.upstream_url
 
         os.makedirs(srcdir, exist_ok=True)
 
         _git_clone(url=url,
-                   worktree=srcdir,
-                   gitdir=gitdir,
+                   repodir=srcdir,
                    refspec=specs.get('branch'))
 
-        gitref = _git_subcmd(['rev-parse', 'HEAD'], gitdir=gitdir)
+        gitref = _git_subcmd(['rev-parse', 'HEAD'], repodir=srcdir)
         self.trace['upstream'].update({'url': url, 'ref': gitref})
 
     def _fetch_upstream_from_tar(self, specs: SourceStrapSpecs):
@@ -569,12 +552,12 @@ class SourceTarball:
         # Run fetch_upstream_hook
         env = {'URL': specs.upstream_url}
         if method == 'git':
-            env['VCSDIR'] = abspath(self._get_upstream_gitdir())
+            env['VCSDIR'] = abspath(upstream_srcdir)
         self._run_build_script('fetch_upstream', method, upstream_srcdir, env)
 
         # Move extracted upstream sources except mmpack packaging
         for elt in os.listdir(upstream_srcdir):
-            if elt != 'mmpack':
+            if elt != 'mmpack' and elt != '.git':
                 shutil.move(os.path.join(upstream_srcdir, elt), srcdir)
 
     def _patch_sources(self, patches: List[str], srcdir: str):
