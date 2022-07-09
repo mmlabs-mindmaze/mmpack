@@ -119,9 +119,6 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		.execname = "mmpack",
 	};
 
-	if (ctx->prefix == NULL)
-		return -1;
-
 	arg_index = mm_arg_parse(&parser, argc, (char**)argv);
 
 	// If completion is running, we need to offload completion of command
@@ -141,6 +138,11 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	} else {
 		args = default_shell_argv;
 		nargs = MM_NELEM(default_shell_argv) - 1;
+	}
+
+	if (ctx->prefix == NULL) {
+		fprintf(stderr, "Prefix not set\n");
+		return -1;
 	}
 
 	// new_argv contains: 1 command, 1 prefix, nargs arguments from
