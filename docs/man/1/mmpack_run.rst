@@ -14,7 +14,9 @@ run command in prefix
 SYNOPSIS
 ========
 
-**mmpack run** [-h|--help] [*command*]
+**mmpack run** [-n|--no-prefix-mount] [*command*]
+
+**mmpack run** -h|--help
 
 DESCRIPTION
 ===========
@@ -24,6 +26,9 @@ prefix instead.
 
 OPTIONS
 =======
+--no-prefix-mount, -n
+  Do not perform mmpack prefix mount.
+
 --help, -h
   Show help and exit
 
