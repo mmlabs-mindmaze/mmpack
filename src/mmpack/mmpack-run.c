@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cmdline.h"
 #include "common.h"
 #include "context.h"
 #include "mmstring.h"
@@ -21,6 +22,16 @@
 #endif
 
 #include "mmpack-run.h"
+
+
+static char run_doc[] =
+	"\"mmpack run\" execute a program in the mmpack prefix. If no program "
+	"is supplied, the default shell is executed.";
+
+
+static const struct mm_arg_opt cmdline_optv[] = {
+};
+
 
 #if !defined (_WIN32)
 
@@ -90,7 +101,8 @@ char* expand_abspath(const char* prefix)
 LOCAL_SYMBOL
 int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	int nargs;
+	int arg_index, nargs;
+	int is_completing = mm_arg_is_completing();
 	const char** args;
 	char** new_argv;
 	const char* full_prefix;
@@ -98,31 +110,34 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		mm_getenv("SHELL", "sh"),
 		NULL,
 	};
+	struct mm_arg_parser parser = {
+		.flags = is_completing ? MM_ARG_PARSER_COMPLETION : 0,
+		.doc = run_doc,
+		.args_doc = RUN_SYNOPSIS,
+		.optv = cmdline_optv,
+		.num_opt = MM_NELEM(cmdline_optv),
+		.execname = "mmpack",
+	};
 
 	if (ctx->prefix == NULL)
 		return -1;
+
+	arg_index = mm_arg_parse(&parser, argc, (char**)argv);
 
 	// If completion is running, we need to offload completion of command
 	// argument to the shell. However the prefix in use must be reported.
 	// Hence we report a first string identifying the action to perform and
 	// then prefix path is reported.
-	if (mm_arg_is_completing()) {
+	if (is_completing) {
 		printf("execute_run_completion\n");
 		printf("%s\n", ctx->prefix);
 		return 0;
 	}
 
-	if (argc == 2
-	    && (STR_EQUAL(argv[1], strlen(argv[1]), "--help")
-	        || STR_EQUAL(argv[1], strlen(argv[1]), "-h"))) {
-		fprintf(stderr, "Usage:\n\tmmpack "RUN_SYNOPSIS "\n");
-		return 0;
-	}
-
 	// Copy command argument if supplied or launch default shell
-	if (argv[1] != NULL) {
-		args = argv + 1;
-		nargs = argc - 1;
+	if (argc > arg_index) {
+		args = argv + arg_index;
+		nargs = argc - arg_index;
 	} else {
 		args = default_shell_argv;
 		nargs = MM_NELEM(default_shell_argv) - 1;
