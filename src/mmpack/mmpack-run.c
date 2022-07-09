@@ -10,6 +10,7 @@
 #include <mmerrno.h>
 #include <mmlib.h>
 #include <mmsysio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -23,6 +24,7 @@
 
 #include "mmpack-run.h"
 
+static int no_prefix_mount = 0;
 
 static char run_doc[] =
 	"\"mmpack run\" execute a program in the mmpack prefix. If no program "
@@ -30,6 +32,8 @@ static char run_doc[] =
 
 
 static const struct mm_arg_opt cmdline_optv[] = {
+	{"n|no-prefix-mount", MM_OPT_NOVAL|MM_OPT_INT, "1",
+	 {.iptr = &no_prefix_mount}, "Do not perform prefix mount"},
 };
 
 
@@ -86,6 +90,33 @@ char* expand_abspath(const char* prefix)
 }
 
 
+static
+int prepend_env(const char* restrict nameenv, const char* restrict fmt, ...)
+{
+	char* envstr;
+	va_list args;
+	int rv, len;
+
+	// Compute needed size for env
+	va_start(args, fmt);
+	len = vsnprintf(NULL, 0, fmt, args);
+	va_end(args);
+
+	envstr = xx_malloc(len);
+
+	// Actual env string formatting
+	va_start(args, fmt);
+	vsprintf(envstr, fmt, args);
+	va_end(args);
+
+	rv = mm_setenv(nameenv, envstr, MM_ENV_PREPEND);
+
+	free(envstr);
+
+	return rv;
+}
+
+
 /**
  * set_run_env()
  * @ctx:        mmpack context
@@ -93,30 +124,27 @@ char* expand_abspath(const char* prefix)
  * Return: 0 in case of success, -1 otherwise.
  */
 static
-int setup_run_env(struct mmpack_ctx* ctx)
+int setup_run_env(struct mmpack_ctx * ctx)
 {
 	char* full_prefix;
+	const char* target;
 	int rv = -1;
 
 	full_prefix = expand_abspath(ctx->prefix);
 	if (!full_prefix)
 		return -1;
 
+	target = no_prefix_mount ? full_prefix : MOUNT_TARGET;
+
 	// Add prefix path to environment variables
-	if (mm_setenv("PATH", MOUNT_TARGET "/bin", MM_ENV_PREPEND)
-	    || mm_setenv("CPATH", MOUNT_TARGET "/include", MM_ENV_PREPEND)
-	    || mm_setenv("LIBRARY_PATH", MOUNT_TARGET "/lib", MM_ENV_PREPEND)
-	    || mm_setenv("PKG_CONFIG_PATH",
-	                 MOUNT_TARGET "/lib/pkgconfig",
-	                 MM_ENV_PREPEND)
-	    || mm_setenv("MANPATH", MOUNT_TARGET "/share/man", MM_ENV_PREPEND)
+	if (prepend_env("PATH", "%s/bin", target)
+	    || prepend_env("CPATH", "%s/include", target)
+	    || prepend_env("LIBRARY_PATH", "%s/lib", target)
+	    || prepend_env("PKG_CONFIG_PATH", "%s/lib/pkgconfig", target)
+	    || prepend_env("MANPATH", "%s/share/man", target)
+	    || prepend_env("PYTHONPATH", "%s/lib/python3/site-packages", target)
 	    || mm_setenv("MMPACK_PREFIX", full_prefix, MM_ENV_OVERWRITE)
-	    || mm_setenv("MMPACK_ACTIVE_PREFIX", full_prefix, MM_ENV_OVERWRITE)
-	    /* XXX: check PYTHONPATH value once a pure-python mmpack package has
-	     * been created */
-	    || mm_setenv("PYTHONPATH",
-	                 MOUNT_TARGET "/lib/python3/site-packages",
-	                 MM_ENV_PREPEND) )
+	    || mm_setenv("MMPACK_ACTIVE_PREFIX", full_prefix, MM_ENV_OVERWRITE))
 		goto exit;
 
 #if defined (_WIN32)
@@ -204,6 +232,9 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// this is not counted in nargs, thus if we copy nargs+1 element
 	// from args, the NULL termination will be added to new_argv
 	memcpy(new_argv+2, args, (nargs+1) * sizeof(*args));
+
+	if (no_prefix_mount)
+		new_argv = (char**)args;
 
 	if (setup_run_env(ctx))
 		return -1;

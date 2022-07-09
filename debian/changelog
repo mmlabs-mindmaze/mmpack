@@ -1,6 +1,7 @@
 mmpack (0.7.3) UNRELEASED; urgency=medium
 
   * Support git submodules when creating sources.
+  * Add --no-prefix-mount option to mmpack run.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 07 Jul 2022 16:36:50 +0200
 
