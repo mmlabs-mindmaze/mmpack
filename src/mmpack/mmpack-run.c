@@ -87,6 +87,56 @@ char* expand_abspath(const char* prefix)
 
 
 /**
+ * set_run_env()
+ * @ctx:        mmpack context
+ *
+ * Return: 0 in case of success, -1 otherwise.
+ */
+static
+int setup_run_env(struct mmpack_ctx* ctx)
+{
+	char* full_prefix;
+	int rv = -1;
+
+	full_prefix = expand_abspath(ctx->prefix);
+	if (!full_prefix)
+		return -1;
+
+	// Add prefix path to environment variables
+	if (mm_setenv("PATH", MOUNT_TARGET "/bin", MM_ENV_PREPEND)
+	    || mm_setenv("CPATH", MOUNT_TARGET "/include", MM_ENV_PREPEND)
+	    || mm_setenv("LIBRARY_PATH", MOUNT_TARGET "/lib", MM_ENV_PREPEND)
+	    || mm_setenv("PKG_CONFIG_PATH",
+	                 MOUNT_TARGET "/lib/pkgconfig",
+	                 MM_ENV_PREPEND)
+	    || mm_setenv("MANPATH", MOUNT_TARGET "/share/man", MM_ENV_PREPEND)
+	    || mm_setenv("MMPACK_PREFIX", full_prefix, MM_ENV_OVERWRITE)
+	    || mm_setenv("MMPACK_ACTIVE_PREFIX", full_prefix, MM_ENV_OVERWRITE)
+	    /* XXX: check PYTHONPATH value once a pure-python mmpack package has
+	     * been created */
+	    || mm_setenv("PYTHONPATH",
+	                 MOUNT_TARGET "/lib/python3/site-packages",
+	                 MM_ENV_PREPEND) )
+		goto exit;
+
+#if defined (_WIN32)
+	// Convert environment path list that has been set/enriched here and
+	// which are meant to be used in POSIX development environment (in
+	// MSYS2 or Cygwin)
+	conv_env_pathlist_win32_to_posix("CPATH");
+	conv_env_pathlist_win32_to_posix("LIBRARY_PATH");
+	conv_env_pathlist_win32_to_posix("MANPATH");
+	conv_env_pathlist_win32_to_posix("ACLOCAL_PATH");
+#endif
+	rv = 0;
+
+exit:
+	free(full_prefix);
+	return rv;
+}
+
+
+/**
  * mmpack_run() - main function for the command to run commands
  * @ctx: mmpack context
  * @argc: number of arguments
@@ -105,7 +155,6 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	int is_completing = mm_arg_is_completing();
 	const char** args;
 	char** new_argv;
-	const char* full_prefix;
 	const char* default_shell_argv[] = {
 		mm_getenv("SHELL", "sh"),
 		NULL,
@@ -156,36 +205,8 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// from args, the NULL termination will be added to new_argv
 	memcpy(new_argv+2, args, (nargs+1) * sizeof(*args));
 
-	full_prefix = expand_abspath(ctx->prefix);
-	if (!full_prefix)
+	if (setup_run_env(ctx))
 		return -1;
-
-	// Add prefix path to environment variables
-	if (mm_setenv("PATH", MOUNT_TARGET "/bin", MM_ENV_PREPEND)
-	    || mm_setenv("CPATH", MOUNT_TARGET "/include", MM_ENV_PREPEND)
-	    || mm_setenv("LIBRARY_PATH", MOUNT_TARGET "/lib", MM_ENV_PREPEND)
-	    || mm_setenv("PKG_CONFIG_PATH",
-	                 MOUNT_TARGET "/lib/pkgconfig",
-	                 MM_ENV_PREPEND)
-	    || mm_setenv("MANPATH", MOUNT_TARGET "/share/man", MM_ENV_PREPEND)
-	    || mm_setenv("MMPACK_PREFIX", full_prefix, MM_ENV_OVERWRITE)
-	    || mm_setenv("MMPACK_ACTIVE_PREFIX", full_prefix, MM_ENV_OVERWRITE)
-	    /* XXX: check PYTHONPATH value once a pure-python mmpack package has
-	     * been created */
-	    || mm_setenv("PYTHONPATH",
-	                 MOUNT_TARGET "/lib/python3/site-packages",
-	                 MM_ENV_PREPEND) )
-		return -1;
-
-#if defined (_WIN32)
-	// Convert environment path list that has been set/enriched here and
-	// which are meant to be used in POSIX development environment (in
-	// MSYS2 or Cygwin)
-	conv_env_pathlist_win32_to_posix("CPATH");
-	conv_env_pathlist_win32_to_posix("LIBRARY_PATH");
-	conv_env_pathlist_win32_to_posix("MANPATH");
-	conv_env_pathlist_win32_to_posix("ACLOCAL_PATH");
-#endif
 
 	return mm_execv(new_argv[0], 0, NULL, 0, new_argv, NULL);
 }
