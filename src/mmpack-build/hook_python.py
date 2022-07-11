@@ -11,7 +11,7 @@ from configparser import ConfigParser
 from email.parser import Parser
 from glob import glob, iglob
 from itertools import chain
-from os.path import basename
+from os.path import basename, commonpath, dirname
 from textwrap import dedent
 from typing import (Set, Dict, List, Iterable, Iterator, NamedTuple, Optional,
                     Tuple)
@@ -186,7 +186,18 @@ def _gen_py_importname(pyfiles: Iterable[str],
     cmd += cmdfiles
 
     cmd_output = shell(cmd)
-    return {k: set(v) for k, v in json.loads(cmd_output).items()}
+    pkgfiles = {k: set(v) for k, v in json.loads(cmd_output).items()}
+
+    # Assign data file to its enclosing python public package
+    data_files = set(pyfiles).difference(set(cmdfiles))
+    pypkg_basedirs = ((imp, commonpath(dirname(f) for f in pkgfiles) + '/')
+                      for imp, pkg_pyfiles in pkgfiles.items())
+    for data in data_files:
+        for impname, rootpath in pypkg_basedirs:
+            if data.startswith(rootpath):
+                pkgfiles[impname].add(data)
+
+    return pkgfiles
 
 
 def _gen_pysymbols(pkgfiles: Set[str],
