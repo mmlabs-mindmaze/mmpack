@@ -10,6 +10,41 @@
 
 #define MOUNT_TARGET    L"M:"
 
+// STYLE-EXCEPTION-BEGIN
+typedef NTSTATUS (*_NtSetInformationProcess)(HANDLE ProcessHandle, PROCESS_INFORMATION_CLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength);
+typedef VOID (*_RtlInitUnicodeString)(PUNICODE_STRING DestinationString, PCWSTR SourceString);
+typedef NTSTATUS (*_NtCreateSymbolicLinkObject)(PHANDLE pHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PUNICODE_STRING DestinationName);
+typedef NTSTATUS (*_NtCreateDirectoryObject)(PHANDLE DirectoryHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes);
+typedef NTSTATUS (*_NtOpenDirectoryObject)(PHANDLE DirectoryObjectHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes);
+
+static _RtlInitUnicodeString pRtlInitUnicodeString;
+static _NtCreateDirectoryObject pNtCreateDirectoryObject;
+static _NtSetInformationProcess pNtSetInformationProcess;
+static _NtCreateSymbolicLinkObject pNtCreateSymbolicLinkObject;
+static _NtOpenDirectoryObject pNtOpenDirectoryObject;
+
+static
+void load_nt_api(void)
+{
+	HMODULE ntmod = LoadLibraryW("ntdll.dll");
+
+	pRtlInitUnicodeString = (_RtlInitUnicodeString)GetProcAddress(ntmod, "RtlInitUnicodeString");
+	pNtCreateDirectoryObject = (_NtCreateDirectoryObject)GetProcAddress(ntmod, "NtCreateDirectoryObject");
+	pNtSetInformationProcess = (_NtSetInformationProcess)GetProcAddress(ntmod, "NtSetInformationProcess");
+	pNtCreateSymbolicLinkObject = (_NtCreateSymbolicLinkObject)GetProcAddress(ntmod, "NtCreateSymbolicLinkObject");
+	pNtOpenDirectoryObject = (_NtOpenDirectoryObject)GetProcAddress(ntmod, "NtOpenDirectoryObject");
+
+	if (!pRtlInitUnicodeString
+	    || !pNtCreateDirectoryObject
+	    || !pNtSetInformationProcess
+	    || !pNtCreateSymbolicLinkObject
+	    || !pNtOpenDirectoryObject) {
+		fprintf(stderr, "Could not load all API's\n");
+		exit(EXIT_FAILURE);
+	}
+}
+// STYLE-EXCEPTION-END
+
 
 /**************************************************************************
  *                                                                        *
@@ -160,6 +195,8 @@ int main(void)
 	DWORD exitcode = EXIT_FAILURE;
 	STARTUPINFOW si = {.cb = sizeof(si)};
 
+	load_nt_api();
+
 	// Read command line, read first argument (path of this program),
 	// discard it, and keep the second argument (normally path of
 	// prefix). After this, cmdline should point at the first argument
@@ -167,20 +204,6 @@ int main(void)
 	cmdline = GetCommandLineW();
 	cmdline = copy_first_arg(path, cmdline);
 	cmdline = copy_first_arg(path, cmdline);
-
-	if (check_running_mmpack(path)) {
-		/* TODO: find a way to create a new authenticated session here */
-		fprintf(stderr, "Cannot mount target with different prefixes and "
-		                "on the same session.");
-		return EXIT_FAILURE;
-	}
-
-	// Create temporary drive M: pointing to prefix_path
-	if (!DefineDosDeviceW(DDD_NO_BROADCAST_SYSTEM, MOUNT_TARGET, path)) {
-		fprintf(stderr, "Failed to create dos device M: mapped"
-		                " to %S: %lu\n", path, GetLastError());
-		return EXIT_FAILURE;
-	}
 
 	// Start process with the same startup information but with the
 	// stripped command line
@@ -205,8 +228,6 @@ int main(void)
 
 exit:
 	// Try remove temporary drive letter M:
-	if (!DefineDosDeviceW(DDD_NO_BROADCAST_SYSTEM|DDD_REMOVE_DEFINITION, MOUNT_TARGET, NULL))
-		fprintf(stderr, "Warning: Failed to revert dos device: %lu\n", GetLastError());
 
 	return exitcode;
 }
