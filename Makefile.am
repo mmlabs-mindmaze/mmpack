@@ -264,11 +264,11 @@ mmpack_LDADD = \
 mount_mmpack_prefix_SOURCES =
 
 if OS_KERNEL_LINUX
-mount_mmpack_prefix_SOURCES += src/mmpack/mount-prefix-linux.c
+mount_mmpack_prefix_SOURCES += src/mmpack/mount-prefix-linux/main.c
 endif
 
 if OS_KERNEL_NT
-mount_mmpack_prefix_SOURCES += src/mmpack/mount-prefix-nt.c
+mount_mmpack_prefix_SOURCES += src/mmpack/mount-prefix-nt/main.c
 endif
 
 
