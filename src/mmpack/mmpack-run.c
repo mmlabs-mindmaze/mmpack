@@ -17,10 +17,8 @@
 #include "cmdline.h"
 #include "common.h"
 #include "context.h"
+#include "exec-in-prefix.h"
 #include "mmstring.h"
-#if defined (_WIN32)
-#include "path-win32.h"
-#endif
 
 #include "mmpack-run.h"
 
@@ -35,39 +33,6 @@ static const struct mm_arg_opt cmdline_optv[] = {
 	{"n|no-prefix-mount", MM_OPT_NOVAL|MM_OPT_INT, "1",
 	 {.iptr = &no_prefix_mount}, "Do not perform prefix mount"},
 };
-
-
-#if !defined (_WIN32)
-
-static
-char* get_mount_prefix_bin(void)
-{
-	return LIBEXECDIR "/mmpack/mount-mmpack-prefix" EXEEXT;
-}
-
-#else // _WIN32
-
-static char* mount_prefix_bin = NULL;
-
-
-MM_DESTRUCTOR(mount_prefix_bin_str)
-{
-	free(mount_prefix_bin);
-}
-
-#define REL_MOUNT_PREFIX_BIN \
-	BIN_TO_LIBEXECDIR "/mmpack/mount-mmpack-prefix" EXEEXT
-
-static
-char* get_mount_prefix_bin(void)
-{
-	if (!mount_prefix_bin)
-		mount_prefix_bin = get_relocated_path(REL_MOUNT_PREFIX_BIN);
-
-	return mount_prefix_bin;
-}
-
-#endif /* if !defined (_WIN32) */
 
 
 static
@@ -147,15 +112,6 @@ int setup_run_env(struct mmpack_ctx* ctx)
 	    || mm_setenv("MMPACK_ACTIVE_PREFIX", full_prefix, MM_ENV_OVERWRITE))
 		goto exit;
 
-#if defined (_WIN32)
-	// Convert environment path list that has been set/enriched here and
-	// which are meant to be used in POSIX development environment (in
-	// MSYS2 or Cygwin)
-	conv_env_pathlist_win32_to_posix("CPATH");
-	conv_env_pathlist_win32_to_posix("LIBRARY_PATH");
-	conv_env_pathlist_win32_to_posix("MANPATH");
-	conv_env_pathlist_win32_to_posix("ACLOCAL_PATH");
-#endif
 	rv = 0;
 
 exit:
@@ -179,10 +135,9 @@ exit:
 LOCAL_SYMBOL
 int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 {
-	int arg_index, nargs;
+	int arg_index;
 	int is_completing = mm_arg_is_completing();
 	const char** args;
-	char** new_argv;
 	const char* default_shell_argv[] = {
 		mm_getenv("SHELL", "sh"),
 		NULL,
@@ -211,10 +166,8 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 	// Copy command argument if supplied or launch default shell
 	if (argc > arg_index) {
 		args = argv + arg_index;
-		nargs = argc - arg_index;
 	} else {
 		args = default_shell_argv;
-		nargs = MM_NELEM(default_shell_argv) - 1;
 	}
 
 	if (ctx->prefix == NULL) {
@@ -222,22 +175,8 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		return -1;
 	}
 
-	// new_argv contains: 1 command, 1 prefix, nargs arguments from
-	// argv and one terminating NULL => length = nargs+3
-	new_argv = alloca((nargs+3) * sizeof(*new_argv));
-	new_argv[0] = get_mount_prefix_bin();
-	new_argv[1] = ctx->prefix;
-
-	// args is terminated by NULL (either from argv or default_argv) and
-	// this is not counted in nargs, thus if we copy nargs+1 element
-	// from args, the NULL termination will be added to new_argv
-	memcpy(new_argv+2, args, (nargs+1) * sizeof(*args));
-
-	if (no_prefix_mount)
-		new_argv = (char**)args;
-
 	if (setup_run_env(ctx))
 		return -1;
 
-	return mm_execv(new_argv[0], 0, NULL, 0, new_argv, NULL);
+	return exec_in_prefix(ctx->prefix, args, no_prefix_mount);
 }
