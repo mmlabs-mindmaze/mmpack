@@ -15,6 +15,7 @@ mmpack_lib_sources = files(
 	'context.h',
 	'download.c',
 	'download.h',
+	'exec-in-prefix.h',
 	'indextable.c',
 	'indextable.h',
 	'install-state.c',
@@ -80,15 +81,15 @@ mmpack_lib_sources = files(
 	'utils.h',
 	'xx-alloc.h',
 )
-if host_machine.system() == 'windows'
-    mmpack_lib_sources += files(
-            'path-win32.c',
-            'path-win32.h',
-    )
-endif
 
 # include top dir for config.h header
 inc = include_directories('.', '../../')
+
+if host_machine.system() == 'windows'
+    subdir('mount-prefix-nt')
+else
+    subdir('mount-prefix-linux')
+endif
 
 gen_site_py = cstrgen.process('site.py')
 
@@ -107,31 +108,6 @@ mmpack = executable('mmpack',
         install : true,
         dependencies: [libcurl, libarchive, libyaml, libmmlib, zlib],
 )
-
-if host_machine.system() == 'windows'
-    mount_mmpack_prefix_sources = files('mount-prefix-nt.c')
-else
-    mount_mmpack_prefix_sources = files('mount-prefix-linux.c')
-endif
-mount_mmpack_prefix = executable('mount-mmpack-prefix',
-        mount_mmpack_prefix_sources,
-        include_directories : inc,
-        install : true,
-        install_dir : get_option('libexecdir') / 'mmpack',
-)
-
-# dev linux-only helper function, not part of any target
-# requires root permissions to run
-setcap = find_program('/sbin/setcap', required : false)
-if setcap.found()
-    run_target('setcap',
-            command : [
-                setcap,
-                'cap_dac_override,cap_sys_admin+ep',
-                get_option('prefix') / get_option('libexecdir') / 'mmpack' / 'mount-mmpack-prefix'
-            ],
-    )
-endif # setcap
 
 install_data(files('prompt.bash'),
         install_dir : get_option('datadir') / 'mmpack',
