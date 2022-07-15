@@ -1,3 +1,5 @@
+subdir('detours')
+
 mount_mmpack_prefix_sources = files('main.c')
 
 mount_mmpack_prefix = executable('mount-mmpack-prefix',
