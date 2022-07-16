@@ -1,4 +1,4 @@
-project('mmpack', 'c',
+project('mmpack', ['c', 'cpp'],
         version: run_command(find_program('read_version.py')).stdout().strip(),
         license: 'GPL3',
         meson_version: '>= 0.50',
