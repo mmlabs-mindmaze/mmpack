@@ -9,4 +9,9 @@ mount_mmpack_prefix = executable('mount-mmpack-prefix',
         install_dir : get_option('libexecdir') / 'mmpack',
 )
 
-
+shared_library('mmpack-mount-helper',
+        files('mount-helper.c'),
+        install : true,
+        install_dir : get_option('libexecdir') / 'mmpack',
+        link_with: [detours],
+)
