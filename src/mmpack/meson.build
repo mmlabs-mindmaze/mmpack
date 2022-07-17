@@ -111,6 +111,7 @@ mmpack = executable('mmpack',
         dependencies: [libcurl, libarchive, libyaml, libmmlib, zlib],
 )
 all_c_sources += mmpack_sources
+deployed_targets += mmpack
 
 install_data(files('prompt.bash'),
         install_dir : get_option('datadir') / 'mmpack',

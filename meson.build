@@ -69,6 +69,7 @@ cstrgen = generator(
 
 all_c_sources = []
 all_sources = []
+deployed_targets = []
 
 
 subdir('common-licenses')
@@ -76,6 +77,8 @@ subdir('src/mmpack')
 subdir('src/mmpack-build')
 subdir('src/repository')
 subdir('data')
+
+all_sources += all_c_sources
 
 deployment_dir = meson.build_root() + '/deployment-test'
 install_manifest = custom_target('install-manifest',
@@ -92,8 +95,8 @@ do_deployment_test = custom_target('deployment-test',
                     deployment_dir,
                     install_manifest,
         ],
-        depends : [install_manifest, mmpack, mount_mmpack_prefix],
-        depend_files : [ mmpack_build_sources ],
+        depends : [ install_manifest ] + deployed_targets,
+        depend_files : [ all_sources ],
         build_by_default : true,
 )
 

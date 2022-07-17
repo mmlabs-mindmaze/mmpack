@@ -2,24 +2,13 @@
 # dev targets
 #
 
-all_sources += all_c_sources
-
-
-if tests_state == 'enabled'
-    all_sources += mmpack_unit_tests_sources
-endif
-
-if docs_state == 'enabled'
-    all_sources += man_pages_sources
-endif
-
 codespell = find_program('codespell', required : false)
 if codespell.found()
     run_target('codespell',
         command : [
             codespell,
             '-x', files('codespell-ignore'),
-            all_sources,
+            all_sources + man_pages_sources + mmpack_unit_tests_sources,
         ]
     )
 endif # codespell
