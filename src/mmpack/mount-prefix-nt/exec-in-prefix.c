@@ -5,6 +5,10 @@
 # include <config.h>
 #endif
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+#include <stdlib.h>
 #include <mmlib.h>
 #include <mmsysio.h>
 
@@ -13,35 +17,124 @@
 #include "exec_in_prefix.h"
 
 
-static char* mount_prefix_bin = NULL;
-
-
-MM_DESTRUCTOR(mount_prefix_bin_str)
+/**
+ * check_running_mmpack() - check mmpack prefix input
+ * @path: given input path
+ *
+ * This is used to prevent running two different prefixes at the same time
+ *
+ * This only is about prevent two distinct concurrent prefixes on the same
+ * windows session. The same user logged twice independently (with password)
+ * does not have that restriction.
+ *
+ * Returns: 0 on success (path can be used), or a non-zero value
+ * otherwise
+ */
+static
+int check_running_mmpack(WCHAR * path)
 {
-	free(mount_prefix_bin);
+	DWORD rv;
+	WCHAR prev_path[MAX_PATH];
+	WCHAR * norm_prev_path;
+	WCHAR norm_path[MAX_PATH];
+
+	/* get and normalize the folder path of MOUNT_TARGET (M:) */
+	rv = QueryDosDeviceW(MOUNT_TARGET, prev_path, MAX_PATH);
+	if (rv == 0) {
+		switch (GetLastError()) {
+		case ERROR_FILE_NOT_FOUND:
+			return 0;
+
+		default:
+			return -1;
+		}
+	}
+	if (memcmp(prev_path, L"\\??\\", 4 * sizeof(WCHAR)) == 0)
+		norm_prev_path = &prev_path[wcslen(L"\\??\\")];
+	else
+		norm_prev_path = &prev_path[0];
+
+	/* normalize input path */
+	GetFullPathNameW(path, MAX_PATH, norm_path, NULL);
+
+	return wcscmp(norm_prev_path, norm_path);
 }
 
-#define REL_MOUNT_PREFIX_BIN \
-	BIN_TO_LIBEXECDIR "/mmpack/mount-mmpack-prefix" EXEEXT
 
 static
-char* get_mount_prefix_bin(void)
+WCHAR* abswpath(const char* path)
 {
-	if (!mount_prefix_bin)
-		mount_prefix_bin = get_relocated_path(REL_MOUNT_PREFIX_BIN);
+	char* fpath;
+	WCHAR* wpath = NULL;
+	int len;
 
-	return mount_prefix_bin;
+	fpath = _fullpath(NULL, path, 32768);
+	len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+	                          fpath, -1,
+	                          NULL, 0);
+	if (len == -1) {
+		fprintf(stderr, "invalid prefix: %s\n", prefix);
+		goto exit;
+	}
+
+	wpath = malloc(len*sizeof(*wpath));
+	MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+	                    fpath, -1, wpath, len);
+
+exit:
+	free(fpath);
+	return wpath;
+}
+
+
+static noreturn
+void mount_and_exec(const char* prefix, const char* argv[])
+{
+	WCHAR* path;
+
+	path = abswpath(prefix);
+	if (!path)
+		goto exit;
+
+	if (check_running_mmpack(path)) {
+		/* TODO: find a way to create a new authenticated session here */
+		fprintf(stderr, "Cannot mount target with different prefixes and "
+		                "on the same session.");
+		goto exit;
+	}
+
+	// Create temporary drive M: pointing to prefix_path
+	if (!DefineDosDeviceW(DDD_NO_BROADCAST_SYSTEM, MOUNT_TARGET, path)) {
+		fprintf(stderr, "Failed to create dos device M: mapped"
+		                " to %S: %lu\n", path, GetLastError());
+		goto exit;
+	}
+
+
+	if (mm_spawn(&pid, argv[0], 0, NULL, 0, argv, NULL)
+	   || mm_wait_process(pid, &status)
+	   || !(status & MM_WSTATUS_EXITED))
+		goto umount;
+
+	exitcode = status & MM_WSTATUS_CODEMASK;
+
+umount:
+	// Try remove temporary drive letter M:
+	if (!DefineDosDeviceW(DDD_NO_BROADCAST_SYSTEM|DDD_REMOVE_DEFINITION, MOUNT_TARGET, NULL))
+		fprintf(stderr, "Warning: Failed to revert dos device: %lu\n", GetLastError());
+exit:
+	free(path);
+	exit(exitcode);
 }
 
 
 LOCAL_SYMBOL
 int exec_in_prefix(const char* prefix, const char* argv[], int no_prefix_mount)
 {
-	char** new_argv;
-	int nargs;
-
-	// Count number of element in argv
-	for (nargs = 0; argv[nargs] != NULL; nargs++);
+	int exitcode = EXIT_FAILURE;
+	int status;
+	mm_pid_t pid;
+	WCHAR* path;
 
 	// Convert environment path list that has been set/enriched here and
 	// which are meant to be used in POSIX development environment (in
@@ -51,19 +144,9 @@ int exec_in_prefix(const char* prefix, const char* argv[], int no_prefix_mount)
 	conv_env_pathlist_win32_to_posix("MANPATH");
 	conv_env_pathlist_win32_to_posix("ACLOCAL_PATH");
 
-	// new_argv contains: 1 command, 1 prefix, nargs arguments from
-	// argv and one terminating NULL => length = nargs+3
-	new_argv = alloca((nargs+3) * sizeof(*new_argv));
-	new_argv[0] = get_mount_prefix_bin();
-	new_argv[1] = prefix;
-
-	// args is terminated by NULL (either from argv or default_argv) and
-	// this is not counted in nargs, thus if we copy nargs+1 element
-	// from args, the NULL termination will be added to new_argv
-	memcpy(new_argv+2, argv, (nargs+1) * sizeof(*argv));
-
 	if (no_prefix_mount)
-		new_argv = (char**)argv;
+		return mm_execv(argv[0], 0, NULL, 0, argv, NULL);
 
-	return mm_execv(new_argv[0], 0, NULL, 0, new_argv, NULL);
+	mount_and_exec(prefix, argv);
 }
+
