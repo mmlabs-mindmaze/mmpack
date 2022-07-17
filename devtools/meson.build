@@ -2,9 +2,6 @@
 # dev targets
 #
 
-all_sources += all_c_sources
-
-
 if tests_state == 'enabled'
     all_sources += mmpack_unit_tests_sources
 endif
