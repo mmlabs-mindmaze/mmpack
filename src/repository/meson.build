@@ -12,6 +12,7 @@ mmpack_repo_scripts = configure_file(
 	configuration: conf_data,
 )
 all_sources += files('mmpack-modifyrepo.py.in')
+deployed_targets += mmpack_repo_scripts
 
 install_data(mmpack_repo_scripts,
         install_dir : get_option('bindir'),

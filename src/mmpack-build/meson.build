@@ -76,6 +76,7 @@ settings_py = configure_file(
         configuration : config_data,
 )
 mmpack_build_sources += settings_py
+deployed_targets += settings_py
 
 install_data(mmpack_build_sources, install_dir : mmpackbuilddir)
 
@@ -87,6 +88,7 @@ mmpack_build = configure_file(
 install_data(mmpack_build,
     install_dir : get_option('bindir'),
 )
+deployed_targets += mmpack_build
 
 mmpack_build_plugins = files(
 	'build-autotools',
