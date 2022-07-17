@@ -92,8 +92,8 @@ do_deployment_test = custom_target('deployment-test',
                     deployment_dir,
                     install_manifest,
         ],
-        depends : [install_manifest, mmpack, mount_mmpack_prefix],
-        depend_files : [ mmpack_build_sources ],
+        depends : [install_manifest, mmpack],
+        depend_files : [ all_sources ],
         build_by_default : true,
 )
 
