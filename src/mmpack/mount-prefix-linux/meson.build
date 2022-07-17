@@ -11,6 +11,7 @@ mount_mmpack_prefix = executable('mount-mmpack-prefix',
         install : true,
         install_dir : get_option('libexecdir') / 'mmpack',
 )
+deployed_targets += mount_mmpack_prefix
 
 # dev linux-only helper function, not part of any target
 # requires root permissions to run
