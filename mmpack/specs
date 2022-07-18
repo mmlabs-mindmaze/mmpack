@@ -4,7 +4,6 @@ maintainer: nicolas.bourdaud@gmail.com
 url: https://github.com/mmlabs-mindmaze/mmpack
 licenses: [ GPL-3 ]
 copyright: 'MindMaze Holdings SA'
-build-system: meson
 build-depends:
   - mmlib-devel
 description: >
