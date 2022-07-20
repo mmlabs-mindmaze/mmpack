@@ -87,6 +87,8 @@ if host_machine.system() == 'windows'
     )
 endif
 
+all_c_sources += mmpack_lib_sources
+
 # include top dir for config.h header
 inc = include_directories('.', '../../')
 
@@ -107,6 +109,7 @@ mmpack = executable('mmpack',
         install : true,
         dependencies: [libcurl, libarchive, libyaml, libmmlib, zlib],
 )
+all_c_sources += mmpack_sources
 
 if host_machine.system() == 'windows'
     mount_mmpack_prefix_sources = files('mount-prefix-nt.c')
@@ -119,6 +122,8 @@ mount_mmpack_prefix = executable('mount-mmpack-prefix',
         install : true,
         install_dir : get_option('libexecdir') / 'mmpack',
 )
+all_c_sources += mount_mmpack_prefix_sources
+
 
 # dev linux-only helper function, not part of any target
 # requires root permissions to run

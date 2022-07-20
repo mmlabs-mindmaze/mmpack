@@ -67,6 +67,10 @@ cstrgen = generator(
 )
 
 
+all_c_sources = []
+all_sources = []
+
+
 subdir('common-licenses')
 subdir('src/mmpack')
 subdir('src/mmpack-build')

@@ -2,13 +2,7 @@
 # dev targets
 #
 
-all_c_sources = (mmpack_sources
-        + mmpack_lib_sources
-        + mount_mmpack_prefix_sources)
-
-all_sources = (all_c_sources
-        + mmpack_build_sources
-        + mmpack_build_plugins)
+all_sources += all_c_sources
 
 
 if tests_state == 'enabled'

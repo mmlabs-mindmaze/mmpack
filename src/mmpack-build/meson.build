@@ -40,6 +40,7 @@ mmpack_build_sources = files(
         'xdg.py',
         'yaml_dumper.py',
 )
+all_sources += mmpack_build_sources
 
 bindir = get_option('prefix') / get_option('bindir')
 pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
