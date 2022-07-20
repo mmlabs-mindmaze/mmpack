@@ -91,8 +91,8 @@ def _escape_newline(text: str) -> str:
     escaped = ''
 
     pos = 0
-    for occurence in re.finditer(r'\n+', text):
-        start, end = occurence.span(0)
+    for occurrence in re.finditer(r'\n+', text):
+        start, end = occurrence.span(0)
         escaped += text[pos:start]
         escaped += text[start:end].replace('\n', '\n.')
         if end != len(text):
