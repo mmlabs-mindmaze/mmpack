@@ -21,7 +21,7 @@
 #define _CRT_STDIO_ARBITRARY_WIDE_SPECIFIERS 1
 #define _ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE 1
 
-#pragma warning(disable:4068) // unknown pragma (suppress)
+//#pragma warning(disable:4068) // unknown pragma (suppress)
 
 #if _MSC_VER >= 1900
 #pragma warning(push)
@@ -125,6 +125,14 @@
 #define DETOURS_STRINGIFY(x)    DETOURS_STRINGIFY_(x)
 
 #define VER_DETOURS_BITS    DETOURS_STRINGIFY(DETOURS_BITS)
+
+#if defined(__GNUC__) || defined(__clang__)
+#  define ALIGN(x) __attribute__ ((aligned(x)))
+#elif defined(_MSC_VER)
+#  define ALIGN(x) __declspec(align(x))
+#else
+#  error "Unknown compiler; can't define ALIGN"
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -301,7 +309,7 @@ typedef ULONG ULONG_PTR;
 
 #ifdef DETOURS_INTERNAL
 
-#pragma warning(disable:4615) // unknown warning type (suppress with older compilers)
+//#pragma warning(disable:4615) // unknown warning type (suppress with older compilers)
 
 #ifndef _Benign_race_begin_
 #define _Benign_race_begin_
@@ -942,10 +950,10 @@ LONG InterlockedCompareExchange(_Inout_ LONG *ptr, _In_ LONG nval, _In_ LONG ova
     return (LONG)::InterlockedCompareExchange((PVOID*)ptr, (PVOID)nval, (PVOID)oval);
 }
 #else
-#pragma warning(push)
-#pragma warning(disable:4091) // empty typedef
+//#pragma warning(push)
+//#pragma warning(disable:4091) // empty typedef
 #include <dbghelp.h>
-#pragma warning(pop)
+//#pragma warning(pop)
 #endif
 
 #ifdef IMAGEAPI // defined by DBGHELP.H
@@ -1036,7 +1044,7 @@ int Detour_AssertExprWithFunctionName(int reportType, const char* filename, int 
 
 C_ASSERT(DETOUR_IA64_TEMPLATE_SIZE + DETOUR_IA64_INSTRUCTIONS_PER_BUNDLE * DETOUR_IA64_INSTRUCTION_SIZE == 128);
 
-__declspec(align(16)) struct DETOUR_IA64_BUNDLE
+struct ALIGN(16) DETOUR_IA64_BUNDLE
 {
   public:
     union

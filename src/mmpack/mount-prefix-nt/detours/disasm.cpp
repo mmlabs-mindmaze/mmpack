@@ -144,8 +144,10 @@
 //      offsets.
 //
 
+#if defined(_MSC_VER)
 #pragma data_seg(".detourd")
 #pragma const_seg(".detourc")
+#endif
 
 //////////////////////////////////////////////////// X86 and X64 Disassembler.
 //
@@ -327,10 +329,13 @@ CDetourDis::CDetourDis(_Out_opt_ PBYTE *ppbTarget, _Out_opt_ LONG *plExtra) :
     m_bOperandOverride(FALSE),
     m_bAddressOverride(FALSE),
     m_bRaxOverride(FALSE),
+    m_bVex(FALSE),
+    m_bEvex(FALSE),
     m_bF2(FALSE),
     m_bF3(FALSE),
-    m_bVex(FALSE),
-    m_bEvex(FALSE)
+    m_lScratchExtra(0),
+    m_pbScratchTarget(NULL),
+    m_rbScratchDst("")
 {
     m_ppbTarget = ppbTarget ? ppbTarget : &m_pbScratchTarget;
     m_plExtra = plExtra ? plExtra : &m_lScratchExtra;
@@ -2195,7 +2200,7 @@ UINT DETOUR_IA64_BUNDLE::Copy(_Out_ DETOUR_IA64_BUNDLE *pDst,
 {
     // Copy the bytes unchanged.
 
-#pragma warning(suppress:6001) // using uninitialized *pDst
+//#pragma warning(suppress:6001) // using uninitialized *pDst
     pDst->wide[0] = wide[0];
     pDst->wide[1] = wide[1];
 
