@@ -1285,7 +1285,6 @@ BOOL WINAPI AllocExeHelper(_Out_ PDETOUR_EXE_HELPER *pHelper,
 
 // REVIEW 28020 The expression '1<=_Param_(2)& &_Param_(2)<=2147483647' is not true at this call.
 // REVIEW 28313 Analysis will not proceed past this point because of annotation evaluation. The annotation expression *_Param_(3)<_Param_(2)&&*_Param_(3)<=stringLength$(_Param_(1)) cannot be true under any assumptions at this point in the program.
-#pragma warning(suppress:28020 28313)
         hr = StringCchLengthA(psz, cSize - cOffset, &cchDest);
         if (!SUCCEEDED(hr)) {
             goto Cleanup;

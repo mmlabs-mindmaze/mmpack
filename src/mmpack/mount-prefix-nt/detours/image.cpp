@@ -9,10 +9,6 @@
 //  Used for for payloads, byways, and imports.
 //
 
-#if _MSC_VER < 1299
-#pragma warning(disable: 4710)
-#endif
-
 // #define DETOUR_DEBUG 1
 #define DETOURS_INTERNAL
 #include "detours.h"
