@@ -85,7 +85,7 @@ static bool detour_is_imported(PBYTE pbCode, PBYTE pbAddress)
             return true;
         }
     }
-#pragma prefast(suppress:28940, "A bad pointer means this probably isn't a PE header.")
+//#pragma prefast(suppress:28940, "A bad pointer means this probably isn't a PE header.")
     __except(GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ?
              EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
         return false;
@@ -342,12 +342,22 @@ enum {
     SIZE_OF_JMP = 5
 };
 
+static
+PBYTE copy_i32(PBYTE pbCode, INT32 value)
+{
+    int i;
+
+    for (i = 0; i < (int)sizeof(value); i++)
+        *pbCode++ = (value >> (8 * i)) & 0xFF;
+
+    return pbCode;
+}
+
 inline PBYTE detour_gen_jmp_immediate(PBYTE pbCode, PBYTE pbJmpVal)
 {
     PBYTE pbJmpSrc = pbCode + 5;
     *pbCode++ = 0xE9;   // jmp +imm32
-    *((INT32*&)pbCode)++ = (INT32)(pbJmpVal - pbJmpSrc);
-    return pbCode;
+    return copy_i32(pbCode, pbJmpVal - pbJmpSrc);
 }
 
 inline PBYTE detour_gen_jmp_indirect(PBYTE pbCode, PBYTE *ppbJmpVal)
@@ -355,8 +365,7 @@ inline PBYTE detour_gen_jmp_indirect(PBYTE pbCode, PBYTE *ppbJmpVal)
     PBYTE pbJmpSrc = pbCode + 6;
     *pbCode++ = 0xff;   // jmp [+imm32]
     *pbCode++ = 0x25;
-    *((INT32*&)pbCode)++ = (INT32)((PBYTE)ppbJmpVal - pbJmpSrc);
-    return pbCode;
+    return copy_i32(pbCode, (PBYTE)ppbJmpVal - pbJmpSrc);
 }
 
 inline PBYTE detour_gen_brk(PBYTE pbCode, PBYTE pbLimit)
@@ -1184,7 +1193,7 @@ struct DETOUR_REGION
 };
 typedef DETOUR_REGION * PDETOUR_REGION;
 
-const ULONG DETOUR_REGION_SIGNATURE = 'Rrtd';
+const ULONG DETOUR_REGION_SIGNATURE = 0x64747252;   // 'Rrtd' is LSB
 const ULONG DETOUR_REGION_SIZE = 0x10000;
 const ULONG DETOUR_TRAMPOLINES_PER_REGION = (DETOUR_REGION_SIZE
                                              / sizeof(DETOUR_TRAMPOLINE)) - 1;
@@ -1494,7 +1503,7 @@ static BOOL detour_is_region_empty(PDETOUR_REGION pRegion)
 
     // Stop if any of the trampolines aren't free.
     PDETOUR_TRAMPOLINE pTrampoline = ((PDETOUR_TRAMPOLINE)pRegion) + 1;
-    for (int i = 0; i < DETOUR_TRAMPOLINES_PER_REGION; i++) {
+    for (ULONG i = 0; i < DETOUR_TRAMPOLINES_PER_REGION; i++) {
         if (pTrampoline[i].pbRemain != NULL &&
             (pTrampoline[i].pbRemain < pbRegionBeg ||
              pTrampoline[i].pbRemain >= pbRegionLim)) {
@@ -1665,7 +1674,7 @@ LONG WINAPI DetourTransactionCommit()
 
 static BYTE detour_align_from_trampoline(PDETOUR_TRAMPOLINE pTrampoline, BYTE obTrampoline)
 {
-    for (LONG n = 0; n < ARRAYSIZE(pTrampoline->rAlign); n++) {
+    for (ULONG n = 0; n < ARRAYSIZE(pTrampoline->rAlign); n++) {
         if (pTrampoline->rAlign[n].obTrampoline == obTrampoline) {
             return pTrampoline->rAlign[n].obTarget;
         }
@@ -1675,7 +1684,7 @@ static BYTE detour_align_from_trampoline(PDETOUR_TRAMPOLINE pTrampoline, BYTE ob
 
 static LONG detour_align_from_target(PDETOUR_TRAMPOLINE pTrampoline, LONG obTarget)
 {
-    for (LONG n = 0; n < ARRAYSIZE(pTrampoline->rAlign); n++) {
+    for (ULONG n = 0; n < ARRAYSIZE(pTrampoline->rAlign); n++) {
         if (pTrampoline->rAlign[n].obTarget == obTarget) {
             return pTrampoline->rAlign[n].obTrampoline;
         }
@@ -2459,7 +2468,7 @@ LONG WINAPI DetourDetach(_Inout_ PVOID *ppPointer,
     //
     LONG cbTarget = pTrampoline->cbRestore;
     PBYTE pbTarget = pTrampoline->pbRemain - cbTarget;
-    if (cbTarget == 0 || cbTarget > sizeof(pTrampoline->rbCode)) {
+    if (cbTarget == 0 || cbTarget > (LONG)sizeof(pTrampoline->rbCode)) {
         error = ERROR_INVALID_BLOCK;
         if (s_fIgnoreTooSmall) {
             goto stop;

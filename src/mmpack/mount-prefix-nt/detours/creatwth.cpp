@@ -896,6 +896,7 @@ BOOL WINAPI DetourUpdateProcessWithDllEx(_In_ HANDLE hProcess,
 
 //////////////////////////////////////////////////////////////////////////////
 //
+#if 0  // remove to fix double definition of StringCcgPrintf* error with optimization
 BOOL WINAPI DetourCreateProcessWithDllA(_In_opt_ LPCSTR lpApplicationName,
                                         _Inout_opt_ LPSTR lpCommandLine,
                                         _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
@@ -1009,6 +1010,7 @@ BOOL WINAPI DetourCreateProcessWithDllW(_In_opt_ LPCWSTR lpApplicationName,
     }
     return TRUE;
 }
+#endif
 
 BOOL WINAPI DetourCopyPayloadToProcess(_In_ HANDLE hProcess,
                                        _In_ REFGUID rguid,
@@ -1125,6 +1127,7 @@ PVOID WINAPI DetourCopyPayloadToProcessEx(_In_ HANDLE hProcess,
     return pbTarget;
 }
 
+#if 0  // remove to fix double definition of StringCcgPrintf* error with optimization
 static BOOL s_fSearchedForHelper = FALSE;
 static PDETOUR_EXE_HELPER s_pHelper = NULL;
 
@@ -1285,7 +1288,7 @@ BOOL WINAPI AllocExeHelper(_Out_ PDETOUR_EXE_HELPER *pHelper,
 
 // REVIEW 28020 The expression '1<=_Param_(2)& &_Param_(2)<=2147483647' is not true at this call.
 // REVIEW 28313 Analysis will not proceed past this point because of annotation evaluation. The annotation expression *_Param_(3)<_Param_(2)&&*_Param_(3)<=stringLength$(_Param_(1)) cannot be true under any assumptions at this point in the program.
-#pragma warning(suppress:28020 28313)
+//#pragma warning(suppress:28020 28313)
         hr = StringCchLengthA(psz, cSize - cOffset, &cchDest);
         if (!SUCCEEDED(hr)) {
             goto Cleanup;
@@ -1483,7 +1486,7 @@ BOOL WINAPI DetourProcessViaHelperDllsW(_In_ DWORD dwTargetPid,
     //so we can't use "%hs" in format string, because the dll that contain this code would inject to any process, even not call _tsetlocale(LC_ALL,_T(".ACP")) before
     
     cchWrittenWideChar = MultiByteToWideChar(CP_ACP, 0, &helper->rDlls[0], -1, szDllName, ARRAYSIZE(szDllName));
-    if (cchWrittenWideChar >= ARRAYSIZE(szDllName) || cchWrittenWideChar <= 0) {
+    if (cchWrittenWideChar >= (int)ARRAYSIZE(szDllName) || cchWrittenWideChar <= 0) {
         goto Cleanup;
     }
     hr = StringCchPrintfW(szCommand, ARRAYSIZE(szCommand),
@@ -1778,6 +1781,7 @@ BOOL WINAPI DetourCreateProcessWithDllsW(_In_opt_ LPCWSTR lpApplicationName,
     }
     return TRUE;
 }
+#endif
 
 //
 ///////////////////////////////////////////////////////////////// End of File.
