@@ -149,7 +149,7 @@ PVOID WINAPI DetourFindFunction(_In_ LPCSTR pszModule,
 
     /////////////////////////////////////////////// First, try GetProcAddress.
     //
-#pragma prefast(suppress:28752, "We don't do the unicode conversion for LoadLibraryExA.")
+//#pragma prefast(suppress:28752, "We don't do the unicode conversion for LoadLibraryExA.")
     HMODULE hModule = LoadLibraryExA(pszModule, NULL, 0);
     if (hModule == NULL) {
         return NULL;
@@ -285,7 +285,7 @@ HMODULE WINAPI DetourEnumerateModules(_In_opt_ HMODULE hModuleLast)
             SetLastError(NO_ERROR);
             return (HMODULE)pDosHeader;
         }
-#pragma prefast(suppress:28940, "A bad pointer means this probably isn't a PE header.")
+//#pragma prefast(suppress:28940, "A bad pointer means this probably isn't a PE header.")
         __except(GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ?
                  EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
             continue;
@@ -302,7 +302,7 @@ PVOID WINAPI DetourGetEntryPoint(_In_opt_ HMODULE hModule)
     }
 
     __try {
-#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
+//#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
         if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
             SetLastError(ERROR_BAD_EXE_FORMAT);
             return NULL;
@@ -375,21 +375,21 @@ ULONG WINAPI DetourGetModuleSize(_In_opt_ HMODULE hModule)
     }
 
     __try {
-#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
+//#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
         if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
             SetLastError(ERROR_BAD_EXE_FORMAT);
-            return NULL;
+            return 0;
         }
 
         PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)((PBYTE)pDosHeader +
                                                           pDosHeader->e_lfanew);
         if (pNtHeader->Signature != IMAGE_NT_SIGNATURE) {
             SetLastError(ERROR_INVALID_EXE_SIGNATURE);
-            return NULL;
+            return 0;
         }
         if (pNtHeader->FileHeader.SizeOfOptionalHeader == 0) {
             SetLastError(ERROR_EXE_MARKED_INVALID);
-            return NULL;
+            return 0;
         }
         SetLastError(NO_ERROR);
 
@@ -398,7 +398,7 @@ ULONG WINAPI DetourGetModuleSize(_In_opt_ HMODULE hModule)
     __except(GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ?
              EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
         SetLastError(ERROR_EXE_MARKED_INVALID);
-        return NULL;
+        return 0;
     }
 }
 
@@ -452,7 +452,7 @@ HMODULE WINAPI DetourGetContainingModule(_In_ PVOID pvAddr)
 
 static inline PBYTE RvaAdjust(_Pre_notnull_ PIMAGE_DOS_HEADER pDosHeader, _In_ DWORD raddr)
 {
-    if (raddr != NULL) {
+    if (raddr != 0) {
         return ((PBYTE)pDosHeader) + raddr;
     }
     return NULL;
@@ -473,10 +473,10 @@ BOOL WINAPI DetourEnumerateExports(_In_ HMODULE hModule,
     }
 
     __try {
-#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
+//#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
         if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
             SetLastError(ERROR_BAD_EXE_FORMAT);
-            return NULL;
+            return FALSE;
         }
 
         PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)((PBYTE)pDosHeader +
@@ -536,7 +536,7 @@ BOOL WINAPI DetourEnumerateExports(_In_ HMODULE hModule,
     __except(GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ?
              EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
         SetLastError(ERROR_EXE_MARKED_INVALID);
-        return NULL;
+        return FALSE;
     }
 }
 
@@ -551,7 +551,7 @@ BOOL WINAPI DetourEnumerateImportsEx(_In_opt_ HMODULE hModule,
     }
 
     __try {
-#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
+//#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
         if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
             SetLastError(ERROR_BAD_EXE_FORMAT);
             return FALSE;
@@ -690,7 +690,7 @@ static PDETOUR_LOADED_BINARY WINAPI GetPayloadSectionFromModule(HMODULE hModule)
     }
 
     __try {
-#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
+//#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
         if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
             SetLastError(ERROR_BAD_EXE_FORMAT);
             return NULL;
