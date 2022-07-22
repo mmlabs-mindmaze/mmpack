@@ -17,6 +17,7 @@ if host_machine.system() == 'windows'
     libexecdir = get_option('prefix') / get_option('libexecdir')
     r = run_command('realpath', '-m', '--relative-to=' + bindir, libexecdir)
     config.set_quoted('BIN_TO_LIBEXECDIR', r.stdout().strip())
+    dlltool = find_program('dlltool', required : true)
 endif
 
 find_program('zstd', required : true)
