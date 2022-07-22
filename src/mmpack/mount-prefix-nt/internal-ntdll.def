@@ -1,0 +1,7 @@
+LIBRARY "ntdll.dll"
+EXPORTS
+NtSetInformationProcess
+RtlInitUnicodeString
+NtCreateSymbolicLinkObject
+NtCreateDirectoryObject
+NtOpenDirectoryObject
