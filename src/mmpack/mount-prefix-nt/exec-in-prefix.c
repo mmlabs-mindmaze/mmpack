@@ -9,81 +9,36 @@
 
 #include <stdlib.h>
 #include <stdnoreturn.h>
+#include <mmdlfcn.h>
 #include <mmlib.h>
 #include <mmsysio.h>
 
 #include "common.h"
 #include "path-win32.h"
+#include "mmpack-mount-prefix.h"
 
 #include "exec-in-prefix.h"
 
 
-/**
- * check_running_mmpack() - check mmpack prefix input
- * @path: given input path
- *
- * This is used to prevent running two different prefixes at the same time
- *
- * This only is about prevent two distinct concurrent prefixes on the same
- * windows session. The same user logged twice independently (with password)
- * does not have that restriction.
- *
- * Returns: 0 on success (path can be used), or a non-zero value
- * otherwise
- */
-static
-int check_running_mmpack(WCHAR * path)
-{
-	DWORD rv;
-	WCHAR prev_path[MAX_PATH];
-	WCHAR * norm_prev_path;
-	WCHAR norm_path[MAX_PATH];
-
-	/* get and normalize the folder path of MOUNT_TARGET (M:) */
-	rv = QueryDosDeviceW(L"" MOUNT_TARGET, prev_path, MAX_PATH);
-	if (rv == 0) {
-		switch (GetLastError()) {
-		case ERROR_FILE_NOT_FOUND:
-			return 0;
-
-		default:
-			return -1;
-		}
-	}
-	if (memcmp(prev_path, L"\\??\\", 4 * sizeof(WCHAR)) == 0)
-		norm_prev_path = &prev_path[wcslen(L"\\??\\")];
-	else
-		norm_prev_path = &prev_path[0];
-
-	/* normalize input path */
-	GetFullPathNameW(path, MAX_PATH, norm_path, NULL);
-
-	return wcscmp(norm_prev_path, norm_path);
-}
-
+#define MOUNT_DLL       BIN_TO_LIBEXECDIR "/mmpack/mount-mmpack-prefix.dll"
 
 static
-WCHAR* abswpath(const char* path)
+WCHAR* path_u16(const char* path)
 {
-	char* fpath;
 	WCHAR* wpath = NULL;
 	int len;
 
-	fpath = _fullpath(NULL, path, 32768);
 	len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
-	                          fpath, -1,
-	                          NULL, 0);
+	                          path, -1, NULL, 0);
 	if (len == -1) {
 		fprintf(stderr, "invalid prefix: %s\n", path);
-		goto exit;
+		return NULL;
 	}
 
 	wpath = malloc(len*sizeof(*wpath));
 	MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
-	                    fpath, -1, wpath, len);
+	                    path, -1, wpath, len);
 
-exit:
-	free(fpath);
 	return wpath;
 }
 
@@ -95,26 +50,22 @@ void mount_and_exec(const char* prefix, const char* argv[])
 	int status;
 	mm_pid_t pid;
 	WCHAR* path;
+	char* mount_dll_abspath = NULL;
+	mm_dynlib_t* mount_lib = NULL;
+	const struct mount_mmpack_dispatch* mmpack_mount = NULL;
 
-	path = abswpath(prefix);
-	if (!path)
+	path = path_u16(prefix);
+	mount_dll_abspath = get_relocated_path(MOUNT_DLL);
+	if (!path || !mount_dll_abspath)
 		goto exit;
 
-	if (check_running_mmpack(path)) {
-		/* TODO: find a way to create a new authenticated session here */
-		fprintf(stderr, "Cannot mount target with different prefixes and "
-		                "on the same session.");
+	// Load helper dll and mount/setup prefix
+	if (!(mount_lib = mm_dlopen(mount_dll_abspath, 0))
+	    || !(mmpack_mount = mm_dlsym(mount_lib, "dispatch_table"))
+	    || mmpack_mount->setup(path))
 		goto exit;
-	}
 
-	// Create temporary drive M: pointing to prefix_path
-	if (!DefineDosDeviceW(DDD_NO_BROADCAST_SYSTEM, L"" MOUNT_TARGET, path)) {
-		fprintf(stderr, "Failed to create dos device M: mapped"
-		                " to %S: %lu\n", path, GetLastError());
-		goto exit;
-	}
-
-
+	// Create child process
 	if (mm_spawn(&pid, argv[0], 0, NULL, 0, (char**)argv, NULL)
 	   || mm_wait_process(pid, &status)
 	   || !(status & MM_WSTATUS_EXITED))
@@ -123,11 +74,11 @@ void mount_and_exec(const char* prefix, const char* argv[])
 	exitcode = status & MM_WSTATUS_CODEMASK;
 
 umount:
-	// Try remove temporary drive letter M:
-	if (!DefineDosDeviceW(DDD_NO_BROADCAST_SYSTEM|DDD_REMOVE_DEFINITION, L"" MOUNT_TARGET, NULL))
-		fprintf(stderr, "Warning: Failed to revert dos device: %lu\n", GetLastError());
+	mm_dlclose(mount_lib);
+
 exit:
 	free(path);
+	free(mount_dll_abspath);
 	exit(exitcode);
 }
 
