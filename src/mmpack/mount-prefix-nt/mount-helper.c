@@ -27,7 +27,7 @@ struct devmap {
 	HANDLE dir;
 	HANDLE drive;
 	DWORD size;
-	WCHAR dll_path[];
+	char dll_path[];
 };
 
 
@@ -100,10 +100,10 @@ exit:
 
 
 static
-WCHAR* get_dll_nt_path(HANDLE dllhnd)
+char* get_dll_path(HANDLE dllhnd)
 {
 	int rsz, maxlen;
-	WCHAR *dllpath, *ntpath;
+	char* dllpath;
 
 	// Get dll path as mapped in memory
 	for (maxlen = 128;; maxlen *= 2) {
@@ -111,29 +111,26 @@ WCHAR* get_dll_nt_path(HANDLE dllhnd)
 		if (!dllpath)
 			return NULL;
 
-		rsz = GetModuleFileNameW(dllhnd, dllpath, maxlen);
+		rsz = GetModuleFileNameA(dllhnd, dllpath, maxlen);
 		if (rsz != maxlen)
 			break;
 
-		// If we reach here, the buffer is too small, lets continue
+		// If we reach here, the buffer is too small, let's continue
 		mem_free(dllpath);
 	}
 
-	ntpath = get_nt_path(dllpath);
-
-	mem_free(dllpath);
-	return ntpath;
+	return dllpath;
 }
 
 
 /**
- * path_size() - Get size in bytes of WCHAR path
- * @path:       null terminated path in WCHAR
+ * path_len() - Get size in bytes of char* path
+ * @path:       null terminated path in char*
  *
  * Return: size in byte of path including the terminating nul.
  */
 static
-size_t path_size(const WCHAR* path)
+size_t path_size(const char* path)
 {
 	int len;
 
@@ -157,11 +154,11 @@ int apply_devmap(HANDLE target_proc)
 LOCAL_SYMBOL
 int prefix_mount_setup_child(PROCESS_INFORMATION* procinfo)
 {
-	FARPROC pfn;
 	HANDLE child_proc = procinfo->hProcess;
 	struct devmap* child_dm;
 	HANDLE child_hnds[2] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
 	HANDLE curr_proc = GetCurrentProcess();
+	const char* dlls[] = {prefix_devmap->dll_path};
 
 	if (!prefix_devmap)
 		return 0;
@@ -185,10 +182,8 @@ int prefix_mount_setup_child(PROCESS_INFORMATION* procinfo)
 	                           sizeof(child_hnds), NULL))
 		return -1;
 
-	// Queue LoadLibrary(dll_pathname) in remote process
-	pfn = GetProcAddress(GetModuleHandleW(L"kernel32"), "LoadLibraryW");
-	QueueUserAPC((PAPCFUNC)pfn, procinfo->hThread,
-	             (ULONG_PTR)(child_dm->dll_path));
+	
+	DetourUpdateProcessWithDll(child_proc, dlls, 1);
 
 	return 0;
 }
@@ -205,7 +200,7 @@ static
 int init_prefix_devmap(HANDLE dir, HANDLE drive)
 {
 	size_t map_sz, dllpath_sz;
-	WCHAR* dllpath;
+	char* dllpath;
 	HMODULE dllhnd;
 	int rv = -1;
 
@@ -213,7 +208,7 @@ int init_prefix_devmap(HANDLE dir, HANDLE drive)
 	GetModuleHandleExW((GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
 			     | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT),
 	                   (LPCWSTR)&prefix_devmap, &dllhnd);
-	dllpath = get_dll_nt_path(dllhnd);
+	dllpath = get_dll_path(dllhnd);
 	if (!dllpath)
 		return -1;
 
