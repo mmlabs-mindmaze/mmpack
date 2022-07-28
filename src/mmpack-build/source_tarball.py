@@ -276,7 +276,8 @@ class SourceTarball:
             name, version = get_name_version_from_srcdir(srcdir)
             srctar = f'{self._outdir}/{name}_{version}_src.tar.xz'
 
-            if self._method == 'git':
+            # Prevent git folder being packaged
+            if self._method == 'git' and not subdir:
                 shutil.rmtree(srcdir + '/.git')
 
             # Create source package tarball
