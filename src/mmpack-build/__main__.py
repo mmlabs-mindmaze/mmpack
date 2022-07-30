@@ -10,7 +10,7 @@ try:
     from argcomplete import autocomplete
 except ImportError:
     # pylint: disable=missing-function-docstring,unused-argument
-    def autocomplete(parser: ArgumentParser):
+    def autocomplete(parser: ArgumentParser, **kwargs):
         pass
 
 from . import mmpack_builddep
@@ -105,7 +105,7 @@ def main():
     redirecting to the various mmpack-bulid commands
     """
     parser = cmdline_parser()
-    autocomplete(parser)
+    autocomplete(parser, output_stream=sys.stdout)
     args = parser.parse_args()
 
     # fake default command set to pkg-create. For some obscure reason,
