@@ -15,7 +15,7 @@ _mmpack_modifyrepo_completion() {
                   _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
                   _ARGCOMPLETE=1 \
                   _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
-                  mmpack-modifyrepo 8>&1 9>&2 1>/dev/null 2>&1) )
+                  mmpack-modifyrepo) )
     if [[ $? != 0 ]]; then
         unset COMPREPLY
     elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then

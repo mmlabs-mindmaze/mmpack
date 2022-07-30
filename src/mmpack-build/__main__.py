@@ -5,12 +5,14 @@ mmpack-build is a stub for all the tools required to create mmpack packages.
 
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from io import TextIOBase
+from typing import Union
 
 try:
     from argcomplete import autocomplete
 except ImportError:
     # pylint: disable=missing-function-docstring,unused-argument
-    def autocomplete(parser: ArgumentParser):
+    def autocomplete(parser: ArgumentParser, **kwargs):
         pass
 
 from . import mmpack_builddep
@@ -99,13 +101,30 @@ def launch_subcommand(args):
     return ret
 
 
+class MixedIO:
+    """File-like accepting both bytes and str"""
+
+    def __init__(self, stream: TextIOBase):
+        self._file = stream
+
+    def write(self, data: Union[bytes, str]) -> int:
+        """Same as IOBase.write"""
+        if isinstance(data, bytes):
+            data = data.decode()
+        return self._file.write(data)
+
+    def flush(self):
+        """Same as IOBase.flush"""
+        self._file.flush()
+
+
 def main():
     """
     main entry point for all mmpack-build commands, and only a stub
     redirecting to the various mmpack-bulid commands
     """
     parser = cmdline_parser()
-    autocomplete(parser)
+    autocomplete(parser, output_stream=MixedIO(sys.stdout))
     args = parser.parse_args()
 
     # fake default command set to pkg-create. For some obscure reason,
