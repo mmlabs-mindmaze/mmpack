@@ -114,8 +114,9 @@ class SrcPackage:
         if not self.licenses:
             self._default_license()
 
-        arch_dist = get_host_arch_dist()
-        init_mmpack_build_hooks(self.name, arch_dist, self.description)
+        init_mmpack_build_hooks(srcname=self.name,
+                                host_archdist=get_host_arch_dist(),
+                                description=self.description)
 
     def _prepare_pkgbuilddir(self, tmp_srcdir: str, srctar: str):
         """

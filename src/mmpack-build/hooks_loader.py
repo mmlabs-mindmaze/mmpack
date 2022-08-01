@@ -17,18 +17,14 @@ from .common import dprint
 MMPACK_BUILD_HOOKS = []
 
 
-def init_mmpack_build_hooks(srcname: str, host_archdist: str,
-                            description: str) -> None:
+def init_mmpack_build_hooks(**kwargs) -> None:
     """
     To be called in the early stages of package creation mmpack-build, it
     populates the list of build hooks plugins and initializes the hooks
     with some important metadata that is constant all across the build.
 
     Args:
-        srcname: name of source package being built
-        host_archdist: architecture/distribution of the host, ie which
-            arch/dist the package is being built for
-        description: description of the source package
+        **kwargs: same as BaseHook.__init__()
 
     Returns:
         None
@@ -44,7 +40,7 @@ def init_mmpack_build_hooks(srcname: str, host_archdist: str,
             module = importlib.import_module('mmpack_build.' + name)
 
             # Instantiate hook and add it to the list
-            hook = module.MMPackBuildHook(srcname, host_archdist, description)
+            hook = module.MMPackBuildHook(**kwargs)
             MMPACK_BUILD_HOOKS.append(hook)
             dprint('hook plugin loaded: {}'.format(hook.__module__))
 

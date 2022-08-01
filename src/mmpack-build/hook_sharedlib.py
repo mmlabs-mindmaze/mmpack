@@ -54,13 +54,13 @@ class MMPackBuildHook(BaseHook):
     of the library library used in binaries.
     """
 
-    def __init__(self, srcname: str, host_archdist: str, description: str):
-        super().__init__(srcname, host_archdist, description)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._mmpack_shlib_provides = None
 
         # load python module to use for handling the executable file
         # format of the targeted host
-        self._execfmt = get_exec_fileformat(host_archdist)
+        self._execfmt = get_exec_fileformat(self._arch)
         modname = 'mmpack_build.{}_utils'.format(self._execfmt)
         self._module = importlib.import_module(modname)
 
