@@ -14,7 +14,6 @@ from .common import *
 from .hooks_loader import MMPACK_BUILD_HOOKS
 from .mm_version import Version
 from .package_info import PackageInfo
-from .workspace import get_staging_dir
 
 
 METADATA_VERSION = '1.0'
@@ -243,7 +242,7 @@ class BinaryPackage:
         Returns:
             the path of the created binary package file (in pkgbuilddir)
         """
-        stagedir = get_staging_dir(pkgbuilddir, self.name)
+        stagedir = f'{pkgbuilddir}/staging/{self.name}'
         os.makedirs(stagedir + '/MMPACK', exist_ok=True)
 
         dprint('link {0} in {1}'.format(self.name, stagedir))
