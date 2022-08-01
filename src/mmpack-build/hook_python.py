@@ -7,6 +7,7 @@ import filecmp
 import json
 import os
 import re
+from collections import Counter
 from configparser import ConfigParser
 from email.parser import Parser
 from glob import glob, iglob
@@ -136,6 +137,29 @@ class EntryPointsParser:
             pass
 
 
+class _BuildFilenameGenerator:
+    """Generator of unique input filename to be passed in support scripts"""
+    def __init__(self):
+        self._counter = Counter()
+        self._builddir = ''
+
+    def reset(self, builddir: str):
+        """Reset counter for a new build"""
+        self._builddir = builddir + '/build-pyfiles'
+        os.makedirs(self._builddir, exist_ok=True)
+        self._counter.clear()
+
+    def get(self, suffix: str) -> str:
+        """Get unique filename in the build with specified suffix"""
+        val = self._counter[suffix]
+        filename = f'{self._builddir}/{val}.{suffix}'
+        self._counter[suffix] += 1
+        return filename
+
+
+_FILENAME_GENERATOR = _BuildFilenameGenerator()
+
+
 def _create_launcher(launcher: str, settings: str):
     # ignore extras
     if '[' in settings:
@@ -180,10 +204,16 @@ def _gen_py_importname(pyfiles: Iterable[str],
     if not cmdfiles:
         return {}
 
+    infile = _FILENAME_GENERATOR.get('dispatch.pyfiles')
+
     script = os.path.join(os.path.dirname(__file__), 'python_dispatch.py')
     cmd = ['python3', script]
     cmd += ['--site-path='+path for path in sitedirs]
-    cmd += cmdfiles
+    cmd += [infile]
+
+    # Write input file containing the python files to analyze
+    with open(infile, 'w') as stream:
+        stream.write('\n'.join(cmdfiles))
 
     cmd_output = shell(cmd)
     pkgfiles = {k: set(v) for k, v in json.loads(cmd_output).items()}
@@ -213,10 +243,16 @@ def _gen_pysymbols(pkgfiles: Set[str],
     if not sites_files:
         return {}
 
+    infile = _FILENAME_GENERATOR.get('provides.pyfiles')
+
     script = os.path.join(os.path.dirname(__file__), 'python_provides.py')
     cmd = ['python3', script]
     cmd += ['--site-path='+path for path in sitedirs]
-    cmd += list(sites_files)
+    cmd += [infile]
+
+    # Write input file containing the python files to analyze
+    with open(infile, 'w') as stream:
+        stream.write('\n'.join(sites_files))
 
     cmd_output = shell(cmd)
     return {k: set(v) for k, v in json.loads(cmd_output).items()}
@@ -255,10 +291,15 @@ def _resolve_ns_deps(provides: ProvideList, pkg: PackageInfo,
 
 def _gen_pydepends(pkg: PackageInfo,
                    sitedirs: List[str]) -> Dict[str, Set[str]]:
+    infile = _FILENAME_GENERATOR.get('depends.pyfiles')
+
     script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
     cmd = ['python3', script]
     cmd += ['--site-path='+path for path in sitedirs]
-    cmd += [f for f in pkg.files if _is_py_file(f)]
+    cmd += [infile]
+
+    with open(infile, 'w') as stream:
+        stream.write('\n'.join(f for f in pkg.files if _is_py_file(f)))
 
     # run in prefix if one is being used, this allows to establish dependency
     # against installed mmpack packages
@@ -379,6 +420,7 @@ class MMPackBuildHook(BaseHook):
         super().__init__(**kwargs)
         self._mmpack_py_provides = None
         self._private_sitedirs = []
+        _FILENAME_GENERATOR.reset(self._builddir)
 
     def _get_mmpack_provides(self) -> ProvideList:
         """

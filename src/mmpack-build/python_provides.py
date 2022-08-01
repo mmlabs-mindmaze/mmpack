@@ -277,7 +277,7 @@ def parse_options():
                         action='append', default=[],
                         help='path of python site-packages or folder '
                         'containing python package')
-    parser.add_argument('infiles', type=str, nargs='*')
+    parser.add_argument('infile', type=str, nargs='?')
 
     return parser.parse_args()
 
@@ -295,8 +295,10 @@ def main():
 
     MANAGER.always_load_extensions = True
 
-    # Load list of files in package from stdin
-    pkgdata = PkgData({abspath(f.strip()) for f in options.infiles})
+    # Load list of files in package from input file
+    with open(options.infile) as input_stream:
+        pkgdata = PkgData({abspath(f.strip()) for f in input_stream})
+
     pkgdata.gen_pypkg_symbols()
 
     # Return result on stdout as JSON

@@ -393,7 +393,7 @@ def parse_options():
                         action='append', default=[],
                         help='path of python site-packages or folder '
                         'containing python package')
-    parser.add_argument('infiles', type=str, nargs='*')
+    parser.add_argument('infile', type=str, nargs='?')
 
     return parser.parse_args()
 
@@ -410,7 +410,8 @@ def main():
         sys.path.insert(0, abspath(sitedir))
         add_to_pkg_resources(sys.path[0])
 
-    pkgfiles = [abspath(f.strip()) for f in options.infiles]
+    with open(options.infile) as input_stream:
+        pkgfiles = [abspath(f.strip()) for f in input_stream]
 
     astroid_manager.always_load_extensions = True
 

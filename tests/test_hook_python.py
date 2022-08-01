@@ -7,7 +7,7 @@ from typing import Set
 
 from mmpack_build.package_info import PackageInfo
 from mmpack_build.hook_python import (_gen_py_importname, _gen_pysymbols,
-                                      _gen_pydepends)
+                                      _gen_pydepends, _FILENAME_GENERATOR)
 
 
 _testdir = dirname(abspath(__file__))
@@ -34,6 +34,10 @@ def _get_py_dispatch(pkgfiles: Set[str]) -> Set[str]:
 
 
 class TestPythonHook(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        _FILENAME_GENERATOR.reset('.')
 
     def test_provides_bare_module(self):
         """test provides module without package folder"""

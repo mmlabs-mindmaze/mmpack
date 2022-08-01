@@ -77,7 +77,7 @@ def parse_options():
                         action='append', default=[],
                         help='path of python site-packages or folder '
                         'containing python package')
-    parser.add_argument('infiles', type=str, nargs='*')
+    parser.add_argument('infile', type=str, nargs='?')
 
     return parser.parse_args()
 
@@ -95,8 +95,11 @@ def main():
     for sitedir in options.site_paths:
         sys.path.insert(0, abspath(sitedir))
 
+    with open(options.infile) as input_stream:
+        pyfiles = [f.strip() for f in input_stream]
+
     pypkgs: Dict[str, Set[str]] = {}
-    for pyfile in options.infiles:
+    for pyfile in pyfiles:
         modname = get_root_modname(pyfile)
         pypkgs.setdefault(modname, set()).add(pyfile)
 
