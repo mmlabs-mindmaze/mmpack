@@ -12,6 +12,7 @@ from email.parser import Parser
 from glob import glob, iglob
 from itertools import chain
 from os.path import basename, commonpath, dirname
+from tempfile import mkstemp
 from textwrap import dedent
 from typing import (Set, Dict, List, Iterable, Iterator, NamedTuple, Optional,
                     Tuple)
@@ -201,7 +202,8 @@ def _gen_py_importname(pyfiles: Iterable[str],
 
 
 def _gen_pysymbols(pkgfiles: Set[str],
-                   sitedirs: List[str]) -> Dict[str, Set[str]]:
+                   sitedirs: List[str],
+                   infile: str) -> Dict[str, Set[str]]:
     # Filter out files that are not python script nor subpath of any sitedirs
     sites_files = set()
     for sitedir in sitedirs:
@@ -216,15 +218,21 @@ def _gen_pysymbols(pkgfiles: Set[str],
     script = os.path.join(os.path.dirname(__file__), 'python_provides.py')
     cmd = ['python3', script]
     cmd += ['--site-path='+path for path in sitedirs]
-    cmd += list(sites_files)
+    cmd += infile
+
+    # Write input file containing the python files to analyze
+    with open(infile, 'w') as stream:
+        stream.write('\n'.join(sites_files))
 
     cmd_output = shell(cmd)
     return {k: set(v) for k, v in json.loads(cmd_output).items()}
 
 
-def _gen_py_provides(pkg: PackageInfo, sitedirs: List[str]) -> ProvideList:
+def _gen_py_provides(pkg: PackageInfo, sitedirs: List[str],
+                     builddir: str) -> ProvideList:
     providelist = ProvideList('python')
-    symbols = _gen_pysymbols(pkg.files, sitedirs)
+    infile = mkstemp(dir=f'{builddir}', suffix='.prov.pyfiles')
+    symbols = _gen_pysymbols(pkg.files, sitedirs, infile)
 
     # Group provided symbols by python package names (import name)
     for pyname, pyname_syms in symbols.items():
@@ -537,13 +545,14 @@ class MMPackBuildHook(BaseHook):
                         specs_provides: Dict[str, Dict]):
         # Add public python package
         public_sitedirs = _get_packaged_public_sitedirs(pkg)
-        py3_provides = _gen_py_provides(pkg, public_sitedirs)
+        py3_provides = _gen_py_provides(pkg, public_sitedirs, self._builddir)
         py3_provides.update_from_specs(specs_provides, pkg)
         pkg.provides['python'] = py3_provides
 
         # Register private python package for cobuilded package dependency
         # resolution
-        pkg.provides['pypriv'] = _gen_py_provides(pkg, self._private_sitedirs)
+        pkg.provides['pypriv'] = _gen_py_provides(pkg, self._private_sitedirs,
+                                                  self._builddir)
 
     def store_provides(self, pkg: PackageInfo, folder: str):
         filename = '{}/{}.pyobjects.gz'.format(folder, pkg.name)
