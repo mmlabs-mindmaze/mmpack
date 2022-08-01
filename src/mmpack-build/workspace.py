@@ -223,15 +223,6 @@ def get_local_install_dir(builddir: str):
     return instdir
 
 
-def get_staging_dir(builddir: str, binpkg_name: str):
-    """
-    Get package staging dir in src package building path
-    """
-    stagedir = '{0}/staging/{1}'.format(builddir, binpkg_name)
-    os.makedirs(stagedir, exist_ok=True)
-    return stagedir
-
-
 def is_valid_prefix(prefix: str) -> bool:
     """
     returns whether given prefix is a valid path for mmpack prefix
