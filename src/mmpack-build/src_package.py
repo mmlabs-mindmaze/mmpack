@@ -15,7 +15,7 @@ from subprocess import Popen
 from threading import Thread
 from tempfile import mkdtemp
 
-from .workspace import Workspace, get_local_install_dir
+from .workspace import Workspace
 from .binary_package import BinaryPackage
 from .common import *
 from .file_utils import *
@@ -159,7 +159,7 @@ class SrcPackage:
         """
         internal helper: build and return the local install path
         """
-        installdir = get_local_install_dir(self.pkgbuild_path())
+        installdir = self.pkgbuild_path() + '/local-install'
         if withprefix and not self.ghost:
             installdir += _get_install_prefix()
 

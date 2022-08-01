@@ -214,15 +214,6 @@ class Workspace:
         self.prefix = _get_prefix_abspath(prefix)
 
 
-def get_local_install_dir(builddir: str):
-    """
-    Get install dir in src package building path
-    """
-    instdir = builddir + '/local-install'
-    os.makedirs(instdir, exist_ok=True)
-    return instdir
-
-
 def is_valid_prefix(prefix: str) -> bool:
     """
     returns whether given prefix is a valid path for mmpack prefix
