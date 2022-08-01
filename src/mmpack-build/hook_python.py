@@ -375,8 +375,8 @@ class MMPackBuildHook(BaseHook):
     """
     Hook tracking python module used and exposed
     """
-    def __init__(self, srcname: str, host_archdist: str, description: str):
-        super().__init__(srcname, host_archdist, description)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._mmpack_py_provides = None
         self._private_sitedirs = []
 
