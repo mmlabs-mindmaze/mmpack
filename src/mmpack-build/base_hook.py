@@ -13,7 +13,8 @@ class BaseHook:
     Base class of mmpack-build hook
     """
 
-    def __init__(self, srcname: str, host_archdist: str, description: str):
+    def __init__(self, srcname: str, host_archdist: str,
+                 description: str, builddir: str):
         """
         Initialize the hook class
 
@@ -22,10 +23,12 @@ class BaseHook:
             host_archdist: architecture/distribution of the host, ie which
                 arch/dist the package is being built for
             description: description of the source package
+            builddir: location where to put files during package build
         """
         self._srcname = srcname
         self._arch = host_archdist
         self._src_description = description
+        self._builddir = builddir
 
     def post_local_install(self):
         """

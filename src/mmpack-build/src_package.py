@@ -116,7 +116,8 @@ class SrcPackage:
 
         init_mmpack_build_hooks(srcname=self.name,
                                 host_archdist=get_host_arch_dist(),
-                                description=self.description)
+                                description=self.description,
+                                builddir=self.pkgbuild_path())
 
     def _prepare_pkgbuilddir(self, tmp_srcdir: str, srctar: str):
         """
