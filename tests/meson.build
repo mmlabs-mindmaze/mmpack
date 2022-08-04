@@ -1,8 +1,8 @@
 long_test = get_option('long-tests') or disabler()
 
 unittest_args = [
-    '-DSRCDIR="' + meson.source_root() + '"',
-    '-DBUILDDIR="' + meson.build_root() + '"',
+    '-DSRCDIR="' + meson.project_source_root() + '"',
+    '-DBUILDDIR="' + meson.project_build_root() + '"',
 ]
 
 mmpack_unit_tests_sources = files(
@@ -74,8 +74,8 @@ mmpack_build_unit_tests_sources = files(
 env = environment()
 env.set('_MMPACK_TEST_PREFIX', deployment_dir)
 env.set('PKGDATADIR', get_option('prefix') / get_option('datadir') + '/mmpack')
-env.set('SRCDIR', meson.source_root())
-env.set('BUILDDIR', meson.build_root())
+env.set('SRCDIR', meson.project_source_root())
+env.set('BUILDDIR', meson.project_build_root())
 env.set('PREFIX', get_option('prefix'))
 env.set('REPO', repo_dir)
 

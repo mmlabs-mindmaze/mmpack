@@ -1,7 +1,7 @@
 project('mmpack', ['c', 'cpp'],
         version: run_command(find_program('read_version.py')).stdout().strip(),
         license: 'GPL3',
-        meson_version: '>= 0.55',
+        meson_version: '>= 0.56',
 )
 cc = meson.get_compiler('c')
 config = configuration_data()
@@ -81,7 +81,7 @@ subdir('data')
 
 all_sources += all_c_sources
 
-deployment_dir = meson.build_root() + '/deployment-test'
+deployment_dir = meson.project_build_root() + '/deployment-test'
 install_manifest = custom_target('install-manifest',
         output : 'install-manifest',
         capture : true,
@@ -105,7 +105,7 @@ run_target('deployment-test-clean',
     command : [ 'rm', '-rvf', deployment_dir ],
 )
 
-repo_dir = meson.build_root() + '/test-repo'
+repo_dir = meson.project_build_root() + '/test-repo'
 do_test_repo = custom_target('test-repo',
         output: 'test-repo',
         command : ['bash',
@@ -117,7 +117,7 @@ do_test_repo = custom_target('test-repo',
         depends : do_deployment_test,
 )
 
-sysrepo_dir = meson.build_root() + '/test-sysrepo'
+sysrepo_dir = meson.project_build_root() + '/test-sysrepo'
 do_test_sysrepo = custom_target('test-sysrepo',
         output: 'test-sysrepo',
         command : ['bash',
@@ -127,7 +127,7 @@ do_test_sysrepo = custom_target('test-sysrepo',
         ],
 )
 
-testpkg_dir = meson.build_root() + '/test-packages'
+testpkg_dir = meson.project_build_root() + '/test-packages'
 do_test_pkg = custom_target('test-pkg',
         output: 'test-packages',
         command : ['bash',
