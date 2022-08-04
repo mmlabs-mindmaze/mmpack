@@ -1,3 +1,9 @@
+mmpack (0.7.4) unstable; urgency=medium
+
+  * Fix build-python (wheel pkg not installed)
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 04 Aug 2022 22:45:07 +0200
+
 mmpack (0.7.3) unstable; urgency=medium
 
   * Support git submodules when creating sources.
