@@ -5,7 +5,7 @@ through the tree for a mmpack folder, and use the containing folder as root
 directory.
 """
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace, SUPPRESS
 
 from .common import DeprecatedStoreAction
 from .mmpack_mksource import (add_parser_args as add_mksource_parser_argument,
@@ -19,6 +19,7 @@ def add_parser_args(parser: ArgumentParser):
     add_mksource_parser_argument(parser)
     parser.add_argument('-p', '--prefix',
                         action=DeprecatedStoreAction, dest='prefix', type=str,
+                        default=SUPPRESS,
                         help='prefix within which to work (DEPRECATED)')
     parser.add_argument('--skip-build-tests',
                         action='store_true', dest='skip_tests',
