@@ -187,7 +187,7 @@ class SrcPackage:
             self.build_system = 'cmake'
         elif path.exists('Makefile'):
             self.build_system = 'makefile'
-        elif path.exists('setup.py'):
+        elif path.exists('setup.py') or path.exists('pyproject.toml'):
             self.build_system = 'python'
         elif path.exists('meson.build'):
             self.build_system = 'meson'
