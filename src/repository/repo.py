@@ -191,7 +191,14 @@ def _init_logger(log_file: str) -> logging.Logger:
 class _BinPkg:
     def __init__(self, name: str = '', data: Optional[Dict[str, Any]] = None):
         self.name = name
-        self._data = data if data is not None else {}
+        self._data = {}
+
+        if not data:
+            return
+
+        # Copy with unfolding value of each field
+        for key, val in data.items():
+            self._data[key] = val.replace('\n .\n ', '\n').replace('\n ', '')
 
     def __getattr__(self, key: str) -> Any:
         try:
