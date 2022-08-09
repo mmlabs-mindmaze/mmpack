@@ -73,7 +73,6 @@ all_sources = []
 deployed_targets = []
 
 
-subdir('common-licenses')
 subdir('src/mmpack')
 subdir('src/mmpack-build')
 subdir('src/repository')
