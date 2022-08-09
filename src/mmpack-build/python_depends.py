@@ -14,9 +14,9 @@ package used, the list of qualified name of the public symbols used.
 import json
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from os.path import abspath, dirname, exists, join as join_path
+from os.path import abspath, basename, dirname, exists, join as join_path
 from functools import cache
-from typing import List, Iterator, Set, Tuple, Union
+from typing import List, Iterable, Iterator, Optional, Set, Tuple, Union
 
 import pkg_resources
 
@@ -334,20 +334,27 @@ class DependsInspector:
             if modname:
                 self.failed_imports.add(modname)
 
-    def gather_pyfile_depends(self, filename: str):
-        """
-        Load python module and inspect its used symbols
-        """
+    def _load_pyfile_module(self, filename: str) -> Optional[Module]:
         try:
             modpath = modpath_from_file_with_callback(filename, None, _is_pkg)
         except ImportError:
             modpath = [filename]
+
         try:
-            tree = astroid_manager.ast_from_file(filename, '.'.join(modpath))
+            return astroid_manager.ast_from_file(filename, '.'.join(modpath))
         except (SyntaxError, InconsistentMroError) as error:
             print(f'{filename} failed to be parsed: {error}', file=sys.stderr)
-            return
         except AstroidImportError:
+            pass
+
+        return None
+
+    def _gather_pyfile_depends(self, filename: str):
+        """
+        Load python module and inspect its used symbols
+        """
+        tree = self._load_pyfile_module(filename)
+        if tree is None:
             return
 
         # If not public module, add directory to simulate calling the script
@@ -362,6 +369,15 @@ class DependsInspector:
         # Reverting sys.path if modified
         if not is_public_submodule:
             sys.path.pop(0)
+
+    def gen_depends(self):
+        pyfiles = sorted(self.pkgfiles)
+
+        for filename in pyfiles:
+            self._load_pyfile_module(filename)
+
+        for filename in pyfiles:
+            self._gather_pyfile_depends(filename)
 
     def used_pkgs(self) -> Iterator[Tuple[str, Set[str]]]:
         """
@@ -430,8 +446,7 @@ def main():
     astroid_manager.always_load_extensions = True
 
     inspector = DependsInspector(pkgfiles)
-    for filename in pkgfiles:
-        inspector.gather_pyfile_depends(filename)
+    inspector.gen_depends()
 
     # Return results as JSON dict on stdout
     json.dump({k: list(sorted(v)) for k, v in inspector.used_pkgs()},
