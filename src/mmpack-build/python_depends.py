@@ -16,7 +16,7 @@ import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, dirname, exists, join as join_path
 from functools import cache
-from typing import List, Iterator, Set, Tuple, Union
+from typing import List, Iterator, Optional, Set, Tuple, Union
 
 import pkg_resources
 
@@ -61,6 +61,22 @@ def _is_pkg(path: str, mod_path: List[str]) -> bool:
             if not _is_namespace_pkg('.'.join(modpath)):
                 return False
     return True
+
+
+def _load_pyfile_module(filename: str) -> Optional[Module]:
+    try:
+        modpath = modpath_from_file_with_callback(filename, None, _is_pkg)
+    except ImportError:
+        modpath = [filename]
+
+    try:
+        return astroid_manager.ast_from_file(filename, '.'.join(modpath))
+    except (SyntaxError, InconsistentMroError) as error:
+        print(f'{filename} failed to be parsed: {error}', file=sys.stderr)
+    except AstroidImportError:
+        pass
+
+    return None
 
 
 def _belong_to_public_package(filename: str):
@@ -334,20 +350,12 @@ class DependsInspector:
             if modname:
                 self.failed_imports.add(modname)
 
-    def gather_pyfile_depends(self, filename: str):
+    def _gather_pyfile_depends(self, filename: str):
         """
         Load python module and inspect its used symbols
         """
-        try:
-            modpath = modpath_from_file_with_callback(filename, None, _is_pkg)
-        except ImportError:
-            modpath = [filename]
-        try:
-            tree = astroid_manager.ast_from_file(filename, '.'.join(modpath))
-        except (SyntaxError, InconsistentMroError) as error:
-            print(f'{filename} failed to be parsed: {error}', file=sys.stderr)
-            return
-        except AstroidImportError:
+        tree = _load_pyfile_module(filename)
+        if tree is None:
             return
 
         # If not public module, add directory to simulate calling the script
@@ -362,6 +370,18 @@ class DependsInspector:
         # Reverting sys.path if modified
         if not is_public_submodule:
             sys.path.pop(0)
+
+    def gen_depends(self):
+        """
+        Inspect loaded python files and generate their dependency list
+        """
+        pyfiles = sorted(self.pkgfiles)
+
+        for filename in pyfiles:
+            _load_pyfile_module(filename)
+
+        for filename in pyfiles:
+            self._gather_pyfile_depends(filename)
 
     def used_pkgs(self) -> Iterator[Tuple[str, Set[str]]]:
         """
@@ -430,8 +450,7 @@ def main():
     astroid_manager.always_load_extensions = True
 
     inspector = DependsInspector(pkgfiles)
-    for filename in pkgfiles:
-        inspector.gather_pyfile_depends(filename)
+    inspector.gen_depends()
 
     # Return results as JSON dict on stdout
     json.dump({k: list(sorted(v)) for k, v in inspector.used_pkgs()},
