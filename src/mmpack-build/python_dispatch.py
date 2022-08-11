@@ -7,6 +7,7 @@ python public package dispatch
 import json
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from functools import cache
 from os.path import abspath, basename
 from platform import system
 from sysconfig import get_config_var
@@ -15,9 +16,6 @@ from typing import Dict, List, Set
 from astroid import MANAGER
 from astroid.modutils import (file_info_from_modpath, is_namespace,
                               modpath_from_file_with_callback)
-
-
-IS_NS: Dict[str, bool] = {}
 
 
 LIMITED_API_EXTENSION_SUFFIX = '.abi3.so'
@@ -31,18 +29,14 @@ COMPILED_EXT_SUFFIXES = (
 )
 
 
-def is_namespace_mod(modpath: List[str]) -> bool:
-    """reports true if modpath is a PEP420 namespace package"""
-    modname = '.'.join(modpath)
-    is_ns = IS_NS.get(modname)
-    if is_ns is not None:
-        return is_ns
-
+@cache
+def is_namespace_mod(modname: str) -> bool:
+    """reports true if modname is a PEP420 namespace package"""
     try:
-        is_ns = is_namespace(file_info_from_modpath(modpath))
+        is_ns = is_namespace(file_info_from_modpath(modname.split('.')))
     except ImportError:
         is_ns = False
-    IS_NS[modname] = is_ns
+
     return is_ns
 
 
@@ -60,11 +54,11 @@ def get_root_modname(pyfile: str) -> str:
 
     # Find first parent package that is not a namespace
     for depth in range(1, len(modpath)+1):
-        root_modpath = modpath[:depth]
-        if not is_namespace_mod(root_modpath):
+        root_modname = '.'.join(modpath[:depth])
+        if not is_namespace_mod(root_modname):
             break
 
-    return '.'.join(root_modpath)
+    return root_modname
 
 
 def parse_options():
