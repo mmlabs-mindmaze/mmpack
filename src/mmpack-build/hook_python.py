@@ -220,12 +220,13 @@ def _gen_py_importname(pyfiles: Iterable[str],
 
     # Assign data file to its enclosing python public package
     data_files = set(pyfiles).difference(set(cmdfiles))
-    pypkg_basedirs = ((imp, commonpath(dirname(f) for f in pkgfiles) + '/')
-                      for imp, pkg_pyfiles in pkgfiles.items())
+    pypkg_basedirs = [(imp, commonpath(dirname(f) for f in files) + '/')
+                      for imp, files in pkgfiles.items()]
     for data in data_files:
         for impname, rootpath in pypkg_basedirs:
             if data.startswith(rootpath):
                 pkgfiles[impname].add(data)
+                break
 
     return pkgfiles
 
