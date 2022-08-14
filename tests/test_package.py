@@ -106,3 +106,19 @@ class TestSrcPackageClass(unittest.TestCase):
         self.assertEqual(len(custom._dependencies['depends']), 4)
         self.assertRegexpMatches(custom.description,
                                  r'This should overload .*')
+    
+    def test_package_expand(self):
+        """
+        smoke test
+        """
+        testdir = os.path.dirname(os.path.abspath(__file__))
+        specfile = testdir + '/specfiles/expand.yaml'
+        versionfile = testdir + '/specfiles/VERSION'
+        _create_test_srcpkg({
+            './mmpack/specs': specfile,
+            './VERSION': versionfile
+        })
+        test_pkg = SrcPackage(_TEST_SRCPKG, 'dummy_tag')
+
+        self.assertEqual(test_pkg.name, 'expand')
+        self.assertEqual(test_pkg.version, Version('0.1.2'))

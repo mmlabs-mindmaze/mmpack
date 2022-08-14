@@ -21,8 +21,8 @@ from argparse import Action
 from hashlib import sha256
 from io import TextIOWrapper
 from subprocess import PIPE, CalledProcessError, Popen, run
-from typing import (Any, AnyStr, BinaryIO, Optional, Union, Dict, Tuple, List,
-                    Set)
+from typing import (Any, AnyStr, BinaryIO, Hashable, Optional, Union, Dict,
+                    Iterator, Tuple, List, Set)
 
 import urllib3
 import yaml
@@ -589,6 +589,21 @@ def open_compressed_file(path: str, mode: str = 'rt',
                      f'opening compressed file {path}')
 
 
+_Collection = Union[dict, list]
+
+def _iter_str_values(data: _Collection) -> Iterator[Tuple[_Collection, Hashable, str]]:
+    """Iterate recursively over all str value in the collection"""
+    if isinstance(data, dict):
+        items = data.items()
+    elif isinstance(data, list):
+        items = data.enumerate()
+
+    for key, value in items:
+        if isinstance(value, str):
+            yield data, key, value
+        elif isinstance(value, (dict, list)):
+            _iter_str_values(value)
+
 def specs_load(specfile: str) -> Dict[str, Any]:
     """
     Load specs for file and return the dictionary out of it. Upgrade the format
@@ -602,6 +617,15 @@ def specs_load(specfile: str) -> Dict[str, Any]:
         pkgs = {n: cfg for n, cfg in specs.items() if n != 'general'}
         new_specs['custom-pkgs'] = pkgs
         specs = new_specs
+
+    # load any file() directive found in values
+    pat = re.compile('file\((.*)\)')
+    for data, key, value in _iter_str_values(specs):
+        match = pat.fullmatch(value)
+        if match:
+            loaded_path = f'{os.path.dirname(specfile)}/{match.groups()[0]}'
+            with open(loaded_path) as stream:
+                data[key] = stream.read().strip()
 
     return specs
 
