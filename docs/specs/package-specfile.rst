@@ -148,6 +148,20 @@ For project XXX, the default packages usually are as follows:
  - If the package contains a library libyyy.so, then a package will be created
    for it.
 
+Special values
+''''''''''''''
+
+For any string field (scalar value in YAML terminology) can be expanded with
+the content of a file. To this end, the `file()` macro is available. Pass the
+path of the target file in the argument to get its content loaded as the value
+of field like:
+
+.. code-block:: yaml
+
+   version: file(../VERSION)
+
+The path loaded is relative to the directory containing the loaded spec file.
+
 
 Examples
 --------
