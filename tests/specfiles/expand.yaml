@@ -1,0 +1,18 @@
+# simple yaml specfile
+
+name: expand
+version: file(../VERSION_FILE)
+maintainer: mmpack.test@mindmaze.ch
+url: ssh://git@intranet.mindmaze.ch:7999/~mmpack.test/simple.git
+licenses: [GPL-3]
+description: |
+    This is the simplest mmpack specfile possible.
+    It serves as a smoke test.
+
+# python dict representation:
+# {'description': 'This is the simplest mmpack specfile possible.\n'
+#                 'It serves as a smoke test.\n',
+#  'maintainer': 'mmpack.test@mindmaze.ch',
+#  'name': 'simple',
+#  'url': 'ssh://git@intranet.mindmaze.ch:7999/~mmpack.test/simple.git',
+#  'version': '0.1.2'}
