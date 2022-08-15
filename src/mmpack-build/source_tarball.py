@@ -12,6 +12,8 @@ from subprocess import call, DEVNULL
 from tarfile import open as taropen, TarFile, TarInfo
 from typing import Dict, Iterator, List, NamedTuple, Optional
 
+import yaml
+
 from .common import *
 from .errors import DownloadError, MMPackBuildError, ShellException
 from .prefix import new_mmpack_prefix_context, prefix_install, run_build_script
@@ -28,12 +30,27 @@ class ProjectSource(NamedTuple):
     srcdir: str
 
 
+def _multiple_replace(lookup: Dict[str, str], text: str) -> str:
+    # Create a regular expression from all of the dictionary keys
+    regex = re.compile('|'.join(lookup.keys()))
+
+    # For each match, look up the corresponding value in the dictionary
+    return regex.sub(lambda match: lookup[match.group(0)], text)
+
+
 class SourceStrapSpecs:
     """source-strap config"""
 
     def __init__(self, srcdir: str):
+        name, version = get_name_version_from_srcdir(srcdir)
+        lookup = {
+            '@MMPACK_NAME@': name,
+            '@MMPACK_VERSION@': version,
+        }
         try:
-            specs = yaml_load(join_path(srcdir, 'mmpack/sources-strap'))
+            with open(join_path(srcdir, 'mmpack/sources-strap')) as stream:
+                content = _multiple_replace(lookup, stream.read())
+                specs = yaml.load(content, Loader=yaml.BaseLoader)
         except FileNotFoundError:
             specs = {}
 

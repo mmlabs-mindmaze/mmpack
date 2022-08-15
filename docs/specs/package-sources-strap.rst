@@ -48,6 +48,14 @@ others.
    list of patch files to applied on upstream sources after fetching them
 
 
+Token expansion
+---------------
+
+If `@MMPACK_VERSION@` or `@MMPACK_NAME@` tokens are found in the file, they are
+expanded to respectively the version and the name of the source package
+specified in **mmpack/specs**.
+
+
 Examples
 --------
 

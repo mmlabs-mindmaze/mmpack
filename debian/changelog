@@ -1,6 +1,7 @@
 mmpack (0.7.5) UNRELEASED; urgency=medium
 
   * Support file() directive in mmpack/specs files.
+  * Support token expansion in mmpack/sources-strap.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Mon, 15 Aug 2022 11:11:07 +0200
 
