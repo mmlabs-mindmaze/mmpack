@@ -15,7 +15,8 @@ import json
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, dirname
-from typing import Dict, Iterator, Set, Tuple, Union
+from functools import cache
+from typing import Iterator, Set, Tuple, Union
 
 import pkg_resources
 
@@ -28,6 +29,25 @@ from astroid.modutils import (is_standard_module, is_namespace,
                               modpath_from_file, file_info_from_modpath)
 from astroid.node_classes import NodeNG
 from astroid.objects import Super
+
+
+@cache
+def _is_namespace_pkg(modname: str) -> bool:
+    """reports true if modname is a PEP420 namespace package"""
+    try:
+        is_ns = is_namespace(file_info_from_modpath(modname.split('.')))
+    except ImportError:
+        is_ns = False
+    return is_ns
+
+
+def _is_standard_module(mod: Module) -> bool:
+    # verify root package is not a PEP420 namespace package
+    # (is_standard_module is fooled by them)
+    if _is_namespace_pkg(mod.name.split('.')[0]):
+        return False
+
+    return is_standard_module(mod.name)
 
 
 def _belong_to_public_package(filename: str):
@@ -107,28 +127,6 @@ class DependsInspector:
         self.pkgfiles = pkgfiles
         self.used_symbols = set()
         self.failed_imports = set()
-        self._is_namespace: Dict[str, bool] = {}
-
-    def _is_namespace_pkg(self, modname: str) -> bool:
-        is_ns = self._is_namespace.get(modname)
-        if is_ns is not None:
-            return is_ns
-
-        modpath = modname.split('.')
-        try:
-            is_ns = is_namespace(file_info_from_modpath(modpath))
-        except ImportError:
-            is_ns = False
-        self._is_namespace[modname] = is_ns
-        return is_ns
-
-    def _is_standard_module(self, mod: Module) -> bool:
-        # verify root package is not a PEP420 namespace package
-        # (is_standard_module is fooled by them)
-        if self._is_namespace_pkg(mod.name.split('.')[0]):
-            return False
-
-        return is_standard_module(mod.name)
 
     def _is_local_module(self, mod: Module) -> bool:
         """
@@ -156,8 +154,7 @@ class DependsInspector:
         if not isinstance(mod, Module):
             return False
 
-        return not (self._is_standard_module(mod)
-                    or self._is_local_module(mod))
+        return not (_is_standard_module(mod) or self._is_local_module(mod))
 
     def _get_module_namefrom(self, impfrom: ImportFrom,
                              name: str) -> Tuple[str, NodeNG]:
@@ -359,7 +356,7 @@ class DependsInspector:
             # Find the first parent package that is not a namespace
             modpath = modname.split('.')
             pypkg = modpath.pop(0)
-            while self._is_namespace.get(pypkg, False):
+            while _is_namespace_pkg(pypkg):
                 pypkg += '.' + modpath.pop(0)
 
             if pypkg in reported_pkgs:
