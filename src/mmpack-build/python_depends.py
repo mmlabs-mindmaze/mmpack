@@ -14,9 +14,9 @@ package used, the list of qualified name of the public symbols used.
 import json
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from os.path import abspath, dirname
+from os.path import abspath, dirname, exists, join as join_path
 from functools import cache
-from typing import Dict, Iterator, Set, Tuple, Union
+from typing import Dict, List, Iterator, Set, Tuple, Union
 
 import pkg_resources
 
@@ -26,7 +26,9 @@ from astroid import Uninferable, Module, Instance, ClassDef, \
 from astroid.exceptions import AttributeInferenceError, AstroidImportError, \
     InconsistentMroError, InferenceError, NameInferenceError
 from astroid.modutils import (is_standard_module, is_namespace,
-                              modpath_from_file, file_info_from_modpath)
+                              modpath_from_file,
+                              modpath_from_file_with_callback,
+                              file_info_from_modpath)
 from astroid.node_classes import NodeNG
 from astroid.objects import Super
 
@@ -39,6 +41,17 @@ def _is_namespace_pkg(modname: str) -> bool:
     except ImportError:
         is_ns = False
     return is_ns
+
+
+def _is_pkg(path: str, mod_path: List[str]) -> bool:
+    modpath = []
+    for part in mod_path:
+        modpath.append(part)
+        path = join_path(path, part)
+        if not exists(join_path(path, '__init__.py')):
+            if not _is_namespace_pkg('.'.join(modpath)):
+                return False
+    return True
 
 
 def _belong_to_public_package(filename: str):
@@ -326,7 +339,11 @@ class DependsInspector:
         Load python module and inspect its used symbols
         """
         try:
-            tree = astroid_manager.ast_from_file(filename)
+            modpath = modpath_from_file_with_callback(filename, None, _is_pkg)
+        except ImportError:
+            modpath = [filename]
+        try:
+            tree = astroid_manager.ast_from_file(filename, '.'.join(modpath))
         except (SyntaxError, InconsistentMroError) as error:
             print(f'{filename} failed to be parsed: {error}', file=sys.stderr)
             return
