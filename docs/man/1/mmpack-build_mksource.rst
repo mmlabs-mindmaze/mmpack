@@ -78,6 +78,11 @@ OPTIONS
   update version stored in the generated source package as update since tag
   named after the version in the specs.
 
+--stop-on-error
+  When building multiple projects, stop after the first build failure
+  encountered. By default, all projects built are attempted, but the global
+  return code will indicate failure if any of the builds fails.
+
 --help, -h
   Show help and exit
 

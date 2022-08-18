@@ -45,6 +45,10 @@ def add_parser_args(parser: ArgumentParser):
     parser.add_argument('--update-version-from-vcs',
                         action='store_true', default=False,
                         help='update version from commits since version tag')
+    parser.add_argument('--stop-on-error',
+                        action='store_true', default=False,
+                        help='stop at first error when building multiple '
+                             'projects')
 
 
 def _source_tarball_kwargs(args: Namespace) -> Dict[str, Any]:
@@ -94,5 +98,7 @@ def call_foreach_srcpkg(func: Callable[[SrcPackage, Namespace], None],
         except MMPackBuildError as err:
             print(f'Build of {prj.name} failed: {err}', file=sys.stderr)
             retcode = 1
+            if args.stop_on_error:
+                break
 
     return retcode
