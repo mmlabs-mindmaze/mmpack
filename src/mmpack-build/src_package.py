@@ -185,12 +185,12 @@ class SrcPackage:
             self.build_system = 'autotools'
         elif path.exists('CMakeLists.txt'):
             self.build_system = 'cmake'
-        elif path.exists('Makefile'):
-            self.build_system = 'makefile'
         elif path.exists('setup.py') or path.exists('pyproject.toml'):
             self.build_system = 'python'
         elif path.exists('meson.build'):
             self.build_system = 'meson'
+        elif path.exists('Makefile'):
+            self.build_system = 'makefile'
         else:
             raise MMPackBuildError('could not guess project build system')
 
