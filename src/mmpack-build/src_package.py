@@ -89,7 +89,6 @@ class SrcPackage:
         self.copyright = ''
 
         self.description = ''
-        self.pkg_tags = ['MindMaze']
 
         self.build_options = None
         self.build_system = None
