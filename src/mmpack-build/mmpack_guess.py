@@ -85,7 +85,7 @@ def guess_version() -> str:
     (git only) return value based on last tag'
     """
     try:
-        return _sshell(['git', 'describe', '--tags', '--abbrev=1'])
+        return _sshell(['git', 'describe', '--tags', '--abbrev=0'])
     except Exception:
         return UNKNOWN
 
