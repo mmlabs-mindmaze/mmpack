@@ -13,7 +13,7 @@ guess package specifications
 SYNOPSIS
 ========
 
-**mmpack-build guess**
+**mmpack-build guess** [create-specs]
 
 DESCRIPTION
 ===========
