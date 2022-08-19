@@ -161,7 +161,7 @@ def main(options):  # pylint: disable=unused-argument
     """
     guess mmpack specs and print to stdout
     """
-    specs = {'general': {
+    specs = {
         'name': guess_name(),
         'version': guess_version(),
         'maintainer': guess_maintainer(),
@@ -169,7 +169,7 @@ def main(options):  # pylint: disable=unused-argument
         'description': guess_description(),
         'copyright': guess_copyright(),
         'licenses': guess_licenses(),
-    }}
+    }
     specs_str = yaml.dump(specs, default_flow_style=False,
                           allow_unicode=True, indent=4)
     for line in specs_str.split('\n'):
