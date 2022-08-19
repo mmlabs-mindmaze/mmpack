@@ -22,6 +22,7 @@ import yaml
 
 from .common import find_license, shell
 from .errors import ShellException
+from .yaml_dumper import MMPackDumper
 
 
 UNKNOWN = 'unknown'  # default return value if guessing failed
@@ -171,7 +172,8 @@ def main(options):  # pylint: disable=unused-argument
         'licenses': guess_licenses(),
     }
     specs_str = yaml.dump(specs, default_flow_style=False,
-                          allow_unicode=True, indent=4)
+                          allow_unicode=True, indent=4,
+                          Dumper=MMPackDumper)
     for line in specs_str.split('\n'):
         if line:  # hide empty lines
             print(line)
