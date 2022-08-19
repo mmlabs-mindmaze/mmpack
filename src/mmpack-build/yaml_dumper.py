@@ -82,10 +82,7 @@ class MMPackDumper(Dumper):
         best_style = True
         if hasattr(mapping, 'items'):
             try:
-                if self.level == 0:
-                    # format entries in mmpack/specs
-                    mapping_items = _sorted_items(mapping, ['general'])
-                elif self.level == 1:
+                if self.level <= 2:
                     # format content of general and custom packages
                     mapping_items = _sorted_items(mapping, _SPECS_ORDER)
                 else:
