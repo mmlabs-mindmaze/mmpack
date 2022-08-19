@@ -32,9 +32,12 @@ UNKNOWN = 'unknown'  # default return value if guessing failed
 # pylint: disable=broad-except
 
 
-# pylint: disable=unused-argument
 def add_parser_args(parser: ArgumentParser):
     """Enrich supplied argument parser with guess related arguments"""
+    subparsers = parser.add_subparsers(dest='guess_subcmd', required=False)
+
+    subparsers.add_parser('create-specs',
+                          help='create mmpack specs for current project')
 
 
 def _sshell(cmd) -> str:
@@ -158,7 +161,7 @@ def guess_licenses() -> List[str]:
     return [license_file] if license_file else [UNKNOWN]
 
 
-def main(options):  # pylint: disable=unused-argument
+def guess_specs():
     """
     guess mmpack specs and print to stdout
     """
@@ -177,3 +180,11 @@ def main(options):  # pylint: disable=unused-argument
     for line in specs_str.split('\n'):
         if line:  # hide empty lines
             print(line)
+
+
+def main(args):
+    """
+    entry point to guess a mmpack package specs
+    """
+    if args.guess_subcmd in (None, 'create-specs'):
+        guess_specs()
