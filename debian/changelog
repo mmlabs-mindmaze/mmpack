@@ -1,6 +1,7 @@
 mmpack (0.7.6) UNRELEASED; urgency=medium
 
   * When guessing build system, prefer any other system over Makefile.
+  * Add update-provides sub command to mmpack-build guess.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 18 Aug 2022 21:49:18 +0200
 
