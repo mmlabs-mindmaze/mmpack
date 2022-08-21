@@ -20,7 +20,7 @@ from typing import List
 import yaml
 
 
-from .common import find_license, shell
+from .common import find_license, shell, yaml_load, yaml_serialize
 from .errors import ShellException
 from .yaml_dumper import MMPackDumper
 
@@ -38,6 +38,11 @@ def add_parser_args(parser: ArgumentParser):
 
     subparsers.add_parser('create-specs',
                           help='create mmpack specs for current project')
+
+    prov_parser = subparsers.add_parser('update-provides',
+                          help='update provides specs from a project build')
+    prov_parser.add_argument('project_builddir',
+                          help='path to a mmpack build of the current project')
 
 
 def _sshell(cmd) -> str:
@@ -182,9 +187,38 @@ def guess_specs():
             print(line)
 
 
+_PROVIDES_REGEX = re.compile(r'([^.]+).(pyobjects|symbols).gz')
+
+
+def _update_provide_spec(build_provide: str, ptype: str, pkg: str):
+    provide_spec_filename = f'mmpack/{pkg}.provides'
+    try:
+        specs = yaml_serialize(provide_spec_filename)
+    except FileNotFoundError:
+        specs = {}
+
+    typed_specs = specs.setdefault(ptype, {})
+    provides = yaml_serialize(build_provide)
+
+
+def update_provides(proj_builddir: str):
+    """
+    Update/create .provides file from built mmpack packages
+    """
+    metadir = 'var/lib/mmpack/metadata'
+    for metafile in glob.glob(f'{proj_builddir}/staging/*/{metadir}/*'):
+        base = os.path.basename(metafile)
+        match = _PROVIDES_REGEX.fullmatch(base)
+        if match:
+            grps = match.groups()
+            _update_provide_spec(metafile, grps[1], grps[0])
+
+
 def main(args):
     """
     entry point to guess a mmpack package specs
     """
     if args.guess_subcmd in (None, 'create-specs'):
         guess_specs()
+    elif args.guess_subcmd == 'update-provides':
+        update_provides(args.project_builddir)
