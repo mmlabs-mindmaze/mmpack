@@ -297,6 +297,32 @@ class ProvideList:
             specs_syms = provide.update_from_specs(pkg_specs, pkg)
             specs_syms.report_changes()
 
+    def update_specs(self, specs: dict, pkg: PackageInfo) -> None:
+        """
+        Update the provide specs from the content of symbols in ProvideList
+        associated with the supplied package. This method is meant to be used
+        in the guess command to update the .provide files.
+
+        Args:
+            specs: dict representing <pkg.name>.provide content to be updated
+            pkg: binary package that has been built.
+
+        Returns: None
+        """
+        typed_specs = specs.setdefault(self.type, {})
+        typed_specs = self._get_full_typed_specs(typed_specs)
+
+        for provide in self._provides.values():
+            new_prov_specs = {'depends': provide.pkgdepends, 'symbols': {}}
+            pkg_specs = typed_specs.setdefault(provide.name, new_prov_specs)
+
+            spec_usage = provide.update_from_specs(pkg_specs, pkg)
+
+            specs_syms = pkg_specs['symbols']
+            prov_syms = provide.symbols
+            specs_syms.update({s: prov_syms[s] for s in spec_usage.new_syms})
+            specs_syms.update({s: prov_syms[s] for s in spec_usage.older})
+
     def _get_dep_minversion(self, soname: str,
                             symbols: Set[str]) -> Tuple[str, Version]:
         """
