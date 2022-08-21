@@ -16,12 +16,15 @@ import glob
 import os
 import re
 from argparse import ArgumentParser
+from email.parser import Parser
 from typing import List
 import yaml
 
-
-from .common import find_license, shell
+from .common import find_license, shell, yaml_load, yaml_serialize
 from .errors import ShellException
+from .package_info import PackageInfo
+from .mm_version import Version
+from .provide import ProvideList
 from .yaml_dumper import MMPackDumper
 
 
@@ -38,6 +41,11 @@ def add_parser_args(parser: ArgumentParser):
 
     sub.add_parser('create-specs',
                    help='create mmpack specs for current project')
+
+    prov = sub.add_parser('update-provides',
+                          help='update provides specs from a project build')
+    prov.add_argument('project_builddir',
+                      help='path to a mmpack build of the current project')
 
 
 def _sshell(cmd) -> str:
@@ -182,9 +190,59 @@ def guess_specs():
             print(line)
 
 
+_PROVIDE_TYPES = {
+    ('sharedlib', 'symbols'),
+    ('python', 'pyobjects'),
+}
+
+
+def _load_pkg_metadata(pkg_staging_dir: str) -> PackageInfo:
+    with open(pkg_staging_dir + '/MMPACK/metadata') as stream:
+        parser = Parser()
+        metadata = parser.parse(stream)
+
+    pkg = PackageInfo(metadata['name'])
+    pkg.version = Version(metadata['version'])
+    return pkg
+
+
+def _update_provide_spec(staging_dir: str, pkg: PackageInfo):
+    metadir = f'{staging_dir}/var/lib/mmpack/metadata'
+    provide_spec_filename = f'mmpack/{pkg.name}.provides'
+    try:
+        specs = yaml_load(provide_spec_filename)
+    except FileNotFoundError:
+        specs = {}
+
+    for ptype, suffix in _PROVIDE_TYPES:
+        provides = ProvideList(ptype)
+
+        try:
+            provides.add_from_file(f'{metadir}/{pkg.name}.{suffix}.gz')
+        except FileNotFoundError:
+            continue
+
+        provides.update_specs(specs, pkg)
+
+    yaml_serialize(specs, provide_spec_filename)
+
+
+def update_provides(proj_builddir: str):
+    """
+    Update/create .provides file from built mmpack packages
+    """
+    staging_root = f'{proj_builddir}/staging'
+    for pkgname in os.listdir(staging_root):
+        pkg_staging_dir = f'{staging_root}/{pkgname}'
+        pkg = _load_pkg_metadata(pkg_staging_dir)
+        _update_provide_spec(pkg_staging_dir, pkg)
+
+
 def main(args):
     """
     entry point to guess a mmpack package specs
     """
     if args.guess_subcmd in (None, 'create-specs'):
         guess_specs()
+    elif args.guess_subcmd == 'update-provides':
+        update_provides(args.project_builddir)
