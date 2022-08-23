@@ -41,11 +41,12 @@ class _SpecSymbol(NamedTuple):
 
 
 class _SpecsSymbols:
-    def __init__(self, symbols: Optional[Dict[str, Version]]):
+    def __init__(self, symbols: Optional[Dict[str, Version]],
+                 provided_syms: Optional[Iterable[ProvidedSymbol]] = None):
         self._older = []  # type: List[ProvidedSymbol]
         self._removed = set()
         self._symbols = symbols if symbols else {}
-        self.used = set()
+        self._new_syms = {s.name for s in (provided_syms or [])}
 
     def known_symbols(self) -> Iterator[_SpecSymbol]:
         """
@@ -72,7 +73,7 @@ class _SpecsSymbols:
         """
         mark the symbol as used
         """
-        self.used.add(provsym.name)
+        self._new_syms.discard(provsym.name)
 
     def mark_removed(self, sym: _SpecSymbol):
         """
@@ -81,14 +82,13 @@ class _SpecsSymbols:
         """
         self._removed.add(sym.name)
 
-    def report_new_symbols(self, provided_symbols: Set[str]):
+    def report_new_symbols(self):
         """
         Print warning log in new symbol have been found, not listed in spec
         """
-        diff = provided_symbols - self.used
-        if diff:
+        if self._new_syms:
             wprint('The following symbols were found but not specified:\n\t'
-                   + '\n\t'.join(sorted(diff)))
+                   + '\n\t'.join(sorted(self._new_syms)))
             wprint('They will all be considered as introduced in the current'
                    ' project version.')
 
@@ -156,8 +156,8 @@ class Provide:
         # Update package deps associated with the provide only if specified
         self.pkgdepends = pkg_specs.get('depends', self.pkgdepends)
 
-        specs_symbols = _SpecsSymbols(pkg_specs.get('symbols'))
         provided_syms = self._get_decorated_symbols()
+        specs_symbols = _SpecsSymbols(pkg_specs.get('symbols'), provided_syms)
 
         # Generate a lookup table with all provided symbols keyed by both the
         # full symbol name and the reduced symbol name. If 2 symbols share the
@@ -197,7 +197,7 @@ class Provide:
                 else:  # version > self.version:
                     specs_symbols.mark_older(provsym)
 
-        specs_symbols.report_new_symbols({s.name for s in provided_syms})
+        specs_symbols.report_new_symbols()
         specs_symbols.report_older_symbols()
         specs_symbols.report_removed_symbols()
 
