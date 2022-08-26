@@ -43,10 +43,10 @@ class _SpecSymbol(NamedTuple):
 class _SpecsSymbols:
     def __init__(self, symbols: Optional[Dict[str, Version]],
                  provided_syms: Optional[Iterable[ProvidedSymbol]] = None):
-        self._older = []  # type: List[ProvidedSymbol]
-        self._removed = set()
+        self.older = []  # type: List[ProvidedSymbol]
+        self.removed = set()
         self._symbols = symbols if symbols else {}
-        self._new_syms = {s.name for s in (provided_syms or [])}
+        self.new_syms = {s.name for s in (provided_syms or [])}
 
     def known_symbols(self) -> Iterator[_SpecSymbol]:
         """
@@ -67,20 +67,20 @@ class _SpecsSymbols:
         """
         mark symbol as provided in a earlier version than expected in the spec
         """
-        self._older.append(specsym)
+        self.older.append(specsym)
 
     def mark_used(self, provsym: ProvidedSymbol):
         """
         mark the symbol as used
         """
-        self._new_syms.discard(provsym.name)
+        self.new_syms.discard(provsym.name)
 
     def mark_removed(self, sym: _SpecSymbol):
         """
         mark the symbol found in the specs, absent from the provided symbol of
         library
         """
-        self._removed.add(sym.name)
+        self.removed.add(sym.name)
 
     def report_changes(self):
         """
@@ -89,20 +89,20 @@ class _SpecsSymbols:
              - symbols appearing in earlier version than expected
              - symbol removed in new version
         """
-        if self._new_syms:
+        if self.new_syms:
             wprint('The following symbols were found but not specified:\n\t'
-                   + '\n\t'.join(sorted(self._new_syms)))
+                   + '\n\t'.join(sorted(self.new_syms)))
             wprint('They will all be considered as introduced in the current'
                    ' project version.')
 
-        if self._older:
-            oldsyms = [f'{s.name}' for s in self._older]
+        if self.older:
+            oldsyms = [f'{s.name}' for s in self.older]
             wprint('The following symbols have been introduced before than'
                    ' expected:\n\t' + '\n\t'.join(sorted(oldsyms)))
 
-        if self._removed:
+        if self.removed:
             wprint('The following symbols appear to have been removed:\n\t'
-                   + '\n\t'.join(sorted(self._removed)))
+                   + '\n\t'.join(sorted(self.removed)))
 
 
 class Provide:

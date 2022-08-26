@@ -272,7 +272,7 @@ def yaml_serialize(obj: Union[list, dict], filename: str,
                   default_flow_style=default_flow_style,
                   default_style='',
                   allow_unicode=True,
-                  indent=4,
+                  indent=2,
                   Dumper=MMPackDumper)
     dprint('wrote {0}'.format(filename))
 
