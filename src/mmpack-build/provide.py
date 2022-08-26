@@ -82,9 +82,12 @@ class _SpecsSymbols:
         """
         self._removed.add(sym.name)
 
-    def report_new_symbols(self):
+    def report_changes(self):
         """
-        Print warning log in new symbol have been found, not listed in spec
+        Print warning log regarding:
+             - new symbol have been found, not listed in spec
+             - symbols appearing in earlier version than expected
+             - symbol removed in new version
         """
         if self._new_syms:
             wprint('The following symbols were found but not specified:\n\t'
@@ -92,21 +95,11 @@ class _SpecsSymbols:
             wprint('They will all be considered as introduced in the current'
                    ' project version.')
 
-    def report_older_symbols(self):
-        """
-        Print warning about symbols appearing in earlier version than expected
-        """
-        if not self._older:
-            return
+        if self._older:
+            oldsyms = [f'{s.name}' for s in self._older]
+            wprint('The following symbols have been introduced before than'
+                   ' expected:\n\t' + '\n\t'.join(sorted(oldsyms)))
 
-        oldsyms = [f'{s.name}' for s in self._older]
-        wprint('The following symbols have been introduced before expected:'
-               '\n\t' + '\n\t'.join(sorted(oldsyms)))
-
-    def report_removed_symbols(self):
-        """
-        Print warning about symbol removed in new version
-        """
         if self._removed:
             wprint('The following symbols appear to have been removed:\n\t'
                    + '\n\t'.join(sorted(self._removed)))
@@ -134,7 +127,8 @@ class Provide:
         """
         self.symbols.update(dict.fromkeys(symbols, version))
 
-    def update_from_specs(self, pkg_specs: dict, pkg: PackageInfo) -> None:
+    def update_from_specs(self, pkg_specs: dict,
+                          pkg: PackageInfo) -> _SpecsSymbols:
         """
         Update minimal version associated with each symbol. This is
         typically used to integrate the data in package provide files.
@@ -151,7 +145,8 @@ class Provide:
             pkg: binary package being built.
 
         Returns:
-            None
+            _SpecSymbols holding the symbols specs associated with the package
+            name.
         """
         # Update package deps associated with the provide only if specified
         self.pkgdepends = pkg_specs.get('depends', self.pkgdepends)
@@ -197,9 +192,7 @@ class Provide:
                 else:  # version > self.version:
                     specs_symbols.mark_older(provsym)
 
-        specs_symbols.report_new_symbols()
-        specs_symbols.report_older_symbols()
-        specs_symbols.report_removed_symbols()
+        return specs_symbols
 
 
 class ProvideList:
@@ -295,7 +288,9 @@ class ProvideList:
                 specs = {key: {'symbols': specs}}
 
         for provide in self._provides.values():
-            provide.update_from_specs(specs.get(provide.name, dict()), pkg)
+            pkg_specs = specs.get(provide.name, {})
+            specs_syms = provide.update_from_specs(pkg_specs, pkg)
+            specs_syms.report_changes()
 
     def _get_dep_minversion(self, soname: str,
                             symbols: Set[str]) -> Tuple[str, Version]:
