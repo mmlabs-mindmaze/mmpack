@@ -244,6 +244,22 @@ class ProvideList:
                                for sym, version in sodata['symbols'].items()}
             self.add(provide)
 
+    def _get_full_typed_specs(self, typed_specs: dict) -> dict:
+        # If there is only one provide of the type, it is allowed that
+        # the provide in specs list directly the exported symbols. In
+        # such case, the depends name and soname are assumed to be the
+        # same as the (only) provide
+        if len(self._provides) == 1:
+            # get the only provide name (not soname)
+            key = list(self._provides.values())[0].name
+
+            # Check specs has the expected layout, if not, assume it contains
+            # directly the dictionary of symbols
+            if key not in typed_specs or 'symbols' not in typed_specs[key]:
+                typed_specs = {key: {'symbols': typed_specs}}
+
+        return typed_specs
+
     def update_from_specs(self, pkg_spec_provide: Dict,
                           pkg: PackageInfo) -> None:
         """
@@ -274,18 +290,7 @@ class ProvideList:
                              'package {} but no such symbols are '
                              'provided'.format(self.type, pkg.name))
 
-        # If there is only one provide of the type, it is allowed that
-        # the provide in specs list directly the exported symbols. In
-        # such case, the depends name and soname are assumed to be the
-        # same as the (only) provide
-        if num_provides == 1:
-            # get the only provide name (not soname)
-            key = list(self._provides.values())[0].name
-
-            # Check specs has the expected layout, if not, assume it contains
-            # directly the dictionary of symbols
-            if key not in specs or 'symbols' not in specs[key]:
-                specs = {key: {'symbols': specs}}
+        specs = self._get_full_typed_specs(specs)
 
         for provide in self._provides.values():
             pkg_specs = specs.get(provide.name, {})
