@@ -458,8 +458,8 @@ def main():
 
     if inspector.failed_imports:
         print('Warning: Following modules failed to be imported. They may be '
-              'optional imports:\n    {}'
-              .format('\n    '.join(sorted(inspector.failed_imports))),
+              'optional imports:\n    '
+              + '\n    '.join(sorted(inspector.failed_imports)),
               file=sys.stderr)
 
 

@@ -115,8 +115,8 @@ class SysPkgManager:
         """
         pkg_list = self._parse_pkgindex(builddir, srcnames)
         if not pkg_list:
-            raise FileNotFoundError('No system package found matching {}'
-                                    .format(' or '.join(srcnames)))
+            srcs = ' or '.join(srcnames)
+            raise FileNotFoundError(f'No system package found matching {srcs}')
 
         files_sysdep = dict()
         for pkg in pkg_list:

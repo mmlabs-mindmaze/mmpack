@@ -467,9 +467,8 @@ class MMPackBuildHook(BaseHook):
             sysdep = syspkg_mgr.find_pypkg_sysdep(pypkg)
             if not sysdep:
                 # <pypkg> dependency could not be met with any available means
-                errmsg = 'Could not find package providing {} python package'\
-                         .format(pypkg)
-                raise Assert(errmsg)
+                msg = f"Couldn't find package providing {pypkg} python package"
+                raise Assert(msg)
 
             currpkg.add_sysdep(sysdep)
 
@@ -571,8 +570,8 @@ class MMPackBuildHook(BaseHook):
                 continue
 
             pyname = pypkg.name if pypkg.name else name
-            pkg.description = '{}\nThis contains the python3 package {}'\
-                              .format(self._src_description, pyname)
+            pkg.description = f'{self._src_description}\n'\
+                              f'This contains the python3 package {pyname}'
 
         self._guess_private_sitedirs(data.pkgs.keys())
 
@@ -589,7 +588,7 @@ class MMPackBuildHook(BaseHook):
         pkg.provides['pypriv'] = _gen_py_provides(pkg, self._private_sitedirs)
 
     def store_provides(self, pkg: PackageInfo, folder: str):
-        filename = '{}/{}.pyobjects.gz'.format(folder, pkg.name)
+        filename = f'{folder}/{pkg.name}.pyobjects.gz'
         pkg.provides['python'].serialize(filename)
 
     def update_depends(self, pkg: PackageInfo, other_pkgs: List[PackageInfo]):

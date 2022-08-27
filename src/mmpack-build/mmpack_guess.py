@@ -107,8 +107,9 @@ def guess_maintainer() -> str:
     (git only) return self
     """
     try:
-        return '{0} <{1}>'.format(_sshell('git config user.name'),
-                                  _sshell('git config user.email'))
+        name = _sshell('git config user.name')
+        email = _sshell('git config user.email')
+        return f'{name} <{email}>'
     except Exception:
         return UNKNOWN
 

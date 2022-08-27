@@ -83,14 +83,13 @@ def get_linked_dll(import_lib):
     # build system (example of automake/libtool generating dll.a for module).
     # Hence only log a warning in this case
     if not dll_names:
-        wprint('No imported DLL could be found in {}'.format(import_lib))
+        wprint(f'No imported DLL could be found in {import_lib}')
         return None
 
     # Check we have no more than one dll
     if len(dll_names) > 1:
-        raise MMPackBuildError('Only one imported dll should be'
-                               'found in {}. dlls found: {}'
-                               .format(import_lib, dll_names))
+        raise MMPackBuildError('Only one imported dll should be found in '
+                               f'{import_lib}. dlls found: {dll_names}')
 
     # Get the only element of dll_names set
     return dll_names.pop()
@@ -152,15 +151,14 @@ def is_dynamic_library(filename: str, host_archdist: str) -> bool:
         # 'lib/libfoo_awesome-special.so.1.2.3'
         # 'lib/libfoo45.so.1.2.3'
         # 'lib/libfoo3.5.so.1.2.3'
-        elffile = r'(?:usr/)?lib/(?:{}/)?lib(?:[+.\w-]+)\.so[.0-9]*' \
-                  .format(multiarch)
+        elffile = rf'(?:usr/)?lib/(?:{multiarch}/)?lib(?:[+.\w-]+)\.so[.0-9]*'
         if not re.match(elffile, filename):
             return False
     elif fmt == 'pe':
         if not ('bin/' in filename and base.endswith('.dll')):
             return False
     else:
-        raise NotImplementedError('Unhandled exec format: {}'.format(fmt))
+        raise NotImplementedError(f'Unhandled exec format: {fmt}')
 
     if islink(filename):
         return False

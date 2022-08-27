@@ -68,7 +68,7 @@ def main(args):
         srctarball = SourceTarball(args.method, args.path_or_url, args.tag,
                                    **_source_tarball_kwargs(args))
         for prj in srctarball.iter_mmpack_srcs():
-            print('{} {} {}'.format(prj.name, prj.version, prj.tarball))
+            print(f'{prj.name} {prj.version} {prj.tarball}')
     except MMPackBuildError as error:
         print(f'Source tarball generation failed: {error}', file=sys.stderr)
         return 1

@@ -31,7 +31,7 @@ def dpkg_find_shlibs_file(target_soname: str):
     """
     name, version = parse_soname(target_soname)
     guess_pkgname = name + version
-    shlib_soname_regex = re.compile(r'\b{0} {1}\b .*'.format(name, version))
+    shlib_soname_regex = re.compile(rf'\b{name} {version}\b .*')
 
     guess = glob(DPKG_METADATA_PREFIX + '/'
                  + guess_pkgname + '**.shlibs')
@@ -68,7 +68,7 @@ def dpkg_parse_shlibs(filename: str, target_soname: str,
     """
     dependency_template = None
     name, version = parse_soname(target_soname)
-    shlib_soname = '{0} {1} '.format(name, version)
+    shlib_soname = f'{name} {version} '
     for line in open(filename):
         line = line.strip('\n')
         if line.startswith(shlib_soname):
@@ -80,11 +80,8 @@ def dpkg_parse_shlibs(filename: str, target_soname: str,
     # read library file to prune symbols
     # assert the existence of <pkgname>*.list
     pkgname = dependency_template.split(' ')[0]
-    glob_search_pattern = '{}/{}**:{}.list' \
-                          .format(DPKG_METADATA_PREFIX,
-                                  pkgname,
-                                  get_host_arch())
-    dpkg_list_file = glob(glob_search_pattern)[0]
+    pattern = f'{DPKG_METADATA_PREFIX}/{pkgname}**:{get_host_arch()}.list'
+    dpkg_list_file = glob(pattern)[0]
     for line in open(dpkg_list_file):
         line = line.strip('\n')
         if target_soname in line:
@@ -105,25 +102,19 @@ def dpkg_find_symbols_file(target_soname: str) -> str:
     """
     name, version = parse_soname(target_soname)
     guess_pkgname = name + version
+    arch = get_host_arch()
 
     # make sure the library characters are not interpreted as PCRE
     # Eg: libstdc++.so.6
     #            ^^^  ^  all those are PCRE wildcards
     # Note: '\b' is PCRE for word boundary
-    symbols_soname_regex = re.compile(r'\b{0}\b .*'
-                                      .format(re.escape(target_soname)))
+    symbols_soname_regex = re.compile(rf'\b{re.escape(target_soname)}\b .*')
 
-    glob_search_pattern = '{}/{}**:{}.symbols' \
-                          .format(DPKG_METADATA_PREFIX,
-                                  guess_pkgname,
-                                  get_host_arch())
-    guess = glob(glob_search_pattern)
+    guess = glob(f'{DPKG_METADATA_PREFIX}/{guess_pkgname}**:{arch}.symbols')
     if guess and os.path.exists(guess[0]):
         return guess[0]
 
-    glob_search_pattern = '{}/**:{}.symbols' \
-                          .format(DPKG_METADATA_PREFIX, get_host_arch())
-    for symbols_file in glob(glob_search_pattern):
+    for symbols_file in glob(f'{DPKG_METADATA_PREFIX}/**:{arch}.symbols'):
         if symbols_soname_regex.search(open(symbols_file).read()):
             return symbols_file
 
@@ -212,7 +203,7 @@ def dpkg_parse_symbols(filename: str, target_soname: str,
 
     if '#MINVER#' in dependency_template:
         if minversion:
-            minver = '(>= {0})'.format(str(minversion))
+            minver = f'(>= {str(minversion)})'
         else:
             # may happen if linked without --as-needed flag:
             # the library is needed, but none of its symbols
@@ -240,7 +231,7 @@ def dpkg_find_pypkg(pypkg: str) -> str:
     Get installed debian package providing the specified python package
     """
     # dpkg -S accept a glob-like pattern
-    pattern = '/usr/lib/python3/dist-packages/{}[/|.py|.*.so]*'.format(pypkg)
+    pattern = f'/usr/lib/python3/dist-packages/{pypkg}[/|.py|.*.so]*'
     cmd_output = shell(['dpkg', '--search', pattern])
     debpkg_list = list({r.split(':')[0] for r in cmd_output.splitlines()})
     return debpkg_list[0] if debpkg_list else None
@@ -251,7 +242,7 @@ class DebPkg(SysPkg):
     representation of a package in a Debian-based distribution repository
     """
     def get_sysdep(self) -> str:
-        return '{} (>= {})'.format(self.name, self.version)
+        return f'{self.name} (>= {self.version})'
 
 
 def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:

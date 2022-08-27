@@ -146,15 +146,15 @@ class Workspace:
         srcpkg is explicit, will only clean given package. If tag is further
         explicted, only tag specific subfolder of srcpkg is cleaned.
         """
-        dprint('cleaning {0} workspace'.format(srcpkg + '/' + tag))
-        shell('rm -rvf {0}/{1}/{2}'.format(self._build, srcpkg, tag))
+        dprint(f"cleaning {srcpkg + '/' + tag} workspace")
+        shell(f'rm -rvf {self._build}/{srcpkg}/{tag}')
 
     def wipe(self):
         """
         clean sources, build, staging, and all packages
         """
         self.clean()
-        shell('rm -vrf {0}/* {1}/*'.format(self._packages, self._cache))
+        shell(f'rm -vrf {self._packages}/* {self._cache}/*')
 
     def cache_get(self, path: str, expected_sha256: str = None) -> bool:
         """
@@ -241,7 +241,7 @@ def cached_download(url: str, path: str, expected_sha256: str = None):
     wrk = Workspace()
 
     if wrk.cache_get(path, expected_sha256):
-        iprint('Skip download {}. Using cached file'.format(url))
+        iprint(f'Skip download {url}. Using cached file')
         _update_access_time(path)
         return
 

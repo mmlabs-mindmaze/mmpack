@@ -43,8 +43,7 @@ def _extract_msgids_from_gnu_mo(filename: str) -> Set[str]:
 
     rev, num, toffset = unpack(endianness + 'III', gmo_data[4:16])
     if rev != 0:
-        raise Assert('{} has an unsupported format revision {}'
-                     .format(filename, rev))
+        raise Assert(f'{filename} has an unsupported format revision {rev}')
 
     # Walk in all entries of original strings
     msgids = set()

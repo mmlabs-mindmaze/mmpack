@@ -207,8 +207,8 @@ class SourceTarball:
 
         # Fetch sources following the specified method and move them to the
         # temporary source build folder
-        dprint('extracting sources in the temporary directory: {}'
-               .format(self._builddir))
+        dprint('extracting sources in the temporary directory: '
+               + self._builddir)
         self._create_srcdir(self._method)
 
     def __del__(self):

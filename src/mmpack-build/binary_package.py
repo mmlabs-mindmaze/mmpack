@@ -83,7 +83,7 @@ def _gen_sha256sums(sha256sums_path: str):
     # Write the file sha256sums file
     with open(sha256sums_path, 'wt', newline='\n') as sums_file:
         for filename in sorted(cksums):
-            sums_file.write('{}: {}\n'.format(filename, cksums[filename]))
+            sums_file.write(f'{filename}: {cksums[filename]}\n')
 
 
 class BinaryPackage:
@@ -120,7 +120,7 @@ class BinaryPackage:
         """
         return the license directory of the package
         """
-        licenses_dir = 'share/licenses/{}'.format(self.name)
+        licenses_dir = f'share/licenses/{self.name}'
         os.makedirs(licenses_dir, exist_ok=True)
         return licenses_dir
 
@@ -134,7 +134,7 @@ class BinaryPackage:
         return an empty interface dict if none was specified.
         """
         # TODO: also work with the last package published
-        provide_spec_name = '{}/{}.provides'.format(self.spec_dir, self.name)
+        provide_spec_name = f'{self.spec_dir}/{self.name}.provides'
         specs_provides = dict()
         try:
             specs_provides.update(yaml_load(provide_spec_name))
@@ -220,9 +220,8 @@ class BinaryPackage:
             os.link(src, dst, follow_symlinks=False)
 
     def _make_archive(self, pkgdir: str, dstdir: str) -> str:
-        mpkfile = "{0}/{1}_{2}_{3}.mpk".format(dstdir, self.name,
-                                               self.version, self.arch)
-        dprint('[tar] {0} -> {1}'.format(pkgdir, mpkfile))
+        mpkfile = f'{dstdir}/{self.name}_{self.version}_{self.arch}.mpk'
+        dprint(f'[tar] {pkgdir} -> {mpkfile}')
         create_tarball(pkgdir, mpkfile, 'zst')
 
         return mpkfile
@@ -245,7 +244,7 @@ class BinaryPackage:
         stagedir = f'{pkgbuilddir}/staging/{self.name}'
         os.makedirs(stagedir + '/MMPACK', exist_ok=True)
 
-        dprint('link {0} in {1}'.format(self.name, stagedir))
+        dprint(f'link {self.name} in {stagedir}')
         self._populate(instdir, stagedir)
         self._store_provides(stagedir)
         self._gen_info(stagedir)

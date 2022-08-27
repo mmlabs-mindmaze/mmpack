@@ -50,8 +50,7 @@ def msys2_find_pypkg(pypkg: str) -> str:
     # pypkg = 'numpy'
     # mingw64/lib/python3.7/site-packages/numpy/
     # mingw64/lib/python3.7/site-packages/numpy.py
-    pattern = r'mingw64/lib/python\d.\d+/site-packages/{}(.py|/.*)' \
-              .format(pypkg)
+    pattern = rf'mingw64/lib/python\d.\d+/site-packages/{pypkg}(.py|/.*)'
     file_regex = re.compile(pattern)
 
     pacman_pkgdir = Workspace().cygroot() + PACMAN_PREFIX + '\\local'
@@ -113,7 +112,7 @@ def _get_msys2_repo_comp(component, arch):
     mingw_subcomps = {'amd64': 'mingw64', 'i386': 'mingw32'}
     val = mingw_subcomps.get(arch)
     if not val:
-        raise Assert('unexpected architecture: {}'.format(arch))
+        raise Assert(f'unexpected architecture: {arch}')
     return val
 
 
@@ -121,7 +120,7 @@ def _get_repo_cpu(arch):
     repo_cpu_map = {'amd64': 'x86_64', 'i386': 'i686'}
     val = repo_cpu_map.get(arch)
     if not val:
-        raise Assert('unexpected architecture: {}'.format(arch))
+        raise Assert(f'unexpected architecture: {arch}')
     return val
 
 
@@ -147,9 +146,9 @@ def _parse_pkgindex_comp(repo_url, component: str, builddir: str,
 
     cpu_arch = _get_repo_cpu(arch)
     repo = _get_msys2_repo_comp(component, arch)
-    pkgindex_url = '{}/{}/{}/{}.db'.format(repo_url, component, cpu_arch, repo)
+    pkgindex_url = f'{repo_url}/{component}/{cpu_arch}/{repo}.db'
     pkgindex = os.path.join(builddir, os.path.basename(pkgindex_url))
-    pkg_baseurl = '{}/{}/{}/'.format(repo_url, component, cpu_arch)
+    pkg_baseurl = f'{repo_url}/{component}/{cpu_arch}/'
 
     # download compressed index
     cached_download(pkgindex_url, pkgindex)
@@ -187,8 +186,8 @@ class PacmanMsys2(SysPkgManager):
         # support z-standart compression (.tar.zst)
         pkgfile_u = shell(['cygpath', '-u', pkgfile], log=False).strip()
         unpackdir_u = shell(['cygpath', '-u', unpackdir], log=False).strip()
-        cmd = 'tar -xvf {} -C {} --exclude=.BUILDINFO --exclude=.MTREE '\
-              '--exclude=.PKGINFO'.format(pkgfile_u, unpackdir_u)
+        cmd = f'tar -xvf {pkgfile_u} -C {unpackdir_u} --exclude=.BUILDINFO '\
+              '--exclude=.MTREE --exclude=.PKGINFO'
         files = shell(cmd).splitlines()
         return [f.rstrip('/') for f in files]
 

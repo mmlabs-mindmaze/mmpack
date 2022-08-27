@@ -61,7 +61,7 @@ class MMPackBuildHook(BaseHook):
         # load python module to use for handling the executable file
         # format of the targeted host
         self._execfmt = get_exec_fileformat(self._arch)
-        modname = 'mmpack_build.{}_utils'.format(self._execfmt)
+        modname = f'mmpack_build.{self._execfmt}_utils'
         self._module = importlib.import_module(modname)
 
     def _get_mmpack_provides(self) -> ProvideList:
@@ -168,7 +168,7 @@ class MMPackBuildHook(BaseHook):
         pkg.provides['sharedlib'] = shlib_provides
 
     def store_provides(self, pkg: PackageInfo, folder: str):
-        filename = '{}/{}.symbols.gz'.format(folder, pkg.name)
+        filename = f'{folder}/{pkg.name}.symbols.gz'
         pkg.provides['sharedlib'].serialize(filename)
 
     def update_depends(self, pkg: PackageInfo, other_pkgs: List[PackageInfo]):
@@ -201,8 +201,7 @@ class MMPackBuildHook(BaseHook):
         self._gen_shlib_deps(pkg, deps, symbols, other_pkgs)
 
         if symbols:
-            errmsg = 'Failed to process all sharedlib symbols of {}\n' \
-                     .format(pkg.name)
+            errmsg = f'Failed to process all sharedlib symbols of {pkg.name}\n'
             errmsg += 'Remaining symbols:\n\t'
             errmsg += '\n\t'.join(symbols)
             wprint(errmsg)

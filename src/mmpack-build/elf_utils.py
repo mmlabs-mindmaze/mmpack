@@ -151,9 +151,7 @@ def _get_version_table(elffile):
     gnu_version = elffile.get_section_by_name('.gnu.version')
     if not gnu_version:
         # TODO: parse unversioned symbols from .symtab/.dynsym
-        msg = 'Could not find Symbol Version Table in {}' \
-              .format(elffile.stream.name)
-        wprint(msg)
+        wprint(f'Could not find Symbol Version Table in {elffile.stream.name}')
         return {}
     for nsym, sym in enumerate(gnu_version.iter_symbols()):
         index = sym['ndx']
@@ -190,8 +188,7 @@ def undefined_symbols(filename):
     gnu_version_r = elffile.get_section_by_name('.gnu.version_r')
     if not gnu_version_r:
         # TODO: parse unversioned symbols from .symtab/.dynsym
-        msg = 'Could not find Version Requirement Table in {}'.format(elffile)
-        wprint(msg)
+        wprint(f'Could not find Version Requirement Table in {elffile}')
         return {}
 
     dyn = elffile.get_section_by_name('.dynsym')
@@ -282,7 +279,7 @@ def symbols_set(filename):
 
             if version:
                 # 3. create the full version string
-                symbols.add('{}@{}'.format(sym.name, version))
+                symbols.add(f'{sym.name}@{version}')
             else:
                 symbols.add(sym.name)
 

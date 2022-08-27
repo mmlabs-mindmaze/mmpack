@@ -163,7 +163,7 @@ def shell(cmd, log: bool = True, input_str: str = None,
         raise ValueError('Invalid shell argument type: ' + str(type(cmd)))
 
     if log:
-        dprint('[shell] {0}'.format(logmsg))
+        dprint(f'[shell] {logmsg}')
 
     input_utf8 = input_str.encode('utf-8') if input_str else None
 
@@ -205,7 +205,7 @@ def run_cmd(cmd: List[str], log: bool = True, env: Dict[str, str] = None,
         ShellException: the command return a failure code
     """
     if log:
-        dprint('[run_cmd] {0}'.format(' '.join(cmd)))
+        dprint('[run_cmd] ' + ' '.join(cmd))
 
     try:
         run(cmd, capture_output=True, encoding='utf-8',
@@ -274,7 +274,7 @@ def yaml_serialize(obj: Union[list, dict], filename: str,
                   allow_unicode=True,
                   indent=2,
                   Dumper=MMPackDumper)
-    dprint('wrote {0}'.format(filename))
+    dprint('wrote ' + filename)
 
 
 def mm_representer(dumper, data):
@@ -384,7 +384,7 @@ def get_host_arch_dist() -> str:
         i386-windows
     """
 
-    return '{0}-{1}'.format(get_host_arch(), get_host_dist())
+    return f'{get_host_arch()}-{get_host_dist()}'
 
 
 def parse_soname(soname: str) -> (str, str):
@@ -656,7 +656,7 @@ def download(url: str, path: str):
     """
     Download file from url to the specified path
     """
-    iprint('Downloading {} ... '.format(url))
+    iprint(f'Downloading {url} ... ')
 
     request = get_http_req(url)
     with open(path, 'wb') as outfile:
@@ -727,7 +727,7 @@ def str2bool(value: str) -> bool:
     if lowerval in _FALSE_STRINGS:
         return False
 
-    raise ValueError('"{}" does not represent a boolean value'.format(value))
+    raise ValueError(f'"{value}" does not represent a boolean value')
 
 
 def extract_matching_set(pcre: str, str_set: Set[str]) -> Set[str]:

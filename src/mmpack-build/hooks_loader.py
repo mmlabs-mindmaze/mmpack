@@ -42,7 +42,7 @@ def init_mmpack_build_hooks(**kwargs) -> None:
             # Instantiate hook and add it to the list
             hook = module.MMPackBuildHook(**kwargs)
             MMPACK_BUILD_HOOKS.append(hook)
-            dprint('hook plugin loaded: {}'.format(hook.__module__))
+            dprint(f'hook plugin loaded: {hook.__module__}')
 
         except AttributeError as error:
             raise ImportError('invalid hook module: ' + name) from error

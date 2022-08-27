@@ -286,9 +286,9 @@ class ProvideList:
 
         num_provides = len(self._provides)
         if num_provides == 0:
-            raise ValueError('provides specified for type {} in '
-                             'package {} but no such symbols are '
-                             'provided'.format(self.type, pkg.name))
+            raise ValueError(f'provides specified for type {self.type} in '
+                             f'package {pkg.name} but no such symbols are '
+                             'provided')
 
         specs = self._get_full_typed_specs(specs)
 
@@ -401,7 +401,7 @@ def load_mmpack_provides(extension: str, symtype) -> ProvideList:
     """
     wrk = Workspace()
     metadatadir = wrk.prefix + '/var/lib/mmpack/metadata/'
-    pattern = re.compile(r'.*.{}(?:.gz)?'.format(extension))
+    pattern = re.compile(rf'.*.{extension}(?:.gz)?')
 
     provides = ProvideList(symtype)
 

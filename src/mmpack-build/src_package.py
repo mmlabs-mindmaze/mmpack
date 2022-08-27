@@ -129,8 +129,7 @@ class SrcPackage:
         builddir = self.pkgbuild_path()
         unpackdir = os.path.join(builddir, self.name)
 
-        iprint('moving unpacked sources from {0} to {1}'
-               .format(tmp_srcdir, unpackdir))
+        iprint(f'moving unpacked sources from {tmp_srcdir} to {unpackdir}')
         shutil.move(tmp_srcdir, unpackdir)
 
         # Copy package tarball in package builddir
@@ -275,7 +274,7 @@ class SrcPackage:
             raise MMPackBuildError(errmsg)
 
         self.licenses = [license_file]
-        dprint('Using file: "{}" as license by default'.format(license_file))
+        dprint(f'Using file: "{license_file}" as license by default')
 
     def _fetch_unpack_syspkg_locally(self):
         """
@@ -363,12 +362,12 @@ class SrcPackage:
         # it is custom build system. The script is then obtained from
         # mmpack folder in the unpacked sources.
         scriptdir = os.path.join(os.path.dirname(__file__), 'buildscripts')
-        build_script = '{0}/build-{1}'.format(scriptdir, self.build_system)
+        build_script = f'{scriptdir}/build-{self.build_system}'
         if self.build_system == 'custom':
             build_script = 'mmpack/build'
 
         build_cmd = cmd_in_optional_prefix(['sh', build_script])
-        dprint('[shell] {0}'.format(' '.join(build_cmd)))
+        dprint('[shell] ' + ' '.join(build_cmd))
 
         # Execute command and transfer output to log
         proc = Popen(build_cmd, env=self._build_env(skip_tests),
@@ -385,8 +384,8 @@ class SrcPackage:
         proc.wait()
         if proc.returncode != 0:
             errmsg = 'Failed to build ' + self.name + '\n'
-            errmsg += 'See {}/mmpack.log file for what went wrong\n' \
-                      .format(self.pkgbuild_path())
+            errmsg += f'See {self.pkgbuild_path()}/mmpack.log file for what '\
+                      'went wrong\n'
             raise ShellException(errmsg)
 
         popdir()  # unpack directory
@@ -432,8 +431,7 @@ class SrcPackage:
             # Raise an error if the described package was expecting one.
             # Note: meta-packages are empty and accepted
             if not pkg.files and 'files' in pkgspecs:
-                errmsg = 'Custom package {0} is empty !'.format(pkgname)
-                raise MMPackBuildError(errmsg)
+                raise MMPackBuildError(f'Custom package {pkgname} is empty !')
 
     def _get_fallback_pkgname(self, pkg_names: Set[str]) -> str:
         """
@@ -528,8 +526,7 @@ class SrcPackage:
 
             binpkg.description = pkginfo.description
             if not binpkg.description:
-                raise MMPackBuildError('Package {0} has no description'
-                                       .format(binpkg.name))
+                raise MMPackBuildError(f'Pkg {binpkg.name} has no description')
 
             self._attach_copyright(binpkg)
             self._packages[binpkg.name] = binpkg
@@ -620,12 +617,9 @@ class SrcPackage:
                            'sha256': self.src_hash}}
 
         outdir = self.pkgbuild_path()
-        manifest_path = '{}/{}_{}_{}.mmpack-manifest'.format(outdir,
-                                                             self.name,
-                                                             self.version,
-                                                             arch)
-        yaml_serialize(data, manifest_path, use_block_style=True)
-        return manifest_path
+        mpath = f'{outdir}/{self.name}_{self.version}_{arch}.mmpack-manifest'
+        yaml_serialize(data, mpath, use_block_style=True)
+        return mpath
 
     def generate_binary_packages(self):
         """
@@ -638,8 +632,7 @@ class SrcPackage:
 
         # Copy source package
         shutil.copy(self.src_tarball, outdir)
-        iprint('source {} copied in {}'
-               .format(path.basename(self.src_tarball), outdir))
+        iprint(f'source {path.basename(self.src_tarball)} copied in {outdir}')
 
         # we need all of the provide infos before starting the dependencies
         for pkgname, binpkg in self._packages.items():
@@ -655,7 +648,7 @@ class SrcPackage:
             for binpkg in self._packages.values():
 
                 # Assign actual system package dependency of ghost package
-                dprint('Files associated to package {}:'.format(binpkg.name))
+                dprint(f'Files associated to package {binpkg.name}:')
                 for filename in sorted(binpkg.install_files):
                     sysdep = self.files_sysdep.get(filename)
                     # local_install_script are allowed to remove and add files
@@ -664,7 +657,7 @@ class SrcPackage:
                     if not sysdep:
                         continue
                     binpkg.add_sysdepend(sysdep)
-                    dprint('    {}  \t[{}]'.format(filename, sysdep))
+                    dprint(f'    {filename}  \t[{sysdep}]')
 
                 # Remove install files from ghost package to avoid to copy them
                 # in the binary ghost package
@@ -673,13 +666,13 @@ class SrcPackage:
         for pkgname, binpkg in self._packages.items():
             pkgfile = binpkg.create(instdir, self.pkgbuild_path())
             shutil.copy(pkgfile, outdir)
-            iprint('generated package: {} : {}'
-                   .format(pkgname, path.join(outdir, path.basename(pkgfile))))
+            pkgpath = path.join(outdir, path.basename(pkgfile))
+            iprint(f'generated package: {pkgname} : {pkgpath}')
 
         manifest = self._generate_manifest()
         shutil.copy(manifest, outdir)
-        iprint('generated manifest: {}'
-               .format(path.join(outdir, path.basename(manifest))))
+        manifest_path = path.join(outdir, path.basename(manifest))
+        iprint(f'generated manifest: {manifest_path}')
 
         popdir()  # local install path
 
@@ -692,4 +685,4 @@ class SrcPackage:
         self.generate_binary_packages()
 
     def __repr__(self):
-        return u'{}'.format(self.__dict__)
+        return repr(self.__dict__)
