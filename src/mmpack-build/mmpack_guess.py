@@ -35,19 +35,6 @@ UNKNOWN = 'unknown'  # default return value if guessing failed
 # pylint: disable=broad-except
 
 
-def add_parser_args(parser: ArgumentParser):
-    """Enrich supplied argument parser with guess related arguments"""
-    sub = parser.add_subparsers(dest='guess_subcmd', required=False)
-
-    sub.add_parser('create-specs',
-                   help='create mmpack specs for current project')
-
-    prov = sub.add_parser('update-provides',
-                          help='update provides specs from a project build')
-    prov.add_argument('project_builddir',
-                      help='path to a mmpack build of the current project')
-
-
 def _sshell(cmd) -> str:
     """
     helper: silent shell call
@@ -191,6 +178,12 @@ def guess_specs():
             print(line)
 
 
+####################################################################
+#
+# update/create provides specs
+#
+####################################################################
+
 _PROVIDE_TYPES = {
     ('sharedlib', 'symbols'),
     ('python', 'pyobjects'),
@@ -239,6 +232,25 @@ def update_provides(proj_builddir: str):
         pkg_staging_dir = f'{staging_root}/{pkgname}'
         pkg = _load_pkg_metadata(pkg_staging_dir)
         _update_provide_spec(pkg_staging_dir, pkg)
+
+
+####################################################################
+#
+# Sub command parsing
+#
+####################################################################
+
+def add_parser_args(parser: ArgumentParser):
+    """Enrich supplied argument parser with guess related arguments"""
+    sub = parser.add_subparsers(dest='guess_subcmd', required=False)
+
+    sub.add_parser('create-specs',
+                   help='create mmpack specs for current project')
+
+    prov = sub.add_parser('update-provides',
+                          help='update provides specs from a project build')
+    prov.add_argument('project_builddir',
+                      help='path to a mmpack build of the current project')
 
 
 def main(args):
