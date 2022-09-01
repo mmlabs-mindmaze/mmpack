@@ -6,7 +6,8 @@ helper module containing dpkg files parsing functions
 import os
 import re
 
-from email import message_from_bytes
+from email import message_from_bytes, message_from_string
+from functools import partial
 from glob import glob
 from importlib import import_module
 from typing import List, TextIO, Iterator, Optional
@@ -241,11 +242,6 @@ class DebPkg(SysPkg):
     """
     representation of a package in a Debian-based distribution repository
     """
-    def get_sysdep(self) -> str:
-        return f'{self.name} (>= {self.version})'
-
-
-def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
     desc_field_to_attr = {
         'Package': 'name',
         'Version': 'version',
@@ -254,21 +250,34 @@ def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
         'SHA256': 'sha256',
     }
 
-    pkg = DebPkg()
-    for line in fileobj:
-        try:
-            key, data = line.split(':', 1)
-            attrname = desc_field_to_attr.get(key)
-            if attrname:
-                setattr(pkg, attrname, data.strip())
-        except ValueError:
-            # Check end of paragraph
-            if not line.strip():
-                if not pkg.source:
-                    pkg.source = pkg.name
-                pkg.source = pkg.source.split(' ', 1)[0]
-                yield pkg
-                pkg = DebPkg()
+    def __init__(self, pkg_str: str):
+        super().__init__()
+
+        for key, value in message_from_string(pkg_str).items():
+            try:
+                setattr(self, self.desc_field_to_attr[key], value)
+            except KeyError:
+                continue
+
+        if not self.source:
+            self.source = self.name
+
+        if ' ' in self.source:
+            self.source = self.source.split(' ', 1)[0]
+
+    def get_sysdep(self) -> str:
+        return f'{self.name} (>= {self.version})'
+
+
+def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
+    pkg_str = ''
+    for line in iter(partial(fileobj.readline), ''):
+        if line != '\n' or not pkg_str:
+            pkg_str += line
+            continue
+
+        yield DebPkg(pkg_str)
+        pkg_str = ''
 
 
 class DebRepo:
