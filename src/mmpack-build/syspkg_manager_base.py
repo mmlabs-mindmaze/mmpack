@@ -64,8 +64,8 @@ class SysPkgManager:
         """
         raise NotImplementedError
 
-    def _parse_pkgindex(self, builddir: str,
-                        srcnames: List[str]) -> List[SysPkg]:
+    def parse_pkgindex(self, builddir: str,
+                       srcnames: List[str]) -> List[SysPkg]:
         """
         fetch and parse system repository index and generate the list of system
         package that are created from the same source.
@@ -113,7 +113,7 @@ class SysPkgManager:
             Couple of system package version as downloaded and the mapping of
             file to package name that provides them
         """
-        pkg_list = self._parse_pkgindex(builddir, srcnames)
+        pkg_list = self.parse_pkgindex(builddir, srcnames)
         if not pkg_list:
             srcs = ' or '.join(srcnames)
             raise FileNotFoundError(f'No system package found matching {srcs}')

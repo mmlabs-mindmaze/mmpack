@@ -191,8 +191,8 @@ class PacmanMsys2(SysPkgManager):
         files = shell(cmd).splitlines()
         return [f.rstrip('/') for f in files]
 
-    def _parse_pkgindex(self, builddir: str,
-                        srcnames: List[str]) -> List[SysPkg]:
+    def parse_pkgindex(self, builddir: str,
+                       srcnames: List[str]) -> List[SysPkg]:
         repo_url = _get_repo_baseurl()
 
         for srcname in srcnames:
