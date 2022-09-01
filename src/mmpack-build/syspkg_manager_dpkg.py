@@ -381,8 +381,8 @@ class Dpkg(SysPkgManager):
 
         return [f.lstrip('./') for f in files]
 
-    def _parse_pkgindex(self, builddir: str,
-                        srcnames: List[str]) -> List[SysPkg]:
+    def parse_pkgindex(self, builddir: str,
+                       srcnames: List[str]) -> List[SysPkg]:
         # Try to get the repo that provide the specified source package
         try:
             repo_url, dist = _get_repo(srcnames)
