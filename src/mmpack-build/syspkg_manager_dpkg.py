@@ -7,6 +7,8 @@ import os
 import re
 
 from email import message_from_bytes
+from email.parser import Parser
+from functools import partial
 from glob import glob
 from importlib import import_module
 from typing import List, TextIO, Iterator, Optional
@@ -254,21 +256,28 @@ def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
         'SHA256': 'sha256',
     }
 
-    pkg = DebPkg()
-    for line in fileobj:
-        try:
-            key, data = line.split(':', 1)
-            attrname = desc_field_to_attr.get(key)
-            if attrname:
-                setattr(pkg, attrname, data.strip())
-        except ValueError:
-            # Check end of paragraph
-            if not line.strip():
-                if not pkg.source:
-                    pkg.source = pkg.name
-                pkg.source = pkg.source.split(' ', 1)[0]
-                yield pkg
-                pkg = DebPkg()
+    parser = Parser()
+    pkg_str = ''
+    for line in iter(partial(fileobj.readline), ''):
+        if line != '\n' or not pkg_str:
+            pkg_str += line
+            continue
+
+        pkg = Debpkg()
+        for key, value in parser.parsestr(pkg_str).items():
+            try:
+                setattr(pkg, fields[key], value)
+            except KeyError:
+                continue
+
+        if not pkg.source:
+            pkg.source = pkg.name:
+
+        if ' ' in pkg.source:
+            pkg.source = pkg.source.split(' ', 1)[0]
+
+        yield pkg
+        pkg_str = ''
 
 
 class DebRepo:
