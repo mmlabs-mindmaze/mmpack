@@ -16,8 +16,11 @@ import glob
 import os
 import re
 from argparse import ArgumentParser
+from difflib import SequenceMatcher
 from email.parser import Parser
-from typing import List
+from typing import Iterable, List
+from shutil import rmtree
+
 import yaml
 
 from .common import find_license, shell, yaml_load, yaml_serialize
@@ -25,6 +28,7 @@ from .errors import ShellException
 from .package_info import PackageInfo
 from .mm_version import Version
 from .provide import ProvideList
+from .syspkg_manager import get_syspkg_mgr
 from .yaml_dumper import MMPackDumper
 
 
@@ -180,6 +184,40 @@ def guess_specs():
 
 ####################################################################
 #
+# create ghost package specs
+#
+####################################################################
+
+def _common_substring(strings: Iterable[str]) -> str:
+    string_iterator = iter(strings)
+    common = next(string_iterator)
+
+    seqm = SequenceMatcher()
+    for string in string_iterator:
+        seqm.set_seqs(common, string)
+        match = seqm.find_longest_match()
+        common = common[match.a:match.a+match.size]
+
+    return common
+
+
+def create_ghost_specs(srcname: str):
+    """
+    Create specs of mmpack package for ghosting a system package
+    """
+    tmpdir = Workspace().tmpdir()
+    syspkg_mgr = get_syspkg_mgr()
+
+    syspkgs = syspkg_mgr.parse_pkgindex(tmpdir, srcname)
+    desc = _common_substring((s.desc for s in syspkgs))
+    
+
+    rmtree(tmpdir)
+    
+
+
+####################################################################
+#
 # update/create provides specs
 #
 ####################################################################
@@ -245,6 +283,11 @@ def add_parser_args(parser: ArgumentParser):
     sub.add_parser('create-specs',
                    help='create mmpack specs for current project')
 
+    ghost = sub.add_parser('create-ghost-specs',
+                           help='create mmpack specs for ghost package')
+    ghost.add_argument('srcname',
+                       help='name of source system package')
+
     prov = sub.add_parser('update-provides',
                           help='update provides specs from a project build')
     prov.add_argument('project_builddir',
@@ -257,5 +300,7 @@ def main(args):
     """
     if args.guess_subcmd in (None, 'create-specs'):
         guess_specs()
+    elif args.guess_subcmd == 'create-ghost-specs':
+        create_ghost_specs(args.srcname)
     elif args.guess_subcmd == 'update-provides':
         update_provides(args.project_builddir)

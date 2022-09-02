@@ -21,6 +21,7 @@ class SysPkg:
         self.filename = ''  # basename of the package file to download
         self.url = ''  # url of the package (includes repo url and basename)
         self.sha256 = ''
+        self.desc = ''
 
     def get_sysdep(self) -> str:
         """
