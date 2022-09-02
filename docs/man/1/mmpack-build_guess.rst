@@ -17,6 +17,8 @@ SYNOPSIS
 
 **mmpack-build guess** update-provides *mmpack_pkg_build_dir*
 
+**mmpack-build guess** create-ghosts-specs *srcname*
+
 DESCRIPTION
 ===========
 **mmpack-build guess** will attempt to guess mmpack spec files. The actual
@@ -34,6 +36,10 @@ The subcommand can be one the values:
   update-provides
     Update provide specs (.provides files in mmpack folder) with the result of
     the build of the mmpack source package specified by *mmpack_pkg_build_dir*.
+
+  create-ghost-specs
+    Attempt to guess a mmpack specfile for creating a system ghosts package for
+    *srcname* and prints it to stdout.
 
 SEE ALSO
 ========
