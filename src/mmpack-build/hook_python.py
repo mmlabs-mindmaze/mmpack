@@ -50,7 +50,7 @@ _PKG_REGEX = re.compile(
     r'/([\w-]+)([^/]*)'
 )
 
-_PYEXT_REGEX = re.compile(r'.*\.cpython-.*\.(?:so|dll|pyd)')
+_PYEXT_REGEX = re.compile(r'.*\.(?:cpython|cp\d+)-.*\.(?:so|dll|pyd)')
 _IGNORE_METADATA = [
     'direct_url.json',
     'LICENSE',
