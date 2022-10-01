@@ -225,7 +225,9 @@ def _update_provide_spec(staging_dir: str, pkg: PackageInfo):
 
         provides.update_specs(specs, pkg)
 
-    yaml_serialize(specs, provide_spec_filename)
+    # Write down specs only if there are not empty
+    if specs:
+        yaml_serialize(specs, provide_spec_filename)
 
 
 def update_provides(proj_builddir: str):
