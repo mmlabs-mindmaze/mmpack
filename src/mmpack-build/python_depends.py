@@ -381,7 +381,14 @@ class DependsInspector:
             _load_pyfile_module(filename)
 
         for filename in pyfiles:
-            self._gather_pyfile_depends(filename)
+            try:
+                self._gather_pyfile_depends(filename)
+            except Exception as exception:
+                print(f'Warning: Analysis of {filename} has raised an exception:\n'
+                      f' {exception}\n'
+                      ' This is possibly an bug from astroid/pylint\n'
+                      f' => Skipping {filename} processing for depends',
+                      file=sys.stderr)
 
     def used_pkgs(self) -> Iterator[Tuple[str, Set[str]]]:
         """

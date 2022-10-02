@@ -206,6 +206,20 @@ class PkgData:
         ns_symset = self.syms.setdefault(namespace, set())
         ns_symset.add(symbol)
 
+    def _gen_pyfile_symbols(self, pyfile: str):
+        modpath = modpath_from_file_with_callback(pyfile, None,
+                                                  lambda x, y: True)
+        mod = MANAGER.ast_from_file(pyfile, '.'.join(modpath))
+
+        self.add_module_public_symbols(mod)
+
+        # For a python package, __main__.py holds the contents which
+        # will be executed when the module is run with -m. If module
+        # exists, <pypkg>.__main__ will be added to the public symbols.
+        if basename(pyfile) == '__main__.py':
+            pkg_namespace = mod.qname().rsplit('.', 1)[0]
+            self.add_namespace_symbol(pkg_namespace, '__main__')
+
     def gen_pypkg_symbols(self):
         """
         Generate set symbols of python package
@@ -230,24 +244,18 @@ class PkgData:
 
         for pyfile in processing_list:
             try:
-                modpath = modpath_from_file_with_callback(pyfile, None,
-                                                          lambda x, y: True)
-                mod = MANAGER.ast_from_file(pyfile, '.'.join(modpath))
+                self._gen_pyfile_symbols(pyfile)
             except (AstroidSyntaxError, InconsistentMroError) as error:
                 print(f'Warning: {pyfile} has raised a syntax error:\n'
                       f' {error}\n'
                       ' => Skipping its processing for provides',
                       file=sys.stderr)
-                continue
-
-            self.add_module_public_symbols(mod)
-
-            # For a python package, __main__.py holds the contents which
-            # will be executed when the module is run with -m. If module
-            # exists, <pypkg>.__main__ will be added to the public symbols.
-            if basename(pyfile) == '__main__.py':
-                pkg_namespace = mod.qname().rsplit('.', 1)[0]
-                self.add_namespace_symbol(pkg_namespace, '__main__')
+            except Exception as exception:
+                print(f'Warning: Analysis of {pyfile} has raised an exception:\n'
+                      f' {exception}\n'
+                      ' This is possibly an bug from astroid/pylint\n'
+                      f' => Skipping {pyfile} processing for provides',
+                      file=sys.stderr)
 
     def get_provided(self) -> Dict[str, Set[str]]:
         """Get dictionary of root package and its public symbols"""
