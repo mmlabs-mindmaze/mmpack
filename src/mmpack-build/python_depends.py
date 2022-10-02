@@ -16,6 +16,7 @@ import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, dirname, exists, join as join_path
 from functools import cache
+from traceback import print_exc
 from typing import List, Iterator, Optional, Set, Tuple, Union
 
 import pkg_resources
@@ -381,7 +382,15 @@ class DependsInspector:
             _load_pyfile_module(filename)
 
         for filename in pyfiles:
-            self._gather_pyfile_depends(filename)
+            try:
+                self._gather_pyfile_depends(filename)
+            except Exception:  # pylint: disable=broad-except
+                print(f'Warning: Analysis of {filename} raises an exception:',
+                      file=sys.stderr)
+                print_exc(file=sys.stderr)
+                print(' This is possibly an bug from astroid\n'
+                      f' => Skipping {filename} processing for depends',
+                      file=sys.stderr)
 
     def used_pkgs(self) -> Iterator[Tuple[str, Set[str]]]:
         """
