@@ -78,6 +78,7 @@ pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
 libexecdir = get_option('prefix') / get_option('libexecdir')
 
 subdir('src/mmpack')
+subdir('src/pyscripts')
 subdir('src/mmpack-build')
 subdir('src/repository')
 subdir('data')
