@@ -164,7 +164,7 @@ def _exec_pyscript(name: str, sitedirs: List[str], files: Iterable[str],
                    try_in_prefix: bool = False) -> Dict[str, Set[str]]:
     infile = _FILENAME_GENERATOR.get(f'{name}.pyfiles')
 
-    script = os.path.join(os.path.dirname(__file__), f'python_{name}.py')
+    script = os.path.join(os.path.dirname(__file__), f'../pyscripts/{name}.py')
     cmd = ['python3', script]
     cmd += ['--site-path='+path for path in sitedirs]
     cmd += [infile]
