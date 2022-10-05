@@ -73,6 +73,10 @@ all_sources = []
 deployed_targets = []
 
 
+bindir = get_option('prefix') / get_option('bindir')
+pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
+libexecdir = get_option('prefix') / get_option('libexecdir')
+
 subdir('src/mmpack')
 subdir('src/mmpack-build')
 subdir('src/repository')

@@ -42,9 +42,6 @@ mmpack_build_sources = files(
 )
 all_sources += mmpack_build_sources
 
-bindir = get_option('prefix') / get_option('bindir')
-pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
-libexecdir = get_option('prefix') / get_option('libexecdir')
 mmpackbuilddir = pkgdatadir / 'mmpack_build'
 
 r = run_command('realpath', '-m', '--relative-to=' + bindir, pkgdatadir)
