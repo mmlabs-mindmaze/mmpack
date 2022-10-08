@@ -14,7 +14,6 @@ import json
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, dirname, exists, join as join_path
-from functools import cache
 from traceback import print_exc
 from typing import List, Iterable, Iterator, Optional, Set, Tuple, Union
 
@@ -25,28 +24,18 @@ from astroid import Uninferable, Module, Instance, ClassDef, \
     Import, ImportFrom, Call, Attribute, Name
 from astroid.exceptions import AttributeInferenceError, AstroidImportError, \
     InconsistentMroError, InferenceError, NameInferenceError
-from astroid.modutils import (is_standard_module, is_namespace,
-                              modpath_from_file,
-                              modpath_from_file_with_callback,
-                              file_info_from_modpath)
+from astroid.modutils import (is_standard_module, modpath_from_file,
+                              modpath_from_file_with_callback)
 from astroid.node_classes import NodeNG
 from astroid.objects import Super
 
-
-@cache
-def _is_namespace_pkg(modname: str) -> bool:
-    """reports true if modname is a PEP420 namespace package"""
-    try:
-        is_ns = is_namespace(file_info_from_modpath(modname.split('.')))
-    except ImportError:
-        is_ns = False
-    return is_ns
+from .utils import is_namespace_pkg
 
 
 def _is_standard_module(mod: Module) -> bool:
     # verify root package is not a PEP420 namespace package
     # (is_standard_module is fooled by them)
-    if _is_namespace_pkg(mod.name.split('.')[0]):
+    if is_namespace_pkg(mod.name.split('.')[0]):
         return False
 
     return is_standard_module(mod.name)
@@ -58,7 +47,7 @@ def _is_pkg(path: str, mod_path: List[str]) -> bool:
         modpath.append(part)
         path = join_path(path, part)
         if not exists(join_path(path, '__init__.py')):
-            if not _is_namespace_pkg('.'.join(modpath)):
+            if not is_namespace_pkg('.'.join(modpath)):
                 return False
     return True
 
@@ -401,7 +390,7 @@ class DependsInspector:
             # Find the first parent package that is not a namespace
             modpath = modname.split('.')
             pypkg = modpath.pop(0)
-            while _is_namespace_pkg(pypkg):
+            while is_namespace_pkg(pypkg):
                 pypkg += '.' + modpath.pop(0)
 
             if pypkg in reported_pkgs:

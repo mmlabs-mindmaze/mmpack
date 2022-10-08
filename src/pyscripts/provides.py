@@ -23,7 +23,6 @@ package and use this one to run the script.
 import json
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from functools import cache
 from os.path import abspath, basename, dirname
 from traceback import print_exc
 from typing import Dict, Iterable, Set, Union
@@ -31,18 +30,9 @@ from typing import Dict, Iterable, Set, Union
 from astroid import AstroidImportError, AstroidSyntaxError, MANAGER
 from astroid import InconsistentMroError
 from astroid.nodes import Import, ImportFrom, AssignName, ClassDef, Module
-from astroid.modutils import (file_info_from_modpath, is_namespace,
-                              modpath_from_file_with_callback)
+from astroid.modutils import modpath_from_file_with_callback
 
-
-@cache
-def is_namespace_mod(modname: str) -> bool:
-    """reports true if modname is a PEP420 namespace package"""
-    try:
-        is_ns = is_namespace(file_info_from_modpath(modname.split('.')))
-    except ImportError:
-        is_ns = False
-    return is_ns
+from .utils import is_namespace_pkg
 
 
 def get_pkg(modname: str) -> str:
@@ -52,7 +42,7 @@ def get_pkg(modname: str) -> str:
     # Find first parent package that is not a namespace
     for depth in range(1, len(modpath)+1):
         root_modname = '.'.join(modpath[:depth])
-        if not is_namespace_mod(root_modname):
+        if not is_namespace_pkg(root_modname):
             break
 
     return root_modname
