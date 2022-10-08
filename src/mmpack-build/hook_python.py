@@ -160,6 +160,22 @@ class _BuildFilenameGenerator:
 _FILENAME_GENERATOR = _BuildFilenameGenerator()
 
 
+def _exec_pyscript(name: str, sitedirs: List[str], files: Iterable[str],
+                   try_in_prefix: bool = False) -> Dict[str, Set[str]]:
+    infile = _FILENAME_GENERATOR.get(f'{name}.pyfiles')
+
+    script = os.path.join(os.path.dirname(__file__), f'python_{name}.py')
+    cmd = ['python3', script]
+    cmd += ['--site-path='+path for path in sitedirs]
+    cmd += [infile]
+
+    with open(infile, 'w') as stream:
+        stream.write('\n'.join(files))
+
+    cmd_output = shell(cmd_in_optional_prefix(cmd) if try_in_prefix else cmd)
+    return {k: set(v) for k, v in json.loads(cmd_output).items()}
+
+
 def _create_launcher(launcher: str, settings: str):
     # ignore extras
     if '[' in settings:
@@ -204,19 +220,7 @@ def _gen_py_importname(pyfiles: Iterable[str],
     if not cmdfiles:
         return {}
 
-    infile = _FILENAME_GENERATOR.get('dispatch.pyfiles')
-
-    script = os.path.join(os.path.dirname(__file__), 'python_dispatch.py')
-    cmd = ['python3', script]
-    cmd += ['--site-path='+path for path in sitedirs]
-    cmd += [infile]
-
-    # Write input file containing the python files to analyze
-    with open(infile, 'w') as stream:
-        stream.write('\n'.join(cmdfiles))
-
-    cmd_output = shell(cmd)
-    pkgfiles = {k: set(v) for k, v in json.loads(cmd_output).items()}
+    pkgfiles = _exec_pyscript('dispatch', sitedirs, cmdfiles)
 
     # Assign data file to its enclosing python public package
     data_files = set(pyfiles).difference(set(cmdfiles))
@@ -244,19 +248,7 @@ def _gen_pysymbols(pkgfiles: Set[str],
     if not sites_files:
         return {}
 
-    infile = _FILENAME_GENERATOR.get('provides.pyfiles')
-
-    script = os.path.join(os.path.dirname(__file__), 'python_provides.py')
-    cmd = ['python3', script]
-    cmd += ['--site-path='+path for path in sitedirs]
-    cmd += [infile]
-
-    # Write input file containing the python files to analyze
-    with open(infile, 'w') as stream:
-        stream.write('\n'.join(sites_files))
-
-    cmd_output = shell(cmd)
-    return {k: set(v) for k, v in json.loads(cmd_output).items()}
+    return _exec_pyscript('provides', sitedirs, sites_files)
 
 
 def _gen_py_provides(pkg: PackageInfo, sitedirs: List[str]) -> ProvideList:
@@ -292,20 +284,11 @@ def _resolve_ns_deps(provides: ProvideList, pkg: PackageInfo,
 
 def _gen_pydepends(pkg: PackageInfo,
                    sitedirs: List[str]) -> Dict[str, Set[str]]:
-    infile = _FILENAME_GENERATOR.get('depends.pyfiles')
-
-    script = os.path.join(os.path.dirname(__file__), 'python_depends.py')
-    cmd = ['python3', script]
-    cmd += ['--site-path='+path for path in sitedirs]
-    cmd += [infile]
-
-    with open(infile, 'w') as stream:
-        stream.write('\n'.join(f for f in pkg.files if _is_py_file(f)))
-
     # run in prefix if one is being used, this allows to establish dependency
     # against installed mmpack packages
-    cmd_output = shell(cmd_in_optional_prefix(cmd))
-    return {k: set(v) for k, v in json.loads(cmd_output).items()}
+    return _exec_pyscript('depends', sitedirs,
+                          filter(_is_py_file, pkg.files),
+                          try_in_prefix=True)
 
 
 def _get_packaged_public_sitedirs(pkg: PackageInfo) -> Set[str]:
