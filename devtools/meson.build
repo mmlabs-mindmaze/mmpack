@@ -34,9 +34,7 @@ if pylint.found()
             deployment_dir + mmpackbuilddir,
             deployment_dir + pkgdatadir + '/repo.py',
             deployment_dir + bindir + '/mmpack-modifyrepo',
-            deployment_dir + pyscripts_installdir + '/depends.py',
-            deployment_dir + pyscripts_installdir + '/provides.py',
-            deployment_dir + pyscripts_installdir + '/dispatch.py',
+            deployment_dir + pyscripts_installdir,
         ],
         depends : do_deployment_test,
     )
