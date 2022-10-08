@@ -16,7 +16,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from os.path import abspath, dirname, exists, join as join_path
 from functools import cache
 from traceback import print_exc
-from typing import List, Iterator, Optional, Set, Tuple, Union
+from typing import List, Iterable, Iterator, Optional, Set, Tuple, Union
 
 import pkg_resources
 
@@ -152,8 +152,8 @@ class DependsInspector:
     """
     Class allowing to collect the external dependencies of python modules
     """
-    def __init__(self, pkgfiles: Set[str]):
-        self.pkgfiles = pkgfiles
+    def __init__(self, pkgfiles: Iterable[str]):
+        self.pkgfiles = {abspath(f) for f in pkgfiles}
         self.used_symbols = set()
         self.failed_imports = set()
 
@@ -425,39 +425,15 @@ def add_to_pkg_resources(entry):
         working_set.add(dist, entry, replace=True)
 
 
-def parse_options():
-    """
-    parse options
-    """
-    parser = ArgumentParser(description=__doc__,
-                            formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('--site-path', dest='site_paths', type=str, nargs='?',
-                        action='append', default=[],
-                        help='path of python site-packages or folder '
-                        'containing python package')
-    parser.add_argument('infile', type=str, nargs='?')
-
-    return parser.parse_args()
-
-
-def main():
+def run_depends(input_files: Iterable[str], sitedirs: Iterable[str]):
     """
     python_depends utility entry point
     """
-    options = parse_options()
+    # If some site path folders are specified, make them known by pkg_resources.
+    for sitedir in sitedirs:
+        add_to_pkg_resources(abspath(sitedir))
 
-    # If site path folder is specified, add it to sys.path so astroid resolve
-    # the imports properly
-    for sitedir in options.site_paths:
-        sys.path.insert(0, abspath(sitedir))
-        add_to_pkg_resources(sys.path[0])
-
-    with open(options.infile) as input_stream:
-        pkgfiles = [abspath(f.strip()) for f in input_stream]
-
-    astroid_manager.always_load_extensions = True
-
-    inspector = DependsInspector(pkgfiles)
+    inspector = DependsInspector(input_files)
     inspector.gen_depends()
 
     # Return results as JSON dict on stdout
@@ -469,7 +445,3 @@ def main():
               'optional imports:\n    '
               + '\n    '.join(sorted(inspector.failed_imports)),
               file=sys.stderr)
-
-
-if __name__ == '__main__':
-    main()

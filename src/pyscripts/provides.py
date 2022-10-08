@@ -26,7 +26,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from functools import cache
 from os.path import abspath, basename, dirname
 from traceback import print_exc
-from typing import Dict, Set, Union
+from typing import Dict, Iterable, Set, Union
 
 from astroid import AstroidImportError, AstroidSyntaxError, MANAGER
 from astroid import InconsistentMroError
@@ -79,8 +79,8 @@ class PkgData:
     Class holding the explored symbols so far and the boundaries of the mmpack
     package being analyzed (ie, which python module is actually copackaged).
     """
-    def __init__(self, pkgfiles: Set[str]):
-        self.pkgfiles = pkgfiles
+    def __init__(self, pkgfiles: Iterable[str]):
+        self.pkgfiles = {abspath(f) for f in pkgfiles}
         self.syms = {}
 
     def is_module_packaged(self, mod: Module):
@@ -271,44 +271,13 @@ class PkgData:
         return provided
 
 
-def parse_options():
-    """
-    parse options
-    """
-    parser = ArgumentParser(description=__doc__,
-                            formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('--site-path', dest='site_paths', type=str, nargs='?',
-                        action='append', default=[],
-                        help='path of python site-packages or folder '
-                        'containing python package')
-    parser.add_argument('infile', type=str, nargs='?')
-
-    return parser.parse_args()
-
-
-def main():
+def run_provides(input_files: Iterable[str]):
     """
     python_provides utility entry point
     """
-    options = parse_options()
-
-    # If site path folders are specified, add them to sys.path so that astroid
-    # resolve the imports properly
-    for sitedir in options.site_paths:
-        sys.path.insert(0, abspath(sitedir))
-
-    MANAGER.always_load_extensions = True
-
-    # Load list of files in package from input file
-    with open(options.infile) as input_stream:
-        pkgdata = PkgData({abspath(f.strip()) for f in input_stream})
-
+    pkgdata = PkgData(input_files)
     pkgdata.gen_pypkg_symbols()
 
     # Return result on stdout as JSON
     json.dump({k: list(sorted(v)) for k, v in pkgdata.get_provided().items()},
               fp=sys.stdout, indent='    ', separators=(',', ': '))
-
-
-if __name__ == '__main__':
-    main()
