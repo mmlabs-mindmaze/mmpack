@@ -12,7 +12,7 @@ from configparser import ConfigParser
 from email.parser import Parser
 from glob import glob, iglob
 from itertools import chain
-from os.path import basename, commonpath, dirname
+from os.path import basename, commonpath, dirname, pathsep
 from textwrap import dedent
 from typing import (Set, Dict, List, Iterable, Iterator, NamedTuple, Optional,
                     Tuple)
@@ -23,6 +23,7 @@ from .file_utils import filetype
 from .package_info import PackageInfo, DispatchData
 from .prefix import cmd_in_optional_prefix
 from .provide import Provide, ProvideList, load_mmpack_provides, pkgs_provides
+from .settings import PKGDATADIR
 from .syspkg_manager import get_syspkg_mgr
 
 
@@ -164,15 +165,20 @@ def _exec_pyscript(name: str, sitedirs: List[str], files: Iterable[str],
                    try_in_prefix: bool = False) -> Dict[str, Set[str]]:
     infile = _FILENAME_GENERATOR.get(f'{name}.pyfiles')
 
-    script = os.path.join(os.path.dirname(__file__), f'../pyscripts/{name}.py')
-    cmd = ['python3', script]
+    cmd = ['python3', '-m', 'pyscripts']
     cmd += ['--site-path='+path for path in sitedirs]
-    cmd += [infile]
+    cmd += [name, infile]
 
     with open(infile, 'w') as stream:
         stream.write('\n'.join(files))
 
-    cmd_output = shell(cmd_in_optional_prefix(cmd) if try_in_prefix else cmd)
+    # Prepend PKGDATADIR to PYTHONPATH for environment used to exec script
+    script_env = os.environ.copy()
+    prev = script_env.get('PYTHONPATH')
+    script_env['PYTHONPATH'] = PKGDATADIR + ((pathsep + prev) if prev else '')
+
+    cmd_output = shell(cmd_in_optional_prefix(cmd) if try_in_prefix else cmd,
+                       env=script_env)
     return {k: set(v) for k, v in json.loads(cmd_output).items()}
 
 
