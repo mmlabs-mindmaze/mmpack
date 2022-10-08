@@ -4,6 +4,7 @@ pyscripts_sources = files(
         'depends.py',
         'dispatch.py',
         'provides.py',
+	'utils.py',
 )
 all_sources += pyscripts_sources
 
