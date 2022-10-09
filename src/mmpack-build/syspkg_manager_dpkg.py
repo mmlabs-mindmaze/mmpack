@@ -248,6 +248,7 @@ class DebPkg(SysPkg):
         'Source': 'source',
         'Filename': 'filename',
         'SHA256': 'sha256',
+        'Description': 'desc',
     }
 
     def __init__(self, pkg_str: str):
