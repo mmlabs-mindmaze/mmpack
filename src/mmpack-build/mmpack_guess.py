@@ -8,8 +8,8 @@ mmpack guess-specs
 
 Expects to be called from the root of the git repository.
 
-Will try to guess mmpack specs from the current repository and print them to
-stdout.
+Will try to guess mmpack specs from the current repository and store them in
+mmpack/specs in the current directory.
 '''
 
 import glob
@@ -17,7 +17,8 @@ import os
 import re
 from argparse import ArgumentParser
 from email.parser import Parser
-from typing import List
+from typing import Any, Dict, List
+
 import yaml
 
 from .common import find_license, shell, yaml_load, yaml_serialize
@@ -43,6 +44,16 @@ def _sshell(cmd) -> str:
         return shell(cmd, log=False, log_stderr=False).strip()
     except ShellException:
         return UNKNOWN
+
+
+def write_mmpack_specs(specs: Dict[str, Any]):
+    """
+    Write mmpack specs in mmpack/specs of the current directory
+    """
+    os.makedirs('mmpack', exist_ok=True)
+    with open('mmpack/specs', 'x') as fileobj:
+        yaml.dump(specs, stream=fileobj, default_flow_style=False,
+                  allow_unicode=True, indent=4, Dumper=MMPackDumper)
 
 
 def guess_url() -> str:
@@ -161,7 +172,7 @@ def guess_specs():
     """
     guess mmpack specs and print to stdout
     """
-    specs = {
+    write_mmpack_specs({
         'name': guess_name(),
         'version': guess_version(),
         'maintainer': guess_maintainer(),
@@ -169,14 +180,7 @@ def guess_specs():
         'description': guess_description(),
         'copyright': guess_copyright(),
         'licenses': guess_licenses(),
-    }
-    specs_str = yaml.dump(specs, default_flow_style=False,
-                          allow_unicode=True, indent=4,
-                          Dumper=MMPackDumper)
-    for line in specs_str.split('\n'):
-        if line:  # hide empty lines
-            print(line)
-
+    })
 
 ####################################################################
 #
