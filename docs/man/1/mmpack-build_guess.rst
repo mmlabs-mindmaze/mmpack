@@ -28,8 +28,9 @@ SUBCOMMANDS
 The subcommand can be one the values:
 
   create-specs
-    Attempt to guess a mmpack specfile from the current tree and prints it to
-    stdout. It expects to be called from the root of the git repository.
+    Attempt to guess a mmpack specfile from the current tree and write it in
+    **mmpack/specs** of the current directory. It expects to be called from the
+    root of the git repository.
 
   update-provides
     Update provide specs (.provides files in mmpack folder) with the result of
