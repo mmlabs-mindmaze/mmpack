@@ -1,6 +1,7 @@
 /usr/bin/mmpack-build
 /usr/share/bash-completion/completions/mmpack-build
 /usr/share/mmpack/mmpack_build/
+/usr/share/mmpack/pyscripts/
 /usr/share/mmpack/common-licenses
 /usr/share/man/man1/mmpack-build.1
 /usr/share/man/man1/mmpack-build_*.1
