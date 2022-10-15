@@ -11,11 +11,13 @@ from os.path import abspath, basename, exists, join as join_path
 from subprocess import call, DEVNULL
 from tarfile import open as taropen, TarFile, TarInfo
 from typing import Dict, Iterator, List, NamedTuple, Optional
+from zipfile import ZipFile
 
 import yaml
 
 from .common import *
 from .errors import DownloadError, MMPackBuildError, ShellException
+from .file_utils import filetype
 from .prefix import new_mmpack_prefix_context, prefix_install, run_build_script
 from .workspace import Workspace, cached_download, find_project_root_folder
 
@@ -548,8 +550,12 @@ class SourceTarball:
             return
 
         # Extract downloaded_file in upstreamdir
-        with taropen(downloaded_file, 'r:*') as tar:
-            tar.extractall(path=upstreamdir)
+        if filetype(downloaded_file) == 'zip':
+            with ZipFile(downloaded_file) as zfile:
+                zfile.extractall(path=upstreamdir)
+        else:
+            with taropen(downloaded_file, 'r:*') as tar:
+                tar.extractall(path=upstreamdir)
 
     def _fetch_upstream(self, specs: SourceStrapSpecs, srcdir: str):
         """
