@@ -36,7 +36,8 @@ def filetype(filename):
     if not islink(filename):
         try:
             # Open file and read magic number (binary)
-            magic = open(filename, 'rb', buffering=0).read(8)
+            with open(filename, 'rb', buffering=0) as fileobj:
+                magic = fileobj.read(8)
         except IsADirectoryError:
             return 'directory'
 
@@ -54,7 +55,8 @@ def filetype(filename):
             # and parse the interpreter. Search for end of line is performed in
             # binary to avoid the UTF-8 decoder encounter invalid UTF-8 char
             # beyond shebang line (can happen since read is buffered)
-            shebang_line = open(filename, 'rb').readline()
+            with open(filename, 'rb') as stream:
+                shebang_line = stream.readline()
             shebang_match = _SHEBANG_REGEX.match(shebang_line)
             if shebang_match:
                 return shebang_match.groups()[0].decode()

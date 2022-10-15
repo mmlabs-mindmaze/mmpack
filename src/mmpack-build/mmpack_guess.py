@@ -132,8 +132,8 @@ def guess_description() -> str:
     assuming markdown, and getting 1st parapgraph
     """
     try:
-        readme = open(glob.glob('[Rr][Ee][Aa][Dd][Mm][Ee]*')[0]).read()
-        return _guess_description(readme)
+        with open(glob.glob('[Rr][Ee][Aa][Dd][Mm][Ee]*')[0]) as fileobj:
+            return _guess_description(fileobj.read())
     except Exception:
         return UNKNOWN
 
@@ -151,7 +151,8 @@ def guess_copyright() -> str:
     try:
         for src in glob.glob('src/**', recursive=True):
             if os.path.isfile(src):
-                header = open(src).readlines()[0:10]
+                with open(src) as srcfile:
+                    header = srcfile.readlines()[0:10]
                 for line in header:
                     if is_copyright.search(line):
                         return line

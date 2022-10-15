@@ -323,7 +323,8 @@ def sha256sum(filename: str, follow_symlink: bool = True) -> str:
         sha.update(os.readlink(filename).encode('utf-8'))
         shastr = sha.hexdigest()
         return "sym-" + shastr
-    sha.update(open(filename, 'rb').read())
+    with open(filename, 'rb') as fileobj:
+        sha.update(fileobj.read())
     hexdig = sha.hexdigest()
 
     if not follow_symlink:
@@ -353,10 +354,11 @@ def get_host_dist() -> str:
     return host distribution
     """
     try:
-        for line in open("/etc/os-release", "r"):
-            if line.startswith('ID='):
-                dist = line[3:].strip()
-                break
+        with open('/etc/os-release', 'r') as fileobj:
+            for line in fileobj:
+                if line.startswith('ID='):
+                    dist = line[3:].strip()
+                    break
     except FileNotFoundError:
         # if not linux, then windows
         dist = 'windows'
