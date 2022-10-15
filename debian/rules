@@ -23,4 +23,5 @@ override_dh_auto_install:
 
 override_dh_python3:
 	dh_python3 -pmmpack-build --requires=3rdparty-python --depends-section=mmpack-build /usr/share/mmpack/mmpack_build
+	dh_python3 -pmmpack-build /usr/share/mmpack/pyscripts
 	dh_python3 -pmmpack-repo-tools --requires=3rdparty-python --depends-section=mmpack-repo
