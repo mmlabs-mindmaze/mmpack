@@ -59,12 +59,14 @@ def msys2_find_pypkg(pypkg: str) -> str:
         if not os.path.isfile(instfiles_filename):
             continue
 
-        for line in open(instfiles_filename, 'rt',
-                         encoding='utf-8').readlines():
-            if file_regex.match(line):
+        # Return 2nd line of desc file if any installed file match pattern
+        with open(instfiles_filename, 'rt', encoding='utf-8') as instfile:
+            if any(True for l in instfile if file_regex.match(l)):
                 desc_filename = os.path.join(pacman_pkgdir, mingw_pkg, 'desc')
-                return open(desc_filename, 'rt',
-                            encoding='utf-8').readlines()[1].strip()
+                with open(desc_filename, 'rt', encoding='utf-8') as stream:
+                    # Return second line of file
+                    _ = next(stream)
+                    return next(stream).strip()
 
     return None
 

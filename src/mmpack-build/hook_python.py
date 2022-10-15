@@ -78,7 +78,8 @@ class PyNameInfo(NamedTuple):
 
 
 def _parse_metadata(filename: str) -> dict:
-    return dict(Parser().parse(open(filename, encoding='utf-8')))
+    with open(filename, encoding='utf-8') as fileobj:
+        return dict(Parser().parse(fileobj))
 
 
 def _parse_py3_filename(filename: str) -> PyNameInfo:
@@ -331,7 +332,8 @@ class _PyPkg:
                 self.name = _parse_metadata(filename)['Name']
 
             if filename.endswith('/top_level.txt'):
-                dirs = {d.strip() for d in open(filename).readlines()}
+                with open(filename) as fileobj:
+                    dirs = {d.strip() for d in fileobj.readlines()}
                 self.meta_top.update(dirs)
 
         self.files.update(files)

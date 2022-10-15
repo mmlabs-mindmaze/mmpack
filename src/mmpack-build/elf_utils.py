@@ -60,13 +60,14 @@ def _path_relative_to_origin(target_dir: str, start_dir: str) -> str:
 
 
 def _get_runpath_list(filename) -> List[str]:
-    elffile = ELFFile(open(filename, 'rb'))
+    with open(filename, 'rb') as fileobj:
+        elffile = ELFFile(fileobj)
 
-    for section in elffile.iter_sections():
-        if isinstance(section, DynamicSection):
-            for tag in section.iter_tags():
-                if tag.entry.d_tag == 'DT_RUNPATH':
-                    return tag.runpath.split(':')
+        for section in elffile.iter_sections():
+            if isinstance(section, DynamicSection):
+                for tag in section.iter_tags():
+                    if tag.entry.d_tag == 'DT_RUNPATH':
+                        return tag.runpath.split(':')
 
     return []
 
@@ -91,8 +92,9 @@ def _has_dynamic_section(filename) -> bool:
     return whether the input filename is an elf file with a dynamic section
     """
     try:
-        elffile = ELFFile(open(filename, 'rb'))
-        dyn = elffile.get_section_by_name('.dynamic')
+        with open(filename, 'rb') as fileobj:
+            elffile = ELFFile(fileobj)
+            dyn = elffile.get_section_by_name('.dynamic')
         return dyn is not None
     except (IsADirectoryError, ELFError):
         return False
@@ -134,14 +136,15 @@ def soname_deps(filename):
     """
     Parse given elf file and return its dependency soname list
     """
-    elffile = ELFFile(open(filename, 'rb'))
-
     libraryset = set()
-    for section in elffile.iter_sections():
-        if isinstance(section, DynamicSection):
-            for tag in section.iter_tags():
-                if tag.entry.d_tag == 'DT_NEEDED':
-                    libraryset.add(tag.needed)
+
+    with open(filename, 'rb') as fileobj:
+        elffile = ELFFile(fileobj)
+        for section in elffile.iter_sections():
+            if isinstance(section, DynamicSection):
+                for tag in section.iter_tags():
+                    if tag.entry.d_tag == 'DT_NEEDED':
+                        libraryset.add(tag.needed)
 
     return libraryset
 
@@ -180,29 +183,30 @@ def undefined_symbols(filename):
 
     This is the reason why we need to iterate over all symbols with enumerate()
     """
-    elffile = ELFFile(open(filename, 'rb'))
-
     undefined_symbols_set = set()
 
-    version = _get_version_table(elffile)
-    gnu_version_r = elffile.get_section_by_name('.gnu.version_r')
-    if not gnu_version_r:
-        # TODO: parse unversioned symbols from .symtab/.dynsym
-        wprint(f'Could not find Version Requirement Table in {elffile}')
-        return {}
+    with open(filename, 'rb') as fileobj:
+        elffile = ELFFile(fileobj)
 
-    dyn = elffile.get_section_by_name('.dynsym')
-    for nsym, sym in enumerate(dyn.iter_symbols()):
-        if (sym['st_info']['bind'] == 'STB_GLOBAL'
-                and sym['st_shndx'] == 'SHN_UNDEF'):
-            symbol_str = sym.name
-            if nsym in version:
-                index = version[nsym]
-                version_name = gnu_version_r.get_version(index)[1].name
-                # objdump and readelf note this as <name>@@<version>
-                # debian notes this with only a single @ in between
-                symbol_str += '@' + version_name
-            undefined_symbols_set.add(symbol_str)
+        version = _get_version_table(elffile)
+        gnu_version_r = elffile.get_section_by_name('.gnu.version_r')
+        if not gnu_version_r:
+            # TODO: parse unversioned symbols from .symtab/.dynsym
+            wprint(f'Could not find Version Requirement Table in {elffile}')
+            return {}
+
+        dyn = elffile.get_section_by_name('.dynsym')
+        for nsym, sym in enumerate(dyn.iter_symbols()):
+            if (sym['st_info']['bind'] == 'STB_GLOBAL'
+                    and sym['st_shndx'] == 'SHN_UNDEF'):
+                symbol_str = sym.name
+                if nsym in version:
+                    index = version[nsym]
+                    version_name = gnu_version_r.get_version(index)[1].name
+                    # objdump and readelf note this as <name>@@<version>
+                    # debian notes this with only a single @ in between
+                    symbol_str += '@' + version_name
+                undefined_symbols_set.add(symbol_str)
 
     return undefined_symbols_set
 
@@ -215,19 +219,20 @@ def soname(filename: str) -> str:
     Raises:
         ELFError: soname not found
     """
-    elffile = ELFFile(open(filename, 'rb'))
-    for section in elffile.iter_sections():
-        if isinstance(section, DynamicSection):
-            for tag in section.iter_tags():
-                if tag.entry.d_tag == 'DT_SONAME':
-                    return tag.soname
+    with open(filename, 'rb') as fileobj:
+        elffile = ELFFile(fileobj)
+        for section in elffile.iter_sections():
+            if isinstance(section, DynamicSection):
+                for tag in section.iter_tags():
+                    if tag.entry.d_tag == 'DT_SONAME':
+                        return tag.soname
     libname = os.path.basename(filename)
     raise ELFError('SONAME not found in library: ' + libname)
 
 
-def symbols_set(filename):
+def _fileobj_symbols_set(fileobj):
     """
-    Parse given elf file and return its exported symbols as a set.
+    Parse given elf fileobj and return its exported symbols as a set.
 
     # https://lists.debian.org/lsb-spec/1999/12/msg00017.html
     For each public symbol:
@@ -240,11 +245,7 @@ def symbols_set(filename):
         3.  use the version and the name of the symbol to create
             the full version name
     """
-    try:
-        elffile = ELFFile(open(filename, 'rb'))
-    except (IsADirectoryError, ELFError):
-        return {}
-
+    elffile = ELFFile(fileobj)
     symbols_versions = dict()
 
     # 1. get a table of version indexes
@@ -284,6 +285,17 @@ def symbols_set(filename):
                 symbols.add(sym.name)
 
     return symbols
+
+
+def symbols_set(filename):
+    """
+    return the exported symbols of a ELF file
+    """
+    try:
+        with open(filename, 'rb') as fileobj:
+            return _fileobj_symbols_set(fileobj)
+    except (IsADirectoryError, ELFError):
+        return {}
 
 
 def sym_basename(name: str) -> str:
