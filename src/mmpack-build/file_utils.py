@@ -46,6 +46,8 @@ def filetype(filename):
             return 'pe'
         if magic[:7] == b'!<arch>':
             return 'ar'
+        if magic[:4] == b'\x50\x4B\x03\x04':
+            return 'zip'
         if magic[:2] == b'#!':
             # the file contains a shebang. So the complete first line of file
             # and parse the interpreter. Search for end of line is performed in
