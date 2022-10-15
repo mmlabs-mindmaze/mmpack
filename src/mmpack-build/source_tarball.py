@@ -528,7 +528,9 @@ class SourceTarball:
         url = specs.upstream_url
         filename = os.path.basename(url)
         downloaded_file = os.path.join(self._get_prj_builddir(), filename)
+        upstreamdir = self._get_unpacked_upstream_dir()
         expected_sha256 = specs.get('sha256')
+        noextract = str2bool(specs.get('noextract', 'false'))
 
         cached_download(url, downloaded_file, expected_sha256)
 
@@ -539,9 +541,15 @@ class SourceTarball:
 
         self.trace['upstream'].update({'url': url, 'sha256': file_hash})
 
+        # Only copy to upstreamdir if noextract requested
+        if noextract:
+            os.makedirs(upstreamdir, exist_ok=True)
+            shutil.copy(downloaded_file, upstreamdir)
+            return
+
         # Extract downloaded_file in upstreamdir
         with taropen(downloaded_file, 'r:*') as tar:
-            tar.extractall(path=self._get_unpacked_upstream_dir())
+            tar.extractall(path=upstreamdir)
 
     def _fetch_upstream(self, specs: SourceStrapSpecs, srcdir: str):
         """

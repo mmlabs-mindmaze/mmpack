@@ -44,6 +44,9 @@ others.
  :sha256:
    (for tar only) The SHA256 hash of the tarball that must be downloaded
 
+ :noextract:
+   (for tar only) Just copy the downloaded file without extracting the archive.
+
  :patches:
    list of patch files to applied on upstream sources after fetching them
 
