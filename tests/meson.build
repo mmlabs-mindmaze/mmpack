@@ -79,6 +79,10 @@ env.set('REPO', repo_dir)
 env.set('MMPACK_BUILD_LICENSES_DIR', meson.project_source_root() / 'data' / 'common-licenses')
 env.prepend('PYTHONPATH', meson.project_source_root() / 'src')
 
+foreach py_path : py_test_paths
+  env.prepend('PYTHONPATH', py_path)
+endforeach
+
 test('mmpack-build unit tests',
         python,
         args: files('pytests.py'),

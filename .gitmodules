@@ -1,0 +1,4 @@
+[submodule "vendor/astroid"]
+	path = vendor/astroid
+	url = https://github.com/PyCQA/astroid.git
+	branch = v2.12.12
