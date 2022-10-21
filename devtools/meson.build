@@ -45,6 +45,7 @@ if pycodestyle.found()
         output : 'pycodestyle',
         command : [
             pycodestyle,
+            '--exclude=vendor,__pycache__',
             '--show-source',
             srcdir / 'mmpack_build',
             srcdir / 'pyscripts',
