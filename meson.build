@@ -77,6 +77,7 @@ all_sources = []
 deployed_targets = []
 
 python3_required_modules = []
+py_test_paths = []
 
 subdir('src/mmpack')
 subdir('src/pyscripts')

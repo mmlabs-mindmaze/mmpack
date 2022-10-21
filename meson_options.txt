@@ -4,3 +4,5 @@ option('long-tests', type: 'boolean', value: false,
         description: 'also build tests that take a long time to run')
 option('docs', type: 'feature', value: 'auto',
         description: 'build documentation')
+option('no-pypkg-vendor', type: 'boolean', value: 'false',
+        description: 'Do not vendor python packages')

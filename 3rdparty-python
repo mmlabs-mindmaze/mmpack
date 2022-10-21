@@ -22,9 +22,21 @@ pefile
 # pacman: mingw-w64-x86_64-python-urllib3
 urllib3
 
-# debian: python3-astroid
-# pacman: mingw-w64-x86_64-python-astroid
-astroid
+# debian: python3-lazy-object-proxy
+# pacman: mingw-w64-x86_64-python-lazy-object-proxy
+lazy_object_proxy
+
+# debian: python3-wrapt
+# pacman: mingw-w64-x86_64-python-wrapt
+wrapt
+
+# debian: python3-typing-extensions
+# pacman: mingw-w64-x86_64-python-typing-extensions
+typing-extensions
+
+# debian: python3-six
+# pacman: mingw-w64-x86_64-python-six
+six
 
 # debian: python3-pip
 # pacman: mingw-w64-x86_64-python-pip
