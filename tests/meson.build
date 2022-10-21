@@ -71,13 +71,21 @@ mmpack_build_unit_tests_sources = files(
 # The variable _MMPACK_TEST_PREFIX is needed by mmpack and mmpack-build to find
 # everything in the right place during the tests (that require a local
 # installation of mmpack project).
+
+python_path_value = meson.project_source_root() / 'src'
+envpath_sep = host_machine.system() == 'windows' ? ';' : ':'
+foreach py_path : py_test_paths
+  python_path_value += envpath_sep + py_path
+endforeach
+
 env = environment()
 env.set('MMPACK_BIN', mmpack.full_path())
 env.set('SRCDIR', meson.project_source_root())
 env.set('BUILDDIR', meson.project_build_root())
 env.set('REPO', repo_dir)
 env.set('MMPACK_BUILD_LICENSES_DIR', meson.project_source_root() / 'data' / 'common-licenses')
-env.prepend('PYTHONPATH', meson.project_source_root() / 'src')
+env.prepend('PYTHONPATH', python_path_value)
+
 
 test('mmpack-build unit tests',
         python,
