@@ -12,4 +12,8 @@ pyscripts_installdir = pkgdatadir / 'pyscripts'
 
 install_data(pyscripts_sources, install_dir : pyscripts_installdir)
 
-python3_required_modules = ['astroid']
+if not get_option('no-pypkg-vendor')
+  subdir('vendor')
+else
+  python3_required_modules = ['astroid']
+endif
