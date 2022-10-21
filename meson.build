@@ -77,6 +77,7 @@ bindir = get_option('prefix') / get_option('bindir')
 pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
 libexecdir = get_option('prefix') / get_option('libexecdir')
 
+subdir('vendor')
 subdir('src/mmpack')
 subdir('src/pyscripts')
 subdir('src/mmpack-build')
