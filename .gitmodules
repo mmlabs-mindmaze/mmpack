@@ -1,0 +1,4 @@
+[submodule "vendor/astroid"]
+	path = src/pyscripts/vendor/astroid
+	url = https://github.com/PyCQA/astroid.git
+	branch = astroid-2.5.1

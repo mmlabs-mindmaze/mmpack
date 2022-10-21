@@ -11,3 +11,7 @@ all_sources += pyscripts_sources
 pyscripts_installdir = pkgdatadir / 'pyscripts'
 
 install_data(pyscripts_sources, install_dir : pyscripts_installdir)
+
+if not get_option('no-pypkg-vendor')
+  subdir('vendor')
+endif

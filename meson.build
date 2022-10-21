@@ -104,6 +104,8 @@ all_c_sources = []
 all_sources = []
 deployed_targets = []
 
+py_test_paths = []
+
 subdir('src/mmpack')
 subdir('src/pyscripts')
 subdir('src/mmpack_build')
