@@ -6,6 +6,7 @@ mmpack-build is a stub for all the tools required to create mmpack packages.
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from io import TextIOBase
+from pathlib import Path
 from typing import Union
 
 try:
@@ -22,8 +23,14 @@ from . import mmpack_mksource
 from . import mmpack_pkg_create
 from . import common
 from .prefix import BuildPrefix, configure_prefix_handling
-from .settings import PACKAGE_VERSION
 from .workspace import Workspace
+
+
+try:
+    with open(Path(__file__).parent / 'VERSION') as fp:
+        _PACKAGE_VERSION = fp.read().strip()
+except FileNotFoundError:
+    _PACKAGE_VERSION = 'unkown'
 
 
 # all subcommand MUST expose a main function, the subcommand main entry point
@@ -41,7 +48,7 @@ def cmdline_parser() -> ArgumentParser:
     parser = ArgumentParser(prog='mmpack-build',
                             formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument("-v", "--version", help="show version and exit",
-                        action="version", version=PACKAGE_VERSION)
+                        action="version", version=_PACKAGE_VERSION)
     parser.add_argument("-q", "--quiet", help="silence output",
                         action="store_true", default=False)
     parser.add_argument("-d", "--debug", help="toggle debug mode",
