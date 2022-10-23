@@ -14,9 +14,11 @@ from typing import Set, List, TextIO
 from .common import *
 from .errors import ShellException
 from .pe_utils import get_dll_from_soname, symbols_set
-from .settings import PACMAN_PREFIX
 from .syspkg_manager_base import SysPkgManager, SysPkg
 from .workspace import Workspace, cached_download
+
+
+PACMAN_PREFIX = '\\var\\lib\\pacman'
 
 
 def msys2_find_dependency(soname: str, symbol_set: Set[str]) -> str:
