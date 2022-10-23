@@ -44,32 +44,10 @@ mmpackbuilddir = pkgdatadir / 'mmpack_build'
 r = run_command('realpath', '-m', '--relative-to=' + bindir, pkgdatadir)
 bindir_to_pkgdatadir = r.stdout().strip()
 
-r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, bindir)
-pydir_to_bindir = r.stdout().strip()
-
-r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, libexecdir)
-pydir_to_libexecdir = r.stdout().strip()
-
-r = run_command('realpath', '-m', '--relative-to=' + mmpackbuilddir, pkgdatadir)
-pydir_to_pkgdatadir = r.stdout().strip()
-
 config_data = configuration_data({
-    'bindir' : bindir,
-    'pydir_to_bindir' :  pydir_to_bindir,
-    'pydir_to_libexecdir' : pydir_to_libexecdir,
-    'pydir_to_pkgdatadir' : pydir_to_pkgdatadir,
     'bindir_to_pkgdatadir' : bindir_to_pkgdatadir,
-    'package_version' : meson.project_version(),
-    'exeext' : exeext,
     'python_path' : python.full_path(),
 })
-
-settings_py = configure_file(
-        output : 'settings.py',
-        input : files('settings.py.in'),
-        configuration : config_data,
-)
-mmpack_build_sources += settings_py
 
 install_data(mmpack_build_sources, install_dir : mmpackbuilddir)
 
