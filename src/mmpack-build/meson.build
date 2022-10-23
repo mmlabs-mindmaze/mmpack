@@ -82,15 +82,15 @@ install_data(mmpack_build,
     install_dir : get_option('bindir'),
 )
 
-mmpack_build_plugins = files(
-	'build-autotools',
-	'build-cmake',
-	'build-makefile',
-	'build-meson',
-	'build-python',
-)
-install_data(mmpack_build_plugins,
-    install_dir : mmpackbuilddir + '/buildscripts',
+install_data(
+  files(
+    'buildscripts/autotools',
+    'buildscripts/cmake',
+    'buildscripts/makefile',
+    'buildscripts/meson',
+    'buildscripts/python',
+  ),
+  install_dir: mmpackbuilddir / 'buildscripts',
 )
 
 install_data(files('../../VERSION'),

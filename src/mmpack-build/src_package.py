@@ -366,7 +366,7 @@ class SrcPackage:
         # it is custom build system. The script is then obtained from
         # mmpack folder in the unpacked sources.
         scriptdir = os.path.join(os.path.dirname(__file__), 'buildscripts')
-        build_script = f'{scriptdir}/build-{self.build_system}'
+        build_script = f'{scriptdir}/{self.build_system}'
         if self.build_system == 'custom':
             build_script = 'mmpack/build'
 
