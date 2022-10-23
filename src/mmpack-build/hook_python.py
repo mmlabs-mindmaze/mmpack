@@ -13,6 +13,7 @@ from email.parser import Parser
 from glob import glob, iglob
 from itertools import chain
 from os.path import basename, commonpath, dirname, pathsep
+from pathlib import Path
 from textwrap import dedent
 from typing import (Set, Dict, List, Iterable, Iterator, NamedTuple, Optional,
                     Tuple)
@@ -23,7 +24,6 @@ from .file_utils import filetype
 from .package_info import PackageInfo, DispatchData
 from .prefix import cmd_in_optional_prefix
 from .provide import Provide, ProvideList, load_mmpack_provides, pkgs_provides
-from .settings import PKGDATADIR
 from .syspkg_manager import get_syspkg_mgr
 
 
@@ -176,7 +176,8 @@ def _exec_pyscript(name: str, sitedirs: List[str], files: Iterable[str],
     # Prepend PKGDATADIR to PYTHONPATH for environment used to exec script
     script_env = os.environ.copy()
     prev = script_env.get('PYTHONPATH')
-    script_env['PYTHONPATH'] = PKGDATADIR + ((pathsep + prev) if prev else '')
+    datadir = str(Path(__file__).parent.parent)
+    script_env['PYTHONPATH'] = datadir + ((pathsep + prev) if prev else '')
 
     cmd_output = shell(cmd_in_optional_prefix(cmd) if try_in_prefix else cmd,
                        env=script_env)
