@@ -15,13 +15,6 @@ def _abspath_from_pydir(from_pydir_rel_path: str):
     return os.path.abspath(os.path.join(pydir, from_pydir_rel_path))
 
 
-try:
-    CFG_HOME = os.environ['XDG_CONFIG_HOME']
-except KeyError:
-    CFG_HOME = os.environ['HOME'] + '/.config'
-
-CONFIG_PATH = CFG_HOME + '/mmpack-config.yaml'
-
 DPKG_PREFIX = '/var/lib/dpkg'
 DPKG_METADATA_PREFIX = DPKG_PREFIX + '/info'
 
