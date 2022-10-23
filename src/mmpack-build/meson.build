@@ -92,3 +92,7 @@ mmpack_build_plugins = files(
 install_data(mmpack_build_plugins,
     install_dir : mmpackbuilddir + '/buildscripts',
 )
+
+install_data(files('../../VERSION'),
+  install_dir: mmpackbuilddir
+)
