@@ -15,11 +15,6 @@ def _abspath_from_pydir(from_pydir_rel_path: str):
     return os.path.abspath(os.path.join(pydir, from_pydir_rel_path))
 
 
-DPKG_PREFIX = '/var/lib/dpkg'
-DPKG_METADATA_PREFIX = DPKG_PREFIX + '/info'
-
-PACMAN_PREFIX = '\\var\\lib\\pacman'
-
 # variables taken from autotools
 EXEEXT = r'@exeext@'
 

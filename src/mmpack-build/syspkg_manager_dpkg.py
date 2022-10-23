@@ -15,9 +15,11 @@ from typing import List, TextIO, Iterator, Optional
 from .common import *
 from .errors import MMPackBuildError
 from .mm_version import Version
-from .settings import DPKG_METADATA_PREFIX
 from .syspkg_manager_base import SysPkgManager, SysPkg
 from .workspace import cached_download
+
+
+DPKG_METADATA_PREFIX = '/var/lib/dpkg/info'
 
 
 def dpkg_find_shlibs_file(target_soname: str):
