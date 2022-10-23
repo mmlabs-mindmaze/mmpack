@@ -11,6 +11,7 @@ import tarfile
 
 from copy import copy
 from os import path
+from pathlib import Path
 from subprocess import Popen
 from threading import Thread
 from tempfile import mkdtemp
@@ -24,7 +25,6 @@ from .hooks_loader import MMPACK_BUILD_HOOKS, init_mmpack_build_hooks
 from .mm_version import Version
 from .package_info import DispatchData, PackageInfo
 from .prefix import cmd_in_optional_prefix, prefix_install, run_build_script
-from .settings import PKGDATADIR
 from .syspkg_manager import get_syspkg_mgr
 
 
@@ -34,6 +34,10 @@ _PREVENTED_BUILDENV_KEYS = (
     'PKG_CONFIG_PATH',
     'CFLAGS', 'CXXFLAGS', 'LDFLAGS',
 )
+
+
+_LICDIR = os.environ.get('MMPACK_BUILD_LICENSES_DIR',
+                         str(Path(__file__).parent.parent / 'common-licenses'))
 
 
 class _FileConsumer(Thread):
@@ -472,7 +476,7 @@ class SrcPackage:
                                    'It then must be supplied in specs')
 
         for entry in self.licenses:
-            tmp = os.path.join(PKGDATADIR, 'common-licenses', entry)
+            tmp = os.path.join(_LICDIR, entry)
             if os.path.isfile(tmp):
                 # TODO: for known licenses, create a dangling symlink to
                 # mmpack common-licenses instead of copying the full file
