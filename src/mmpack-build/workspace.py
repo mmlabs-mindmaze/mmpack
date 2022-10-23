@@ -12,7 +12,6 @@ from time import time_ns
 from .common import shell, dprint, download, sha256sum, iprint, rmfile
 from .decorators import singleton
 from .errors import ShellException
-from .settings import BINDIR, EXEEXT
 from .xdg import XDG_CACHE_HOME, XDG_DATA_HOME
 
 
@@ -90,7 +89,7 @@ class Workspace:
         if self._mmpack_bin is not None:
             return self._mmpack_bin
 
-        mmpack_bin = BINDIR + '/mmpack' + EXEEXT
+        mmpack_bin = os.environ.get('MMPACK_BIN', 'mmpack')
         try:
             self._mmpack_bin = shell(['cygpath', '-w', mmpack_bin], log=False)
             self._mmpack_bin = self._mmpack_bin.strip()
