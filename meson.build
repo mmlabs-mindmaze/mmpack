@@ -9,12 +9,17 @@ config = configuration_data()
 subdir('config/api-exports')
 subdir('config/autotools-compat')
 
+bindir = get_option('prefix') / get_option('bindir')
+pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
+libexecdir = get_option('prefix') / get_option('libexecdir')
+
+r = run_command('realpath', '-m', '--relative-to=' + bindir, pkgdatadir)
+config.set('bindir_to_pkgdatadir', r.stdout().strip())
+
 if host_machine.system() == 'windows'
     add_project_arguments('-DWIN32_LEAN_AND_MEAN', language : 'c')
 
     # Store in config the relative path from installed bindir to installed libexecdir
-    bindir = get_option('prefix') / get_option('bindir')
-    libexecdir = get_option('prefix') / get_option('libexecdir')
     r = run_command('realpath', '-m', '--relative-to=' + bindir, libexecdir)
     config.set_quoted('BIN_TO_LIBEXECDIR', r.stdout().strip())
     dlltool = find_program('dlltool', required : true)
@@ -25,6 +30,7 @@ find_program('tar', required : true)
 
 # meson modules
 python = import('python').find_installation('python3', required : true)
+config.set('python_path', python.full_path())
 
 python3_required_modules = ['astroid', 'urllib3']
 if host_machine.system() == 'windows'
@@ -71,11 +77,6 @@ cstrgen = generator(
 all_c_sources = []
 all_sources = []
 deployed_targets = []
-
-
-bindir = get_option('prefix') / get_option('bindir')
-pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
-libexecdir = get_option('prefix') / get_option('libexecdir')
 
 subdir('src/mmpack')
 subdir('src/pyscripts')
