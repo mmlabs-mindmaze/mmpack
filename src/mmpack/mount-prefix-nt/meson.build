@@ -36,7 +36,7 @@ deployed_targets += shared_module('mount-mmpack-prefix',
         name_prefix: '',
         include_directories : inc,
         install : true,
-        install_dir : get_option('libexecdir') / 'mmpack',
+        install_dir : pkglibexecdir,
         link_with: [internal_ntdll],
         link_args: ['-static'],
 )

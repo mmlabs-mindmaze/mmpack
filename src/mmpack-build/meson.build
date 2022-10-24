@@ -41,23 +41,15 @@ all_sources += mmpack_build_sources
 
 mmpackbuilddir = pkgdatadir / 'mmpack_build'
 
-r = run_command('realpath', '-m', '--relative-to=' + bindir, pkgdatadir)
-bindir_to_pkgdatadir = r.stdout().strip()
-
-config_data = configuration_data({
-    'bindir_to_pkgdatadir' : bindir_to_pkgdatadir,
-    'python_path' : python.full_path(),
-})
-
 install_data(mmpack_build_sources, install_dir : mmpackbuilddir)
 
 mmpack_build = configure_file(
         output : 'mmpack-build',
         input : 'mmpack-build.in',
-        configuration : config_data,
+        configuration : config,
 )
 install_data(mmpack_build,
-    install_dir : get_option('bindir'),
+    install_dir : bindir,
 )
 
 install_data(

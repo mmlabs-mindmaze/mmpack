@@ -9,7 +9,7 @@ mount_mmpack_prefix = executable('mount-mmpack-prefix',
         mount_mmpack_prefix_sources,
         include_directories : inc,
         install : true,
-        install_dir : get_option('libexecdir') / 'mmpack',
+        install_dir : pkglibexecdir,
 )
 deployed_targets += mount_mmpack_prefix
 
@@ -21,7 +21,7 @@ if setcap.found()
             command : [
                 setcap,
                 'cap_dac_override,cap_sys_admin+ep',
-                get_option('prefix') / get_option('libexecdir') / 'mmpack' / 'mount-mmpack-prefix'
+                pkglibexecdir / 'mount-mmpack-prefix'
             ],
     )
 endif # setcap

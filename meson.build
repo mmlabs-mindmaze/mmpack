@@ -4,19 +4,50 @@ project('mmpack', ['c', 'cpp'],
         meson_version: '>= 0.56',
 )
 cc = meson.get_compiler('c')
+
+#################### Configuration #################################
+prefix = get_option('prefix')
+bindir = prefix / get_option('bindir')
+pkgdatadir = prefix / get_option('datadir') / meson.project_name()
+pkglibexecdir = prefix / get_option('libexecdir') / meson.project_name()
+sysconfdir = prefix / get_option('sysconfdir')
+
+
 config = configuration_data()
 
-subdir('config/api-exports')
-subdir('config/autotools-compat')
+config.set_quoted('SYSCONFDIR', sysconfdir)
+config.set_quoted('PKGLIBEXECDIR', pkglibexecdir)
+config.set_quoted('PKGDATADIR', pkgdatadir)
+config.set_quoted('PACKAGE_NAME', meson.project_name())
+config.set_quoted('PACKAGE_VERSION', meson.project_version())
+config.set_quoted('PACKAGE_STRING', meson.project_name() + ' ' + meson.project_version())
+
+r = run_command('realpath', '-m', '--relative-to=' + bindir, pkgdatadir)
+config.set('bindir_to_pkgdatadir', r.stdout().strip())
+
+r = run_command('realpath', '-m', '--relative-to=' + bindir, pkglibexecdir)
+config.set_quoted('BIN_TO_PKGLIBEXECDIR', r.stdout().strip())
 
 if host_machine.system() == 'windows'
-    add_project_arguments('-DWIN32_LEAN_AND_MEAN', language : 'c')
+    config.set('API_EXPORTED', '__declspec(dllexport)')
+    config.set('LOCAL_SYMBOL', '')
+    config.set('API_EXPORTED_RELOCATABLE', '__declspec(dllexport)')
+    config.set('DEPRECATED', '__attribute__ ((deprecated))')
+    config.set('HOTSPOT', '__attribute__ ((hot))')
+    config.set_quoted('EXEEXT', '.exe')
+else
+    config.set('API_EXPORTED', '__attribute__ ((visibility ("protected")))')
+    config.set('LOCAL_SYMBOL', '__attribute__ ((visibility ("hidden")))')
+    config.set('API_EXPORTED_RELOCATABLE', '__attribute__ ((visibility ("default")))')
+    config.set('DEPRECATED', '__attribute__ ((deprecated))')
+    config.set('HOTSPOT', '__attribute__ ((hot))')
+    config.set_quoted('EXEEXT', '')
+endif
 
-    # Store in config the relative path from installed bindir to installed libexecdir
-    bindir = get_option('prefix') / get_option('bindir')
-    libexecdir = get_option('prefix') / get_option('libexecdir')
-    r = run_command('realpath', '-m', '--relative-to=' + bindir, libexecdir)
-    config.set_quoted('BIN_TO_LIBEXECDIR', r.stdout().strip())
+
+#################### Dependency search #################################
+if host_machine.system() == 'windows'
+    add_project_arguments('-DWIN32_LEAN_AND_MEAN', language : 'c')
     dlltool = find_program('dlltool', required : true)
 endif
 
@@ -25,6 +56,7 @@ find_program('tar', required : true)
 
 # meson modules
 python = import('python').find_installation('python3', required : true)
+config.set('python_path', python.full_path())
 
 python3_required_modules = ['astroid', 'urllib3']
 if host_machine.system() == 'windows'
@@ -43,19 +75,19 @@ foreach p : python3_required_modules
     endif
 endforeach
 
-# write config file
-build_cfg = 'config.h'  # named as such to match autotools build system
-configure_file(output : build_cfg, configuration : config)
-
-# define HAVE_CONFIG_H with compiler command line to include the generated
-# config.h file (same as autotools)
-add_project_arguments('-DHAVE_CONFIG_H', language : 'c')
 
 libcurl = dependency('libcurl', required : true)
 libarchive = dependency('libarchive', required : true)
 zlib = dependency('zlib', required : true)
 libyaml = cc.find_library('libyaml', required : true)
 libmmlib = cc.find_library('mmlib', required : true)
+
+
+#################### target builds #################################
+
+# write config file
+configure_file(output: 'config.h', configuration : config)
+add_project_arguments('-DHAVE_CONFIG_H', language : 'c')
 
 cstrgen = generator(
     python,
@@ -72,11 +104,6 @@ all_c_sources = []
 all_sources = []
 deployed_targets = []
 
-
-bindir = get_option('prefix') / get_option('bindir')
-pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
-libexecdir = get_option('prefix') / get_option('libexecdir')
-
 subdir('src/mmpack')
 subdir('src/pyscripts')
 subdir('src/mmpack-build')
@@ -85,6 +112,8 @@ subdir('data')
 
 all_sources += all_c_sources
 
+
+#################### tests #################################
 deployment_dir = meson.project_build_root() + '/deployment-test'
 install_manifest = custom_target('install-manifest',
         output : 'install-manifest',
@@ -141,6 +170,7 @@ do_test_pkg = custom_target('test-pkg',
         ],
 )
 
+
 tests_state = 'disabled'
 libcheck = dependency('check', required : get_option('tests'))
 if libcheck.found() and not get_option('tests').disabled()
@@ -148,6 +178,8 @@ if libcheck.found() and not get_option('tests').disabled()
     subdir('tests')
 endif
 
+
+#################### Docs generation #################################
 docs_state = 'disabled'
 sphinxbuild = find_program('sphinx-build', required : get_option('docs'))
 if sphinxbuild.found() and not get_option('docs').disabled()
@@ -169,10 +201,14 @@ if docs_state == 'enabled'
     subdir('docs')
 endif
 
+
+#################### Style checks #################################
 # uses all the other meson files.
 # keep at the end
 subdir('devtools')
 
+
+#################### Summary #################################
 # print the status of the auto-detect features
 message('Configuration summary')
 message('=====================')

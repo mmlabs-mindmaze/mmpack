@@ -16,7 +16,7 @@
 static
 char* get_mount_prefix_bin(void)
 {
-	return LIBEXECDIR "/mmpack/mount-mmpack-prefix" EXEEXT;
+	return PKGLIBEXECDIR "/mount-mmpack-prefix" EXEEXT;
 }
 
 

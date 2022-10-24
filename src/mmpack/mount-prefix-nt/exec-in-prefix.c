@@ -20,7 +20,7 @@
 #include "exec-in-prefix.h"
 
 
-#define MOUNT_DLL       BIN_TO_LIBEXECDIR "/mmpack/mount-mmpack-prefix.dll"
+#define MOUNT_DLL       BIN_TO_PKGLIBEXECDIR "/mount-mmpack-prefix.dll"
 
 static
 WCHAR* path_u16(const char* path)
