@@ -2,10 +2,9 @@
 
 import sys
 from os.path import abspath, dirname, join as joinpath
+from runpy import run_module
 
 pkgdir = abspath(joinpath(dirname(__file__), r'@bindir_to_pkgdatadir@'))
 sys.path.insert(0, pkgdir)
 
-from mmpack_build.__main__ import main
-
-sys.exit(main())
+run_module('mmpack_build', run_name='__main__')
