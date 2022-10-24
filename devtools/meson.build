@@ -32,7 +32,7 @@ if pylint.found()
             '--disable=locally-disabled',
             '--rcfile', files('pylint-config'),
             deployment_dir + mmpackbuilddir,
-            deployment_dir + pkgdatadir + '/repo.py',
+            deployment_dir + pkgdatadir + '/repository/repo.py',
             deployment_dir + bindir + '/mmpack-modifyrepo',
             deployment_dir + pyscripts_installdir,
         ],
