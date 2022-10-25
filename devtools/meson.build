@@ -22,6 +22,7 @@ if codespell.found()
 endif # codespell
 
 pkgdatadir = get_option('prefix') / get_option('datadir') + '/mmpack'
+srcdir = meson.project_source_root() / 'src'
 
 pylint = find_program(['pylint3', 'pylint'], required : false)
 if pylint.found()
@@ -31,11 +32,10 @@ if pylint.found()
             '--jobs=0',
             '--disable=locally-disabled',
             '--rcfile', files('pylint-config'),
-            deployment_dir + mmpackbuilddir,
-            deployment_dir + pkgdatadir + '/repository',
-            deployment_dir + pyscripts_installdir,
+            srcdir / 'mmpack_build',
+            srcdir / 'pyscripts',
+            srcdir / 'repository',
         ],
-        depends : do_deployment_test,
     )
 endif # pylint
 
@@ -46,9 +46,10 @@ if pycodestyle.found()
         command : [
             pycodestyle,
             '--show-source',
-            deployment_dir,
+            srcdir / 'mmpack_build',
+            srcdir / 'pyscripts',
+            srcdir / 'repository',
         ],
-        depends : do_deployment_test,
     )
 else
     run_pycodestyle = []
