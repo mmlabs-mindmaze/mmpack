@@ -38,6 +38,7 @@ from repo import Repo  # noqa
 # configuration global variable
 OBSERVERS = []
 
+
 class MmpackDbObserver(PatternMatchingEventHandler):
     """
     Observer to update repository
@@ -201,12 +202,14 @@ def load_repository(opts) -> Repo:
     try:
         metadata = yaml.load(open(metadata_path, 'rt'), Loader=yaml.BaseLoader)
     except FileNotFoundError:
-        # Create initial repo metadata if new repo
+        # Create initial repo metadata if new repo
         if not opts.repo_arch:
-            print('New repository must have architecture specified', file=sys.stderr)
+            print('New repository must have architecture specified',
+                  file=sys.stderr)
             sys.exit(1)
         metadata = {'architecture': opts.repo_arch}
-        yaml.dump(metadata, open(metadata_path, 'wt'), default_flow_style=False)
+        yaml.dump(metadata, open(metadata_path, 'wt'),
+                  default_flow_style=False)
 
     repo_arch = metadata['architecture']
     return Repo(repo_path, repo_arch)
