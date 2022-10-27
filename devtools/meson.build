@@ -32,7 +32,7 @@ if pylint.found()
             '--jobs=0',
             '--disable=locally-disabled',
             '--rcfile', files('pylint-config'),
-            srcdir / 'mmpack-build',
+            srcdir / 'mmpack_build',
             srcdir / 'pyscripts',
             srcdir / 'repository',
         ],
@@ -46,7 +46,7 @@ if pycodestyle.found()
         command : [
             pycodestyle,
             '--show-source',
-            srcdir / 'mmpack-build',
+            srcdir / 'mmpack_build',
             srcdir / 'pyscripts',
             srcdir / 'repository',
         ],
