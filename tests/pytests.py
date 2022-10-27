@@ -4,6 +4,8 @@ import copy
 import os
 import sys
 import unittest
+from pathlib import Path
+from importlib.util import spec_from_file_location, module_from_spec
 
 
 class TapTestResult(unittest.TestResult):
@@ -70,8 +72,19 @@ class TapTestRunner(unittest.TextTestRunner):
         return result
 
 
+def prepare_import():
+    srcpath = Path(__file__).parent.parent / 'src'
+
+    module_path = str(srcpath.resolve() / 'mmpack-build' / '__init__.py')
+    module_name = 'mmpack_build'
+    spec = spec_from_file_location(module_name, module_path)
+    module = module_from_spec(spec)
+    sys.modules[module_name] = module
+
 
 if __name__ == '__main__':
+    prepare_import()
+
     tests_dir = os.path.dirname(os.path.abspath(__file__))
     case_filter = os.environ.get('PY_RUN_CASE', '')
     pattern = 'test_*{0}*.py'.format(case_filter)
