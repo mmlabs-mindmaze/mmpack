@@ -106,7 +106,7 @@ deployed_targets = []
 
 subdir('src/mmpack')
 subdir('src/pyscripts')
-subdir('src/mmpack-build')
+subdir('src/mmpack_build')
 subdir('src/repository')
 subdir('data')
 
