@@ -1,15 +1,3 @@
 #!/bin/sh
 
-set -e
-set -x
-
-# window path conversion
-if [ -n "$(which cygpath)" ] ; then
-	_MMPACK_TEST_PREFIX=$(cygpath -u $_MMPACK_TEST_PREFIX)
-	PKGDATADIR=$(cygpath -u $PKGDATADIR)
-	SRCDIR=$(cygpath -u $SRCDIR)
-fi
-
-# Finally, run the tests
-export PYTHONPATH=${_MMPACK_TEST_PREFIX}${PKGDATADIR}
-python3 $SRCDIR/tests/pytests.py
+exec python3 $SRCDIR/tests/pytests.py

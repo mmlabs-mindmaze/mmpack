@@ -79,12 +79,14 @@ env.set('SRCDIR', meson.project_source_root())
 env.set('BUILDDIR', meson.project_build_root())
 env.set('PREFIX', get_option('prefix'))
 env.set('REPO', repo_dir)
+env.prepend('PYTHONPATH', meson.project_source_root() / 'src')
 
 test('mmpack-build unit tests',
-        files('python-unittests.tap'),
+        python,
+        args: files('pytests.py'),
         suite : 'mmpack-build',
         env : env,
-        depends : [do_deployment_test, do_test_repo],
+        depends : [do_test_repo],
 )
 
 test('mmpack-build-meson',
