@@ -115,11 +115,8 @@ do_test_repo = custom_target('test-repo',
         output: 'test-repo',
         command : ['bash',
                    files('tests/create-test-repo.sh'),
-                   deployment_dir,
                    repo_dir,
-                   get_option('prefix') / get_option('bindir'),
         ],
-        depends : do_deployment_test,
 )
 
 sysrepo_dir = meson.project_build_root() + '/test-sysrepo'
