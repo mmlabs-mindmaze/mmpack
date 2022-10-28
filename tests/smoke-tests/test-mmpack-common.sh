@@ -1,3 +1,4 @@
+shopt -s expand_aliases
 
 prepare_env()
 {
@@ -5,8 +6,6 @@ prepare_env()
 	if [ -n "$(which cygpath)" ] ; then
 		SRCDIR=$(cygpath -u $SRCDIR)
 		BUILDDIR=$(cygpath -u $BUILDDIR)
-		PREFIX=$(cygpath -u $PREFIX)
-		_MMPACK_TEST_PREFIX=$(cygpath -u $_MMPACK_TEST_PREFIX)
 
 		# get the windows-format of the full path to $REPO
 		# it will be used with curl with the file protocol
@@ -18,6 +17,8 @@ prepare_env()
 		dos2unix=cat
 	fi
 
+	alias mmpack=$BUILDDIR/src/mmpack/mmpack$EXEEXT
+
 	# initialisation of variables
 	PREFIX_TEST=$BUILDDIR/prefix
 	TEST_SRCDIR=$SRCDIR/tests/smoke-tests
@@ -27,9 +28,8 @@ prepare_env()
 	PREFIX_TEST+=_${name%.*}
 
 	# set the environment properly
-	PATH=$_MMPACK_TEST_PREFIX$PREFIX/bin:$PATH
 	export MMPACK_PREFIX=$PREFIX_TEST
-	export XDG_CACHE_HOME=$_MMPACK_TEST_PREFIX/cache
+	export XDG_CACHE_HOME=$BUILDDIR/xdg-cache
 
 	# prevent loading user global configuration
 	export XDG_CONFIG_HOME=/non-existing-dir

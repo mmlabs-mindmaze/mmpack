@@ -1,5 +1,7 @@
 #!/bin/bash
 
+shopt -s expand_aliases
+
 prepare_env()
 {
 	local build_sys=$1
@@ -10,20 +12,18 @@ prepare_env()
 
 	if [ -n "$(which cygpath)" ] ; then
 	    SRCDIR=$(cygpath -u $SRCDIR)
-	    _MMPACK_TEST_PREFIX=$(cygpath -u $_MMPACK_TEST_PREFIX)
 	    BUILDDIR=$(cygpath -u $BUILDDIR)
-	    PREFIX=$(cygpath -u $PREFIX)
-	    PKGDATADIR=$(cygpath -u $PKGDATADIR)
 	fi
 
 	export TMP_BUILD=$BUILDDIR/tmp-build_$build_sys
 	export XDG_CONFIG_HOME=$BUILDDIR/config_$build_sys
 	export XDG_CACHE_HOME=$BUILDDIR/cache_$build_sys
 	export MMPACK_BUILD_OUTDIR=$BUILDDIR/data_$build_sys
-	export PYTHONPATH=${_MMPACK_TEST_PREFIX}${PKGDATADIR}
 	SRC_PKG=$BUILDDIR/test-packages/smoke/
 
-	export PATH=$_MMPACK_TEST_PREFIX$PREFIX/bin:$PATH
+	export PATH=$BUILDDIR/src/mmpack_build:$PATH
+
+	alias mmpack-build=$BUILDDIR/src/mmpack_build/mmpack-build$EXEEXT
 }
 
 cleanup()
