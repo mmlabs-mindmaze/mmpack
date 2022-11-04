@@ -114,30 +114,6 @@ all_sources += all_c_sources
 
 
 #################### tests #################################
-deployment_dir = meson.project_build_root() + '/deployment-test'
-install_manifest = custom_target('install-manifest',
-        output : 'install-manifest',
-        capture : true,
-        command : [ 'meson', 'introspect', '--installed' ],
-        build_by_default : true,
-)
-
-do_deployment_test = custom_target('deployment-test',
-        output : 'deployment-test',
-        command : [ 'python3',
-                    files('tests/do-deployment-test.py'),
-                    deployment_dir,
-                    install_manifest,
-        ],
-        depends : [ install_manifest ] + deployed_targets,
-        depend_files : [ all_sources ],
-        build_by_default : true,
-)
-
-run_target('deployment-test-clean',
-    command : [ 'rm', '-rvf', deployment_dir ],
-)
-
 repo_dir = meson.project_build_root() + '/test-repo'
 do_test_repo = custom_target('test-repo',
         output: 'test-repo',
