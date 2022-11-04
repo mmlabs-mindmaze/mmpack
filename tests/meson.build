@@ -72,15 +72,15 @@ mmpack_build_unit_tests_sources = files(
 # everything in the right place during the tests (that require a local
 # installation of mmpack project).
 env = environment()
-env.set('_MMPACK_TEST_PREFIX', deployment_dir)
-env.set('MMPACK_BIN', deployment_dir / get_option('prefix') / get_option('bindir') + '/mmpack')
-env.set('PKGDATADIR', get_option('prefix') / get_option('datadir') + '/mmpack')
+env.set('MMPACK_BIN', mmpack.full_path())
 env.set('SRCDIR', meson.project_source_root())
 env.set('BUILDDIR', meson.project_build_root())
-env.set('PREFIX', get_option('prefix'))
 env.set('REPO', repo_dir)
 env.set('MMPACK_BUILD_LICENSES_DIR', meson.project_source_root() / 'data' / 'common-licenses')
 env.prepend('PYTHONPATH', meson.project_source_root() / 'src')
+env.prepend('PATH', meson.project_build_root() / 'src' / 'mmpack')
+env.prepend('PATH', meson.project_build_root() / 'src' / 'mmpack_build')
+env.prepend('PATH', meson.project_build_root() / 'src' / 'repository')
 
 test('mmpack-build unit tests',
         python,
