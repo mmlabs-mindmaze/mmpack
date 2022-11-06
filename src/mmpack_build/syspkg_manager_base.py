@@ -119,7 +119,7 @@ class SysPkgManager:
             srcs = ' or '.join(srcnames)
             raise FileNotFoundError(f'No system package found matching {srcs}')
 
-        files_sysdep = dict()
+        files_sysdep = {}
         for pkg in pkg_list:
             # Download and extract the download system package file and update
             # the mapping files -> syspkg

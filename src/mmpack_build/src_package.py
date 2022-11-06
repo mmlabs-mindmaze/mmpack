@@ -604,13 +604,15 @@ class SrcPackage:
         """
         Generate the manifest and return its path
         """
-
         # Generate the manifest data for binary packages
-        pkgs = dict()
-        for pkgname, binpkg in self._packages.items():
-            pkgs[pkgname] = {'file': path.basename(binpkg.pkg_path),
-                             'size': path.getsize(binpkg.pkg_path),
-                             'sha256': sha256sum(binpkg.pkg_path)}
+        pkgs = {
+            pkgname: {
+                'file': path.basename(binpkg.pkg_path),
+                'size': path.getsize(binpkg.pkg_path),
+                'sha256': sha256sum(binpkg.pkg_path)
+            }
+            for pkgname, binpkg in self._packages.items()
+        }
 
         # Generate the whole manifest data
         arch = get_host_arch_dist()
