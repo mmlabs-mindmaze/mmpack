@@ -246,7 +246,7 @@ def _fileobj_symbols_set(fileobj):
             the full version name
     """
     elffile = ELFFile(fileobj)
-    symbols_versions = dict()
+    symbols_versions = {}
 
     # 1. get a table of version indexes
     version_table = _get_version_table(elffile)

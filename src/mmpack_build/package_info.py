@@ -99,7 +99,7 @@ class PackageInfo:
     def __init__(self, name: str):
         self.name = name
         self.files = set()
-        self.provides = dict()
+        self.provides = {}
         self.deplist = []  # List of triplet of (dep_name, min_ver, max_ver)
         self.version = Version('any')
         self.sysdeps = set()

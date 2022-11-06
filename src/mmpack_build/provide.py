@@ -115,7 +115,7 @@ class Provide:
         self.name = name
         self.soname = soname if soname else name
         self.pkgdepends = None
-        self.symbols = dict()
+        self.symbols = {}
 
     def _get_decorated_symbols(self) -> List[ProvidedSymbol]:
         return [ProvidedSymbol(s) for s in self.symbols.keys()]
@@ -202,7 +202,7 @@ class ProvideList:
 
     def __init__(self, symbol_type: str):
         self.type = symbol_type
-        self._provides = dict()
+        self._provides = {}
 
     def add(self, provide: Provide) -> None:
         """
@@ -225,10 +225,10 @@ class ProvideList:
         if not self._provides:
             return
 
-        data = dict()
-        for provide in self._provides.values():
-            data[provide.soname] = {'depends': provide.pkgdepends,
-                                    'symbols': provide.symbols}
+        data = {
+            p.soname: {'depends': p.pkgdepends, 'symbols': p.symbols}
+            for p in self._provides.values()
+        }
 
         yaml_serialize(data, filename, use_block_style=True)
 
