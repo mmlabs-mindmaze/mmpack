@@ -503,10 +503,9 @@ def create_tarball(srcdir: str, dstfile: str, compression: str = '') -> None:
             - 'bz2': create a tarfile with bzip2 compression
             - 'xz': create a tarfile with lzma compression
     """
-    with open_compressed_file(dstfile, 'wb', compression) as fileobj:
-        tar = tarfile.open(fileobj=fileobj, mode='w|')
+    with (open_compressed_file(dstfile, 'wb', compression) as fileobj,
+          tarfile.open(fileobj=fileobj, mode='w|') as tar):
         tar.add(srcdir, recursive=True, filter=_reset_entry_attrs, arcname='.')
-        tar.close()
 
 
 def _compression_from_filename(path: str) -> str:

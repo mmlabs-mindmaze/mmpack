@@ -25,7 +25,7 @@ except ImportError:
     def autocomplete(parser: ArgumentParser, **kwargs):
         pass
 
-from .repo import Repo  # noqa
+from .repo import Repo, yaml_load  # noqa
 
 
 # configuration global variable
@@ -193,7 +193,7 @@ def load_repository(opts) -> Repo:
     # Load metadata from repo or create if not existing
     metadata_path = os.path.join(repo_path, 'metadata')
     try:
-        metadata = yaml.load(open(metadata_path, 'rt'), Loader=yaml.BaseLoader)
+        metadata = yaml_load(metadata_path)
     except FileNotFoundError:
         # Create initial repo metadata if new repo
         if not opts.repo_arch:
@@ -201,8 +201,8 @@ def load_repository(opts) -> Repo:
                   file=sys.stderr)
             sys.exit(1)
         metadata = {'architecture': opts.repo_arch}
-        yaml.dump(metadata, open(metadata_path, 'wt'),
-                  default_flow_style=False)
+        with open(metadata_path, 'wt') as stream:
+            yaml.dump(metadata, stream, default_flow_style=False)
 
     repo_arch = metadata['architecture']
     return Repo(repo_path, repo_arch)
