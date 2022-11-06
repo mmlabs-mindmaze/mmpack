@@ -135,15 +135,13 @@ class BinaryPackage:
         """
         # TODO: also work with the last package published
         provide_spec_name = f'{self.spec_dir}/{self.name}.provides'
-        specs_provides = dict()
         try:
-            specs_provides.update(yaml_load(provide_spec_name))
+            specs_provides = yaml_load(provide_spec_name)
             dprint('symbols read from ' + provide_spec_name)
+            return specs_provides
         except FileNotFoundError:
             # return an empty dict if nothing has been provided
-            pass
-
-        return specs_provides
+            return {}
 
     def _write_basic_pkginfo(self, stream: TextIO):
         _write_keyval(stream, 'name', self.name)

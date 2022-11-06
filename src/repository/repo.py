@@ -350,8 +350,8 @@ class Repo:
         self.logger = _init_logger(os.path.join(self.repo_dir, LOG_FILE))
 
         self.arch = architecture
-        self.binindex = dict()
-        self.srcindex = dict()
+        self.binindex = {}
+        self.srcindex = {}
         self.count_src_refs = Counter()
         self._reload_indices_from_files()
 
@@ -382,7 +382,7 @@ class Repo:
 
         self.srcindex = file_load(self.srcindex_file)
         if self.srcindex is None:
-            self.srcindex = dict()
+            self.srcindex = {}
 
         # count_src_refs: dictionary where the keys correspond to hash of
         # source packages and the values correspond to the number of binary

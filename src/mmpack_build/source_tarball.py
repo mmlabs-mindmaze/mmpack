@@ -200,7 +200,7 @@ class SourceTarball:
         self._srcdir = None
         self._outdir = outdir if outdir else Workspace().outdir()
         self._curr_subdir = ''
-        self.trace = dict()
+        self.trace = {}
         self._update_version = kwargs.get('version_from_vcs', False)
 
         if self._method == 'guess':
