@@ -81,7 +81,8 @@ def sha256sum(filename: str) -> str:
         a string containing hexadecimal value of hash
     """
     sha = sha256()
-    sha.update(open(filename, 'rb').read())
+    with open(filename, 'rb') as stream:
+        sha.update(stream.read())
     hexdig = sha.hexdigest()
 
     return hexdig
@@ -162,7 +163,8 @@ def yaml_load(filename: str):
     """
     helper: load yaml file with BasicLoader
     """
-    return yaml.load(open(filename, 'rb').read(), Loader=yaml.BaseLoader)
+    with open(filename, 'rb') as stream:
+        return yaml.load(stream.read(), Loader=yaml.BaseLoader)
 
 
 def _init_logger(log_file: str) -> logging.Logger:
@@ -288,14 +290,15 @@ def file_load(filename: str) -> dict:
     srcindex = {}
     entry = {}
 
-    for line in open(filename, 'r'):
-        if not line.strip():
-            src_id = _srcid(entry['name'], entry['sha256'])
-            srcindex[src_id] = entry.copy()
-            continue
+    with open(filename, 'r') as stream:
+        for line in stream:
+            if not line.strip():
+                src_id = _srcid(entry['name'], entry['sha256'])
+                srcindex[src_id] = entry.copy()
+                continue
 
-        key, value = line.split(': ')
-        entry[key] = value.rstrip('\n')
+            key, value = line.split(': ')
+            entry[key] = value.rstrip('\n')
 
     return srcindex
 
@@ -305,7 +308,8 @@ def _create_empty_if_not_exist(filename: str):
     Ensures filename exists, create it as empty if needed
     """
     if not os.path.isfile(filename):
-        open(filename, 'w+')
+        with open(filename, 'w+'):
+            pass
 
 
 class Repo:
@@ -414,6 +418,7 @@ class Repo:
             raise ValueError
 
     def _lock_repo(self):
+        # pylint: disable=consider-using-with
         self.lockfile = open(os.path.join(self.repo_dir, 'lock'), 'w')
         if _USE_LOCKING_METHOD == _LockingMethod.FCNTL:
             fcntl.flock(self.lockfile.fileno(), fcntl.LOCK_EX)

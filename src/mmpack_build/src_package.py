@@ -67,7 +67,8 @@ def _get_install_prefix() -> str:
 
 def _extract_mmpack_source(srctar_path: str) -> str:
     srcdir = Workspace().tmpdir()
-    tarfile.open(srctar_path, 'r:*').extractall(path=srcdir)
+    with tarfile.open(srctar_path, 'r:*') as tarstream:
+        tarstream.extractall(path=srcdir)
     return srcdir
 
 
@@ -374,23 +375,23 @@ class SrcPackage:
         dprint('[shell] ' + ' '.join(build_cmd))
 
         # Execute command and transfer output to log
-        proc = Popen(build_cmd, env=self._build_env(skip_tests),
-                     stdout=PIPE, stderr=PIPE, universal_newlines=True)
-        out = _FileConsumer(file_in=proc.stdout, file_out=sys.stdout)
-        err = _FileConsumer(file_in=proc.stderr, file_out=sys.stderr)
-        out.start()
-        err.start()
-        out.join()
-        err.join()
+        with Popen(build_cmd, env=self._build_env(skip_tests),
+                   stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+            out = _FileConsumer(file_in=proc.stdout, file_out=sys.stdout)
+            err = _FileConsumer(file_in=proc.stderr, file_out=sys.stderr)
+            out.start()
+            err.start()
+            out.join()
+            err.join()
 
-        # Wait the command is actually finished (or failed) and inspect
-        # return code
-        proc.wait()
-        if proc.returncode != 0:
-            errmsg = 'Failed to build ' + self.name + '\n'
-            errmsg += f'See {self.pkgbuild_path()}/mmpack.log file for what '\
-                      'went wrong\n'
-            raise ShellException(errmsg)
+            # Wait the command is actually finished (or failed) and inspect
+            # return code
+            proc.wait()
+            if proc.returncode != 0:
+                errmsg = 'Failed to build ' + self.name + '\n'
+                errmsg += f'See {self.pkgbuild_path()}/mmpack.log file for '\
+                          'what went wrong\n'
+                raise ShellException(errmsg)
 
         popdir()  # unpack directory
 
