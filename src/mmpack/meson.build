@@ -113,10 +113,10 @@ mmpack = executable('mmpack',
 all_c_sources += mmpack_sources
 deployed_targets += mmpack
 
-install_data(files('prompt.bash'),
-        install_dir : get_option('datadir') / 'mmpack',
-)
-
-install_data(files('check-dpkg-installed'),
-        install_dir : get_option('datadir') / 'mmpack',
+install_data(
+        files(
+          'prompt.bash',
+          'check-dpkg-installed',
+        ),
+        install_dir : pkgdatadir,
 )

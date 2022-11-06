@@ -49,7 +49,7 @@ mmpack_build = configure_file(
         configuration : config,
 )
 install_data(mmpack_build,
-    install_dir : get_option('bindir'),
+    install_dir : bindir,
 )
 
 install_data(
