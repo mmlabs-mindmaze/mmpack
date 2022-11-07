@@ -1,3 +1,6 @@
+find_program('tar', required : true)
+
+
 mmpack_repo_private = files(
   '__init__.py',
   '__main__.py',

@@ -1,7 +1,18 @@
+find_program('zstd', required : true)
+
 # patchelf is required to create any package containing elf files
 if host_machine.system() == 'linux'
     find_program('patchelf', required : true)
 endif
+
+
+python3_required_modules += ['urllib3']
+if host_machine.system() == 'windows'
+    python3_required_modules += ['pefile']
+elif host_machine.system() == 'linux'
+    python3_required_modules += ['elftools']
+endif
+
 
 mmpack_build_sources = files(
         '__init__.py',

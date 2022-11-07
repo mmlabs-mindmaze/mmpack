@@ -45,42 +45,14 @@ else
 endif
 
 
-#################### Dependency search #################################
 if host_machine.system() == 'windows'
     add_project_arguments('-DWIN32_LEAN_AND_MEAN', language : 'c')
     dlltool = find_program('dlltool', required : true)
 endif
 
-find_program('zstd', required : true)
-find_program('tar', required : true)
-
 # meson modules
-python = import('python').find_installation('python3', required : true)
+python = import('python').find_installation('python3')
 config.set('python_path', python.full_path())
-
-python3_required_modules = ['astroid', 'urllib3']
-if host_machine.system() == 'windows'
-    python3_required_modules += ['pefile']
-elif host_machine.system() == 'linux'
-    python3_required_modules += ['elftools']
-endif
-
-# meson's python.dependency() is not working yet
-# use this code picked from gtk-doc as a workaround
-foreach p : python3_required_modules
-    # Source: https://docs.python.org/3/library/importlib.html#checking-if-a-module-can-be-imported
-    script = 'import importlib.util; import sys; exit(1) if importlib.util.find_spec(\''+ p +'\') is None else exit(0)'
-    if run_command(python, '-c', script).returncode() != 0
-        error('Required Python3 module \'' + p + '\' not found')
-    endif
-endforeach
-
-
-libcurl = dependency('libcurl', required : true)
-libarchive = dependency('libarchive', required : true)
-zlib = dependency('zlib', required : true)
-libyaml = cc.find_library('libyaml', required : true)
-libmmlib = cc.find_library('mmlib', required : true)
 
 
 #################### target builds #################################
@@ -104,6 +76,8 @@ all_c_sources = []
 all_sources = []
 deployed_targets = []
 
+python3_required_modules = []
+
 subdir('src/mmpack')
 subdir('src/pyscripts')
 subdir('src/mmpack_build')
@@ -111,6 +85,16 @@ subdir('src/repository')
 subdir('data')
 
 all_sources += all_c_sources
+
+# meson's python.dependency() is not working yet
+# use this code picked from gtk-doc as a workaround
+foreach p : python3_required_modules
+    # Source: https://docs.python.org/3/library/importlib.html#checking-if-a-module-can-be-imported
+    script = 'import importlib.util; import sys; exit(1) if importlib.util.find_spec(\''+ p +'\') is None else exit(0)'
+    if run_command(python, '-c', script).returncode() != 0
+        error('Required Python3 module \'' + p + '\' not found')
+    endif
+endforeach
 
 
 #################### tests #################################
