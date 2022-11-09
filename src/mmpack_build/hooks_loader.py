@@ -29,7 +29,6 @@ def init_mmpack_build_hooks(**kwargs) -> None:
     Returns:
         None
     """
-    global MMPACK_BUILD_HOOKS  # pylint: disable=global-statement
     MMPACK_BUILD_HOOKS.clear()
 
     for _, name, _ in pkgutil.iter_modules([dirname(__file__)]):
