@@ -179,9 +179,9 @@ def shell(cmd, log: bool = True, input_str: str = None,
         if ret.returncode == 0:
             return ret.stdout.decode('utf-8')
 
-        errmsg = 'Command "{:.50s}{:s}" failed with error {:d}' \
-                 .format(logmsg, '...' if len(logmsg) > 50 else '',
-                         ret.returncode)
+        cmd_msg = logmsg[:50]
+        cmd_msg += '...' if len(logmsg) > 50 else ''
+        errmsg = f'Command "{cmd_msg}" failed with error {ret.returncode}'
         raise ShellException(errmsg)
     except FileNotFoundError as error:
         raise ShellException('failed to exec command') from error
