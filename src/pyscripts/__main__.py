@@ -50,7 +50,7 @@ def main():
 
     astroid_manager.always_load_extensions = True
 
-    with open(options.infile) as input_stream:
+    with open(options.infile, encoding='utf-8') as input_stream:
         input_files = [f.strip() for f in input_stream]
 
     if options.command == 'depends':

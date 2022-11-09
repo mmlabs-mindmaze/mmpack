@@ -27,7 +27,7 @@ from .workspace import Workspace
 
 
 try:
-    with open(Path(__file__).parent / 'VERSION') as fp:
+    with open(Path(__file__).parent / 'VERSION', encoding='utf-8') as fp:
         _PACKAGE_VERSION = fp.read().strip()
 except FileNotFoundError:
     _PACKAGE_VERSION = 'unkown'

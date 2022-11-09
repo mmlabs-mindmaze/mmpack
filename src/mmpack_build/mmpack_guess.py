@@ -56,7 +56,7 @@ def write_mmpack_specs(specs: Dict[str, Any]):
     Write mmpack specs in mmpack/specs of the current directory
     """
     os.makedirs('mmpack', exist_ok=True)
-    with open('mmpack/specs', 'x') as fileobj:
+    with open('mmpack/specs', 'x', encoding='utf-8') as fileobj:
         yaml.dump(specs, stream=fileobj, default_flow_style=False,
                   allow_unicode=True, indent=4, Dumper=MMPackDumper)
 
@@ -132,7 +132,8 @@ def guess_description() -> str:
     assuming markdown, and getting 1st parapgraph
     """
     try:
-        with open(glob.glob('[Rr][Ee][Aa][Dd][Mm][Ee]*')[0]) as fileobj:
+        path = glob.glob('[Rr][Ee][Aa][Dd][Mm][Ee]*')[0]
+        with open(path, encoding='utf-8') as fileobj:
             return _guess_description(fileobj.read())
     except Exception:
         return UNKNOWN
@@ -151,7 +152,7 @@ def guess_copyright() -> str:
     try:
         for src in glob.glob('src/**', recursive=True):
             if os.path.isfile(src):
-                with open(src) as srcfile:
+                with open(src, encoding='utf-8') as srcfile:
                     header = srcfile.readlines()[0:10]
                 for line in header:
                     if is_copyright.search(line):
@@ -247,7 +248,8 @@ _PROVIDE_TYPES = {
 
 
 def _load_pkg_metadata(pkg_staging_dir: str) -> PackageInfo:
-    with open(pkg_staging_dir + '/MMPACK/metadata') as stream:
+    metadata_path = pkg_staging_dir + '/MMPACK/metadata'
+    with open(metadata_path, encoding='utf-8') as stream:
         parser = Parser()
         metadata = parser.parse(stream)
 

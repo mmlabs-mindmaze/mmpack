@@ -201,7 +201,7 @@ def load_repository(opts) -> Repo:
                   file=sys.stderr)
             sys.exit(1)
         metadata = {'architecture': opts.repo_arch}
-        with open(metadata_path, 'wt') as stream:
+        with open(metadata_path, 'wt', encoding='utf-8') as stream:
             yaml.dump(metadata, stream, default_flow_style=False)
 
     repo_arch = metadata['architecture']
