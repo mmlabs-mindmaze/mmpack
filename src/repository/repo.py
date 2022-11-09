@@ -270,7 +270,7 @@ def file_serialize(index: dict, filename: str):
         index: dictionary to serialize.
         filename: file in which to serialize the dictionary.
     """
-    with open(filename, 'w', newline='\n') as outfile:
+    with open(filename, 'w', newline='\n', encoding='utf-8') as outfile:
         for value in index.values():
             lines = ['{}: {}\n'.format(k, v) for k, v in value.items()]
             outfile.write(''.join(lines) + '\n')
@@ -290,7 +290,7 @@ def file_load(filename: str) -> dict:
     srcindex = {}
     entry = {}
 
-    with open(filename, 'r') as stream:
+    with open(filename, 'r', encoding='utf-8') as stream:
         for line in stream:
             if not line.strip():
                 src_id = _srcid(entry['name'], entry['sha256'])
@@ -308,7 +308,7 @@ def _create_empty_if_not_exist(filename: str):
     Ensures filename exists, create it as empty if needed
     """
     if not os.path.isfile(filename):
-        with open(filename, 'w+'):
+        with open(filename, 'w+', encoding='utf-8'):
             pass
 
 
@@ -418,8 +418,9 @@ class Repo:
             raise ValueError
 
     def _lock_repo(self):
+        lock_path = os.path.join(self.repo_dir, 'lock')
         # pylint: disable=consider-using-with
-        self.lockfile = open(os.path.join(self.repo_dir, 'lock'), 'w')
+        self.lockfile = open(lock_path, 'w', encoding='utf-8')
         if _USE_LOCKING_METHOD == _LockingMethod.FCNTL:
             fcntl.flock(self.lockfile.fileno(), fcntl.LOCK_EX)
         elif _USE_LOCKING_METHOD == _LockingMethod.MSVCRT:

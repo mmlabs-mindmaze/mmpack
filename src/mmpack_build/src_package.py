@@ -503,7 +503,7 @@ class SrcPackage:
             copyright_file = self.copyright
         else:
             copyright_file = binpkg.licenses_dir() + '/copyright'
-            with open(copyright_file, 'w') as outfile:
+            with open(copyright_file, 'w', encoding='utf-8') as outfile:
                 outfile.write(self.copyright)
 
         # add a copy of the copyright to each package

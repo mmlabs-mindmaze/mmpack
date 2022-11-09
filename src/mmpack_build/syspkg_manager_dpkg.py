@@ -42,7 +42,7 @@ def dpkg_find_shlibs_file(target_soname: str):
         return guess[0]
 
     for shlibs_file in glob(DPKG_METADATA_PREFIX + '/**.shlibs'):
-        with open(shlibs_file) as stream:
+        with open(shlibs_file, encoding='utf-8') as stream:
             if shlib_soname_regex.search(stream.read()):
                 return shlibs_file
 
@@ -73,7 +73,7 @@ def dpkg_parse_shlibs(filename: str, target_soname: str,
     dependency_template = None
     name, version = parse_soname(target_soname)
     shlib_soname = f'{name} {version} '
-    with open(filename) as stream:
+    with open(filename, encoding='utf-8') as stream:
         for line in stream:
             if line.startswith(shlib_soname):
                 dependency_template = line[len(shlib_soname):-1]
@@ -86,7 +86,7 @@ def dpkg_parse_shlibs(filename: str, target_soname: str,
     pkgname = dependency_template.split(' ')[0]
     pattern = f'{DPKG_METADATA_PREFIX}/{pkgname}**:{get_host_arch()}.list'
     dpkg_list_file = glob(pattern)[0]
-    with open(dpkg_list_file) as listfile:
+    with open(dpkg_list_file, encoding='utf-8') as listfile:
         for line in (ln.strip('\n') for ln in listfile if target_soname in ln):
             _prune_soname_symbols(line, symbols_list)
 
@@ -118,7 +118,7 @@ def dpkg_find_symbols_file(target_soname: str) -> str:
         return guess[0]
 
     for symbols_file in glob(f'{DPKG_METADATA_PREFIX}/**:{arch}.symbols'):
-        with open(symbols_file) as stream:
+        with open(symbols_file, encoding='utf-8') as stream:
             if symbols_soname_regex.search(stream.read()):
                 return symbols_file
 
@@ -157,7 +157,7 @@ def dpkg_parse_symbols(filename: str, target_soname: str,
     minversion = None
     soname = None
 
-    with open(filename) as symbol_file:
+    with open(filename, encoding='utf-8') as symbol_file:
         for line in symbol_file:
             line = line.strip('\n')
             if line.startswith('*'):  # field name: field-value
@@ -328,7 +328,7 @@ class DebRepo:
         Iterator of package in the distribution
         """
         for index in self.pkgs_index_list:
-            with open_compressed_file(index) as fileobj:
+            with open_compressed_file(index, encoding='utf-8') as fileobj:
                 for pkg in _list_debpkg_index(fileobj):
                     yield pkg
 
