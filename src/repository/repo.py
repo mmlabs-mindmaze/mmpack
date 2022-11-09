@@ -272,7 +272,7 @@ def file_serialize(index: dict, filename: str):
     """
     with open(filename, 'w', newline='\n', encoding='utf-8') as outfile:
         for value in index.values():
-            lines = ['{}: {}\n'.format(k, v) for k, v in value.items()]
+            lines = [f'{k}: {v}\n' for k, v in value.items()]
             outfile.write(''.join(lines) + '\n')
 
 
@@ -473,12 +473,12 @@ class Repo:
         needed anymore.
         """
         for filename in self.to_remove:
-            self.logger.info('Remove {} from repository'.format(filename))
+            self.logger.info('Remove %s from repository', filename)
             file_path = os.path.join(self.repo_dir, filename)
             os.remove(file_path)
 
         for filename in self.to_add:
-            self.logger.info('Add {} in repository'.format(filename))
+            self.logger.info('Add %s in repository', filename)
             source = os.path.join(self.working_dir, filename)
             destination = os.path.join(self.repo_dir, filename)
             os.replace(source, destination)
@@ -761,7 +761,7 @@ class Repo:
             false is returned and repository would be reverted to its state
             just before the call.
         """
-        self.logger.info('Checking {}'.format(manifest_file))
+        self.logger.info('Checking %s', manifest_file)
         self.begin_changes()
 
         if not self.stage_upload(manifest_file, remove_upload):
