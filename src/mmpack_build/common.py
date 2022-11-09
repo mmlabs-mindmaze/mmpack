@@ -354,7 +354,7 @@ def get_host_dist() -> str:
     return host distribution
     """
     try:
-        with open('/etc/os-release', 'r') as fileobj:
+        with open('/etc/os-release', 'r', encoding='utf-8') as fileobj:
             for line in fileobj:
                 if line.startswith('ID='):
                     dist = line[3:].strip()
@@ -583,6 +583,7 @@ def open_compressed_file(path: str, mode: str = 'rt',
         else:
             return _RWPopen(['zstd', '-dqc', path], stdout=PIPE)
     elif compression == '':
+        # pylint: disable=unspecified-encoding
         return open(path, mode, **kwargs)
 
     # Unsupported compression if we reach here
@@ -627,7 +628,7 @@ def specs_load(specfile: str) -> Dict[str, Any]:
         match = pat.fullmatch(value)
         if match:
             loaded_path = f'{os.path.dirname(specfile)}/{match.groups()[0]}'
-            with open(loaded_path) as stream:
+            with open(loaded_path, encoding='utf-8') as stream:
                 data[key] = stream.read().strip()
 
     return specs

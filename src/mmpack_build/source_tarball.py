@@ -50,7 +50,8 @@ class SourceStrapSpecs:
             '@MMPACK_VERSION@': version,
         }
         try:
-            with open(join_path(srcdir, 'mmpack/sources-strap')) as stream:
+            path = join_path(srcdir, 'mmpack/sources-strap')
+            with open(path, encoding='utf-8') as stream:
                 content = _multiple_replace(lookup, stream.read())
                 specs = yaml.load(content, Loader=yaml.BaseLoader)
         except FileNotFoundError:
@@ -356,7 +357,7 @@ class SourceTarball:
             subdirs = ['']
         elif exists(prjlist_path):
             # List subdirs listed in projects.mmpack if any
-            with open(prjlist_path, 'rt') as list_fp:
+            with open(prjlist_path, 'rt', encoding='utf-8') as list_fp:
                 subdirs = [p.strip() for p in list_fp]
 
             # Filter subdirs if requested in named argument build_only_modified

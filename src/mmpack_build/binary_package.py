@@ -81,9 +81,9 @@ def _gen_sha256sums(sha256sums_path: str):
         cksums[filename] = sha256sum(filename, follow_symlink=False)
 
     # Write the file sha256sums file
-    with open(sha256sums_path, 'wt', newline='\n') as sums_file:
+    with open(sha256sums_path, 'wt', newline='\n', encoding='utf-8') as stream:
         for filename in sorted(cksums):
-            sums_file.write(f'{filename}: {cksums[filename]}\n')
+            stream.write(f'{filename}: {cksums[filename]}\n')
 
 
 class BinaryPackage:

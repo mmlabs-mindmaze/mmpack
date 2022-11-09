@@ -170,7 +170,7 @@ def _exec_pyscript(name: str, sitedirs: List[str], files: Iterable[str],
     cmd += ['--site-path='+path for path in sitedirs]
     cmd += [name, infile]
 
-    with open(infile, 'w') as stream:
+    with open(infile, 'w', encoding='utf-8') as stream:
         stream.write('\n'.join(files))
 
     # Prepend PKGDATADIR to PYTHONPATH for environment used to exec script
@@ -333,7 +333,7 @@ class _PyPkg:
                 self.name = _parse_metadata(filename)['Name']
 
             if filename.endswith('/top_level.txt'):
-                with open(filename) as fileobj:
+                with open(filename, encoding='utf-8') as fileobj:
                     dirs = {d.strip() for d in fileobj.readlines()}
                 self.meta_top.update(dirs)
 
