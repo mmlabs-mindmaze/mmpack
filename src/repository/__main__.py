@@ -226,7 +226,7 @@ def str2bool(value: str) -> bool:
     if lowerval in _FALSE_STRINGS:
         return False
 
-    raise ValueError('"{}" does not represent a boolean value'.format(value))
+    raise ValueError(f'"{value}" does not represent a boolean value')
 
 
 class MixedIO:
