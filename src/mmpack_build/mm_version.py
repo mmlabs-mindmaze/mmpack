@@ -1,86 +1,75 @@
 # @mindmaze_header@
 """
-version manipulation utility based on python's distutil LooseVersion class
-
-LooseVersion is described as:
-  Version numbering for anarchists and software realists.
-
-  A version number consists of a series of numbers, separated by either periods
-  or strings of letters. When comparing version numbers, the numeric components
-  will be compared numerically, and the alphabetic components lexically.
-
-There are no invalid version number.
-Still LooseVersion expects *at least* one digit within the version string.
+version manipulation utility
 """
+from __future__ import annotations
 
-from distutils.version import LooseVersion
-
+import re
 import yaml
+from typing import Optional, Union
 
 from .common import mm_representer
 
 
-class Version(LooseVersion):  # pylint: disable=too-few-public-methods
+class Version:
     """
     Simple version class
 
-    * inherited from LooseVersion:
-      - recognizes digits so that: "1.2" == "1.02", and "1.2" < "1.10"
-      - Use string comparison otherwise: "1x" < "1y"
+    * recognizes digits so that: "1.2" == "1.02", and "1.2" < "1.10"
+    * Use string comparison otherwise: "1x" < "1y"
     * adds "any" as version wildcard
     """
+    _COMP_RE = re.compile(r'(\d+)')
 
-    def __init__(self, string):
+    def __init__(self, string: Optional[str] = None):
         if not string:
             string = 'any'
         elif '_' in string:
             raise ValueError(f'invalid version {string}')
 
-        super().__init__(string)
+        self._string = string
+        self._comps = [x for x in self._COMP_RE.split(string) if x]
+        for ind, value in enumerate(self._comps):
+            try:
+                self._comps[ind] = int(value)
+            except ValueError:
+                pass
 
     def is_any(self):
-        """
-        LooseVersion asserts its string description contains at least one
-        digit. We need to explicitly request its string description to
-        prevent raising a TypeError
-        """
-        return str(self) == "any"
+        return self._string == 'any'
 
     def __lt__(self, other):
         if self.is_any() or other.is_any():
             return True
-        try:
-            return super().__lt__(other)
-        except TypeError:
-            return str(self) < str(other)
+        return self._comps < other._comps
 
     def __le__(self, other):
         if self.is_any() or other.is_any():
             return True
-        try:
-            return super().__le__(other)
-        except TypeError:
-            return str(self) < str(other)
+        return self._comps <= other._comps
 
     def __eq__(self, other):
         if self.is_any() or other.is_any():
             return True
-        return str(self.version) == str(other.version)
+        return self._comps == other._comps
 
     def __ne__(self, other):
         if self.is_any() or other.is_any():
             return True
-        return not self.__eq__(other)
+        return self._comps != other._comps
 
     def __gt__(self, other):
         if self.is_any() or other.is_any():
             return True
-        return not self.__le__(other)
+        return self._comps > other._comps
 
     def __ge__(self, other):
         if self.is_any() or other.is_any():
             return True
-        return not self.__lt__(other)
+        return self._comps >= other._comps
+
+    def __str__(self):
+        return self._string
 
     def __repr__(self):
         return str(self)
