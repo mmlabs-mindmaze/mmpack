@@ -233,6 +233,7 @@ class TestPythonHook(unittest.TestCase):
             'multi': {
                 'multi.somefunc',
                 'multi.bar.Employee',
+                'multi.bar.Employee.name',
                 'multi.bar.Employee2',
             },
             'simple': {
