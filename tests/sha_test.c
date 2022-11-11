@@ -17,7 +17,7 @@
 #include "utils.h"
 #include "testcases.h"
 
-#define HASHFILE_DIR    BUILDDIR"/hash"
+#define HASHFILE_DIR    TESTSDIR"/hash"
 
 static
 struct {

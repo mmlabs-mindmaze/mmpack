@@ -1,8 +1,38 @@
+repo_dir = meson.current_build_dir() + '/repo'
+do_test_repo = custom_target('test-repo',
+        output: 'repo',
+        command : ['bash',
+                   files('create-test-repo.sh'),
+                   repo_dir,
+        ],
+)
+
+sysrepo_dir = meson.current_build_dir() + '/sysrepo'
+do_test_sysrepo = custom_target('test-sysrepo',
+        output: 'sysrepo',
+        command : ['bash',
+                   files('create-test-sysrepo.sh'),
+                   sysrepo_dir,
+                   '@0@'.format(get_option('long-tests')),
+        ],
+)
+
+testpkg_dir = meson.current_build_dir() + '/packages'
+do_test_pkg = custom_target('test-pkg',
+        output: 'packages',
+        command : ['bash',
+                   files('create-test-pkg.sh'),
+                   testpkg_dir,
+                   '@0@'.format(get_option('long-tests')),
+        ],
+)
+
+
 long_test = get_option('long-tests') or disabler()
 
 unittest_args = [
     '-DSRCDIR="' + meson.project_source_root() + '"',
-    '-DBUILDDIR="' + meson.project_build_root() + '"',
+    '-DTESTSDIR="' + meson.current_build_dir() + '"',
 ]
 
 mmpack_unit_tests_sources = files(
@@ -82,6 +112,7 @@ env = environment()
 env.set('MMPACK_BIN', mmpack.full_path())
 env.set('SRCDIR', meson.project_source_root())
 env.set('BUILDDIR', meson.project_build_root())
+env.set('TESTSDIR', meson.current_build_dir())
 env.set('REPO', repo_dir)
 env.set('MMPACK_BUILD_LICENSES_DIR', meson.project_source_root() / 'data' / 'common-licenses')
 env.prepend('PYTHONPATH', python_path_value)

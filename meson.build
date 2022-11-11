@@ -99,36 +99,6 @@ endforeach
 
 
 #################### tests #################################
-repo_dir = meson.project_build_root() + '/test-repo'
-do_test_repo = custom_target('test-repo',
-        output: 'test-repo',
-        command : ['bash',
-                   files('tests/create-test-repo.sh'),
-                   repo_dir,
-        ],
-)
-
-sysrepo_dir = meson.project_build_root() + '/test-sysrepo'
-do_test_sysrepo = custom_target('test-sysrepo',
-        output: 'test-sysrepo',
-        command : ['bash',
-                   files('tests/create-test-sysrepo.sh'),
-                   sysrepo_dir,
-                   '@0@'.format(get_option('long-tests')),
-        ],
-)
-
-testpkg_dir = meson.project_build_root() + '/test-packages'
-do_test_pkg = custom_target('test-pkg',
-        output: 'test-packages',
-        command : ['bash',
-                   files('tests/create-test-pkg.sh'),
-                   testpkg_dir,
-                   '@0@'.format(get_option('long-tests')),
-        ],
-)
-
-
 tests_state = 'disabled'
 libcheck = dependency('check', required : get_option('tests'))
 if libcheck.found() and not get_option('tests').disabled()

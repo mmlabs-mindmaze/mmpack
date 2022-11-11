@@ -30,7 +30,7 @@ get_unused_port() {
 
 # spawn HTTP server
 http_port=$(get_unused_port)
-python3 -m http.server --bind 127.0.0.1 --directory $BUILDDIR/test-sysrepo $http_port 2>/dev/null &
+python3 -m http.server --bind 127.0.0.1 --directory $TESTSDIR/sysrepo $http_port 2>/dev/null &
 srvpid=$!
 
 

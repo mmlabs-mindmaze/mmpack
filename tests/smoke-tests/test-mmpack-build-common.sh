@@ -13,13 +13,14 @@ prepare_env()
 	if [ -n "$(which cygpath)" ] ; then
 	    SRCDIR=$(cygpath -u $SRCDIR)
 	    BUILDDIR=$(cygpath -u $BUILDDIR)
+	    TESTSDIR=$(cygpath -u $TESTSDIR)
 	fi
 
-	export TMP_BUILD=$BUILDDIR/tmp-build_$build_sys
-	export XDG_CONFIG_HOME=$BUILDDIR/config_$build_sys
-	export XDG_CACHE_HOME=$BUILDDIR/cache_$build_sys
-	export MMPACK_BUILD_OUTDIR=$BUILDDIR/data_$build_sys
-	SRC_PKG=$BUILDDIR/test-packages/smoke/
+	export TMP_BUILD=$TESTSDIR/tmp-build_$build_sys
+	export XDG_CONFIG_HOME=$TESTSDIR/config_$build_sys
+	export XDG_CACHE_HOME=$TESTSDIR/cache_$build_sys
+	export MMPACK_BUILD_OUTDIR=$TESTSDIR/data_$build_sys
+	SRC_PKG=$TESTSDIR/packages/smoke/
 
 	export PATH=$BUILDDIR/src/mmpack_build:$PATH
 
