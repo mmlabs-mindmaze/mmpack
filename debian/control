@@ -13,7 +13,8 @@ Build-Depends: debhelper-compat (= 13), dh-python,
  libdpkg-perl,
  python3-pip,
  python3-sphinx, python3-sphinx-rtd-theme, python3-docutils,
- python3-astroid, python3-pefile, python3-pyelftools, python3-urllib3,
+ python3-wrapt, python3-lazy-object-proxy, python3-six,
+ python3-pefile, python3-pyelftools, python3-urllib3,
  python3-yaml, python3-watchdog, python3-argcomplete
 Standards-Version: 4.5.1
 Vcs-Git: https://review.gerrithub.io/mmlabs-mindmaze/mmpack
