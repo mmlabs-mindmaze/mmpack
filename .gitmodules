@@ -2,3 +2,6 @@
 	path = src/pyscripts/vendor/astroid
 	url = https://github.com/PyCQA/astroid.git
 	branch = astroid-2.5.1
+[submodule "typing_extensions"]
+	path = src/pyscripts/vendor/typing_extensions
+	url = https://github.com/python/typing_extensions.git
