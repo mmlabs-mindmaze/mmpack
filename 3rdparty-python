@@ -30,10 +30,6 @@ lazy_object_proxy
 # pacman: mingw-w64-x86_64-python-wrapt
 wrapt
 
-# debian: python3-typing-extensions
-# pacman: mingw-w64-x86_64-python-typing-extensions
-typing-extensions
-
 # debian: python3-six
 # pacman: mingw-w64-x86_64-python-six
 six
