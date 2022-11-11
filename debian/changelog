@@ -2,6 +2,7 @@ mmpack (0.7.7) UNRELEASED; urgency=medium
 
   * Various bugfixes.
   * Fix pycompile of /usr/share/mmpack/pyscripts.
+  * Reorganize installed data and scripts in /usr/share/mmpack.
 
  -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Sat, 15 Oct 2022 14:25:31 +0200
 
