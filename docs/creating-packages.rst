@@ -7,6 +7,8 @@ Creating mmpack packages
 
 .. include:: specs/package-sources-strap.rst
 
+.. include:: specs/build-scripts.rst
+
 Generating binary packages
 ==========================
 
