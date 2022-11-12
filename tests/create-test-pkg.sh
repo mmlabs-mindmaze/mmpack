@@ -17,5 +17,5 @@ mkdir -p $(dirname $DSTDIR)
 cp -a $SRCDIR $DSTDIR
 
 if [ "$LONG_TESTS" = "true" ]; then
-	autoreconf -fi $DSTDIR/smoke
+	autoreconf -fi $DSTDIR/smoke 2>&1
 fi

@@ -1,6 +1,7 @@
 repo_dir = meson.current_build_dir() + '/repo'
 do_test_repo = custom_target('test-repo',
-        output: 'repo',
+        output: 'repo.log',
+        capture: true,
         command : ['bash',
                    files('create-test-repo.sh'),
                    repo_dir,
@@ -9,7 +10,8 @@ do_test_repo = custom_target('test-repo',
 
 sysrepo_dir = meson.current_build_dir() + '/sysrepo'
 do_test_sysrepo = custom_target('test-sysrepo',
-        output: 'sysrepo',
+        output: 'sysrepo.log',
+        capture: true,
         command : ['bash',
                    files('create-test-sysrepo.sh'),
                    sysrepo_dir,
@@ -19,7 +21,8 @@ do_test_sysrepo = custom_target('test-sysrepo',
 
 testpkg_dir = meson.current_build_dir() + '/packages'
 do_test_pkg = custom_target('test-pkg',
-        output: 'packages',
+        output: 'test-pkg.log',
+        capture: true,
         command : ['bash',
                    files('create-test-pkg.sh'),
                    testpkg_dir,
