@@ -3,6 +3,7 @@ import os
 import unittest
 import tarfile
 from typing import Dict
+from shutil import rmtree
 
 from mmpack_build.common import sha256sum
 from mmpack_build.src_package import SrcPackage
@@ -11,6 +12,7 @@ from mmpack_build.package_info import DispatchData
 
 
 _TEST_SRCPKG = 'testsrc.tar.xz'
+_TESTS_DATA_DIR = os.environ.get('TESTSDIR', '.') + '/tmp-data'
 
 
 def _create_test_srcpkg(content: Dict[str, str]):
@@ -21,6 +23,19 @@ def _create_test_srcpkg(content: Dict[str, str]):
 
 
 class TestSrcPackageClass(unittest.TestCase):
+    abs_testdir = '.'
+
+    @classmethod
+    def setUpClass(cls):
+        cls.abs_testdir = os.getcwd()
+        os.makedirs(_TESTS_DATA_DIR, exist_ok=True)
+        os.chdir(_TESTS_DATA_DIR)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cls.abs_testdir)
+        rmtree(_TESTS_DATA_DIR, ignore_errors=True)
+
     def tearDown(self):
         # Delete test src pkg
         try:
