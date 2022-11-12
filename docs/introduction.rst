@@ -36,7 +36,7 @@ The goal
  * Help with cross-platform development
 
 List of mmpack subcommands
-``````````````````````````
+''''''''''''''''''''''''''
 
 Below are html versions of all the man pages of the ``mmpack`` and
 ``mmpack-build`` subcommands.
@@ -56,7 +56,7 @@ Features
 --------
 
 mmpack
-``````
+''''''
 
  * Retrieve, install, remove ...
      All package management operations. See `List of mmpack subcommands`_
@@ -96,7 +96,7 @@ mmpack
 
 
 mmpack-build
-````````````
+''''''''''''
 
  * Create packages
      When building packages from a project, mmpack will gather all the files

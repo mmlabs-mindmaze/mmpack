@@ -21,7 +21,7 @@ The format follows the `yaml`_ format.
 .. _yaml: https://yaml.org/
 
 Fields
-``````
+''''''
 
 All fields are optional. However some might become mandatory in presence of
 others.

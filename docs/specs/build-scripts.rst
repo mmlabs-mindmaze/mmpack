@@ -1,6 +1,5 @@
-*************
 Build scripts
-*************
+=============
 
 When building the source package or the binary package from a source package,
 it is possible to call several scripts to implement non standard behavior.
@@ -12,11 +11,11 @@ Currently they can only be POSIX shell script.
 
 
 Package source build scripts
-============================
+----------------------------
 
 
 create_srcdir_script
---------------------
+''''''''''''''''''''
 
 condition
 `````````
@@ -42,7 +41,7 @@ location of the mmpack source unpacked (subdir of BUILDDIR)
 
 
 fetch_upstream_script
----------------------
+'''''''''''''''''''''
 
 condition
 `````````
@@ -68,7 +67,7 @@ location of the upstream source have been unpacked (subdir of BUILDDIR)
 
 
 source_strapped_hook
---------------------
+''''''''''''''''''''
 
 condition
 `````````
@@ -93,10 +92,10 @@ location where the source have been preprared (subdir of BUILDDIR)
 
 
 Binary package build scripts
-============================
+----------------------------
 
 local_install
--------------
+'''''''''''''
 
 condition
 `````````

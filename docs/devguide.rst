@@ -29,14 +29,14 @@ Runtime dependencies
 --------------------
 
 mmpack
-``````
+''''''
  * libyaml
  * libcurl
  * libarchive
  * zlib
 
 mmpack-build
-````````````
+''''''''''''
 
  * mmpack
  * python3
@@ -75,7 +75,7 @@ The mmpack project uses the **meson** build system, which is therefore needed
 to build.
 
 mmpack
-``````
+''''''
 
  * mmlib (https://github.com/mmlabs-mindmaze/mmlib.git)
  * libyaml development files
@@ -84,7 +84,7 @@ mmpack
  * zlib development files
 
 mmpack-build
-````````````
+''''''''''''
 python packages:
 
  * astroid
@@ -94,7 +94,7 @@ python packages:
  * pyyaml
 
 Tests
-`````
+'''''
 All runtime dependencies, plus:
 
  * check
