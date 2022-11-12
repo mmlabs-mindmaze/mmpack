@@ -31,25 +31,22 @@ other dependencies.
 Compiling from source
 ---------------------
 
-mmpack uses **autotools**.
+mmpack uses the `Meson build system`_.
+
+.. _`Meson build system`: https://mesonbuild.com/index.html
 
 Below are the usual targets:
 
 .. code-block:: sh
 
-   ./autogen.sh
    mkdir build && cd build
-   ../configure --help  # list the possible options
-   ../configure [options]
-   make
+   meson [options]
+   ninja
 
    # run the tests
-   make check
+   ninja test
 
-   # build the doc (if configured with --enable-sphinxdoc)
-   make html
-
-   # install (may require root permission,
-   # configure using --prefix so as to not to)
-   make install
+   # install (may require root permission, depending which prefix has been
+   # configure when calling meson)
+   ninja install
 
