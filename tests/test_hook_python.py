@@ -2,6 +2,7 @@
 
 import unittest
 from glob import glob
+from os import environ
 from os.path import dirname, abspath, join
 from typing import Set
 
@@ -12,6 +13,7 @@ from mmpack_build.hook_python import (_gen_py_importname, _gen_pysymbols,
 
 _testdir = dirname(abspath(__file__))
 _sitedir = join(_testdir, 'pydata')
+_tests_data_dir = environ.get('TESTSDIR', '.')
 
 
 def _prefix_sitedir(files: Set[str]) -> Set[str]:
@@ -37,7 +39,7 @@ class TestPythonHook(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        _FILENAME_GENERATOR.reset('.')
+        _FILENAME_GENERATOR.reset(_tests_data_dir)
 
     def test_provides_bare_module(self):
         """test provides module without package folder"""

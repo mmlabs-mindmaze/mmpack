@@ -31,6 +31,7 @@ prepare_env()
 	# set the environment properly
 	export MMPACK_PREFIX=$PREFIX_TEST
 	export XDG_CACHE_HOME=$TESTSDIR/xdg-cache
+	export TESTS_DATA_DIR=$TESTSDIR/tmp-data
 
 	# prevent loading user global configuration
 	export XDG_CONFIG_HOME=/non-existing-dir
@@ -40,6 +41,7 @@ prepare_env()
 cleanup()
 {
 	rm -rf $PREFIX_TEST
+	rm -rf $TESTS_DATA_DIR
 }
 
 assert-str-equal()

@@ -1,7 +1,7 @@
 # @mindmaze_header@
 import unittest
 
-from os import makedirs, getcwd, chdir
+from os import environ, makedirs, getcwd, chdir
 from os.path import dirname, abspath
 from shutil import rmtree
 
@@ -35,7 +35,8 @@ REF_FILELIST_WITHDIRS = [
     'bfile',
 ]
 
-TEST_TREE_ROOT = 'test_tree/root'
+TEST_TREE = environ.get('TESTSDIR', '.') + '/test_tree'
+TEST_TREE_ROOT = TEST_TREE + '/root'
 
 
 REF_SONAME_DATA = [
@@ -146,7 +147,7 @@ class TestFileList(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        rmtree(TEST_TREE_ROOT)
+        rmtree(TEST_TREE)
 
     def tearDown(self):
         chdir(self.abs_testdir)
@@ -169,7 +170,7 @@ class TestFileList(unittest.TestCase):
         """
         test list_files on topdir with single component
         """
-        chdir('test_tree')
+        chdir(TEST_TREE)
         filelist = list_files('root', exclude_dirs=True)
         self.assertEqual(filelist, REF_FILELIST)
 
