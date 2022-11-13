@@ -237,6 +237,7 @@ class TestPythonHook(unittest.TestCase):
                 'multi.bar.Employee',
                 'multi.bar.Employee.name',
                 'multi.bar.Employee2',
+                'multi.bar.Employee2.name2',
             },
             'simple': {
                 'simple.main_dummy_fn',
