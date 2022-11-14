@@ -432,12 +432,6 @@ class SrcPackage:
             pkg.init_from_specs(pkgspecs, dist, data.unassigned_files)
             self._format_description(pkg)
 
-            # check that at least one file is present in the custom package.
-            # Raise an error if the described package was expecting one.
-            # Note: meta-packages are empty and accepted
-            if not pkg.files and 'files' in pkgspecs:
-                raise MMPackBuildError(f'Custom package {pkgname} is empty !')
-
     def _get_fallback_pkgname(self, pkg_names: Set[str]) -> str:
         """
         if a binary package is already created, use it
