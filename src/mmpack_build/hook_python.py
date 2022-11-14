@@ -48,7 +48,7 @@ from .syspkg_manager import get_syspkg_mgr
 #               => None
 _PKG_REGEX = re.compile(
     r'((?:usr/|mingw64/)?lib/python3(?:\.\d+)?/(?:dist|site)-packages)'
-    r'/([\w-]+)([^/]*)'
+    r'/([\w_]+)([^/]*)'
 )
 
 _PYEXT_REGEX = re.compile(r'.*\.(?:cpython|cp\d+)-.*\.(?:so|dll|pyd)')
