@@ -386,7 +386,7 @@ def _assign_privname_to_pypkg(priv_name, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
             return pypkg
 
     # Pick the first that is not a private package
-    return list({p for n, p in pypkg.items() if not n.startswith('_')})[0]
+    return list({p for n, p in pypkgs.items() if not n.startswith('_')})[0]
 
 
 def _assign_metadata(metaname, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
