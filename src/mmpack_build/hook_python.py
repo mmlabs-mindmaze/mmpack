@@ -385,6 +385,12 @@ def _assign_privname_to_pypkg(priv_name, pypkgs: Dict[str, _PyPkg]) -> _PyPkg:
         if priv_name in pypkg.meta_top:
             return pypkg
 
+    # Pick the first package that has metadata
+    for pypkg in pypkgs.values():
+        for file in pypkg.files:
+            if '.dist-info' in file or '.egg-info' in file:
+                return pypkg
+
     # Pick the first that is not a private package
     return list({p for n, p in pypkgs.items() if not n.startswith('_')})[0]
 
