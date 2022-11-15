@@ -298,7 +298,7 @@ class SourceTarball:
 
             # Prevent git folder being packaged
             if self._method == 'git' and not subdir:
-                shutil.rmtree(srcdir + '/.git')
+                rmtree_force(srcdir + '/.git')
 
             # Create source package tarball
             dprint('Building source tarball ' + srctar)
