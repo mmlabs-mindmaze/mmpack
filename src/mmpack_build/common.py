@@ -753,12 +753,8 @@ def extract_matching_set(pcre: str, str_set: Set[str]) -> Set[str]:
 
 # pylint: disable=unused-argument
 def _onerror_handler(func, path, exc_info):
-    if not os.access(path, os.W_OK):
-        os.chmod(path, stat.S_IWRITE)
-        try:
-            os.remove(path)
-        except IsADirectoryError:
-            os.rmdir(path)
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
 
 
 def rmtree_force(path: str):
