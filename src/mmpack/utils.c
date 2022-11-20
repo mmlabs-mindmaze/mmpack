@@ -11,7 +11,9 @@
 #include <mmlib.h>
 #include <mmlog.h>
 #include <mmsysio.h>
+#include <nettle/sha2.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +22,6 @@
 #include "buffer.h"
 #include "common.h"
 #include "mmstring.h"
-#include "sha256.h"
 #include "utils.h"
 #include "xx-alloc.h"
 
@@ -446,8 +447,8 @@ int conv_to_hexstr(char* hexstr, const unsigned char* data, size_t len)
 static
 int sha_fd_compute(char* hash, int fd)
 {
-	unsigned char md[SHA256_BLOCK_SIZE], data[HASH_UPDATE_SIZE];
-	SHA256_CTX ctx;
+	uint8_t md[SHA256_DIGEST_SIZE], data[HASH_UPDATE_SIZE];
+	struct sha256_ctx ctx;
 	ssize_t rsz;
 	int rv = 0;
 
@@ -460,10 +461,10 @@ int sha_fd_compute(char* hash, int fd)
 			break;
 		}
 
-		sha256_update(&ctx, data, rsz);
+		sha256_update(&ctx, rsz, data);
 	} while (rsz > 0);
 
-	sha256_final(&ctx, md);
+	sha256_digest(&ctx, sizeof(md), md);
 
 	conv_to_hexstr(hash, md, sizeof(md));
 
@@ -502,8 +503,8 @@ int sha_regfile_compute(mmstr* hash, const mmstr* path, int with_prefix)
 static
 int sha_symlink_compute(mmstr* hash, const mmstr* path, size_t target_size)
 {
-	unsigned char md[SHA256_BLOCK_SIZE];
-	SHA256_CTX ctx;
+	uint8_t md[SHA256_DIGEST_SIZE];
+	struct sha256_ctx ctx;
 	char* buff;
 	int len;
 	int rv = -1;
@@ -513,8 +514,8 @@ int sha_symlink_compute(mmstr* hash, const mmstr* path, size_t target_size)
 		goto exit;
 
 	sha256_init(&ctx);
-	sha256_update(&ctx, buff, target_size-1);
-	sha256_final(&ctx, md);
+	sha256_update(&ctx, target_size-1, (uint8_t*)buff);
+	sha256_digest(&ctx, sizeof(md), md);
 
 	// Convert sha into hexadecimal and with "sym-" prefixed
 	memcpy(hash, SHA_HDR_SYM, SHA_HDRLEN);

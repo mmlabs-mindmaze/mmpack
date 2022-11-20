@@ -1,3 +1,9 @@
+mmpack (0.7.8) UNRELEASED; urgency=medium
+
+  * Use nettle library for computing SHA256.
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Sun, 20 Nov 2022 16:11:46 +0100
+
 mmpack (0.7.7) unstable; urgency=medium
 
   * Various bugfixes.
