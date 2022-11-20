@@ -1,7 +1,7 @@
 libcurl = dependency('libcurl', required : true)
 libarchive = dependency('libarchive', required : true)
 zlib = dependency('zlib', required : true)
-libyaml = cc.find_library('libyaml', required : true)
+yaml = cc.find_library('yaml', required : true)
 libmmlib = cc.find_library('mmlib', required : true)
 
 
@@ -105,7 +105,7 @@ libmmpack = static_library('mmpack-static',
         mmpack_lib_sources,
         gen_site_py,
         include_directories : inc,
-        dependencies: [libcurl, libarchive, libyaml, libmmlib, zlib],
+        dependencies: [libcurl, libarchive, yaml, libmmlib, zlib],
 )
 all_c_sources += mmpack_lib_sources
 
