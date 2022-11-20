@@ -3,6 +3,7 @@ libarchive = dependency('libarchive', required : true)
 zlib = dependency('zlib', required : true)
 yaml = cc.find_library('yaml', required : true)
 libmmlib = cc.find_library('mmlib', required : true)
+nettle = dependency('nettle', required : true)
 
 
 mmpack_lib_sources = files(
@@ -72,8 +73,6 @@ mmpack_lib_sources = files(
 	'repo.h',
 	'settings.c',
 	'settings.h',
-	'sha256.c',
-	'sha256.h',
 	'srcindex.c',
 	'srcindex.h',
 	'strchunk.h',
@@ -105,7 +104,7 @@ libmmpack = static_library('mmpack-static',
         mmpack_lib_sources,
         gen_site_py,
         include_directories : inc,
-        dependencies: [libcurl, libarchive, yaml, libmmlib, zlib],
+        dependencies: [libcurl, libarchive, yaml, libmmlib, zlib, nettle],
 )
 all_c_sources += mmpack_lib_sources
 
