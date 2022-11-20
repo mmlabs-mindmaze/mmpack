@@ -115,7 +115,6 @@ mmpack = executable('mmpack',
         include_directories : inc,
         link_with : libmmpack,
         install : true,
-        dependencies: [libcurl, libarchive, libyaml, libmmlib, zlib],
 )
 all_c_sources += mmpack_sources
 deployed_targets += mmpack
