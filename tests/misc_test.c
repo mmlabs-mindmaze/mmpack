@@ -49,8 +49,8 @@ static const struct {
 START_TEST(parse_dirname)
 {
 	int i;
-	char result_data[64], path_data[64], expected_data[64];
-	mmstr* result = mmstr_map_on_array(result_data);
+	char path_data[64], expected_data[64];
+	mmstr* result = mmstr_malloc(64);
 	mmstr* path = mmstr_map_on_array(path_data);
 	mmstr* expected = mmstr_map_on_array(expected_data);
 
@@ -65,6 +65,8 @@ START_TEST(parse_dirname)
 			             path, result, expected);
 		}
 	}
+
+	mmstr_free(result);
 }
 END_TEST
 
@@ -72,8 +74,8 @@ END_TEST
 START_TEST(parse_basename)
 {
 	int i;
-	char result_data[64], path_data[64], expected_data[64];
-	mmstr* result = mmstr_map_on_array(result_data);
+	char path_data[64], expected_data[64];
+	mmstr* result = mmstr_malloc(64);
 	mmstr* path = mmstr_map_on_array(path_data);
 	mmstr* expected = mmstr_map_on_array(expected_data);
 
@@ -88,6 +90,8 @@ START_TEST(parse_basename)
 			             path, result, expected);
 		}
 	}
+
+	mmstr_free(result);
 }
 END_TEST
 
