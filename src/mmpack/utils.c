@@ -473,7 +473,7 @@ int sha_fd_compute(char* hash, int fd)
 
 
 static
-int sha_regfile_compute(mmstr* hash, const mmstr* path, int with_prefix)
+int sha_regfile_compute(mmstr* hash, const char* path, int with_prefix)
 {
 	int fd;
 	int rv = 0;
@@ -501,7 +501,7 @@ int sha_regfile_compute(mmstr* hash, const mmstr* path, int with_prefix)
 
 
 static
-int sha_symlink_compute(mmstr* hash, const mmstr* path, size_t target_size)
+int sha_symlink_compute(mmstr* hash, const char* path, size_t target_size)
 {
 	uint8_t md[SHA256_DIGEST_SIZE];
 	struct sha256_ctx ctx;
