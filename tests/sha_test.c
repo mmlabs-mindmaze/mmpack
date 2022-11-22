@@ -173,21 +173,7 @@ void sha_cleanup(void)
 STATIC_CONST_MMSTR(hashfile_dir, HASHFILE_DIR);
 
 
-START_TEST(hashfile_with_parent)
-{
-	mmstr* hash = mmstr_alloca(SHA_HEXSTR_LEN);
-	const mmstr* filename = mmstr_alloca_from_cstr(sha_cases[_i].name);
-	const mmstr* refhash = mmstr_alloca_from_cstr(sha_cases[_i].refhash);
-
-	sha_compute(hash, filename, hashfile_dir, 0);
-	ck_assert_str_eq(hash, refhash);
-	sha_compute(hash, filename, hashfile_dir, 1);
-	ck_assert_str_eq(hash, refhash + SHA_HDRLEN);
-}
-END_TEST
-
-
-START_TEST(hashfile_without_parent)
+START_TEST(hash_regfile)
 {
 	mmstr* hash = mmstr_alloca(SHA_HEXSTR_LEN);
 	mmstr* fullpath = mmstr_alloca(256);
@@ -196,9 +182,9 @@ START_TEST(hashfile_without_parent)
 
 	mmstr_join_path(fullpath, hashfile_dir, filename);
 
-	sha_compute(hash, fullpath, NULL, 0);
+	sha_compute(hash, fullpath, 0);
 	ck_assert_str_eq(hash, refhash);
-	sha_compute(hash, fullpath, NULL, 1);
+	sha_compute(hash, fullpath, 1);
 	ck_assert_str_eq(hash, refhash + SHA_HDRLEN);
 }
 END_TEST
@@ -207,16 +193,19 @@ END_TEST
 START_TEST(hash_symlink)
 {
 	mmstr* hash = mmstr_alloca(SHA_HEXSTR_LEN);
+	mmstr* fullpath = mmstr_alloca(256);
 	const mmstr* filename = mmstr_alloca_from_cstr(symlink_cases[_i].name);
 	const char* refhash = symlink_cases[_i].refhash;
 	const char* refhash_follow = symlink_cases[_i].refhash_follow;
 	int expected_rv = symlink_cases[_i].is_reg_target ? 0 : -1;
 	int rv;
 
-	ck_assert(sha_compute(hash, filename, hashfile_dir, 0) == 0);
+	mmstr_join_path(fullpath, hashfile_dir, filename);
+
+	ck_assert(sha_compute(hash, fullpath, 0) == 0);
 	ck_assert_str_eq(hash, refhash);
 
-	rv = sha_compute(hash, filename, hashfile_dir, 1);
+	rv = sha_compute(hash, fullpath, 1);
 	ck_assert_int_eq(rv, expected_rv);
 	if (expected_rv == 0)
 		ck_assert_str_eq(hash, refhash_follow);
@@ -235,8 +224,7 @@ TCase* create_sha_tcase(void)
 	tc = tcase_create("sha");
 	tcase_add_unchecked_fixture(tc, sha_setup, sha_cleanup);
 
-	tcase_add_loop_test(tc, hashfile_without_parent, 0, NUM_HASH_CASES);
-	tcase_add_loop_test(tc, hashfile_with_parent, 0, NUM_HASH_CASES);
+	tcase_add_loop_test(tc, hash_regfile, 0, NUM_HASH_CASES);
 	tcase_add_loop_test(tc, hash_symlink, 0, NUM_SYMLINK_CASES);
 
 	return tc;

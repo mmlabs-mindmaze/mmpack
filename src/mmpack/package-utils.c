@@ -507,7 +507,7 @@ struct binpkg* binindex_add_pkgfile(struct binindex* binindex,
 	res->filename = mmstr_malloc_from_cstr(filename);
 	res->sha256 = hash = mmstr_malloc(SHA_HEXSTR_LEN);
 
-	if (sha_compute(hash, filename, NULL, 1)
+	if (sha_compute(hash, filename, 1)
 	    || pkg_parse_pkginfo(filename, &tmppkg))
 		goto exit;
 

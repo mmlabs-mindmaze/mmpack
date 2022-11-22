@@ -67,7 +67,7 @@ int fix_broken_installed_packages(struct mmpack_ctx * ctx)
 	// Loop over installed packages
 	pkg = inststate_first(&iter, &ctx->installed);
 	for (; pkg != NULL && rv == 0; pkg = inststate_next(&iter)) {
-		if (check_installed_pkg(ctx, pkg) == 0)
+		if (check_installed_pkg(pkg) == 0)
 			continue;
 
 		info("Trying to fix broken installed package: "
