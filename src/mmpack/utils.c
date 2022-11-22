@@ -535,16 +535,13 @@ exit:
  * @hash:       mmstr* buffer receiving the hexadecimal form of hash. The
  *              pointed string must be at least HASH_HEXSTR_LEN long.
  * @filename:   path of file whose hash must be computed
- * @parent:     prefix directory to prepend to @filename to get the
- *              final path of the file to hash. This may be NULL
  * @follow:     if set to non zero and the file is a symlink, the hash is
  *              computed on the file it refers to (ie the symlink is
  *              followed). If set to zero the generated hash is prefixed
  *              by file type indicator (regular file or symlink).
  *
  * This function allows to compute the SHA256 hash of a file located at
- *  * @parent/@filename if @parent is non NULL
- *  * @filename if @parent is NULL
+ * @filename.
  *
  * The computed hash is stored in hexadecimal as a NULL terminated string
  * in @hash which must be at least SHA_HEXSTR_LEN long (this include the
@@ -559,11 +556,8 @@ exit:
  * encountered.
  */
 LOCAL_SYMBOL
-int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent,
-                int follow)
+int sha_compute(mmstr* hash, const mmstr* filename, int follow)
 {
-	mmstr* fullpath = NULL;
-	size_t len;
 	int rv = 0;
 	int needed_len, with_prefix;
 	struct mm_stat st;
@@ -574,14 +568,6 @@ int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent,
 	needed_len += with_prefix ? SHA_HDRLEN : 0;
 	if (mmstr_maxlen(hash) < needed_len)
 		return mm_raise_error(EOVERFLOW, "hash argument to short");
-
-	if (parent != NULL) {
-		len = mmstrlen(filename) + mmstrlen(parent) + 1;
-		fullpath = mmstr_malloca(len);
-		mmstr_join_path(fullpath, parent, filename);
-
-		filename = fullpath;
-	}
 
 	if (mm_stat(filename, &st, follow ? 0 : MM_NOFOLLOW)) {
 		rv = -1;
@@ -598,7 +584,6 @@ int sha_compute(mmstr* hash, const mmstr* filename, const mmstr* parent,
 	}
 
 exit:
-	mmstr_freea(fullpath);
 	if (rv == -1)
 		mm_log_error("Cannot compute SHA-256 of %s", filename);
 
@@ -609,14 +594,12 @@ exit:
 /**
  * check_hash() - Check integrity of given file
  * @ref_sha: reference file sha256 to compare against
- * @parent: prefix directory to prepend to @filename to get the
- *          final path of the file to hash. This may be NULL
  * @filename: path of file whose hash must be computed
  *
  * Return: 0 if no issue has been found, -1 otherwise
  */
 LOCAL_SYMBOL
-int check_hash(const mmstr* refsha, const mmstr* parent, const mmstr* filename)
+int check_hash(const mmstr* refsha, const mmstr* filename)
 {
 	int follow;
 	mmstr* sha = mmstr_alloca(SHA_HEXSTR_LEN);
@@ -627,7 +610,7 @@ int check_hash(const mmstr* refsha, const mmstr* parent, const mmstr* filename)
 	if (mmstrlen(refsha) != SHA_HEXSTR_LEN)
 		follow = 1;
 
-	if (sha_compute(sha, filename, parent, follow))
+	if (sha_compute(sha, filename, follow))
 		return -1;
 
 	if (!mmstrequal(sha, refsha)) {

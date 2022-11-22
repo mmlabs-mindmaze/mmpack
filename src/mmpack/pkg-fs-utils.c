@@ -71,30 +71,27 @@ mmstr* sha256sums_path(const struct binpkg* pkg)
 
 /**
  * read_sha256sums() - parse the sha256sums of an installed package
- * @ctx:      mmpack prefix context containing @pkg (may be NULL)
- * @sha256sums_path: path to the sha256sums file to read. If @ctx is not NULL,
- *            this path is interpreted as relative to prefix folder of @ctx.
+ * @sha256sums_path: path to the sha256sums file to read.
  * @filelist: string list receiving the list of file in package
  * @hashlist: string list receiving the hash for each file in @filelist. If
  *            NULL, the hash list is ignored.
  *
- * Open and parse the sha256sums file of the installed package @pkg from the
- * mmpack prefix context @ctx. If @ctx is NULL, the installed package is
- * assumed to be located relatively to the current directory.
+ * Open and parse the sha256sums file of the installed package @pkg. The
+ * installed package is assumed to be located relatively to the current
+ * directory.
  *
  * Return: 0 in case of success, -1 otherwise.
  */
 static
-int read_sha256sums(const struct mmpack_ctx* ctx, const mmstr* sha256sums_path,
+int read_sha256sums(const mmstr* sha256sums_path,
                     struct strlist* filelist, struct strlist* hashlist)
 {
 	struct strchunk data_to_parse, line;
 	int pos, rv;
 	void* map = NULL;
 	size_t mapsize = 0;
-	const mmstr* prefix = ctx ? ctx->prefix : NULL;
 
-	rv = map_file_in_prefix(prefix, sha256sums_path, &map, &mapsize);
+	rv = map_file_in_prefix(NULL, sha256sums_path, &map, &mapsize);
 	if (rv == -1)
 		goto exit;
 
@@ -472,7 +469,7 @@ int fschange_list_pkg_rm_files(struct fschange* fsc, const struct binpkg* pkg)
 	path = sha256sums_path(pkg);
 
 	strlist_add(&fsc->rm_files, path);
-	rv = read_sha256sums(NULL, path, &fsc->rm_files, NULL);
+	rv = read_sha256sums(path, &fsc->rm_files, NULL);
 
 	mmstr_free(path);
 	return rv;
@@ -655,14 +652,15 @@ int fschange_postrm(struct fschange* fsc,
  **************************************************************************/
 /**
  * check_installed_pkg() - check integrity of installed package
- * @ctx:        mmpack context. If NULL, current dir is assumed to be the root
- *              the mmpack prefix where to search the installed files.
  * @pkg:        installed package whose integrity must be checked
+ *
+ * Current dir is assumed to be the root of the mmpack prefix where to search
+ * the installed files.
  *
  * Return: 0 if no issue has been found, -1 otherwise
  */
 LOCAL_SYMBOL
-int check_installed_pkg(const struct mmpack_ctx* ctx, const struct binpkg* pkg)
+int check_installed_pkg(const struct binpkg* pkg)
 {
 	mmstr * filename, * ref_sha, * sumsha_path;
 	struct strlist filelist, hashlist;
@@ -673,7 +671,7 @@ int check_installed_pkg(const struct mmpack_ctx* ctx, const struct binpkg* pkg)
 	strlist_init(&hashlist);
 
 	sumsha_path = sha256sums_path(pkg);
-	rv = read_sha256sums(ctx, sumsha_path, &filelist, &hashlist);
+	rv = read_sha256sums(sumsha_path, &filelist, &hashlist);
 	mmstr_free(sumsha_path);
 	if (rv == -1)
 		goto exit;
@@ -685,7 +683,7 @@ int check_installed_pkg(const struct mmpack_ctx* ctx, const struct binpkg* pkg)
 		filename = file_elt->str.buf;
 		ref_sha = hash_elt->str.buf;
 
-		if (check_hash(ref_sha, ctx->prefix, filename) != 0)
+		if (check_hash(ref_sha, filename) != 0)
 			goto exit;
 
 		file_elt = file_elt->next;
