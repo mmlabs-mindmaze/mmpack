@@ -7,6 +7,7 @@
 #endif
 
 #include <mmargparse.h>
+#include <mmsysio.h>
 
 #include "action-solver.h"
 #include "cmdline.h"
@@ -115,8 +116,9 @@ int mmpack_fix_broken(struct mmpack_ctx * ctx, int argc, const char ** argv)
 	if (mm_arg_is_completing())
 		return complete_pkgname(ctx, argv[argc-1], ONLY_INSTALLED);
 
-	/* Load prefix configuration and caches */
-	if (mmpack_ctx_use_prefix(ctx, 0))
+	// Load prefix configuration and caches and move to prefix directory
+	if (mmpack_ctx_use_prefix(ctx, 0)
+	    || mm_chdir(ctx->prefix))
 		return -1;
 
 	/* Fill package requested to be fixed from cmd arguments */
@@ -131,6 +133,9 @@ int mmpack_fix_broken(struct mmpack_ctx * ctx, int argc, const char ** argv)
 
 	if (nreq == 0)
 		rv = fix_broken_installed_packages(ctx);
+
+	// Restore previous current directory
+	mm_chdir(ctx->cwd);
 
 	return rv;
 }
