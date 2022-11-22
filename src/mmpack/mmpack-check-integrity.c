@@ -73,8 +73,9 @@ int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc,
 		return argc > 2;
 	}
 
-	/* Load prefix configuration and caches */
-	if (mmpack_ctx_use_prefix(ctx, 0))
+	// Load prefix configuration and caches and move to prefix directory
+	if (mmpack_ctx_use_prefix(ctx, 0)
+	    || mm_chdir(ctx->prefix))
 		return -1;
 
 	rv = 0;
@@ -95,6 +96,9 @@ int mmpack_check_integrity(struct mmpack_ctx * ctx, int argc,
 		for (; pkg != NULL; pkg = inststate_next(&iter))
 			rv = (check_pkg_integrity(pkg, ctx) < 0) ? -1 : rv;
 	}
+
+	// Restore previous current directory
+	mm_chdir(ctx->cwd);
 
 	return rv;
 }
