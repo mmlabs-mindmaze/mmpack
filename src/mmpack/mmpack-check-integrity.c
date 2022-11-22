@@ -30,7 +30,7 @@ int check_pkg_integrity(const struct binpkg* pkg, struct mmpack_ctx* ctx)
 	int rv;
 
 	info("Checking %s (%s) ... ", pkg->name, pkg->version);
-	rv = check_installed_pkg(ctx, pkg);
+	rv = check_installed_pkg(pkg);
 	info("%s\n", (rv == 0) ? "OK" : "Failed");
 
 	return rv;

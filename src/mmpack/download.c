@@ -207,7 +207,7 @@ int is_resource_in_cache(struct mmpack_ctx * ctx,
 	for (from = res; from != NULL && !available; from = from->next) {
 		filename = mmstr_join_path_realloc(filename,
 		                                   cachedir, from->sha256);
-		if (check_hash(from->sha256, NULL, filename) == 0) {
+		if (check_hash(from->sha256, filename) == 0) {
 			available = 1;
 			break;
 		}
@@ -279,7 +279,7 @@ int download_remote_resource(struct mmpack_ctx * ctx,
 
 		// Check previous download operation result and hash. If both
 		// are success, then we are done here
-		if (rv == 0 && check_hash(from->sha256, NULL, filename) == 0)
+		if (rv == 0 && check_hash(from->sha256, filename) == 0)
 			done = 1;
 	}
 
