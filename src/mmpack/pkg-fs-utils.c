@@ -16,6 +16,7 @@
 #include "buffer.h"
 #include "common.h"
 #include "context.h"
+#include "crypto.h"
 #include "download.h"
 #include "mmstring.h"
 #include "package-utils.h"

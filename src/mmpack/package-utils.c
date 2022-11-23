@@ -19,6 +19,7 @@
 #include "binpkg.h"
 #include "buffer.h"
 #include "common.h"
+#include "crypto.h"
 #include "indextable.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"

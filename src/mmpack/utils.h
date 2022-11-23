@@ -49,16 +49,6 @@ int is_path_separator(char c)
 mmstr* get_xdg_subpath(enum mm_known_dir dirtype, const char* subdir);
 
 
-#define SHA_HDR_REG "reg-"
-#define SHA_HDR_SYM "sym-"
-#define SHA_HDRLEN 4
-/* string of header and SHA-256 in hexa (\0 NOT incl.) */
-#define SHA_HEXSTR_LEN (SHA_HDRLEN + 32*2)
-
-int sha_compute(mmstr* hash, const mmstr* filename, int follow);
-int check_hash(const mmstr* sha, const mmstr* filename);
-
-
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path);
 mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path);
 mmstr* mmstr_join_path(mmstr* restrict dst,
