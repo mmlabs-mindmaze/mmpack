@@ -21,6 +21,8 @@ mmpack_lib_sources = files(
 	'constraints.h',
 	'context.c',
 	'context.h',
+	'crypto.c',
+	'crypto.h',
 	'download.c',
 	'download.h',
 	'exec-in-prefix.h',
