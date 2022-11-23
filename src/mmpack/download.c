@@ -13,6 +13,7 @@
 #include <mmsysio.h>
 
 #include "context.h"
+#include "crypto.h"
 #include "repo.h"
 #include "utils.h"
 
