@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "crypto.h"
 #include "mmstring.h"
 #include "utils.h"
 #include "testcases.h"
