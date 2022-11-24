@@ -5,15 +5,26 @@
 #ifndef CRYPTO_H
 #define CRYPTO_H
 
+#include <nettle/sha2.h>
+#include <stdalign.h>
+#include <stdint.h>
+
 #include "mmstring.h"
 
 
 #define SHA_HDR_REG "reg-"
 #define SHA_HDR_SYM "sym-"
 #define SHA_HDRLEN 4
+#define SHA_HEXLEN (32 * 2)
 /* string of header and SHA-256 in hexa (\0 NOT incl.) */
-#define SHA_HEXSTR_LEN (SHA_HDRLEN + 32*2)
+#define SHA_HEXSTR_LEN (SHA_HDRLEN + SHA_HEXLEN)
 
+struct sha_digest {
+	uint8_t data[SHA256_DIGEST_SIZE];
+};
+
+int sha_digest_to_hexstr(char* hexstr, const struct sha_digest* digest);
+int sha_file_compute(struct sha_digest* digest, const char* filename);
 int sha_compute(mmstr* hash, const mmstr* filename, int follow);
 int check_hash(const mmstr* sha, const mmstr* filename);
 
