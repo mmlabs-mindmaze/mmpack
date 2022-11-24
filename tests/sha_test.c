@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "buffer.h"
 #include "crypto.h"
 #include "mmstring.h"
 #include "utils.h"
@@ -25,6 +26,7 @@ struct {
 	size_t len;
 	char name[64];
 	char refhash[SHA_HEXSTR_LEN+1];
+	digest_t refdigest;
 } sha_cases[] = {
 	{.len =  0, .name = "zero_len"},
 	{.len =  4, .name = "tiny_file"},
@@ -121,6 +123,24 @@ void gen_ref_hash(char* hash, const char* filename)
 }
 
 
+/**
+ * gen_ref_md() - compute the reference digest with openssl cmdline tool
+ * @digest:     buffer receiving the digest
+ * filename:    path of the file to hash
+ */
+static
+void gen_ref_digest(digest_t* digest, const char* filename)
+{
+	char* cmd[] = {"openssl", "sha256", "-binary", (char*)filename, NULL};
+	struct buffer output;
+
+	buffer_init(&output);
+	execute_cmd_capture_output(cmd, &output);
+	memcpy(digest, output.base, sizeof(*digest));
+	buffer_deinit(&output);
+}
+
+
 static
 void sha_setup(void)
 {
@@ -138,6 +158,7 @@ void sha_setup(void)
 		strcat(filename, sha_cases[i].name);
 		create_rand_file(filename, sha_cases[i].len);
 		gen_ref_hash(sha_cases[i].refhash, filename);
+		gen_ref_digest(&sha_cases[i].refdigest, filename);
 	}
 
 	// Create subfolder for symbolic links
@@ -213,6 +234,52 @@ START_TEST(hash_symlink)
 }
 END_TEST
 
+
+START_TEST(binary_sha)
+{
+	mmstr* fullpath = mmstr_alloca(256);
+	const mmstr* filename = mmstr_alloca_from_cstr(sha_cases[_i].name);
+	const digest_t* ref = &sha_cases[_i].refdigest;
+	digest_t digest;
+
+	mmstr_join_path(fullpath, hashfile_dir, filename);
+
+	sha_file_compute(&digest, fullpath);
+	ck_assert_mem_eq(&digest, ref, sizeof(digest));
+	ck_assert(digest_equal(&digest, ref));
+}
+END_TEST
+
+
+START_TEST(digest_to_str)
+{
+	const char* ref_hexstr = sha_cases[0].refhash + SHA_HDRLEN;
+	const digest_t* digest = &sha_cases[0].refdigest;
+	char hexstr[SHA_HEXLEN + 1];
+
+	hexstr_from_digest(hexstr, digest);
+	hexstr[SHA_HEXLEN] = '\0';
+
+	ck_assert_str_eq(hexstr, ref_hexstr);
+}
+END_TEST
+
+
+START_TEST(digest_from_str)
+{
+	digest_t digest;
+	const digest_t* ref_digest = &sha_cases[0].refdigest;
+	struct strchunk hexstr = {
+		.buf = sha_cases[0].refhash + SHA_HDRLEN,
+		.len = SHA_HEXLEN,
+	};
+
+	digest_from_hexstr(&digest, hexstr);
+	ck_assert_mem_eq(&digest, ref_digest, sizeof(digest));
+}
+END_TEST
+
+
 /**************************************************************************
  *                                                                        *
  *                         test suite creation                            *
@@ -226,7 +293,10 @@ TCase* create_sha_tcase(void)
 	tcase_add_unchecked_fixture(tc, sha_setup, sha_cleanup);
 
 	tcase_add_loop_test(tc, hash_regfile, 0, NUM_HASH_CASES);
+	tcase_add_loop_test(tc, binary_sha, 0, NUM_HASH_CASES);
 	tcase_add_loop_test(tc, hash_symlink, 0, NUM_SYMLINK_CASES);
+	tcase_add_test(tc, digest_to_str);
+	tcase_add_test(tc, digest_from_str);
 
 	return tc;
 }
