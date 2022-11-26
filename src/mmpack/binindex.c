@@ -187,19 +187,12 @@ struct binpkg* pkglist_add_or_modify(struct pkglist* list, struct binpkg* pkg)
 	for (entry = list->head; entry != NULL; entry = entry->next) {
 		// Check the entry match version and sumsha
 		if (!mmstrequal(pkg->version, entry->pkg.version)
-		    || !mmstrequal(pkg->sumsha, entry->pkg.sumsha))
+		    || !sha_equal(&pkg->sumsha, &entry->pkg.sumsha))
 			continue;
 
 		// Update repo specific fields if repo index is not set
 		pkg_in_list = &entry->pkg;
 		binpkg_add_remote_resource(pkg_in_list, pkg->remote_res);
-
-		// update srcsha if not provided (might be missing in
-		// installed.yaml produced by old version of mmpack)
-		if (!pkg_in_list->srcsha) {
-			pkg_in_list->srcsha = pkg->srcsha;
-			pkg->srcsha = NULL;
-		}
 
 		return pkg_in_list;
 	}
@@ -357,7 +350,7 @@ struct binpkg const* binindex_lookup(struct binindex* binindex,
 	for (pkgentry = list->head; pkgentry; pkgentry = pkgentry->next) {
 		pkg = &pkgentry->pkg;
 
-		if (c && c->sumsha && mmstrcmp(c->sumsha, pkg->sumsha))
+		if (c && c->sumsha && !sha_equal(c->sumsha, &pkg->sumsha))
 			continue;
 
 		if (c && c->repo && !binpkg_is_provided_by_repo(pkg, c->repo))

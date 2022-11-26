@@ -9,6 +9,7 @@
 #include <mmlib.h>
 #include <mmsysio.h>
 
+#include "crypto.h"
 #include "mmstring.h"
 #include "package-utils.h"
 #include "repo.h"
@@ -17,28 +18,35 @@
 
 
 static
-int keyid_len(const mmstr* srcname, const mmstr* srcsha)
+int keyid_len(const mmstr* srcname)
 {
-	return mmstrlen(srcname) + mmstrlen(srcsha) + 1;
+	return mmstrlen(srcname) + SHA_HEXLEN + 1;
 }
 
 
 static
-mmstr* set_keyid(mmstr* keyid, const mmstr* srcname, const mmstr* srcsha)
+mmstr* set_keyid(mmstr* keyid, const mmstr* srcname,
+                 const digest_t* srcsha)
 {
+	int len;
+
 	// Form the indexing key "<name>_<srcsha>"
 	mmstrcpy(keyid, srcname);
 	mmstrcat_cstr(keyid, "_");
-	mmstrcat(keyid, srcsha);
+
+	// Append the srcsha converted in hex
+	len = mmstrlen(keyid);
+	hexstr_from_digest(keyid + len, srcsha);
+	mmstr_setlen(keyid, len + SHA_HEXLEN);
 
 	return keyid;
 }
 
 
 static
-mmstr* create_keyid(const mmstr* srcname, const mmstr* srcsha)
+mmstr* create_keyid(const mmstr* srcname, const digest_t* srcsha)
 {
-	mmstr* keyid = mmstr_malloc(keyid_len(srcname, srcsha));
+	mmstr* keyid = mmstr_malloc(keyid_len(srcname));
 	return set_keyid(keyid, srcname, srcsha);
 }
 
@@ -58,7 +66,6 @@ static
 void srcpkg_deinit(struct srcpkg * pkg)
 {
 	mmstr_free(pkg->name);
-	mmstr_free(pkg->sha256);
 	mmstr_free(pkg->version);
 	remote_resource_destroy(pkg->remote_res);
 
@@ -70,7 +77,6 @@ static
 int srcpkg_is_empty(const struct srcpkg * pkg)
 {
 	return (!pkg->name
-	        && !pkg->sha256
 	        && !pkg->version
 	        && !pkg->remote_res->filename);
 }
@@ -80,10 +86,8 @@ static
 int srcpkg_is_fully_set(const struct srcpkg * pkg)
 {
 	return (pkg->name
-	        && pkg->sha256
 	        && pkg->version
 	        && pkg->remote_res->filename
-	        && pkg->remote_res->sha256
 	        && pkg->remote_res->size);
 }
 
@@ -93,7 +97,6 @@ int srcpkg_setfield(struct srcpkg* pkg, struct strchunk line)
 {
 	struct strchunk key, val;
 	const mmstr** str_ptr = NULL;
-	int update_pkg_sha = 0;
 	int pos;
 
 	pos = strchunk_find(line, ':');
@@ -110,11 +113,12 @@ int srcpkg_setfield(struct srcpkg* pkg, struct strchunk line)
 		str_ptr = &pkg->name;
 	} else if (STR_EQUAL(key.buf, key.len, "filename")) {
 		str_ptr = &pkg->remote_res->filename;
-	} else if (STR_EQUAL(key.buf, key.len, "sha256")) {
-		str_ptr = &pkg->remote_res->sha256;
-		update_pkg_sha = 1;
 	} else if (STR_EQUAL(key.buf, key.len, "version")) {
 		str_ptr = &pkg->version;
+	} else if (STR_EQUAL(key.buf, key.len, "sha256")) {
+		digest_from_hexstr(&pkg->remote_res->sha256, val);
+		pkg->sha256 = pkg->remote_res->sha256;
+		return 0;
 	} else {
 		// ignore unknown field
 		return 0;
@@ -123,12 +127,6 @@ int srcpkg_setfield(struct srcpkg* pkg, struct strchunk line)
 	// Update the mmstr* field with the value set in the line
 	mmstr_free(*str_ptr);
 	*str_ptr = mmstr_malloc_copy(val.buf, val.len);
-
-	// sha256 of the remote resource must be duplicated to pkg
-	if (update_pkg_sha) {
-		mmstr_free(pkg->sha256);
-		pkg->sha256 = mmstrdup(*str_ptr);
-	}
 
 	return 0;
 }
@@ -192,7 +190,7 @@ int srcindex_add_pkg(struct srcindex* srcindex, struct srcpkg* pkg)
 	}
 
 	// Allocate and set the table key
-	keyid = create_keyid(pkg->name, pkg->remote_res->sha256);
+	keyid = create_keyid(pkg->name, &pkg->remote_res->sha256);
 
 	// Try to create the entry in the indextable. If already existing (ie
 	// entry->value != NULL), only add remote resource
@@ -289,15 +287,14 @@ LOCAL_SYMBOL
 const struct srcpkg* srcindex_lookup(struct srcindex* srcindex,
                                      const mmstr* srcname,
                                      const mmstr* version,
-                                     const mmstr* srchash)
+                                     const digest_t* srchash)
 {
 	(void)version; // version is currently not used in lookup
 	const mmstr* keyid;
 	struct it_entry * entry;
 
 	// Allocate and set on stack the key
-	keyid = set_keyid(mmstr_alloca(keyid_len(srcname, srchash)),
-	                  srcname, srchash);
+	keyid = set_keyid(mmstr_alloca(keyid_len(srcname)), srcname, srchash);
 
 	entry = indextable_lookup(&srcindex->pkgname_idx, keyid);
 	if (!entry)
