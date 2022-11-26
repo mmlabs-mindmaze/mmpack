@@ -4,6 +4,7 @@
 #ifndef REPO_H
 #define REPO_H
 
+#include "crypto.h"
 #include "mmstring.h"
 
 /**
@@ -82,7 +83,7 @@ struct repo* repo_iter_first(struct repo_iter* iter, struct repolist* list)
  */
 struct remote_resource {
 	const mmstr* filename;
-	const mmstr* sha256;
+	digest_t sha256;
 	size_t size;
 	const struct repo* repo;
 	struct remote_resource* next;

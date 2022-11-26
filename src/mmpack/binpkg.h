@@ -5,6 +5,7 @@
 #define BINPKG_H
 
 #include "buffer.h"
+#include "crypto.h"
 #include "mmstring.h"
 #include "repo.h"
 #include "strchunk.h"
@@ -32,8 +33,8 @@ struct binpkg {
 	mmstr const * version;
 	mmstr const * source;
 	mmstr const * desc;
-	mmstr const * sumsha;
-	mmstr const * srcsha;
+	digest_t sumsha;
+	digest_t srcsha;
 
 	struct remote_resource* remote_res;
 
