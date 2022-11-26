@@ -51,6 +51,38 @@ int sha_digest_to_hexstr(char* hexstr, const struct sha_digest* digest)
 }
 
 
+LOCAL_SYMBOL
+int hexstr_to_sha_digest(struct sha_digest* digest, struct strchunk hexstr)
+{
+	int i;
+	uint8_t d;
+	char c;
+
+	if (hexstr.len != SHA_HEXLEN)
+		goto error;
+
+	for (i = 0; i < SHA_HEXLEN; i++) {
+		c = hexstr.buf[i];
+		if (c >= '0' && c <= '9')
+			d = c - '0';
+		else if (c >= 'a' && c <= 'f')
+			d = c - 'a' + 10;
+		else
+			goto error;
+
+		if (i % 2 == 0)
+			digest->data[i / 2] = d << 4;
+		else
+			digest->data[i / 2] += d;
+	}
+	return 0;
+
+error:
+	return mm_raise_error(EINVAL, "invalid hexstr (%*s) argument",
+	                      hexstr.len, hexstr.buf);
+}
+
+
 /**
  * sha_file_compute() - compute SHA256 hash of a file
  * @digest:     pointer to structure holding the SHA256 digest.
@@ -206,6 +238,23 @@ int check_hash(const mmstr* refsha, const mmstr* filename)
 		return -1;
 
 	if (!mmstrequal(sha, refsha)) {
+		mm_raise_error(EBADMSG, "bad SHA-256 detected %s", filename);
+		return -1;
+	}
+
+	return 0;
+}
+
+
+LOCAL_SYMBOL
+int check_sha_digest(const struct sha_digest* refsha, const char* filename)
+{
+	struct sha_digest sha;
+
+	if (sha_file_compute(&sha, filename))
+		return -1;
+
+	if (!sha_equal(&sha, refsha)) {
 		mm_raise_error(EBADMSG, "bad SHA-256 detected %s", filename);
 		return -1;
 	}
