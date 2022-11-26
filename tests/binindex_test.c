@@ -62,7 +62,6 @@ int check_from_repo_fully_set(struct remote_resource* res)
 
 	while (elt) {
 		ck_assert(elt->size != 0);
-		ck_assert(elt->sha256 != NULL);
 		ck_assert(elt->filename != NULL);
 		ck_assert(elt->repo != NULL);
 		elt = elt->next;
