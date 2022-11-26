@@ -193,6 +193,25 @@ exit:
 
 
 static
+mmstr* resource_in_cache(mmstr* filename, struct mmpack_ctx * ctx,
+                         const struct remote_resource* res)
+{
+	int len;
+	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
+
+	filename = mmstrcpy_realloc(filename, cachedir);
+
+	len = mmstrlen(filename);
+	filename = mmstr_realloc(filename, len + SHA_HEXLEN + 1);
+	filename[len++] = '/';
+	len += hexstr_from_digest(filename + len, &res->sha256);
+
+	mmstr_setlen(filename, len);
+	return filename;
+}
+
+
+static
 int is_resource_in_cache(struct mmpack_ctx * ctx,
                          const struct remote_resource* res,
                          mmstr** downloaded_file)
@@ -201,14 +220,12 @@ int is_resource_in_cache(struct mmpack_ctx * ctx,
 	int previous;
 	int available = 0;
 	mmstr* filename = *downloaded_file;
-	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 
 	// Set available if a valid package already is available in cache
 	previous = mm_error_set_flags(MM_ERROR_SET, MM_ERROR_IGNORE);
 	for (from = res; from != NULL && !available; from = from->next) {
-		filename = mmstr_join_path_realloc(filename,
-		                                   cachedir, from->sha256);
-		if (check_hash(from->sha256, filename) == 0) {
+		filename = resource_in_cache(filename, ctx, from);
+		if (check_digest(&from->sha256, filename) == 0) {
 			available = 1;
 			break;
 		}
@@ -249,7 +266,6 @@ int download_remote_resource(struct mmpack_ctx * ctx,
 {
 	const struct remote_resource* from;
 	const struct repo* repo;
-	const mmstr* cachedir = mmpack_ctx_get_pkgcachedir(ctx);
 	mmstr* filename = *downloaded_file;
 	int previous;
 	int done = 0;
@@ -272,15 +288,14 @@ int download_remote_resource(struct mmpack_ctx * ctx,
 			break;
 		}
 		printf("download %s from %s... ", from->filename, repo->url);
-		filename = mmstr_join_path_realloc(filename,
-		                                   cachedir, from->sha256);
+		filename = resource_in_cache(filename, ctx, from);
 		rv = download_from_repo(ctx, repo->url, from->filename,
 		                        NULL, filename);
 		printf("%s\n", rv ? "failed" : "ok");
 
 		// Check previous download operation result and hash. If both
 		// are success, then we are done here
-		if (rv == 0 && check_hash(from->sha256, filename) == 0)
+		if (rv == 0 && check_digest(&from->sha256, filename) == 0)
 			done = 1;
 	}
 
