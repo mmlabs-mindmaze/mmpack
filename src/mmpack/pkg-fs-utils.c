@@ -760,10 +760,12 @@ int fschange_install_pkg(struct fschange* fsc,
                          const struct binpkg* pkg, const mmstr* mpkfile)
 {
 	struct mmpack_ctx* ctx = fsc->ctx;
+	char hexstr[SHA_HEXLEN + 1] = {0};
 
 	info("Installing package %s (%s)... ", pkg->name, pkg->version);
 
-	mm_log_info("\tsumsha: %s", pkg->sumsha);
+	hexstr_from_digest(hexstr, &pkg->sumsha);
+	mm_log_info("\tsumsha: %s", hexstr);
 
 	if (fschange_preinst(fsc, NULL, pkg)
 	    || fschange_pkg_unpack(fsc, mpkfile)
