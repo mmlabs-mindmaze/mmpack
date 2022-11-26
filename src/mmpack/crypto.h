@@ -41,9 +41,11 @@ int digest_equal(const digest_t* hash1, const digest_t* hash2)
 
 
 int hexstr_from_digest(char* hexstr, const digest_t* digest);
+int digest_from_hexstr(digest_t* digest, struct strchunk hexstr);
 int sha_file_compute(digest_t* digest, const char* filename);
 int sha_compute(mmstr* hash, const mmstr* filename, int follow);
 int check_hash(const mmstr* sha, const mmstr* filename);
+int check_digest(const digest_t* hash, const char* filename);
 
 
 #endif /* CRYPTO_H */
