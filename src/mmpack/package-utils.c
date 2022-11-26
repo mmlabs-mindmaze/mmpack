@@ -300,8 +300,8 @@ int set_binpkg_field(struct binpkg * pkg,
 	case FIELD_NAME:    return update_mmstr(&pkg->name, value);
 	case FIELD_VERSION: return update_mmstr(&pkg->version, value);
 	case FIELD_SOURCE:  return update_mmstr(&pkg->source, value);
-	case FIELD_SUMSHA:  return update_mmstr(&pkg->sumsha, value);
-	case FIELD_SRCSHA:  return update_mmstr(&pkg->srcsha, value);
+	case FIELD_SUMSHA:  return hexstr_to_sha_digest(&pkg->sumsha, value);
+	case FIELD_SRCSHA:  return hexstr_to_sha_digest(&pkg->srcsha, value);
 	case FIELD_DESC:
 		if (unwrap_desc)
 			return update_mmstr_unwrap(&pkg->desc, value);
@@ -330,7 +330,7 @@ int set_binpkg_field(struct binpkg * pkg,
 
 	switch (type) {
 	case FIELD_FILENAME: return update_mmstr(&res->filename, value);
-	case FIELD_SHA:      return update_mmstr(&res->sha256, value);
+	case FIELD_SHA:      return hexstr_to_sha_digest(&res->sha256, value);
 	case FIELD_SIZE:     return strchunk_parse_size(&res->size, value);
 	default:
 		mm_crash("invalid field type");
@@ -501,14 +501,12 @@ struct binpkg* binindex_add_pkgfile(struct binindex* binindex,
 	struct binpkg* pkg = NULL;
 	struct binpkg tmppkg;
 	struct remote_resource* res;
-	mmstr* hash;
 
 	binpkg_init(&tmppkg, NULL);
 	res = binpkg_get_remote_res(&tmppkg, NULL);
 	res->filename = mmstr_malloc_from_cstr(filename);
-	res->sha256 = hash = mmstr_malloc(SHA_HEXSTR_LEN);
 
-	if (sha_compute(hash, filename, 1)
+	if (sha_file_compute(&res->sha256, filename)
 	    || pkg_parse_pkginfo(filename, &tmppkg))
 		goto exit;
 

@@ -16,6 +16,7 @@
 
 #include "cmdline.h"
 #include "context.h"
+#include "crypto.h"
 #include "download.h"
 #include "mmstring.h"
 #include "package-utils.h"
@@ -31,19 +32,22 @@ int install_pkg_sources(struct mmpack_ctx * ctx, struct binpkg const * pkg)
 	const struct srcpkg* srcpkg;
 	mmstr* srctar = NULL;
 	mmstr *basepath, *srcdir;
+	char hexstr[SHA_HEXLEN + 1] = {0};
 	int rv = 0;
 
 	srcpkg = srcindex_lookup(&ctx->srcindex,
-	                         pkg->source, pkg->version, pkg->srcsha);
+	                         pkg->source, pkg->version, &pkg->srcsha);
 	if (!srcpkg) {
+		sha_digest_to_hexstr(hexstr, &pkg->srcsha);
 		printf("Cannot find source of package %s %s (%s)\n",
-		       pkg->source, pkg->version, pkg->srcsha);
+		       pkg->source, pkg->version, hexstr);
 		return -1;
 	}
 
 	basepath = mmstr_basename(NULL, srcpkg->remote_res->filename);
+	sha_digest_to_hexstr(hexstr, &srcpkg->sha256);
 	srcdir = mmstr_asprintf(NULL, "%s/src/%s-%s-%.4s", ctx->prefix,
-	                        srcpkg->name, srcpkg->version, srcpkg->sha256);
+	                        srcpkg->name, srcpkg->version, hexstr);
 
 	if (download_remote_resource(ctx, srcpkg->remote_res, &srctar)
 	    || mm_mkdir(srcdir, 0777, MM_RECURSIVE)

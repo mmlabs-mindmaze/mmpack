@@ -15,6 +15,7 @@
 #include <string.h>
 #include "cmdline.h"
 #include "context.h"
+#include "crypto.h"
 #include "repo.h"
 #include "settings.h"
 #include "package-utils.h"
@@ -38,17 +39,20 @@ void show_pkg(const struct binpkg* pkg, const struct mmpack_ctx* ctx)
 	struct remote_resource* from;
 	const struct pkgdep* dep;
 	const struct strlist_elt* sysdep;
+	char hexstr[SHA_HEXLEN+1] = ""; // ensure null termination is set
 
 	printf("%s (%s) %s\n", pkg->name, pkg->version,
 	       mmpack_ctx_is_pkg_installed(ctx, pkg) ? "[installed]" : "");
 
-	printf("SUMSHA256: %s\n", pkg->sumsha);
+	sha_digest_to_hexstr(hexstr, &pkg->sumsha);
+	printf("SUMSHA256: %s\n", hexstr);
 
 	for (from = pkg->remote_res; from != NULL; from = from->next) {
 		printf("Repository: %s\n", from->repo ?
 		       from->repo->name : "unknown");
 		printf("\tPackage file: %s\n", from->filename);
-		printf("\tSHA256: %s\n", from->sha256);
+		sha_digest_to_hexstr(hexstr, &from->sha256);
+		printf("\tSHA256: %s\n", hexstr);
 	}
 
 	printf("Source package: %s\n", pkg->source);

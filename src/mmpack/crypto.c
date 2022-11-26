@@ -78,8 +78,8 @@ int hexstr_to_sha_digest(struct sha_digest* digest, struct strchunk hexstr)
 	return 0;
 
 error:
-	return mm_raise_error(EINVAL, "invalid hexstr (%*s) argument",
-	                      hexstr.len, hexstr.buf);
+	return mm_raise_error(EINVAL, "invalid hexstr (l%i) (%.*s) argument",
+	                      hexstr.len, hexstr.len, hexstr.buf);
 }
 
 

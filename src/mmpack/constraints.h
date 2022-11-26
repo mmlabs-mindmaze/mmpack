@@ -5,6 +5,8 @@
 #define CONSTRAINTS_H
 
 #include <string.h>
+
+#include "crypto.h"
 #include "mmstring.h"
 #include "repo.h"
 
@@ -18,7 +20,7 @@
 struct constraints {
 	mmstr * version;
 	const struct repo* repo;
-	mmstr * sumsha;
+	struct sha_digest* sumsha;
 };
 
 
@@ -31,7 +33,7 @@ void constraints_deinit(struct constraints * c)
 {
 	mmstr_free(c->version);
 	c->version = NULL;
-	mmstr_free(c->sumsha);
+	free(c->sumsha);
 	c->sumsha = NULL;
 }
 

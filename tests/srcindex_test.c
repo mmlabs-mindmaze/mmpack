@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "crypto.h"
 #include "mmstring.h"
 #include "srcindex.h"
 #include "testcases.h"
@@ -21,7 +22,7 @@
 struct srcpkg_ref {
 	mmstr* name;
 	mmstr* filenames;
-	mmstr* srcsha;
+	struct sha_digest srcsha;
 	mmstr* version;
 	size_t size;
 	mmstr* repos;
@@ -61,6 +62,19 @@ mmstr* get_ref_field(FILE* fp)
 }
 
 
+static
+int get_ref_sha_field(struct sha_digest* digest, FILE* fp)
+{
+	char line[128];
+
+	if (fgets(line, sizeof(line), fp) == NULL)
+		return -1;
+
+	struct strchunk sc = {.buf = line, .len = strlen(line)};
+	return hexstr_to_sha_digest(digest, strchunk_strip(sc));
+}
+
+
 /**
  * srcpkg_ref_reinit() - cleanup package reference and reset fields
  * @ref:        source package reference to reset
@@ -70,7 +84,6 @@ void srcpkg_ref_reinit(struct srcpkg_ref* ref)
 {
 	mmstr_free(ref->name);
 	mmstr_free(ref->filenames);
-	mmstr_free(ref->srcsha);
 	mmstr_free(ref->version);
 	mmstr_free(ref->repos);
 
@@ -96,7 +109,7 @@ bool read_srcpkg_ref(struct srcpkg_ref* ref, FILE* fp)
 	srcpkg_ref_reinit(ref);
 
 	ref->name = get_ref_field(fp);
-	ref->srcsha = get_ref_field(fp);
+	get_ref_sha_field(&ref->srcsha, fp);
 	size_field = get_ref_field(fp);
 	ref->version = get_ref_field(fp);
 	ref->repos = get_ref_field(fp);
@@ -115,7 +128,6 @@ bool read_srcpkg_ref(struct srcpkg_ref* ref, FILE* fp)
 	if (!ref->name
 	   || !ref->filenames
 	   || !ref->version
-	   || !ref->srcsha
 	   || !size_field
 	   || !ref->repos) {
 		goto exit;
@@ -123,7 +135,7 @@ bool read_srcpkg_ref(struct srcpkg_ref* ref, FILE* fp)
 
 	ref->size = atoi(size_field);
 	retval = true;
-	printf("name=%s\nfilename=%s\nsrcsha=%s\n\n", ref->name, ref->filenames, ref->srcsha);
+	printf("name=%s\nfilename=%s\n\n", ref->name, ref->filenames);
 
 exit:
 	mmstr_free(delim);
@@ -164,7 +176,7 @@ void check_srcpkg(const struct srcpkg* pkg, const struct srcpkg_ref* ref)
 		ck_assert(res != NULL);
 		ck_assert_str_eq(res->repo->name, tokenrepo);
 		ck_assert_str_eq(res->filename, tokenfname);
-		ck_assert_str_eq(res->sha256, ref->srcsha);
+		ck_assert(sha_equal(&res->sha256, &ref->srcsha));
 		ck_assert_int_eq(res->size, ref->size);
 
 		tokenrepo = tokenfname = NULL;
@@ -193,7 +205,7 @@ void check_srcindex_content(struct srcindex* srcindex, const char* reference)
 
 	while (read_srcpkg_ref(ref, fp)) {
 		pkg = srcindex_lookup(srcindex,
-				      ref->name, ref->version, ref->srcsha);
+				      ref->name, ref->version, &ref->srcsha);
 		ck_assert(pkg != NULL);
 		check_srcpkg(pkg, ref);
 	}

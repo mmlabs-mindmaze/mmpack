@@ -214,7 +214,9 @@ int constraints_set(struct mmpack_ctx * ctx,
 
 	switch (type) {
 	case HASH:
-		cons->sumsha = mmstrcpy_cstr_realloc(cons->sumsha, value);
+		cons->sumsha = xx_malloc(sizeof(*cons->sumsha));
+		hexstr_to_sha_digest(cons->sumsha,
+		                     (struct strchunk) {.buf = value, .len = strlen(value)});
 		break;
 	case REPO:
 		cons->repo = repolist_lookup(&ctx->settings.repo_list, value);
