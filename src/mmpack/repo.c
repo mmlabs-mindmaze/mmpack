@@ -235,7 +235,6 @@ void remote_resource_destroy(struct remote_resource* res)
 	while (elt) {
 		next = elt->next;
 		mmstr_free(elt->filename);
-		mmstr_free(elt->sha256);
 		free(elt);
 		elt = next;
 	}
