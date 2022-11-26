@@ -26,6 +26,18 @@ void push_dep_elt(struct buffer* buff, const mmstr* name,
 
 
 static
+void write_keysha(struct buffer* buff, const char* key,
+                  const digest_t* digest)
+{
+	buffer_push(buff, key, strlen(key));
+	buffer_push(buff, ": ", 2);
+	hexstr_from_digest(buffer_reserve_data(buff, SHA_HEXLEN), digest);
+	buffer_inc_size(buff, SHA_HEXLEN);
+	buffer_push(buff, "\n", 1);
+}
+
+
+static
 void write_keyval(struct buffer* buff, const char* key, const mmstr* value)
 {
 	buffer_push(buff, key, strlen(key));
@@ -146,8 +158,6 @@ void binpkg_deinit(struct binpkg * pkg)
 	mmstr_free(pkg->version);
 	mmstr_free(pkg->source);
 	mmstr_free(pkg->desc);
-	mmstr_free(pkg->sumsha);
-	mmstr_free(pkg->srcsha);
 
 	remote_resource_destroy(pkg->remote_res);
 	pkg->remote_res = NULL;
@@ -229,8 +239,8 @@ void binpkg_save_to_buffer(const struct binpkg* pkg, struct buffer* buff)
 	write_keyval(buff, "name", pkg->name);
 	write_keyval(buff, "version", pkg->version);
 	write_keyval(buff, "source", pkg->source);
-	write_keyval(buff, "srcsha256", pkg->srcsha);
-	write_keyval(buff, "sumsha256sums", pkg->sumsha);
+	write_keysha(buff, "srcsha256", &pkg->srcsha);
+	write_keysha(buff, "sumsha256sums", &pkg->sumsha);
 	write_keyval(buff, "ghost", mmstr_alloca_from_cstr(ghost_val));
 
 	pkgdep_save_to_keyval(pkg->mpkdeps, buff);
@@ -290,7 +300,6 @@ void binpkg_add_remote_resource(struct binpkg* pkg,
 	for (src = res_added; src != NULL; src = src->next) {
 		dst = binpkg_get_remote_res(pkg, src->repo);
 		mmstr_free(dst->filename);
-		mmstr_free(dst->sha256);
 
 		// copy from src while preserving the original chaining
 		next = dst->next;
@@ -310,7 +319,7 @@ int from_repo_check_valid(struct binpkg const * pkg)
 	struct remote_resource* elt;
 
 	for (elt = pkg->remote_res; elt != NULL; elt = elt->next) {
-		if (!elt->sha256 || !elt->size || !elt->filename)
+		if (!elt->size || !elt->filename)
 			return mm_raise_error(EINVAL,
 			                      "Invalid package data for %s."
 			                      " Missing fields needed in"
@@ -326,7 +335,6 @@ LOCAL_SYMBOL
 int binpkg_check_valid(struct binpkg const * pkg, int in_repo_cache)
 {
 	if (!pkg->version
-	    || !pkg->sumsha
 	    || !pkg->source)
 		return mm_raise_error(EINVAL, "Invalid package data for %s."
 		                      " Missing fields.", pkg->name);
