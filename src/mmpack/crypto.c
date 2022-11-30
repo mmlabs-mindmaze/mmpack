@@ -179,22 +179,17 @@ exit:
  * encountered.
  */
 LOCAL_SYMBOL
-int sha_compute(mmstr* hash, const mmstr* filename, int follow)
+int sha_compute(mmstr* hash, const mmstr* filename)
 {
 	digest_t digest;
 	int rv = 0;
-	int needed_len, with_prefix, offset, len;
 	struct mm_stat st;
 	const char* prefix;
 
-	with_prefix = !follow;
-
-	needed_len = SHA_HEXSTR_LEN - SHA_HDRLEN;
-	needed_len += with_prefix ? SHA_HDRLEN : 0;
-	if (mmstr_maxlen(hash) < needed_len)
+	if (mmstr_maxlen(hash) < SHA_HEXSTR_LEN)
 		return mm_raise_error(EOVERFLOW, "hash argument to short");
 
-	if (mm_stat(filename, &st, follow ? 0 : MM_NOFOLLOW)) {
+	if (mm_stat(filename, &st, MM_NOFOLLOW)) {
 		rv = -1;
 		goto exit;
 	}
@@ -212,10 +207,9 @@ int sha_compute(mmstr* hash, const mmstr* filename, int follow)
 	}
 
 	// Convert sha into hexadecimal and with prefix if needed
-	offset = with_prefix ? SHA_HDRLEN : 0;
-	memcpy(hash, prefix, offset);
-	len = hexstr_from_digest(hash + offset, &digest);
-	mmstr_setlen(hash, len + offset);
+	memcpy(hash, prefix, SHA_HDRLEN);
+	hexstr_from_digest(hash + SHA_HDRLEN, &digest);
+	mmstr_setlen(hash, SHA_HEXSTR_LEN);
 
 exit:
 	if (rv == -1)
@@ -235,16 +229,9 @@ exit:
 LOCAL_SYMBOL
 int check_hash(const mmstr* refsha, const mmstr* filename)
 {
-	int follow;
 	mmstr* sha = mmstr_alloca(SHA_HEXSTR_LEN);
 
-	// If reference hash contains type prefix (ie its length is
-	// SHA_HEXSTR_LEN), symlink must not be followed
-	follow = 0;
-	if (mmstrlen(refsha) != SHA_HEXSTR_LEN)
-		follow = 1;
-
-	if (sha_compute(sha, filename, follow))
+	if (sha_compute(sha, filename))
 		return -1;
 
 	if (!mmstrequal(sha, refsha)) {
