@@ -35,5 +35,5 @@ fi
 if [ -f "$sphinxconf" ]; then
 	# Try to build sphinx documentation but ignore failure
 	sphinx_srcdir=$(dirname "$sphinxconf")
-	PYTHONPATH=$SRCDIR sphinx-build -Dversion=$SRCVERSION -b html -d $BUILDDIR/doctrees "$sphinx_srcdir" $DESTDIR$PREFIX/share/doc/$SRCNAME/html || true
+	PYTHONPATH=$SRCDIR${PYTHONPATH:+:${PYTHONPATH}} sphinx-build -Dversion=$SRCVERSION -b html -d $BUILDDIR/doctrees "$sphinx_srcdir" $DESTDIR$PREFIX/share/doc/$SRCNAME/html || true
 fi
