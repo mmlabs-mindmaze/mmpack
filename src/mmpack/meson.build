@@ -26,6 +26,8 @@ mmpack_lib_sources = files(
 	'download.c',
 	'download.h',
 	'exec-in-prefix.h',
+	'hashset.c',
+	'hashset.h',
 	'indextable.c',
 	'indextable.h',
 	'install-state.c',
