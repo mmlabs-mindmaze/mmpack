@@ -43,6 +43,7 @@ mmpack_unit_tests_sources = files(
         'config_test.c',
         'dependencies_test.c',
         'indextable_test.c',
+        'hashset_test.c',
         'misc_test.c',
         'sha_test.c',
         'srcindex_test.c',
