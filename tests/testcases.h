@@ -13,6 +13,7 @@ TCase* create_dependencies_tcase(void);
 TCase* create_version_tcase(void);
 TCase* create_sha_tcase(void);
 TCase* create_indextable_tcase(void);
+TCase* create_hashset_tcase(void);
 TCase* create_misc_tcase(void);
 
 #endif /* TESTCASES_H */
