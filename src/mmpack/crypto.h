@@ -5,6 +5,7 @@
 #ifndef CRYPTO_H
 #define CRYPTO_H
 
+#include <mmpredefs.h>
 #include <nettle/sha2.h>
 #include <stdalign.h>
 #include <stdint.h>
@@ -23,6 +24,8 @@
 
 typedef struct sha_digest {
 	uint8_t alignas(16) u8[SHA256_DIGEST_SIZE];
+	uint32_t alignas(16) u32[SHA256_DIGEST_SIZE / sizeof(uint32_t)];
+	uint64_t alignas(16) u64[SHA256_DIGEST_SIZE / sizeof(uint64_t)];
 } digest_t;
 
 
@@ -30,6 +33,19 @@ static inline
 int digest_equal(const digest_t* hash1, const digest_t* hash2)
 {
 	return memcmp(hash1->u8, hash2->u8, sizeof(hash1->u8)) == 0;
+}
+
+
+static inline
+int digest_is_zero(const digest_t* hash)
+{
+	int i;
+
+	for (i = 0; i < MM_NELEM(hash->u64); i++)
+		if (hash->u64[i])
+			return 0;
+
+	return 1;
 }
 
 
