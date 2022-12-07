@@ -37,6 +37,8 @@ int is_path_separator(char c)
 
 #define INSTALLED_INDEX_RELPATH \
 	MMPACK_STATEDIR_RELPATH "/installed"
+#define HASHSET_RELPATH \
+	MMPACK_STATEDIR_RELPATH "/installed.hashset"
 #define MANUALLY_INST_RELPATH \
 	MMPACK_STATEDIR_RELPATH "/manually-installed.txt"
 #define REPO_INDEX_RELPATH \
