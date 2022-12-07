@@ -18,6 +18,7 @@
 #include "common.h"
 #include "context.h"
 #include "indextable.h"
+#include "hashset.h"
 #include "mmstring.h"
 #include "package-utils.h"
 #include "repo.h"
@@ -364,6 +365,38 @@ int save_manually_installed(const mmstr * prefix, struct strset * manually_inst)
 }
 
 
+static
+int mmpack_ctx_save_installed_hashset(struct mmpack_ctx * ctx)
+{
+	mmstr* path;
+	mmstr* tmp;
+	int npkg, rv;
+	const struct binpkg* pkg;
+	struct inststate_iter iter;
+	struct buffer buff = {0};
+
+	path = mmstr_asprintf(NULL, "%s/"HASHSET_RELPATH, ctx->prefix);
+	tmp = mmstr_asprintf(NULL, "%s/"TMP_HASHSET_RELPATH, ctx->prefix);
+
+	// Create array of sumsha all install packages in buffer
+	pkg = inststate_first(&iter, &ctx->installed);
+	for (; pkg != NULL; pkg = inststate_next(&iter))
+		buffer_push(&buff, &pkg->sumsha, sizeof(pkg->sumsha));
+
+	// Atomically update hashset
+	npkg = buff.size / sizeof(pkg->sumsha);
+	if (create_hashset(tmp, npkg, buff.base)
+	    || mm_rename(tmp, path))
+		rv = 0;
+
+	buffer_deinit(&buff);
+	mmstr_free(tmp);
+	mmstr_free(path);
+
+	return rv;
+}
+
+
 LOCAL_SYMBOL
 int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 {
@@ -385,6 +418,9 @@ int mmpack_ctx_save_installed_list(struct mmpack_ctx * ctx)
 	buffer_deinit(&buff);
 
 	mmstr_freea(installed_index_path);
+
+	if (rv == 0)
+		rv = mmpack_ctx_save_installed_hashset(ctx);
 
 	return rv;
 }
