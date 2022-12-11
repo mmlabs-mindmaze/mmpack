@@ -833,7 +833,7 @@ int save_file_atomically(const mmstr* path, const struct buffer* buff)
 	int flags, i, rv = -1;
 	mmstr* tmp_path = NULL;
 
-	tmp_path = mmstrcpy_cstr_realloc(NULL, path);
+	tmp_path = mmstrdup(path);
 
 	flags = mm_error_set_flags(MM_ERROR_SET, MM_ERROR_IGNORE);
 	for (i = 0; i < NUM_ATTEMPT; i++) {
