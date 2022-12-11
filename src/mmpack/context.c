@@ -20,6 +20,7 @@
 #include "hashset.h"
 #include "mmstring.h"
 #include "package-utils.h"
+#include "prefix-list.h"
 #include "repo.h"
 #include "settings.h"
 #include "strset.h"
@@ -393,6 +394,9 @@ int mmpack_ctx_save_installed_hashset(struct mmpack_ctx * ctx)
 	buffer_deinit(&buff);
 	mmstr_free(tmp);
 	mmstr_free(path);
+
+	if (rv == 0)
+		rv = update_prefix_list_with_current_prefix(ctx->prefix);
 
 	return rv;
 }
