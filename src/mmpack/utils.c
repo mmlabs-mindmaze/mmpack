@@ -135,6 +135,36 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 
 
 static
+mmstr* mmstr_tmp_copyname(mmstr* restrict tmppath, const mmstr* restrict path, int num_attempt)
+{
+	const char* baseptr;
+	int len;
+
+	tmppath = mmstr_realloc(tmppath, mmstrlen(path) + 16);
+
+	baseptr = get_basename_ptr(path);
+
+	// Copy dirname if any
+	len = baseptr - path;
+	mmstr_copy(tmppath, path, len);
+
+	// prepend dot to basename
+	mmstr_append(tmppath, ".", 1);
+
+	// copy basename
+	len = mmstrlen(path) - len;
+	mmstr_append(tmppath, baseptr, len);
+
+	// append -## to the filename
+	len = mmstrlen(tmppath);
+	len += sprintf(tmppath + len, "-%i", num_attempt);
+	mmstr_setlen(tmppath, len);
+
+	return tmppath;
+}
+
+
+static
 int is_absolute_path(const mmstr * p)
 {
 #if defined (_WIN32)
@@ -756,11 +786,82 @@ exit:
 
 /**************************************************************************
  *                                                                        *
- *                        Compressed file handling                        *
+ *                        High level file handling                        *
  *                                                                        *
  **************************************************************************/
 
 #define BLOCK_SZ        8192
+#define NUM_ATTEMPT             10
+
+
+static
+int save_file(const char* path, const struct buffer* buff)
+{
+	int fd, rv, rlen;
+	const char* data = buff->base;
+	int remaining = buff->size;
+
+	fd = mm_open(path, O_WRONLY|O_CREAT|O_EXCL, 0666);
+	if (fd < 0)
+		return -1;
+
+	rv = 0;
+	while (remaining) {
+		rlen = mm_write(fd, data, remaining);
+		if (rlen < 0) {
+			rv = -1;
+			goto exit;
+		}
+
+		remaining -= rlen;
+		data += rlen;
+	}
+
+exit:
+	mm_close(fd);
+	return rv;
+}
+
+
+/**
+ * save_file_atomically() - save content of a buffer into a file
+ * @path:       path of the file to open
+ * @buff:       pointer to struct buffer that will hold the data to be written
+ *
+ * Return: 0 in case if success. Otherwise -1 is returned with error state set
+ * accordingly.
+ */
+LOCAL_SYMBOL
+int save_file_atomically(const mmstr* path, const struct buffer* buff)
+{
+	struct mm_error_state errstate;
+	int flags, i, rv = -1;
+	mmstr* tmp_path = NULL;
+
+	tmp_path = mmstrdup(path);
+	mm_save_errorstate(&errstate);
+	flags = mm_error_set_flags(MM_ERROR_SET, MM_ERROR_NOLOG);
+
+	for (i = 0; i < NUM_ATTEMPT; i++) {
+		tmp_path = mmstr_tmp_copyname(tmp_path, path, i);
+		rv = save_file(tmp_path, buff);
+		if (rv == 0)
+			break;
+
+		if (i >= NUM_ATTEMPT-1 || mm_get_lasterror_number() != EEXIST)
+			goto exit;
+	}
+	rv = mm_rename(tmp_path, path);
+
+exit:
+	mm_error_set_flags(flags, MM_ERROR_NOLOG);
+	if (rv == 0)
+		mm_set_errorstate(&errstate);
+
+	mmstr_free(tmp_path);
+	return rv;
+}
+
 
 static
 int from_zlib_error(int zlib_errnum)
