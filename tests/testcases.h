@@ -15,5 +15,6 @@ TCase* create_sha_tcase(void);
 TCase* create_indextable_tcase(void);
 TCase* create_hashset_tcase(void);
 TCase* create_misc_tcase(void);
+TCase* create_prefix_list_tcase(void);
 
 #endif /* TESTCASES_H */
