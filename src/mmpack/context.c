@@ -21,6 +21,7 @@
 #include "hashset.h"
 #include "mmstring.h"
 #include "package-utils.h"
+#include "prefix-list.h"
 #include "repo.h"
 #include "settings.h"
 
@@ -386,7 +387,8 @@ int mmpack_ctx_save_installed_hashset(struct mmpack_ctx * ctx)
 	// Atomically update hashset
 	npkg = buff.size / sizeof(pkg->sumsha);
 	if (create_hashset(tmp, npkg, buff.base)
-	    || mm_rename(tmp, path))
+	    || mm_rename(tmp, path)
+	    || register_in_prefix_list(ctx->prefix))
 		rv = 0;
 
 	buffer_deinit(&buff);
