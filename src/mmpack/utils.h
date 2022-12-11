@@ -97,9 +97,11 @@ int execute_cmd_capture_output(char* argv[], struct buffer* output);
 
 /**************************************************************************
  *                                                                        *
- *                        Compressed file handling                        *
+ *                        High level file handling                        *
  *                                                                        *
  **************************************************************************/
+int load_file(const char* path, struct buffer* buff);
+int save_file(const char* path, const struct buffer* buff, int oflags);
 int load_compressed_file(const char* path, struct buffer* buff);
 int save_compressed_file(const char* path, const struct buffer* buff);
 

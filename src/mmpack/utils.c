@@ -756,11 +756,85 @@ exit:
 
 /**************************************************************************
  *                                                                        *
- *                        Compressed file handling                        *
+ *                        High level file handling                        *
  *                                                                        *
  **************************************************************************/
 
 #define BLOCK_SZ        8192
+
+/**
+ * load_file() - load content of a file in a buffer
+ * @path:       path of the file to open
+ * @buff:       pointer to struct buffer that will hold the file content
+ *
+ * Return: 0 in case if success. Otherwise -1 is returned with error state set
+ * accordingly.
+ */
+LOCAL_SYMBOL
+int load_file(const char* path, struct buffer* buff)
+{
+	void* block;
+	int fd, rlen, rv;
+
+	fd = mm_open(path, O_RDONLY, 0);
+	if (fd < 0)
+		return -1;
+
+	rv = 0;
+	do {
+		block = buffer_reserve_data(buff, BLOCK_SZ);
+		rlen = mm_read(fd, block, BLOCK_SZ);
+		if (rlen < 0) {
+			rv = -1;
+			goto exit;
+		}
+
+		buffer_inc_size(buff, rlen);
+	} while (rlen);
+
+exit:
+	mm_close(fd);
+	return rv;
+}
+
+
+/**
+ * save_file() - save content of a bufer into a file
+ * @path:       path of the file to open
+ * @buff:       pointer to struct buffer that will hold the data to be written
+ * @oflags:     flags to add to mm_open() in addition to O_WRONLY|O_CREAT
+ *
+ * Return: 0 in case if success. Otherwise -1 is returned with error state set
+ * accordingly.
+ */
+LOCAL_SYMBOL
+int save_file(const char* path, const struct buffer* buff, int oflags)
+{
+	int fd, rv, rlen;
+	const char* data = buff->base;
+	int remaining = buff->size;
+
+	fd = mm_open(path, O_WRONLY|O_CREAT|oflags, 0666);
+	if (fd < -1)
+		return -1;
+
+	rv = 0;
+	while (remaining) {
+		rlen = mm_write(fd, data, remaining);
+		if (rlen <= 0) {
+			rv = -1;
+			goto exit;
+		}
+
+		remaining -= rlen;
+		data += rlen;
+	}
+
+exit:
+	mm_close(fd);
+	return rv;
+}
+
 
 static
 int from_zlib_error(int zlib_errnum)
