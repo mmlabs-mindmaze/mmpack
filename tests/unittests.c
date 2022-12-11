@@ -25,6 +25,7 @@ Suite* api_suite(void)
 	suite_add_tcase(s, create_indextable_tcase());
 	suite_add_tcase(s, create_hashset_tcase());
 	suite_add_tcase(s, create_misc_tcase());
+	suite_add_tcase(s, create_prefix_list_tcase());
 
 	return s;
 }
