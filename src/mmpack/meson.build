@@ -69,6 +69,8 @@ mmpack_lib_sources = files(
 	'mmpack-upgrade.c',
 	'mmpack-upgrade.h',
 	'mmstring.h',
+	'prefix-list.c',
+	'prefix-list.h',
 	'package-utils.c',
 	'package-utils.h',
 	'pkg-fs-utils.c',
