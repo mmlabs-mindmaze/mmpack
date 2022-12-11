@@ -19,6 +19,7 @@
 #include "context.h"
 #include "exec-in-prefix.h"
 #include "mmstring.h"
+#include "utils.h"
 
 #include "mmpack-run.h"
 
@@ -33,26 +34,6 @@ static const struct mm_arg_opt cmdline_optv[] = {
 	{"n|no-prefix-mount", MM_OPT_NOVAL|MM_OPT_INT, "1",
 	 {.iptr = &no_prefix_mount}, "Do not perform prefix mount"},
 };
-
-
-static
-char* expand_abspath(const char* prefix)
-{
-	char* res;
-
-	// TODO Implement a proper version of realpath in mmlib
-#if _WIN32
-	res = _fullpath(NULL, prefix, 32768);
-#else
-	res = realpath(prefix, NULL);
-#endif
-	if (!res) {
-		mm_raise_from_errno("Cannot expand %s", prefix);
-		return NULL;
-	}
-
-	return res;
-}
 
 
 static
