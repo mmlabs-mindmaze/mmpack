@@ -51,6 +51,7 @@ int is_path_separator(char c)
 	MMPACK_STATEDIR_RELPATH "/metadata"
 
 mmstr* get_xdg_subpath(enum mm_known_dir dirtype, const char* subdir);
+char* expand_abspath(const char* path);
 
 
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path);
