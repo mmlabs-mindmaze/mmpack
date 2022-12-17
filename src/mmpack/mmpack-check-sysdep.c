@@ -9,7 +9,7 @@
 #include "mmpack-check-sysdep.h"
 
 #include "context.h"
-#include "indextable.h"
+#include "strset.h"
 #include "sysdeps.h"
 
 

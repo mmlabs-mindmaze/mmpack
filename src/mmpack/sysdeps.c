@@ -11,8 +11,8 @@
 #include <mmlib.h>
 
 #include "buffer.h"
-#include "indextable.h"
 #include "mmstring.h"
+#include "strset.h"
 #include "sysdeps.h"
 #include "utils.h"
 

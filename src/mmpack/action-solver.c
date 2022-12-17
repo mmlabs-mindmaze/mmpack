@@ -13,6 +13,7 @@
 #include "buffer.h"
 #include "context.h"
 #include "package-utils.h"
+#include "strset.h"
 #include "utils.h"
 
 enum {

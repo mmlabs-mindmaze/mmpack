@@ -4,6 +4,9 @@
 #ifndef SYSDEPS_H
 #define SYSDEPS_H
 
+#include "strset.h"
+
+
 enum {
 	DEPS_OK = 0,
 	DEPS_MISSING

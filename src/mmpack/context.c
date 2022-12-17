@@ -17,11 +17,11 @@
 
 #include "common.h"
 #include "context.h"
-#include "indextable.h"
 #include "mmstring.h"
 #include "package-utils.h"
 #include "repo.h"
 #include "settings.h"
+#include "strset.h"
 
 #define ALIAS_PREFIX_FOLDER "mmpack/prefix"
 #define CACHE_KEEP_TIME_SEC (7*24*60*60)        // 7 days

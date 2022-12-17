@@ -10,6 +10,7 @@
 #include "action-solver.h"
 #include "mmpack-autoremove.h"
 #include "pkg-fs-utils.h"
+#include "strset.h"
 #include "xx-alloc.h"
 
 static int is_yes_assumed = 0;

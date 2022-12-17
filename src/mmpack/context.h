@@ -7,10 +7,10 @@
 
 #include <curl/curl.h>
 
-#include "indextable.h"
 #include "package-utils.h"
 #include "settings.h"
 #include "srcindex.h"
+#include "strset.h"
 
 #define CTX_SKIP_PKGLIST 0x01
 #define CTX_SKIP_REDIRECT_LOG 0x02

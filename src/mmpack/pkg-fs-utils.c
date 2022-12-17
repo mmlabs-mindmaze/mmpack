@@ -22,6 +22,7 @@
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
 #include "strlist.h"
+#include "strset.h"
 #include "utils.h"
 #include "sysdeps.h"
 #include "tar.h"
