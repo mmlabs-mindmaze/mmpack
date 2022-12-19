@@ -89,6 +89,33 @@ int strlist_add(struct strlist* list, const char* str)
 
 
 /**
+ * strlist_drop_after() - remove element from list after the one specified
+ * @list:       initialized strlist structure.
+ * @prev:       element after which the element to drop appear. If NULL, the
+ *              first element of the list must be dropped.
+ */
+LOCAL_SYMBOL
+void strlist_drop_after(struct strlist* list, struct strlist_elt* prev)
+{
+	struct strlist_elt* elt;
+
+	if (prev) {
+		elt = prev->next;
+		prev->next = elt->next;
+	} else {
+		elt = list->head;
+		list->head = elt->next;
+	}
+
+	// Update last element if applicable
+	if (!elt->next)
+		list->last = prev;
+
+	free(elt);
+}
+
+
+/**
  * strlist_remove() - remove string from list
  * @list: initialized strlist structure
  * @str: mmstr structure to remove
@@ -112,16 +139,7 @@ void strlist_remove(struct strlist* list, const mmstr* str)
 	if (!elt)
 		return;
 
-	if (prev)
-		prev->next = elt->next;
-	else
-		list->head = elt->next;
-
-	// Update last element if applicable
-	if (!elt->next)
-		list->last = prev;
-
-	free(elt);
+	strlist_drop_after(list, prev);
 }
 
 

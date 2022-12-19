@@ -23,6 +23,7 @@ void strlist_deinit(struct strlist* list);
 int strlist_add_strchunk(struct strlist* list, struct strchunk sv);
 int strlist_add(struct strlist* list, const char* str);
 void strlist_remove(struct strlist* list, const mmstr* str);
+void strlist_drop_after(struct strlist* list, struct strlist_elt* elt);
 
 
 #endif /* STRLIST_H */
