@@ -134,6 +134,49 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 }
 
 
+/**
+ * mmstr_tmppath_from_path() - generate a name suitable for atomic rename
+ * @dst:        pointer to mmstr* string to update or NULL
+ * @path:       final path to which the file will be renamed
+ * @suffix:     numbered suffix
+ *
+ * This generate a temporary filename intended to perform an atomic rename to
+ * @path. In other words, the filename generated will be used to prepare work
+ * in progress file meant to be renamed atomically to @path.
+ *
+ * Return: the allocated temporary filename.
+ */
+LOCAL_SYMBOL
+mmstr* mmstr_tmppath_from_path(mmstr* restrict dst, const mmstr* restrict path,
+                               int suffix)
+{
+	const char* baseptr;
+	int len;
+
+	dst = mmstr_realloc(dst, mmstrlen(path) + 16);
+
+	baseptr = get_basename_ptr(path);
+
+	// Copy dirname if any
+	len = baseptr - path;
+	mmstr_copy(dst, path, len);
+
+	// prepend dot to basename
+	mmstr_append(dst, ".", 1);
+
+	// copy basename
+	len = mmstrlen(path) - len;
+	mmstr_append(dst, baseptr, len);
+
+	// append -## to the filename
+	len = mmstrlen(dst);
+	len += sprintf(dst + len, "-%i", suffix);
+	mmstr_setlen(dst, len);
+
+	return dst;
+}
+
+
 static
 int is_absolute_path(const mmstr * p)
 {

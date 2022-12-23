@@ -51,6 +51,8 @@ mmstr* get_xdg_subpath(enum mm_known_dir dirtype, const char* subdir);
 
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path);
 mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path);
+mmstr* mmstr_tmppath_from_path(mmstr* restrict dst, const mmstr* restrict path,
+                               int suffix);
 mmstr* mmstr_join_path(mmstr* restrict dst,
                        const mmstr* restrict p1, const mmstr* restrict p2);
 mmstr* mmstr_join_path_realloc(mmstr* restrict dst,
