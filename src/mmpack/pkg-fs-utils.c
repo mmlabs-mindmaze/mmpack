@@ -395,7 +395,7 @@ int fschange_list_pkg_rm_files(struct fschange* fsc, const struct binpkg* pkg)
 	int rv;
 	mmstr* path;
 
-	path = sha256sums_path(pkg);
+	path = sha256sums_path(NULL, pkg);
 
 	strlist_add(&fsc->rm_files, path);
 	rv = read_sumsha_filelist(path, &fsc->rm_files);
@@ -599,7 +599,7 @@ int check_installed_pkg(const struct binpkg* pkg)
 
 	sumsha_init(&sumsha);
 
-	sumsha_path = sha256sums_path(pkg);
+	sumsha_path = sha256sums_path(NULL, pkg);
 	rv = sumsha_load(&sumsha, sumsha_path);
 	mmstr_free(sumsha_path);
 	if (rv == -1)
