@@ -18,9 +18,11 @@
 #include "context.h"
 #include "crypto.h"
 #include "download.h"
+#include "hashset.h"
 #include "mmstring.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
+#include "prefix-list.h"
 #include "strlist.h"
 #include "strset.h"
 #include "utils.h"
@@ -643,6 +645,171 @@ exit:
 }
 
 
+static
+mmstr* imported_data_unpack_dir(mmstr* dir, const struct binpkg* pkg)
+{
+	int len;
+
+	len = sizeof(UNPACK_CACHEDIR_RELPATH) + 1 + SHA_HEXLEN;
+	dir = mmstr_realloc(dir, len);
+
+	mmstrcpy_cstr(dir, UNPACK_CACHEDIR_RELPATH);
+	mmstrcat_cstr(dir, "/");
+
+	hexstr_from_digest(dir + mmstrlen(dir), &pkg->sumsha);
+
+	return dir;
+}
+
+
+enum import_method {
+	USE_COW = 0,
+	USE_HARDLINK,
+};
+
+
+static
+int import_file(const mmstr* dst, const mmstr* src, const struct typed_hash* hash,
+                enum import_method method)
+{
+	struct mm_stat buf;
+	int mode, rv;
+
+	if (mm_stat(src, &buf, MM_NOFOLLOW))
+		return -1;
+
+	if (S_ISREG(buf.mode) && method == USE_HARDLINK) {
+		rv = mm_link(src, dst);
+	} else {
+		mode = buf.mode & 0777;
+		rv = mm_copy(src, dst, MM_NOFOLLOW | MM_FORCECOW, mode);
+	}
+
+	if (rv == 0)
+		rv = check_typed_hash(hash, dst);
+
+	return rv;
+}
+
+
+static
+int import_load_sumsha(struct sumsha* sumsha, const mmstr* dstdir,
+                       const struct binpkg* pkg, const mmstr* prefix,
+                       enum import_method method)
+{
+	struct typed_hash expected_hash = {
+		.digest = pkg->sumsha,
+		.type = MM_DT_REG,
+	};
+	mmstr* src = sha256sums_path(prefix, pkg);
+	mmstr* dst = mmstr_asprintf(NULL, "%s/0", dstdir);
+	int rv = 0;
+
+	if (import_file(dst, src, &expected_hash, method)
+	    || sumsha_load(sumsha, dst))
+		rv = -1;
+
+	mmstr_free(dst);
+	mmstr_free(src);
+
+	return rv;
+}
+
+
+static
+int import_binpkg_from_prefix(const struct binpkg* pkg, const mmstr* prefix,
+                              enum import_method method, const mmstr* dstdir)
+{
+	mmstr *src = NULL, *dst = NULL;
+	struct sumsha_entry* e;
+	struct sumsha_iterator it;
+	struct sumsha sumsha;
+	int rv = 0;
+
+	sumsha_init(&sumsha);
+	if (mm_mkdir(dstdir, 0777, MM_RECURSIVE)
+	    || import_load_sumsha(&sumsha, dstdir, pkg, prefix, method))
+		rv = -1;
+
+	for (e = sumsha_first(&it, &sumsha); e && !rv; e = sumsha_next(&it)) {
+		src = mmstr_join_path_realloc(src, prefix, e->path.buf);
+		dst = mmstr_asprintf(dst, "%s/%i", dstdir, e->index + 1);
+		rv = import_file(dst, src, &e->hash, method);
+	}
+
+	if (rv == -1)
+		mm_remove(dstdir, MM_RECURSIVE | MM_DT_ANY);
+
+	mmstr_free(src);
+	mmstr_free(dst);
+	sumsha_deinit(&sumsha);
+
+	return rv;
+}
+
+
+static
+int copy_pkgs_from_prefix(struct mmpack_ctx* ctx,
+                          struct action_stack* act_stk,
+                          const mmstr* prefix,
+                          enum import_method method)
+{
+	const struct binpkg* pkg;
+	struct action* act;
+	int i, num = 0;
+	struct hashset hset;
+
+	hashset_init_from_file(&hset, NULL);
+
+	for (i = 0; i < act_stk->index; i++) {
+		act = &act_stk->actions[i];
+		pkg = act->pkg;
+		act->pathname = imported_data_unpack_dir(act->pathname, pkg);
+		if (act->action == REMOVE_PKG
+		   || act->flags & ACTFL_FROM_PREFIX)
+			continue;
+
+		if (hashset_contains(&hset, &pkg->sumsha)
+		    && import_binpkg_from_prefix(pkg, prefix, method,
+		                                 act->pathname)) {
+			act->flags |= ACTFL_FROM_PREFIX;
+			continue;
+		}
+
+		// Add to the count of package to be installed but could not be
+		// fetched from other prefix so far.
+		num++;
+	}
+
+	hashset_deinit(&hset);
+
+	return num;
+}
+
+
+static
+void fetch_from_other_prefixes(struct mmpack_ctx* ctx,
+                              struct action_stack* act_stk)
+{
+	struct strset known_prefixes;
+	struct strset_iterator iter;
+	const mmstr* prefix;
+
+	strset_init(&known_prefixes, STRSET_HANDLE_STRINGS_MEM);
+	if (load_other_prefixes(&known_prefixes, ctx->prefix))
+		goto exit;
+
+	prefix = strset_iter_first(&iter, &known_prefixes);
+	for (; prefix; prefix = strset_iter_next(&iter)) {
+		if (!copy_pkgs_from_prefix(ctx, act_stk, prefix, USE_HARDLINK))
+			goto exit;
+	}
+
+exit:
+	strset_deinit(&known_prefixes);
+}
+
+
 /**
  * fetch_pkgs() - download packages that are going to be installed
  * @ctx:       initialized mmpack context
@@ -662,7 +829,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 	for (i = 0; i < act_stk->index; i++) {
 		act = &act_stk->actions[i];
 		pkg = act->pkg;
-		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
+		if (act->action == REMOVE_PKG
+		   || act->flags & ACTFL_FROM_PREFIX)
 			continue;
 
 		if (download_remote_resource(ctx, pkg->remote_res,
@@ -921,6 +1089,7 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 		return -1;
 
 	// Fetch missing packages
+	fetch_from_other_prefixes(ctx, stack);
 	rv = fetch_pkgs(ctx, stack);
 	if (rv != 0)
 		return rv;
