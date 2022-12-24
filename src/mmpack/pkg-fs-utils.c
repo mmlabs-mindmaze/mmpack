@@ -709,6 +709,81 @@ exit:
 }
 
 
+static
+mmstr* copy_unpack_dir(struct binpkg* pkg)
+{
+	mmstr* dir = NULL;
+	int len;
+
+	len = sizeof(UNPACK_CACHEDIR_RELPATH) + 1 + SHA_HEXLEN;
+	dir = mmstr_malloc(len);
+	
+	mmstrcpy_cstr(dir, UNPACK_CACHEDIR_RELPATH);
+	mmstrcat_cstr(dir, "/");
+
+	hexstr_from_digest(dir + mmstrlen(dir), &pkg->sumsha);
+
+	return dir;
+}
+
+
+static
+int import_binpkg_from_prefix(struct binpkg* pkg, const mmstr* prefix)
+{
+	mmstr* sumsha_path = sha256sums_path(prefix, pkg);
+	mmstr* dstdir = NULL;
+	mmstr* src = NULL;
+	mmstr* dst = NULL;
+	int rv = 0;
+
+	if (mm_check_access(sumsha_path, R_OK) != 1)
+		goto exit;
+	
+	dstdir = copy_unpack_dir(pkg);
+	if (mm_mkdir(dstdir, 0777, MM_RECURSIVE))
+		goto exit;
+
+	// Copy sumsha
+	dst = mmstr_asprintf(dst, "%s/sha256sums", dstdir);
+	if (mm_link(src, dst)
+	    || check_digest(&pkg->sumsha, dst)) {
+		mm_remove(dstdir, MM_RECURSIVE | MM_DT_ANY);
+		goto exit;
+	}
+
+	rv = 1;
+
+exit:
+	mmstr_free(sumsha_path);
+	mmstr_free(dstdir);
+	mmstr_free(src);
+	mmstr_free(dst);
+
+	return rv;
+}
+
+
+static
+int copy_pkgs_from_prefix(struct mmpack_ctx* ctx,
+                          struct action_stack* act_stk,
+                          const mmstr* prefix)
+{
+	const struct binpkg* pkg;
+	struct action* act;
+	int i;
+
+	for (i = 0; i < act_stk->index; i++) {
+		act = &act_stk->actions[i];
+		pkg = act->pkg;
+		if (act->action == REMOVE_PKG
+		   || act->flags & ACTFL_FROM_PREFIX)
+			continue;
+
+		//act->flags |= ACTFL_FROM_PREFIX;
+	}
+}
+
+
 /**
  * fetch_pkgs() - download packages that are going to be installed
  * @ctx:       initialized mmpack context
@@ -728,7 +803,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 	for (i = 0; i < act_stk->index; i++) {
 		act = &act_stk->actions[i];
 		pkg = act->pkg;
-		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
+		if (act->action == REMOVE_PKG
+		   || act->flags & ACTFL_FROM_PREFIX)
 			continue;
 
 		if (download_remote_resource(ctx, pkg->remote_res,
@@ -985,6 +1061,7 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 		return -1;
 
 	// Fetch missing packages
+	copy_pkgs_from_other_prefix(ctx, stack);
 	rv = fetch_pkgs(ctx, stack);
 	if (rv != 0)
 		return rv;
