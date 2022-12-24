@@ -18,9 +18,11 @@
 #include "context.h"
 #include "crypto.h"
 #include "download.h"
+#include "hashset.h"
 #include "mmstring.h"
 #include "package-utils.h"
 #include "pkg-fs-utils.h"
+#include "prefix-list.h"
 #include "strlist.h"
 #include "strset.h"
 #include "utils.h"
@@ -221,7 +223,7 @@ int fschange_unpack_mpk(struct fschange* fsc, const char* mpk_filename, const ch
 /**
  * fschange_pkg_unpack() - extract files of a given package
  * @fsc:        file system change data
- * @mpk_filename: filename of the downloaded package file
+ * @datapath:   filename of mpk file or path to imported pkg files
  *
  * In order the install and upgrade commands to be atomic, the extraction is
  * done in two steps: first all the regular files and symlink are extracted in a
@@ -232,13 +234,21 @@ int fschange_unpack_mpk(struct fschange* fsc, const char* mpk_filename, const ch
  * Return: 0 on success, a negative value otherwise.
  */
 static
-int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
+int fschange_pkg_unpack(struct fschange* fsc, const mmstr* datapath)
 {
 	const char* unpackdir;
+	mmstr* sumsha_path;
 
-	unpackdir = UNPACK_CACHEDIR_RELPATH;
-	if (fschange_unpack_mpk(fsc, mpk_filename, unpackdir))
-		return -1;
+	if (fsc->curr_action->flags & ACTFL_FROM_PREFIX) {
+		sumsha_path = mmstr_asprintf(NULL, "%s/0", datapath);
+		read_sumsha_filelist(sumsha_path, &fsc->inst_files);
+		mmstr_free(sumsha_path);
+		unpackdir = datapath;
+	} else {
+		unpackdir = UNPACK_CACHEDIR_RELPATH;
+		if (fschange_unpack_mpk(fsc, datapath, unpackdir))
+			return -1;
+	}
 
 	return fschange_move_instfiles(fsc, unpackdir);
 }
@@ -655,6 +665,171 @@ exit:
 }
 
 
+static
+mmstr* imported_data_unpack_dir(mmstr* dir, const struct binpkg* pkg)
+{
+	int len;
+
+	len = sizeof(UNPACK_CACHEDIR_RELPATH) + 1 + SHA_HEXLEN;
+	dir = mmstr_realloc(dir, len);
+
+	mmstrcpy_cstr(dir, UNPACK_CACHEDIR_RELPATH);
+	mmstrcat_cstr(dir, "/");
+
+	hexstr_from_digest(dir + mmstrlen(dir), &pkg->sumsha);
+
+	return dir;
+}
+
+
+enum import_method {
+	USE_COW = 0,
+	USE_HARDLINK,
+};
+
+
+static
+int import_file(const mmstr* dst, const mmstr* src, const struct typed_hash* hash,
+                enum import_method method)
+{
+	struct mm_stat buf;
+	int mode, rv;
+
+	if (mm_stat(src, &buf, MM_NOFOLLOW))
+		return -1;
+
+	if (S_ISREG(buf.mode) && method == USE_HARDLINK) {
+		rv = mm_link(src, dst);
+	} else {
+		mode = buf.mode & 0777;
+		rv = mm_copy(src, dst, MM_NOFOLLOW | MM_FORCECOW, mode);
+	}
+
+	if (rv == 0)
+		rv = check_typed_hash(hash, dst);
+
+	return rv;
+}
+
+
+static
+int import_load_sumsha(struct sumsha* sumsha, const mmstr* dstdir,
+                       const struct binpkg* pkg, const mmstr* prefix,
+                       enum import_method method)
+{
+	struct typed_hash expected_hash = {
+		.digest = pkg->sumsha,
+		.type = MM_DT_REG,
+	};
+	mmstr* src = sha256sums_path(prefix, pkg);
+	mmstr* dst = mmstr_asprintf(NULL, "%s/0", dstdir);
+	int rv = 0;
+
+	if (import_file(dst, src, &expected_hash, method)
+	    || sumsha_load(sumsha, dst))
+		rv = -1;
+
+	mmstr_free(dst);
+	mmstr_free(src);
+
+	return rv;
+}
+
+
+static
+int import_binpkg_from_prefix(const struct binpkg* pkg, const mmstr* prefix,
+                              enum import_method method, const mmstr* dstdir)
+{
+	mmstr *src = NULL, *dst = NULL;
+	struct sumsha_entry* e;
+	struct sumsha_iterator it;
+	struct sumsha sumsha;
+	int rv = 0;
+
+	sumsha_init(&sumsha);
+	if (mm_mkdir(dstdir, 0777, MM_RECURSIVE)
+	    || import_load_sumsha(&sumsha, dstdir, pkg, prefix, method))
+		rv = -1;
+
+	for (e = sumsha_first(&it, &sumsha); e && !rv; e = sumsha_next(&it)) {
+		src = mmstr_join_path_realloc(src, prefix, e->path.buf);
+		dst = mmstr_asprintf(dst, "%s/%i", dstdir, e->index + 1);
+		rv = import_file(dst, src, &e->hash, method);
+	}
+
+	if (rv == -1)
+		mm_remove(dstdir, MM_RECURSIVE | MM_DT_ANY);
+
+	mmstr_free(src);
+	mmstr_free(dst);
+	sumsha_deinit(&sumsha);
+
+	return rv;
+}
+
+
+static
+int copy_pkgs_from_prefix(struct mmpack_ctx* ctx,
+                          struct action_stack* act_stk,
+                          const mmstr* prefix,
+                          enum import_method method)
+{
+	const struct binpkg* pkg;
+	struct action* act;
+	int i, num = 0;
+	struct hashset hset;
+
+	hashset_init_from_file(&hset, NULL);
+
+	for (i = 0; i < act_stk->index; i++) {
+		act = &act_stk->actions[i];
+		pkg = act->pkg;
+		act->pathname = imported_data_unpack_dir(act->pathname, pkg);
+		if (act->action == REMOVE_PKG
+		   || act->flags & ACTFL_FROM_PREFIX)
+			continue;
+
+		if (hashset_contains(&hset, &pkg->sumsha)
+		    && import_binpkg_from_prefix(pkg, prefix, method,
+		                                 act->pathname)) {
+			act->flags |= ACTFL_FROM_PREFIX;
+			continue;
+		}
+
+		// Add to the count of package to be installed but could not be
+		// fetched from other prefix so far.
+		num++;
+	}
+
+	hashset_deinit(&hset);
+
+	return num;
+}
+
+
+static
+void fetch_from_other_prefixes(struct mmpack_ctx* ctx,
+                              struct action_stack* act_stk)
+{
+	struct strset known_prefixes;
+	struct strset_iterator iter;
+	const mmstr* prefix;
+
+	strset_init(&known_prefixes, STRSET_HANDLE_STRINGS_MEM);
+	if (load_other_prefixes(&known_prefixes, ctx->prefix))
+		goto exit;
+
+	prefix = strset_iter_first(&iter, &known_prefixes);
+	for (; prefix; prefix = strset_iter_next(&iter)) {
+		if (!copy_pkgs_from_prefix(ctx, act_stk, prefix, USE_HARDLINK))
+			goto exit;
+	}
+
+exit:
+	strset_deinit(&known_prefixes);
+}
+
+
 /**
  * fetch_pkgs() - download packages that are going to be installed
  * @ctx:       initialized mmpack context
@@ -674,7 +849,8 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
 	for (i = 0; i < act_stk->index; i++) {
 		act = &act_stk->actions[i];
 		pkg = act->pkg;
-		if (act->action != INSTALL_PKG && act->action != UPGRADE_PKG)
+		if (act->action == REMOVE_PKG
+		   || act->flags & ACTFL_FROM_PREFIX)
 			continue;
 
 		if (download_remote_resource(ctx, pkg->remote_res,
@@ -701,7 +877,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
  * fschange_install_pkg() - install a package in the prefix
  * @fsc:        file system change data
  * @pkg:        mmpack package to be installed
- * @mpkfile:    filename of the downloaded package file
+ * @datapath:   filename of mpk file or path to imported pkg files
  *
  * This function install a package in a prefix hierarchy. The list of installed
  * package of context @fsc->ctx will be updated.
@@ -712,7 +888,7 @@ int fetch_pkgs(struct mmpack_ctx* ctx, struct action_stack* act_stk)
  */
 static
 int fschange_install_pkg(struct fschange* fsc,
-                         const struct binpkg* pkg, const mmstr* mpkfile)
+                         const struct binpkg* pkg, const mmstr* datapath)
 {
 	struct mmpack_ctx* ctx = fsc->ctx;
 	char hexstr[SHA_HEXLEN + 1] = {0};
@@ -723,7 +899,7 @@ int fschange_install_pkg(struct fschange* fsc,
 	mm_log_info("\tsumsha: %s", hexstr);
 
 	if (fschange_preinst(fsc, NULL, pkg)
-	    || fschange_pkg_unpack(fsc, mpkfile)
+	    || fschange_pkg_unpack(fsc, datapath)
 	    || fschange_postinst(fsc, NULL, pkg)) {
 		error("Failed!\n");
 		return -1;
@@ -776,7 +952,7 @@ int fschange_remove_pkg(struct fschange* fsc, const struct binpkg* pkg)
  * @fsc:        file system change data
  * @pkg:        package to install
  * @oldpkg:     package to remove (replaced by installed package)
- * @mpkfile:    filename of the downloaded package file
+ * @datapath:   filename of mpk file or path to imported pkg files
  *
  * This function upgrades a package in a prefix hierarchy. The list of
  * installed package of context @ctx will be updated.
@@ -787,7 +963,7 @@ int fschange_remove_pkg(struct fschange* fsc, const struct binpkg* pkg)
  */
 static
 int fschange_upgrade_pkg(struct fschange* fsc, const struct binpkg* pkg,
-                         const struct binpkg* oldpkg, const mmstr* mpkfile)
+                         const struct binpkg* oldpkg, const mmstr* datapath)
 {
 	int rv = 0;
 	struct mmpack_ctx* ctx = fsc->ctx;
@@ -803,7 +979,7 @@ int fschange_upgrade_pkg(struct fschange* fsc, const struct binpkg* pkg,
 
 	if (fschange_list_pkg_rm_files(fsc, oldpkg)
 	    || fschange_prerm(fsc, oldpkg, pkg)
-	    || fschange_pkg_unpack(fsc, mpkfile)
+	    || fschange_pkg_unpack(fsc, datapath)
 	    || fschange_apply_rm_files_list(fsc)
 	    || fschange_postrm(fsc, oldpkg, pkg)
 	    || fschange_postinst(fsc, oldpkg, pkg)) {
@@ -933,6 +1109,7 @@ int apply_action_stack(struct mmpack_ctx* ctx, struct action_stack* stack)
 		return -1;
 
 	// Fetch missing packages
+	fetch_from_other_prefixes(ctx, stack);
 	rv = fetch_pkgs(ctx, stack);
 	if (rv != 0)
 		return rv;
