@@ -174,6 +174,7 @@ mmpack_smoke_test = [
         ['search', files('smoke-tests/test_mmpack_search.sh')],
         ['source', files('smoke-tests/test_mmpack_source.sh')],
         ['upgrade', files('smoke-tests/test_mmpack_upgrade.sh')],
+        ['import-prefix-pkg', files('smoke-tests/test_mmpack_import-prefix-pkg.sh')],
 ]
 
 foreach test : mmpack_smoke_test
