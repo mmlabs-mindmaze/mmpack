@@ -61,7 +61,7 @@ struct sumsha_entry* sumsha_next(struct sumsha_iterator* iter)
 }
 
 
-mmstr* sha256sums_path(const struct binpkg* pkg);
+mmstr* sha256sums_path(const mmstr* rootpath, const struct binpkg* pkg);
 void sumsha_init(struct sumsha* sumsha);
 int sumsha_load(struct sumsha* sumsha, const char* sumsha_path);
 void sumsha_deinit(struct sumsha* sumsha);
