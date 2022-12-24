@@ -14,15 +14,19 @@
 
 #define SOLVER_ERROR (1 << 0)
 
+#define ACTFL_FROM_PREFIX   (1 << 0)
+
 /**
  * struct action - action to take on prefix hierarchy
  * @action:     type of action to perform
+ * @flags:      flags (ACTFL_*)
  * @pkg:        pointer to package to install or remove
  * @oldpkg:     pointer to replaced package (applicable for upgrade)
  * @pathname:   path to downloaded mpk file if not NULL
  */
 struct action {
 	int action;
+	int flags;
 	struct binpkg const * pkg;
 	struct binpkg const * oldpkg;
 	mmstr* pathname;
