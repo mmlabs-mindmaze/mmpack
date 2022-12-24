@@ -21,6 +21,7 @@
 
 /**
  * sha256sums_path() - get path to sha256sums file of given package
+ * @rootpath: NULL or prefix path to prepend to returned path
  * @pkg:      package whose sha256sums file must be obtained.
  *
  * Return:
@@ -28,10 +29,17 @@
  * pointer must be freed with mmstr_free() when done with it.
  */
 LOCAL_SYMBOL
-mmstr* sha256sums_path(const struct binpkg* pkg)
+mmstr* sha256sums_path(const mmstr* rootpath, const struct binpkg* pkg)
 {
 	int len = sizeof(METADATA_RELPATH "/.sha256sums") + mmstrlen(pkg->name);
-	mmstr* sha256sums = mmstr_malloc(len);
+	mmstr* sha256sums;
+
+	sha256sums = mmstr_malloc(len + (rootpath ? mmstrlen(rootpath)+1 : 0));
+
+	if (rootpath) {
+		mmstrcat_cstr(sha256sums, rootpath);
+		mmstrcat_cstr(sha256sums, "/");
+	}
 
 	mmstrcat_cstr(sha256sums, METADATA_RELPATH "/");
 	mmstrcat(sha256sums, pkg->name);
