@@ -21,7 +21,7 @@
 
 /**
  * sha256sums_path() - get path to sha256sums file of given package
- * @rootpath: NULL or prefix path to prepend to returned path    
+ * @rootpath: NULL or prefix path to prepend to returned path
  * @pkg:      package whose sha256sums file must be obtained.
  *
  * Return:
