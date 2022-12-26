@@ -82,6 +82,8 @@ mmpack_lib_sources = files(
 	'strlist.h',
 	'strlist.c',
 	'strset.h',
+	'sumsha.h',
+	'sumsha.c',
 	'sysdeps.c',
 	'sysdeps.h',
 	'tar.c',
