@@ -105,10 +105,9 @@ int sumsha_reader_next(struct sumsha_reader* reader,
  * read_sha256sums() - parse the sha256sums of an installed package
  * @sha256sums_path: path to the sha256sums file to read.
  * @filelist: string list receiving the list of file in package
- * @hashlist: string list receiving the hash for each file in @filelist. If
- *            NULL, the hash list is ignored.
+ * @hashlist: string list receiving the hash for each file in @filelist.
  *
- * Open and parse the sha256sums file of the installed package @pkg. The
+ * Open and parse the sha256sums specified by @sha256sums_path. The
  * installed package is assumed to be located relatively to the current
  * directory.
  *
@@ -126,10 +125,6 @@ int read_sha256sums(const mmstr* sha256sums_path,
 
 	while (sumsha_reader_next(&reader, &path, &hash)) {
 		strlist_add_strchunk(filelist, path);
-
-		if (!hashlist)
-			continue;
-
 		strlist_add_strchunk(hashlist, hash);
 	}
 
