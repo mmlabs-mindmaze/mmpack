@@ -398,7 +398,7 @@ int fschange_list_pkg_rm_files(struct fschange* fsc, const struct binpkg* pkg)
 	path = sha256sums_path(pkg);
 
 	strlist_add(&fsc->rm_files, path);
-	rv = read_sha256sums(path, &fsc->rm_files, NULL);
+	rv = read_sumsha_filelist(path, &fsc->rm_files);
 
 	mmstr_free(path);
 	return rv;
