@@ -38,6 +38,69 @@ mmstr* sha256sums_path(const struct binpkg* pkg)
 }
 
 
+struct sumsha_reader {
+	void* map;
+	const char* sumsha_path;
+	struct strchunk data;
+	int failure;
+};
+
+
+static
+int sumsha_reader_init(struct sumsha_reader* reader, const char* sumsha_path)
+{
+	void* map = NULL;
+	size_t mapsize = 0;
+
+	if (map_file_in_prefix(NULL, sumsha_path, &map, &mapsize))
+		return -1;
+
+	*reader = (struct sumsha_reader) {
+		.data = {.buf = map, .len = mapsize},
+		.map = map,
+		.sumsha_path = sumsha_path,
+	};
+	return 0;
+}
+
+
+static
+int sumsha_reader_deinit(struct sumsha_reader* reader)
+{
+	mm_unmap(reader->map);
+	return reader->failure ? -1 : 0;
+}
+
+
+static
+int sumsha_reader_next(struct sumsha_reader* reader,
+                       struct strchunk* path, struct strchunk* hash)
+{
+	struct strchunk line;
+	int pos;
+
+	if (reader->data.len == 0)
+		return 0;
+
+	line = strchunk_getline(&reader->data);
+	pos = strchunk_rfind(line, ':');
+	if (pos == -1) {
+		reader->failure = 1;
+		mm_raise_error(EBADMSG, "Error while parsing %s",
+		               reader->sumsha_path);
+		return 0;
+	}
+
+	*path = strchunk_lpart(line, pos);
+	if (hash) {
+		// Skip space after colon before reading hash value
+		*hash = strchunk_rpart(line, pos+1);
+	}
+
+	return 1;
+}
+
+
 /**
  * read_sha256sums() - parse the sha256sums of an installed package
  * @sha256sums_path: path to the sha256sums file to read.
@@ -55,36 +118,20 @@ LOCAL_SYMBOL
 int read_sha256sums(const mmstr* sha256sums_path,
                     struct strlist* filelist, struct strlist* hashlist)
 {
-	struct strchunk data_to_parse, line;
-	int pos, rv;
-	void* map = NULL;
-	size_t mapsize = 0;
+	struct sumsha_reader reader;
+	struct strchunk path, hash;
 
-	rv = map_file_in_prefix(NULL, sha256sums_path, &map, &mapsize);
-	if (rv == -1)
-		goto exit;
+	if (sumsha_reader_init(&reader, sha256sums_path))
+		return -1;
 
-	data_to_parse = (struct strchunk) {.buf = map, .len = mapsize};
-	while (data_to_parse.len) {
-		line = strchunk_getline(&data_to_parse);
-		pos = strchunk_rfind(line, ':');
-		if (pos == -1) {
-			rv = mm_raise_error(EBADMSG, "Error while parsing %s",
-			                    sha256sums_path);
-			break;
-		}
-
-		strlist_add_strchunk(filelist, strchunk_lpart(line, pos));
+	while (sumsha_reader_next(&reader, &path, &hash)) {
+		strlist_add_strchunk(filelist, path);
 
 		if (!hashlist)
 			continue;
 
-		// Skip space after colon before reading hash value
-		strlist_add_strchunk(hashlist, strchunk_rpart(line, pos+1));
+		strlist_add_strchunk(hashlist, hash);
 	}
 
-
-exit:
-	mm_unmap(map);
-	return rv;
+	return sumsha_reader_deinit(&reader);
 }
