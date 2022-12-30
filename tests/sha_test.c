@@ -232,6 +232,42 @@ START_TEST(binary_sha)
 END_TEST
 
 
+START_TEST(typed_hash_regfile)
+{
+	struct typed_hash hash;
+	mmstr* fullpath = mmstr_alloca(256);
+	const mmstr* filename = mmstr_alloca_from_cstr(sha_cases[_i].name);
+	const digest_t* refdigest = &sha_cases[_i].refdigest;
+
+	mmstr_join_path(fullpath, hashfile_dir, filename);
+
+	compute_typed_hash(&hash, fullpath);
+	ck_assert_mem_eq(&hash.digest, refdigest, sizeof(*refdigest));
+	ck_assert_int_eq(hash.type, MM_DT_REG);
+}
+END_TEST
+
+
+START_TEST(typed_hash_symlink)
+{
+	struct typed_hash hash;
+	mmstr* fullpath = mmstr_alloca(256);
+	const mmstr* filename = mmstr_alloca_from_cstr(symlink_cases[_i].name);
+	const char* refhexstr = symlink_cases[_i].refhash + SHA_HDRLEN;
+	digest_t refdigest;
+
+	digest_from_hexstr(&refdigest, strchunk_from_cstr(refhexstr));
+
+	mmstr_join_path(fullpath, hashfile_dir, filename);
+
+	compute_typed_hash(&hash, fullpath);
+	ck_assert_mem_eq(&hash.digest, &refdigest, sizeof(refdigest));
+	ck_assert_int_eq(hash.type, MM_DT_LNK);
+}
+END_TEST
+
+
+
 static const digest_t ref_digest = {{
   0x98, 0x10, 0x76, 0x2e, 0x95, 0x72, 0x0f, 0x46, 0xfc, 0xdf, 0x29, 0x00,
   0xfa, 0x1d, 0x15, 0x77, 0x06, 0xaf, 0x21, 0x66, 0xa5, 0x0a, 0x30, 0xae,
@@ -282,6 +318,8 @@ TCase* create_sha_tcase(void)
 	tcase_add_loop_test(tc, hash_regfile, 0, NUM_HASH_CASES);
 	tcase_add_loop_test(tc, binary_sha, 0, NUM_HASH_CASES);
 	tcase_add_loop_test(tc, hash_symlink, 0, NUM_SYMLINK_CASES);
+	tcase_add_loop_test(tc, typed_hash_regfile, 0, NUM_HASH_CASES);
+	tcase_add_loop_test(tc, typed_hash_symlink, 0, NUM_SYMLINK_CASES);
 	tcase_add_test(tc, digest_to_str);
 	tcase_add_test(tc, digest_from_str);
 
