@@ -154,87 +154,61 @@ exit:
 
 
 /**
- * sha_compute() - compute SHA256 hash on specified file
- * @hash:       mmstr* buffer receiving the hexadecimal form of hash. The
- *              pointed string must be at least HASH_HEXSTR_LEN long.
+ * compute_typed_hash() - compute hash along with type on specified file
+ * @hash:       pointer to struct typed_hash to received the values.
  * @filename:   path of file whose hash must be computed
- * @follow:     if set to non zero and the file is a symlink, the hash is
- *              computed on the file it refers to (ie the symlink is
- *              followed). If set to zero the generated hash is prefixed
- *              by file type indicator (regular file or symlink).
- *
- * This function allows to compute the SHA256 hash of a file located at
- * @filename.
- *
- * The computed hash is stored in hexadecimal as a NULL terminated string
- * in @hash which must be at least SHA_HEXSTR_LEN long (this include the
- * NULL termination).
- *
- * If @follow is zero, hash string written in @hash is prefixed with the
- * type ("reg-" or "sym-"). The constraints on the size of the buffer
- * pointed to by @hash do not changes (SHA_HEXSTR_LEN takes into account
- * the possible type prefix).
  *
  * Return: 0 in case of success, -1 if a problem of file reading has been
  * encountered.
  */
 LOCAL_SYMBOL
-int sha_compute(mmstr* hash, const mmstr* filename)
+int compute_typed_hash(struct typed_hash* hash, const char* filename)
 {
-	digest_t digest;
 	int rv = -1;
 	struct mm_stat st;
-	const char* prefix;
-
-	if (mmstr_maxlen(hash) < SHA_HEXSTR_LEN)
-		return mm_raise_error(EOVERFLOW, "hash argument to short");
 
 	if (mm_stat(filename, &st, MM_NOFOLLOW))
-		goto error;
+		goto exit;
 
 	if (S_ISREG(st.mode)) {
-		rv = sha_file_compute(&digest, filename);
-		prefix = SHA_HDR_REG;
+		hash->type = MM_DT_REG;
+		rv = sha_file_compute(&hash->digest, filename);
 	} else if (S_ISLNK(st.mode)) {
-		rv = sha_symlink_compute(&digest, filename, st.size);
-		prefix = SHA_HDR_SYM;
+		hash->type = MM_DT_LNK;
+		rv = sha_symlink_compute(&hash->digest, filename, st.size);
 	} else {
 		mm_raise_error(EINVAL, "%s is neither a regular file "
 		               "or symlink", filename);
 	}
 
+exit:
 	if (rv)
-		goto error;
-
-	// Convert sha into hexadecimal and with prefix if needed
-	memcpy(hash, prefix, SHA_HDRLEN);
-	hexstr_from_digest(hash + SHA_HDRLEN, &digest);
-	mmstr_setlen(hash, SHA_HEXSTR_LEN);
-
-	return 0;
-
-error:
-	mm_log_error("Cannot compute SHA-256 of %s", filename);
-	return -1;
+		mm_log_error("Cannot compute SHA-256 of %s", filename);
+	return rv;
 }
 
 
 /**
- * check_hash() - Check integrity of given file
- * @ref_sha: reference file sha256 to compare against
+ * check_typed_hash() - Check integrity of given file
+ * @ref:      reference typed hash to compare against
  * @filename: path of file whose hash must be computed
  *
  * Return: 0 if no issue has been found, -1 otherwise
  */
 LOCAL_SYMBOL
-int check_hash(const mmstr* refsha, const mmstr* filename)
+int check_typed_hash(const struct typed_hash* ref, const char* filename)
 {
-	mmstr* sha = mmstr_alloca(SHA_HEXSTR_LEN);
+	struct typed_hash hash;
 
-	if (sha_compute(sha, filename))
+	if (compute_typed_hash(&hash, filename))
 		return -1;
 
-	if (!mmstrequal(sha, refsha)) {
+	if (hash.type != ref->type) {
+		mm_raise_error(EBADMSG, "unexpected filetype for %s", filename);
+		return -1;
+	}
+
+	if (!digest_equal(&hash.digest, &ref->digest)) {
 		mm_raise_error(EBADMSG, "bad SHA-256 detected %s", filename);
 		return -1;
 	}

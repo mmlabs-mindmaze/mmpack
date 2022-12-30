@@ -25,7 +25,6 @@ static
 struct {
 	size_t len;
 	char name[64];
-	char refhash[SHA_HEXSTR_LEN+1];
 	digest_t refdigest;
 } sha_cases[] = {
 	{.len =  0, .name = "zero_len"},
@@ -44,20 +43,44 @@ static
 struct {
 	char name[64];
 	char target[64];
-	char refhash[SHA_HEXSTR_LEN+1];
+	digest_t refdigest;
 } symlink_cases[] = {
 	{.name = "a_link", .target = "zero_len",
-	 .refhash = "sym-6d712e7edfc58ec6ca9b28efd3a01175c7cdb4178921aab352ea0ec56b6cdab6"},
+	 .refdigest = {{0x6d, 0x71, 0x2e, 0x7e, 0xdf, 0xc5, 0x8e, 0xc6, 0xca,
+	                0x9b, 0x28, 0xef, 0xd3, 0xa0, 0x11, 0x75, 0xc7, 0xcd,
+	                0xb4, 0x17, 0x89, 0x21, 0xaa, 0xb3, 0x52, 0xea, 0x0e,
+	                0xc5, 0x6b, 0x6c, 0xda, 0xb6}}
+	},
 	{.name = "b_link", .target = "small_file",
-	 .refhash = "sym-63425cb6d2a9304d3ed60ea1aa2b31a2c7804c98ddf31fb818a45a36433a2f1c"},
+	 .refdigest = {{0x63, 0x42, 0x5c, 0xb6, 0xd2, 0xa9, 0x30, 0x4d, 0x3e,
+	                0xd6, 0x0e, 0xa1, 0xaa, 0x2b, 0x31, 0xa2, 0xc7, 0x80,
+	                0x4c, 0x98, 0xdd, 0xf3, 0x1f, 0xb8, 0x18, 0xa4, 0x5a,
+	                0x36, 0x43, 0x3a, 0x2f, 0x1c}}
+	},
 	{.name = "links/bdir/blink", .target = "../adir",
-	 .refhash = "sym-4714d47f0664d0e100b078e25fc66994ee7251f172062040dcadc4fe4cd85f20"},
+	 .refdigest = {{0x47, 0x14, 0xd4, 0x7f, 0x06, 0x64, 0xd0, 0xe1, 0x00,
+	                0xb0, 0x78, 0xe2, 0x5f, 0xc6, 0x69, 0x94, 0xee, 0x72,
+	                0x51, 0xf1, 0x72, 0x06, 0x20, 0x40, 0xdc, 0xad, 0xc4,
+	                0xfe, 0x4c, 0xd8, 0x5f, 0x20}}
+	},
 	{.name = "links/some dir/foo", .target = "to_non_existent",
-	 .refhash = "sym-88a3f6baef51ad2c2a21443bd3178d9f8bb7bbfcdd8b49146643272d1c572709"},
+	 .refdigest = {{0x88, 0xa3, 0xf6, 0xba, 0xef, 0x51, 0xad, 0x2c, 0x2a,
+	                0x21, 0x44, 0x3b, 0xd3, 0x17, 0x8d, 0x9f, 0x8b, 0xb7,
+	                0xbb, 0xfc, 0xdd, 0x8b, 0x49, 0x14, 0x66, 0x43, 0x27,
+	                0x2d, 0x1c, 0x57, 0x27, 0x09}}
+	},
 	{.name = "links/some dir/bar", .target = "../adir/to_non_existent",
-	 .refhash = "sym-c238df1ae2bd59950b09421be20f3c2f1e7e1c4d04ae872b9704664178b86ad6"},
+	 .refdigest = {{0xc2, 0x38, 0xdf, 0x1a, 0xe2, 0xbd, 0x59, 0x95, 0x0b,
+	                0x09, 0x42, 0x1b, 0xe2, 0x0f, 0x3c, 0x2f, 0x1e, 0x7e,
+	                0x1c, 0x4d, 0x04, 0xae, 0x87, 0x2b, 0x97, 0x04, 0x66,
+	                0x41, 0x78, 0xb8, 0x6a, 0xd6}}
+	},
 	{.name = "c_link", .target = "links/adir",
-	 .refhash = "sym-b5f07c53c8f582a56708b4cb455a997a043a56da57ea3d94d23d0fc1369fddce"},
+	 .refdigest = {{0xb5, 0xf0, 0x7c, 0x53, 0xc8, 0xf5, 0x82, 0xa5, 0x67,
+	                0x08, 0xb4, 0xcb, 0x45, 0x5a, 0x99, 0x7a, 0x04, 0x3a,
+	                0x56, 0xda, 0x57, 0xea, 0x3d, 0x94, 0xd2, 0x3d, 0x0f,
+	                0xc1, 0x36, 0x9f, 0xdd, 0xce}}
+	},
 };
 #define NUM_SYMLINK_CASES       MM_NELEM(symlink_cases)
 
@@ -99,29 +122,6 @@ void create_rand_file(const char* filename, size_t len)
 
 
 /**
- * gen_ref_hash() - compute the reference hash with openssl cmdline tool
- * @hash:       buffer receiving the hash (must be HASH_HEXSTR_SIZE long)
- * filename:    path of the file to hash
- */
-static
-void gen_ref_hash(char* hash, const char* filename)
-{
-	char cmd[512];
-	FILE* fp;
-	int sha256_strlen = SHA_HEXSTR_LEN - SHA_HDRLEN;
-
-	memcpy(hash, SHA_HDR_REG, SHA_HDRLEN);
-
-	sprintf(cmd, "openssl sha256 -hex %s | cut -f2 -d' '", filename);
-	fp = popen(cmd, "r");
-	if (fread(hash + SHA_HDRLEN, sha256_strlen, 1, fp)) {}
-	pclose(fp);
-
-	hash[SHA_HEXSTR_LEN] = '\0';
-}
-
-
-/**
  * gen_ref_md() - compute the reference digest with openssl cmdline tool
  * @digest:     buffer receiving the digest
  * filename:    path of the file to hash
@@ -154,7 +154,6 @@ void sha_setup(void)
 		strcpy(filename, HASHFILE_DIR "/");
 		strcat(filename, sha_cases[i].name);
 		create_rand_file(filename, sha_cases[i].len);
-		gen_ref_hash(sha_cases[i].refhash, filename);
 		gen_ref_digest(&sha_cases[i].refdigest, filename);
 	}
 
@@ -188,30 +187,32 @@ STATIC_CONST_MMSTR(hashfile_dir, HASHFILE_DIR);
 
 START_TEST(hash_regfile)
 {
-	mmstr* hash = mmstr_alloca(SHA_HEXSTR_LEN);
+	struct typed_hash hash;
 	mmstr* fullpath = mmstr_alloca(256);
 	const mmstr* filename = mmstr_alloca_from_cstr(sha_cases[_i].name);
-	const mmstr* refhash = mmstr_alloca_from_cstr(sha_cases[_i].refhash);
+	const digest_t* refdigest = &sha_cases[_i].refdigest;
 
 	mmstr_join_path(fullpath, hashfile_dir, filename);
 
-	sha_compute(hash, fullpath);
-	ck_assert_str_eq(hash, refhash);
+	compute_typed_hash(&hash, fullpath);
+	ck_assert_mem_eq(&hash.digest, refdigest, sizeof(*refdigest));
+	ck_assert_int_eq(hash.type, MM_DT_REG);
 }
 END_TEST
 
 
 START_TEST(hash_symlink)
 {
-	mmstr* hash = mmstr_alloca(SHA_HEXSTR_LEN);
+	struct typed_hash hash;
 	mmstr* fullpath = mmstr_alloca(256);
 	const mmstr* filename = mmstr_alloca_from_cstr(symlink_cases[_i].name);
-	const char* refhash = symlink_cases[_i].refhash;
+	const digest_t* refdigest = &symlink_cases[_i].refdigest;
 
 	mmstr_join_path(fullpath, hashfile_dir, filename);
 
-	ck_assert(sha_compute(hash, fullpath) == 0);
-	ck_assert_str_eq(hash, refhash);
+	compute_typed_hash(&hash, fullpath);
+	ck_assert_mem_eq(&hash.digest, refdigest, sizeof(*refdigest));
+	ck_assert_int_eq(hash.type, MM_DT_LNK);
 }
 END_TEST
 
