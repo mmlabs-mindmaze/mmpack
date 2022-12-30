@@ -9,10 +9,13 @@
 #include <mmerrno.h>
 #include <mmsysio.h>
 
+#include "common.h"
+#include "indextable.h"
 #include "mmstring.h"
 #include "strlist.h"
 #include "sumsha.h"
 #include "utils.h"
+#include "xx-alloc.h"
 
 
 
@@ -38,6 +41,9 @@ mmstr* sha256sums_path(const struct binpkg* pkg)
 }
 
 
+/***********************************************************************
+ *                      sumsha file reader                             *
+ ***********************************************************************/
 struct sumsha_reader {
 	void* map;
 	const char* sumsha_path;
@@ -101,6 +107,102 @@ int sumsha_reader_next(struct sumsha_reader* reader,
 }
 
 
+static
+void sumsha_reader_parse_typed_hash(struct sumsha_reader* reader,
+                                    struct typed_hash* hash, struct strchunk sv)
+{
+	struct strchunk prefix, hexhash;
+
+	hexhash =  strchunk_rpart(sv, SHA_HDRLEN - 1);
+	if (digest_from_hexstr(&hash->digest, hexhash))
+		goto failure;
+
+	prefix = strchunk_lpart (sv, SHA_HDRLEN);
+	if (STR_STARTS_WITH(prefix.buf, prefix.len, SHA_HDR_REG))
+		hash->type = MM_DT_REG;
+	else if (STR_STARTS_WITH(prefix.buf, prefix.len, SHA_HDR_SYM))
+		hash->type = MM_DT_LNK;
+	else
+		goto failure;
+
+	return;
+
+failure:
+	reader->failure = 1;
+	mm_raise_error(EBADMSG, "Invalid hash %*s when parsing %s",
+	               sv.len, sv.buf, reader->sumsha_path);
+}
+
+
+/***********************************************************************
+ *                      sumsha data methods                            *
+ ***********************************************************************/
+
+/**
+ * sumsha_init() - initialize sumsha table structure
+ * @sumsha:     pointer to sumsha struct to initialize
+ */
+LOCAL_SYMBOL
+void sumsha_init(struct sumsha* sumsha)
+{
+	indextable_init(&sumsha->idx, 64, -1);
+}
+
+
+/**
+ * sumsha_deinit() - cleanup sumsha table structure
+ * @sumsha:     pointer to sumsha struct to clean
+ */
+LOCAL_SYMBOL
+void sumsha_deinit(struct sumsha* sumsha)
+{
+	struct sumsha_entry* e;
+	struct sumsha_iterator iter;
+
+	for (e = sumsha_first(&iter, sumsha); e; e = sumsha_next(&iter))
+		free(e);
+
+	indextable_deinit(&sumsha->idx);
+}
+
+
+/**
+ * sumsha_load() - load sumsha table from a .sha256sums file
+ * @sumsha:     initialized sumsha table to hold the file content
+ * @sumsha_path: path to .sha256sums file
+ *
+ * Return: 0 in case of success, otherwise -1 with error state set.
+ */
+LOCAL_SYMBOL
+int sumsha_load(struct sumsha* sumsha, const char* sumsha_path)
+{
+	struct sumsha_reader reader;
+	struct strchunk path, hash;
+	struct sumsha_entry* entry;
+	struct it_entry* idx_entry;
+
+	if (sumsha_reader_init(&reader, sumsha_path))
+		return -1;
+
+	while (sumsha_reader_next(&reader, &path, &hash)) {
+		// Create sumsha entry
+		entry = xx_malloc(sizeof(*entry) + path.len + 1);
+		mmstr_copy(entry->path.buf, path.buf, path.len);
+		sumsha_reader_parse_typed_hash(&reader, &entry->hash, hash);
+
+		// Insert sumsha entry in indextable
+		idx_entry = indextable_insert(&sumsha->idx, entry->path.buf);
+		idx_entry->key = entry->path.buf;
+		idx_entry->value = entry;
+	}
+
+	return sumsha_reader_deinit(&reader);
+}
+
+
+/***********************************************************************
+ *                      General sumsha functions                       *
+ ***********************************************************************/
 /**
  * read_sha256sums() - parse the sha256sums of an installed package
  * @sha256sums_path: path to the sha256sums file to read.
