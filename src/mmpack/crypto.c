@@ -244,6 +244,70 @@ int check_hash(const mmstr* refsha, const mmstr* filename)
 
 
 /**
+ * compute_typed_hash() - compute hash along with type on specified file
+ * @hash:       pointer to struct typed_hash to received the values.
+ * @filename:   path of file whose hash must be computed
+ *
+ * Return: 0 in case of success, -1 if a problem of file reading has been
+ * encountered.
+ */
+LOCAL_SYMBOL
+int compute_typed_hash(struct typed_hash* hash, const char* filename)
+{
+	int rv = -1;
+	struct mm_stat st;
+
+	if (mm_stat(filename, &st, MM_NOFOLLOW))
+		goto exit;
+
+	if (S_ISREG(st.mode)) {
+		hash->type = MM_DT_REG;
+		rv = sha_file_compute(&hash->digest, filename);
+	} else if (S_ISLNK(st.mode)) {
+		hash->type = MM_DT_LNK;
+		rv = sha_symlink_compute(&hash->digest, filename, st.size);
+	} else {
+		mm_raise_error(EINVAL, "%s is neither a regular file "
+		               "or symlink", filename);
+	}
+
+exit:
+	if (rv)
+		mm_log_error("Cannot compute SHA-256 of %s", filename);
+	return rv;
+}
+
+
+/**
+ * check_typed_hash() - Check integrity of given file
+ * @ref:      reference typed hash to compare against
+ * @filename: path of file whose hash must be computed
+ *
+ * Return: 0 if no issue has been found, -1 otherwise
+ */
+LOCAL_SYMBOL
+int check_typed_hash(const struct typed_hash* ref, const char* filename)
+{
+	struct typed_hash hash;
+
+	if (compute_typed_hash(&hash, filename))
+		return -1;
+
+	if (hash.type != ref->type) {
+		mm_raise_error(EBADMSG, "unexpected filetype for %s", filename);
+		return -1;
+	}
+
+	if (!digest_equal(&hash.digest, &ref->digest)) {
+		mm_raise_error(EBADMSG, "bad SHA-256 detected %s", filename);
+		return -1;
+	}
+
+	return 0;
+}
+
+
+/**
  * check_digest() - Check integrity of given file using digest
  * @ref:      reference sha256 digest to compare against
  * @filename: path of file whose hash must be computed
