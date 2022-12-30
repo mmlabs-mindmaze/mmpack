@@ -591,39 +591,28 @@ int fschange_postrm(struct fschange* fsc,
 LOCAL_SYMBOL
 int check_installed_pkg(const struct binpkg* pkg)
 {
-	mmstr * filename, * ref_sha, * sumsha_path;
-	struct strlist filelist, hashlist;
-	struct strlist_elt * file_elt, * hash_elt;
 	int rv = -1;
+	struct sumsha sumsha;
+	struct sumsha_entry* e;
+	struct sumsha_iterator iter;
+	mmstr* sumsha_path;
 
-	strlist_init(&filelist);
-	strlist_init(&hashlist);
+	sumsha_init(&sumsha);
 
 	sumsha_path = sha256sums_path(pkg);
-	rv = read_sha256sums(sumsha_path, &filelist, &hashlist);
+	rv = sumsha_load(&sumsha, sumsha_path);
 	mmstr_free(sumsha_path);
 	if (rv == -1)
 		goto exit;
 
-	file_elt = filelist.head;
-	hash_elt = hashlist.head;
-	while (file_elt) {
-		mm_check(hash_elt != NULL);
-		filename = file_elt->str.buf;
-		ref_sha = hash_elt->str.buf;
-
-		if (check_hash(ref_sha, filename) != 0)
+	for (e = sumsha_first(&iter, &sumsha); e; e = sumsha_next(&iter)) {
+		if (check_typed_hash(&e->hash, e->path.buf) != 0)
 			goto exit;
-
-		file_elt = file_elt->next;
-		hash_elt = hash_elt->next;
 	}
-
 	rv = 0;
 
 exit:
-	strlist_deinit(&filelist);
-	strlist_deinit(&hashlist);
+	sumsha_deinit(&sumsha);
 	return rv;
 }
 
