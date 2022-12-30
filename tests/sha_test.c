@@ -232,10 +232,17 @@ START_TEST(binary_sha)
 END_TEST
 
 
+static const digest_t ref_digest = {{
+  0x98, 0x10, 0x76, 0x2e, 0x95, 0x72, 0x0f, 0x46, 0xfc, 0xdf, 0x29, 0x00,
+  0xfa, 0x1d, 0x15, 0x77, 0x06, 0xaf, 0x21, 0x66, 0xa5, 0x0a, 0x30, 0xae,
+  0x75, 0xe6, 0xe6, 0x65, 0xe3, 0xbd, 0xae, 0x54
+}};
+static char ref_hexstr[] = \
+	"9810762e95720f46fcdf2900fa1d157706af2166a50a30ae75e6e665e3bdae54";
+
 START_TEST(digest_to_str)
 {
-	const char* ref_hexstr = sha_cases[0].refhash + SHA_HDRLEN;
-	const digest_t* digest = &sha_cases[0].refdigest;
+	const digest_t* digest = &ref_digest;
 	char hexstr[SHA_HEXLEN + 1];
 
 	hexstr_from_digest(hexstr, digest);
@@ -249,14 +256,13 @@ END_TEST
 START_TEST(digest_from_str)
 {
 	digest_t digest;
-	const digest_t* ref_digest = &sha_cases[0].refdigest;
 	struct strchunk hexstr = {
-		.buf = sha_cases[0].refhash + SHA_HDRLEN,
-		.len = SHA_HEXLEN,
+		.buf = ref_hexstr,
+		.len = strlen(ref_hexstr),
 	};
 
 	digest_from_hexstr(&digest, hexstr);
-	ck_assert_mem_eq(&digest, ref_digest, sizeof(digest));
+	ck_assert_mem_eq(&digest, &ref_digest, sizeof(digest));
 }
 END_TEST
 
