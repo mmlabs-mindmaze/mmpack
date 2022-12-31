@@ -27,6 +27,19 @@ struct strchunk {
 
 
 /**
+ * strchunk_from_cstr() - Get the string chunk from a string
+ * @str:         nul-terminated string
+ *
+ * Return: string chunk pointing to @str.
+ */
+static inline
+struct strchunk strchunk_from_cstr(const char* str)
+{
+	return (struct strchunk) {.buf = str, .len = strlen(str)};
+}
+
+
+/**
  * strchunk_find() - search the first occurrence of a character
  * @sc: string chunk to search in
  * @c:  character to search
