@@ -204,37 +204,6 @@ int sumsha_load(struct sumsha* sumsha, const char* sumsha_path)
  *                      General sumsha functions                       *
  ***********************************************************************/
 /**
- * read_sha256sums() - parse the sha256sums of an installed package
- * @sha256sums_path: path to the sha256sums file to read.
- * @filelist: string list receiving the list of file in package
- * @hashlist: string list receiving the hash for each file in @filelist.
- *
- * Open and parse the sha256sums specified by @sha256sums_path. The
- * installed package is assumed to be located relatively to the current
- * directory.
- *
- * Return: 0 in case of success, -1 otherwise.
- */
-LOCAL_SYMBOL
-int read_sha256sums(const mmstr* sha256sums_path,
-                    struct strlist* filelist, struct strlist* hashlist)
-{
-	struct sumsha_reader reader;
-	struct strchunk path, hash;
-
-	if (sumsha_reader_init(&reader, sha256sums_path))
-		return -1;
-
-	while (sumsha_reader_next(&reader, &path, &hash)) {
-		strlist_add_strchunk(filelist, path);
-		strlist_add_strchunk(hashlist, hash);
-	}
-
-	return sumsha_reader_deinit(&reader);
-}
-
-
-/**
  * read_sumsha_filelist() - parse the sha256sums and fill the file list
  * @sumsha_path:        path to the sha256sums file to read.
  * @filelist:           string list receiving the list of file in package
