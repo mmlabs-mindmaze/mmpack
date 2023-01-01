@@ -18,6 +18,7 @@ struct sumsha {
 
 struct sumsha_entry {
 	struct typed_hash hash;
+	int index;
 	struct mmstring path;
 };
 
