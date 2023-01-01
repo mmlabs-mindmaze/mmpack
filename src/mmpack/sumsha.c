@@ -188,13 +188,16 @@ int sumsha_load(struct sumsha* sumsha, const char* sumsha_path)
 	struct strchunk path, hash;
 	struct sumsha_entry* entry;
 	struct it_entry* idx_entry;
+	int i;
 
 	if (sumsha_reader_init(&reader, sumsha_path))
 		return -1;
 
+	i = 0;
 	while (sumsha_reader_next(&reader, &path, &hash)) {
 		// Create sumsha entry
 		entry = xx_malloc(sizeof(*entry) + path.len + 1);
+		entry->index = i++;
 		mmstr_copy(entry->path.buf, path.buf, path.len);
 		sumsha_reader_parse_typed_hash(&reader, &entry->hash, hash);
 
