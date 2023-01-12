@@ -483,8 +483,10 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     tarinfo.uname = tarinfo.gname = 'root'
     tarinfo.mtime = 0
 
-    if tarinfo.name.lower().endswith('.dll'):
-        tarinfo.mode = 0o755
+    if get_host_dist() == 'windows':
+        ext, _ = os.path.splitext(tarinfo.name)
+        if ext.lower() == '.dll':
+            tarinfo.mode = 0o755
 
     return tarinfo
 
