@@ -492,6 +492,10 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
         if ext.lower() in ('.dll', '.pyd'):
             tarinfo.mode = 0o755
 
+    # Unify permission in tarball: all file are RW for own, R for group and
+    # other. If a file is executable for owner it is executable for every one
+    tarinfo.mode = 0o755 if (tarinfo.mode & 0o100) else 0o644
+
     return tarinfo
 
 
