@@ -489,7 +489,7 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     # execution permission)
     if get_host_dist() == 'windows':
         ext, _ = os.path.splitext(tarinfo.name)
-        if ext.lower() == '.dll':
+        if ext.lower() in ('.dll', '.pyd'):
             tarinfo.mode = 0o755
 
     return tarinfo
