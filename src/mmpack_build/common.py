@@ -18,6 +18,7 @@ import tarfile
 import platform
 
 from argparse import Action
+from functools import cache
 from hashlib import sha256
 from io import TextIOWrapper
 from subprocess import PIPE, CalledProcessError, Popen, run
@@ -333,6 +334,7 @@ def sha256sum(filename: str, follow_symlink: bool = True) -> str:
     return hexdig
 
 
+@cache
 def get_host_arch() -> str:
     """
     return the host arch
@@ -349,6 +351,7 @@ _DIST_DERIVATIVES = {
 }
 
 
+@cache
 def get_host_dist() -> str:
     """
     return host distribution
