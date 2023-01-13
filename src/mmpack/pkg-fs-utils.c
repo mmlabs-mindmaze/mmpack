@@ -106,44 +106,117 @@ int is_mmpack_metadata(mmstr const * path)
 
 
 /**
- * rename_all() - rename all the files
- * @to_rename:    files to be renamed
+ * fschange_move_instfiles() - Move files from unpackdir to final location
+ * @fsc:          file system change data
+ * @unpackdir:    path where the source file can be found
  *
  * In order for the install and upgrade commands to be atomic, the extraction is
  * done in two steps: first all the regular files and symlink are extracted in a
  * temporary directory (in var/cache/unpack), then they are all renamed, to be
- * placed into their final directories. Note that the directories of the package
- * are extracted directly in the good directory during the first step.
+ * placed into their final directories. Note that the directories are not
+ * extracted during initial tar extraction, hence must be created if not
+ * existing yet.
  *
  * The current function permits to rename the regular and symlink files.
  *
  * Return: 0 on success, a negative value otherwise.
  */
 static
-int rename_all(struct strlist* to_rename)
+int fschange_move_instfiles(struct fschange* fsc, const char* unpackdir)
 {
-	mmstr * file = NULL;
-	int len = sizeof(UNPACK_CACHEDIR_RELPATH) + 10;
-	struct strlist_elt * curr = to_rename->head;
-	int cpt = 0;
+	mmstr* path = mmstr_malloc(32);
+	const mmstr* d;
+	struct strlist_elt* curr;
+	struct strset set;
+	struct strset_iterator it;
+	int cpt, rv = -1;
 
-	file = mmstr_malloc(len);
-	while (curr) {
-		sprintf(file, "%s/%d", UNPACK_CACHEDIR_RELPATH, cpt);
+	strset_init(&set, STRSET_HANDLE_STRINGS_MEM);
 
-		if (mm_rename(file, curr->str.buf) == -1)
-			return -1;
-
-		curr = curr->next;
-		cpt++;
+	// Drop files being installed from file planned to be remove (in case
+	// of upgrade) and collect target directories in a set (deduplicate).
+	for (curr = fsc->inst_files.head; curr; curr = curr->next) {
+		strlist_remove(&fsc->rm_files, curr->str.buf);
+		path = mmstr_dirname(path, curr->str.buf);
+		strset_add(&set, path);
 	}
 
-	mmstr_free(file);
-	return 0;
+	// Create collected target folders (with parents if needed)
+	for (d = strset_iter_first(&it, &set); d; d = strset_iter_next(&it)) {
+		if (mm_mkdir(d, 0777, MM_RECURSIVE))
+			goto exit;
+	}
+
+	// Move file from unpackdir to final location
+	cpt = 0;
+	for (curr = fsc->inst_files.head; curr; curr = curr->next) {
+		path = mmstr_asprintf(path, "%s/%d", unpackdir, cpt++);
+		if (mm_rename(path, curr->str.buf))
+			goto exit;
+	}
+
+	rv = 0;
+
+exit:
+	strset_deinit(&set);
+	mmstr_free(path);
+	return rv;
 }
 
 
-#define CACHE_FILENAME_MAXLEN (sizeof(UNPACK_CACHEDIR_RELPATH "/XXXXXX"))
+/**
+ * fschange_unpack_mpk() - extract mpk file to a specified temporary folder
+ * @fsc:          file system change data
+ * @mpk_filename: filename of the downloaded package file
+ * @unpackdir:    path where the file in mpk must be extracted
+ *
+ * This extracts the files from mpk package located at @mpk_filename and store
+ * them in @unpackdir, named after the rank they appear in the tarball (first
+ * will be named @unpackdir/0, second @unpackdir/1, ...). @fsc->inst_files is
+ * filled at the same time with the path where they should be located
+ * eventually after package installation.
+ *
+ * Return: 0 in case of success, -1 otherwise with error state set accordingly.
+ */
+static
+int fschange_unpack_mpk(struct fschange* fsc, const char* mpk_filename, const char* unpackdir)
+{
+	struct tarstream tar;
+	mmstr* path = NULL;
+	int rv = 0;
+	int cpt = 0;
+
+	if (tarstream_open(&tar, mpk_filename))
+		return -1;
+
+	// Loop over each entry in the archive and process them
+	while (!rv && ((rv = tarstream_read_next(&tar)) == 0)) {
+
+		// Obtain the pathname (with leading "./" stripped) of the
+		// file being extracted and skip metadata (MMPACK/*)
+		path = mmstrcpy_cstr_realloc(path, tar.entry_path+2);
+		if (!mmstrlen(path) || is_mmpack_metadata(path))
+			continue;
+
+		// If not a directory, copy extracted files in a temporary
+		// folder. They will be moved to final destination once the
+		// whole package has been extracted.
+		if (tar.entry_type == AE_IFDIR)
+			continue;
+
+		strlist_add(&fsc->inst_files, path);
+
+		path = mmstr_asprintf(path, "%s/%d", unpackdir, cpt++);
+		rv = tarstream_extract(&tar, path);
+	}
+
+	// Cleanup
+	tarstream_close(&tar);
+	mmstr_free(path);
+
+	return (rv == READ_ARCHIVE_EOF) ? 0 : -1;
+}
+
 
 /**
  * fschange_pkg_unpack() - extract files of a given package
@@ -161,50 +234,13 @@ int rename_all(struct strlist* to_rename)
 static
 int fschange_pkg_unpack(struct fschange* fsc, const char* mpk_filename)
 {
-	struct tarstream tar;
-	mmstr* path = NULL;
-	int rv = 0;
-	int cpt = 0;
+	const char* unpackdir;
 
-	if (tarstream_open(&tar, mpk_filename))
+	unpackdir = UNPACK_CACHEDIR_RELPATH;
+	if (fschange_unpack_mpk(fsc, mpk_filename, unpackdir))
 		return -1;
 
-	// Loop over each entry in the archive and process them
-	path = mmstr_malloc(sizeof(UNPACK_CACHEDIR_RELPATH "/XXXXXX"));
-	while (!rv && ((rv = tarstream_read_next(&tar)) == 0)) {
-
-		// Obtain the pathname (with leading "./" stripped) of the
-		// file being extracted and skip metadata (MMPACK/*)
-		path = mmstrcpy_cstr_realloc(path, tar.entry_path+2);
-		if (!mmstrlen(path) || is_mmpack_metadata(path))
-			continue;
-
-		strlist_remove(&fsc->rm_files, path);
-
-		// If not a directory, copy extracted files in a temporary
-		// folder. They will be moved to final destination once the
-		// whole package has been extracted.
-		if (tar.entry_type != AE_IFDIR) {
-			strlist_add(&fsc->inst_files, path);
-			sprintf(path, UNPACK_CACHEDIR_RELPATH "/%d", cpt++);
-			mmstr_update_len_from_buffer(path);
-		}
-
-		rv = tarstream_extract(&tar, path);
-	}
-
-	// Cleanup
-	tarstream_close(&tar);
-	mmstr_free(path);
-
-	if (rv != -1) {
-		// proceed to the rename of the files that have been unpacked in
-		// another directory than the "true" one, in order to execute an
-		// atomic upgrade
-		rv = rename_all(&fsc->inst_files);
-	}
-
-	return rv;
+	return fschange_move_instfiles(fsc, unpackdir);
 }
 
 
