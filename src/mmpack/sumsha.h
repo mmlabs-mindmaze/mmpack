@@ -62,6 +62,22 @@ struct sumsha_entry* sumsha_next(struct sumsha_iterator* iter)
 }
 
 
+/**
+ * sumsha_get() - lookup typed hash from path in sumsha
+ * @sumsha:     sumsha table to search
+ * @path:       path of the entry in the sumsha to lookup
+ *
+ * Return: pointer to struct typed_hash mapped to @path if found in @sumsha,
+ * NULL otherwise.
+ */
+static inline
+struct typed_hash* sumsha_get(const struct sumsha* sumsha, const mmstr* path)
+{
+	struct it_entry* entry = indextable_lookup(&sumsha->idx, path);
+	return entry ? &((struct sumsha_entry*)entry->value)->hash : NULL;
+}
+
+
 mmstr* sha256sums_path(const mmstr* rootpath, const struct binpkg* pkg);
 void sumsha_init(struct sumsha* sumsha);
 int sumsha_load(struct sumsha* sumsha, const char* sumsha_path);
