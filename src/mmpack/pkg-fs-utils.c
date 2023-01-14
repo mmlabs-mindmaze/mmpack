@@ -181,6 +181,60 @@ exit:
  * Return: 0 in case of success, -1 otherwise with error state set accordingly.
  */
 static
+int fschange_check_unpacked_integrity(struct fschange* fsc, const char* unpackdir)
+{
+	const struct binpkg* pkg = fsc->curr_action->pkg;
+	struct strlist_elt* elt;
+	struct sumsha sumsha;
+	const struct sumsha_entry* entry;
+	mmstr* path = NULL;
+	int idx, sumsha_idx, rv = -1;
+
+	sumsha_init(&sumsha);
+
+	// Find sumsha file
+	path = sha256sums_path(NULL, pkg);
+	for (elt = fsc->inst_files.head, idx = 0; elt; elt = elt->next, idx++) {
+		if (mmstrequal(path, elt->str.buf))
+			break;
+	}
+
+	// Test a match has been found, test sumsha file integrity and load data
+	sumsha_idx = idx;
+	path = mmstr_asprintf(path, "%s/%i", unpackdir, sumsha_idx);
+	if (elt == NULL
+	    || check_digest(&pkg->sumsha, path)
+	    || sumsha_load(&sumsha, path))
+		goto exit;
+
+	// Check integrity of all unpacked files
+	for (elt = fsc->inst_files.head, idx = 0; elt; elt = elt->next, idx++) {
+		if (idx == sumsha_idx)
+			continue;
+
+		entry = sumsha_get(&sumsha, elt->str.buf);
+		if (!entry) {
+			mm_raise_error(EBADMSG, "Extra file %s unpacked from"
+			               " tarball without being referenced by"
+				       " sumsha file", elt->str.buf);
+			goto exit;
+		}
+
+		path = mmstr_asprintf(path, "%s/%i", unpackdir, idx);
+		if (check_typed_hash(&entry->hash, path))
+			goto exit;
+	}
+
+	rv = 0;
+
+exit:
+	mmstr_free(path);
+	sumsha_deinit(&sumsha);
+	return rv;
+}
+
+
+static
 int fschange_unpack_mpk(struct fschange* fsc, const char* mpk_filename, const char* unpackdir)
 {
 	struct tarstream tar;
@@ -216,7 +270,10 @@ int fschange_unpack_mpk(struct fschange* fsc, const char* mpk_filename, const ch
 	tarstream_close(&tar);
 	mmstr_free(path);
 
-	return (rv == READ_ARCHIVE_EOF) ? 0 : -1;
+	if (rv == READ_ARCHIVE_EOF)
+		rv = fschange_check_unpacked_integrity(fsc, unpackdir);
+
+	return rv;
 }
 
 
