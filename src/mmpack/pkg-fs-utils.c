@@ -108,6 +108,76 @@ int is_mmpack_metadata(mmstr const * path)
 
 
 /**
+ * check_unpacked_integrity() - verifies unpacked files match sumsha file
+ * @pkg:	binary package being unpacked
+ * @inst_files: list of files being installed
+ * @unpackdir:  path where the unpacked files can be found.
+ *
+ * This ensures that the files unpacked from binary package @pkg match the hash
+ * value and collectively the sumsha is correct. The list pointed to by
+ * @inst_files hold the final location where the file will be installed. Each
+ * file can be found in @unpackdir folder named after the index they appear in
+ * @inst_files list.
+ *
+ * Return: 0 if all files are valid, -1 with an appropriate error state set if
+ * one of the file does not match its expected hash or an error occured.
+ */
+static
+int check_unpacked_integrity(const struct binpkg* pkg,
+                             const struct strlist* inst_files,
+			     const char* unpackdir)
+{
+	struct strlist_elt* elt;
+	struct sumsha sumsha;
+	const struct typed_hash* hash;
+	mmstr* path = NULL;
+	int idx, sumsha_idx, rv = -1;
+
+	sumsha_init(&sumsha);
+
+	// Find sumsha file
+	path = sha256sums_path(NULL, pkg);
+	for (elt = inst_files->head, idx = 0; elt; elt = elt->next, idx++) {
+		if (mmstrequal(path, elt->str.buf))
+			break;
+	}
+
+	// Test a match has been found, test sumsha file integrity and load data
+	sumsha_idx = idx;
+	path = mmstr_asprintf(path, "%s/%i", unpackdir, sumsha_idx);
+	if (elt == NULL
+	    || check_digest(&pkg->sumsha, path)
+	    || sumsha_load(&sumsha, path))
+		goto exit;
+
+	// Check integrity of all unpacked files
+	for (elt = inst_files->head, idx = 0; elt; elt = elt->next, idx++) {
+		if (idx == sumsha_idx)
+			continue;
+
+		hash = sumsha_get(&sumsha, elt->str.buf);
+		if (!hash) {
+			mm_raise_error(EBADMSG, "Extra file %s unpacked from"
+			               " tarball without being referenced by"
+			               " sumsha file", elt->str.buf);
+			goto exit;
+		}
+
+		path = mmstr_asprintf(path, "%s/%i", unpackdir, idx);
+		if (check_typed_hash(hash, path))
+			goto exit;
+	}
+
+	rv = 0;
+
+exit:
+	mmstr_free(path);
+	sumsha_deinit(&sumsha);
+	return rv;
+}
+
+
+/**
  * fschange_move_instfiles() - Move files from unpackdir to final location
  * @fsc:          file system change data
  * @unpackdir:    path where the source file can be found
@@ -216,7 +286,11 @@ int fschange_unpack_mpk(struct fschange* fsc, const char* mpk_filename, const ch
 	tarstream_close(&tar);
 	mmstr_free(path);
 
-	return (rv == READ_ARCHIVE_EOF) ? 0 : -1;
+	if (rv == READ_ARCHIVE_EOF)
+		rv = check_unpacked_integrity(fsc->curr_action->pkg,
+		                              &fsc->inst_files, unpackdir);
+
+	return rv;
 }
 
 
