@@ -32,6 +32,7 @@
 /**
  * struct fschange - data carried over file system actions
  * ctx: mmpack prefix context
+ * curr_action: pointer to action being applied
  * inst_files:  list of files being installed
  * rm_files:    list of files being removed
  * rm_dirs:     set of folders to try to remove at the end of stack application
@@ -43,6 +44,7 @@
  */
 struct fschange {
 	struct mmpack_ctx* ctx;
+	struct action* curr_action;
 	struct strlist inst_files;
 	struct strlist rm_files;
 	struct strset rm_dirs;
@@ -788,6 +790,7 @@ int fschange_apply_action(struct fschange* fsc, struct action* act)
 {
 	int rv, type;
 
+	fsc->curr_action = act;
 	strlist_init(&fsc->inst_files);
 	strlist_init(&fsc->rm_files);
 
@@ -816,6 +819,7 @@ int fschange_apply_action(struct fschange* fsc, struct action* act)
 
 	strlist_deinit(&fsc->inst_files);
 	strlist_deinit(&fsc->rm_files);
+	fsc->curr_action = NULL;
 
 	return rv;
 }
