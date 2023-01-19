@@ -620,12 +620,13 @@ mmstr* mmstr_asprintf(mmstr* restrict dst, const char* restrict fmt, ...)
  * expand_abspath() - create the absolute path from a relative path
  * @path:       relative path to expand
  *
- * Return: string holding the absolute path allocated with malloc()
+ * Return: mmstr* holding the absolute path. Dispose with mmstr_free()
  */
 LOCAL_SYMBOL
 char* expand_abspath(const char* path)
 {
 	char* res;
+	mmstr* abspath = NULL;
 
 	// TODO Implement a proper version of realpath in mmlib
 #if _WIN32
@@ -638,7 +639,10 @@ char* expand_abspath(const char* path)
 		return NULL;
 	}
 
-	return res;
+	abspath = mmstr_malloc_from_cstr(res);
+	free(res);
+
+	return abspath;
 }
 
 
