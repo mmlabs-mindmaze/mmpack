@@ -96,7 +96,7 @@ int setup_run_env(struct mmpack_ctx* ctx)
 	rv = 0;
 
 exit:
-	free(full_prefix);
+	mmstr_free(full_prefix);
 	return rv;
 }
 
