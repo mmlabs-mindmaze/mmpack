@@ -13,6 +13,7 @@ int create_initial_index_files(const mmstr* prefix, struct repolist* repos);
 struct settings {
 	struct repolist repo_list;
 	mmstr* default_prefix;
+	int disable_import_other;
 };
 
 void settings_init(struct settings* settings);

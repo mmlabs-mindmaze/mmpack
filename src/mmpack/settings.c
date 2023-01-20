@@ -24,6 +24,7 @@ enum {
 	UNKNOWN_FIELD = -1,
 	REPOSITORIES,
 	DEFAULT_PREFIX,
+	DISABLE_IMPORT_OTHER,
 };
 
 
@@ -34,6 +35,8 @@ int get_field_type(const char* name, int len)
 		return REPOSITORIES;
 	else if (STR_EQUAL(name, len, "default-prefix"))
 		return DEFAULT_PREFIX;
+	else if (STR_EQUAL(name, len, "disable-import-other-prefix"))
+		return DISABLE_IMPORT_OTHER;
 	else
 		return UNKNOWN_FIELD;
 }
@@ -48,6 +51,10 @@ int set_settings_field(struct settings* s, int field_type,
 		s->default_prefix = mmstr_copy_realloc(s->default_prefix,
 		                                       data,
 		                                       len);
+		break;
+
+	case DISABLE_IMPORT_OTHER:
+		s->disable_import_other = atoi(data);
 		break;
 
 	default:
@@ -371,6 +378,7 @@ void settings_init(struct settings* settings)
 {
 	*settings = (struct settings) {
 		.default_prefix = NULL,
+		.disable_import_other = 0,
 	};
 
 	repolist_init(&settings->repo_list);
@@ -448,7 +456,7 @@ int settings_serialize(const mmstr* prefix,
 {
 	const struct repolist* repo_list = &settings->repo_list;
 	const mmstr* cfg_relpath = mmstr_alloca_from_cstr(CFG_RELPATH);
-	char repo_hdr_line[] = "repositories:\n";
+	char line[128];
 	int fd, oflag;
 
 	oflag = O_WRONLY|O_CREAT|(force_create ? O_TRUNC : O_EXCL);
@@ -456,8 +464,13 @@ int settings_serialize(const mmstr* prefix,
 	if (fd < 0)
 		return -1;
 
+	sprintf(line, "disable-import-other-prefix: %i\n",
+	        settings->disable_import_other);
+	mm_write(fd, line, strlen(line));
+
 	// Write list of repositories to configuration file
-	mm_write(fd, repo_hdr_line, sizeof(repo_hdr_line)-1);
+	strcpy(line, "repositories:\n");
+	mm_write(fd, line, strlen(line));
 	dump_repo_elt_and_children(fd, repo_list->head);
 
 	mm_close(fd);
