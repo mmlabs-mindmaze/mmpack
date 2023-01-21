@@ -51,7 +51,8 @@ int load_prefix_config(struct mmpack_ctx* ctx)
 {
 	STATIC_CONST_MMSTR(cfg_relpath, CFG_RELPATH);
 	mmstr* filename;
-	int rv, len;
+	int rv, len, bval;
+	const char* val;
 
 	// Reset any previously loaded configuration
 	settings_reset(&ctx->settings);
@@ -63,6 +64,13 @@ int load_prefix_config(struct mmpack_ctx* ctx)
 	rv = settings_load(&ctx->settings, filename);
 
 	mmstr_freea(filename);
+
+	val = mm_getenv("MMPACK_DISABLE_IMPORT_OTHER_PREFIX", "no");
+	if (strchunk_parse_bool(&bval, (struct strchunk) {val, strlen(val)}))
+		return -1;
+
+	ctx->flags |= bval ? CTX_DISABLE_IMPORT_OTHER_PREFIX : 0;
+
 	return rv;
 }
 

@@ -63,6 +63,16 @@ This section describes the environment variables that affect how
   Otherwise, use $XDG_DATA_HOME/mmpack-prefix/$MMPACK_PREFIX as install prefix.
   This can also be given using the ``-p|--prefix`` flag.
 
+``MMPACK_DISABLE_IMPORT_OTHER_PREFIX``
+  By default when installing or upgrading a package, the desired package is
+  searched in the set of installed packages in all known prefixes. If a match
+  is found, the download of mpk file is skipped and the installed files in the
+  other prefix are unpacked through hardlink. If this environment variable is
+  set to true, the search in other prefixes is skipped and packages are
+  installed from a mmpack package (downloaded, in cache or supplied on command
+  line).
+
+
 EXAMPLE
 =======
 

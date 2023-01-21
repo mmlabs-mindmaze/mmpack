@@ -12,6 +12,7 @@ unset MMPACK_PREFIX
 prefix1=$PREFIX_TEST/first
 prefix2=$PREFIX_TEST/second
 
+unset MMPACK_DISABLE_IMPORT_OTHER_PREFIX
 mmpack -p $prefix1 mkprefix --name="test-repo" --url="$REPO_URL/0"
 mmpack -p $prefix1 update
 mmpack -p $prefix2 mkprefix --name="test-repo" --url="$REPO_URL/0"
@@ -28,3 +29,10 @@ check_file_match() {
 
 check_file_match bin/hello-world
 check_file_match var/lib/mmpack/metadata/hello.sha256sums
+
+export MMPACK_DISABLE_IMPORT_OTHER_PREFIX=true
+mmpack -p $prefix2 remove -y hello-data
+mmpack -p $prefix2 install -y hello
+
+! check_file_match bin/hello-world
+! check_file_match var/lib/mmpack/metadata/hello.sha256sums

@@ -35,6 +35,9 @@ prepare_env()
 
 	# prevent loading user global configuration
 	export XDG_CONFIG_HOME=/non-existing-dir
+
+	# by default run tests with without sharing installed packages
+	export MMPACK_DISABLE_IMPORT_OTHER_PREFIX=true
 }
 
 # clean the files and repositories necessary for the tests

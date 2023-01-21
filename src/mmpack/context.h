@@ -15,6 +15,8 @@
 #define CTX_SKIP_PKGLIST 0x01
 #define CTX_SKIP_REDIRECT_LOG 0x02
 
+#define CTX_DISABLE_IMPORT_OTHER_PREFIX (1 << 0)
+
 struct mmpack_opts {
 	const char* prefix;
 	const char* version;
@@ -31,6 +33,7 @@ struct mmpack_opts {
  * @prefix:     path to the root of folder to use for prefix
  * @cwd:        path to where mmpack was invoked
  * @pkgcachedir: path to downloaded package cache folder
+ * @flags:      flags
  */
 struct mmpack_ctx {
 	CURL * curl;
@@ -43,6 +46,7 @@ struct mmpack_ctx {
 	mmstr* prefix;
 	mmstr* cwd;
 	mmstr* pkgcachedir;
+	int flags;
 };
 
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts);
