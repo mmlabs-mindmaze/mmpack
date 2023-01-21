@@ -14,7 +14,6 @@
 #include <yaml.h>
 
 #include <mmerrno.h>
-#include <mmlib.h>
 
 #include "binpkg.h"
 #include "buffer.h"
@@ -160,38 +159,6 @@ const char* const field_names[] = {
 
 
 static
-int get_bool_value(struct strchunk val)
-{
-	char tmp[8] = "";
-
-	if ((size_t)val.len > sizeof(tmp) - 1)
-		goto error;
-
-	memcpy(tmp, val.buf, val.len);
-	if (mm_strcasecmp(tmp, "true") == 0)
-		return 1;
-	else if (mm_strcasecmp(tmp, "false") == 0)
-		return 0;
-	else if (mm_strcasecmp(tmp, "on") == 0)
-		return 1;
-	else if (mm_strcasecmp(tmp, "off") == 0)
-		return 0;
-	else if (mm_strcasecmp(tmp, "yes") == 0)
-		return 1;
-	else if (mm_strcasecmp(tmp, "no") == 0)
-		return 0;
-	else if (mm_strcasecmp(tmp, "y") == 0)
-		return 1;
-	else if (mm_strcasecmp(tmp, "n") == 0)
-		return 0;
-
-error:
-	mm_raise_error(EINVAL, "invalid bool value: %.*s", val.len, val.buf);
-	return -1;
-}
-
-
-static
 enum field_type get_field_type(struct strchunk key)
 {
 	int i;
@@ -309,8 +276,7 @@ int set_binpkg_field(struct binpkg * pkg,
 			return update_mmstr(&pkg->desc, value);
 
 	case FIELD_GHOST:
-		bval = get_bool_value(value);
-		if (bval == -1)
+		if (strchunk_parse_bool(&bval, value))
 			return -1;
 
 		binpkg_update_flags(pkg, MMPKG_FLAGS_GHOST, bval);

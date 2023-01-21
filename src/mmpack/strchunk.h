@@ -271,6 +271,7 @@ struct strchunk strchunk_extract(struct strchunk sc, const char* charset)
 
 
 int strchunk_parse_size(size_t* szval, struct strchunk sc);
+int strchunk_parse_bool(int* val, struct strchunk sc);
 
 
 #endif /* ifndef STRCHUNK_H */

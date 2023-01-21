@@ -6,6 +6,7 @@
 #endif
 
 #include <mmerrno.h>
+#include <mmlib.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -70,5 +71,51 @@ int strchunk_parse_size(size_t* szval, struct strchunk sv)
 
 error:
 	mm_raise_error(errcode, "fails to convert %.*s", sv.len, sv.buf);
+	return -1;
+}
+
+
+
+/**
+ * strchunk_parse_bool() - convert strchunk into 0 or 1 int
+ * @val:        pointer to int receiving the converted value
+ * @sc:         strchunk holding the string to convert
+ *
+ * Returns: 0 in case of success, -1 otherwise with error state set.
+ */
+LOCAL_SYMBOL
+int strchunk_parse_bool(int* val, struct strchunk sc)
+{
+	int bval = -1;
+	char tmp[8] = "";
+
+	if ((size_t)sc.len > sizeof(tmp) - 1)
+		goto error;
+
+	memcpy(tmp, sc.buf, sc.len);
+	if (mm_strcasecmp(tmp, "true") == 0)
+		bval = 1;
+	else if (mm_strcasecmp(tmp, "false") == 0)
+		bval = 0;
+	else if (mm_strcasecmp(tmp, "on") == 0)
+		bval = 1;
+	else if (mm_strcasecmp(tmp, "off") == 0)
+		bval = 0;
+	else if (mm_strcasecmp(tmp, "yes") == 0)
+		bval = 1;
+	else if (mm_strcasecmp(tmp, "no") == 0)
+		bval = 0;
+	else if (mm_strcasecmp(tmp, "y") == 0)
+		bval = 1;
+	else if (mm_strcasecmp(tmp, "n") == 0)
+		bval = 0;
+
+	if (bval != -1) {
+		*val = bval;
+		return 0;
+	}
+
+error:
+	mm_raise_error(EINVAL, "invalid bool value: %.*s", sc.len, sc.buf);
 	return -1;
 }
