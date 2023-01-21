@@ -825,6 +825,9 @@ void import_pkgs_from_other_prefixes(struct mmpack_ctx* ctx,
 	struct strset_iterator iter;
 	const mmstr* prefix;
 
+	if (ctx->flags & CTX_DISABLE_IMPORT_OTHER_PREFIX)
+		return;
+
 	strset_init(&known_prefixes, STRSET_HANDLE_STRINGS_MEM);
 	if (load_other_prefixes(&known_prefixes, ctx->prefix))
 		goto exit;
