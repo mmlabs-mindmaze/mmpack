@@ -124,10 +124,11 @@ void cleanup_cachedir(const mmstr* cachedir, int keep_time_sec)
 	dir = mm_opendir(".");
 	while ((entry = mm_readdir(dir, NULL))) {
 		if (entry->type != MM_DT_REG
-		    || mm_stat(entry->name, &buf, MM_NOFOLLOW)
-		    || (now.tv_sec - buf.atime) > keep_time_sec
-		    || mm_unlink(entry->name))
+		    || mm_stat(entry->name, &buf, MM_NOFOLLOW))
 			continue;
+
+		if ((now.tv_sec - buf.atime) > keep_time_sec)
+			mm_unlink(entry->name);
 	}
 	mm_closedir(dir);
 
