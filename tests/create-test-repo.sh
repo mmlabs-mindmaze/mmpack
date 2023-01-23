@@ -14,6 +14,7 @@ fi
 # prepend src folder to PYTHONPATH
 srcdir=$(readlink -f $(dirname $0)/../src)
 export PYTHONPATH="$srcdir${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONDONTWRITEBYTECODE=true
 
 modifyrepo="python3 -m repository"
 
