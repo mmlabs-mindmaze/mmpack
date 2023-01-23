@@ -150,8 +150,6 @@ LOCAL_SYMBOL
 int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 {
 	const char* prefix;
-	mmstr * cwd;
-	int len = 512;
 
 	memset(ctx, 0, sizeof(*ctx));
 	settings_init(&ctx->settings);
@@ -180,15 +178,11 @@ int mmpack_ctx_init(struct mmpack_ctx * ctx, struct mmpack_opts* opts)
 		ctx->prefix = mmstr_malloc_from_cstr(prefix);
 	}
 
-	cwd = mmstr_malloc(len);
-	while (!mm_getcwd(cwd, len)) {
-		len = len * 2;
-		mm_check(len > 0);
-		cwd = mmstr_realloc(cwd, len);
+	ctx->cwd = mmstr_getcwd();
+	if (!ctx->cwd) {
+		mm_log_error("Failed to get current dir");
+		return -1;
 	}
-
-	ctx->cwd = cwd;
-	mmstr_setlen(ctx->cwd, strlen(ctx->cwd));
 
 	return 0;
 }

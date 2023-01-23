@@ -54,6 +54,7 @@ mmstr* expand_abspath(const char* path);
 
 mmstr* mmstr_basename(mmstr* restrict basepath, const mmstr* restrict path);
 mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path);
+mmstr* mmstr_getcwd(void);
 mmstr* mmstr_tmppath_from_path(mmstr* restrict dst, const mmstr* restrict path,
                                int suffix);
 mmstr* mmstr_join_path(mmstr* restrict dst,
