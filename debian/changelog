@@ -1,8 +1,13 @@
-mmpack (0.7.8) UNRELEASED; urgency=medium
+mmpack (0.7.8) unstable; urgency=medium
 
   * Use nettle library for computing SHA256.
+  * packages can be installed from other prefixes where they are already
+    installed (disabled with MMPACK_DISABLE_IMPORT_OTHER_PREFIX env var).
+  * file of installed package are checked against their expected hash upon
+    installation.
+  * fix cache cleanup in mmpack.
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Sun, 20 Nov 2022 16:11:46 +0100
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Tue, 24 Jan 2023 00:47:38 +0100
 
 mmpack (0.7.7) unstable; urgency=medium
 
