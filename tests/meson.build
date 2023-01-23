@@ -120,6 +120,7 @@ env.set('BUILDDIR', meson.project_build_root())
 env.set('TESTSDIR', meson.current_build_dir())
 env.set('REPO', repo_dir)
 env.set('MMPACK_BUILD_LICENSES_DIR', meson.project_source_root() / 'data' / 'common-licenses')
+env.set('PYTHONDONTWRITEBYTECODE', 'true')
 env.prepend('PYTHONPATH', python_path_value)
 
 
