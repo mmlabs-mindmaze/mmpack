@@ -135,6 +135,35 @@ mmstr* mmstr_dirname(mmstr* restrict dirpath, const mmstr* restrict path)
 
 
 /**
+ * mmstr_getcwd() - Get current directory as mmstr*
+ *
+ * Returns: mmstr* pointing to current directory in case of success, NULL
+ * otherwise with error state set accordingly. Dispose with mmstr_free().
+ */
+LOCAL_SYMBOL
+mmstr* mmstr_getcwd(void)
+{
+	int len = 512;
+	mmstr* cwd;
+
+	cwd = mmstr_malloc(len);
+	while (!mm_getcwd(cwd, len)) {
+		if (mm_get_lasterror_number() != ERANGE) {
+			mmstr_free(cwd);
+			return NULL;
+		}
+
+		len = len * 2;
+		mm_check(len > 0);
+		cwd = mmstr_realloc(cwd, len);
+	}
+
+	mmstr_setlen(cwd, strlen(cwd));
+	return cwd;
+}
+
+
+/**
  * mmstr_tmppath_from_path() - generate a name suitable for atomic rename
  * @dst:        pointer to mmstr* string to update or NULL
  * @path:       final path to which the file will be renamed
