@@ -5,9 +5,6 @@ packaging as mmpack file.
 """
 
 import os
-
-from glob import glob
-from os.path import isdir
 from typing import Any, List, Dict, TextIO
 
 from .common import *
@@ -72,13 +69,14 @@ def _gen_sha256sums(sha256sums_path: str):
     """
     # Compute hashes of all installed files
     cksums = {}
-    for filename in glob('**', recursive=True):
-        # skip folder and MMPACK/info
-        if isdir(filename) or filename == 'MMPACK/info':
+    for dirpath, _, filenames in os.walk('.'):
+        dirpath = dirpath.removeprefix('./')
+        if dirpath == 'MMPACK':
             continue
 
-        # Add file with checksum
-        cksums[filename] = sha256sum(filename, follow_symlink=False)
+        for filename in filenames:
+            path = dirpath + '/' + filename
+            cksums[path] = sha256sum(path, follow_symlink=False)
 
     # Write the file sha256sums file
     with open(sha256sums_path, 'wt', newline='\n', encoding='utf-8') as stream:
