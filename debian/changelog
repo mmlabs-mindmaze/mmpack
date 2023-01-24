@@ -1,3 +1,9 @@
+mmpack (0.7.9) UNRELEASED; urgency=medium
+
+  * Hidden files are now properly listed in sha256sums file of packages.
+
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Tue, 24 Jan 2023 21:13:55 +0100
+
 mmpack (0.7.8) unstable; urgency=medium
 
   * Use nettle library for computing SHA256.
