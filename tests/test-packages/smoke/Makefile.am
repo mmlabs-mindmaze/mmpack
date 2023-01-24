@@ -33,6 +33,9 @@ libhello_la_LDFLAGS = \
 	-no-undefined \
 	-version-info 1:0:0
 
+hiddendir = $(pkgdatadir)/.hidden
+hidden_DATA = afile
+
 hello_world_SOURCES = hello-world.c
 hello_world_LDADD = libhello.la
 

@@ -35,6 +35,10 @@ install_data(files('shell-exec.py'),
         install_dir : get_option('bindir'),
 )
 
+install_data(files('afile'),
+        install_dir : get_option('datadir') / meson.project_name() / '.hidden',
+)
+
 executable('libexec-world',
         'libexec-world.c',
         install : true,

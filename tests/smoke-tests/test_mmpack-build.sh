@@ -43,6 +43,7 @@ tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep libexec/hello/libexec-world
 tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep var/lib/mmpack/metadata/hello.sha256sums
 tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep share/licenses/hello/dummy
 tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep share/licenses/hello/copyright
+tar -tvf $MMPACK_BUILD_OUTDIR/hello_*.mpk | grep share/hello/.hidden/afile
 
 tar -tvf $MMPACK_BUILD_OUTDIR/hello-devel_*.mpk | grep include/libhello.h
 tar -tvf $MMPACK_BUILD_OUTDIR/hello-devel_*.mpk | grep -e lib/libhello.dll.a -e lib/libhello.so
@@ -52,6 +53,19 @@ tar -tvf $MMPACK_BUILD_OUTDIR/hello-devel_*.mpk | grep share/licenses/hello-deve
 tar -tvf $MMPACK_BUILD_OUTDIR/libhello*.mpk | grep -e lib/libhello.so.1.0.0 -e bin/libhello-1.dll
 tar -tvf $MMPACK_BUILD_OUTDIR/libhello*.mpk | grep -P share/licenses/libhello[0-9]*/copyright
 tar -tvf $MMPACK_BUILD_OUTDIR/libhello*.mpk | grep -P share/licenses/libhello[0-9]*/dummy
+
+# check that package sumsha list expected files
+sumsha=$TMP_BUILD/sha256sums
+tar -x -O -f $MMPACK_BUILD_OUTDIR/hello_*.mpk ./var/lib/mmpack/metadata/hello.sha256sums > $sumsha
+! grep -q MMPACK/info $sumsha
+grep -q bin/hello-world $sumsha
+grep -q bin/head-libexec-world $sumsha
+grep -q bin/shell-exec.py $sumsha
+grep -q libexec/hello/libexec-world $sumsha
+! grep -q var/lib/mmpack/metadata/hello.sha256sums $sumsha
+grep -q share/licenses/hello/dummy $sumsha
+grep -q share/licenses/hello/copyright $sumsha
+grep -q share/hello/.hidden/afile $sumsha
 
 # check that the package files are well formed
 pushd $TMP_BUILD
