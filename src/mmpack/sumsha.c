@@ -93,7 +93,7 @@ int sumsha_reader_next(struct sumsha_reader* reader,
 	struct strchunk line;
 	int pos;
 
-	if (reader->data.len == 0)
+	if (reader->failure || reader->data.len == 0)
 		return 0;
 
 	line = strchunk_getline(&reader->data);
