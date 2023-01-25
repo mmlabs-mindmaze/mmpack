@@ -188,6 +188,7 @@ int sumsha_load(struct sumsha* sumsha, const char* sumsha_path)
 	struct strchunk path, hash;
 	struct sumsha_entry* entry;
 	struct it_entry* idx_entry;
+	const mmstr* key;
 	int i;
 
 	if (sumsha_reader_init(&reader, sumsha_path))
@@ -202,9 +203,16 @@ int sumsha_load(struct sumsha* sumsha, const char* sumsha_path)
 		sumsha_reader_parse_typed_hash(&reader, &entry->hash, hash);
 
 		// Insert sumsha entry in indextable
-		idx_entry = indextable_insert(&sumsha->idx, entry->path.buf);
-		idx_entry->key = entry->path.buf;
-		idx_entry->value = entry;
+		key = entry->path.buf;
+		idx_entry = indextable_lookup_create(&sumsha->idx, key);
+		if (idx_entry->value) {
+			mm_raise_error(EBADMSG, "Multiple %s in sumsha %s",
+			               key, sumsha_path);
+			reader.failure = 1;
+			free(entry);
+		} else {
+			idx_entry->value = entry;
+		}
 	}
 
 	return sumsha_reader_deinit(&reader);
