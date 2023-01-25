@@ -168,6 +168,12 @@ int check_unpacked_integrity(const struct binpkg* pkg,
 			goto exit;
 	}
 
+	if (idx < sumsha.num_entries + 1) {
+		mm_raise_error(EBADMSG, "Some file referenced in sumsha have"
+		               " not be found in tarball");
+		goto exit;
+	}
+
 	rv = 0;
 
 exit:
