@@ -13,6 +13,7 @@
 
 struct sumsha {
 	struct indextable idx;
+	int num_entries;
 };
 
 

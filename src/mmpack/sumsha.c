@@ -154,6 +154,7 @@ LOCAL_SYMBOL
 void sumsha_init(struct sumsha* sumsha)
 {
 	indextable_init(&sumsha->idx, 64, -1);
+	sumsha->num_entries = 0;
 }
 
 
@@ -212,6 +213,7 @@ int sumsha_load(struct sumsha* sumsha, const char* sumsha_path)
 			free(entry);
 		} else {
 			idx_entry->value = entry;
+			sumsha->num_entries++;
 		}
 	}
 
