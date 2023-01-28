@@ -292,9 +292,13 @@ int fschange_unpack_mpk(struct fschange* fsc, const char* mpk_filename, const ch
 	tarstream_close(&tar);
 	mmstr_free(path);
 
-	if (rv == READ_ARCHIVE_EOF)
+	if (rv == READ_ARCHIVE_EOF) {
+		if (fsc->ctx->flags & CTX_DISABLE_CHECK_MPK_INTEGRITY)
+			return 0;
+
 		rv = check_unpacked_integrity(fsc->curr_action->pkg,
 		                              &fsc->inst_files, unpackdir);
+	}
 
 	return rv;
 }

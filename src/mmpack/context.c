@@ -93,6 +93,7 @@ int load_prefix_config(struct mmpack_ctx* ctx)
 	mmstr_freea(filename);
 
 	ctx->flags |= ctx_env_flags(DISABLE_IMPORT_OTHER_PREFIX, 0);
+	ctx->flags |= ctx_env_flags(DISABLE_CHECK_MPK_INTEGRITY, 0);
 
 	return rv;
 }
