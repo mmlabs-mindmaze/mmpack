@@ -16,6 +16,7 @@
 #define CTX_SKIP_REDIRECT_LOG 0x02
 
 #define CTX_DISABLE_IMPORT_OTHER_PREFIX (1 << 0)
+#define CTX_DISABLE_CHECK_MPK_INTEGRITY (2 << 0)
 
 struct mmpack_opts {
 	const char* prefix;

@@ -72,6 +72,10 @@ This section describes the environment variables that affect how
   installed from a mmpack package (downloaded, in cache or supplied on command
   line).
 
+``MMPACK_DISABLE_CHECK_MPK_INTEGRITY``
+  When unpacking a mpk package, its integrity is verified. If this environment
+  variable is set to true, the check is bypassed.
+
 
 EXAMPLE
 =======
