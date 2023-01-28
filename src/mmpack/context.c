@@ -46,13 +46,40 @@ int load_user_config(struct mmpack_ctx* ctx)
 }
 
 
+/**
+ * get_env_flags() - set flags according to environment variable
+ * @flags_val:  value to return if env is set
+ * @envvar:     environment variable to read
+ * @defval:     default state if @envvar is missing or invalid value
+ *
+ * Return: flags_val if @envvar (or @defval in case of fallback)  is set to
+ * value equivalent to true, 0 if equivalent to false.
+ */
+static
+int get_env_flags(int flags_val, const char* envvar, int defval)
+{
+	int bval;
+	const char* val;
+
+	// read env val and parse it to bool.
+	// Revert to defval if env is missing or value parsing fails.
+	if (!(val = mm_getenv(envvar, NULL))
+	    || strchunk_parse_bool(&bval, (struct strchunk) {val, strlen(val)}))
+		bval = defval;
+
+	return bval ? flags_val : 0;
+}
+
+#define ctx_env_flags(suffix, defval) \
+	get_env_flags(CTX_ ## suffix, "MMPACK_"#suffix, defval)
+
+
 static
 int load_prefix_config(struct mmpack_ctx* ctx)
 {
 	STATIC_CONST_MMSTR(cfg_relpath, CFG_RELPATH);
 	mmstr* filename;
-	int rv, len, bval;
-	const char* val;
+	int rv, len;
 
 	// Reset any previously loaded configuration
 	settings_reset(&ctx->settings);
@@ -65,11 +92,7 @@ int load_prefix_config(struct mmpack_ctx* ctx)
 
 	mmstr_freea(filename);
 
-	val = mm_getenv("MMPACK_DISABLE_IMPORT_OTHER_PREFIX", "no");
-	if (strchunk_parse_bool(&bval, (struct strchunk) {val, strlen(val)}))
-		return -1;
-
-	ctx->flags |= bval ? CTX_DISABLE_IMPORT_OTHER_PREFIX : 0;
+	ctx->flags |= ctx_env_flags(DISABLE_IMPORT_OTHER_PREFIX, 0);
 
 	return rv;
 }
