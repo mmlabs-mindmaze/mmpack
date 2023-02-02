@@ -1,8 +1,10 @@
-mmpack (0.7.9) UNRELEASED; urgency=medium
+mmpack (0.7.9) unstable; urgency=medium
 
   * Hidden files are now properly listed in sha256sums file of packages.
+  * validate file integrity upon mpk unpacking (disabled with
+    MMPACK_DISABLE_CHECK_MPK_INTEGRITY env var).
 
- -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Tue, 24 Jan 2023 21:13:55 +0100
+ -- Nicolas Bourdaud <nicolas.bourdaud@gmail.com>  Thu, 02 Feb 2023 06:31:06 +0100
 
 mmpack (0.7.8) unstable; urgency=medium
 
