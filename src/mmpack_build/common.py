@@ -488,7 +488,7 @@ def _reset_entry_attrs(tarinfo: tarfile.TarInfo):
     # required by some file to be usable are wrongly dropped (like .dll needing
     # execution permission)
     if get_host_dist() == 'windows':
-        ext, _ = os.path.splitext(tarinfo.name)
+        _, ext = os.path.splitext(tarinfo.name)
         if ext.lower() in ('.dll', '.pyd'):
             tarinfo.mode = 0o755
 
