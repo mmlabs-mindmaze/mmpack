@@ -19,7 +19,7 @@ from typing import (Set, Dict, List, Iterable, Iterator, NamedTuple, Optional,
                     Tuple)
 
 from .base_hook import BaseHook
-from .common import shell, Assert, iprint, rmfile, rmtree_force
+from .common import shell, Assert, iprint, rmfile, rmtree_force, wprint
 from .file_utils import filetype
 from .package_info import PackageInfo, DispatchData
 from .prefix import cmd_in_optional_prefix
@@ -466,7 +466,8 @@ class MMPackBuildHook(BaseHook):
             if not sysdep:
                 # <pypkg> dependency could not be met with any available means
                 msg = f"Couldn't find package providing {pypkg} python package"
-                raise Assert(msg)
+                wprint(msg)
+                continue
 
             currpkg.add_sysdep(sysdep)
 

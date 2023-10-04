@@ -13,7 +13,7 @@ from importlib import import_module
 from typing import List, TextIO, Iterator, Optional
 
 from .common import *
-from .errors import MMPackBuildError
+from .errors import MMPackBuildError, ShellException
 from .mm_version import Version
 from .syspkg_manager_base import SysPkgManager, SysPkg
 from .workspace import cached_download
@@ -237,9 +237,12 @@ def dpkg_find_pypkg(pypkg: str) -> str:
     """
     # dpkg -S accept a glob-like pattern
     pattern = f'/usr/lib/python3/dist-packages/{pypkg}[/|.py|.*.so]*'
-    cmd_output = shell(['dpkg', '--search', pattern])
-    debpkg_list = list({r.split(':')[0] for r in cmd_output.splitlines()})
-    return debpkg_list[0] if debpkg_list else None
+    try:
+        cmd_output = shell(['dpkg', '--search', pattern])
+        debpkg_list = list({r.split(':')[0] for r in cmd_output.splitlines()})
+        return debpkg_list[0] if debpkg_list else None
+    except ShellException:
+        return None
 
 
 class DebPkg(SysPkg):
