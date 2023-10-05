@@ -324,7 +324,7 @@ class DebRepo:
                     cached_download(comp_url, filename,
                                     expected_sha256=shalist[comp_res][0])
                     self.pkgs_index_list.append(filename)
-                    return
+                    break
 
     def pkgs(self) -> Iterator[DebPkg]:
         """
