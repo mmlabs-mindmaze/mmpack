@@ -10,7 +10,7 @@ from email import message_from_bytes, message_from_string
 from functools import partial
 from glob import glob
 from importlib import import_module
-from typing import List, TextIO, Iterator, NamedTuple, Optional
+from typing import List, TextIO, Iterable, Iterator, NamedTuple, Optional
 
 from .common import *
 from .errors import MMPackBuildError, ShellException
@@ -268,6 +268,7 @@ class DebPkg(SysPkg):
         self.filename = msg['Filename']
         self.sha256 = msg['SHA256']
         self.desc = msg['Description']
+        self.desc_md5 = msg['Description-md5']
 
         if not self.source:
             self.source = self.name
@@ -286,7 +287,7 @@ def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
             pkg_str += line
             continue
 
-        yield DebPkg(pkg_str)
+        yield pkg_str
         pkg_str = ''
 
 
@@ -338,14 +339,35 @@ class DebRepo:
         raise MMPackBuildError(f'cannot find {res} in '
                                f'{self._base_url} {self._comp}')
 
+    def translate_pkgs(self, pkgs: Iterable[DebPkg]):
+        """Replace short description of package with long description."""
+        md5_pkg = {p.desc_md5: p for p in pkgs if p.desc_md5 is not None}
+
+        # Download translation, but missing one is not an error
+        try:
+            filename = self._fetch_distfile('i18n/Translation-en')
+        except MMPackBuildError:
+            return
+
+        # Read translation and try to load description matching package
+        with open_compressed_file(filename, encoding='utf-8') as fileobj:
+            for entry in _list_debpkg_index(fileobj):
+                msg = message_from_string(entry)
+                md5 = msg['Description-md5']
+                if md5 in md5_pkg:
+                    body = msg['Description-en'].partition('\n ')[2]
+                    body = body.replace('\n .\n ', '\n')
+                    body = body.replace('\n ', ' ')
+                    md5_pkg[md5].desc = body
+
     def pkgs(self) -> Iterator[DebPkg]:
         """
         Iterator of package in the distribution
         """
         index = self._fetch_distfile(f'binary-{self._arch}/Packages')
         with open_compressed_file(index, encoding='utf-8') as fileobj:
-            for pkg in _list_debpkg_index(fileobj):
-                yield pkg
+            for entry in _list_debpkg_index(fileobj):
+                yield DebPkg(entry)
 
 
 def _get_repo(srcnames: List[str]) -> (str, str):
@@ -433,6 +455,7 @@ class Dpkg(SysPkgManager):
             # If list of binary package is not empty, we don't have to test for
             # other source name alternative.
             if pkg_list:
+                repo.translate_pkgs(pkg_list)
                 return pkg_list
 
         raise MMPackBuildError(f'Could not find {srcnames} in'
