@@ -258,7 +258,7 @@ class DebPkg(SysPkg):
         'Description': 'desc',
     }
 
-    def __init__(self, pkg_str: str):
+    def __init__(self, pkg_str: str, desc_md5s: dict[str, str]):
         super().__init__()
 
         msg = message_from_string(pkg_str)
@@ -267,7 +267,10 @@ class DebPkg(SysPkg):
         self.source = msg['Source']
         self.filename = msg['Filename']
         self.sha256 = msg['SHA256']
-        self.desc = msg['Description']
+        if desc_md5s:
+            self.desc = desc_md5s[msg['Description-md5']]
+        else:
+            self.desc = msg['Description']
 
         if not self.source:
             self.source = self.name
@@ -286,7 +289,7 @@ def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
             pkg_str += line
             continue
 
-        yield DebPkg(pkg_str)
+        yield pkg_str
         pkg_str = ''
 
 
@@ -308,10 +311,11 @@ class DebRepo:
         self._arch = arch if arch else get_host_arch()
         self._shalist: dict[str, _FileInfo]
         self._pkgs_index_list: list[str] = []
+        self._pkg_desc: dict[str, str] = {}
 
         components = self._load_release()
         for comp in components:
-            self._update_pkgs_list(comp)
+            self._update_pkgs_list(comp, True)
 
     def _load_release(self) -> list[str]:
         dist_url = f'{self._baseurl}/dists/{self._dist}/Release'
@@ -339,11 +343,21 @@ class DebRepo:
 
         raise MMPackBuildError(f'cannot find {comp_res} in {self._baseurl}')
 
-    def _update_pkgs_list(self, comp: str):
+    def _update_pkgs_list(self, comp: str, load_translation: bool):
         for arch in (self._arch, 'all'):
             res = f'{comp}/binary-{arch}/Packages'
             filename = self._fetch_package_list(res)
             self._pkgs_index_list.append(filename)
+
+        if not load_translation:
+            return
+
+        res = f'{comp}/i18n/Translation-en'
+        filename = self._fetch_package_list(res)
+        with open_compressed_file(filename, encoding='utf-8') as fileobj:
+            for entry in _list_debpkg_index(fileobj):
+                msg = message_from_string(entry)
+                self._pkg_desc[msg['Description-md5']] = msg['Description-en']
 
     def pkgs(self) -> Iterator[DebPkg]:
         """
@@ -351,8 +365,8 @@ class DebRepo:
         """
         for index in self._pkgs_index_list:
             with open_compressed_file(index, encoding='utf-8') as fileobj:
-                for pkg in _list_debpkg_index(fileobj):
-                    yield pkg
+                for entry in _list_debpkg_index(fileobj):
+                    yield DebPkg(entry, self._pkg_desc)
 
 
 def _get_repo(srcnames: List[str]) -> (str, str):
