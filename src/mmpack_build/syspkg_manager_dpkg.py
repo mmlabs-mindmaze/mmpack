@@ -10,7 +10,7 @@ from email import message_from_bytes, message_from_string
 from functools import partial
 from glob import glob
 from importlib import import_module
-from typing import List, TextIO, Iterator, Optional
+from typing import List, TextIO, Iterator, NamedTuple, Optional
 
 from .common import *
 from .errors import MMPackBuildError, ShellException
@@ -261,11 +261,13 @@ class DebPkg(SysPkg):
     def __init__(self, pkg_str: str):
         super().__init__()
 
-        for key, value in message_from_string(pkg_str).items():
-            try:
-                setattr(self, self.desc_field_to_attr[key], value)
-            except KeyError:
-                continue
+        msg = message_from_string(pkg_str)
+        self.name = msg['package']
+        self.version = msg['Version']
+        self.source = msg['Source']
+        self.filename = msg['Filename']
+        self.sha256 = msg['SHA256']
+        self.desc = msg['Description']
 
         if not self.source:
             self.source = self.name
@@ -288,49 +290,73 @@ def _list_debpkg_index(fileobj: TextIO) -> Iterator[DebPkg]:
         pkg_str = ''
 
 
+class _FileInfo(NamedTuple):
+    size: str
+    sha: str
+    filename: str
+
+
 class DebRepo:
     """
     Wrapper of Debian repository
     """
     def __init__(self, url: str, dist: str, builddir: str,
                  arch: Optional[str] = None):
-        self.components = []
-        self.baseurl = url
-        self.dist = dist
-        self.arch = arch if arch else get_host_arch()
-        self.pkgs_index_list = []
+        self._baseurl = url
+        self._dist = dist
+        self._builddir = builddir
 
-        self._update_pkgs_index_list(builddir)
-
-    def _update_pkgs_index_list(self, builddir: str):
-        dist_url = f'{self.baseurl}/dists/{self.dist}/Release'
+        dist_url = f'{self._baseurl}/dists/{self._dist}/Release'
         release = message_from_bytes(get_http_req(dist_url).data)
-        archs = release['Architectures'].split()
-        components = release['Components'].split()
-        shalist = {c[2]: (c[0], c[1]) for c in
-                   [f.strip().split()
-                    for f in release['SHA256'].strip().split('\n')]}
 
-        if self.arch not in archs:
-            raise MMPackBuildError(f'No dist for {self.arch} in {dist_url}')
+        sha_section = release['SHA256'].strip().split('\n')
+        self._shalist = {c[2]: _FileInfo(filename=c[2], sha=c[0], size=c[1])
+                         for c in [f.strip().split() for f in sha_section]}
 
-        for comp in components:
-            for ext in ('.gz', '.xz', ''):
-                comp_res = f'{comp}/binary-{self.arch}/Packages{ext}'
-                if comp_res in shalist:
-                    comp_url = f'{self.baseurl}/dists/{self.dist}/{comp_res}'
-                    filename = os.path.join(builddir,
-                                            comp_res.replace('/', '_'))
-                    cached_download(comp_url, filename,
-                                    expected_sha256=shalist[comp_res][0])
-                    self.pkgs_index_list.append(filename)
-                    break
+        arch = arch or get_host_arch()
+        archs = set(release['Architectures'].split())
+        self._archs = archs.intersection({arch, 'all'})
+        if arch not in self._archs:
+            raise MMPackBuildError(f'No dist for {arch} in {dist_url}')
+
+        self._pkgs_index_list: list[str] = []
+        for comp in release['Components'].split():
+            self._update_pkgs_list(comp)
+
+    def _load_release(self) -> list[str]:
+        dist_url = f'{self._baseurl}/dists/{self._dist}/Release'
+        release = message_from_bytes(get_http_req(dist_url).data)
+        self._archs = set(release['Architectures'].split())
+        sha_section = release['SHA256'].strip().split('\n')
+        self._shalist = {c[2]: _FileInfo(filename=c[2], sha=c[0], size=c[1])
+                         for c in [f.strip().split() for f in sha_section]}
+
+        return release['Components'].split()
+
+    def _fetch_package_list(self, res: str) -> str:
+        for ext in ('.gz', '.xz', '.bz2', ''):
+            comp_res = res + ext
+            if comp_res in self._shalist:
+                comp_url = f'{self._baseurl}/dists/{self._dist}/{comp_res}'
+                filename = os.path.join(self._builddir,
+                                        comp_res.replace('/', '_'))
+                cached_download(comp_url, filename,
+                                expected_sha256=self._shalist[comp_res].sha)
+                return filename
+
+        raise MMPackBuildError(f'cannot find {comp_res} in {self._baseurl}')
+
+    def _update_pkgs_list(self, comp: str):
+        for arch in self._archs:
+            res = f'{comp}/binary-{arch}/Packages'
+            filename = self._fetch_package_list(res)
+            self._pkgs_index_list.append(filename)
 
     def pkgs(self) -> Iterator[DebPkg]:
         """
         Iterator of package in the distribution
         """
-        for index in self.pkgs_index_list:
+        for index in self._pkgs_index_list:
             with open_compressed_file(index, encoding='utf-8') as fileobj:
                 for pkg in _list_debpkg_index(fileobj):
                     yield pkg
