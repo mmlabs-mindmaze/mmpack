@@ -41,6 +41,8 @@ build_debian_repo() {
 	do
 		dpkg-deb -f $debfile dpkg-deb -f $debfile Package Source Version Architecture Maintainer Installed-Size Depends Section Description
 		cp $debfile $pooldir
+		description_md5=($(dpkg-deb -f $debfile Description | md5sum))
+		echo "Description-md5: $description_md5"
 		echo "Filename: pool/$(basename $debfile)"
 		echo ""
 	done | gzip > $pkgfile
