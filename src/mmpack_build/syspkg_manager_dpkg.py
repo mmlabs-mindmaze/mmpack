@@ -268,7 +268,10 @@ class DebPkg(SysPkg):
         self.filename = msg['Filename']
         self.sha256 = msg['SHA256']
         if desc_md5s:
-            self.desc = desc_md5s[msg['Description-md5']]
+            desc = desc_md5s[msg['Description-md5']]
+            body = desc.partition('\n ')[2]
+            body = body.replace('\n .\n ', '\n').replace('\n ', ' ')
+            self.desc = body or desc
         else:
             self.desc = msg['Description']
 
