@@ -226,6 +226,8 @@ def create_ghost_specs(srcname: str):
     syspkgs = get_syspkg_mgr().parse_pkgindex(tmpdir, [srcname])
     rmtree(tmpdir)
 
+    print([s.desc for s in syspkgs])
+
     write_mmpack_specs({
         'name': srcname,
         'version': guess_version_from_syspkgs(syspkgs),
