@@ -19,6 +19,7 @@ from .file_utils import filetype
 from .prefix import new_mmpack_prefix_context, prefix_install, run_build_script
 from .source_strap_specs import SourceStrapSpecs
 from .workspace import Workspace, cached_download, find_project_root_folder
+from .builddeps_guess import guess_build_depends
 
 
 class ProjectSource(NamedTuple):
@@ -291,6 +292,8 @@ class SourceTarball:
         self._run_build_script('source_strapped',
                                specs.upstream_method or 'none', srcdir)
 
+        self._guess_build_depends(specs, srcdir)
+
     def _run_build_script(self, name: str, method: str,
                           execdir: str, env: Optional[Dict[str, str]] = None):
         if env is None:
@@ -558,3 +561,19 @@ class SourceTarball:
                 run_cmd(['patch', '-d', srcdir, '-p1'], stdin=patchfile)
 
         self.trace['patches'] = patches
+
+    def _guess_build_depends(self, specs: SourceStrapSpecs, srcdir: str):
+        guessed_deps = guess_build_depends(specs, srcdir)
+
+        specs_path = join_path(srcdir, 'mmpack/specs')
+        build_depends = specs_load(specs_path).get('build-depends', [])
+
+        guessed_deps.difference_update(set(build_depends))
+        if not guessed_deps:
+            return
+
+        # Add updated build dependencies at the end of specs.
+        with open(specs_path, 'a', encoding='utf-8') as stream:
+            stream.write('build-depends:\n')
+            for dep in build_depends + list(guessed_deps):
+                stream.write(f'- {dep}\n')

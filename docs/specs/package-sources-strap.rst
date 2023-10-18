@@ -50,6 +50,38 @@ others.
  :patches:
    list of patch files to applied on upstream sources after fetching them
 
+ :guess-build-depends:
+   Contains a dictionnary representing the configuration of the mechanism
+   guessing the build-depends to add in package specs.
+
+The guess-build-depends section
+```````````````````````````````
+It is possible to avoid to explicitly specify the build dependencies in the
+package specs and to guess them from project sources. In such a case the
+build-depends section of mmpack/specs is added when the mmpack source package
+is created, the guessed dependencies being specified in addition to possible
+build dependencies set already in package specs. The guess mechanism performed
+per build system (not all are supported).
+
+Several fields control the guess mechanism:
+
+ :from:
+   string or list of string of all build system that must be inspected. Can be
+   python or all. If unset, all build system section listed are implied
+
+ <build-system>
+   Only python is currently supported.
+
+The <build-system> section
+..........................
+  :ignore:
+    list of guessed used dependencies that must not generate a mmpack build
+    dependency.
+
+  :remap:
+    dictionary of used dependencies associated to the mmpack package name to
+    use in the build-depends list. Use it to fix a bad guessed package name.
+
 
 Token expansion
 ---------------
@@ -73,3 +105,16 @@ Examples
    method: tar
    url: https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.24.0.tar.xz
    sha256: 9f71d61973626d8b28c4cdf8e2484b4bf13870ed643fed982d68b2cfd754371b
+
+.. code-block:: yaml
+
+   guess-build-depends:
+     from: python
+
+.. code-block:: yaml
+
+   guess-build-depends:
+     python:
+       ignore: [Setuptools]
+       remap:
+         PyYaml: python3-yaml
