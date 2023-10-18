@@ -19,6 +19,7 @@ mmpack_build_sources = files(
         '__main__.py',
         'base_hook.py',
         'binary_package.py',
+        'builddeps_guess.py',
         'common.py',
         'decorators.py',
         'elf_utils.py',
