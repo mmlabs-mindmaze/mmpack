@@ -6,7 +6,7 @@ Fetch/gather sources of a mmpack package and create source tarball
 import os
 import re
 import shutil
-from copy import copy
+from copy import copy, deepcopy
 from os.path import abspath, basename, exists, join as join_path
 from subprocess import call, DEVNULL
 from tarfile import open as taropen, TarFile, TarInfo
@@ -333,6 +333,7 @@ class SourceTarball:
 
         self._fetch_upstream(specs, srcdir)
         self._patch_sources(specs.patches, srcdir)
+        self._guess_build_depends(specs, srcdir)
 
         # Run source strapped_hook
         self._run_build_script('source_strapped',
@@ -605,3 +606,36 @@ class SourceTarball:
                 run_cmd(['patch', '-d', srcdir, '-p1'], stdin=patchfile)
 
         self.trace['patches'] = patches
+
+    def _guess_build_depends(self, specs: SourceStrapSpecs, srcdir: str):
+        backends = {
+        }
+        cfg = deepcopy(specs.get('guess-build-depends', {}))
+        from_builders = cfg.pop('from', None)
+        if from_builders is None:
+            from_builders = list(cfg.keys())
+        elif from_builders == 'all':
+            from_builders = list(backend.keys())
+        elif isinstance(from_builders, str):
+            from_builders = list(from_builders)
+        
+        # Run builddeps guess for all listed builders
+        guessed_deps = set()
+        for builder in from_builders:
+            builder_cfg = cfg.get(builder, {})
+            guess_builddeps_func = backends.get(builder)
+            deps = guess_builddeps_func(builder_cfg, srcdir)
+            guessed_deps.update(deps)
+
+        specs_path = join_path(self._srcdir, 'mmpack/specs')
+        build_depends = specs_load(specs_path).get('build-depends', [])
+
+        guessed_deps.difference_update(build_depends)
+        if not guessed_deps:
+            return
+
+        # Add updated build dependencies at the end of specs.
+        with open(specs_path, 'w', encoding='utf-8') as stream:
+            stream.write('build-depends:\n')
+            for dep in build_depends + list(guessed_deps):
+                stream.write(f'- {dep}\n')
