@@ -13,12 +13,11 @@ from tarfile import open as taropen, TarFile, TarInfo
 from typing import Dict, Iterator, List, NamedTuple, Optional
 from zipfile import ZipFile
 
-import yaml
-
 from .common import *
 from .errors import DownloadError, MMPackBuildError, ShellException
 from .file_utils import filetype
 from .prefix import new_mmpack_prefix_context, prefix_install, run_build_script
+from .source_strap_specs import SourceStrapSpecs
 from .workspace import Workspace, cached_download, find_project_root_folder
 
 
@@ -30,52 +29,6 @@ class ProjectSource(NamedTuple):
     version: str
     tarball: str
     srcdir: str
-
-
-def _multiple_replace(lookup: Dict[str, str], text: str) -> str:
-    # Create a regular expression from all of the dictionary keys
-    regex = re.compile('|'.join(lookup.keys()))
-
-    # For each match, look up the corresponding value in the dictionary
-    return regex.sub(lambda match: lookup[match.group(0)], text)
-
-
-class SourceStrapSpecs:
-    """source-strap config"""
-
-    def __init__(self, srcdir: str):
-        name, version = get_name_version_from_srcdir(srcdir)
-        lookup = {
-            '@MMPACK_NAME@': name,
-            '@MMPACK_VERSION@': version,
-        }
-        try:
-            path = join_path(srcdir, 'mmpack/sources-strap')
-            with open(path, encoding='utf-8') as stream:
-                content = _multiple_replace(lookup, stream.read())
-                specs = yaml.load(content, Loader=yaml.BaseLoader)
-        except FileNotFoundError:
-            specs = {}
-
-        self.depends: List[str] = specs.pop('depends', [])
-        self.upstream_method: Optional[str] = specs.pop('method', None)
-        self.upstream_url: Optional[str] = specs.pop('url', None)
-        self.patches: List[str] = specs.pop('patches', [])
-        self._opts: Dict[str, str] = specs
-
-        self._validate()
-
-    def get(self, *args) -> Any:
-        """Get optional value"""
-        return self._opts.get(*args)
-
-    def _validate(self):
-        if self.upstream_method:
-            if self.upstream_method not in ('git', 'tar'):
-                raise Assert('Invalid method ' + self.upstream_method)
-
-            if not self.upstream_url:
-                raise Assert('upstream method specified but url missing')
 
 
 def _strip_leading_comp_tar_iter(tar: TarFile) -> Iterator[TarInfo]:

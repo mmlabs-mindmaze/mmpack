@@ -37,6 +37,7 @@ mmpack_build_sources = files(
         'pe_utils.py',
         'prefix.py',
         'provide.py',
+        'source_strap_specs.py',
         'source_tarball.py',
         'src_package.py',
         'syspkg_manager.py',
