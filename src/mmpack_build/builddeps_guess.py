@@ -5,6 +5,14 @@ Guess build_dependencies from sources
 
 from copy import deepcopy
 from typing import Any, Iterator
+from configparser import ConfigParser
+
+try:
+    from tomllib import load as toml_load
+except ImportError:
+    from tomli import load as toml_load
+
+from pkg_resources import Requirement
 
 from .source_strap_specs import SourceStrapSpecs
 
@@ -28,7 +36,46 @@ class _BuilddepsGuess:
                 for u in used_deps}
 
 
+class _BuilddepsGuessPython(_BuilddepsGuess):
+    def _iter_pyproject_builddeps(self, srcdir: str) -> list[str]:
+        try:
+            with open(f'{srcdir}/pyproject.toml', 'rb') as stream:
+                data = toml_load(stream)
+        except FileNotFoundError:
+            return []
+
+        return (data.get('build-system', {}).get('requires', [])
+                + data.get('project', {}).get('dependencies', []))
+
+    def _iter_setupcfg_builddeps(self, srcdir: str) -> list[str]:
+        try:
+            config = ConfigParser()
+            config.read(f'{srcdir}/setup.cfg')
+            deps_field = config['options']['install_requires']
+        except (FileNotFoundError, KeyError):
+            return []
+
+        return deps_field.strip().split('\n')
+
+    def _iter_guessed_used_builddeps(self, srcdir: str) -> Iterator[str]:
+        dep_strings = []
+        dep_strings += self._iter_pyproject_builddeps(srcdir)
+        dep_strings += self._iter_setupcfg_builddeps(srcdir)
+
+        for dep_string in dep_strings:
+            req = Requirement.parse(dep_string)
+            yield req.project_name
+
+    def _get_mmpack_dep(self, used: str) -> str:
+        name = used.lower().replace('-', '_')
+        if name.startswith('python_'):
+            name = name[len('python_'):]
+        name.translate({ord('_'): '-', ord('.'): '-'})
+        return 'python3-' + name
+
+
 _GUESS_BACKENDS: dict[str, _BuilddepsGuess] = {
+    'python': _BuilddepsGuessPython
 }
 
 
