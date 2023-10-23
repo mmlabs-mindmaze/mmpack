@@ -6,13 +6,16 @@ Guess build_dependencies from sources
 from copy import deepcopy
 from typing import Any, Iterator
 
+from tomli import load as toml_load
+from configparser import ConfigParser
+
 from .source_strap_specs import SourceStrapSpecs
 
 
 class _BuilddepsGuess:
     def __init__(self, cfg: dict[str, Any]):
-        self._ignore = set(cfg.get('ignore'))
-        self._remap = cfg.get('remap')
+        self._ignore = set(cfg.get('ignore', []))
+        self._remap = cfg.get('remap', {})
 
     def _iter_guessed_used_builddeps(self, srcdir: str) -> Iterator[str]:
         raise NotImplementedError
@@ -21,13 +24,52 @@ class _BuilddepsGuess:
         raise NotImplementedError
 
     def guess(self, srcdir: str) -> set[str]:
-        used_deps = set(self._iter_guessed_used_builddeps())
+        used_deps = set(self._iter_guessed_used_builddeps(srcdir))
         used_deps.difference_update(self._ignore)
         return {self._remap.get(u, self._get_mmpack_dep(u))
                 for u in used_deps}
 
 
+class _BuilddepsGuessPython(_BuilddepsGuess):
+    def _iter_pyproject_builddeps(self, srcdir: str) -> list[str]:
+        try:
+            with open(f'{srcdir}/pyproject.toml', 'rb') as stream:
+                data = toml_load(stream)
+        except FileNotFoundError:
+            return []
+
+        return (data.get('build-system', {}).get('requires', [])
+               + data.get('project', {}).get('dependencies', []))
+
+    def _iter_setupcfg_builddeps(self, srcdir: str) -> list[str]:
+        try:
+            config = ConfigParser()
+            config.load(f'{srcdir}/setup.cfg')
+            deps_field = config['options']['install_requires']
+        except (FileNotFoundError, KeyError):
+            return []
+
+        return deps_field.strip().split('\n')
+
+    def _iter_guessed_used_builddeps(self, srcdir: str) -> Iterator[str]:
+        dep_strings = []
+        dep_strings += self._iter_pyproject_builddeps(srcdir)
+        dep_strings += self._iter_setupcfg_builddeps(srcdir)
+
+        for dep_string in dep_strings:
+            req = Requirement.parse(dep_string)
+            yield req.project_name
+
+    def _get_mmpack_dep(self, used: str) -> str:
+        pyname = used.lower().replace('-', '_')
+        if pyname.startswith('python_'):
+            pyname = pyname[len('python_'):]
+        name.translate({ord('_'): '-', ord('.'): '-'})
+        return 'python3-' + name
+
+
 _GUESS_BACKENDS: dict[str, _BuilddepsGuess] = {
+    'python': _BuilddepsGuessPython
 }
 
 
