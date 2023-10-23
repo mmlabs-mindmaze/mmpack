@@ -5,9 +5,10 @@ Guess build_dependencies from sources
 
 from copy import deepcopy
 from typing import Any, Iterator
+from configparser import ConfigParser
 
 from tomli import load as toml_load
-from configparser import ConfigParser
+from pkg_resources import Requirement
 
 from .source_strap_specs import SourceStrapSpecs
 
@@ -44,7 +45,7 @@ class _BuilddepsGuessPython(_BuilddepsGuess):
     def _iter_setupcfg_builddeps(self, srcdir: str) -> list[str]:
         try:
             config = ConfigParser()
-            config.load(f'{srcdir}/setup.cfg')
+            config.read(f'{srcdir}/setup.cfg')
             deps_field = config['options']['install_requires']
         except (FileNotFoundError, KeyError):
             return []
@@ -61,9 +62,9 @@ class _BuilddepsGuessPython(_BuilddepsGuess):
             yield req.project_name
 
     def _get_mmpack_dep(self, used: str) -> str:
-        pyname = used.lower().replace('-', '_')
-        if pyname.startswith('python_'):
-            pyname = pyname[len('python_'):]
+        name = used.lower().replace('-', '_')
+        if name.startswith('python_'):
+            name = pyname[len('python_'):]
         name.translate({ord('_'): '-', ord('.'): '-'})
         return 'python3-' + name
 
