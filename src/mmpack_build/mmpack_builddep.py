@@ -10,11 +10,14 @@ missing will be proposed for install within the current prefix.
 
 import sys
 from argparse import ArgumentParser
+from os.path import exists
 
 from .common import DeprecatedStoreAction, specs_load
 from .errors import MMPackBuildError
 from .prefix import prefix_install
 from .workspace import find_project_root_folder
+from .source_strap_specs import SourceStrapSpecs
+from .builddeps_guess import guess_build_depends
 
 
 def add_parser_args(parser: ArgumentParser):
@@ -47,6 +50,12 @@ def main(options):
     specs = specs_load(specfile)
 
     mmpack_builddeps = specs.get('build-depends', [])
+
+    # If not mmpack proper sources, add guessed build depends according to
+    # mmpack/sources-strap file
+    if not exists(prj_root + '/mmpack/src_orig_tracing'):
+        src_strap_specs = SourceStrapSpecs(prj_root)
+        mmpack_builddeps += guess_build_depends(src_strap_specs, prj_root)
 
     try:
         # install missing mmpack packages
