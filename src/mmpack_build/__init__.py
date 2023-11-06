@@ -18,6 +18,11 @@ The following are currently presented:
 """
 # pylint: disable=invalid-name
 
+import sys
+from os.path import dirname, join as join_path
+
+sys.path.insert(0, join_path(dirname(__file__), '_vendor'))
+
 from . import base_hook
 from . import binary_package
 from . import common
