@@ -4,3 +4,6 @@
 [submodule "typing_extensions"]
 	path = src/pyscripts/vendor/typing_extensions
 	url = https://github.com/python/typing_extensions.git
+[submodule "tomli"]
+	path = src/mmpack_build/vendor/tomli
+	url = https://github.com/hukkin/tomli.git

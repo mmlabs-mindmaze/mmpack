@@ -79,3 +79,5 @@ install_data(
 install_data(files('../../VERSION'),
   install_dir: mmpackbuilddir
 )
+
+subdir('vendor')
