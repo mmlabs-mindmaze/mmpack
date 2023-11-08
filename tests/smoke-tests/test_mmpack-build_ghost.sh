@@ -43,7 +43,7 @@ gen-ghost-specs
 
 mkdir -p $TMP_BUILD
 pushd $TMP_BUILD
-export MMPACK_BUILD_DPKG_REPO="http://127.0.0.1:$http_port/debian testdata"
+export MMPACK_BUILD_DPKG_REPO="http://127.0.0.1:$http_port/debian testdata/main"
 export MMPACK_BUILD_MSYS2_REPO="http://127.0.0.1:$http_port"
 mmpack-build --debug pkg-create
 popd

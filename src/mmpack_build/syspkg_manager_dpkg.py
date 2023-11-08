@@ -300,14 +300,21 @@ class DebRepo:
     """
     Wrapper of Debian repository
     """
-    def __init__(self, url: str, dist: str, builddir: str,
+    def __init__(self, url: str, distcomp: str, builddir: str,
                  arch: Optional[str] = None):
-        self._baseurl = url
-        self._dist = dist
-        self._builddir = builddir
+        dist, _, comp = distcomp.partition('/')
 
-        dist_url = f'{self._baseurl}/dists/{self._dist}/Release'
-        release = message_from_bytes(get_http_req(dist_url).data)
+        release_url = f'{url}/dists/{dist}/Release'
+        release = message_from_bytes(get_http_req(release_url).data)
+
+        # Check component is valid for this repo
+        if comp not in release['Components'].split():
+            raise MMPackBuildError(f'No {comp} in {release_url}')
+
+        self._base_url = url
+        self._builddir = builddir
+        self._dist = dist
+        self._comp = comp
 
         sha_section = release['SHA256'].strip().split('\n')
         self._shalist = {c[2]: _FileInfo(filename=c[2], sha=c[0], size=c[1])
@@ -315,32 +322,28 @@ class DebRepo:
 
         arch = arch or get_host_arch()
         archs = set(release['Architectures'].split())
-        self._archs = archs.intersection({arch, 'all'})
-        if arch not in self._archs:
-            raise MMPackBuildError(f'No dist for {arch} in {dist_url}')
+        archs.intersection_update({arch, 'all'})
+        if arch not in archs:
+            raise MMPackBuildError(f'No arch {arch} in {url} {distcomp}')
 
-        self._pkgs_index_list: list[str] = []
-        for comp in release['Components'].split():
-            self._update_pkgs_list(comp)
+        self._pkgs_index_list = [
+            self._fetch_distfile(f'binary-{a}/Packages')
+            for a in archs
+        ]
 
-    def _fetch_package_list(self, res: str) -> str:
+    def _fetch_distfile(self, res: str) -> str:
         for ext in ('.gz', '.xz', '.bz2', ''):
-            comp_res = res + ext
+            comp_res = f'{self._comp}/{res}{ext}'
             if comp_res in self._shalist:
-                comp_url = f'{self._baseurl}/dists/{self._dist}/{comp_res}'
+                comp_url = f'{self._base_url}/dists/{self._dist}/{comp_res}'
                 filename = os.path.join(self._builddir,
                                         comp_res.replace('/', '_'))
                 cached_download(comp_url, filename,
                                 expected_sha256=self._shalist[comp_res].sha)
                 return filename
 
-        raise MMPackBuildError(f'cannot find {comp_res} in {self._baseurl}')
-
-    def _update_pkgs_list(self, comp: str):
-        for arch in self._archs:
-            res = f'{comp}/binary-{arch}/Packages'
-            filename = self._fetch_package_list(res)
-            self._pkgs_index_list.append(filename)
+        raise MMPackBuildError(f'cannot find {res} in '
+                               f'{self._base_url} {self._comp}')
 
     def pkgs(self) -> Iterator[DebPkg]:
         """
@@ -371,8 +374,7 @@ def _get_repo(srcnames: List[str]) -> (str, str):
             continue
         debrepo = line.split('|')[-1].strip()
         base_url, distcomp, _ = debrepo.split()
-        dist = distcomp.rsplit('/', maxsplit=1)[0]
-        return (base_url, dist)
+        return (base_url, distcomp)
 
     # If we reach here, there was no source package called srcname
     raise ValueError
@@ -418,11 +420,11 @@ class Dpkg(SysPkgManager):
                        srcnames: List[str]) -> List[SysPkg]:
         # Try to get the repo that provide the specified source package
         try:
-            repo_url, dist = _get_repo(srcnames)
+            repo_url, distcomp = _get_repo(srcnames)
         except ValueError:
             return []
 
-        repo = DebRepo(repo_url, dist, builddir)
+        repo = DebRepo(repo_url, distcomp, builddir)
         pkg_list = []
         for srcname in srcnames:
             # Parse compressed package index for binary package matching source
