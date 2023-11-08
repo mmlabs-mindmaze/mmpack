@@ -44,6 +44,7 @@ class PrefixHandlingOptions:
             self.use_build_prefix = BuildPrefix(opts.build_prefix)
 
         # setup default value of install deps
+        # pylint: disable=superfluous-parens
         self.install_deps = (opts.command == 'builddep')
         if self.use_build_prefix is BuildPrefix.CREATE:
             self.install_deps = True
