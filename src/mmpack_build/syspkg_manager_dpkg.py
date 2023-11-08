@@ -312,9 +312,7 @@ class DebRepo:
             raise MMPackBuildError(f'No {comp} in {release_url}')
 
         arch = arch or get_host_arch()
-        archs = set(release['Architectures'].split())
-        archs.intersection_update({arch, 'all'})
-        if arch not in archs:
+        if arch not in set(release['Architectures'].split()):
             raise MMPackBuildError(f'No arch {arch} in {url} {distcomp}')
 
         sha_section = release['SHA256'].strip().split('\n')
@@ -324,11 +322,7 @@ class DebRepo:
         self._builddir = builddir
         self._dist = dist
         self._comp = comp
-
-        self._pkgs_index_list = [
-            self._fetch_distfile(f'binary-{a}/Packages')
-            for a in archs
-        ]
+        self._arch = arch
 
     def _fetch_distfile(self, res: str) -> str:
         for ext in ('.gz', '.xz', '.bz2', ''):
@@ -348,10 +342,10 @@ class DebRepo:
         """
         Iterator of package in the distribution
         """
-        for index in self._pkgs_index_list:
-            with open_compressed_file(index, encoding='utf-8') as fileobj:
-                for pkg in _list_debpkg_index(fileobj):
-                    yield pkg
+        index = self._fetch_distfile(f'binary-{self._arch}/Packages')
+        with open_compressed_file(index, encoding='utf-8') as fileobj:
+            for pkg in _list_debpkg_index(fileobj):
+                yield pkg
 
 
 def _get_repo(srcnames: List[str]) -> (str, str):
