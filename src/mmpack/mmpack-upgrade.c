@@ -7,6 +7,7 @@
 #endif
 
 #include <mmargparse.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "action-solver.h"
@@ -128,7 +129,8 @@ int get_upgradeable_reqlist(struct mmpack_ctx* ctx, int nreq,
 
 
 static
-int mmpack_upgrade_reqlist(struct mmpack_ctx * ctx, struct pkg_request* reqlist)
+int mmpack_upgrade_reqlist(struct mmpack_ctx * ctx, bool skip_confirm,
+                           struct pkg_request* reqlist)
 {
 
 	struct action_stack* act_stack = NULL;
@@ -139,7 +141,7 @@ int mmpack_upgrade_reqlist(struct mmpack_ctx * ctx, struct pkg_request* reqlist)
 	if (!act_stack)
 		goto exit;
 
-	if (!is_yes_assumed) {
+	if (!skip_confirm) {
 		rv = confirm_action_stack_if_needed(0, act_stack);
 		if (rv != 0)
 			goto exit;
@@ -200,7 +202,7 @@ int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 
 	rv = 0;
 	if (reqlist != NULL) {
-		rv = mmpack_upgrade_reqlist(ctx, reqlist);
+		rv = mmpack_upgrade_reqlist(ctx, is_yes_assumed, reqlist);
 		clean_reqlist(reqlist);
 	}
 
