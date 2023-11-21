@@ -218,6 +218,20 @@ def guess_version_from_syspkgs(syspkgs: Iterable[SysPkg]) -> str:
     return res.group('version') if res else UNKNOWN
 
 
+def _common_lineseq(strings: Iterable[str]) -> str:
+    """Find the common sequence of line in a iterable of string."""
+    string_iterator = iter(strings)
+    common = next(string_iterator).split('\n')
+
+    seqm = SequenceMatcher()
+    for string in string_iterator:
+        seqm.set_seqs(common, string.split('\n'))
+        match = seqm.find_longest_match()
+        common = common[match.a:match.a+match.size]
+
+    return '\n'.join(common)
+
+
 def create_ghost_specs(srcname: str):
     """
     Create specs of mmpack package for ghosting a system package
@@ -230,7 +244,7 @@ def create_ghost_specs(srcname: str):
         'name': srcname,
         'version': guess_version_from_syspkgs(syspkgs),
         'maintainer': guess_maintainer(),
-        'description': _common_substring(s.desc for s in syspkgs),
+        'description': _common_lineseq(s.desc for s in syspkgs),
         'ghost': True,
     })
 
