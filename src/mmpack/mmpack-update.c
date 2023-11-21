@@ -57,6 +57,36 @@ exit:
 
 
 /**
+ * mmpack_update_repos() - update the repositories of a prefix
+ * @ctx: mmpack context
+ *
+ * update local package list from repository list in config file.
+ * NOTE: This assumes that the prefix context has been initialized with
+ * mmpack_ctx_use_prefix().
+ *
+ * Return: 0 on success, -1 otherwise
+ */
+LOCAL_SYMBOL
+int mmpack_update_repos(struct mmpack_ctx* ctx)
+{
+	struct repo_iter iter;
+	struct repolist* list;
+	const struct repo* r;
+
+	list = &ctx->settings.repo_list;
+	if (repolist_num_repo(list) == 0) {
+		info("No repository specified, nothing to update\n");
+		return 0;
+	}
+
+	for (r = repo_iter_first(&iter, list); r; r = repo_iter_next(&iter))
+		download_repo_index(ctx, r);
+
+	return 0;
+}
+
+
+/**
  * mmpack_update_all() - main function for the update command
  * @ctx: mmpack context
  * @argc: number of arguments
@@ -69,10 +99,6 @@ exit:
 LOCAL_SYMBOL
 int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 {
-	struct repo_iter iter;
-	struct repolist* list;
-	const struct repo* r;
-
 	if (mm_arg_is_completing())
 		return 0;
 
@@ -87,14 +113,5 @@ int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	if (mmpack_ctx_use_prefix(ctx, CTX_SKIP_PKGLIST))
 		return -1;
 
-	list = &ctx->settings.repo_list;
-	if (repolist_num_repo(list) == 0) {
-		info("No repository specified, nothing to update\n");
-		return 0;
-	}
-
-	for (r = repo_iter_first(&iter, list); r; r = repo_iter_next(&iter))
-		download_repo_index(ctx, r);
-
-	return 0;
+	return mmpack_update_repos(ctx);
 }
