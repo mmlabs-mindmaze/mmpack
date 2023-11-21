@@ -10,5 +10,6 @@
 #define UPDATE_SYNOPSIS "update"
 
 int mmpack_update_all(struct mmpack_ctx * ctx, int argc, char const ** argv);
+int mmpack_update_repos(struct mmpack_ctx* ctx);
 
 #endif /* MMPACK_UPDATE_H */
