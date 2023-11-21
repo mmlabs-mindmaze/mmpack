@@ -26,6 +26,9 @@ prefix instead.
 
 OPTIONS
 =======
+--upgrade-packages, -u
+  Upgrade installed packages before run.
+
 --no-prefix-mount, -n
   Do not perform mmpack prefix mount.
 

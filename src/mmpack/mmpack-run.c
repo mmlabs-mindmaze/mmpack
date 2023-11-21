@@ -22,8 +22,11 @@
 #include "utils.h"
 
 #include "mmpack-run.h"
+#include "mmpack-update.h"
+#include "mmpack-upgrade.h"
 
 static int no_prefix_mount = 0;
+static int upgrade_pkgs = 0;
 
 static char run_doc[] =
 	"\"mmpack run\" execute a program in the mmpack prefix. If no program "
@@ -31,9 +34,24 @@ static char run_doc[] =
 
 
 static const struct mm_arg_opt cmdline_optv[] = {
+	{"u|upgrade-packages", MM_OPT_NOVAL|MM_OPT_INT, "1",
+	 {.iptr = &upgrade_pkgs}, "Upgrade installed packages before run"},
 	{"n|no-prefix-mount", MM_OPT_NOVAL|MM_OPT_INT, "1",
 	 {.iptr = &no_prefix_mount}, "Do not perform prefix mount"},
 };
+
+
+static
+int upgrade_prefix(struct mmpack_ctx* ctx)
+{
+	if (mmpack_ctx_use_prefix(ctx, CTX_SKIP_PKGLIST|CTX_SKIP_REDIRECT_LOG)
+	    || mmpack_update_repos(ctx)
+	    || mmpack_ctx_init_pkglist(ctx)
+	    || mmpack_upgrade_from_repos(ctx, true, 0, NULL))
+		return -1;
+
+	return 0;
+}
 
 
 static
@@ -155,6 +173,11 @@ int mmpack_run(struct mmpack_ctx * ctx, int argc, const char* argv[])
 		fprintf(stderr, "Prefix not set\n");
 		return -1;
 	}
+
+	// If specified in command line, upgrade packages that are installed in
+	// prefix.
+	if (upgrade_pkgs && upgrade_prefix(ctx))
+		return -1;
 
 	if (setup_run_env(ctx))
 		return -1;
