@@ -157,6 +157,47 @@ exit:
 
 
 /**
+ * mmpack_upgrade_from_repos() - upgrade package from repositories
+ * @ctx: mmpack context
+ * @skip_confirm: if true, just perform upgrade without asking confirmation
+ * @nreq: number of package that must be explicitely upgraded. If 0 all
+ *        upgreable packages will be upgraded.
+ * @req_args: list of required package to be upgraded. ignored if @nreq is 0.
+ *
+ * installs available upgrades of all packages currently installed in the
+ * current prefix if @nreq is 0. Otherwise only listed packages will be
+ * upgraded. New packages will be installed if required to satisfy
+ * dependencies.
+ *
+ * NOTE: this function assumes that @ctx has been initialized with package list
+ * (mmpack_ctx_use_prefix(ctx, 0) or mmpack_ctx_init_pkglist(ctx)).
+ *
+ * Return: 0 on success, -1 otherwise
+ */
+int mmpack_upgrade_from_repos(struct mmpack_ctx* ctx, bool skip_confirm,
+                              int nreq, const char** req_args)
+{
+	int rv;
+	struct pkg_request* reqlist;
+
+	if (nreq == 0) {
+		reqlist = get_full_upgradeable_reqlist(ctx);
+	} else {
+		if (get_upgradeable_reqlist(ctx, nreq, req_args, &reqlist) != 0)
+			return -1;
+	}
+
+	rv = 0;
+	if (reqlist != NULL) {
+		rv = mmpack_upgrade_reqlist(ctx, skip_confirm, reqlist);
+		clean_reqlist(reqlist);
+	}
+
+	return rv;
+}
+
+
+/**
  * mmpack_upgrade() - main function for the upgrade command
  * @ctx: mmpack context
  * @argc: number of arguments
@@ -171,9 +212,8 @@ exit:
 LOCAL_SYMBOL
 int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 {
-	int nreq, arg_index, rv;
+	int nreq, arg_index;
 	const char** req_args;
-	struct pkg_request* reqlist;
 	struct mm_arg_parser parser = {
 		.flags = mm_arg_is_completing() ? MM_ARG_PARSER_COMPLETION : 0,
 		.doc = upgrade_doc,
@@ -193,18 +233,6 @@ int mmpack_upgrade(struct mmpack_ctx * ctx, int argc, char const ** argv)
 	if (mmpack_ctx_use_prefix(ctx, 0))
 		return -1;
 
-	if (nreq == 0) {
-		reqlist = get_full_upgradeable_reqlist(ctx);
-	} else {
-		if (get_upgradeable_reqlist(ctx, nreq, req_args, &reqlist) != 0)
-			return -1;
-	}
+	return mmpack_upgrade_from_repos(ctx, is_yes_assumed, nreq, req_args);
 
-	rv = 0;
-	if (reqlist != NULL) {
-		rv = mmpack_upgrade_reqlist(ctx, is_yes_assumed, reqlist);
-		clean_reqlist(reqlist);
-	}
-
-	return rv;
 }
