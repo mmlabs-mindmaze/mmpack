@@ -104,7 +104,7 @@ int hashset_create_slots(struct hashset* hashset, const char* path, int num)
 		filesize = MM_PAGESZ;
 
 	// Create the file of slots, resetting to its size to 0 if it exists.
-	fd = mm_open(path, O_RDWR|O_CREAT|O_TRUNC, 0666);
+	fd = mm_open(path, O_RDWR|O_CREAT|O_TRUNC, MODE_DEF);
 	if (fd < 0)
 		return -1;
 

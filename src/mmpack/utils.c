@@ -328,7 +328,7 @@ int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 	if (oflag & O_CREAT) {
 		dirpath = mmstr_malloca(mmstrlen(path));
 		mmstr_dirname(dirpath, path);
-		if (mm_mkdir(dirpath, 0777, MM_RECURSIVE)) {
+		if (mm_mkdir(dirpath, MODE_XDEF, MM_RECURSIVE)) {
 			fprintf(stderr, "Create parent dir of %s failed: %s\n",
 			        path, mm_strerror(mm_get_lasterror_number()));
 			goto exit;
@@ -336,7 +336,7 @@ int open_file_in_prefix(const mmstr* prefix, const mmstr* path, int oflag)
 	}
 
 	// Create file
-	fd = mm_open(path, oflag, 0666);
+	fd = mm_open(path, oflag, MODE_DEF);
 	if (fd < 0)
 		fprintf(stderr, "Failed to open %s: %s\n",
 		        path, mm_strerror(mm_get_lasterror_number()));
@@ -873,7 +873,7 @@ int save_file(const char* path, const struct buffer* buff)
 	const char* data = buff->base;
 	int remaining = buff->size;
 
-	fd = mm_open(path, O_WRONLY|O_CREAT|O_EXCL, 0666);
+	fd = mm_open(path, O_WRONLY|O_CREAT|O_EXCL, MODE_DEF);
 	if (fd < 0)
 		return -1;
 

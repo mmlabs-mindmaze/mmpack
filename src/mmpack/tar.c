@@ -143,7 +143,7 @@ int tarstream_extract_regfile(struct tarstream* tar, const char* path)
 
 	// Create the new file. This step should not fail because the caller
 	// must have created parent dir
-	mode = archive_entry_perm(tar->entry);
+	mode = archive_entry_perm(tar->entry) & (0111) ? MODE_XDEF : MODE_DEF;
 	fd = mm_open(path, O_CREAT|O_EXCL|O_WRONLY, mode);
 	if (fd < 0)
 		return -1;
