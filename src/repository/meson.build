@@ -1,24 +1,36 @@
-find_program('tar', required : true)
+#find_program('tar', required : true)
+#
+#
+#mmpack_repo_private = files(
+#  '__init__.py',
+#  '__main__.py',
+#  'repo.py',
+#)
+#all_sources += mmpack_repo_private
+#
+#mmpack_repo_scripts = configure_file(
+#	output: 'mmpack-modifyrepo',
+#	input: files('mmpack-modifyrepo.py.in'),
+#	configuration: config,
+#)
+#all_sources += files('mmpack-modifyrepo.py.in')
+#
+#install_data(mmpack_repo_scripts,
+#        install_dir : bindir,
+#)
+#
+#install_data(mmpack_repo_private,
+#        install_dir : pkgdatadir / 'repository',
+#)
 
-
-mmpack_repo_private = files(
-  '__init__.py',
-  '__main__.py',
-  'repo.py',
+mmpack_repo_sources = files(
+  'modifyrepo.cpp',
+  'repository.cpp',
+  'repository.hpp',
 )
-all_sources += mmpack_repo_private
-
-mmpack_repo_scripts = configure_file(
-	output: 'mmpack-modifyrepo',
-	input: files('mmpack-modifyrepo.py.in'),
-	configuration: config,
+mmpack_repo = executable('mmpack-modifyrepo',
+        mmpack_repo_sources,
+        install : true,
 )
-all_sources += files('mmpack-modifyrepo.py.in')
-
-install_data(mmpack_repo_scripts,
-        install_dir : bindir,
-)
-
-install_data(mmpack_repo_private,
-        install_dir : pkgdatadir / 'repository',
-)
+all_c_sources += mmpack_repo_sources
+deployed_targets += mmpack_repo
